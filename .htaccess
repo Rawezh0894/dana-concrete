@@ -39,9 +39,6 @@ RewriteRule ^includes/ - [F,L]
 RewriteCond %{THE_REQUEST} ^(GET|POST|HEAD)\ /config/.*\ HTTP/
 RewriteRule ^config/ - [F,L]
 
-RewriteCond %{THE_REQUEST} ^(GET|POST|HEAD)\ /process/.*\ HTTP/
-RewriteRule ^process/ - [F,L]
-
 RewriteCond %{THE_REQUEST} ^(GET|POST|HEAD)\ /core/.*\ HTTP/
 RewriteRule ^core/ - [F,L]
 
