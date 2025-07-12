@@ -19,6 +19,6 @@ $options = [
 try {
     $pdo = new PDO($dsn, $user, $pass, $options);
 } catch (PDOException $e) {
-    // بڵاوکردنەوەی هەڵەیەک بێ زانیاری تایبەتی
-    throw new PDOException("هەڵە لە پەیوەندیکردن بە داتابەیس!");
+    // بڵاوکردنەوەی هەڵەی ڕاستی PDO بۆ تاقیکردنەوە
+    die("DB ERROR: " . $e->getMessage());
 }
