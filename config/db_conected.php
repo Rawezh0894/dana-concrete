@@ -4,8 +4,8 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 // Database connection settings
 $host = 'localhost';
-$db   = 'dana_concrete';
-$user = 'webuser'; // گەر ناوی بەکارهێنەر یان وشەی نهێنی جیاوازە، گۆڕی
+$db   = 'dana_concrete_db';
+$user = 'root'; // گەر ناوی بەکارهێنەر یان وشەی نهێنی جیاوازە، گۆڕی
 $pass = 'Rawezh.Jaza@0894';
 $charset = 'utf8mb4';
 
