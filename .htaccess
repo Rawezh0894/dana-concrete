@@ -1,3 +1,7 @@
+# Allow direct access to login
+RewriteCond %{REQUEST_URI} ^/process/login/sign_in\.php$ [NC]
+RewriteRule ^ - [L]
+
 # Enable URL rewriting
 RewriteEngine On
 
