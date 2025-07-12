@@ -3,7 +3,7 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 session_start();
-require_once '../../config/db_conected.php';
+require_once '../config/db_conected.php';
 require_once '../../config/permissions.php';
 header('Content-Type: application/json');
 if (!isset($_SESSION['user_id'])) {
