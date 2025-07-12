@@ -40,6 +40,91 @@ $pump_cars = array_filter($cars, function($car) { return preg_match('/^p/i', tri
     <link href="../assets/css/comon/style.css" rel="stylesheet">
     <link href="../assets/css/comon/select2_design.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        /* Filter buttons base styles */
+        .filter-btn {
+            background: var(--seafoam-green);
+            color: white;
+            font-weight: 600;
+            border: 2px solid var(--seafoam-green);
+            border-radius: 8px;
+            padding: 8px 16px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Hover effects */
+        .filter-btn:hover {
+            background: var(--kelly-green);
+            border-color: var(--kelly-green);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Active state - when button is clicked/active */
+        .filter-btn.active {
+            background: var(--kelly-green);
+            border-color: var(--kelly-green);
+            color: var(--seafoam-green);
+            font-weight: bold;
+            transform: translateY(0);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Specific colors for each button */
+        #filter_today {
+            background: var(--seafoam-green);
+            border-color: var(--seafoam-green);
+        }
+        
+        #filter_today:hover,
+        #filter_today.active {
+            background: var(--kelly-green);
+            border-color: var(--kelly-green);
+        }
+        
+        #filter_yesterday {
+            background: var(--lime-green);
+            border-color: var(--lime-green);
+        }
+        
+        #filter_yesterday:hover,
+        #filter_yesterday.active {
+            background: var(--kelly-green);
+            border-color: var(--kelly-green);
+        }
+        
+        #filter_reset {
+            background: var(--spearmint);
+            border-color: var(--spearmint);
+        }
+        
+        #filter_reset:hover,
+        #filter_reset.active {
+            background: var(--kelly-green);
+            border-color: var(--kelly-green);
+        }
+        
+        /* Click animation */
+        .filter-btn:active {
+            transform: translateY(0);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Responsive design for filter buttons */
+        @media (max-width: 768px) {
+            .col-md-2.d-flex.gap-2 {
+                flex-direction: column;
+                gap: 8px !important;
+            }
+            
+            .col-md-2.d-flex.gap-2 .btn {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+        }
+    </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -108,9 +193,15 @@ $pump_cars = array_filter($cars, function($car) { return preg_match('/^p/i', tri
         <input type="date" class="form-control" id="filter_date_to" placeholder="بۆ بەرواری">
       </div>
       <div class="col-md-2 d-flex gap-2">
-        <button type="button" class="btn" id="filter_today" style="background: var(--seafoam-green); color: white; font-weight: bold;">ئەمڕۆ</button>
-        <button type="button" class="btn" id="filter_yesterday" style="background: var(--lime-green); color: white; font-weight: bold;">دوێنێ</button>
-        <button type="button" class="btn" id="filter_reset" style="background: var(--spearmint); color: white; font-weight: bold;">ڕیفڕێش</button>
+        <button type="button" class="btn btn-sm filter-btn" id="filter_today" data-filter="today">
+          <i class="fas fa-calendar-day me-1"></i>ئەمڕۆ
+        </button>
+        <button type="button" class="btn btn-sm filter-btn" id="filter_yesterday" data-filter="yesterday">
+          <i class="fas fa-calendar-minus me-1"></i>دوێنێ
+        </button>
+        <button type="button" class="btn btn-sm filter-btn" id="filter_reset" data-filter="reset">
+          <i class="fas fa-redo me-1"></i>ڕیفڕێش
+        </button>
       </div>
     </div>
     <div class="table-responsive">
@@ -364,5 +455,36 @@ window.userPermissions = {
 };
 </script>
 <script src="../assets/js/concrete_receipts/filter.js"></script>
+<script>
+// Filter button active state management
+document.addEventListener('DOMContentLoaded', function() {
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove active class from all buttons
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            
+            // Add active class to clicked button
+            this.classList.add('active');
+            
+            // Remove active class after 2 seconds (for reset button)
+            if (this.id === 'filter_reset') {
+                setTimeout(() => {
+                    this.classList.remove('active');
+                }, 2000);
+            }
+        });
+    });
+    
+    // Remove active class when other filters are used
+    const filterInputs = document.querySelectorAll('#filter_customer_id, #filter_location, #filter_formulas_id, #filter_date_from, #filter_date_to');
+    filterInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+        });
+    });
+});
+</script>
 </body>
 </html>

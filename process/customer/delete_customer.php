@@ -13,7 +13,7 @@ if (empty($_POST['id']) || !is_numeric($_POST['id'])) {
 }
 $id = (int)$_POST['id'];
 
-// Prevent delete if customer has payments or sales
+// Prevent delete if customer has payments or sales or concrete receipts
 $hasPayments = $pdo->prepare('SELECT COUNT(*) FROM customer_debt_payments WHERE customer_id = ?');
 $hasPayments->execute([$id]);
 if ($hasPayments->fetchColumn() > 0) {
@@ -24,6 +24,12 @@ $hasSales = $pdo->prepare('SELECT COUNT(*) FROM sales WHERE customer_id = ?');
 $hasSales->execute([$id]);
 if ($hasSales->fetchColumn() > 0) {
     echo json_encode(['success' => false, 'message' => 'ناتوانرێت کڕیار بسڕدرێت چونکە مامەڵەی فرۆشتن بۆ تۆمارکراوە']);
+    exit;
+}
+$hasConcreteReceipts = $pdo->prepare('SELECT COUNT(*) FROM concrete_receipts WHERE customer_id = ?');
+$hasConcreteReceipts->execute([$id]);
+if ($hasConcreteReceipts->fetchColumn() > 0) {
+    echo json_encode(['success' => false, 'message' => 'ناتوانرێت کڕیار بسڕدرێت چونکە پسوڵەی کۆنکرێت بۆ تۆمارکراوە']);
     exit;
 }
 
