@@ -57,7 +57,7 @@ if (!isset($_SESSION['user_id']) || !hasPermission('add_car')) {
         <div class="modal-header">
           <h5 class="modal-title" id="addCarModalLabel">زیادکردنی سەیارە</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>.
+        </div>
         <div class="modal-body">
           <div class="mb-3">
             <label for="car_name" class="form-label">ناوی سەیارە</label>
