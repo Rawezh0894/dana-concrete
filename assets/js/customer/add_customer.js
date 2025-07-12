@@ -24,8 +24,13 @@ if (addCustomerForm) {
             method: 'POST',
             body: formData
         })
-        .then(res => res.json())
+        .then(res => {
+            // Log raw response for debugging
+            res.clone().text().then(txt => console.log('Raw response from add_customer.php:', txt));
+            return res.json();
+        })
         .then(data => {
+            console.log('Parsed JSON:', data); // Debug
             if (data.success) {
                 Swal.fire({
                     icon: 'success',
@@ -46,7 +51,8 @@ if (addCustomerForm) {
                 });
             }
         })
-        .catch(() => {
+        .catch((err) => {
+            console.error('Fetch or JSON error:', err);
             Swal.fire({
                 icon: 'error',
                 title: 'هەڵە',
