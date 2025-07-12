@@ -1,0 +1,83 @@
+<?php
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+require_once '../../config/db_conected.php';
+header('Content-Type: application/json; charset=utf-8');
+$customer_id = isset($_GET['customer_id']) ? intval($_GET['customer_id']) : 0;
+if (!$customer_id) { echo json_encode([]); exit; }
+
+$type = isset($_GET['type']) ? $_GET['type'] : 'all';
+$month = isset($_GET['month']) ? $_GET['month'] : 'all';
+$date_from = isset($_GET['date_from']) ? $_GET['date_from'] : '';
+$date_to = isset($_GET['date_to']) ? $_GET['date_to'] : '';
+
+// Get customer information including opening debt, name, and mobile
+$customer_sql = "SELECT opening_debt_usd, name, mobile1 FROM customers WHERE id = :customer_id";
+$customer_stmt = $pdo->prepare($customer_sql);
+$customer_stmt->execute(['customer_id' => $customer_id]);
+$customer_data = $customer_stmt->fetch(PDO::FETCH_ASSOC);
+$opening_debt = is_numeric($customer_data['opening_debt_usd']) ? floatval($customer_data['opening_debt_usd']) : 0;
+$company_name = $customer_data['name'] ?? '';
+$mobile = $customer_data['mobile1'] ?? '';
+
+$sql = "SELECT s.quantity, f.strength_mpa, f.strength_kg, s.price_per_unit, s.total_price, s.invoice_number, s.order_date, s.amount_paid_usd, s.amount_paid_iq, s.remaining_amount 
+        FROM sales s 
+        LEFT JOIN concrete_formulas f ON s.formula_id = f.id 
+        WHERE s.customer_id = :customer_id";
+
+if ($type === 'cash') {
+    $sql .= " AND (s.remaining_amount = 0 OR s.remaining_amount IS NULL)";
+} elseif ($type === 'debt') {
+    $sql .= " AND s.remaining_amount > 0";
+} elseif ($type === 'has_remaining') {
+    $sql .= " AND s.remaining_amount > 0";
+}
+
+$params = ['customer_id' => $customer_id];
+if ($month !== 'all') {
+    $sql .= " AND MONTH(s.order_date) = :month";
+    $params['month'] = $month;
+}
+if ($date_from) {
+    $sql .= " AND s.order_date >= :date_from";
+    $params['date_from'] = $date_from;
+}
+if ($date_to) {
+    $sql .= " AND s.order_date <= :date_to";
+    $params['date_to'] = $date_to;
+}
+$sql .= " ORDER BY s.order_date ASC";
+$stmt = $pdo->prepare($sql);
+$stmt->execute($params);
+$data = [];
+while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+    $quantity = $row['quantity'] . ' م³';
+    $rezh = $row['strength_mpa'] ? $row['strength_mpa'] . ' MPa' : ($row['strength_kg'] ? $row['strength_kg'] . ' Kg' : '');
+    $ppu = is_numeric($row['price_per_unit']) ? '$' . number_format($row['price_per_unit'], 2, '.', ',') : '';
+    $total = is_numeric($row['total_price']) ? '$' . number_format($row['total_price'], 2, '.', ',') : '';
+    $paid_usd = is_numeric($row['amount_paid_usd']) ? '$' . number_format($row['amount_paid_usd'], 2, '.', ',') : '$0.00';
+    $paid_iqd = is_numeric($row['amount_paid_iq']) ? number_format($row['amount_paid_iq'], 0, '.', ',') . ' د.ع' : '0 د.ع';
+    $remaining = is_numeric($row['remaining_amount']) ? '$' . number_format($row['remaining_amount'], 2, '.', ',') : '$0.00';
+    $data[] = [
+        'quantity' => $quantity,
+        'rezh' => $rezh,
+        'price_per_unit' => $ppu,
+        'total_price' => $total,
+        'amount_paid_usd' => $paid_usd,
+        'amount_paid_iqd' => $paid_iqd,
+        'remaining_amount' => $remaining,
+        'invoice_number' => $row['invoice_number'],
+        'order_date' => $row['order_date']
+    ];
+}
+
+$response = [
+    'sales_data' => $data,
+    'opening_debt' => '$' . number_format($opening_debt, 2, '.', ','),
+    'customer_info' => [
+        'company_name' => $company_name,
+        'mobile' => $mobile
+    ]
+];
+
+echo json_encode($response, JSON_UNESCAPED_UNICODE);

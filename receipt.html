@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بەڵگەنامەی یاسایی</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans Arabic', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            direction: rtl;
+        }
+        
+        .document-container {
+            max-width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            animation: float 20s infinite linear;
+        }
+        
+        @keyframes float {
+            0% { transform: translateX(0) translateY(0); }
+            100% { transform: translateX(-20px) translateY(-20px); }
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .lawyer-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .lawyer-details {
+            text-align: right;
+        }
+        
+        .lawyer-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .phone-numbers {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .scales-icon {
+            font-size: 4rem;
+            opacity: 0.8;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-top: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .content {
+            padding: 40px;
+            background: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);
+            min-height: 600px;
+            position: relative;
+        }
+        
+        .content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #1e3c72, #2a5298, #1e3c72);
+        }
+        
+        .document-body {
+            background: white;
+            padding: 30px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border-left: 4px solid #2a5298;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #1e3c72;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .form-control {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px 15px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+        
+        .form-control:focus {
+            border-color: #2a5298;
+            box-shadow: 0 0 0 0.2rem rgba(42, 82, 152, 0.25);
+            background: white;
+        }
+        
+        .signature-section {
+            margin-top: 50px;
+            padding: 30px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 10px;
+            border: 2px dashed #2a5298;
+        }
+        
+        .signature-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 10px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .date-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+        }
+        
+        .date-box {
+            background: #1e3c72;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(30, 60, 114, 0.3);
+        }
+        
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 8rem;
+            color: rgba(42, 82, 152, 0.03);
+            font-weight: 700;
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        .print-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .print-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .document-container {
+                box-shadow: none;
+                border-radius: 0;
+            }
+            .print-button {
+                display: none;
+            }
+        }
+        
+        .fancy-border {
+            border: 3px solid;
+            border-image: linear-gradient(45deg, #1e3c72, #2a5298, #1e3c72) 1;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .highlight-text {
+            background: linear-gradient(120deg, rgba(42, 82, 152, 0.1) 0%, rgba(42, 82, 152, 0.05) 100%);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="document-container">
+        <div class="watermark">پارێزەر</div>
+        
+        <div class="header">
+            <div class="header-content">
+                <div class="lawyer-info">
+                    <div class="lawyer-details">
+                        <div class="lawyer-name">پارێزەر</div>
+                        <div class="lawyer-name">ڕەمیار حسێن علی</div>
+                        <div class="phone-numbers">
+                            <div>07708542838</div>
+                            <div>07515377023</div>
+                        </div>
+                    </div>
+                    <div class="scales-icon">⚖️</div>
+                    <div class="lawyer-details">
+                        <div class="lawyer-name">پارێزەر</div>
+                        <div class="lawyer-name">ڕەمیار حسێن علی</div>
+                        <div class="phone-numbers">
+                            <div>07708542838</div>
+                            <div>07515377023</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="title">بەڵگەنامەی یاسایی</div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="document-body">
+                <div class="fancy-border">
+                    <div class="form-group">
+                        <label class="form-label">بەڕێز/بەڕێزان دادگای کەتیی</label>
+                        <input type="text" class="form-control" placeholder="ناوی دادگا">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">بەڕێز/بەڕێزان دادمەدانی دادگای کەتیی</label>
+                        <input type="text" class="form-control" placeholder="ناوی دادمەدان">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">بابەت: <span class="highlight-text">پرسیارکردن/پارێزگاری پەکردن</span></label>
+                        <textarea class="form-control" rows="3" placeholder="جۆری بابەت"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">دوای ئەوەی دۆسیەی ژمارە ( )</label>
+                        <input type="text" class="form-control" placeholder="ژمارەی دۆسیە">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">بە بەرکردنی نیشانی مادە ( )</label>
+                        <input type="text" class="form-control" placeholder="ژمارەی مادە">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">دادگاکرانی مؤکەڵی داداپەروەری دادگای کەتیی</label>
+                        <textarea class="form-control" rows="4" placeholder="ناوی مؤکەڵ و زانیاری پەیوەندیدار"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">دادگاکرانی چوونە پرسیارکردن و ئاکامە مەبەستی</label>
+                        <textarea class="form-control" rows="4" placeholder="پرسیارکردن و ئاکامە مەبەستی"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">دادگاکرانی چوونە پرسیارکردن و ئاکامە مەبەستی</label>
+                        <textarea class="form-control" rows="4" placeholder="پرسیارکردن و ئاکامە مەبەستی"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">بە بەسێ لە وەکیلی دەستوریی مؤکەڵی کۆمیسیۆنی</label>
+                        <textarea class="form-control" rows="3" placeholder="زانیاری تایبەت بە وەکیلی دەستوریی"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">ئەوانەی ڕێگرانی تۆێژینەوە پرسیارکردن بە بەخشەوە</label>
+                        <textarea class="form-control" rows="3" placeholder="ڕێگرانی تۆێژینەوە"></textarea>
+                    </div>
+                </div>
+                
+                <div class="signature-section">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="signature-box">
+                                <div class="form-label">لە گەڵ ڕێزدا...</div>
+                                <div style="height: 80px; border-bottom: 2px solid #2a5298; margin: 20px 0;"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="signature-box">
+                                <div class="form-label">پارێزەر:</div>
+                                <div style="height: 80px; border-bottom: 2px solid #2a5298; margin: 20px 0;"></div>
+                                <div class="highlight-text">ڕەمیار حسێن علی</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="date-section">
+                        <div class="date-box">
+                            بەروار: ____/____/202_
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <button class="print-button" onclick="window.print()">
+        🖨️ چاپکردن
+    </button>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

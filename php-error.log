@@ -1,0 +1,674 @@
+[05-Jul-2025 10:41:16 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana@0101
+    [role] => admin
+)
+
+[05-Jul-2025 10:41:16 Europe/Berlin] add_sale.php POST: Array
+(
+    [customer_id] => 7
+    [recipient] => 
+    [location] => سلێمانی
+    [invoice_number] => 4585
+    [formula_id] => 17
+    [order_date] => 2025-07-04
+    [quantity] => 5
+    [price_per_unit] => 48
+    [total_price] => 240.00
+    [payment_type] => قەرز
+    [amount_paid_iq] => 0
+    [amount_paid_usd] => 0
+    [remaining_amount] => 240.00
+    [dolar_rate] => 150000
+    [discount] => 0
+    [notes] => 
+)
+
+[05-Jul-2025 10:41:16 Europe/Berlin] Parsed vars: customer_id='7', recipient='', location='سلێمانی', quantity='5', price_per_unit='48', total_price='240.00', payment_type='قەرز', amount_paid_usd='0', amount_paid_iq='0', dolar_rate='150000', remaining_amount='240.00', invoice_number='4585', order_date='2025-07-04', notes='', formula_id='17', discount='0'
+[05-Jul-2025 10:41:58 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana@0101
+    [role] => admin
+)
+
+[05-Jul-2025 10:41:58 Europe/Berlin] add_sale.php POST: Array
+(
+    [customer_id] => 7
+    [recipient] => 
+    [location] => سلێمانی
+    [invoice_number] => 474
+    [formula_id] => 17
+    [order_date] => 2025-07-04
+    [quantity] => 4
+    [price_per_unit] => 48
+    [total_price] => 192.00
+    [payment_type] => قەرز
+    [amount_paid_iq] => 75000
+    [amount_paid_usd] => 42
+    [remaining_amount] => 100.00
+    [dolar_rate] => 150000
+    [discount] => 0
+    [notes] => 
+)
+
+[05-Jul-2025 10:41:58 Europe/Berlin] Parsed vars: customer_id='7', recipient='', location='سلێمانی', quantity='4', price_per_unit='48', total_price='192.00', payment_type='قەرز', amount_paid_usd='42', amount_paid_iq='75000', dolar_rate='150000', remaining_amount='100.00', invoice_number='474', order_date='2025-07-04', notes='', formula_id='17', discount='0'
+[05-Jul-2025 12:09:21 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana@0101
+    [role] => admin
+)
+
+[05-Jul-2025 12:09:21 Europe/Berlin] add_sale.php POST: Array
+(
+    [customer_id] => 8
+    [recipient] => 
+    [location] => test
+    [invoice_number] => 454
+    [formula_id] => 17
+    [order_date] => 2025-07-04
+    [quantity] => 5
+    [price_per_unit] => 50
+    [total_price] => 250.00
+    [payment_type] => قەرز
+    [amount_paid_iq] => 50000
+    [amount_paid_usd] => 0
+    [remaining_amount] => 216.67
+    [dolar_rate] => 150000
+    [discount] => 0
+    [notes] => 
+)
+
+[05-Jul-2025 12:09:21 Europe/Berlin] Parsed vars: customer_id='8', recipient='', location='test', quantity='5', price_per_unit='50', total_price='250.00', payment_type='قەرز', amount_paid_usd='0', amount_paid_iq='50000', dolar_rate='150000', remaining_amount='216.67', invoice_number='454', order_date='2025-07-04', notes='', formula_id='17', discount='0'
+[05-Jul-2025 12:09:41 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana@0101
+    [role] => admin
+)
+
+[05-Jul-2025 12:09:41 Europe/Berlin] add_sale.php POST: Array
+(
+    [customer_id] => 8
+    [recipient] => 
+    [location] => test
+    [invoice_number] => 45447
+    [formula_id] => 17
+    [order_date] => 2025-07-04
+    [quantity] => 5
+    [price_per_unit] => 48
+    [total_price] => 240.00
+    [payment_type] => قەرز
+    [amount_paid_iq] => 0
+    [amount_paid_usd] => 0
+    [remaining_amount] => 240.00
+    [dolar_rate] => 150000
+    [discount] => 0
+    [notes] => 
+)
+
+[05-Jul-2025 12:09:41 Europe/Berlin] Parsed vars: customer_id='8', recipient='', location='test', quantity='5', price_per_unit='48', total_price='240.00', payment_type='قەرز', amount_paid_usd='0', amount_paid_iq='0', dolar_rate='150000', remaining_amount='240.00', invoice_number='45447', order_date='2025-07-04', notes='', formula_id='17', discount='0'
+[05-Jul-2025 12:30:53 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana@0101
+    [role] => admin
+)
+
+[05-Jul-2025 12:30:53 Europe/Berlin] add_sale.php POST: Array
+(
+    [customer_id] => 9
+    [recipient] => 
+    [location] => ژ
+    [invoice_number] => 45
+    [formula_id] => 17
+    [order_date] => 2025-07-04
+    [quantity] => 2
+    [price_per_unit] => 50
+    [total_price] => 100.00
+    [payment_type] => قەرز
+    [amount_paid_iq] => 0
+    [amount_paid_usd] => 0
+    [remaining_amount] => 100.00
+    [dolar_rate] => 150000
+    [discount] => 0
+    [notes] => 
+)
+
+[05-Jul-2025 12:30:53 Europe/Berlin] Parsed vars: customer_id='9', recipient='', location='ژ', quantity='2', price_per_unit='50', total_price='100.00', payment_type='قەرز', amount_paid_usd='0', amount_paid_iq='0', dolar_rate='150000', remaining_amount='100.00', invoice_number='45', order_date='2025-07-04', notes='', formula_id='17', discount='0'
+[05-Jul-2025 12:31:09 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana@0101
+    [role] => admin
+)
+
+[05-Jul-2025 12:31:09 Europe/Berlin] add_sale.php POST: Array
+(
+    [customer_id] => 9
+    [recipient] => 
+    [location] => ژ
+    [invoice_number] => 4577
+    [formula_id] => 17
+    [order_date] => 2025-07-04
+    [quantity] => 3
+    [price_per_unit] => 50
+    [total_price] => 150.00
+    [payment_type] => قەرز
+    [amount_paid_iq] => 0
+    [amount_paid_usd] => 0
+    [remaining_amount] => 150.00
+    [dolar_rate] => 150000
+    [discount] => 0
+    [notes] => 
+)
+
+[05-Jul-2025 12:31:09 Europe/Berlin] Parsed vars: customer_id='9', recipient='', location='ژ', quantity='3', price_per_unit='50', total_price='150.00', payment_type='قەرز', amount_paid_usd='0', amount_paid_iq='0', dolar_rate='150000', remaining_amount='150.00', invoice_number='4577', order_date='2025-07-04', notes='', formula_id='17', discount='0'
+[05-Jul-2025 12:42:30 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana@0101
+    [role] => admin
+)
+
+[05-Jul-2025 12:42:30 Europe/Berlin] add_sale.php POST: Array
+(
+    [customer_id] => 10
+    [recipient] => 
+    [location] => k
+    [invoice_number] => 364
+    [formula_id] => 17
+    [order_date] => 2025-07-04
+    [quantity] => 5
+    [price_per_unit] => 50
+    [total_price] => 250.00
+    [payment_type] => قەرز
+    [amount_paid_iq] => 0
+    [amount_paid_usd] => 0
+    [remaining_amount] => 250.00
+    [dolar_rate] => 150000
+    [discount] => 0
+    [notes] => 
+)
+
+[05-Jul-2025 12:42:30 Europe/Berlin] Parsed vars: customer_id='10', recipient='', location='k', quantity='5', price_per_unit='50', total_price='250.00', payment_type='قەرز', amount_paid_usd='0', amount_paid_iq='0', dolar_rate='150000', remaining_amount='250.00', invoice_number='364', order_date='2025-07-04', notes='', formula_id='17', discount='0'
+[05-Jul-2025 12:42:54 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana@0101
+    [role] => admin
+)
+
+[05-Jul-2025 12:42:54 Europe/Berlin] add_sale.php POST: Array
+(
+    [customer_id] => 10
+    [recipient] => 
+    [location] => k
+    [invoice_number] => 364
+    [formula_id] => 17
+    [order_date] => 2025-07-04
+    [quantity] => 50
+    [price_per_unit] => 48
+    [total_price] => 2400.00
+    [payment_type] => قەرز
+    [amount_paid_iq] => 0
+    [amount_paid_usd] => 0
+    [remaining_amount] => 2400.00
+    [dolar_rate] => 150000
+    [discount] => 0
+    [notes] => 
+)
+
+[05-Jul-2025 12:42:54 Europe/Berlin] Parsed vars: customer_id='10', recipient='', location='k', quantity='50', price_per_unit='48', total_price='2400.00', payment_type='قەرز', amount_paid_usd='0', amount_paid_iq='0', dolar_rate='150000', remaining_amount='2400.00', invoice_number='364', order_date='2025-07-04', notes='', formula_id='17', discount='0'
+[05-Jul-2025 12:42:54 Europe/Berlin] PDOException: SQLSTATE[45000]: <<Unknown error>>: 1644 بڕی پێویست لە لمی ڕەش نییە. بڕی پێویست: 57000.00 kg، بڕی بەردەست: 42080.00 kg
+[05-Jul-2025 12:43:08 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana@0101
+    [role] => admin
+)
+
+[05-Jul-2025 12:43:08 Europe/Berlin] add_sale.php POST: Array
+(
+    [customer_id] => 10
+    [recipient] => 
+    [location] => k
+    [invoice_number] => 364
+    [formula_id] => 17
+    [order_date] => 2025-07-04
+    [quantity] => 10
+    [price_per_unit] => 48
+    [total_price] => 480.00
+    [payment_type] => قەرز
+    [amount_paid_iq] => 0
+    [amount_paid_usd] => 0
+    [remaining_amount] => 480.00
+    [dolar_rate] => 150000
+    [discount] => 0
+    [notes] => 
+)
+
+[05-Jul-2025 12:43:08 Europe/Berlin] Parsed vars: customer_id='10', recipient='', location='k', quantity='10', price_per_unit='48', total_price='480.00', payment_type='قەرز', amount_paid_usd='0', amount_paid_iq='0', dolar_rate='150000', remaining_amount='480.00', invoice_number='364', order_date='2025-07-04', notes='', formula_id='17', discount='0'
+[05-Jul-2025 12:55:01 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana@0101
+    [role] => admin
+)
+
+[05-Jul-2025 12:55:01 Europe/Berlin] add_sale.php POST: Array
+(
+    [customer_id] => 11
+    [recipient] => 
+    [location] => s
+    [invoice_number] => 5448
+    [formula_id] => 17
+    [order_date] => 2025-07-04
+    [quantity] => 3
+    [price_per_unit] => 50
+    [total_price] => 150.00
+    [payment_type] => قەرز
+    [amount_paid_iq] => 0
+    [amount_paid_usd] => 0
+    [remaining_amount] => 150.00
+    [dolar_rate] => 150000
+    [discount] => 0
+    [notes] => 
+)
+
+[05-Jul-2025 12:55:01 Europe/Berlin] Parsed vars: customer_id='11', recipient='', location='s', quantity='3', price_per_unit='50', total_price='150.00', payment_type='قەرز', amount_paid_usd='0', amount_paid_iq='0', dolar_rate='150000', remaining_amount='150.00', invoice_number='5448', order_date='2025-07-04', notes='', formula_id='17', discount='0'
+[05-Jul-2025 13:44:33 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana@0101
+    [role] => admin
+)
+
+[05-Jul-2025 13:44:33 Europe/Berlin] add_sale.php POST: Array
+(
+    [customer_id] => 11
+    [recipient] => 
+    [location] => س
+    [invoice_number] => 45454
+    [formula_id] => 19
+    [order_date] => 2025-07-04
+    [quantity] => 2
+    [price_per_unit] => 50
+    [total_price] => 100.00
+    [payment_type] => قەرز
+    [amount_paid_iq] => 0
+    [amount_paid_usd] => 0
+    [remaining_amount] => 100.00
+    [dolar_rate] => 150000
+    [discount] => 0
+    [notes] => 
+)
+
+[05-Jul-2025 13:44:33 Europe/Berlin] Parsed vars: customer_id='11', recipient='', location='س', quantity='2', price_per_unit='50', total_price='100.00', payment_type='قەرز', amount_paid_usd='0', amount_paid_iq='0', dolar_rate='150000', remaining_amount='100.00', invoice_number='45454', order_date='2025-07-04', notes='', formula_id='19', discount='0'
+[05-Jul-2025 17:48:53 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana@0101
+    [role] => admin
+)
+
+[05-Jul-2025 17:48:53 Europe/Berlin] add_sale.php POST: Array
+(
+    [customer_id] => 4
+    [recipient] => 
+    [location] => دهۆک 
+    [invoice_number] => 2384
+    [formula_id] => 23
+    [order_date] => 2025-07-04
+    [quantity] => 5
+    [price_per_unit] => 50
+    [total_price] => 250.00
+    [payment_type] => نەقد
+    [amount_paid_iq] => 0
+    [amount_paid_usd] => 250
+    [remaining_amount] => 0.00
+    [dolar_rate] => 150000
+    [discount] => 0
+    [notes] => 
+)
+
+[05-Jul-2025 17:48:53 Europe/Berlin] Parsed vars: customer_id='4', recipient='', location='دهۆک ', quantity='5', price_per_unit='50', total_price='250.00', payment_type='نەقد', amount_paid_usd='250', amount_paid_iq='0', dolar_rate='150000', remaining_amount='0.00', invoice_number='2384', order_date='2025-07-04', notes='', formula_id='23', discount='0'
+[06-Jul-2025 18:09:28 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[06-Jul-2025 18:09:28 Europe/Berlin] add_sale.php POST: Array
+(
+    [customer_id] => 12
+    [recipient] => ڕاوێژ
+    [location] => سلێمانی
+    [invoice_number] => 3654
+    [formula_id] => 30
+    [order_date] => 2025-07-05
+    [quantity] => 10
+    [price_per_unit] => 40
+    [total_price] => 400.00
+    [payment_type] => قەرز
+    [amount_paid_iq] => 0
+    [amount_paid_usd] => 0
+    [remaining_amount] => 400.00
+    [dolar_rate] => 150000
+    [discount] => 0
+    [notes] => 
+)
+
+[06-Jul-2025 18:09:28 Europe/Berlin] Parsed vars: customer_id='12', recipient='ڕاوێژ', location='سلێمانی', quantity='10', price_per_unit='40', total_price='400.00', payment_type='قەرز', amount_paid_usd='0', amount_paid_iq='0', dolar_rate='150000', remaining_amount='400.00', invoice_number='3654', order_date='2025-07-05', notes='', formula_id='30', discount='0'
+[07-Jul-2025 12:13:00 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[07-Jul-2025 12:13:00 Europe/Berlin] add_sale.php POST: Array
+(
+    [customer_id] => 4
+    [recipient] => سلێمانی
+    [location] => کوردتان
+    [invoice_number] => 437
+    [formula_id] => 18
+    [order_date] => 2025-07-06
+    [quantity] => 10
+    [price_per_unit] => 50
+    [total_price] => 500.00
+    [payment_type] => قەرز
+    [amount_paid_iq] => 0
+    [amount_paid_usd] => 0
+    [remaining_amount] => 500.00
+    [dolar_rate] => 150000
+    [discount] => 0
+    [notes] => 
+)
+
+[07-Jul-2025 12:13:00 Europe/Berlin] Parsed vars: customer_id='4', recipient='سلێمانی', location='کوردتان', quantity='10', price_per_unit='50', total_price='500.00', payment_type='قەرز', amount_paid_usd='0', amount_paid_iq='0', dolar_rate='150000', remaining_amount='500.00', invoice_number='437', order_date='2025-07-06', notes='', formula_id='18', discount='0'
+[07-Jul-2025 12:15:08 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[07-Jul-2025 12:15:08 Europe/Berlin] add_sale.php POST: Array
+(
+    [customer_id] => 4
+    [recipient] => سلێمانی
+    [location] => کوردتان
+    [invoice_number] => 4375
+    [formula_id] => 17
+    [order_date] => 2025-07-06
+    [quantity] => 100
+    [price_per_unit] => 50
+    [total_price] => 5000.00
+    [payment_type] => قەرز
+    [amount_paid_iq] => 0
+    [amount_paid_usd] => 0
+    [remaining_amount] => 5000.00
+    [dolar_rate] => 150000
+    [discount] => 0
+    [notes] => 
+)
+
+[07-Jul-2025 12:15:08 Europe/Berlin] Parsed vars: customer_id='4', recipient='سلێمانی', location='کوردتان', quantity='100', price_per_unit='50', total_price='5000.00', payment_type='قەرز', amount_paid_usd='0', amount_paid_iq='0', dolar_rate='150000', remaining_amount='5000.00', invoice_number='4375', order_date='2025-07-06', notes='', formula_id='17', discount='0'
+[07-Jul-2025 12:15:08 Europe/Berlin] PDOException: SQLSTATE[45000]: <<Unknown error>>: 1644 بڕی پێویست لە لمی ڕەش نییە. بڕی پێویست: 114000.00 kg، بڕی بەردەست: 41360.00 kg
+[07-Jul-2025 12:15:12 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[07-Jul-2025 12:15:12 Europe/Berlin] add_sale.php POST: Array
+(
+    [customer_id] => 4
+    [recipient] => سلێمانی
+    [location] => کوردتان
+    [invoice_number] => 4375
+    [formula_id] => 17
+    [order_date] => 2025-07-06
+    [quantity] => 1
+    [price_per_unit] => 50
+    [total_price] => 50.00
+    [payment_type] => قەرز
+    [amount_paid_iq] => 0
+    [amount_paid_usd] => 0
+    [remaining_amount] => 50.00
+    [dolar_rate] => 150000
+    [discount] => 0
+    [notes] => 
+)
+
+[07-Jul-2025 12:15:12 Europe/Berlin] Parsed vars: customer_id='4', recipient='سلێمانی', location='کوردتان', quantity='1', price_per_unit='50', total_price='50.00', payment_type='قەرز', amount_paid_usd='0', amount_paid_iq='0', dolar_rate='150000', remaining_amount='50.00', invoice_number='4375', order_date='2025-07-06', notes='', formula_id='17', discount='0'
+[07-Jul-2025 12:17:08 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[07-Jul-2025 12:17:08 Europe/Berlin] add_sale.php POST: Array
+(
+    [customer_id] => 4
+    [recipient] => سلێمانی
+    [location] => کوردتان
+    [invoice_number] => 4374
+    [formula_id] => 17
+    [order_date] => 2025-07-06
+    [quantity] => 1
+    [price_per_unit] => 55.00
+    [total_price] => 55.00
+    [payment_type] => قەرز
+    [amount_paid_iq] => 0
+    [amount_paid_usd] => 0
+    [remaining_amount] => 55.00
+    [dolar_rate] => 150000
+    [discount] => 0
+    [notes] => 
+)
+
+[07-Jul-2025 12:17:08 Europe/Berlin] Parsed vars: customer_id='4', recipient='سلێمانی', location='کوردتان', quantity='1', price_per_unit='55.00', total_price='55.00', payment_type='قەرز', amount_paid_usd='0', amount_paid_iq='0', dolar_rate='150000', remaining_amount='55.00', invoice_number='4374', order_date='2025-07-06', notes='', formula_id='17', discount='0'
+[07-Jul-2025 12:19:24 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[07-Jul-2025 12:19:24 Europe/Berlin] add_sale.php POST: Array
+(
+    [customer_id] => 4
+    [recipient] => سلێمانی
+    [location] => سلێمانی
+    [invoice_number] => 22
+    [formula_id] => 24
+    [order_date] => 2025-07-06
+    [quantity] => 2
+    [price_per_unit] => 55.00
+    [total_price] => 110.00
+    [payment_type] => قەرز
+    [amount_paid_iq] => 0
+    [amount_paid_usd] => 0
+    [remaining_amount] => 110.00
+    [dolar_rate] => 150000
+    [discount] => 0
+    [notes] => 
+)
+
+[07-Jul-2025 12:19:24 Europe/Berlin] Parsed vars: customer_id='4', recipient='سلێمانی', location='سلێمانی', quantity='2', price_per_unit='55.00', total_price='110.00', payment_type='قەرز', amount_paid_usd='0', amount_paid_iq='0', dolar_rate='150000', remaining_amount='110.00', invoice_number='22', order_date='2025-07-06', notes='', formula_id='24', discount='0'
+[07-Jul-2025 21:25:18 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[07-Jul-2025 21:25:18 Europe/Berlin] add_sale.php POST: Array
+(
+    [customer_id] => 4
+    [recipient] => سلێمانی
+    [location] => کوردتان
+    [invoice_number] => 45
+    [formula_id] => 19
+    [order_date] => 2025-07-06
+    [quantity] => 1
+    [price_per_unit] => 50
+    [total_price] => 50.00
+    [payment_type] => قەرز
+    [amount_paid_iq] => 0
+    [amount_paid_usd] => 0
+    [remaining_amount] => 50.00
+    [dolar_rate] => 150000
+    [discount] => 0
+    [notes] => 
+)
+
+[07-Jul-2025 21:25:18 Europe/Berlin] Parsed vars: customer_id='4', recipient='سلێمانی', location='کوردتان', quantity='1', price_per_unit='50', total_price='50.00', payment_type='قەرز', amount_paid_usd='0', amount_paid_iq='0', dolar_rate='150000', remaining_amount='50.00', invoice_number='45', order_date='2025-07-06', notes='', formula_id='19', discount='0'
+[07-Jul-2025 21:26:02 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[07-Jul-2025 21:26:02 Europe/Berlin] add_sale.php POST: Array
+(
+    [customer_id] => 13
+    [recipient] => کوردستان
+    [location] => Iraq-Kurdistan, Sulaymaniyah 
+    [invoice_number] => 453
+    [formula_id] => 26
+    [order_date] => 2025-07-06
+    [quantity] => 1
+    [price_per_unit] => 50
+    [total_price] => 50.00
+    [payment_type] => قەرز
+    [amount_paid_iq] => 0
+    [amount_paid_usd] => 0
+    [remaining_amount] => 50.00
+    [dolar_rate] => 150000
+    [discount] => 0
+    [notes] => 
+)
+
+[07-Jul-2025 21:26:02 Europe/Berlin] Parsed vars: customer_id='13', recipient='کوردستان', location='Iraq-Kurdistan, Sulaymaniyah ', quantity='1', price_per_unit='50', total_price='50.00', payment_type='قەرز', amount_paid_usd='0', amount_paid_iq='0', dolar_rate='150000', remaining_amount='50.00', invoice_number='453', order_date='2025-07-06', notes='', formula_id='26', discount='0'
+[09-Jul-2025 16:34:57 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[09-Jul-2025 16:34:57 Europe/Berlin] add_sale.php POST: Array
+(
+    [customer_id] => 4
+    [recipient] => سلێمانی
+    [location] => سلێمانی
+    [invoice_number] => 5475
+    [formula_id] => 18
+    [order_date] => 2025-07-08
+    [quantity] => 1
+    [price_per_unit] => 10
+    [total_price] => 10.00
+    [payment_type] => نەقد
+    [amount_paid_iq] => 0
+    [amount_paid_usd] => 10
+    [remaining_amount] => 0.00
+    [dolar_rate] => 150000
+    [discount] => 0
+    [notes] => 
+)
+
+[09-Jul-2025 16:34:57 Europe/Berlin] Parsed vars: customer_id='4', recipient='سلێمانی', location='سلێمانی', quantity='1', price_per_unit='10', total_price='10.00', payment_type='نەقد', amount_paid_usd='10', amount_paid_iq='0', dolar_rate='150000', remaining_amount='0.00', invoice_number='5475', order_date='2025-07-08', notes='', formula_id='18', discount='0'
+[09-Jul-2025 19:10:06 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[09-Jul-2025 19:10:06 Europe/Berlin] add_sale.php POST: Array
+(
+    [customer_id] => 14
+    [recipient] => سلێمانی
+    [location] => سلێمانی
+    [invoice_number] => 469
+    [formula_id] => 18
+    [order_date] => 2025-07-08
+    [quantity] => 2
+    [price_per_unit] => 50
+    [total_price] => 100.00
+    [payment_type] => قەرز
+    [amount_paid_iq] => 0
+    [amount_paid_usd] => 0
+    [remaining_amount] => 100.00
+    [dolar_rate] => 150000
+    [discount] => 0
+    [notes] => 
+)
+
+[09-Jul-2025 19:10:06 Europe/Berlin] Parsed vars: customer_id='14', recipient='سلێمانی', location='سلێمانی', quantity='2', price_per_unit='50', total_price='100.00', payment_type='قەرز', amount_paid_usd='0', amount_paid_iq='0', dolar_rate='150000', remaining_amount='100.00', invoice_number='469', order_date='2025-07-08', notes='', formula_id='18', discount='0'
+[10-Jul-2025 20:47:46 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[10-Jul-2025 20:47:46 Europe/Berlin] add_sale.php POST: Array
+(
+    [customer_id] => 8
+    [recipient] => سلێمانی
+    [location] => کوردتان
+    [invoice_number] => 123
+    [formula_id] => 19
+    [order_date] => 2025-07-09
+    [quantity] => 2
+    [price_per_unit] => 50
+    [total_price] => 100.00
+    [payment_type] => نەقد
+    [amount_paid_iq] => 0
+    [amount_paid_usd] => 100
+    [remaining_amount] => 0.00
+    [dolar_rate] => 150000
+    [discount] => 0
+    [notes] => 
+)
+
+[10-Jul-2025 20:47:46 Europe/Berlin] Parsed vars: customer_id='8', recipient='سلێمانی', location='کوردتان', quantity='2', price_per_unit='50', total_price='100.00', payment_type='نەقد', amount_paid_usd='100', amount_paid_iq='0', dolar_rate='150000', remaining_amount='0.00', invoice_number='123', order_date='2025-07-09', notes='', formula_id='19', discount='0'
+[10-Jul-2025 20:50:03 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[10-Jul-2025 20:50:03 Europe/Berlin] add_sale.php POST: Array
+(
+    [customer_id] => 4
+    [recipient] => سلێمانی
+    [location] => کوردتان
+    [invoice_number] => 4375
+    [formula_id] => 18
+    [order_date] => 2025-07-09
+    [quantity] => 2
+    [price_per_unit] => 43.4
+    [total_price] => 86.80
+    [payment_type] => نەقد
+    [amount_paid_iq] => 0
+    [amount_paid_usd] => 086
+    [remaining_amount] => -0.00
+    [dolar_rate] => 150000
+    [discount] => 0.8
+    [notes] => 
+)
+
+[10-Jul-2025 20:50:03 Europe/Berlin] Parsed vars: customer_id='4', recipient='سلێمانی', location='کوردتان', quantity='2', price_per_unit='43.4', total_price='86.80', payment_type='نەقد', amount_paid_usd='086', amount_paid_iq='0', dolar_rate='150000', remaining_amount='-0.00', invoice_number='4375', order_date='2025-07-09', notes='', formula_id='18', discount='0.8'

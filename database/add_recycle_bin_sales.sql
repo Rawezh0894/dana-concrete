@@ -1,0 +1,21 @@
+CREATE TABLE IF NOT EXISTS recycle_bin_sales (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  original_id INT NOT NULL,
+  customer_id INT DEFAULT NULL,
+  recipient VARCHAR(255) DEFAULT NULL,
+  location VARCHAR(255) NOT NULL,
+  quantity DECIMAL(10,2) DEFAULT NULL,
+  price_per_unit DECIMAL(10,2) DEFAULT NULL,
+  total_price DECIMAL(10,2) DEFAULT NULL,
+  payment_type ENUM('نەقد','قەرز') NOT NULL,
+  amount_paid_usd DECIMAL(10,2) DEFAULT NULL,
+  amount_paid_iq DECIMAL(10,2) DEFAULT NULL,
+  dolar_rate DECIMAL(10,2) DEFAULT NULL,
+  remaining_amount DECIMAL(10,2) DEFAULT NULL,
+  invoice_number VARCHAR(100) NOT NULL,
+  order_date DATE NOT NULL,
+  notes TEXT DEFAULT NULL,
+  formula_id INT NOT NULL,
+  discount DECIMAL(10,2) DEFAULT 0.00,
+  deleted_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+); 

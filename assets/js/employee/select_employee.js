@@ -1,0 +1,26 @@
+$(function() {
+    function formatSalary(salary) {
+        return Number(salary).toLocaleString('en-US') + ' د.ع';
+    }
+    function loadEmployees() {
+        TableController.showLoading('#employeeTable', ['#', 'name', 'mobile', 'role', 'salary', 'actions']);
+        $.get('../process/employee/select_employee.php', function(res) {
+            if (!res || !Array.isArray(res)) {
+                TableController.render('#employeeTable', [], ['#', 'name', 'mobile', 'role', 'salary', 'actions']);
+                return;
+            }
+            // Add actions column (edit/delete buttons) and format salary
+            res.forEach(emp => {
+                const rawSalary = emp.salary;
+                emp.salary = formatSalary(emp.salary);
+                emp.actions = `
+                    <button class="btn btn-sm btn-primary edit-employee" data-id="${emp.id}" data-name="${emp.name}" data-mobile="${emp.mobile}" data-role="${emp.role}" data-salary="${rawSalary}"><i class="fa fa-edit"></i></button>
+                    <button class="btn btn-sm btn-danger delete-employee" data-id="${emp.id}"><i class="fa fa-trash"></i></button>
+                `;
+            });
+            TableController.renderWithPagination('#employeeTable', res, ['#', 'name', 'mobile', 'role', 'salary', 'actions']);
+        }, 'json');
+    }
+    loadEmployees();
+    window.loadEmployees = loadEmployees;
+});
