@@ -37,6 +37,12 @@ $receipt_id = isset($_GET['id']) ? $_GET['id'] : null;
 </head>
 <body>
     <div class="receipt" id="receiptTemplate">
+        <!-- Decorative corners -->
+        <img src="../assets/images/leaves.png" class="corner corner-top-left" alt="corner">
+        <img src="../assets/images/leaves.png" class="corner corner-top-right" alt="corner">
+        <img src="../assets/images/leaves.png" class="corner corner-bottom-left" alt="corner">
+        <img src="../assets/images/leaves.png" class="corner corner-bottom-right" alt="corner">
+        
         <div class="header">
           
             <div class="company-info">
@@ -129,9 +135,11 @@ $receipt_id = isset($_GET['id']) ? $_GET['id'] : null;
             </tbody>
         </table>
         
-        <!-- Notes Section -->
-        <div class="notes-box" style="margin: 16px 0 8px 0; padding: 10px 16px; border: 2px dashed var(--primary-green); border-radius: 10px; background: var(--light-green); min-height: 80px; font-size: 15px; color: var(--dark-green);">
-            <strong>تێبینی:</strong> <span id="notes">-</span>
+        <!-- Decorative line section -->
+        <div class="decorative-line-section">
+            <div class="decorative-line"></div>
+            <div class="decorative-text">✧ ✧ ✧</div>
+            <div class="decorative-line"></div>
         </div>
         
         <!-- Footer signatures -->

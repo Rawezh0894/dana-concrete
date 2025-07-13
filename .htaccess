@@ -2,6 +2,10 @@
 RewriteCond %{REQUEST_URI} ^/process/login/sign_in\.php$ [NC]
 RewriteRule ^ - [L]
 
+# Allow direct access to logout
+RewriteCond %{REQUEST_URI} ^/core/logout\.php$ [NC]
+RewriteRule ^ - [L]
+
 # Enable URL rewriting
 RewriteEngine On
 

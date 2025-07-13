@@ -10,8 +10,8 @@ const TableController = {
             const tr = document.createElement('tr');
             const td = document.createElement('td');
             td.colSpan = columns.length;
-            td.className = 'text-center text-muted';
-            td.textContent = 'هیچ زانیارییەک نەدۆزرایەوە';
+            td.className = 'table-empty-state';
+            td.innerHTML = '<i class="bi bi-inbox"></i><br>هیچ زانیارییەک نەدۆزرایەوە';
             tr.appendChild(td);
             tbody.appendChild(tr);
             return;
@@ -40,6 +40,11 @@ const TableController = {
                 }
                 tr.appendChild(td);
             });
+            // Row select highlight
+            tr.onclick = function() {
+                tbody.querySelectorAll('tr').forEach(row => row.classList.remove('selected'));
+                tr.classList.add('selected');
+            };
             tbody.appendChild(tr);
         });
     },

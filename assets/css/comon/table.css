@@ -1,171 +1,530 @@
-/* Table search input styles */
+.table-pagination .prev-btn,
+  .table-pagination .next-btn {
+    border-radius: var(--border-radius-sm);
+    min-width: 40px;
+  }/* ڕەنگە سەرەکییەکان */
+:root {
+  --primary-blue: #3b82f6;
+  --secondary-purple: #8b5cf6;
+  --accent-orange: #f59e0b;
+  --neutral-gray: #6b7280;
+  --light-gray: #f8fafc;
+  --ultra-light-gray: #f1f5f9;
+  --white: #ffffff;
+  --dark-text: #1e293b;
+  --light-text: #64748b;
+  --border-color: #e2e8f0;
+  --shadow-light: rgba(15, 23, 42, 0.08);
+  --shadow-medium: rgba(15, 23, 42, 0.12);
+  --shadow-dark: rgba(15, 23, 42, 0.20);
+  --border-radius: 12px;
+  --border-radius-sm: 8px;
+  --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* فۆنتی کوردی */
+@font-face {
+  font-family: 'Rabar_021';
+  src: url('fonts/Rabar_021.woff2') format('woff2'),
+       url('fonts/Rabar_021.woff') format('woff');
+  font-display: swap;
+}
+
+/* ستایلی گشتی بۆ تەیبڵ */
+.table-container {
+  background: var(--white);
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 20px var(--shadow-light);
+  overflow: hidden;
+  margin: 1.5rem 0;
+  position: relative;
+}
+
+.table-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary-blue), var(--secondary-purple));
+}
+
+/* ستایلی گەڕان */
+.table-search-container {
+  padding: 1.5rem;
+  background: linear-gradient(135deg, var(--ultra-light-gray) 0%, var(--white) 100%);
+  border-bottom: 1px solid var(--border-color);
+  position: relative;
+}
+
 .table-search-input {
   width: 100%;
-  padding: 2px 6px;
-  font-size: 0.95em;
-  border: 1px solid var(--kelly-green);
-  border-radius: 4px;
-  box-sizing: border-box;
-  margin-top: 2px;
-  margin-bottom: 2px;
-  
-  color: #222;
+  padding: 12px 16px;
+  font-size: 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  background: var(--white);
+  color: var(--dark-text);
+  font-family: 'Rabar_021', sans-serif;
+  transition: var(--transition);
+  box-shadow: 0 2px 8px var(--shadow-light);
+  outline: none;
 }
 
 .table-search-input:focus {
-  outline: none;
-  border-color: #26a69a;
-  
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  transform: translateY(-1px);
 }
 
-/* --- Compact Modern Pagination Styles --- */
+.table-search-input::placeholder {
+  color: var(--light-text);
+  font-family: 'Rabar_021', sans-serif;
+}
+
+/* ستایلی تەیبڵ */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Rabar_021', sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  background: var(--white);
+}
+
+/* سەرەوەی تەیبڵ */
+.table thead {
+  background: linear-gradient(135deg, var(--ultra-light-gray) 0%, #f8fafc 100%);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.table thead th {
+  padding: 1rem 0.75rem;
+  font-weight: 600;
+  color: var(--dark-text);
+  text-align: center;
+  border-bottom: 2px solid var(--primary-blue);
+  font-size: 1rem;
+  letter-spacing: 0.5px;
+  position: relative;
+  background: inherit;
+}
+
+.table thead th::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 2px;
+  background: var(--primary-blue);
+  border-radius: 2px;
+}
+
+/* ناوەڕۆکی تەیبڵ - هەر ڕیزێک ڕەنگێک */
+.table tbody tr {
+  transition: var(--transition);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+}
+
+.table tbody tr:nth-child(6n+1) {
+  background: #fef2f2; /* ڕەنگی سووری کاڵ */
+}
+
+.table tbody tr:nth-child(6n+2) {
+  background: #f0f9ff; /* ڕەنگی شینی کاڵ */
+}
+
+.table tbody tr:nth-child(6n+3) {
+  background: #fefce8; /* ڕەنگی زەردی کاڵ */
+}
+
+.table tbody tr:nth-child(6n+4) {
+  background: #fdf4ff; /* ڕەنگی پەمەیی کاڵ */
+}
+
+.table tbody tr:nth-child(6n+5) {
+  background: #f0fdfa; /* ڕەنگی سەوزی کاڵ */
+}
+
+.table tbody tr:nth-child(6n+6) {
+  background: #f8fafc; /* ڕەنگی گریی کاڵ */
+}
+
+.table tbody tr:hover {
+  background: rgba(59, 130, 246, 0.1) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--shadow-medium);
+}
+
+.table tbody tr.selected {
+  background: var(--primary-blue) !important;
+  color: var(--white);
+  font-weight: 500;
+  box-shadow: 0 4px 16px var(--shadow-dark);
+}
+
+.table td, .table th {
+  padding: 0.875rem 0.75rem;
+  text-align: center;
+  vertical-align: middle;
+  word-wrap: break-word;
+  min-width: 120px;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* دووگمەکانی کردار */
+.table .action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  margin: 0 3px;
+  text-decoration: none;
+  outline: none;
+  box-shadow: 0 2px 8px var(--shadow-light);
+  font-family: 'Rabar_021', sans-serif;
+}
+
+.table .action-btn.edit {
+  background: var(--primary-blue);
+  color: var(--white);
+}
+
+.table .action-btn.edit:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px var(--shadow-medium);
+}
+
+.table .action-btn.delete {
+  background: #ef4444;
+  color: var(--white);
+}
+
+.table .action-btn.delete:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(220, 38, 38, 0.3);
+}
+
+.table .action-btn.view {
+  background: var(--secondary-purple);
+  color: var(--white);
+}
+
+.table .action-btn.view:hover {
+  background: #7c3aed;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.3);
+}
+
+/* ڕێکخستنی لاپەڕەکان - بازنەیی و چووک */
 .table-pagination {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 0.25rem;
-  margin: 8px auto 0 auto;
-  background: #fff;
-  border-radius: 10px;
+  gap: 4px;
+  padding: 1rem;
+  background: linear-gradient(135deg, var(--ultra-light-gray) 0%, var(--white) 100%);
+  border-top: 1px solid var(--border-color);
+  flex-wrap: wrap;
+}
 
-  padding: 4px 10px;
-  max-width: fit-content;
-  font-size: 0.97em;
-  transition: box-shadow 0.2s;
-}
-.table-pagination button, .table-pagination select {
-  min-width: 30px;
-  margin: 0 2px;
-  border-radius: 7px;
-  border: 1.2px solid var(--seafoam-green);
-  background: #fff;
-  color: white;
+.table-pagination button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  background: var(--white);
+  color: var(--dark-text);
   font-family: 'Rabar_021', sans-serif;
-  font-size: 0.97em;
-  padding: 2px 8px;
-  height: 30px;
-  transition: background 0.16s, color 0.16s, border 0.16s, transform 0.16s;
- background: var(--seafoam-green);
-  outline: none;
-  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 500;
   cursor: pointer;
+  transition: var(--transition);
+  outline: none;
+  box-shadow: 0 1px 3px var(--shadow-light);
 }
-.table-pagination button.btn-success, .table-pagination button.active {
-  background: var(--seafoam-green);
-  color: #fff;
-  border-color: var(--seafoam-green);
-  font-weight: bold;
-  transform: scale(1.05);
-  box-shadow: 0 2px 8px rgba(47, 82, 51, 0.10);
-  z-index: 1;
+
+.table-pagination button:hover:not(:disabled) {
+  background: var(--primary-blue);
+  border-color: var(--primary-blue);
+  color: var(--white);
+  transform: translateY(-1px) scale(1.1);
+  box-shadow: 0 4px 12px var(--shadow-medium);
 }
-.table-pagination button:hover:not(:disabled), .table-pagination select:focus {
-  background: var(--seafoam-green);
-  color: #fff;
-  border-color: var(--seafoam-green);
-  transform: scale(1.03);
+
+.table-pagination button.active {
+  background: var(--primary-blue);
+  border-color: var(--primary-blue);
+  color: var(--white);
+  font-weight: 600;
+  transform: scale(1.1);
+  box-shadow: 0 4px 16px var(--shadow-dark);
 }
+
 .table-pagination button:disabled {
-  background: #f0f0f0;
-  color: #bdbdbd;
-  border-color: #e0e0e0;
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  color: #cbd5e1;
   cursor: not-allowed;
   box-shadow: none;
 }
-.table-pagination .table-page-size {
-  width: auto;
-  min-width: 50px;
-  font-size: 0.97em;
-  margin-left: 6px;
-  margin-right: 6px;
-  background: white;
-  color: var(--seafoam-green);
-  border-radius: 7px;
-  border: 1.2px solid var(--kelly-green);
-  padding: 2px 8px;
-  height: 30px;
-  vertical-align: middle;
-  box-shadow: 0 1px 4px rgba(47, 82, 51, 0.06);
-  transition: border 0.16s, box-shadow 0.16s;
-}
-.table-pagination .table-page-size:focus {
-  outline: none;
-  border-color: var(--seafoam-green);
-  background: white;
-}
-.table-pagination span {
-  padding: 0 3px;
-  color: #bdbdbd;
-  font-size: 1em;
-  user-select: none;
-  background: #f8fffa;
-  border-radius: 5px;
-  margin: 0 1px;
-  letter-spacing: 1px;
-}
-@media (max-width: 600px) {
-  .table-pagination {
-    flex-direction: column;
-    gap: 0.12rem;
-    padding: 4px 2px;
-  }
-  .table-pagination .table-page-size {
-    margin: 4px 0;
-  }
+
+/* دووگمەکانی پێشوو و دواتر */
+.table-pagination .prev-btn,
+.table-pagination .next-btn {
+  border-radius: var(--border-radius-sm);
+  min-width: 32px;
+  height: 28px;
+  font-size: 0.7rem;
+  padding: 0 6px;
 }
 
-/* جوانکردنەوەی dropdown ـی ژمارەی ڕیکۆرد */
+.table-pagination .prev-btn:hover,
+.table-pagination .next-btn:hover {
+  border-radius: var(--border-radius-sm);
+}
+
+/* دروپدۆونی ژمارەی ڕیکۆردەکان */
 .table-page-size {
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  background: white;
-  border: 1.5px solid var(--seafoam-green, #26a69a);
-  border-radius: 8px;
-  padding: 6px 32px 6px 10px;
-  font-size: 1.05em;
-  color: var(--seafoam-green, #26a69a);
+  padding: 8px 32px 8px 12px;
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  background: var(--white);
+  color: var(--dark-text);
   font-family: 'Rabar_021', sans-serif;
-  box-shadow: 0 2px 8px rgba(47, 82, 51, 0.08);
-  transition: border 0.2s, box-shadow 0.2s;
+  font-size: 0.875rem;
   cursor: pointer;
+  transition: var(--transition);
+  outline: none;
+  box-shadow: 0 2px 6px var(--shadow-light);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 8px center;
+  background-repeat: no-repeat;
+  background-size: 16px;
 }
 
 .table-page-size:focus {
-
-  box-shadow: 0 0 0 2px #b2dfdb;
-  background-color: white;
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .table-page-size option {
-  color: #222;
-  background: #fff;
+  color: var(--dark-text);
+  background: var(--white);
   font-family: 'Rabar_021', sans-serif;
 }
 
-/* break long words and wrap text in table cells */
-.table td,
-.table th {
-    min-width: 120px;
-    white-space: normal;
-    word-wrap: break-word;
-    vertical-align: middle;
-    padding: 0.75rem;
+/* ڕیسپۆنسیڤ */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary-green) var(--ultra-light-green);
 }
 
-.table th,
-.table td {
-    text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.table-responsive::-webkit-scrollbar {
+  height: 8px;
+  background: var(--ultra-light-green);
+  border-radius: 4px;
 }
 
-/* Odd/even row coloring for better readability */
-.table tbody tr:nth-child(odd) {
-    background-color: #f8fffa !important;
+.table-responsive::-webkit-scrollbar-thumb {
+  background: var(--primary-blue);
+  border-radius: 4px;
 }
-.table tbody tr:nth-child(even) {
-    background-color: #e0f2f1 !important;
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+  background: #2563eb;
+}
+
+/* حاڵەتی بەتاڵ */
+.table-empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--light-text);
+  background: linear-gradient(135deg, var(--ultra-light-gray) 0%, var(--white) 100%);
+}
+
+.table-empty-state .empty-icon {
+  font-size: 4rem;
+  color: var(--primary-blue);
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.table-empty-state .empty-message {
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: var(--dark-text);
+}
+
+.table-empty-state .empty-description {
+  font-size: 0.95rem;
+  color: var(--light-text);
+}
+
+/* ئەنیمەیشنی لۆدینگ */
+.table-loading {
+  position: relative;
+  overflow: hidden;
+}
+
+.table-loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.6), 
+    transparent
+  );
+  animation: loading-shimmer 2s infinite;
+}
+
+@keyframes loading-shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* ڕیسپۆنسیڤ بۆ مۆبایل */
+@media (max-width: 768px) {
+  .table-container {
+    margin: 1rem 0;
+    border-radius: var(--border-radius-sm);
+  }
+  
+  .table-search-container {
+    padding: 1rem;
+  }
+  
+  .table-search-input {
+    font-size: 16px; /* بۆ ئەوەی زووم نەکات لە iOS دا */
+  }
+  
+  .table {
+    font-size: 0.875rem;
+  }
+  
+  .table td, .table th {
+    padding: 0.5rem 0.375rem;
+    min-width: 80px;
+  }
+  
+  .table-pagination {
+    flex-direction: column;
+    gap: 12px;
+    padding: 1rem;
+  }
+  
+  .table-pagination button {
+    min-width: 36px;
+    height: 36px;
+    border-radius: 50%;
+  }
+  
+  .table .action-btn {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+    margin: 1px;
+  }
+}
+
+@media (max-width: 480px) {
+  .table-container {
+    margin: 0.5rem 0;
+  }
+  
+  .table {
+    font-size: 0.8rem;
+  }
+  
+  .table td, .table th {
+    padding: 0.375rem 0.25rem;
+    min-width: 60px;
+  }
+  
+  .table thead th {
+    font-size: 0.875rem;
+  }
+}
+
+/* کلاسی یارمەتیدەر */
+.table-highlight {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1)) !important;
+  color: var(--dark-text) !important;
+  font-weight: 600;
+}
+
+.table-success {
+  background: #dcfce7 !important;
+  color: #166534 !important;
+}
+
+.table-warning {
+  background: #fef3c7 !important;
+  color: #d97706 !important;
+}
+
+.table-error {
+  background: #fee2e2 !important;
+  color: #dc2626 !important;
+}
+
+/* ئیفێکتی هۆڤەر بۆ سەر */
+.table thead th:hover {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--dark-text);
+  transition: var(--transition);
+}
+
+/* ستایلی سۆرتکردن */
+.table thead th.sortable {
+  cursor: pointer;
+  position: relative;
+  user-select: none;
+}
+
+.table thead th.sortable::before {
+  content: '⇅';
+  position: absolute;
+  right: 8px;
+  opacity: 0.5;
+  font-size: 0.8rem;
+}
+
+.table thead th.sortable.asc::before {
+  content: '↑';
+  opacity: 1;
+  color: var(--primary-blue);
+}
+
+.table thead th.sortable.desc::before {
+  content: '↓';
+  opacity: 1;
+  color: var(--primary-blue);
 }
