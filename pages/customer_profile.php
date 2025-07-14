@@ -47,7 +47,7 @@ if ($customer_id) {
         <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">
             <?php echo htmlspecialchars($customer_name); ?>
         </h2>
-        <button class="btn d-none" style="background: var(--seafoam-green); color: #fff; border: none; font-weight: bold;" onclick="window.location.href='receipts.php?id=' + CUSTOMER_ID">
+        <button class="btn" style="background: var(--seafoam-green); color: #fff; border: none; font-weight: bold;" onclick="window.location.href='receipts.php?id=' + CUSTOMER_ID">
             <i class="fa fa-print"></i> پرێنت
         </button>
     </div>
