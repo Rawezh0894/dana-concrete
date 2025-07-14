@@ -3,6 +3,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 // Database connection settings
+
 $host = 'localhost';
 $db   = 'dana_concrete_db';
 $user = 'dana_user'; // گەر ناوی بەکارهێنەر یان وشەی نهێنی جیاوازە، گۆڕی

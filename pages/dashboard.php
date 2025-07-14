@@ -6,13 +6,6 @@ if (!isset($_SESSION['user_id'])) {
     header('Location: ../index.php');
     exit;
 }
-if (!hasPermission('view_dashboard')) {
-    echo '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;">'
-        .'<i class="bi bi-lock-fill" style="font-size:5rem;color:#ccc;"></i>'
-        .'<h2 style="color:#888;">توانای دەست گەیشتنت نییە بەم پەیجە</h2>'
-        .'</div>';
-    exit;
-}
 ?>
 <!DOCTYPE html>
 <html lang="ku" dir="rtl">
@@ -33,81 +26,88 @@ if (!hasPermission('view_dashboard')) {
 <?php include '../includes/navbar.php'; ?>
 <?php include '../includes/sidebar.php'; ?>
 
-<div class="container py-4">
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
-        <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">داشبۆرد</h2>
-        <div class="quick-actions d-flex gap-2">
-            <button class="btn btn-primary quick-action" onclick="location.href='../pages/concrete_receipts.php'"><i class="fa fa-plus"></i> زیادکردنی پسوڵە</button>
-            <button class="btn btn-success quick-action" onclick="location.href='../pages/add_sale.php'"><i class="fa fa-plus"></i> زیادکردنی فرۆشتن</button>
-            <button class="btn btn-info quick-action" onclick="location.href='../pages/add_purchase.php'"><i class="fa fa-plus"></i> زیادکردنی کڕین</button>
+<?php if (!hasPermission('view_dashboard')): ?>
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;">
+        <i class="bi bi-lock-fill" style="font-size:5rem;color:#ccc;"></i>
+        <h2 style="color:#888;">توانای دەست گەیشتنت نییە بەم پەیجە</h2>
+    </div>
+<?php else: ?>
+    <div class="container py-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+            <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">داشبۆرد</h2>
+            <div class="quick-actions d-flex gap-2">
+                <button class="btn btn-primary quick-action" onclick="location.href='../pages/concrete_receipts.php'"><i class="fa fa-plus"></i> زیادکردنی پسوڵە</button>
+                <button class="btn btn-success quick-action" onclick="location.href='../pages/add_sale.php'"><i class="fa fa-plus"></i> زیادکردنی فرۆشتن</button>
+                <button class="btn btn-info quick-action" onclick="location.href='../pages/add_purchase.php'"><i class="fa fa-plus"></i> زیادکردنی کڕین</button>
+            </div>
         </div>
-    </div>
-    
-    <!-- Summary Cards Row 1 -->
-    <div class="row g-3 mb-4" id="dashboard-summary-cards">
-        <!-- Cards will be loaded by JS -->
-    </div>
-    
-    <!-- Stock Status Row -->
-    <div class="row g-3 mb-4" id="stock-status-cards">
-        <!-- Stock status cards will be loaded by JS -->
-    </div>
-    
-    <div class="row g-3">
-        <div class="col-lg-6 mb-3">
-            <div class="card shadow h-100">
-                <div class="card-body">
-                    <h5 class="card-title mb-3" style="color: var(--seafoam-green); font-weight: bold;">
-                        <i class="bi bi-clock-history me-2"></i>دواین چالاکییەکان
-                    </h5>
-                    <ul class="list-group list-group-flush" id="dashboard-recent-activities">
-                        <!-- Recent activities will be loaded by JS -->
-                    </ul>
+        
+        <!-- Summary Cards Row 1 -->
+        <div class="row g-3 mb-4" id="dashboard-summary-cards">
+            <!-- Cards will be loaded by JS -->
+        </div>
+        
+        <!-- Stock Status Row -->
+        <div class="row g-3 mb-4" id="stock-status-cards">
+            <!-- Stock status cards will be loaded by JS -->
+        </div>
+        
+        <div class="row g-3">
+            <div class="col-lg-6 mb-3">
+                <div class="card shadow h-100">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3" style="color: var(--seafoam-green); font-weight: bold;">
+                            <i class="bi bi-clock-history me-2"></i>دواین چالاکییەکان
+                        </h5>
+                        <ul class="list-group list-group-flush" id="dashboard-recent-activities">
+                            <!-- Recent activities will be loaded by JS -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 mb-3">
+                <div class="card shadow h-100">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3" style="color: var(--seafoam-green); font-weight: bold;">
+                            <i class="bi bi-lightning me-2"></i>کردارە خێراکان
+                        </h5>
+                        <div class="row g-2" id="dashboard-quick-links">
+                            <!-- Quick links will be loaded by JS -->
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-lg-6 mb-3">
-            <div class="card shadow h-100">
-                <div class="card-body">
-                    <h5 class="card-title mb-3" style="color: var(--seafoam-green); font-weight: bold;">
-                        <i class="bi bi-lightning me-2"></i>کردارە خێراکان
-                    </h5>
-                    <div class="row g-2" id="dashboard-quick-links">
-                        <!-- Quick links will be loaded by JS -->
+        
+        <!-- Additional Dashboard Sections -->
+        <div class="row g-3">
+            <div class="col-lg-8 mb-3">
+                <div class="card shadow h-100">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3" style="color: var(--seafoam-green); font-weight: bold;">
+                            <i class="bi bi-graph-up me-2"></i>ئامارە گرنگەکان
+                        </h5>
+                        <div class="row g-3" id="dashboard-stats">
+                            <!-- Statistics will be loaded by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 mb-3">
+                <div class="card shadow h-100">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3" style="color: var(--seafoam-green); font-weight: bold;">
+                            <i class="bi bi-bell me-2"></i>ئاگادارکردنەوەکان
+                        </h5>
+                        <div id="dashboard-notifications">
+                            <!-- Notifications will be loaded by JS -->
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    
-    <!-- Additional Dashboard Sections -->
-    <div class="row g-3">
-        <div class="col-lg-8 mb-3">
-            <div class="card shadow h-100">
-                <div class="card-body">
-                    <h5 class="card-title mb-3" style="color: var(--seafoam-green); font-weight: bold;">
-                        <i class="bi bi-graph-up me-2"></i>ئامارە گرنگەکان
-                    </h5>
-                    <div class="row g-3" id="dashboard-stats">
-                        <!-- Statistics will be loaded by JS -->
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4 mb-3">
-            <div class="card shadow h-100">
-                <div class="card-body">
-                    <h5 class="card-title mb-3" style="color: var(--seafoam-green); font-weight: bold;">
-                        <i class="bi bi-bell me-2"></i>ئاگادارکردنەوەکان
-                    </h5>
-                    <div id="dashboard-notifications">
-                        <!-- Notifications will be loaded by JS -->
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<?php endif; ?>
 <script src="../assets/js/dashboard/select_information.js"></script>
 </body>
 </html>

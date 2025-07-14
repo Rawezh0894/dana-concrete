@@ -436,8 +436,8 @@
   }
   
   .table-pagination {
-    flex-direction: column;
-    gap: 12px;
+    flex-direction: row;
+    gap: 8px;
     padding: 1rem;
   }
   
