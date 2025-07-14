@@ -36,9 +36,9 @@ if (!isset($_SESSION['user_id'])) {
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
             <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">داشبۆرد</h2>
             <div class="quick-actions d-flex gap-2">
-                <button class="btn btn-primary quick-action" onclick="location.href='../pages/concrete_receipts.php'"><i class="fa fa-plus"></i> زیادکردنی پسوڵە</button>
-                <button class="btn btn-success quick-action" onclick="location.href='../pages/add_sale.php'"><i class="fa fa-plus"></i> زیادکردنی فرۆشتن</button>
-                <button class="btn btn-info quick-action" onclick="location.href='../pages/add_purchase.php'"><i class="fa fa-plus"></i> زیادکردنی کڕین</button>
+                <button class="btn btn-primary quick-action" onclick="location.href='../pages/concrete_receipts.php'"><i class="fa fa-plus"></i> پسوڵە</button>
+                <button class="btn btn-success quick-action" onclick="location.href='../pages/add_sale.php'"><i class="fa fa-plus"></i> فرۆشتن</button>
+                <button class="btn btn-info quick-action" onclick="location.href='../pages/add_purchase.php'"><i class="fa fa-plus"></i> کڕین</button>
             </div>
         </div>
         
