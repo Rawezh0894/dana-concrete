@@ -23,9 +23,9 @@
       </div>
     </div>
     <!-- Right: Menu button (for sidebar toggle) -->
-    <button class="btn btn-light d-lg-none" id="sidebarToggle" type="button" style="border-radius: 1rem; box-shadow: 0 2px 8px 0 var(--kelly-green);">
+    <!-- <button class="btn btn-light d-lg-none" id="sidebarToggle" type="button" style="border-radius: 1rem; box-shadow: 0 2px 8px 0 var(--kelly-green);">
       <i class="bi bi-grid-3x3-gap-fill" style="font-size: 1.5rem; color: var(--seafoam-green);"></i>
-    </button>
+    </button> -->
   </div>
 </nav>
 <script src="../assets/js/nav/nav.js"></script>
