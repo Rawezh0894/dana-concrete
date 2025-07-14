@@ -31,6 +31,8 @@ if (!hasPermission('view_dashboard')) {
 </head>
 <body dir="rtl">
 <?php include '../includes/navbar.php'; ?>
+<?php include '../includes/sidebar.php'; ?>
+
 <div class="container py-4">
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
         <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">داشبۆرد</h2>

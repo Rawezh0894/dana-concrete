@@ -41,6 +41,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
 </head>
 <body dir="rtl">
 <?php include '../includes/navbar.php'; ?>
+<?php include '../includes/sidebar.php'; ?>
 <div class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">کڕین</h2>

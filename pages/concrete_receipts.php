@@ -131,6 +131,7 @@ $pump_cars = array_filter($cars, function($car) { return preg_match('/^p/i', tri
 </head>
 <body dir="rtl">
 <?php include '../includes/navbar.php'; ?>
+<?php include '../includes/sidebar.php'; ?>
 <div class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">پسوڵەی کۆنکرێت</h2>

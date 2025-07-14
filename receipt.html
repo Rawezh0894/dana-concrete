@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dana Concrete Factory - Invoice</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap');
+        
+        @font-face {
+            font-family: 'Rabar021';
+            src: url('assets/fonts/Rabar_021.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        
+        * {
+            font-family: 'Rabar021', 'Noto Sans Arabic', sans-serif !important;
+        }
+        
+        /* Print-specific styles for A4 */
+        @media print {
+            @page {
+                size: A4;
+                margin: 0;
+            }
+            
+            body {
+                margin: 0;
+                padding: 0;
+                background: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                font-size: 13pt;
+            }
+            
+            .invoice-container {
+                width: 210mm !important;
+                min-height: 297mm !important;
+                max-width: 210mm !important;
+                max-height: 297mm !important;
+                margin: 0 !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                display: flex !important;
+                flex-direction: column !important;
+                position: relative !important;
+            }
+            
+            .header {
+                background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                padding: 15px 20px !important;
+            }
+            
+            .content {
+                padding: 20px !important;
+                flex: 1;
+            }
+            
+            .footer {
+                background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                padding: 15px 20px !important;
+                margin-top: auto !important;
+                page-break-after: avoid !important;
+            }
+            
+            .table thead th {
+                background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                padding: 12px 8px !important;
+                font-size: 18px !important;
+            }
+            
+            .table tbody td {
+                padding: 10px 8px !important;
+                font-size: 16px !important;
+            }
+            
+            .company-name {
+                font-size: 24px !important;
+            }
+            
+            .company-subtitle {
+                font-size: 13px !important;
+            }
+            
+            .invoice-number, .invoice-date {
+                font-size: 14px !important;
+            }
+            
+            .client-info {
+                margin-bottom: 20px !important;
+                padding: 15px !important;
+            }
+            
+            .client-info h5 {
+                font-size: 18px !important;
+                margin-bottom: 10px !important;
+            }
+            
+            .client-info p {
+                font-size: 15px !important;
+                margin-bottom: 5px !important;
+                line-height: 1.4 !important;
+            }
+            
+            .pricing-table {
+                margin-bottom: 20px !important;
+            }
+            
+            .signatures {
+                flex-direction: row !important;
+                gap: 20px !important;
+                margin-top: 20px !important;
+                padding-top: 15px !important;
+            }
+            
+            .signature-box {
+                width: 48% !important;
+                display: block !important;
+            }
+            
+            .signature-line {
+                height: 40px !important;
+                margin-bottom: 10px !important;
+            }
+            
+            .signature-title {
+                font-size: 14px !important;
+            }
+            
+            .signature-company, .signature-date {
+                font-size: 12px !important;
+            }
+            
+            .contact-info {
+                flex-direction: row !important;
+                flex-wrap: wrap !important;
+                gap: 30px !important;
+                justify-content: flex-start !important;
+                align-items: flex-start !important;
+            }
+            
+            .contact-item {
+                min-width: 120px !important;
+                width: auto !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: flex-start !important;
+            }
+            
+            .watermark {
+                font-size: 80px !important;
+                opacity: 0.03 !important;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
+            
+            .page-break {
+                page-break-after: always;
+            }
+        }
+        
+        .invoice-container {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 20px 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.3;
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .logo-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            gap: 20px;
+        }
+        
+        .logo-container {
+            flex: 0 0 110px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #fff;
+            border-radius: 16px;
+            padding: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .logo-img {
+            width: 90px;
+            height: 90px;
+            object-fit: contain;
+            display: block;
+            margin: 0 auto;
+        }
+        
+        .company-info {
+            flex: 1;
+            text-align: right;
+        }
+        
+        .invoice-info {
+            flex: 0 0 200px;
+            text-align: left;
+        }
+        
+        .company-name {
+            font-size: 26px;
+            font-weight: 700;
+            margin: 0 0 5px 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .company-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+            margin: 2px 0;
+            line-height: 1.3;
+        }
+        
+        .invoice-details {
+            background: rgba(255,255,255,0.1);
+            padding: 12px 18px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .invoice-number {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+        
+        .invoice-date {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 2px;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .client-info {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border-left: 4px solid #2c3e50;
+        }
+        
+        .client-info h5 {
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        
+        .client-info p {
+            color: #555;
+            line-height: 1.8;
+            margin-bottom: 8px;
+        }
+        
+        .pricing-table {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .table {
+            margin: 0;
+        }
+        
+        .table thead th {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: #fff;
+            border: none;
+            padding: 18px 12px;
+            font-weight: 700;
+            font-size: 20px;
+            text-align: center;
+            letter-spacing: 1px;
+            border-radius: 0 !important;
+        }
+        
+        .table tbody td {
+            padding: 16px 10px;
+            font-size: 17px;
+            font-weight: 500;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+            background: #fff;
+            transition: background-color 0.3s ease;
+        }
+        
+        .table tbody tr:hover td {
+            background: #f8f9fa;
+        }
+        
+        .table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .grade-cell {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .strength-cell {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+        
+        .signatures {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #eee;
+        }
+        
+        .signature-box {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            width: 48%;
+            border: 2px dashed #ddd;
+        }
+        
+        .signature-line {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-style: italic;
+            color: #666;
+            border-bottom: 2px solid #ddd;
+            margin-bottom: 15px;
+        }
+        
+        .signature-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .signature-company {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .signature-date {
+            font-size: 14px;
+            color: #888;
+            margin-top: 5px;
+        }
+        
+        .footer {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        .contact-info {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            background: rgba(255,255,255,0.1);
+            padding: 12px 18px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+        
+        .contact-item i {
+            color: #fff;
+            font-size: 20px;
+            vertical-align: middle;
+        }
+        
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 120px;
+            color: rgba(0,0,0,0.05);
+            font-weight: 900;
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        .print-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .print-button:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+        }
+        
+        @media (max-width: 768px) {
+            .invoice-container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .company-name {
+                font-size: 24px;
+            }
+            
+            .signatures {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .signature-box {
+                width: 100%;
+            }
+            
+            .contact-info {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .print-button {
+                top: 10px;
+                right: 10px;
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+        }
+        
+        .note-label {
+            display: inline-block;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: #fff;
+            font-weight: bold;
+            padding: 2px 12px;
+            border-radius: 8px;
+            font-size: 15px;
+            margin-bottom: 4px;
+            margin-left: 8px;
+            letter-spacing: 1px;
+            box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <button class="print-button no-print" onclick="window.print()">
+        <i class="fas fa-print me-2"></i>پرینت کردن
+    </button>
+    
+    <div class="invoice-container">
+        <div class="watermark">DANA</div>
+        
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo-container">
+                        <img src="assets/images/logo.png" alt="Dana Concrete Logo" class="logo-img">
+                    </div>
+                    
+                    <div class="company-info">
+                        <h1 class="company-name">Dana Concrete Factory</h1>
+                        <p class="company-subtitle">کارگەی کۆنکرێتی دانا</p>
+                        <p class="company-subtitle">For Ready - Mix Concrete</p>
+                        <p class="company-subtitle">بۆ کۆنکرێتی ئامادەکراو</p>
+                </div>
+                
+                    <div class="invoice-info">
+                <div class="invoice-details">
+                            <div class="invoice-number">بەروار: ____/____/2025</div>
+                            <div class="invoice-date">_______________:NO</div>
+                            <div class="invoice-date">Date: ___/___/2025</div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Content -->
+        <div class="content">
+            <!-- Client Information -->
+            <div class="client-info">
+             <p style="text-align: center; font-size: 22px; font-weight: bold;">بابەت/ قەرەبوو</p>
+                <!-- <h5><i class="fas  me-2"></i>بەڕێز / کاک/...........</h5> -->
+               
+                <p>بە هۆکاری درز و تەقیوی و دایانی ئاو ئەم سەقفی کۆنکرێتانە بەم شێوازە قەرەبوو کرانەوە:</p>
+                <p></p>
+            </div>
+            
+            <!-- Pricing Table -->
+            <div class="pricing-table">
+                <table class="table" style="direction: rtl;">
+                    <thead>
+                        <tr>
+                            <th>ناو</th>
+                            <th>شوێن</th>
+                            <th>بڕ م<sup>3</sup></th>
+                            <th>ڕێژە</th>
+                            <th>نرخ</th>
+                            <th>کۆی نرخ</th>
+                            <th>بڕی قەرەبوو</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>و.هەڵمەت</td>
+                            <td>سابووراوا</td>
+                            <td>6.5 م³</td>
+                            <td>25Mga</td>
+                            <td>$46 + $100 ی پەمپ</td>
+                            <td>$399</td>
+                            <td>$400</td>
+                        </tr>
+                        <tr>
+                            <td>و.ئەحیا</td>
+                            <td>پیرەمەگروون</td>
+                            <td>25 م³</td>
+                            <td>25Mga</td>
+                            <td>$46</td>
+                            <td>$1,150</td>
+                            <td>$800</td>
+                        </tr>
+                        <tr>
+                            <td>و.ڕێبوار</td>
+                            <td>ڕاپەڕین</td>
+                            <td>31 م³</td>
+                            <td>25Mga</td>
+                            <td>$45</td>
+                            <td>$1,395</td>
+                            <td>$500</td>
+                        </tr>
+                        <tr style="background: #e9ecef; font-weight: bold;">
+                            <td colspan="6" style="text-align: left;">کۆی قەرەبوو</td>
+                            <td class="" style="color: #2c3e50;">$1,700</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="client-info">
+            <p>
+             <span class="note-label">تێبینی:</span> یەکەم موعالەجە کردنی سەقفێک لە ڕاپەڕین کە لە خاڵی سێیەم نوسراوە 500$ تێچووەکەی بووە کە خودی خۆمان موعالەجەمان کردووە.
+            </p>
+            </div>
+              <div class="client-info">
+            <p>
+             <span class="note-label">تێبینی:</span> چەندین سەقفی دیکەمان هەیە کە موعالەجە کراوە یان پارەی بۆ گەڕێنراوەتەوە و باس نەکراوە
+            </p>
+            </div>
+             <div class="client-info">
+            <p>
+             <span class="note-label">تێبینی:</span> ئەم سێ کارەی کە لە خشتەکەدا ڕوون کراوەتەوە هەموویان لە یەک ڕۆژدا ڕوویداوە لە بەرواری 2025/05/12 .
+            </p>
+            </div>
+            
+            <p class="text-center mb-4"><strong>لەگەڵ ڕێزدا ...</strong></p>
+            
+            <!-- Signatures -->
+            <div class="signatures">
+                <div class="signature-box">
+                    <div class="signature-line">
+                        <span>ئیمزا</span>
+                    </div>
+                    <div class="signature-title">دانا علی جلال</div>
+                    <div class="signature-company">کارگەی کۆنکرێتی دانا</div>
+                    <div class="signature-date">..../..../2025</div>
+                </div>
+                
+                <div class="signature-box">
+                    <div class="signature-line">
+                        <i class="fas">مۆر</i>
+                    </div>
+                    <div class="signature-title"></div>
+                    <div class="signature-company">DANA CONCRETE</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <div class="contact-info">
+                <div class="contact-item">
+                  <i class="bi bi-telephone-forward-fill"></i>
+                    <span>5414 144 0773</span>
+                </div>
+                <div class="contact-item">
+                  <i class="bi bi-telephone-forward-fill"></i>
+                    <span>0101 995 0772</span>
+                </div>
+                <div class="contact-item">
+                  <i class="bi bi-telephone-forward-fill"></i>
+                    <span>0543 152 0750</span>
+                </div>
+                <div class="contact-item">
+                    <i class="bi bi-geo-alt-fill"></i>
+                    <span>سلێمانی - تاسڵوجە - نزیک بازگەی کەڵەوانان</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -39,6 +39,7 @@ if (!hasPermission('view_users')) {
 </head>
 <body dir="rtl">
 <?php include '../includes/navbar.php'; ?>
+<?php include '../includes/sidebar.php'; ?>
 <div class="container py-5">
     <ul class="nav nav-tabs mb-4" id="userTabs" role="tablist">
         <li class="nav-item" role="presentation">

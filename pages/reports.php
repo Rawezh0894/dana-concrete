@@ -1,5 +1,6 @@
 <?php require_once '../config/db_conected.php'; ?>
 <?php include '../includes/navbar.php'; ?>
+<?php include '../includes/sidebar.php'; ?>
 <!DOCTYPE html>
 <html lang="ku" dir="rtl">
 <head>
