@@ -75,7 +75,7 @@
                 <input type="date" class="form-control" id="to-date" name="to-date">
             </div>
             <button class="btn btn-outline-danger ms-2" id="clear-filters-btn" type="button">
-                <i class="fa fa-times"></i> پاککردنەوەی فلتەر
+                <i class="fa fa-times"></i> پاککردنەوە
             </button>
         </div>
     </div>

@@ -25,7 +25,8 @@ $receipt_id = isset($_GET['id']) ? $_GET['id'] : null;
 <!DOCTYPE html>
 <html lang="ku" dir="rtl">
 <head>
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>پسوڵەی کۆنکرێت - دانا کۆنکرێت</title>
     <link href="../assets/css/central_receipts.css" rel="stylesheet">

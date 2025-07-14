@@ -10,7 +10,8 @@ $company_name = $company_row ? $company_row['name'] : '';
 <!DOCTYPE html>
 <html lang="ku" dir="rtl">
 <head>
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>پسووڵەی کۆمپانیا</title>
     <link rel="stylesheet" href="../assets/css/receipts.css">
     <link rel="stylesheet" href="../assets/fonts/Rabar_021.ttf">
