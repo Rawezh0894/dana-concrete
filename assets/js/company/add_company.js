@@ -1,7 +1,10 @@
+let submitting = false;
 document.addEventListener('DOMContentLoaded', function () {
     const addCompanyForm = document.getElementById('addCompanyForm');
     if (addCompanyForm) {
         addCompanyForm.addEventListener('submit', function (e) {
+            if (submitting) return false;
+            submitting = true;
             e.preventDefault();
             const formData = new FormData(addCompanyForm);
             if (!formData.has('opening_debt_usd')) formData.append('opening_debt_usd', 0);
@@ -26,8 +29,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else {
                     swalAlert('هەڵە', data.message || 'هەڵەیەک هەیە', 'error');
                 }
+                submitting = false;
             })
-            .catch(() => swalAlert('هەڵە', 'هەڵەیەک هەیە لە پەیوەندیدا.', 'error'));
+            .catch(() => {
+                swalAlert('هەڵە', 'هەڵەیەک هەیە لە پەیوەندیدا.', 'error');
+                submitting = false;
+            });
         });
     }
 });

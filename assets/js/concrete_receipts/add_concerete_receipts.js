@@ -1,5 +1,8 @@
+let submitting = false;
 $(document).ready(function() {
     $('#addConcreteReceiptForm').on('submit', async function(e) {
+        if (submitting) return false;
+        submitting = true;
         e.preventDefault();
         const formData = new FormData(this);
         const res = await fetch('../process/concrete_receipts/add_concerete_receipts.php', {
@@ -24,6 +27,7 @@ $(document).ready(function() {
         } else {
             Swal.fire('هەڵە!', data.message || 'هەڵەیەک ڕویدا', 'error');
         }
+        submitting = false;
     });
 
     $('#addConcreteReceiptModal').on('show.bs.modal', function() {

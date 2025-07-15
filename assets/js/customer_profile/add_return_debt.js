@@ -1,6 +1,7 @@
 // Global variable to store current customer debt
 let CUSTOMER_CURRENT_DEBT = 0;
 let CUSTOMER_OPENING_DEBT_USD = 0;
+let submitting = false;
 
 // Function to fetch customer current debt
 async function fetchCustomerDebt(customerId) {
@@ -90,6 +91,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 document.getElementById('addCustomerDebtForm').addEventListener('submit', async function(e) {
+    if (submitting) return false;
+    submitting = true;
     e.preventDefault();
     const customer_id = typeof CUSTOMER_ID !== 'undefined' ? CUSTOMER_ID : null;
     const date = document.getElementById('customer_debt_date').value;
@@ -105,6 +108,7 @@ document.getElementById('addCustomerDebtForm').addEventListener('submit', async 
 
     if (!customer_id || !date || (paid_usd <= 0 && paid_iqd <= 0 && discount <= 0)) {
         Swal.fire('هەڵە', 'هەموو خانەکان پڕ بکە!', 'error');
+        submitting = false;
         return;
     }
 
@@ -117,24 +121,29 @@ document.getElementById('addCustomerDebtForm').addEventListener('submit', async 
     formData.append('discount', discount);
     formData.append('note', note);
 
-    const res = await fetch('../process/customer_profile/add_return_debt.php', {
-        method: 'POST',
-        body: formData
-    });
-    const data = await res.json();
-    if (data.success) {
-        Swal.fire('سەرکەوتوو', data.msg, 'success');
-        document.getElementById('addCustomerDebtForm').reset();
-        // Recalculate remaining debt after form reset
-        setTimeout(() => {
-            if (typeof CUSTOMER_ID !== 'undefined' && CUSTOMER_ID) {
-                fetchCustomerDebt(CUSTOMER_ID);
-            }
-        }, 100);
-        const modal = bootstrap.Modal.getInstance(document.getElementById('addCustomerDebtModal'));
-        if (modal) modal.hide();
-        if (typeof loadCustomerReturnDebts === 'function') loadCustomerReturnDebts(customer_id);
-    } else {
-        Swal.fire('هەڵە', data.msg || 'هەڵەیەک ڕووی دا', 'error');
+    try {
+        const res = await fetch('../process/customer_profile/add_return_debt.php', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+            Swal.fire('سەرکەوتوو', data.msg, 'success');
+            document.getElementById('addCustomerDebtForm').reset();
+            // Recalculate remaining debt after form reset
+            setTimeout(() => {
+                if (typeof CUSTOMER_ID !== 'undefined' && CUSTOMER_ID) {
+                    fetchCustomerDebt(CUSTOMER_ID);
+                }
+            }, 100);
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addCustomerDebtModal'));
+            if (modal) modal.hide();
+            if (typeof loadCustomerReturnDebts === 'function') loadCustomerReturnDebts(customer_id);
+        } else {
+            Swal.fire('هەڵە', data.msg || 'هەڵەیەک ڕووی دا', 'error');
+        }
+    } catch (err) {
+        Swal.fire('هەڵە', 'هەڵەیەک ڕووی دا', 'error');
     }
+    submitting = false;
 });

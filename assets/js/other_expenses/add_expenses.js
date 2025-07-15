@@ -1,6 +1,9 @@
+let submittingExpense = false;
 const addExpenseForm = document.getElementById('addExpenseForm');
 if (addExpenseForm) {
     addExpenseForm.onsubmit = async function(e) {
+        if (submittingExpense) return false;
+        submittingExpense = true;
         e.preventDefault();
         const invoiceNumber = document.getElementById('invoice_number').value.trim();
         if (invoiceNumber) {
@@ -17,24 +20,30 @@ if (addExpenseForm) {
             }
             if (duplicate) {
                 Swal.fire('هەڵە!', 'ئەم ژمارەی پسوڵەیە پێشتر تۆمارکراوە!', 'error');
+                submittingExpense = false;
                 return;
             }
         }
         const formData = new FormData(addExpenseForm);
-        const res = await fetch('../process/other_expenses/add_expenses.php', {
-            method: 'POST',
-            body: formData
-        });
-        const data = await res.json();
-        if (data.success) {
-            Swal.fire('سەرکەوتوو!', 'خەرجی تر زیادکرا', 'success');
-            var modal = bootstrap.Modal.getInstance(document.getElementById('addExpenseModal'));
-            modal.hide();
-            if (typeof loadOtherExpenses === 'function') loadOtherExpenses();
-            addExpenseForm.reset();
-        } else {
-            Swal.fire('هەڵە!', data.msg || 'هەڵەیەک ڕویدا', 'error');
+        try {
+            const res = await fetch('../process/other_expenses/add_expenses.php', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            if (data.success) {
+                Swal.fire('سەرکەوتوو!', 'خەرجی تر زیادکرا', 'success');
+                var modal = bootstrap.Modal.getInstance(document.getElementById('addExpenseModal'));
+                modal.hide();
+                if (typeof loadOtherExpenses === 'function') loadOtherExpenses();
+                addExpenseForm.reset();
+            } else {
+                Swal.fire('هەڵە!', data.msg || 'هەڵەیەک ڕویدا', 'error');
+            }
+        } catch (err) {
+            Swal.fire('هەڵە!', 'هەڵەیەک ڕویدا', 'error');
         }
+        submittingExpense = false;
     }
 }
 
@@ -59,30 +68,38 @@ if (addExpenseModal) {
     });
 }
 
+let submittingPerson = false;
 const addPersonForm = document.getElementById('addPersonForm');
 if (addPersonForm) {
     addPersonForm.onsubmit = async function(e) {
+        if (submittingPerson) return false;
+        submittingPerson = true;
         e.preventDefault();
         const formData = new FormData(addPersonForm);
-        const res = await fetch('../process/other_expenses/add_person.php', {
-            method: 'POST',
-            body: formData
-        });
-        const data = await res.json();
-        if (data.success) {
-            Swal.fire('سەرکەوتوو!', 'کەس زیادکرا', 'success');
-            var modal = bootstrap.Modal.getInstance(document.getElementById('addPersonModal'));
-            modal.hide();
-            // Add new person to select
-            const personSelect = document.getElementById('person_id');
-            const option = document.createElement('option');
-            option.value = data.id;
-            option.textContent = data.name;
-            option.selected = true;
-            personSelect.appendChild(option);
-            addPersonForm.reset();
-        } else {
-            Swal.fire('هەڵە!', data.msg || 'هەڵەیەک ڕویدا', 'error');
+        try {
+            const res = await fetch('../process/other_expenses/add_person.php', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            if (data.success) {
+                Swal.fire('سەرکەوتوو!', 'کەس زیادکرا', 'success');
+                var modal = bootstrap.Modal.getInstance(document.getElementById('addPersonModal'));
+                modal.hide();
+                // Add new person to select
+                const personSelect = document.getElementById('person_id');
+                const option = document.createElement('option');
+                option.value = data.id;
+                option.textContent = data.name;
+                option.selected = true;
+                personSelect.appendChild(option);
+                addPersonForm.reset();
+            } else {
+                Swal.fire('هەڵە!', data.msg || 'هەڵەیەک ڕویدا', 'error');
+            }
+        } catch (err) {
+            Swal.fire('هەڵە!', 'هەڵەیەک ڕویدا', 'error');
         }
+        submittingPerson = false;
     }
 }

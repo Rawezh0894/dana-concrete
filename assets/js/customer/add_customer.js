@@ -1,6 +1,9 @@
+let submitting = false;
 const addCustomerForm = document.getElementById('addCustomerForm');
 if (addCustomerForm) {
     addCustomerForm.addEventListener('submit', function(e) {
+        if (submitting) return false;
+        submitting = true;
         e.preventDefault();
         const name = document.getElementById('customer_name').value.trim();
         const mobile1 = document.getElementById('customer_mobile1').value.trim();
@@ -9,14 +12,17 @@ if (addCustomerForm) {
         const mobileRegex = /^07\d{9}$/;
         if (!mobileRegex.test(mobile1)) {
             Swal.fire({ icon: 'error', title: 'هەڵە', text: 'ژمارە مۆبایلی یەکەم دەبێت بە 07 دەست پێ بکات و 11 ژمارە بێت.' });
+            submitting = false;
             return;
         }
         if (mobile2 && !mobileRegex.test(mobile2)) {
             Swal.fire({ icon: 'error', title: 'هەڵە', text: 'ژمارە مۆبایلی دووەم دەبێت بە 07 دەست پێ بکات و 11 ژمارە بێت.' });
+            submitting = false;
             return;
         }
         if (mobile2 && mobile1 === mobile2) {
             Swal.fire({ icon: 'error', title: 'هەڵە', text: 'ژمارە مۆبایلی یەکەم و دووەم نابێت یەکسان بن.' });
+            submitting = false;
             return;
         }
         const formData = new FormData(addCustomerForm);
@@ -50,6 +56,7 @@ if (addCustomerForm) {
                     text: data.message || 'هەڵەیەک ڕووی دا',
                 });
             }
+            submitting = false;
         })
         .catch((err) => {
             console.error('Fetch or JSON error:', err);
@@ -58,6 +65,7 @@ if (addCustomerForm) {
                 title: 'هەڵە',
                 text: 'هەڵەیەک ڕووی دا',
             });
+            submitting = false;
         });
     });
 }

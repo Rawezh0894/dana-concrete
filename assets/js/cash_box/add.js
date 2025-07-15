@@ -1,5 +1,8 @@
+let submitting = false;
 $(document).ready(function() {
     $('#addCashBoxForm').on('submit', function(e) {
+        if (submitting) return false;
+        submitting = true;
         e.preventDefault();
         var formData = {
             date: $('#date').val(),
@@ -23,9 +26,11 @@ $(document).ready(function() {
                 } else {
                     Swal.fire('هەڵە!', response.error || 'ناتوانرێت مامەڵە زیاد بکرێت', 'error');
                 }
+                submitting = false;
             },
             error: function() {
                 Swal.fire('هەڵە!', 'هەڵەیەک ڕووی دا لە کۆنێکتکردن.', 'error');
+                submitting = false;
             }
         });
     });

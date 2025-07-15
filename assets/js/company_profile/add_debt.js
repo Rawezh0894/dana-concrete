@@ -1,6 +1,7 @@
 let companyCurrencyType = null;
 let lastTotalRemainingUSD = 0;
 let lastTotalRemainingIQD = 0;
+let submitting = false;
 
 function fetchCompanyCurrencyType() {
     return fetch(`../process/company_profile/select_debt.php?company_id=${COMPANY_ID}&company_info=1`)
@@ -67,6 +68,8 @@ $('#addDebtForm').on('submit', function(e) {
 });
 
 document.getElementById('addDebtForm').onsubmit = async function(e) {
+    if (submitting) return false;
+    submitting = true;
     e.preventDefault();
     const form = e.target;
     const formData = new FormData(form);
@@ -75,22 +78,28 @@ document.getElementById('addDebtForm').onsubmit = async function(e) {
     const amount_iqd = parseFloat(form.amount_iqd.value) || 0;
     if (amount_usd <= 0 && amount_iqd <= 0) {
         Swal.fire('هەڵە!', 'بە لایەنی کەم یەک بڕ پڕبکە (دۆلار یان دینار)', 'error');
+        submitting = false;
         return;
     }
-    const res = await fetch('../process/company_profile/add_debt.php', {
-        method: 'POST',
-        body: formData
-    });
-    const data = await res.json();
-    if (data.success) {
-        Swal.fire('سەرکەوتوو!', 'دانەوەی قەرز تۆمارکرا', 'success');
-        form.reset();
-        var modal = bootstrap.Modal.getInstance(document.getElementById('addDebtModal'));
-        modal.hide();
-        if (typeof loadDebts === 'function') loadDebts();
-        if (typeof loadPurchases === 'function') loadPurchases();
-        if (typeof loadCompanyInfoCards === 'function') loadCompanyInfoCards();
-    } else {
-        Swal.fire('هەڵە!', data.msg || 'هەڵەیەک ڕویدا', 'error');
+    try {
+        const res = await fetch('../process/company_profile/add_debt.php', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+            Swal.fire('سەرکەوتوو!', 'دانەوەی قەرز تۆمارکرا', 'success');
+            form.reset();
+            var modal = bootstrap.Modal.getInstance(document.getElementById('addDebtModal'));
+            modal.hide();
+            if (typeof loadDebts === 'function') loadDebts();
+            if (typeof loadPurchases === 'function') loadPurchases();
+            if (typeof loadCompanyInfoCards === 'function') loadCompanyInfoCards();
+        } else {
+            Swal.fire('هەڵە!', data.msg || 'هەڵەیەک ڕویدا', 'error');
+        }
+    } catch (err) {
+        Swal.fire('هەڵە!', 'هەڵەیەک ڕویدا', 'error');
     }
+    submitting = false;
 };

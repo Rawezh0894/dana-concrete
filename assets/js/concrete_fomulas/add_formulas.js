@@ -1,7 +1,10 @@
+let submitting = false;
 // Handle add formula form submission
 const addFormulaForm = document.getElementById('addFormulaForm');
 if (addFormulaForm) {
     addFormulaForm.addEventListener('submit', function(e) {
+        if (submitting) return false;
+        submitting = true;
         e.preventDefault();
         const formData = new FormData(addFormulaForm);
         fetch('../process/concrete_fomulas/add_formulas.php', {
@@ -39,6 +42,7 @@ if (addFormulaForm) {
                     text: data.message || 'هەڵەیەک ڕووی دا',
                 });
             }
+            submitting = false;
         })
         .catch((error) => {
             console.error('Fetch error:', error);
@@ -47,6 +51,7 @@ if (addFormulaForm) {
                 title: 'هەڵە',
                 text: 'هەڵەیەک ڕووی دا',
             });
+            submitting = false;
         });
     });
 }
