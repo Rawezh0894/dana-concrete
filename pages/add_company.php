@@ -9,7 +9,7 @@ if (!hasPermission('view_accounts')) {
         .'</div>';
     exit;
 }
-if (!isset($_SESSION['user_id']) || !hasPermission('add_company')) {
+if (!isset($_SESSION['user_id'])) {
     header('Location: ../index.php');
     exit;
 }

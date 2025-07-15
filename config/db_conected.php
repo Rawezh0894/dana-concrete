@@ -2,6 +2,20 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
+// ماوەی بەسەرچوونی سێشن (بە چرکە) - 24 کاتژمێر = 86400
+$session_timeout = 86400;
+
+// هەرکات session هاتەوە، کاتی دوا جووڵەی بەکارهێنەر نوێ بکەوە
+if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > $session_timeout)) {
+    // سێشن بەسەرچووە
+    session_unset();
+    session_destroy();
+    header('Location: ../index.php');
+    exit;
+}
+$_SESSION['LAST_ACTIVITY'] = time();
+
 // Database connection settings
 
 $host = 'localhost';

@@ -1,4 +1,11 @@
-<?php require_once '../config/db_conected.php'; ?>
+<?php
+session_start();
+require_once '../config/db_conected.php';
+if (!isset($_SESSION['user_id'])) {
+    header('Location: ../index.php');
+    exit;
+}
+?>
 <?php include '../includes/navbar.php'; ?>
 <?php include '../includes/sidebar.php'; ?>
 <!DOCTYPE html>

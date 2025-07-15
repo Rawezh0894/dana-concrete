@@ -1,5 +1,10 @@
 <?php
+session_start();
 require_once '../config/db_conected.php';
+if (!isset($_SESSION['user_id'])) {
+    header('Location: ../index.php');
+    exit;
+}
 $company_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 // Fetch company info
 $company = $pdo->prepare('SELECT name FROM company WHERE id = ?');

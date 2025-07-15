@@ -8,7 +8,7 @@
   <div class="container-fluid d-flex align-items-center justify-content-between">
     <!-- Left: Menu icon -->
     <div class="d-flex align-items-center gap-3">
-      <img src="../assets/images/menu.svg" alt="Menu" style="height: 36px; width: 36px;" />
+      <img src="../assets/images/menu.svg" alt="Menu" style="height: 36px; width: 36px; color: white;" />
     </div>
     <!-- Center: User image and username with dropdown -->
     <div class="flex-grow-1 d-flex justify-content-end align-items-center gap-2 position-relative" id="userDropdownContainer">
