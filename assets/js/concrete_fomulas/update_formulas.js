@@ -71,12 +71,6 @@ if (updateFormulaForm) {
         if (updateId) {
             e.preventDefault();
             const formData = new FormData(updateFormulaForm);
-            const strengthType = formData.get('strength_type');
-            if (strengthType === 'kg') {
-                formData.delete('strength_mpa');
-            } else if (strengthType === 'mpa') {
-                formData.delete('strength_kg');
-            }
             formData.append('id', updateId);
             fetch('../process/concrete_fomulas/update_formulas.php', {
                 method: 'POST',

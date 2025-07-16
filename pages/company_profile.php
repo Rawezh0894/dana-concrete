@@ -25,7 +25,7 @@ if ($company_id) {
 <!DOCTYPE html>
 <html lang="ku">
 <head>
-<meta charset="UTF-8">
+    <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>پرۆفایلی کۆمپانیا</title>

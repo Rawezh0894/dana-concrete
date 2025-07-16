@@ -22,14 +22,14 @@ $type = $_POST['type'];
 $strength_type = isset($_POST['strength_type']) ? $_POST['strength_type'] : 'kg';
 
 if ($strength_type === 'kg') {
-    $strength_kg = isset($_POST['strength_kg']) ? $_POST['strength_kg'] : '';
-    $strength_mpa = '';
+    $strength_kg = isset($_POST['strength_kg']) && $_POST['strength_kg'] !== '' ? $_POST['strength_kg'] : null;
+    $strength_mpa = null;
 } else if ($strength_type === 'mpa') {
-    $strength_kg = '';
-    $strength_mpa = isset($_POST['strength_mpa']) ? $_POST['strength_mpa'] : '';
+    $strength_kg = null;
+    $strength_mpa = isset($_POST['strength_mpa']) && $_POST['strength_mpa'] !== '' ? $_POST['strength_mpa'] : null;
 } else {
-    $strength_kg = '';
-    $strength_mpa = '';
+    $strength_kg = null;
+    $strength_mpa = null;
 }
 $black_sand_kg = isset($_POST['black_sand_kg']) ? $_POST['black_sand_kg'] : 0;
 $brown_sand_kg = isset($_POST['brown_sand_kg']) ? $_POST['brown_sand_kg'] : 0;
