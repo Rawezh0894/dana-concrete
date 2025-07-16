@@ -15,8 +15,18 @@ if (empty($_POST['id']) || !is_numeric($_POST['id'])) {
 $id = (int)$_POST['id'];
 $name = $_POST['name'] ?? '';
 $type = $_POST['type'] ?? '';
-$strength_kg = $_POST['strength_kg'] ?? '';
-$strength_mpa = $_POST['strength_mpa'] ?? '';
+$strength_type = $_POST['strength_type'] ?? 'kg';
+
+if ($strength_type === 'kg') {
+    $strength_kg = $_POST['strength_kg'] ?? '';
+    $strength_mpa = '';
+} else if ($strength_type === 'mpa') {
+    $strength_kg = '';
+    $strength_mpa = $_POST['strength_mpa'] ?? '';
+} else {
+    $strength_kg = '';
+    $strength_mpa = '';
+}
 $black_sand_kg = $_POST['black_sand_kg'] ?? 0;
 $brown_sand_kg = $_POST['brown_sand_kg'] ?? 0;
 $gravel_bin3_kg = $_POST['gravel_bin3_kg'] ?? 0;
