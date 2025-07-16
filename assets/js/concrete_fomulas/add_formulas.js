@@ -7,6 +7,12 @@ if (addFormulaForm) {
         submitting = true;
         e.preventDefault();
         const formData = new FormData(addFormulaForm);
+        const strengthType = formData.get('strength_type');
+        if (strengthType === 'kg') {
+            formData.delete('strength_mpa');
+        } else if (strengthType === 'mpa') {
+            formData.delete('strength_kg');
+        }
         fetch('../process/concrete_fomulas/add_formulas.php', {
             method: 'POST',
             body: formData
