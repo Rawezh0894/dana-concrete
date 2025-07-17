@@ -66,6 +66,8 @@ $logout_pages = ['logout.php'];
         <?php if (hasPermission('view_vouchers')): ?>
           <li><a href="../pages/add_purchase.php" class="sidebar-link<?php if($current_page == 'add_purchase.php') echo ' active'; ?>"><i class="bi bi-cart-plus me-2"></i> کڕین</a></li>
           <li><a href="../pages/add_sale.php" class="sidebar-link<?php if($current_page == 'add_sale.php') echo ' active'; ?>"><i class="bi bi-cart-check me-2"></i> فرۆشتن</a></li>
+          <li><a href="../pages/cash_sales.php" class="sidebar-link<?php if($current_page == 'cash_sales.php') echo ' active'; ?>"><i class="bi bi-cash-coin me-2"></i> فرۆشتنی نەقد</a></li>
+          <li><a href="../pages/credit_sales.php" class="sidebar-link<?php if($current_page == 'credit_sales.php') echo ' active'; ?>"><i class="bi bi-credit-card-2-front me-2"></i> فرۆشتنی قەرز</a></li>
         <?php endif; ?>
         <?php if (hasPermission('delete_purchase')): ?>
           <li><a href="../pages/recycle_bin_purchases.php" class="sidebar-link<?php if($current_page == 'recycle_bin_purchases.php') echo ' active'; ?>"><i class="bi bi-cart-x me-2"></i> کڕین سڕدراوەکان</a></li>
@@ -85,6 +87,7 @@ $logout_pages = ['logout.php'];
         <?php endif; ?>
         <?php if (hasPermission('view_other_expenses')): ?>
           <li><a href="../pages/other_expenses.php" class="sidebar-link<?php if($current_page == 'other_expenses.php') echo ' active'; ?>"><i class="bi bi-receipt-cutoff me-2"></i> خەرجی تر</a></li>
+          <li><a href="../pages/cars_expenses.php" class="sidebar-link<?php if($current_page == 'cars_expenses.php') echo ' active'; ?>"><i class="bi bi-truck-front me-2"></i> خەرجی سەیارەکان</a></li>
         <?php endif; ?>
       </ul>
     </li>

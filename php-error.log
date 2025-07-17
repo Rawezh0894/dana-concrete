@@ -84,3 +84,32 @@
 )
 
 [14-Jul-2025 16:38:30 Europe/Berlin] Parsed vars: customer_id='21', recipient='کاک.محمود ', location='پیرەمەگروون ', quantity='2', price_per_unit='20', total_price='40.00', payment_type='قەرز', amount_paid_usd='0', amount_paid_iq='0', dolar_rate='150000', remaining_amount='40.00', invoice_number='88', order_date='2025-07-13', notes='', formula_id='24', discount='0'
+[17-Jul-2025 09:22:32 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1752736928
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[17-Jul-2025 09:22:32 Europe/Berlin] add_sale.php POST: Array
+(
+    [customer_id] => 21
+    [recipient] => کاک.محمود 
+    [location] => پیرەمەگروون 
+    [invoice_number] => 88
+    [formula_id] => 21
+    [order_date] => 2025-07-16
+    [quantity] => 2
+    [price_per_unit] => 20
+    [total_price] => 40.00
+    [payment_type] => نەقد
+    [amount_paid_iq] => 0
+    [amount_paid_usd] => 40
+    [remaining_amount] => 0.00
+    [dolar_rate] => 150000
+    [discount] => 0
+    [notes] => 
+)
+
+[17-Jul-2025 09:22:32 Europe/Berlin] Parsed vars: customer_id='21', recipient='کاک.محمود ', location='پیرەمەگروون ', quantity='2', price_per_unit='20', total_price='40.00', payment_type='نەقد', amount_paid_usd='40', amount_paid_iq='0', dolar_rate='150000', remaining_amount='0.00', invoice_number='88', order_date='2025-07-16', notes='', formula_id='21', discount='0'
