@@ -25,8 +25,8 @@
 /* فۆنتی کوردی */
 @font-face {
   font-family: 'Rabar_021';
-  src: url('fonts/Rabar_021.ttf') format('ttf'),
-       url('fonts/Rabar_021.ttf') format('tff');
+  src: url('fonts/Rabar_021.woff2') format('woff2'),
+       url('fonts/Rabar_021.woff') format('woff');
   font-display: swap;
 }
 
