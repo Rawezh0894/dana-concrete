@@ -29,6 +29,8 @@ if ($employee_id <= 0 || $salary === 0 || $karwanhisabi === 0 || $pay_month === 
 try {
     $stmt = $pdo->prepare('INSERT INTO employee_payments (employee_id, salary, karwanhisabi, bonus, total, pay_month, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())');
     if ($stmt->execute([$employee_id, $salary, $karwanhisabi, $bonus, $total, $pay_month])) {
+        require_once __DIR__ . '/../../includes/notify.php';
+        notify('insert', 'employee_payments', $pdo->lastInsertId(), 'پارەدان بە کارمەند زیادکرا (کارمەند: ' . $employee_id . ')');
         echo json_encode(['success' => true, 'message' => 'پارەدان زیادکرا']);
     } else {
         echo json_encode(['success' => false, 'message' => 'هەڵە لە زیادکردن']);

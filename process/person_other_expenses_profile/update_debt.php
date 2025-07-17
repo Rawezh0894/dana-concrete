@@ -142,7 +142,8 @@ try {
     // تۆمارکردنی مامەڵەکە
     $stmt = $pdo->prepare("INSERT INTO person_other_expenses_debt_payments (person_id, date, amount_usd, amount_iqd, note) VALUES (?, ?, ?, ?, ?)");
     $stmt->execute([$person_id, $date, $amount_usd, $amount_iqd, $note]);
-
+    require_once __DIR__ . '/../../includes/notify.php';
+    notify('update', 'person_other_expenses_debt_payments', $debt_id, 'پارەدانی قەرزی کەسانی تر نوێکرایەوە (کەس: ' . $person_id . ')');
     $pdo->commit();
     echo json_encode(['success' => true]);
 } catch (Exception $e) {

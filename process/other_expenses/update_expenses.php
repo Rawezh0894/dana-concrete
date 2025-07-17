@@ -64,6 +64,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id
     ]);
     if ($ok) {
+        require_once __DIR__ . '/../../includes/notify.php';
+        notify('update', 'other_expenses', $id, 'خەرجی تر نوێکرایەوە (ID: ' . $id . ')');
         echo json_encode(['success' => true]);
     } else {
         echo json_encode(['success' => false, 'msg' => 'هەڵە لە نوێکردنەوە']);

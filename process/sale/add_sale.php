@@ -65,6 +65,7 @@ try {
         $formula_id,
         $discount
     ]);
+    $sale_id = $pdo->lastInsertId();
 
     // Update customer debt if needed
     if ($customer_id !== null && $payment_type === 'قەرز') {
@@ -72,6 +73,8 @@ try {
         $stmt2->execute([$remaining_amount, $customer_id]);
     }
 
+    require_once __DIR__ . '/../../includes/notify.php';
+    notify('insert', 'sales', $sale_id, 'فرۆشتنێکی نوێ زیادکرا (invoice: ' . $invoice_number . ')');
     echo json_encode(['success' => true, 'message' => 'فرۆشتن بەسەرکەوتوویی زیادکرا!']);
 } catch (PDOException $e) {
     error_log('PDOException: ' . $e->getMessage());

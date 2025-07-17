@@ -64,6 +64,8 @@ try {
     $stmt = $pdo->prepare('DELETE FROM sales WHERE id = ?');
     $stmt->execute([$id]);
     if ($stmt->rowCount()) {
+        require_once __DIR__ . '/../../includes/notify.php';
+        notify('delete', 'sales', $id, 'فرۆشتنەکە سڕایەوە (invoice: ' . $sale['invoice_number'] . ')');
         echo json_encode(['success' => true, 'message' => 'فرۆشتن بەسەرکەوتوویی سڕایەوە!']);
     } else {
         echo json_encode(['success' => false, 'message' => 'فرۆشتن نەدۆزرایەوە!']);

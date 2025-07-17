@@ -24,6 +24,8 @@ if ($id <= 0) {
 try {
     $stmt = $pdo->prepare('DELETE FROM employee_payments WHERE id=?');
     if ($stmt->execute([$id])) {
+        require_once __DIR__ . '/../../includes/notify.php';
+        notify('delete', 'employee_payments', $id, 'پارەدان بە کارمەند سڕایەوە (ID: ' . $id . ')');
         echo json_encode(['success' => true, 'message' => 'پارەدان سڕایەوە']);
     } else {
         echo json_encode(['success' => false, 'message' => 'هەڵە لە سڕینەوە']);

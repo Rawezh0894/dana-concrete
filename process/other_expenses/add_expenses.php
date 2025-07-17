@@ -69,6 +69,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $update = $pdo->prepare('UPDATE other_expense_persons SET expense_usd = expense_usd + ?, expense_iqd = expense_iqd + ? WHERE id = ?');
             $update->execute([$remaining_usd, $remaining_iqd, $person_id]);
         }
+        require_once __DIR__ . '/../../includes/notify.php';
+        notify('insert', 'other_expenses', $pdo->lastInsertId(), 'خەرجی تر زیادکرا (invoice: ' . $invoice_number . ')');
         echo json_encode(['success' => true]);
     } else {
         echo json_encode(['success' => false, 'msg' => 'هەڵە لە زیادکردن']);

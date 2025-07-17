@@ -119,6 +119,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $updateDebt->execute([$remaining_iqd, $company_id]);
                 }
             }
+            require_once __DIR__ . '/../../includes/notify.php';
+            notify('insert', 'purchases', $pdo->lastInsertId(), 'کڕینێکی نوێ زیادکرا (invoice: ' . $invoice_number . ')');
             echo json_encode(['success' => true]);
         } else {
             $errorInfo = $stmt->errorInfo();

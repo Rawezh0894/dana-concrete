@@ -44,6 +44,8 @@ try {
         $mixer_driver_id ?: null,
         $id
     ]);
+    require_once __DIR__ . '/../../includes/notify.php';
+    notify('update', 'concrete_receipts', $id, 'پسوڵەی کۆنکرێت نوێکرایەوە (شماره: ' . $receipt_number . ')');
     echo json_encode(['success' => true, 'message' => 'پسوڵە نوێکرایەوە']);
 } catch (Exception $e) {
     echo json_encode(['success' => false, 'message' => $e->getMessage()]);

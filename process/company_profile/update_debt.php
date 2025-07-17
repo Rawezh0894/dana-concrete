@@ -99,6 +99,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
         echo json_encode(['success' => false, 'msg' => 'هەڵە لە نوێکردنەوە']);
         exit;
     }
+    require_once __DIR__ . '/../../includes/notify.php';
+    notify('update', 'debt_payments', $id, 'پارەدانی قەرزی کۆمپانیا نوێکرایەوە (کۆمپانیا: ' . $company_id . ')');
     // Apply new FIFO effect (like add)
     if ($amount_usd > 0) {
         $remaining = $amount_usd;

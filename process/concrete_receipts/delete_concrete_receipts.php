@@ -24,6 +24,8 @@ if (!$id) {
 try {
     $stmt = $pdo->prepare('DELETE FROM concrete_receipts WHERE id = ?');
     $stmt->execute([$id]);
+    require_once __DIR__ . '/../../includes/notify.php';
+    notify('delete', 'concrete_receipts', $id, 'پسوڵەی کۆنکرێت سڕایەوە (شماره: ' . $id . ')');
     echo json_encode(['success' => true, 'message' => 'پسوڵە سڕایەوە']);
 } catch (Exception $e) {
     echo json_encode(['success' => false, 'message' => $e->getMessage()]);

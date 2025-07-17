@@ -69,6 +69,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
                 $updateDebt->execute([$purchase['remaining_iqd'], $purchase['company_id']]);
             }
         }
+        require_once __DIR__ . '/../../includes/notify.php';
+        notify('delete', 'purchases', $id, 'کڕینەکە سڕایەوە (invoice: ' . $purchase['invoice_number'] . ')');
         echo json_encode(['success' => true]);
     } else {
         echo json_encode(['success' => false, 'msg' => 'هەڵە لە سڕینەوە یان id نەدۆزرایەوە']);

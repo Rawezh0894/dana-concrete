@@ -77,6 +77,8 @@ try {
     }
 
     echo json_encode(['success' => true, 'message' => 'فرۆشتن نوێکرایەوە!']);
+    require_once __DIR__ . '/../../includes/notify.php';
+    notify('update', 'sales', $id, 'فرۆشتنەکە نوێکرایەوە (invoice: ' . $invoice_number . ')');
 } catch (PDOException $e) {
     echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 }

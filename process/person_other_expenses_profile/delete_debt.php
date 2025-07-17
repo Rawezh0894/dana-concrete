@@ -72,7 +72,8 @@ try {
 
     // سڕینەوەی تۆمارەکە
     $pdo->prepare("DELETE FROM person_other_expenses_debt_payments WHERE id=?")->execute([$id]);
-
+    require_once __DIR__ . '/../../includes/notify.php';
+    notify('delete', 'person_other_expenses_debt_payments', $id, 'پارەدانی قەرزی کەسانی تر سڕایەوە (کەس: ' . $person_id . ')');
     $pdo->commit();
     echo json_encode(['success' => true]);
 } catch (Exception $e) {

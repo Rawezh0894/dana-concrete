@@ -84,6 +84,8 @@ if (!$ok) {
     echo json_encode(['success' => false, 'msg' => 'هەڵە لە تۆمارکردن']);
     exit;
 }
+require_once __DIR__ . '/../../includes/notify.php';
+notify('insert', 'customer_debt_payments', $pdo->lastInsertId(), 'پارەدان بۆ قەرزی کڕیار زیادکرا (کڕیار: ' . $customer_id . ')');
 
 // 5. تەنها debt_usd بە قەدەغەی paid_from_sales کەم بکە
 $upd = $pdo->prepare("UPDATE customers SET debt_usd = GREATEST(debt_usd - ?, 0) WHERE id = ?");

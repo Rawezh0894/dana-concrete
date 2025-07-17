@@ -120,6 +120,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $updateDebt->execute([$remaining_iqd, $company_id]);
             }
         }
+        require_once __DIR__ . '/../../includes/notify.php';
+        notify('update', 'purchases', $id, 'کڕینەکە نوێکرایەوە (invoice: ' . $invoice_number . ')');
         echo json_encode(['success' => true]);
     } else {
         error_log('DB Update Error: ' . print_r($stmt->errorInfo(), true));

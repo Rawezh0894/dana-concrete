@@ -45,6 +45,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo json_encode(['success' => false, 'msg' => 'هەڵە لە تۆمارکردن']);
         exit;
     }
+    require_once __DIR__ . '/../../includes/notify.php';
+    notify('insert', 'debt_payments', $pdo->lastInsertId(), 'پارەدان بۆ قەرزی کۆمپانیا زیادکرا (کۆمپانیا: ' . $company_id . ')');
     // FIFO: Reduce opening_debt_usd first, then remaining_usd in purchases
     if ($amount_usd > 0) {
         $remaining = $amount_usd;

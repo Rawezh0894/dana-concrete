@@ -30,6 +30,8 @@ if ($id <= 0 || $employee_id <= 0 || $salary === 0 || $karwanhisabi === 0 || $pa
 try {
     $stmt = $pdo->prepare('UPDATE employee_payments SET employee_id=?, salary=?, karwanhisabi=?, bonus=?, total=?, pay_month=?, updated_at=NOW() WHERE id=?');
     if ($stmt->execute([$employee_id, $salary, $karwanhisabi, $bonus, $total, $pay_month, $id])) {
+        require_once __DIR__ . '/../../includes/notify.php';
+        notify('update', 'employee_payments', $id, 'پارەدان بە کارمەند نوێکرایەوە (ID: ' . $id . ')');
         echo json_encode(['success' => true, 'message' => 'پارەدان نوێکرایەوە']);
     } else {
         echo json_encode(['success' => false, 'message' => 'هەڵە لە نوێکردنەوە']);

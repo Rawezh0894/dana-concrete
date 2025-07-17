@@ -109,4 +109,6 @@ if (!$ok) {
     echo json_encode(['success' => false, 'msg' => 'هەڵە لە نوێکردنەوە']);
     exit;
 }
+require_once __DIR__ . '/../../includes/notify.php';
+notify('update', 'customer_debt_payments', $id, 'پارەدانی قەرزی کڕیار نوێکرایەوە (کڕیار: ' . $customer_id . ')');
 echo json_encode(['success' => true, 'msg' => 'دانەوەی قەرز بەسەرکەوتوویی نوێکرایەوە!']);

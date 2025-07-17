@@ -85,7 +85,9 @@ try {
     // تۆمارکردنی مامەڵەکە
     $stmt = $pdo->prepare("INSERT INTO person_other_expenses_debt_payments (person_id, date, amount_usd, amount_iqd, note) VALUES (?, ?, ?, ?, ?)");
     $stmt->execute([$person_id, $date, $amount_usd, $amount_iqd, $note]);
-
+    $inserted_id = $pdo->lastInsertId();
+    require_once __DIR__ . '/../../includes/notify.php';
+    notify('insert', 'person_other_expenses_debt_payments', $inserted_id, 'پارەدان بۆ قەرزی کەسانی تر زیادکرا (کەس: ' . $person_id . ')');
     $pdo->commit();
     echo json_encode(['success' => true]);
 } catch (Exception $e) {

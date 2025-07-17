@@ -33,6 +33,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
         echo json_encode(['success' => false, 'msg' => 'هەڵە لە سڕینەوە']);
         exit;
     }
+    require_once __DIR__ . '/../../includes/notify.php';
+    notify('delete', 'debt_payments', $id, 'پارەدانی قەرزی کۆمپانیا سڕایەوە (کۆمپانیا: ' . $company_id . ')');
     // Reverse FIFO: add back to purchases first, then opening debt
     if ($amount_usd > 0) {
         $remaining = $amount_usd;

@@ -71,6 +71,8 @@ $del = $pdo->prepare('DELETE FROM customer_debt_payments WHERE id = ?');
 $ok = $del->execute([$id]);
 
 if ($ok) {
+    require_once __DIR__ . '/../../includes/notify.php';
+    notify('delete', 'customer_debt_payments', $id, 'پارەدانی قەرزی کڕیار سڕایەوە (کڕیار: ' . $customer_id . ')');
     echo json_encode(['success' => true, 'msg' => 'قەرز بەسەرکەوتوویی سڕایەوە!']);
 } else {
     echo json_encode(['success' => false, 'msg' => 'هەڵە لە سڕینەوە!']);

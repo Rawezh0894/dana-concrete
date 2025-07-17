@@ -24,6 +24,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $update = $pdo->prepare('UPDATE other_expense_persons SET expense_usd = expense_usd - ?, expense_iqd = expense_iqd - ? WHERE id = ?');
             $update->execute([$row['remaining_usd'], $row['remaining_iqd'], $row['person_id']]);
         }
+        require_once __DIR__ . '/../../includes/notify.php';
+        notify('delete', 'other_expenses', $id, 'خەرجی تر سڕایەوە (ID: ' . $id . ')');
         echo json_encode(['success' => true]);
     } else {
         echo json_encode(['success' => false, 'msg' => 'هەڵە لە سڕینەوە']);

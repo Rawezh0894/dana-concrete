@@ -42,6 +42,8 @@ try {
         $mixer_driver_id ?: null
     ]);
     $inserted_id = $pdo->lastInsertId();
+    require_once __DIR__ . '/../../includes/notify.php';
+    notify('insert', 'concrete_receipts', $inserted_id, 'پسوڵەی کۆنکرێت زیادکرا (شماره: ' . $receipt_number . ')');
     echo json_encode(['success' => true, 'message' => 'پسوڵە بەسەرکەوتوویی زیادکرا!', 'id' => $inserted_id]);
 } catch (PDOException $e) {
     echo json_encode(['success' => false, 'message' => $e->getMessage()]);
