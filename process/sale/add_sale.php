@@ -46,6 +46,14 @@ try {
         exit;
     }
 
+    // Check for duplicate invoice_number
+    $check = $pdo->prepare('SELECT COUNT(*) FROM sales WHERE invoice_number = ?');
+    $check->execute([$invoice_number]);
+    if ($check->fetchColumn() > 0) {
+        echo json_encode(['success' => false, 'message' => 'ئەم ژمارەی پسوڵە پێشتر تۆمارکراوە!']);
+        exit;
+    }
+
     $stmt = $pdo->prepare("INSERT INTO sales (customer_id, recipient, location, quantity, price_per_unit, total_price, payment_type, amount_paid_usd, amount_paid_iq, dolar_rate, remaining_amount, invoice_number, order_date, notes, formula_id, discount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     $stmt->execute([
         $customer_id,

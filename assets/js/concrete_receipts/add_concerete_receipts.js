@@ -12,20 +12,28 @@ $(document).ready(function() {
         const data = await res.json();
         if (data.success) {
             Swal.fire({
-                title: 'سەرکەوتوو!',
-                text: 'دەتەوێت پسوڵەکە چاپ بکەیت؟',
                 icon: 'success',
+                title: 'پسوڵە زیادکرا',
+                text: 'ئایا دەتەوێت پسوڵە چاپ بکەیت؟',
                 showCancelButton: true,
-                confirmButtonText: 'بەڵێ، چاپ',
-                cancelButtonText: 'نەخێر'
+                confirmButtonText: 'بەڵێ',
+                cancelButtonText: 'نەخێر',
             }).then((result) => {
+                // Always reset form and close modal
+                $('#addConcreteReceiptForm')[0].reset();
+                $('#addConcreteReceiptModal').modal('hide');
+                if (window.reloadConcreteReceipts) window.reloadConcreteReceipts();
+                if (window.reloadConcreteReceiptsSummary) window.reloadConcreteReceiptsSummary();
                 if (result.isConfirmed && data.id) {
-                    window.location.href = '../pages/central_receipts.php?id=' + data.id;
+                    window.open('../receipt.html?id=' + data.id, '_blank');
                 }
-                // else: stay on page
             });
         } else {
-            Swal.fire('هەڵە!', data.message || 'هەڵەیەک ڕویدا', 'error');
+            Swal.fire({
+                icon: 'error',
+                title: 'هەڵە',
+                text: data.message || 'هەڵەیەک ڕویدا لە زیادکردنی پسوڵە!'
+            });
         }
         submitting = false;
     });
