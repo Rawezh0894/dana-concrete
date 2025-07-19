@@ -14,18 +14,20 @@ $(document).ready(function() {
             Swal.fire({
                 icon: 'success',
                 title: 'پسوڵە زیادکرا',
-                text: 'ئایا دەتەوێت پسوڵە چاپ بکەیت؟',
-                showCancelButton: true,
-                confirmButtonText: 'بەڵێ',
-                cancelButtonText: 'نەخێر',
-            }).then((result) => {
-                // Always reset form and close modal
-                $('#addConcreteReceiptForm')[0].reset();
-                $('#addConcreteReceiptModal').modal('hide');
-                if (window.reloadConcreteReceipts) window.reloadConcreteReceipts();
-                if (window.reloadConcreteReceiptsSummary) window.reloadConcreteReceiptsSummary();
-                if (result.isConfirmed && data.id) {
-                    window.open('../pages/central_receipts.php?id=' + data.id, '_blank');
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 1000,
+                timerProgressBar: true,
+                didClose: () => {
+                    if (data.id) {
+                        window.open('../pages/central_receipts.php?id=' + data.id + '&auto_print=1', '_blank');
+                    }
+                    // Always reset form and close modal
+                    $('#addConcreteReceiptForm')[0].reset();
+                    $('#addConcreteReceiptModal').modal('hide');
+                    if (window.reloadConcreteReceipts) window.reloadConcreteReceipts();
+                    if (window.reloadConcreteReceiptsSummary) window.reloadConcreteReceiptsSummary();
                 }
             });
         } else {

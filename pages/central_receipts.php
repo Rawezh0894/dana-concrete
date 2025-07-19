@@ -179,6 +179,14 @@ $receipt_id = isset($_GET['id']) ? $_GET['id'] : null;
     
     <!-- Include the external JavaScript file -->
     <script src="../assets/js/central_receipts/get_information.js"></script>
+    <script>
+    // Auto print if auto_print=1 in URL
+    if (window.location.search.includes('auto_print=1')) {
+        window.onload = function() {
+            setTimeout(function() { window.print(); }, 300); // slight delay for rendering
+        };
+    }
+    </script>
 </body>
 </html>
 
