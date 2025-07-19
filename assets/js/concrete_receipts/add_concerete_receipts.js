@@ -25,7 +25,7 @@ $(document).ready(function() {
                 if (window.reloadConcreteReceipts) window.reloadConcreteReceipts();
                 if (window.reloadConcreteReceiptsSummary) window.reloadConcreteReceiptsSummary();
                 if (result.isConfirmed && data.id) {
-                    window.open('../receipt.html?id=' + data.id, '_blank');
+                    window.open('../pages/central_receipts.php?id=' + data.id, '_blank');
                 }
             });
         } else {

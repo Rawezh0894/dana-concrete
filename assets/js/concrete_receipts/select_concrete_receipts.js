@@ -115,5 +115,22 @@ $(document).ready(function() {
 
 $(document).on('click', '.print-receipt', function() {
     var id = $(this).data('id');
-    window.open('../pages/central_receipts.php?id=' + id, '_blank');
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            icon: 'question',
+            title: 'چاپکردن',
+            text: 'دەتەوێت پسوڵە چاپ بکەیت؟',
+            showCancelButton: true,
+            confirmButtonText: 'بەڵێ',
+            cancelButtonText: 'نەخێر',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.open('../pages/central_receipts.php?id=' + id, '_blank');
+            }
+        });
+    } else {
+        if (window.confirm('دەتەوێت پسوڵە چاپ بکەیت؟')) {
+            window.open('../pages/central_receipts.php?id=' + id, '_blank');
+        }
+    }
 });

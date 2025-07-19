@@ -3,685 +3,336 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dana Concrete Factory - Invoice</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <title>کارگەی کۆنکرێتی دانا - Invoice</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap');
-        
         @font-face {
-            font-family: 'Rabar021';
-            src: url('assets/fonts/Rabar_021.ttf') format('truetype');
-            font-weight: normal;
-            font-style: normal;
+            font-family: 'Rabar_021';
+            src: url('../assets/fonts/Rabar_021.ttf') format('truetype');
+            font-display: swap;
         }
-        
-        * {
-            font-family: 'Rabar021', 'Noto Sans Arabic', sans-serif !important;
+        body {
+            font-family: 'Rabar_021', Arial, sans-serif;
+            line-height: 1.4;
         }
-        
-        /* Print-specific styles for A4 */
-        @media print {
-            @page {
-                size: A4;
-                margin: 0;
-            }
-            
-            body {
-                margin: 0;
-                padding: 0;
-                background: white !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-                font-size: 13pt;
-            }
-            
-            .invoice-container {
-                width: 210mm !important;
-                min-height: 297mm !important;
-                max-width: 210mm !important;
-                max-height: 297mm !important;
-                margin: 0 !important;
-                box-shadow: none !important;
-                border-radius: 0 !important;
-                display: flex !important;
-                flex-direction: column !important;
-                position: relative !important;
-            }
-            
-            .header {
-                background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
-                color: white !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-                padding: 15px 20px !important;
-            }
-            
-            .content {
-                padding: 20px !important;
-                flex: 1;
-            }
-            
-            .footer {
-                background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
-                color: white !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-                padding: 15px 20px !important;
-                margin-top: auto !important;
-                page-break-after: avoid !important;
-            }
-            
-            .table thead th {
-                background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
-                color: white !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-                padding: 12px 8px !important;
-                font-size: 18px !important;
-            }
-            
-            .table tbody td {
-                padding: 10px 8px !important;
-                font-size: 16px !important;
-            }
-            
-            .company-name {
-                font-size: 24px !important;
-            }
-            
-            .company-subtitle {
-                font-size: 13px !important;
-            }
-            
-            .invoice-number, .invoice-date {
-                font-size: 14px !important;
-            }
-            
-            .client-info {
-                margin-bottom: 20px !important;
-                padding: 15px !important;
-            }
-            
-            .client-info h5 {
-                font-size: 18px !important;
-                margin-bottom: 10px !important;
-            }
-            
-            .client-info p {
-                font-size: 15px !important;
-                margin-bottom: 5px !important;
-                line-height: 1.4 !important;
-            }
-            
-            .pricing-table {
-                margin-bottom: 20px !important;
-            }
-            
-            .signatures {
-                flex-direction: row !important;
-                gap: 20px !important;
-                margin-top: 20px !important;
-                padding-top: 15px !important;
-            }
-            
-            .signature-box {
-                width: 48% !important;
-                display: block !important;
-            }
-            
-            .signature-line {
-                height: 40px !important;
-                margin-bottom: 10px !important;
-            }
-            
-            .signature-title {
-                font-size: 14px !important;
-            }
-            
-            .signature-company, .signature-date {
-                font-size: 12px !important;
-            }
-            
-            .contact-info {
-                flex-direction: row !important;
-                flex-wrap: wrap !important;
-                gap: 30px !important;
-                justify-content: flex-start !important;
-                align-items: flex-start !important;
-            }
-            
-            .contact-item {
-                min-width: 120px !important;
-                width: auto !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: flex-start !important;
-            }
-            
-            .watermark {
-                font-size: 80px !important;
-                opacity: 0.03 !important;
-            }
-            
-            .no-print {
-                display: none !important;
-            }
-            
-            .page-break {
-                page-break-after: always;
-            }
-        }
-        
-        .invoice-container {
-            width: 210mm;
-            min-height: 297mm;
-            margin: 0 auto;
-            background: white;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            border-radius: 15px;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .header {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-            color: white;
-            padding: 20px 25px;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
-            opacity: 0.3;
-        }
-        
-        .header-content {
-            position: relative;
-            z-index: 2;
-        }
-        
-        .logo-section {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 15px;
-            gap: 20px;
-        }
-        
-        .logo-container {
-            flex: 0 0 110px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #fff;
-            border-radius: 16px;
-            padding: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-        
-        .logo-img {
-            width: 90px;
-            height: 90px;
-            object-fit: contain;
-            display: block;
-            margin: 0 auto;
-        }
-        
-        .company-info {
-            flex: 1;
-            text-align: right;
-        }
-        
-        .invoice-info {
-            flex: 0 0 200px;
-            text-align: left;
-        }
-        
-        .company-name {
-            font-size: 26px;
-            font-weight: 700;
-            margin: 0 0 5px 0;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-        
-        .company-subtitle {
-            font-size: 14px;
-            opacity: 0.9;
-            margin: 2px 0;
-            line-height: 1.3;
-        }
-        
-        .invoice-details {
-            background: rgba(255,255,255,0.1);
-            padding: 12px 18px;
-            border-radius: 10px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-        
-        .invoice-number {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 3px;
-        }
-        
-        .invoice-date {
-            font-size: 14px;
-            opacity: 0.9;
-            margin-bottom: 2px;
-        }
-        
-        .content {
-            padding: 40px;
-        }
-        
-        .client-info {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            padding: 25px;
-            border-radius: 12px;
-            margin-bottom: 30px;
-            border-left: 4px solid #2c3e50;
-        }
-        
-        .client-info h5 {
-            color: #2c3e50;
-            font-weight: 600;
-            margin-bottom: 15px;
-            font-size: 20px;
-        }
-        
-        .client-info p {
-            color: #555;
-            line-height: 1.8;
-            margin-bottom: 8px;
-        }
-        
-        .pricing-table {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-        
-        .table {
+        @page {
+            size: A4;
             margin: 0;
         }
         
-        .table thead th {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-            color: #fff;
-            border: none;
-            padding: 18px 12px;
-            font-weight: 700;
-            font-size: 20px;
-            text-align: center;
-            letter-spacing: 1px;
-            border-radius: 0 !important;
+        .a4-page {
+            width: 210mm;
+            height: 297mm;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
         
-        .table tbody td {
-            padding: 16px 10px;
-            font-size: 17px;
-            font-weight: 500;
-            text-align: center;
-            border-bottom: 1px solid #eee;
-            background: #fff;
-            transition: background-color 0.3s ease;
+        .header-gradient {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
         }
         
-        .table tbody tr:hover td {
-            background: #f8f9fa;
-        }
-        
-        .table tbody tr:last-child td {
-            border-bottom: none;
-        }
-        
-        .grade-cell {
-            font-weight: 600;
-            color: #2c3e50;
-        }
-        
-        .strength-cell {
-            color: #e74c3c;
-            font-weight: 600;
-        }
-        
-        .signatures {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 40px;
-            padding-top: 30px;
-            border-top: 2px solid #eee;
-        }
-        
-        .signature-box {
-            text-align: center;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            width: 48%;
-            border: 2px dashed #ddd;
-        }
-        
-        .signature-line {
+        .logo-shape {
+            width: 60px;
             height: 60px;
+            background: rgba(255,255,255,0.2);
+            border: 3px solid rgba(255,255,255,0.3);
+           padding: 5PX;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-style: italic;
-            color: #666;
-            border-bottom: 2px solid #ddd;
-            margin-bottom: 15px;
         }
         
-        .signature-title {
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 5px;
-        }
-        
-        .signature-company {
-            font-size: 14px;
-            color: #666;
-        }
-        
-        .signature-date {
-            font-size: 14px;
-            color: #888;
-            margin-top: 5px;
-        }
-        
-        .footer {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        .logo-inner {
+            transform: rotate(-45deg);
+            font-weight: bold;
             color: white;
-            padding: 25px;
-            text-align: center;
+            font-size: 18px;
         }
         
-        .contact-info {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            flex-wrap: wrap;
-            background: rgba(255,255,255,0.1);
-            padding: 12px 18px;
-            border-radius: 10px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
+        .company-info {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
         }
         
-        .contact-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
+        .table-header {
+            background: linear-gradient(135deg, #065f46 0%, #047857 100%);
         }
         
-        .contact-item i {
-            color: #fff;
-            font-size: 20px;
-            vertical-align: middle;
+        .table-row:nth-child(even) {
+            background: #f8fafc;
+        }
+        
+        .table-row:nth-child(odd) {
+            background: white;
         }
         
         .watermark {
             position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%) rotate(-45deg);
+            transform: translate(-50%, -50%) rotate(-20deg);
             font-size: 120px;
-            color: rgba(0,0,0,0.05);
-            font-weight: 900;
-            z-index: 1;
-            pointer-events: none;
-        }
-        
-        .print-button {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 25px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
-            transition: all 0.3s ease;
-        }
-        
-        .print-button:hover {
-            background: #2980b9;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
-        }
-        
-        @media (max-width: 768px) {
-            .invoice-container {
-                margin: 10px;
-                border-radius: 10px;
-            }
-            
-            .content {
-                padding: 20px;
-            }
-            
-            .header {
-                padding: 20px;
-            }
-            
-            .company-name {
-                font-size: 24px;
-            }
-            
-            .signatures {
-                flex-direction: column;
-                gap: 20px;
-            }
-            
-            .signature-box {
-                width: 100%;
-            }
-            
-            .contact-info {
-                flex-direction: column;
-                gap: 15px;
-            }
-            
-            .print-button {
-                top: 10px;
-                right: 10px;
-                padding: 10px 20px;
-                font-size: 14px;
-            }
-        }
-        
-        .note-label {
-            display: inline-block;
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-            color: #fff;
+            color: rgba(5, 150, 105, 0.03);
             font-weight: bold;
-            padding: 2px 12px;
-            border-radius: 8px;
-            font-size: 15px;
-            margin-bottom: 4px;
-            margin-left: 8px;
-            letter-spacing: 1px;
-            box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+            z-index: 0;
+        }
+        
+        .content-wrapper {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .truck-illustration {
+            opacity: 0.05;
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 200px;
+            height: 120px;
+        }
+        
+        @media print {
+            .a4-page {
+                box-shadow: none;
+                margin: 0;
+            }
+            
+            body {
+                margin: 0;
+                padding: 0;
+            }
+            table { width: 100% !important; table-layout: fixed !important; }
+            th, td { font-size: 10px !important; padding: 2px 4px !important; }
+            #print-btn { display: none !important; }
         }
     </style>
 </head>
-<body class="bg-light">
-    <button class="print-button no-print" onclick="window.print()">
-        <i class="fas fa-print me-2"></i>پرینت کردن
-    </button>
-    
-    <div class="invoice-container">
-        <div class="watermark">DANA</div>
+<body class="bg-gray-100">
+    <button onclick="window.print()" id="print-btn" style="position:fixed;top:20px;left:20px;z-index:9999;background:#059669;color:white;padding:10px 20px;border-radius:8px;font-size:16px;box-shadow:0 2px 8px #0002;cursor:pointer;">پڕینت</button>
+    <div class="a4-page relative">
+        <div class="watermark">Dana Concrete</div>
         
-        <!-- Header -->
-        <div class="header">
-            <div class="header-content">
-                <div class="logo-section">
-                    <div class="logo-container">
-                        <img src="assets/images/logo.png" alt="Dana Concrete Logo" class="logo-img">
+        <div class="content-wrapper h-full flex flex-col">
+            <!-- Header -->
+            <div class="header-gradient text-white px-8 py-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-6 space-x-reverse">
+                        <div class="logo-shape" style="width:96px;height:96px;overflow:hidden;display:flex;align-items:center;justify-content:center;">
+                            <img src="assets/images/Screenshot_2025-07-05_103044-removebg-preview.png" alt="Logo" class="w-full h-full object-cover" />
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold">کارگەی کۆنکرێتی دانا</h1>
+                            <p class="text-sm opacity-80">بۆ کۆنکرێتی ئامادەکراو</p>
+                            <p class="text-lg opacity-90">Dana Concrete Factory</p>
+                            
+                            <p class="text-sm opacity-80">For Ready - Mix Concrete</p>
+                        </div>
                     </div>
                     
-                    <div class="company-info">
-                        <h1 class="company-name">Dana Concrete Factory</h1>
-                        <p class="company-subtitle">کارگەی کۆنکرێتی دانا</p>
-                        <p class="company-subtitle">For Ready - Mix Concrete</p>
-                        <p class="company-subtitle">بۆ کۆنکرێتی ئامادەکراو</p>
+                    <div class="text-right">
+                        <div class="bg-white bg-opacity-20 rounded-lg p-4">
+                            <div class="flex items-center space-x-3 space-x-reverse mb-2">
+                                <span class="font-bold">ژمارە:</span>
+                                <div class="bg-white text-gray-800 px-3 py-1 rounded font-bold">2024</div>
+                            </div>
+                            <div class="flex items-center space-x-3 space-x-reverse">
+                                <span class="font-bold">بەروار:</span>
+                                <div class="bg-white text-gray-800 px-3 py-1 rounded">__ / __ / 202</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Company Information -->
+            <div class="company-info px-8 py-4 border-b-2 border-emerald-200">
+                <div class="text-center">
+                    <h2 class="text-xl font-bold text-gray-800 mb-2">بابەت/ میزانەی ساڵی 2024</h2>
+                    <p class="text-gray-600">بۆ بەڕێوەبەرایەتی باج و دەرامەتی سلێمانی</p>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="flex-1 px-8 py-6">
+                <!-- Products Table -->
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
+                    <div class="w-full overflow-x-auto p-0 m-0">
+                        <table class="w-full text-xs" style="table-layout:fixed;">
+                        <thead class="table-header text-white">
+                            <tr>
+                                    <th class="px-1 py-1 text-base text-center font-bold" style="width:40px;">مانگ</th>
+                                    <th class="px-1 py-1 text-base text-center font-bold">بری مەتر</th>
+                                    <th class="px-1 py-1 text-base text-center font-bold">بڕی م3 </th>
+                                    <th class="px-1 py-1 text-base text-center font-bold">کۆی نرخ</th>
+                                    <th class="px-1 py-1 text-base text-center font-bold">مەسرەف</th>
+                                    <th class="px-1 py-1 text-base text-center font-bold">معاش</th>
+                                    <th class="px-1 py-1 text-base text-center font-bold">داهات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="table-row border-b border-gray-200 hover:bg-emerald-50 transition-colors">
+                                    <td class="px-1 py-2 text-base text-right" style="width:40px;"><div class="font-semibold text-gray-800">1</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-blue-100 text-blue-800 font-bold px-2 py-1 rounded">1,000 م<sup>٣</sup></div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-emerald-100 text-emerald-800 font-bold px-2 py-1 rounded">52,500,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-yellow-100 text-yellow-800 font-bold px-2 py-1 rounded">69,000,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-red-100 text-red-800 font-bold px-2 py-1 rounded">15,000,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-purple-100 text-purple-800 font-bold px-2 py-1 rounded">6,000,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-left"><div class="bg-green-100 text-green-800 font-bold px-2 py-1 rounded">-4,500,000 د.ع</div></td>
+                                </tr>
+                                <tr class="table-row border-b border-gray-200 hover:bg-emerald-50 transition-colors">
+                                    <td class="px-1 py-2 text-base text-right" style="width:40px;"><div class="font-semibold text-gray-800">2</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-blue-100 text-blue-800 font-bold px-2 py-1 rounded">1,194 م<sup>٣</sup></div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-emerald-100 text-emerald-800 font-bold px-2 py-1 rounded">62,685,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-yellow-100 text-yellow-800 font-bold px-2 py-1 rounded">82,386,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-red-100 text-red-800 font-bold px-2 py-1 rounded">18,750,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-purple-100 text-purple-800 font-bold px-2 py-1 rounded">6,060,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-left"><div class="bg-green-100 text-green-800 font-bold px-2 py-1 rounded">-5,109,000 د.ع</div></td>
+                                </tr>
+                                <tr class="table-row border-b border-gray-200 hover:bg-emerald-50 transition-colors">
+                                    <td class="px-1 py-2 text-base text-right" style="width:40px;"><div class="font-semibold text-gray-800">3</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-blue-100 text-blue-800 font-bold px-2 py-1 rounded">1,485 م<sup>٣</sup></div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-emerald-100 text-emerald-800 font-bold px-2 py-1 rounded">77,962,500 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-yellow-100 text-yellow-800 font-bold px-2 py-1 rounded">97,786,500 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-red-100 text-red-800 font-bold px-2 py-1 rounded">16,500,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-purple-100 text-purple-800 font-bold px-2 py-1 rounded">6,145,500 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-left"><div class="bg-green-100 text-green-800 font-bold px-2 py-1 rounded">-2,821,500 د.ع</div></td>
+                                </tr>
+                                <tr class="table-row border-b border-gray-200 hover:bg-emerald-50 transition-colors">
+                                    <td class="px-1 py-2 text-base text-right" style="width:40px;"><div class="font-semibold text-gray-800">4</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-blue-100 text-blue-800 font-bold px-2 py-1 rounded">1,785 م<sup>٣</sup></div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-emerald-100 text-emerald-800 font-bold px-2 py-1 rounded">93,712,500 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-yellow-100 text-yellow-800 font-bold px-2 py-1 rounded">115,935,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-red-100 text-red-800 font-bold px-2 py-1 rounded">15,840,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-purple-100 text-purple-800 font-bold px-2 py-1 rounded">6,262,500 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-left"><div class="bg-green-100 text-green-800 font-bold px-2 py-1 rounded">120,000 د.ع</div></td>
+                                </tr>
+                                <tr class="table-row border-b border-gray-200 hover:bg-emerald-50 transition-colors">
+                                    <td class="px-1 py-2 text-base text-right" style="width:40px;"><div class="font-semibold text-gray-800">5</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-blue-100 text-blue-800 font-bold px-2 py-1 rounded">1,560 م<sup>٣</sup></div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-emerald-100 text-emerald-800 font-bold px-2 py-1 rounded">79,170,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-yellow-100 text-yellow-800 font-bold px-2 py-1 rounded">98,623,200 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-red-100 text-red-800 font-bold px-2 py-1 rounded">13,050,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-purple-100 text-purple-800 font-bold px-2 py-1 rounded">5,962,400 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-left"><div class="bg-green-100 text-green-800 font-bold px-2 py-1 rounded">440,800 د.ع</div></td>
+                                </tr>
+                                <tr class="table-row border-b border-gray-200 hover:bg-emerald-50 transition-colors">
+                                    <td class="px-1 py-2 text-base text-right" style="width:40px;"><div class="font-semibold text-gray-800">6</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-blue-100 text-blue-800 font-bold px-2 py-1 rounded">1,500 م<sup>٣</sup></div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-emerald-100 text-emerald-800 font-bold px-2 py-1 rounded">76,125,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-yellow-100 text-yellow-800 font-bold px-2 py-1 rounded">96,570,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-red-100 text-red-800 font-bold px-2 py-1 rounded">12,615,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-purple-100 text-purple-800 font-bold px-2 py-1 rounded">5,945,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-left"><div class="bg-green-100 text-green-800 font-bold px-2 py-1 rounded">1,885,000 د.ع</div></td>
+                                </tr>
+                                <tr class="table-row border-b border-gray-200 hover:bg-emerald-50 transition-colors">
+                                    <td class="px-1 py-2 text-base text-right" style="width:40px;"><div class="font-semibold text-gray-800">7</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-blue-100 text-blue-800 font-bold px-2 py-1 rounded">1,900 م<sup>٣</sup></div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-emerald-100 text-emerald-800 font-bold px-2 py-1 rounded">96,425,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-yellow-100 text-yellow-800 font-bold px-2 py-1 rounded">125,628,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-red-100 text-red-800 font-bold px-2 py-1 rounded">14,500,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-purple-100 text-purple-800 font-bold px-2 py-1 rounded">7,511,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-left"><div class="bg-green-100 text-green-800 font-bold px-2 py-1 rounded">7,192,000 د.ع</div></td>
+                                </tr>
+                                <tr class="table-row border-b border-gray-200 hover:bg-emerald-50 transition-colors">
+                                    <td class="px-1 py-2 text-base text-right" style="width:40px;"><div class="font-semibold text-gray-800">8</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-blue-100 text-blue-800 font-bold px-2 py-1 rounded">2,130 م<sup>٣</sup></div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-emerald-100 text-emerald-800 font-bold px-2 py-1 rounded">115,020,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-yellow-100 text-yellow-800 font-bold px-2 py-1 rounded">144,094,500 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-red-100 text-red-800 font-bold px-2 py-1 rounded">18,375,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-purple-100 text-purple-800 font-bold px-2 py-1 rounded">7,839,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-left"><div class="bg-green-100 text-green-800 font-bold px-2 py-1 rounded">2,860,500 د.ع</div></td>
+                                </tr>
+                                <tr class="table-row border-b border-gray-200 hover:bg-emerald-50 transition-colors">
+                                    <td class="px-1 py-2 text-base text-right" style="width:40px;"><div class="font-semibold text-gray-800">9</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-blue-100 text-blue-800 font-bold px-2 py-1 rounded">2,150 م<sup>٣</sup></div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-emerald-100 text-emerald-800 font-bold px-2 py-1 rounded">116,100,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-yellow-100 text-yellow-800 font-bold px-2 py-1 rounded">143,512,500 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-red-100 text-red-800 font-bold px-2 py-1 rounded">17,850,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-purple-100 text-purple-800 font-bold px-2 py-1 rounded">7,845,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-left"><div class="bg-green-100 text-green-800 font-bold px-2 py-1 rounded">1,717,500 د.ع</div></td>
+                                </tr>
+                                <tr class="table-row border-b border-gray-200 hover:bg-emerald-50 transition-colors">
+                                    <td class="px-1 py-2 text-base text-right" style="width:40px;"><div class="font-semibold text-gray-800">10</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-blue-100 text-blue-800 font-bold px-2 py-1 rounded">3,000 م<sup>٣</sup></div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-emerald-100 text-emerald-800 font-bold px-2 py-1 rounded">162,000,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-yellow-100 text-yellow-900 font-bold px-2 py-1 rounded">201,105,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-red-100 text-red-800 font-bold px-2 py-1 rounded">22,500,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-purple-100 text-purple-800 font-bold px-2 py-1 rounded">9,600,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-left"><div class="bg-green-100 text-green-800 font-bold px-2 py-1 rounded">7,005,000 د.ع</div></td>
+                                </tr>
+                                <tr class="table-row border-b border-gray-200 hover:bg-emerald-50 transition-colors">
+                                    <td class="px-1 py-2 text-base text-right" style="width:40px;"><div class="font-semibold text-gray-800">11</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-blue-100 text-blue-800 font-bold px-2 py-1 rounded">2,000 م<sup>٣</sup></div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-emerald-100 text-emerald-800 font-bold px-2 py-1 rounded">108,000,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-yellow-100 text-yellow-900 font-bold px-2 py-1 rounded">135,300,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-red-100 text-red-800 font-bold px-2 py-1 rounded">16,950,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-purple-100 text-purple-800 font-bold px-2 py-1 rounded">9,300,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-left"><div class="bg-green-100 text-green-800 font-bold px-2 py-1 rounded">1,050,000 د.ع</div></td>
+                            </tr>
+                            <tr class="table-row border-b border-gray-200 hover:bg-emerald-50 transition-colors">
+                                    <td class="px-1 py-2 text-base text-right" style="width:40px;"><div class="font-semibold text-gray-800">12</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-blue-100 text-blue-800 font-bold px-2 py-1 rounded">2,200 م<sup>٣</sup></div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-emerald-100 text-emerald-800 font-bold px-2 py-1 rounded">118,800,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-yellow-100 text-yellow-900 font-bold px-2 py-1 rounded">147,015,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-red-100 text-red-800 font-bold px-2 py-1 rounded">15,000,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-purple-100 text-purple-800 font-bold px-2 py-1 rounded">9,360,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-left"><div class="bg-green-100 text-green-800 font-bold px-2 py-1 rounded">3,855,000 د.ع</div></td>
+                            </tr>
+                            <tr class="bg-gray-50 border-t-2 border-emerald-600">
+                                    <td class="px-1 py-2 text-base text-right font-bold text-gray-800">کۆی گشتی</td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-blue-200 text-blue-900 font-bold px-2 py-1 rounded">20,099 م<sup>٣</sup></div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-emerald-200 text-emerald-900 font-bold px-2 py-1 rounded">1,094,487,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-yellow-200 text-yellow-900 font-bold px-2 py-1 rounded">1,315,949,200 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-red-200 text-red-900 font-bold px-2 py-1 rounded">176,830,000 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-center"><div class="bg-purple-200 text-purple-900 font-bold px-2 py-1 rounded">80,980,100 د.ع</div></td>
+                                    <td class="px-1 py-1 text-xs text-left"><div class="bg-green-200 text-green-900 font-bold px-2 py-1 rounded">13,695,300 د.ع</div></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    </div>
+                </div>
+
+                <!-- Additional Information -->
+                <div class="mt-8 bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg p-6 border border-emerald-200">
+                    <div class="flex items-center space-x-3 space-x-reverse mb-3">
+                        <div class="w-6 h-6 bg-emerald-600 rounded-full flex items-center justify-center">
+                            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <h3 class="font-bold text-gray-800 text-lg">دانا عەلی جلال</h3>
+                    </div>
+                    <p class="text-gray-700 font-medium">کارگەی کۆنکرێتی دانا</p>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="bg-gray-50 px-8 py-6 border-t border-gray-200 mt-auto">
+                <div class="flex justify-between items-center text-sm text-gray-600">
+                    <div class="flex space-x-6 space-x-reverse">
+                       
+
+                         <span class="font-semibold">5414 144 0773</span>
+                        <span class="font-semibold">0101 995 0772</span>
+                        <span class="font-semibold">0543 152 0750</span>
+                    </div>
+                    <div class="text-left">
+                        <p class="font-semibold">ناونیشان: سلێمانی-تاسڵوجە-نزیک بازگەی کەڵەوانان</p>
+                    </div>
                 </div>
                 
-                    <div class="invoice-info">
-                <div class="invoice-details">
-                            <div class="invoice-number">بەروار: ____/____/2025</div>
-                            <div class="invoice-date">_______________:NO</div>
-                            <div class="invoice-date">Date: ___/___/2025</div>
-                    </div>
-                    </div>
-                </div>
+              
             </div>
         </div>
         
-        <!-- Content -->
-        <div class="content">
-            <!-- Client Information -->
-            <div class="client-info">
-             <p style="text-align: center; font-size: 22px; font-weight: bold;">بابەت/ قەرەبوو</p>
-                <!-- <h5><i class="fas  me-2"></i>بەڕێز / کاک/...........</h5> -->
-               
-                <p>بە هۆکاری درز و تەقیوی و دایانی ئاو ئەم سەقفی کۆنکرێتانە بەم شێوازە قەرەبوو کرانەوە:</p>
-                <p></p>
-            </div>
-            
-            <!-- Pricing Table -->
-            <div class="pricing-table">
-                <table class="table" style="direction: rtl;">
-                    <thead>
-                        <tr>
-                            <th>ناو</th>
-                            <th>شوێن</th>
-                            <th>بڕ م<sup>3</sup></th>
-                            <th>ڕێژە</th>
-                            <th>نرخ</th>
-                            <th>کۆی نرخ</th>
-                            <th>بڕی قەرەبوو</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>و.هەڵمەت</td>
-                            <td>سابووراوا</td>
-                            <td>6.5 م³</td>
-                            <td>25Mga</td>
-                            <td>$46 + $100 ی پەمپ</td>
-                            <td>$399</td>
-                            <td>$400</td>
-                        </tr>
-                        <tr>
-                            <td>و.ئەحیا</td>
-                            <td>پیرەمەگروون</td>
-                            <td>25 م³</td>
-                            <td>25Mga</td>
-                            <td>$46</td>
-                            <td>$1,150</td>
-                            <td>$800</td>
-                        </tr>
-                        <tr>
-                            <td>و.ڕێبوار</td>
-                            <td>ڕاپەڕین</td>
-                            <td>31 م³</td>
-                            <td>25Mga</td>
-                            <td>$45</td>
-                            <td>$1,395</td>
-                            <td>$500</td>
-                        </tr>
-                        <tr style="background: #e9ecef; font-weight: bold;">
-                            <td colspan="6" style="text-align: left;">کۆی قەرەبوو</td>
-                            <td class="" style="color: #2c3e50;">$1,700</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            
-            <div class="client-info">
-            <p>
-             <span class="note-label">تێبینی:</span> یەکەم موعالەجە کردنی سەقفێک لە ڕاپەڕین کە لە خاڵی سێیەم نوسراوە 500$ تێچووەکەی بووە کە خودی خۆمان موعالەجەمان کردووە.
-            </p>
-            </div>
-              <div class="client-info">
-            <p>
-             <span class="note-label">تێبینی:</span> چەندین سەقفی دیکەمان هەیە کە موعالەجە کراوە یان پارەی بۆ گەڕێنراوەتەوە و باس نەکراوە
-            </p>
-            </div>
-             <div class="client-info">
-            <p>
-             <span class="note-label">تێبینی:</span> ئەم سێ کارەی کە لە خشتەکەدا ڕوون کراوەتەوە هەموویان لە یەک ڕۆژدا ڕوویداوە لە بەرواری 2025/05/12 .
-            </p>
-            </div>
-            
-            <p class="text-center mb-4"><strong>لەگەڵ ڕێزدا ...</strong></p>
-            
-            <!-- Signatures -->
-            <div class="signatures">
-                <div class="signature-box">
-                    <div class="signature-line">
-                        <span>ئیمزا</span>
-                    </div>
-                    <div class="signature-title">دانا علی جلال</div>
-                    <div class="signature-company">کارگەی کۆنکرێتی دانا</div>
-                    <div class="signature-date">..../..../2025</div>
-                </div>
-                
-                <div class="signature-box">
-                    <div class="signature-line">
-                        <i class="fas">مۆر</i>
-                    </div>
-                    <div class="signature-title"></div>
-                    <div class="signature-company">DANA CONCRETE</div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Footer -->
-        <div class="footer">
-            <div class="contact-info">
-                <div class="contact-item">
-                  <i class="bi bi-telephone-forward-fill"></i>
-                    <span>5414 144 0773</span>
-                </div>
-                <div class="contact-item">
-                  <i class="bi bi-telephone-forward-fill"></i>
-                    <span>0101 995 0772</span>
-                </div>
-                <div class="contact-item">
-                  <i class="bi bi-telephone-forward-fill"></i>
-                    <span>0543 152 0750</span>
-                </div>
-                <div class="contact-item">
-                    <i class="bi bi-geo-alt-fill"></i>
-                    <span>سلێمانی - تاسڵوجە - نزیک بازگەی کەڵەوانان</span>
-                </div>
-            </div>
+        <!-- Truck Illustration -->
+        <div class="truck-illustration">
+            <svg viewBox="0 0 200 120" fill="currentColor" class="text-emerald-600">
+                <path d="M10 80 L60 80 L60 60 L140 60 L160 80 L190 80 L190 90 L170 90 C170 95 165 100 160 100 C155 100 150 95 150 90 L70 90 C70 95 65 100 60 100 C55 100 50 95 50 90 L10 90 Z M70 50 L70 30 L130 30 L140 40 L140 50 Z"/>
+                <circle cx="60" cy="90" r="8"/>
+                <circle cx="160" cy="90" r="8"/>
+            </svg>
         </div>
     </div>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
