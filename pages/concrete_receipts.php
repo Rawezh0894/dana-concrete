@@ -24,6 +24,18 @@ $employees = $pdo->query("SELECT id, name, role FROM employees")->fetchAll(PDO::
 $drivers = array_filter($employees, function($emp) { return $emp['role'] === 'شۆفێر'; });
 $mixer_cars = array_filter($cars, function($car) { return preg_match('/^m/i', trim($car['name'])); });
 $pump_cars = array_filter($cars, function($car) { return preg_match('/^p/i', trim($car['name'])); });
+
+// Define allowed names for pump and mixer
+$pump_names = ['بەرزان', 'شاڵاو', 'سەربەست', 'بازیان'];
+$mixer_names = ['بەرزان', 'شاڵاو', 'سەربەست', 'بازیان', 'طارق', 'عماد', 'علاوی', 'ئامانج', 'احمد(ابو روەیدا)', 'وشیار', 'هۆژین', 'هاوکار', 'عادل', 'ڕزگار'];
+
+// Filter employees for pump and mixer
+$pump_drivers = array_filter($employees, function($emp) use ($pump_names) {
+    return $emp['role'] === 'شۆفێر' && in_array(trim($emp['name']), $pump_names, true);
+});
+$mixer_drivers = array_filter($employees, function($emp) use ($mixer_names) {
+    return $emp['role'] === 'شۆفێر' && in_array(trim($emp['name']), $mixer_names, true);
+});
 ?>
 <!DOCTYPE html>
 <html lang="ku">
@@ -122,6 +134,58 @@ $pump_cars = array_filter($cars, function($car) { return preg_match('/^p/i', tri
             .col-md-2.d-flex.gap-2 .btn {
                 width: 100%;
                 margin-bottom: 5px;
+            }
+        }
+        /* Compact table styles to avoid horizontal scroll on desktop */
+        #concreteReceiptsTable {
+            font-size: 0.95rem;
+            table-layout: fixed;
+            width: 100%;
+        }
+        #concreteReceiptsTable th, #concreteReceiptsTable td {
+            padding: 0.3rem 0.4rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        #concreteReceiptsTable th {
+            font-size: 0.98rem;
+        }
+        #concreteReceiptsTable th:nth-child(1),
+        #concreteReceiptsTable td:nth-child(1) { width: 32px; }
+        #concreteReceiptsTable th:nth-child(2),
+        #concreteReceiptsTable td:nth-child(2) { max-width: 80px; }
+        #concreteReceiptsTable th:nth-child(3),
+        #concreteReceiptsTable td:nth-child(3) { max-width: 110px; }
+        #concreteReceiptsTable th:nth-child(4),
+        #concreteReceiptsTable td:nth-child(4) { max-width: 90px; }
+        #concreteReceiptsTable th:nth-child(5),
+        #concreteReceiptsTable td:nth-child(5) { max-width: 90px; }
+        #concreteReceiptsTable th:nth-child(6),
+        #concreteReceiptsTable td:nth-child(6) { max-width: 80px; }
+        #concreteReceiptsTable th:nth-child(7),
+        #concreteReceiptsTable td:nth-child(7) { max-width: 90px; }
+        #concreteReceiptsTable th:nth-child(8),
+        #concreteReceiptsTable td:nth-child(8) { max-width: 80px; }
+        #concreteReceiptsTable th:nth-child(9),
+        #concreteReceiptsTable td:nth-child(9) { max-width: 110px; }
+        #concreteReceiptsTable th:nth-child(10),
+        #concreteReceiptsTable td:nth-child(10) { max-width: 80px; }
+        #concreteReceiptsTable th:nth-child(11),
+        #concreteReceiptsTable td:nth-child(11) { max-width: 110px; }
+        #concreteReceiptsTable th:nth-child(12),
+        #concreteReceiptsTable td:nth-child(12) { max-width: 110px; }
+        @media (max-width: 900px) {
+            .table-responsive {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            #concreteReceiptsTable {
+                min-width: 900px;
+                font-size: 0.85rem;
+            }
+            #concreteReceiptsTable th, #concreteReceiptsTable td {
+                padding: 0.2rem 0.2rem;
             }
         }
     </style>
@@ -260,7 +324,7 @@ $pump_cars = array_filter($cars, function($car) { return preg_match('/^p/i', tri
               </div>
               <div class="col-md-6">
                 <label for="meter_amount" class="form-label">بڕی مەتر سێجا</label>
-                <input type="number" class="form-control" id="meter_amount" name="meter_amount" min="0" step="0.01" required>
+                <input type="number" class="form-control" id="meter_amount" name="meter_amount" min="0" max="12" step="0.01" required>
               </div>
               <div class="col-md-6">
                 <label for="formulas_id" class="form-label">ڕێژە</label>
@@ -290,7 +354,7 @@ $pump_cars = array_filter($cars, function($car) { return preg_match('/^p/i', tri
                       <label for="mixer_driver_id" class="form-label">شۆفێری میکسەر</label>
                       <select class="form-select" id="mixer_driver_id" name="mixer_driver_id">
                         <option value="">هەڵبژێرە</option>
-                        <?php foreach ($drivers as $emp): ?>
+                        <?php foreach ($mixer_drivers as $emp): ?>
                           <option value="<?= $emp['id'] ?>"><?= htmlspecialchars($emp['name']) ?></option>
                         <?php endforeach; ?>
                       </select>
@@ -315,7 +379,7 @@ $pump_cars = array_filter($cars, function($car) { return preg_match('/^p/i', tri
                       <label for="pump_driver_id" class="form-label">شۆفێری پەمپ</label>
                       <select class="form-select" id="pump_driver_id" name="pump_driver_id">
                         <option value="">هەڵبژێرە</option>
-                        <?php foreach ($drivers as $emp): ?>
+                        <?php foreach ($pump_drivers as $emp): ?>
                           <option value="<?= $emp['id'] ?>"><?= htmlspecialchars($emp['name']) ?></option>
                         <?php endforeach; ?>
                       </select>
@@ -364,7 +428,7 @@ $pump_cars = array_filter($cars, function($car) { return preg_match('/^p/i', tri
               </div>
               <div class="col-md-6">
                 <label for="edit_meter_amount" class="form-label">بڕی مەتر سێجا</label>
-                <input type="number" class="form-control" id="edit_meter_amount" name="meter_amount" min="0" step="0.01" required>
+                <input type="number" class="form-control" id="edit_meter_amount" name="meter_amount" min="0" max="12" step="0.01" required>
               </div>
               <div class="col-md-6">
                 <label for="edit_formulas_id" class="form-label">ڕێژە</label>
@@ -394,7 +458,7 @@ $pump_cars = array_filter($cars, function($car) { return preg_match('/^p/i', tri
                       <label for="edit_mixer_driver_id" class="form-label">شۆفێری میکسەر</label>
                       <select class="form-select" id="edit_mixer_driver_id" name="mixer_driver_id">
                         <option value="">هەڵبژێرە</option>
-                        <?php foreach ($drivers as $emp): ?>
+                        <?php foreach ($mixer_drivers as $emp): ?>
                           <option value="<?= $emp['id'] ?>"><?= htmlspecialchars($emp['name']) ?></option>
                         <?php endforeach; ?>
                       </select>
@@ -419,7 +483,7 @@ $pump_cars = array_filter($cars, function($car) { return preg_match('/^p/i', tri
                       <label for="edit_pump_driver_id" class="form-label">شۆفێری پەمپ</label>
                       <select class="form-select" id="edit_pump_driver_id" name="pump_driver_id">
                         <option value="">هەڵبژێرە</option>
-                        <?php foreach ($drivers as $emp): ?>
+                        <?php foreach ($pump_drivers as $emp): ?>
                           <option value="<?= $emp['id'] ?>"><?= htmlspecialchars($emp['name']) ?></option>
                         <?php endforeach; ?>
                       </select>
@@ -485,6 +549,19 @@ document.addEventListener('DOMContentLoaded', function() {
             filterButtons.forEach(btn => btn.classList.remove('active'));
         });
     });
+});
+</script>
+<script>
+// Prevent submitting meter_amount < 0 or > 12 in add/edit forms
+$(function() {
+  $('#addConcreteReceiptForm, #editConcreteReceiptForm').on('submit', function(e) {
+    var meter = parseFloat($(this).find('[name="meter_amount"]').val());
+    if (isNaN(meter) || meter < 0 || meter > 12) {
+      e.preventDefault();
+      Swal.fire('هەڵە!', 'بڕی مەتر سێجا دەبێت لە 0 تا 12 بێت.', 'error');
+      return false;
+    }
+  });
 });
 </script>
 </body>
