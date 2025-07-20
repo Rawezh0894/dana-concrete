@@ -38,7 +38,10 @@ if (!hasPermission('add_customer')) {
 <div class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">کڕیارەکان</h2>
-        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addCustomerModal" style="background: var(--seafoam-green); font-weight: bold;">+ زیادکردنی کڕیار</button>
+        <div>
+            <a href="credit_of_all_customers.php" class="btn btn-primary me-2" target="_blank" style="font-weight: bold;">پرێنتی قەرزەکانی کڕیاران</a>
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addCustomerModal" style="background: var(--seafoam-green); font-weight: bold;">+ زیادکردنی کڕیار</button>
+        </div>
     </div>
     <div class="table-responsive">
         <table class="table table-bordered table-hover align-middle text-center" id="customerTable">

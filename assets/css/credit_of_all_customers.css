@@ -1,0 +1,101 @@
+@font-face {
+    font-family: 'Rabar';
+    src: url('../assets/fonts/Rabar_021.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+:root {
+    --seafoam-green: #003b73;
+}
+body {
+    font-family: 'Rabar', sans-serif;
+    direction: rtl;
+    background: #f8faf5;
+    color: #222;
+}
+.container {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px 0 rgba(0,59,115,0.07);
+    padding: 2rem 2.5rem;
+    margin-top: 2rem;
+}
+.customer-header {
+    background: linear-gradient(90deg, var(--seafoam-green) 0%, #e0f7fa 100%);
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border-radius: 8px;
+    padding: 12px 18px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 8px 0 rgba(0,59,115,0.05);
+    letter-spacing: 0.5px;
+}
+.customer-section {
+    background: #f4faff;
+    border-radius: 10px;
+    margin-bottom: 2.5rem;
+    padding: 1.2rem 1.5rem 1.5rem 1.5rem;
+    box-shadow: 0 2px 8px 0 rgba(0,59,115,0.04);
+    border: 1px solid #e0f7fa;
+}
+.table {
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 0;
+    font-size: 1rem;
+}
+.table th {
+    background: var(--seafoam-green);
+    color: #fff;
+    font-weight: bold;
+    border: none;
+}
+.table td {
+    background: #fafdff;
+    color: #003b73;
+    border: none;
+}
+.table-bordered > :not(caption) > * > * {
+    border-color: #b2d8ef;
+}
+.btn-primary {
+    background: var(--seafoam-green);
+    border: none;
+    font-family: 'Rabar', sans-serif;
+    font-weight: bold;
+    font-size: 1.1rem;
+    padding: 0.5rem 1.5rem;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+.btn-primary:hover, .btn-primary:focus {
+    background: #00264d;
+}
+.alert-info, .alert-warning {
+    font-family: 'Rabar', sans-serif;
+    font-size: 1rem;
+    border-radius: 8px;
+    padding: 0.7rem 1.2rem;
+}
+@media print {
+    body, .container {
+        background: #fff !important;
+        color: #222 !important;
+        box-shadow: none !important;
+    }
+    .no-print {
+        display: none !important;
+    }
+    .customer-section, .customer-header {
+        box-shadow: none !important;
+        background: #fff !important;
+        color: #222 !important;
+    }
+    .table th, .table td {
+        font-size: 13px;
+        color: #222 !important;
+        background: #fff !important;
+    }
+}

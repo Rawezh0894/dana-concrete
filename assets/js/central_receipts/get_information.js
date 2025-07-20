@@ -69,49 +69,7 @@ function setElementText(elementId, text) {
     }
 }
 
-// Function to ensure printing in portrait mode
-function printInPortrait() {
-    // Set print settings before opening dialog
-    const mediaQueryList = window.matchMedia('print');
-    mediaQueryList.addEventListener('change', function(mql) {
-        if (mql.matches) {
-            document.title = "پسوڵەی کۆنکرێت - دانا کۆنکرێت";
-        }
-    });
-    
-    // Short delay to ensure everything is ready
-    setTimeout(function() {
-        window.print();
-    }, 200);
-}
-
-// Auto print function for when auto_print parameter is set
-function autoPrint() {
-    // Set print settings before opening dialog
-    const mediaQueryList = window.matchMedia('print');
-    mediaQueryList.addEventListener('change', function(mql) {
-        if (mql.matches) {
-            // Before print
-            document.title = "پسوڵەی کۆنکرێت - دانا کۆنکرێت";
-        }
-    });
-    
-    // Wait a moment to ensure the page is fully loaded
-    setTimeout(function() {
-        window.print();
-    }, 500);
-}
-
-// Check if auto print is requested
-function checkAutoPrint() {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('auto_print')) {
-        autoPrint();
-    }
-}
-
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     loadReceiptData();
-    checkAutoPrint();
 });

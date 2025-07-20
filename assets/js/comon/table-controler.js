@@ -111,7 +111,7 @@ const TableController = {
     },
     renderWithPagination: function(tableSelector, data, columns, options = {}) {
         const pageSize = options.pageSize || 10;
-        let currentPage = options.currentPage || 1;
+        let currentPage = typeof options.currentPage === 'number' ? options.currentPage : 1;
         const table = document.querySelector(tableSelector);
         if (!table) return;
         const thead = table.querySelector('thead');
@@ -134,6 +134,7 @@ const TableController = {
             });
             sizeSelect.onchange = function() {
                 options.pageSize = parseInt(this.value);
+                options.currentPage = 1;
                 TableController.renderWithPagination(tableSelector, data, columns, options);
             };
             table.parentElement.insertBefore(sizeSelect, table);
@@ -202,7 +203,7 @@ const TableController = {
             prev.setAttribute('aria-label', 'پەڕەی پێشوو');
             prev.innerHTML = '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 15L8 10L13 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
             prev.disabled = currentPage === 1;
-            prev.onclick = () => renderPage(currentPage - 1);
+            prev.onclick = () => TableController.renderWithPagination(tableSelector, data, columns, { ...options, currentPage: currentPage - 1 });
             pagination.appendChild(prev);
             for (let i = 1; i <= totalPages; i++) {
                 if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 2) {
@@ -214,7 +215,7 @@ const TableController = {
                         btn.style.transition = 'transform 0.18s';
                         btn.style.transform = 'scale(1.08)';
                     }
-                    btn.onclick = () => renderPage(i);
+                    btn.onclick = () => TableController.renderWithPagination(tableSelector, data, columns, { ...options, currentPage: i });
                     pagination.appendChild(btn);
                 } else if (i === currentPage - 3 || i === currentPage + 3) {
                     const span = document.createElement('span');
@@ -228,7 +229,7 @@ const TableController = {
             next.setAttribute('aria-label', 'پەڕەی دواتر');
             next.innerHTML = '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 5L12 10L7 15" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
             next.disabled = currentPage === totalPages;
-            next.onclick = () => renderPage(currentPage + 1);
+            next.onclick = () => TableController.renderWithPagination(tableSelector, data, columns, { ...options, currentPage: currentPage + 1 });
             pagination.appendChild(next);
         }
 

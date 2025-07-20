@@ -52,7 +52,12 @@ try {
     $stmt = $pdo->prepare("INSERT INTO customers (name, mobile1, mobile2, debt_usd, debt_iqd, opening_debt_usd, opening_debt_iqd) VALUES (?, ?, ?, ?, ?, ?, ?)");
     $result = $stmt->execute([$name, $mobile1, $mobile2, $debt_usd, $debt_iqd, $opening_debt_usd, $opening_debt_iqd]);
     if ($result) {
-        echo json_encode(['success' => true, 'message' => 'کڕیار بە سەرکەوتوویی زیادکرا']);
+        echo json_encode([
+            'success' => true,
+            'id' => $pdo->lastInsertId(),
+            'name' => $name,
+            'message' => 'کڕیار بە سەرکەوتوویی زیادکرا'
+        ]);
     } else {
         echo json_encode(['success' => false, 'message' => 'هەڵە لە زیادکردنەوەی کڕیار']);
     }

@@ -179,13 +179,38 @@ $receipt_id = isset($_GET['id']) ? $_GET['id'] : null;
     
     <!-- Include the external JavaScript file -->
     <script src="../assets/js/central_receipts/get_information.js"></script>
-    <script>
-    // Auto print if auto_print=1 in URL
-    if (window.location.search.includes('auto_print=1')) {
-        window.onload = function() {
-            setTimeout(function() { window.print(); }, 300); // slight delay for rendering
-        };
+    <style>
+    .loading-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(255,255,255,0.85);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: #333;
+        font-family: 'Rabar', Arial, sans-serif;
+        transition: opacity 0.3s;
     }
+    </style>
+    <div id="print-loading-overlay" class="loading-overlay" style="display:none;">
+        <span>تکایە چاوەڕێ بکە ...</span>
+    </div>
+    <script>
+    function printInPortrait() {
+        var overlay = document.getElementById('print-loading-overlay');
+        overlay.style.display = 'flex';
+        setTimeout(function() {
+            overlay.style.display = 'none';
+            window.print();
+        }, 500);
+    }
+
+    // Redirect after print dialog closes (for manual print)
+    window.addEventListener('afterprint', function() {
+        window.location.href = '../pages/concrete_receipts.php';
+    });
     </script>
 </body>
 </html>

@@ -52,180 +52,7 @@ $mixer_drivers = array_filter($employees, function($emp) use ($mixer_names) {
     <link href="../assets/css/comon/style.css" rel="stylesheet">
     <link href="../assets/css/comon/select2_design.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <style>
-        /* Modern Professional Filter Buttons Design */
-        .filter-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            font-weight: 700;
-            border: 2px solid transparent;
-            border-radius: 25px;
-            padding: 12px 24px;
-            font-size: 13px;
-            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.25);
-            text-transform: none;
-            letter-spacing: 0.3px;
-            backdrop-filter: blur(10px);
-            min-width: 120px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        
-        .filter-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
-            transition: left 0.6s ease;
-        }
-        
-        .filter-btn:hover::before {
-            left: 100%;
-        }
-        
-        /* Hover effects */
-        .filter-btn:hover {
-            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
-            transform: translateY(-2px) scale(1.02);
-            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.35);
-            border-color: rgba(255, 255, 255, 0.3);
-        }
-        
-        /* Active state */
-        .filter-btn.active {
-            background: linear-gradient(135deg, #4c63d2 0%, #5d3780 100%);
-            transform: translateY(0) scale(0.98);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-            border-color: rgba(255, 255, 255, 0.5);
-        }
-        
-        /* Specific colors for each button */
-        #filter_today {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            box-shadow: 0 6px 20px rgba(17, 153, 142, 0.25);
-        }
-        
-        #filter_today:hover {
-            background: linear-gradient(135deg, #0f8a7d 0%, #2fd86a 100%);
-            box-shadow: 0 12px 30px rgba(17, 153, 142, 0.35);
-        }
-        
-        #filter_today.active {
-            background: linear-gradient(135deg, #0d7a6d 0%, #26c85a 100%);
-            box-shadow: 0 8px 25px rgba(17, 153, 142, 0.4);
-        }
-        
-        #filter_yesterday {
-            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
-            box-shadow: 0 6px 20px rgba(255, 154, 158, 0.25);
-        }
-        
-        #filter_yesterday:hover {
-            background: linear-gradient(135deg, #ff8a8e 0%, #febfdf 100%);
-            box-shadow: 0 12px 30px rgba(255, 154, 158, 0.35);
-        }
-        
-        #filter_yesterday.active {
-            background: linear-gradient(135deg, #ff7a7e 0%, #feafcf 100%);
-            box-shadow: 0 8px 25px rgba(255, 154, 158, 0.4);
-        }
-        
-        #filter_reset {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.25);
-        }
-        
-        #filter_reset:hover {
-            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
-            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.35);
-        }
-        
-        #filter_reset.active {
-            background: linear-gradient(135deg, #4c63d2 0%, #5d3780 100%);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-        }
-        
-        /* Click animation */
-        .filter-btn:active {
-            transform: translateY(1px) scale(0.96);
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        }
-        
-        /* Icon styling */
-        .filter-btn i {
-            font-size: 14px;
-            transition: all 0.3s ease;
-            opacity: 0.9;
-        }
-        
-        .filter-btn:hover i {
-            transform: rotate(5deg) scale(1.1);
-            opacity: 1;
-        }
-        
-        /* Focus state for accessibility */
-        .filter-btn:focus {
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
-        }
-        
-        /* Responsive design */
-        @media (max-width: 768px) {
-            .col-md-2.d-flex.gap-2 {
-                flex-direction: column;
-                gap: 15px !important;
-            }
-            
-            .col-md-2.d-flex.gap-2 .filter-btn {
-                width: 100%;
-                margin-bottom: 10px;
-                padding: 15px 24px;
-                font-size: 15px;
-                border-radius: 30px;
-            }
-        }
-        
-        /* Loading state */
-        .filter-btn.loading {
-            pointer-events: none;
-            opacity: 0.8;
-        }
-        
-        .filter-btn.loading::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 18px;
-            height: 18px;
-            margin: -9px 0 0 -9px;
-            border: 2px solid transparent;
-            border-top: 2px solid white;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        /* Button container styling */
-        .filter-buttons-container {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-    </style>
+    <link href="../assets/css/concrete_receipts_custom.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -236,9 +63,14 @@ $mixer_drivers = array_filter($employees, function($emp) use ($mixer_names) {
 <div class="container-fluid py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">پسوڵەی کۆنکرێت</h2>
-        <?php if (hasPermission('add_concrete_receipts')): ?>
-        <button class="btn" data-bs-toggle="modal" data-bs-target="#addConcreteReceiptModal" style="background: var(--seafoam-green); color:white; font-weight: bold;">+ زیادکردنی پسوڵە</button>
-        <?php endif; ?>
+        <div class="d-flex gap-2">
+            <?php if (hasPermission('add_customer')): ?>
+            <button class="btn" data-bs-toggle="modal" data-bs-target="#addCustomerModal" style="background: #1976d2; color:white; font-weight: bold;">+ زیادکردنی کڕیار</button>
+            <?php endif; ?>
+            <?php if (hasPermission('add_concrete_receipts')): ?>
+            <button class="btn" data-bs-toggle="modal" data-bs-target="#addConcreteReceiptModal" style="background: var(--seafoam-green); color:white; font-weight: bold;">+ زیادکردنی پسوڵە</button>
+            <?php endif; ?>
+        </div>
     </div>
     <!-- Summary Cards Row -->
     <div class="row mb-3" id="concrete-receipts-summary">
@@ -538,15 +370,48 @@ $mixer_drivers = array_filter($employees, function($emp) use ($mixer_names) {
     </div>
   </div>
 </div>
+<!-- Add Customer Modal -->
+<div class="modal fade" id="addCustomerModal" tabindex="-1" aria-labelledby="addCustomerModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="addCustomerForm">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addCustomerModalLabel">زیادکردنی کڕیار</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="customer_name" class="form-label">ناوی کڕیار</label>
+            <input type="text" class="form-control" id="customer_name" name="name" required>
+          </div>
+          <div class="mb-3">
+            <label for="customer_phone1" class="form-label">ژمارە تەلەفۆنی یەکەم</label>
+            <input type="text" class="form-control" id="customer_phone1" name="mobile1" required>
+          </div>
+          <div class="mb-3">
+            <label for="customer_phone2" class="form-label">ژمارە تەلەفۆنی دووەم (ئیختیاری)</label>
+            <input type="text" class="form-control" id="customer_phone2" name="mobile2">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
+          <button type="submit" class="btn" style="background: #1976d2; color: white; font-weight: bold;">زیادکردن</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="../assets/js/swalAlert.js"></script>
 <script src="../assets/js/comon/table-controler.js"></script>
 <script src="../assets/js/comon/select2_script.js"></script>
+<script src="../assets/js/concrete_receipts/add_customer.js"></script>
 <script src="../assets/js/concrete_receipts/add_concerete_receipts.js"></script>
 <script src="../assets/js/concrete_receipts/select_concrete_receipts.js"></script>
 <script src="../assets/js/concrete_receipts/delete_concrete_receipts.js"></script>
 <script src="../assets/js/concrete_receipts/update_concrete_receipts.js"></script>
+<script src="../assets/js/concrete_receipts/concrete_receipts_custom.js"></script>
 <script>
 // Pass permissions to JavaScript
 window.userPermissions = {
@@ -555,38 +420,6 @@ window.userPermissions = {
     canDelete: <?php echo hasPermission('delete_concrete_receipts') ? 'true' : 'false'; ?>,
     canPrint: <?php echo hasPermission('print_concrete_receipts') ? 'true' : 'false'; ?>
 };
-</script>
-<script src="../assets/js/concrete_receipts/filter.js"></script>
-<script>
-// Filter button active state management
-document.addEventListener('DOMContentLoaded', function() {
-    const filterButtons = document.querySelectorAll('.filter-btn');
-    
-    filterButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            // Remove active class from all buttons
-            filterButtons.forEach(btn => btn.classList.remove('active'));
-            
-            // Add active class to clicked button
-            this.classList.add('active');
-            
-            // Remove active class after 2 seconds (for reset button)
-            if (this.id === 'filter_reset') {
-                setTimeout(() => {
-                    this.classList.remove('active');
-                }, 2000);
-            }
-        });
-    });
-    
-    // Remove active class when other filters are used
-    const filterInputs = document.querySelectorAll('#filter_customer_id, #filter_location, #filter_formulas_id, #filter_date_from, #filter_date_to');
-    filterInputs.forEach(input => {
-        input.addEventListener('change', function() {
-            filterButtons.forEach(btn => btn.classList.remove('active'));
-        });
-    });
-});
 </script>
 </body>
 </html>
