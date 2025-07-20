@@ -136,15 +136,6 @@ $mixer_drivers = array_filter($employees, function($emp) use ($mixer_names) {
                 margin-bottom: 5px;
             }
         }
-        #concreteReceiptsTable td, #concreteReceiptsTable th {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 0;
-        }
-        #concreteReceiptsTable td {
-            padding: 0.5rem 0.25rem;
-        }
     </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
@@ -226,27 +217,30 @@ $mixer_drivers = array_filter($employees, function($emp) use ($mixer_names) {
         </button>
       </div>
     </div>
-    <table class="table table-bordered table-hover align-middle text-center" id="concreteReceiptsTable" style="font-size: 0.85rem; width: 100%; table-layout: fixed;">
-        <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
-            <tr>
-                <th style="width: 3%;">#</th>
-                <th style="width: 8%;">ژمارەی پسوڵە</th>
-                <th style="width: 12%;">کڕیار</th>
-                <th style="width: 10%;">شوێن</th>
-                <th style="width: 8%;">بەروار</th>
-                <th style="width: 8%;">بڕی مەتر سێجا</th>
-                <th style="width: 8%;">فۆرمۆلا</th>
-                <th style="width: 8%;">پەمپ</th>
-                <th style="width: 10%;">شۆفێری پەمپ</th>
-                <th style="width: 8%;">میکسەر</th>
-                <th style="width: 10%;">شۆفێری میکسەر</th>
-                <th style="width: 7%;">کردارەکان</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Receipts will be loaded here by JS -->
-        </tbody>
-    </table>
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle text-center" id="concreteReceiptsTable">
+            <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
+                <tr>
+                    <th>#</th>
+                    <th>ژمارەی پسوڵە</th>
+                    <th>کڕیار</th>
+                    <th>شوێن</th>
+                    <th>بەروار</th>
+                    <th>بڕی مەتر سێجا</th>
+                    <th>فۆرمۆلا</th>
+                  
+                    <th>پەمپ</th>
+                    <th>شۆفێری پەمپ</th>
+                    <th>میکسەر</th>
+                    <th>شۆفێری میکسەر</th>
+                    <th>کردارەکان</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Receipts will be loaded here by JS -->
+            </tbody>
+        </table>
+    </div>
 </div>
 <!-- Add Concrete Receipt Modal -->
 <div class="modal fade" id="addConcreteReceiptModal" tabindex="-1" aria-labelledby="addConcreteReceiptModalLabel" aria-hidden="true">

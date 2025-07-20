@@ -48,12 +48,15 @@ $(document).ready(function() {
                 <td>${receipt.mixer_car_name || '-'}</td>
                 <td>${receipt.mixer_driver_name || '-'}</td>
                 <td>
-                    <button class='btn btn-sm btn-warning edit-receipt' data-id='${receipt.id}' title='نوێکردنەوە'><i class='fa fa-edit'></i></button>
-                    <button class='btn btn-sm btn-danger delete-receipt' data-id='${receipt.id}' title='سڕینەوە'><i class='fa fa-trash'></i></button>
+                    ${window.userPermissions && window.userPermissions.canEdit ? `<button class='btn btn-sm btn-warning edit-receipt' data-id='${receipt.id}' title='نوێکردنەوە'><i class='fa fa-edit'></i></button>` : ''}
+                    ${window.userPermissions && window.userPermissions.canDelete ? `<button class='btn btn-sm btn-danger delete-receipt' data-id='${receipt.id}' title='سڕینەوە'><i class='fa fa-trash'></i></button>` : ''}
+                    ${window.userPermissions && window.userPermissions.canPrint ? `<button class='btn btn-sm btn-info print-receipt' data-id='${receipt.id}' title='پرێنت'><i class='fa fa-print'></i></button>` : ''}
                 </td>
             </tr>`;
           });
           $('#concreteReceiptsTable tbody').html(rows);
+          // Re-attach event handlers for the new buttons
+          attachEventHandlers();
         } else {
           updateSummaryCards({total_receipts: 0, total_meter: 0, total_customers: 0});
           $('#concreteReceiptsTable tbody').html('<tr><td colspan="11">هەڵەیەک روویدا</td></tr>');
@@ -131,4 +134,46 @@ $(document).ready(function() {
 
   // Set summary cards to 0 by default on page load
   updateSummaryCards({total_receipts: 0, total_meter: 0, total_customers: 0});
+
+  // Function to attach event handlers to buttons
+  function attachEventHandlers() {
+    // Edit button handlers
+    $('.edit-receipt').off('click').on('click', function() {
+      var id = $(this).data('id');
+      if (typeof window.loadEditForm === 'function') {
+        window.loadEditForm(id);
+      }
+    });
+    
+    // Delete button handlers
+    $('.delete-receipt').off('click').on('click', function() {
+      var id = $(this).data('id');
+      if (typeof window.deleteReceipt === 'function') {
+        window.deleteReceipt(id);
+      }
+    });
+    
+    // Print button handlers
+    $('.print-receipt').off('click').on('click', function() {
+      var id = $(this).data('id');
+      if (typeof Swal !== 'undefined') {
+        Swal.fire({
+          icon: 'question',
+          title: 'چاپکردن',
+          text: 'دەتەوێت پسوڵە چاپ بکەیت؟',
+          showCancelButton: true,
+          confirmButtonText: 'بەڵێ',
+          cancelButtonText: 'نەخێر',
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.open('../pages/central_receipts.php?id=' + id, '_blank');
+          }
+        });
+      } else {
+        if (window.confirm('دەتەوێت پسوڵە چاپ بکەیت؟')) {
+          window.open('../pages/central_receipts.php?id=' + id, '_blank');
+        }
+      }
+    });
+  }
 });
