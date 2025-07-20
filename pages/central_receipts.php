@@ -212,6 +212,13 @@ $receipt_id = isset($_GET['id']) ? $_GET['id'] : null;
         window.location.href = '../pages/concrete_receipts.php';
     });
     </script>
+<?php if (isset($_GET['auto_print'])): ?>
+    <script>
+    window.addEventListener('DOMContentLoaded', function() {
+        printInPortrait();
+    });
+    </script>
+<?php endif; ?>
 </body>
 </html>
 
