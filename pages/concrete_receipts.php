@@ -136,58 +136,6 @@ $mixer_drivers = array_filter($employees, function($emp) use ($mixer_names) {
                 margin-bottom: 5px;
             }
         }
-        /* Compact table styles to avoid horizontal scroll on desktop */
-        #concreteReceiptsTable {
-            font-size: 0.95rem;
-            table-layout: fixed;
-            width: 100%;
-        }
-        #concreteReceiptsTable th, #concreteReceiptsTable td {
-            padding: 0.3rem 0.4rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        #concreteReceiptsTable th {
-            font-size: 0.98rem;
-        }
-        #concreteReceiptsTable th:nth-child(1),
-        #concreteReceiptsTable td:nth-child(1) { width: 32px; }
-        #concreteReceiptsTable th:nth-child(2),
-        #concreteReceiptsTable td:nth-child(2) { max-width: 80px; }
-        #concreteReceiptsTable th:nth-child(3),
-        #concreteReceiptsTable td:nth-child(3) { max-width: 110px; }
-        #concreteReceiptsTable th:nth-child(4),
-        #concreteReceiptsTable td:nth-child(4) { max-width: 90px; }
-        #concreteReceiptsTable th:nth-child(5),
-        #concreteReceiptsTable td:nth-child(5) { max-width: 90px; }
-        #concreteReceiptsTable th:nth-child(6),
-        #concreteReceiptsTable td:nth-child(6) { max-width: 80px; }
-        #concreteReceiptsTable th:nth-child(7),
-        #concreteReceiptsTable td:nth-child(7) { max-width: 90px; }
-        #concreteReceiptsTable th:nth-child(8),
-        #concreteReceiptsTable td:nth-child(8) { max-width: 80px; }
-        #concreteReceiptsTable th:nth-child(9),
-        #concreteReceiptsTable td:nth-child(9) { max-width: 110px; }
-        #concreteReceiptsTable th:nth-child(10),
-        #concreteReceiptsTable td:nth-child(10) { max-width: 80px; }
-        #concreteReceiptsTable th:nth-child(11),
-        #concreteReceiptsTable td:nth-child(11) { max-width: 110px; }
-        #concreteReceiptsTable th:nth-child(12),
-        #concreteReceiptsTable td:nth-child(12) { max-width: 110px; }
-        @media (max-width: 900px) {
-            .table-responsive {
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-            }
-            #concreteReceiptsTable {
-                min-width: 900px;
-                font-size: 0.85rem;
-            }
-            #concreteReceiptsTable th, #concreteReceiptsTable td {
-                padding: 0.2rem 0.2rem;
-            }
-        }
     </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
@@ -549,19 +497,6 @@ document.addEventListener('DOMContentLoaded', function() {
             filterButtons.forEach(btn => btn.classList.remove('active'));
         });
     });
-});
-</script>
-<script>
-// Prevent submitting meter_amount < 0 or > 12 in add/edit forms
-$(function() {
-  $('#addConcreteReceiptForm, #editConcreteReceiptForm').on('submit', function(e) {
-    var meter = parseFloat($(this).find('[name="meter_amount"]').val());
-    if (isNaN(meter) || meter < 0 || meter > 12) {
-      e.preventDefault();
-      Swal.fire('هەڵە!', 'بڕی مەتر سێجا دەبێت لە 0 تا 12 بێت.', 'error');
-      return false;
-    }
-  });
 });
 </script>
 </body>
