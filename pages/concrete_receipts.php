@@ -53,21 +53,27 @@ $mixer_drivers = array_filter($employees, function($emp) use ($mixer_names) {
     <link href="../assets/css/comon/select2_design.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
-        /* Professional Filter Buttons Design */
+        /* Modern Professional Filter Buttons Design */
         .filter-btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            font-weight: 600;
-            border: none;
-            border-radius: 12px;
-            padding: 10px 20px;
-            font-size: 14px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 700;
+            border: 2px solid transparent;
+            border-radius: 25px;
+            padding: 12px 24px;
+            font-size: 13px;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             position: relative;
             overflow: hidden;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.25);
+            text-transform: none;
+            letter-spacing: 0.3px;
+            backdrop-filter: blur(10px);
+            min-width: 120px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         
         .filter-btn::before {
@@ -77,8 +83,8 @@ $mixer_drivers = array_filter($employees, function($emp) use ($mixer_names) {
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            transition: left 0.6s ease;
         }
         
         .filter-btn:hover::before {
@@ -88,99 +94,109 @@ $mixer_drivers = array_filter($employees, function($emp) use ($mixer_names) {
         /* Hover effects */
         .filter-btn:hover {
             background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.35);
+            border-color: rgba(255, 255, 255, 0.3);
         }
         
         /* Active state */
         .filter-btn.active {
             background: linear-gradient(135deg, #4c63d2 0%, #5d3780 100%);
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+            transform: translateY(0) scale(0.98);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            border-color: rgba(255, 255, 255, 0.5);
         }
         
         /* Specific colors for each button */
         #filter_today {
             background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            box-shadow: 0 4px 15px rgba(17, 153, 142, 0.3);
+            box-shadow: 0 6px 20px rgba(17, 153, 142, 0.25);
         }
         
         #filter_today:hover {
             background: linear-gradient(135deg, #0f8a7d 0%, #2fd86a 100%);
-            box-shadow: 0 8px 25px rgba(17, 153, 142, 0.4);
+            box-shadow: 0 12px 30px rgba(17, 153, 142, 0.35);
         }
         
         #filter_today.active {
             background: linear-gradient(135deg, #0d7a6d 0%, #26c85a 100%);
-            box-shadow: 0 6px 20px rgba(17, 153, 142, 0.5);
+            box-shadow: 0 8px 25px rgba(17, 153, 142, 0.4);
         }
         
         #filter_yesterday {
             background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
-            box-shadow: 0 4px 15px rgba(255, 154, 158, 0.3);
+            box-shadow: 0 6px 20px rgba(255, 154, 158, 0.25);
         }
         
         #filter_yesterday:hover {
             background: linear-gradient(135deg, #ff8a8e 0%, #febfdf 100%);
-            box-shadow: 0 8px 25px rgba(255, 154, 158, 0.4);
+            box-shadow: 0 12px 30px rgba(255, 154, 158, 0.35);
         }
         
         #filter_yesterday.active {
             background: linear-gradient(135deg, #ff7a7e 0%, #feafcf 100%);
-            box-shadow: 0 6px 20px rgba(255, 154, 158, 0.5);
+            box-shadow: 0 8px 25px rgba(255, 154, 158, 0.4);
         }
         
         #filter_reset {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.25);
         }
         
         #filter_reset:hover {
             background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.35);
         }
         
         #filter_reset.active {
             background: linear-gradient(135deg, #4c63d2 0%, #5d3780 100%);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
         }
         
         /* Click animation */
         .filter-btn:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+            transform: translateY(1px) scale(0.96);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
         
         /* Icon styling */
         .filter-btn i {
-            margin-left: 8px;
-            font-size: 12px;
-            transition: transform 0.3s ease;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            opacity: 0.9;
         }
         
         .filter-btn:hover i {
-            transform: scale(1.1);
+            transform: rotate(5deg) scale(1.1);
+            opacity: 1;
+        }
+        
+        /* Focus state for accessibility */
+        .filter-btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
         }
         
         /* Responsive design */
         @media (max-width: 768px) {
             .col-md-2.d-flex.gap-2 {
                 flex-direction: column;
-                gap: 12px !important;
+                gap: 15px !important;
             }
             
             .col-md-2.d-flex.gap-2 .filter-btn {
                 width: 100%;
-                margin-bottom: 8px;
-                padding: 12px 20px;
-                font-size: 16px;
+                margin-bottom: 10px;
+                padding: 15px 24px;
+                font-size: 15px;
+                border-radius: 30px;
             }
         }
         
         /* Loading state */
         .filter-btn.loading {
             pointer-events: none;
-            opacity: 0.7;
+            opacity: 0.8;
         }
         
         .filter-btn.loading::after {
@@ -188,9 +204,9 @@ $mixer_drivers = array_filter($employees, function($emp) use ($mixer_names) {
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 16px;
-            height: 16px;
-            margin: -8px 0 0 -8px;
+            width: 18px;
+            height: 18px;
+            margin: -9px 0 0 -9px;
             border: 2px solid transparent;
             border-top: 2px solid white;
             border-radius: 50%;
@@ -200,6 +216,14 @@ $mixer_drivers = array_filter($employees, function($emp) use ($mixer_names) {
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+        
+        /* Button container styling */
+        .filter-buttons-container {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
         }
     </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
