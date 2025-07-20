@@ -53,88 +53,153 @@ $mixer_drivers = array_filter($employees, function($emp) use ($mixer_names) {
     <link href="../assets/css/comon/select2_design.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
-        /* Filter buttons base styles */
+        /* Professional Filter Buttons Design */
         .filter-btn {
-            background: var(--seafoam-green);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             font-weight: 600;
-            border: 2px solid var(--seafoam-green);
-            border-radius: 8px;
-            padding: 8px 16px;
-            transition: all 0.3s ease;
+            border: none;
+            border-radius: 12px;
+            padding: 10px 20px;
+            font-size: 14px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .filter-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .filter-btn:hover::before {
+            left: 100%;
         }
         
         /* Hover effects */
         .filter-btn:hover {
-            background: var(--kelly-green);
-            border-color: var(--kelly-green);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
         }
         
-        /* Active state - when button is clicked/active */
+        /* Active state */
         .filter-btn.active {
-            background: var(--kelly-green);
-            border-color: var(--kelly-green);
-            color: var(--seafoam-green);
-            font-weight: bold;
-            transform: translateY(0);
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(135deg, #4c63d2 0%, #5d3780 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
         }
         
         /* Specific colors for each button */
         #filter_today {
-            background: var(--seafoam-green);
-            border-color: var(--seafoam-green);
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            box-shadow: 0 4px 15px rgba(17, 153, 142, 0.3);
         }
         
-        #filter_today:hover,
+        #filter_today:hover {
+            background: linear-gradient(135deg, #0f8a7d 0%, #2fd86a 100%);
+            box-shadow: 0 8px 25px rgba(17, 153, 142, 0.4);
+        }
+        
         #filter_today.active {
-            background: var(--kelly-green);
-            border-color: var(--kelly-green);
+            background: linear-gradient(135deg, #0d7a6d 0%, #26c85a 100%);
+            box-shadow: 0 6px 20px rgba(17, 153, 142, 0.5);
         }
         
         #filter_yesterday {
-            background: var(--lime-green);
-            border-color: var(--lime-green);
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            box-shadow: 0 4px 15px rgba(255, 154, 158, 0.3);
         }
         
-        #filter_yesterday:hover,
+        #filter_yesterday:hover {
+            background: linear-gradient(135deg, #ff8a8e 0%, #febfdf 100%);
+            box-shadow: 0 8px 25px rgba(255, 154, 158, 0.4);
+        }
+        
         #filter_yesterday.active {
-            background: var(--kelly-green);
-            border-color: var(--kelly-green);
+            background: linear-gradient(135deg, #ff7a7e 0%, #feafcf 100%);
+            box-shadow: 0 6px 20px rgba(255, 154, 158, 0.5);
         }
         
         #filter_reset {
-            background: var(--spearmint);
-            border-color: var(--spearmint);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
         
-        #filter_reset:hover,
+        #filter_reset:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        
         #filter_reset.active {
-            background: var(--kelly-green);
-            border-color: var(--kelly-green);
+            background: linear-gradient(135deg, #4c63d2 0%, #5d3780 100%);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
         }
         
         /* Click animation */
         .filter-btn:active {
             transform: translateY(0);
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
         }
         
-        /* Responsive design for filter buttons */
+        /* Icon styling */
+        .filter-btn i {
+            margin-left: 8px;
+            font-size: 12px;
+            transition: transform 0.3s ease;
+        }
+        
+        .filter-btn:hover i {
+            transform: scale(1.1);
+        }
+        
+        /* Responsive design */
         @media (max-width: 768px) {
             .col-md-2.d-flex.gap-2 {
                 flex-direction: column;
-                gap: 8px !important;
+                gap: 12px !important;
             }
             
-            .col-md-2.d-flex.gap-2 .btn {
+            .col-md-2.d-flex.gap-2 .filter-btn {
                 width: 100%;
-                margin-bottom: 5px;
+                margin-bottom: 8px;
+                padding: 12px 20px;
+                font-size: 16px;
             }
+        }
+        
+        /* Loading state */
+        .filter-btn.loading {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        
+        .filter-btn.loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 16px;
+            height: 16px;
+            margin: -8px 0 0 -8px;
+            border: 2px solid transparent;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
