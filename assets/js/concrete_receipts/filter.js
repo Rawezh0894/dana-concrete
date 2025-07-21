@@ -188,4 +188,18 @@ $(document).ready(function() {
       }
     });
   }
+
+  // Function to reload only the summary cards (no filters)
+  window.reloadConcreteReceiptsSummary = function() {
+    $.ajax({
+      url: '../process/concrete_receipts/select_concrete_receipts.php',
+      method: 'GET',
+      dataType: 'json',
+      success: function(response) {
+        if (response.success && response.summary) {
+          updateSummaryCards(response.summary);
+        }
+      }
+    });
+  };
 });
