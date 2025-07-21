@@ -193,7 +193,7 @@ $mixer_drivers = array_filter($employees, function($emp) use ($mixer_names) {
               </div>
               <div class="col-md-6">
                 <label for="meter_amount" class="form-label">بڕی مەتر سێجا</label>
-                <input type="number" class="form-control" id="meter_amount" name="meter_amount" min="0" max="12" step="0.01" required>
+                <input type="number" class="form-control" id="meter_amount" name="meter_amount" min="0" max="12" step="0.5" required>
               </div>
               <div class="col-md-6">
                 <label for="formulas_id" class="form-label">ڕێژە</label>
@@ -297,7 +297,7 @@ $mixer_drivers = array_filter($employees, function($emp) use ($mixer_names) {
               </div>
               <div class="col-md-6">
                 <label for="edit_meter_amount" class="form-label">بڕی مەتر سێجا</label>
-                <input type="number" class="form-control" id="edit_meter_amount" name="meter_amount" min="0" max="12" step="0.01" required>
+                <input type="number" class="form-control" id="edit_meter_amount" name="meter_amount" min="0" max="12" step="0.5" required>
               </div>
               <div class="col-md-6">
                 <label for="edit_formulas_id" class="form-label">ڕێژە</label>
@@ -407,6 +407,7 @@ $mixer_drivers = array_filter($employees, function($emp) use ($mixer_names) {
 <script src="../assets/js/comon/table-controler.js"></script>
 <script src="../assets/js/comon/select2_script.js"></script>
 <script src="../assets/js/concrete_receipts/add_customer.js"></script>
+<script src="../assets/js/concrete_receipts/filter.js"></script>
 <script src="../assets/js/concrete_receipts/add_concerete_receipts.js"></script>
 <script src="../assets/js/concrete_receipts/select_concrete_receipts.js"></script>
 <script src="../assets/js/concrete_receipts/delete_concrete_receipts.js"></script>

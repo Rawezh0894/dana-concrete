@@ -14,7 +14,7 @@ async function loadConcreteReceiptsTable() {
         return;
     }
     if (!data.success) {
-        TableController.renderWithPagination('#concreteReceiptsTable', [], columns, { pageSize: 10 });
+        TableController.renderWithPagination('#concreteReceiptsTable', [], columns, { pageSize: 10, currentPage: 1 });
         return;
     }
     function formatNumber(n) {
@@ -52,7 +52,7 @@ async function loadConcreteReceiptsTable() {
             return buttons || '-';
         })()
     }));
-    TableController.renderWithPagination('#concreteReceiptsTable', mapped, columns, { pageSize: 10 });
+    TableController.renderWithPagination('#concreteReceiptsTable', mapped, columns, { pageSize: 10, currentPage: 1 });
 }
 document.addEventListener('DOMContentLoaded', loadConcreteReceiptsTable);
 window.reloadConcreteReceipts = loadConcreteReceiptsTable;
@@ -125,12 +125,12 @@ $(document).on('click', '.print-receipt', function() {
             cancelButtonText: 'نەخێر',
         }).then((result) => {
             if (result.isConfirmed) {
-                window.open('../pages/central_receipts.php?id=' + id, '_blank');
+                window.open('../pages/central_receipts.php?id=' + id, '_self');
             }
         });
     } else {
         if (window.confirm('دەتەوێت پسوڵە چاپ بکەیت؟')) {
-            window.open('../pages/central_receipts.php?id=' + id, '_blank');
+            window.open('../pages/central_receipts.php?id=' + id, '_self');
         }
     }
 });

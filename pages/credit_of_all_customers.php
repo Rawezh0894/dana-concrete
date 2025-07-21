@@ -108,6 +108,15 @@ foreach ($sales as $sale) {
   
     <div class="row g-4">
     <?php foreach ($customers as $c): ?>
+        <?php
+            // Calculate total sales amount for this customer
+            $total_sales_amount = 0;
+            if (!empty($sales_by_customer[$c['id']])) {
+                foreach ($sales_by_customer[$c['id']] as $s) {
+                    $total_sales_amount += floatval($s['total_price']);
+                }
+            }
+        ?>
         <div class="col-12">
             <div class="card shadow-lg border-0 mb-3 print-card" style="background: var(--kelly-green, #bfd7ed);">
                 <div class="card-body d-flex flex-wrap align-items-center justify-content-start gap-4" style="font-size: 1.13rem;">
@@ -120,8 +129,11 @@ foreach ($sales as $sale) {
                     <span style="color:#6c757d; font-weight:500; display:flex; align-items:center; gap:6px;">
                         <i class="fa fa-cube"></i> مەتر سێجا: <?= number_format($c['total_credit_meter'], 2) ?> م٣
                     </span>
+                    <span style="color:#1976d2; font-weight:500; display:flex; align-items:center; gap:6px;">
+                        <i class="fa fa-calculator"></i> کۆی گشتی مامەڵەکان: <?= number_format($total_sales_amount, 2) ?> $
+                    </span>
                     <span style="color:#e67e22; font-weight:500; display:flex; align-items:center; gap:6px;">
-                        <i class="fa fa-money-bill-wave"></i> قەرز (USD): <?= number_format($c['debt_usd'], 2) ?> $
+                        <i class="fa fa-money-bill-wave"></i> قەرز (دۆلار): <?= number_format($c['debt_usd'], 2) ?> $
                     </span>
                 </div>
                 <?php if (!empty($sales_by_customer[$c['id']])): ?>
@@ -144,8 +156,6 @@ foreach ($sales as $sale) {
                         <thead class="table-warning">
                             <tr>
                                 <th>#</th>
-                                <th>ژمارە فاکتور</th>
-                                <th>ڕێکەوت</th>
                                 <th>وەرگر</th>
                                 <th>شوێن</th>
                                 <th>کۆی مەتر</th>
@@ -155,14 +165,14 @@ foreach ($sales as $sale) {
                                 <th>پارەی دراو (IQD)</th>
                                 <th>بڕی ماوە</th>
                                 <th>داشکاندن</th>
+                                <th>ژمارە فاکتور</th>
+                                <th>ڕێکەوت</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php foreach ($sales_by_customer[$c['id']] as $i => $s): ?>
                             <tr>
                                 <td><?= $i+1 ?></td>
-                                <td><?= htmlspecialchars($s['invoice_number']) ?></td>
-                                <td><?= htmlspecialchars($s['order_date']) ?></td>
                                 <td><?= htmlspecialchars($s['recipient']) ?></td>
                                 <td><?= htmlspecialchars($s['location']) ?></td>
                                 <td><?= number_format($s['quantity'], 2) ?> م٣</td>
@@ -172,6 +182,8 @@ foreach ($sales as $sale) {
                                 <td><?= number_format($s['amount_paid_iq'], 0) ?> IQD</td>
                                 <td><?= number_format($s['remaining_amount'], 2) ?> $</td>
                                 <td><?= number_format($s['discount'], 2) ?> $</td>
+                                <td><?= htmlspecialchars($s['invoice_number']) ?></td>
+                                <td><?= htmlspecialchars($s['order_date']) ?></td>
                             </tr>
                             <?php endforeach; ?>
                         </tbody>

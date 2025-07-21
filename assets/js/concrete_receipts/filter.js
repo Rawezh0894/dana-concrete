@@ -119,7 +119,11 @@ $(document).ready(function() {
     $('#filter_today').removeClass('active btn-primary').addClass('btn-outline-primary');
     $('#filter_yesterday').removeClass('active btn-secondary').addClass('btn-outline-secondary');
     // Reload table
-    loadFilteredReceipts();
+    if (typeof window.reloadConcreteReceipts === 'function') {
+      window.reloadConcreteReceipts();
+    } else {
+      loadFilteredReceipts();
+    }
   });
 
   function updateSummaryCards(summary) {
@@ -129,11 +133,15 @@ $(document).ready(function() {
     } else {
       $('#summary_total_meter').text('0 m³');
     }
-    $('#summary_total_customers').text(summary && summary.total_customers ? summary.total_customers : 0);
+    if (summary && (summary.total_customers === 'هەموو بێط' || summary.total_customers === 0)) {
+      $('#summary_total_customers').text('هەموو بێط');
+    } else {
+      $('#summary_total_customers').text(summary && summary.total_customers ? summary.total_customers : 0);
+    }
   }
 
   // Set summary cards to 0 by default on page load
-  updateSummaryCards({total_receipts: 0, total_meter: 0, total_customers: 0});
+  updateSummaryCards({total_receipts: 26, total_meter: 408, total_customers: 'هەموو بێط'});
 
   // Function to attach event handlers to buttons
   function attachEventHandlers() {
@@ -166,12 +174,12 @@ $(document).ready(function() {
           cancelButtonText: 'نەخێر',
         }).then((result) => {
           if (result.isConfirmed) {
-            window.open('../pages/central_receipts.php?id=' + id, '_blank');
+            window.open('../pages/central_receipts.php?id=' + id, '_self');
           }
         });
       } else {
         if (window.confirm('دەتەوێت پسوڵە چاپ بکەیت؟')) {
-          window.open('../pages/central_receipts.php?id=' + id, '_blank');
+          window.open('../pages/central_receipts.php?id=' + id, '_self');
         }
       }
     });

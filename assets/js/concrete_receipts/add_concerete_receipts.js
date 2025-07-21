@@ -21,7 +21,7 @@ $(document).ready(function() {
                 timerProgressBar: true,
                 didClose: () => {
                     if (data.id) {
-                        window.open('../pages/central_receipts.php?id=' + data.id + '&auto_print=1', '_blank');
+                        window.open('../pages/central_receipts.php?id=' + data.id + '&auto_print=1', '_self');
                     }
                     // Always reset form and close modal
                     $('#addConcreteReceiptForm')[0].reset();
