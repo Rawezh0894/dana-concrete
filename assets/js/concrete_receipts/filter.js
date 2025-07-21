@@ -144,8 +144,10 @@ $(document).ready(function() {
     }
   }
 
-  // Set summary cards to 0 by default on page load
-  updateSummaryCards({total_receipts: 26, total_meter: 408, total_customers: 'هەموو'});
+  // On page load, fetch and show the real summary values
+  if (typeof window.reloadConcreteReceiptsSummary === 'function') {
+    window.reloadConcreteReceiptsSummary();
+  }
 
   // Function to attach event handlers to buttons
   function attachEventHandlers() {
