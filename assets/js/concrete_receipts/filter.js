@@ -124,6 +124,10 @@ $(document).ready(function() {
     } else {
       loadFilteredReceipts();
     }
+    // Reload summary cards as well
+    if (typeof window.reloadConcreteReceiptsSummary === 'function') {
+      window.reloadConcreteReceiptsSummary();
+    }
   });
 
   function updateSummaryCards(summary) {
