@@ -133,15 +133,11 @@ $(document).ready(function() {
     } else {
       $('#summary_total_meter').text('0 m³');
     }
-    if (summary && (summary.total_customers === 'هەموو بێط' || summary.total_customers === 0)) {
-      $('#summary_total_customers').text('هەموو بێط');
-    } else {
-      $('#summary_total_customers').text(summary && summary.total_customers ? summary.total_customers : 0);
-    }
+    $('#summary_total_customers').text(summary && summary.total_customers ? summary.total_customers : 0);
   }
 
   // Set summary cards to 0 by default on page load
-  updateSummaryCards({total_receipts: 26, total_meter: 408, total_customers: 'هەموو بێط'});
+  updateSummaryCards({total_receipts: 0, total_meter: 0, total_customers: 0});
 
   // Function to attach event handlers to buttons
   function attachEventHandlers() {
