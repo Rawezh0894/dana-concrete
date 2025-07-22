@@ -14,20 +14,22 @@ try {
     require_once '../../config/db_conected.php';
     
     $receiptQuery = "SELECT cr.*, 
-                c.name as customer_name, c.mobile1 as customer_phone, c.mobile2 as customer_phone2,
-                f.name as formula_name, f.type as formula_type, f.strength_type, f.strength_kg, f.strength_mpa,
-                pump_car.name as pump_car_name,
-                pump_driver.name as pump_driver_name, pump_driver.mobile as pump_driver_mobile,
-                mixer_car.name as mixer_car_name,
-                mixer_driver.name as mixer_driver_name, mixer_driver.mobile as mixer_driver_mobile
-                FROM concrete_receipts cr
-                LEFT JOIN customers c ON cr.customer_id = c.id
-                LEFT JOIN concrete_formulas f ON cr.formulas_id = f.id
-                LEFT JOIN cars pump_car ON cr.pump_car_id = pump_car.id
-                LEFT JOIN employees pump_driver ON cr.pump_driver_id = pump_driver.id
-                LEFT JOIN cars mixer_car ON cr.mixer_car_id = mixer_car.id
-                LEFT JOIN employees mixer_driver ON cr.mixer_driver_id = mixer_driver.id
-                WHERE cr.id = ?";
+    cr.recever_name,
+    c.name as customer_name, c.mobile1 as customer_phone, c.mobile2 as customer_phone2,
+    f.name as formula_name, f.type as formula_type, f.strength_type, f.strength_kg, f.strength_mpa,
+    pump_car.name as pump_car_name,
+    pump_driver.name as pump_driver_name, pump_driver.mobile as pump_driver_mobile,
+    mixer_car.name as mixer_car_name,
+    mixer_driver.name as mixer_driver_name, mixer_driver.mobile as mixer_driver_mobile
+    FROM concrete_receipts cr
+    LEFT JOIN customers c ON cr.customer_id = c.id
+    LEFT JOIN concrete_formulas f ON cr.formulas_id = f.id
+    LEFT JOIN cars pump_car ON cr.pump_car_id = pump_car.id
+    LEFT JOIN employees pump_driver ON cr.pump_driver_id = pump_driver.id
+    LEFT JOIN cars mixer_car ON cr.mixer_car_id = mixer_car.id
+    LEFT JOIN employees mixer_driver ON cr.mixer_driver_id = mixer_driver.id
+    WHERE cr.id = ?";
+
     
     $stmt = $pdo->prepare($receiptQuery);
     $stmt->execute([$receipt_id]);
