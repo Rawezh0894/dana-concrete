@@ -149,8 +149,8 @@ $mixer_drivers = array_filter($employees, function ($emp) use ($mixer_names) {
       <table class="table table-bordered table-hover align-middle text-center" id="concreteReceiptsTable">
         <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
           <tr>
-            <th style="width:20px;">#</th>
-            <th>ژمارەی پسوڵە</th>
+            <th style="width:1px;">#</th>
+            <th>ژم.پسووڵە</th>
             <th>کڕیار</th>
             <th>شوێن</th>
             <th>وەرگر</th>
