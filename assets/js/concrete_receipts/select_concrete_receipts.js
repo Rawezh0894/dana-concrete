@@ -1,11 +1,13 @@
 async function loadConcreteReceiptsTable() {
     const columns = [
-        '#', 'receipt_number', 'customer_name', 'location', 'created_at', 'meter_amount', 'formula_name',
-        'pump_car_name', 'pump_driver_name', 'mixer_car_name', 'mixer_driver_name', 'actions'
+        '#', 'receipt_number', 'customer_name', 'location', 'receiver_name', 'created_at', 'meter_amount',
+        'formula_name', 'pump_car_name', 'pump_driver_name', 'mixer_car_name', 'mixer_driver_name', 'actions'
     ];
+
     let res = await fetch('../process/concrete_receipts/select_concrete_receipts.php');
     let text = await res.text();
     let data;
+
     try {
         data = JSON.parse(text);
     } catch (e) {
@@ -13,19 +15,23 @@ async function loadConcreteReceiptsTable() {
         alert('هەڵەیەک لە وەڵامەکەی سێرڤەر هەیە. زانیاری زیاتر لە console.');
         return;
     }
+
     if (!data.success) {
         TableController.renderWithPagination('#concreteReceiptsTable', [], columns, { pageSize: 10, currentPage: 1 });
         return;
     }
+
     function formatNumber(n) {
         if (n === null || n === undefined || n === '') return '';
         return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
+
     const mapped = data.data.map((row, idx) => ({
         '#': idx + 1,
         receipt_number: row.receipt_number || '-',
         customer_name: row.customer_name || '-',
         location: row.location || '-',
+        receiver_name: row.receiver_name || '-', // ✅ نوێ
         created_at: (function(dt) {
             if (!dt) return '-';
             const d = new Date(dt);
@@ -52,8 +58,10 @@ async function loadConcreteReceiptsTable() {
             return buttons || '-';
         })()
     }));
+
     TableController.renderWithPagination('#concreteReceiptsTable', mapped, columns, { pageSize: 10, currentPage: 1 });
 }
+
 document.addEventListener('DOMContentLoaded', loadConcreteReceiptsTable);
 window.reloadConcreteReceipts = loadConcreteReceiptsTable;
 
@@ -66,20 +74,23 @@ $(document).ready(function() {
             success: function(response) {
                 if (response.success) {
                     if (response.data.length === 0) {
-                        $('#concreteReceiptsTable tbody').html('<tr><td colspan="8">هیچ پسوڵەیەک نیە</td></tr>');
+                        $('#concreteReceiptsTable tbody').html('<tr><td colspan="13">هیچ پسوڵەیەک نیە</td></tr>');
                         return;
                     }
+
                     let rows = '';
                     response.data.forEach(function(receipt, idx) {
                         function formatNumber(n) {
                             if (n === null || n === undefined || n === '') return '';
                             return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
                         }
+
                         rows += `<tr>
                             <td>${idx + 1}</td>
                             <td>${receipt.receipt_number || '-'}</td>
                             <td>${receipt.customer_name || '-'}</td>
                             <td>${receipt.location || '-'}</td>
+                            <td>${receipt.receiver_name || '-'}</td> <!-- ✅ نوێ -->
                             <td>${(function(dt) {
                                 if (!dt) return '-';
                                 const d = new Date(dt);
@@ -99,16 +110,18 @@ $(document).ready(function() {
                             </td>
                         </tr>`;
                     });
+
                     $('#concreteReceiptsTable tbody').html(rows);
                 } else {
-                    $('#concreteReceiptsTable tbody').html('<tr><td colspan="12">هەڵەیەک روویدا</td></tr>');
+                    $('#concreteReceiptsTable tbody').html('<tr><td colspan="13">هەڵەیەک روویدا</td></tr>');
                 }
             },
             error: function() {
-                $('#concreteReceiptsTable tbody').html('<tr><td colspan="12">هەڵەیەک روویدا</td></tr>');
+                $('#concreteReceiptsTable tbody').html('<tr><td colspan="13">هەڵەیەک روویدا</td></tr>');
             }
         });
     }
+
     loadConcreteReceipts();
     window.reloadConcreteReceipts = loadConcreteReceipts;
 });

@@ -44,8 +44,9 @@ try {
     $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
     $sql = '
         SELECT cr.*, c.name AS customer_name, f.name AS formula_name,
-               pump_car.name AS pump_car_name, pump_driver.name AS pump_driver_name,
-               mixer_car.name AS mixer_car_name, mixer_driver.name AS mixer_driver_name
+       pump_car.name AS pump_car_name, pump_driver.name AS pump_driver_name,
+       mixer_car.name AS mixer_car_name, mixer_driver.name AS mixer_driver_name
+
         FROM concrete_receipts cr
         LEFT JOIN customers c ON cr.customer_id = c.id
         LEFT JOIN concrete_formulas f ON cr.formulas_id = f.id
@@ -72,9 +73,9 @@ try {
     $summary_stmt->execute($params);
     $summary = $summary_stmt->fetch(PDO::FETCH_ASSOC);
     // Fallbacks for null
-    $summary["total_receipts"] = (int)($summary["total_receipts"] ?? 0);
-    $summary["total_meter"] = (float)($summary["total_meter"] ?? 0);
-    $summary["total_customers"] = (int)($summary["total_customers"] ?? 0);
+    $summary["total_receipts"] = (int) ($summary["total_receipts"] ?? 0);
+    $summary["total_meter"] = (float) ($summary["total_meter"] ?? 0);
+    $summary["total_customers"] = (int) ($summary["total_customers"] ?? 0);
 
     echo json_encode(['success' => true, 'data' => $receipts, 'summary' => $summary]);
 } catch (Exception $e) {

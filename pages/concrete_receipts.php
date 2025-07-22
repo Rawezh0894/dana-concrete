@@ -5,72 +5,79 @@ require_once '../config/permissions.php';
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
-    header('Location: ../index.php');
-    exit;
+  header('Location: ../index.php');
+  exit;
 }
 
 // Check if user has permission to view concrete receipts
 if (!hasPermission('view_concrete_receipts')) {
-    echo '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;">'
-        .'<i class="bi bi-lock-fill" style="font-size:5rem;color:#ccc;"></i>'
-        .'<h2 style="color:#888;">توانای دەست گەیشتنت نییە بەم پەیجە</h2>'
-        .'</div>';
-    exit;
+  echo '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;">'
+    . '<i class="bi bi-lock-fill" style="font-size:5rem;color:#ccc;"></i>'
+    . '<h2 style="color:#888;">توانای دەست گەیشتنت نییە بەم پەیجە</h2>'
+    . '</div>';
+  exit;
 }
 $customers = $pdo->query("SELECT id, name FROM customers")->fetchAll(PDO::FETCH_ASSOC);
 $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO::FETCH_ASSOC);
 $cars = $pdo->query("SELECT id, name FROM cars")->fetchAll(PDO::FETCH_ASSOC);
 $employees = $pdo->query("SELECT id, name, role FROM employees")->fetchAll(PDO::FETCH_ASSOC);
-$drivers = array_filter($employees, function($emp) { return $emp['role'] === 'شۆفێر'; });
-$mixer_cars = array_filter($cars, function($car) { return preg_match('/^m/i', trim($car['name'])); });
-$pump_cars = array_filter($cars, function($car) { return preg_match('/^p/i', trim($car['name'])); });
+$drivers = array_filter($employees, function ($emp) {
+  return $emp['role'] === 'شۆفێر'; });
+$mixer_cars = array_filter($cars, function ($car) {
+  return preg_match('/^m/i', trim($car['name'])); });
+$pump_cars = array_filter($cars, function ($car) {
+  return preg_match('/^p/i', trim($car['name'])); });
 
 // Define allowed names for pump and mixer
 $pump_names = ['بەرزان', 'شاڵاو', 'سەربەست', 'بازیان'];
 $mixer_names = ['بەرزان', 'شاڵاو', 'سەربەست', 'بازیان', 'طارق', 'عماد', 'علاوی', 'ئامانج', 'احمد(ابو روەیدا)', 'وشیار', 'هۆژین', 'هاوکار', 'عادل', 'ڕزگار'];
 
 // Filter employees for pump and mixer
-$pump_drivers = array_filter($employees, function($emp) use ($pump_names) {
-    return $emp['role'] === 'شۆفێر' && in_array(trim($emp['name']), $pump_names, true);
+$pump_drivers = array_filter($employees, function ($emp) use ($pump_names) {
+  return $emp['role'] === 'شۆفێر' && in_array(trim($emp['name']), $pump_names, true);
 });
-$mixer_drivers = array_filter($employees, function($emp) use ($mixer_names) {
-    return $emp['role'] === 'شۆفێر' && in_array(trim($emp['name']), $mixer_names, true);
+$mixer_drivers = array_filter($employees, function ($emp) use ($mixer_names) {
+  return $emp['role'] === 'شۆفێر' && in_array(trim($emp['name']), $mixer_names, true);
 });
 ?>
 <!DOCTYPE html>
 <html lang="ku">
+
 <head>
-    <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>زیادکردنی پسوڵەی کۆنکرێت</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
-    <link href="../assets/css/login.css" rel="stylesheet">
-    <link href="../assets/css/variables.css" rel="stylesheet">
-    <link href="../assets/css/nav.css" rel="stylesheet">
-    <link href="../assets/css/comon/table.css" rel="stylesheet">
-    <link href="../assets/css/comon/style.css" rel="stylesheet">
-    <link href="../assets/css/comon/style.css" rel="stylesheet">
-    <link href="../assets/css/comon/select2_design.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link href="../assets/css/concrete_receipts_custom.css" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>زیادکردنی پسوڵەی کۆنکرێت</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+  <link href="../assets/css/login.css" rel="stylesheet">
+  <link href="../assets/css/variables.css" rel="stylesheet">
+  <link href="../assets/css/nav.css" rel="stylesheet">
+  <link href="../assets/css/comon/table.css" rel="stylesheet">
+  <link href="../assets/css/comon/style.css" rel="stylesheet">
+  <link href="../assets/css/comon/style.css" rel="stylesheet">
+  <link href="../assets/css/comon/select2_design.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link href="../assets/css/concrete_receipts_custom.css" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 </head>
+
 <body dir="rtl">
-<?php include '../includes/navbar.php'; ?>
-<?php include '../includes/sidebar.php'; ?>
-<div class="container-fluid py-5">
+  <?php include '../includes/navbar.php'; ?>
+  <?php include '../includes/sidebar.php'; ?>
+  <div class="container-fluid py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">پسوڵەی کۆنکرێت</h2>
-        <div class="d-flex gap-2">
-            <?php if (hasPermission('add_customer')): ?>
-            <button class="btn" data-bs-toggle="modal" data-bs-target="#addCustomerModal" style="background: #1976d2; color:white; font-weight: bold;">+ زیادکردنی کڕیار</button>
-            <?php endif; ?>
-            <?php if (hasPermission('add_concrete_receipts')): ?>
-            <button class="btn" data-bs-toggle="modal" data-bs-target="#addConcreteReceiptModal" style="background: var(--seafoam-green); color:white; font-weight: bold;">+ زیادکردنی پسوڵە</button>
-            <?php endif; ?>
-        </div>
+      <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">پسوڵەی کۆنکرێت</h2>
+      <div class="d-flex gap-2">
+        <?php if (hasPermission('add_customer')): ?>
+          <button class="btn" data-bs-toggle="modal" data-bs-target="#addCustomerModal"
+            style="background: #1976d2; color:white; font-weight: bold;">+ زیادکردنی کڕیار</button>
+        <?php endif; ?>
+        <?php if (hasPermission('add_concrete_receipts')): ?>
+          <button class="btn" data-bs-toggle="modal" data-bs-target="#addConcreteReceiptModal"
+            style="background: var(--seafoam-green); color:white; font-weight: bold;">+ زیادکردنی پسوڵە</button>
+        <?php endif; ?>
+      </div>
     </div>
     <!-- Summary Cards Row -->
     <div class="row mb-3" id="concrete-receipts-summary">
@@ -139,40 +146,43 @@ $mixer_drivers = array_filter($employees, function($emp) use ($mixer_names) {
       </div>
     </div>
     <div class="table-responsive">
-        <table class="table table-bordered table-hover align-middle text-center" id="concreteReceiptsTable">
-            <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
-                <tr>
-                    <th>#</th>
-                    <th>ژمارەی پسوڵە</th>
-                    <th>کڕیار</th>
-                    <th>شوێن</th>
-                    <th>بەروار</th>
-                    <th>بڕی مەتر سێجا</th>
-                    <th>فۆرمۆلا</th>
-                  
-                    <th>پەمپ</th>
-                    <th>شۆفێری پەمپ</th>
-                    <th>میکسەر</th>
-                    <th>شۆفێری میکسەر</th>
-                    <th>کردارەکان</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Receipts will be loaded here by JS -->
-            </tbody>
-        </table>
+      <table class="table table-bordered table-hover align-middle text-center" id="concreteReceiptsTable">
+        <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
+          <tr>
+            <th>#</th>
+            <th>ژمارەی پسوڵە</th>
+            <th>کڕیار</th>
+            <th>شوێن</th>
+            <th>وەرگر</th>
+            <th>بەروار</th>
+            <th>بڕی مەتر سێجا</th>
+            <th>فۆرمۆلا</th>
+
+            <th>پەمپ</th>
+            <th>شۆفێری پەمپ</th>
+            <th>میکسەر</th>
+            <th>شۆفێری میکسەر</th>
+            
+            <th>کردارەکان</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Receipts will be loaded here by JS -->
+        </tbody>
+      </table>
     </div>
-</div>
-<!-- Add Concrete Receipt Modal -->
-<div class="modal fade" id="addConcreteReceiptModal" tabindex="-1" aria-labelledby="addConcreteReceiptModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <form id="addConcreteReceiptForm">
-        <div class="modal-header">
-          <h5 class="modal-title" id="addConcreteReceiptModalLabel">زیادکردنی پسوڵەی کۆنکرێت</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
+  </div>
+  <!-- Add Concrete Receipt Modal -->
+  <div class="modal fade" id="addConcreteReceiptModal" tabindex="-1" aria-labelledby="addConcreteReceiptModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <form id="addConcreteReceiptForm">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addConcreteReceiptModalLabel">زیادکردنی پسوڵەی کۆنکرێت</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
             <div class="row g-3">
               <div class="col-md-6">
                 <label for="receipt_number" class="form-label">ژمارەی پسوڵە</label>
@@ -190,13 +200,20 @@ $mixer_drivers = array_filter($employees, function($emp) use ($mixer_names) {
               <div class="col-md-6">
                 <label for="location" class="form-label">شوێن</label>
                 <input type="text" class="form-control" id="location" name="location" required>
-              </div>
-              <div class="col-md-6">
+
                 <label for="meter_amount" class="form-label">بڕی مەتر سێجا</label>
-                <input type="number" class="form-control" id="meter_amount" name="meter_amount" min="0" max="12" step="0.5" required>
+                <input type="number" class="form-control" id="meter_amount" name="meter_amount" min="0" max="12"
+                  step="0.5" required>
+            
+
+                
+
               </div>
+
               <div class="col-md-6">
-                <label for="formulas_id" class="form-label">ڕێژە</label>
+              <label for="receiver_name">ناوی وەرگر</label>
+              <input type="text" class="form-control" name="receiver_name" id="receiver_name" required>
+                  <label for="formulas_id" class="form-label">ڕێژە</label>
                 <select class="form-select" id="formulas_id" name="formulas_id" required>
                   <option value="">هەڵبژێرە</option>
                   <?php foreach ($formulas as $f): ?>
@@ -204,7 +221,8 @@ $mixer_drivers = array_filter($employees, function($emp) use ($mixer_names) {
                   <?php endforeach; ?>
                 </select>
               </div>
-            </div>
+              </div>
+          
             <div class="row mt-4">
               <div class="col-md-6">
                 <div class="card">
@@ -257,26 +275,28 @@ $mixer_drivers = array_filter($employees, function($emp) use ($mixer_names) {
                 </div>
               </div>
             </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
-          <button type="submit" class="btn" style="background: var(--seafoam-green); color: white; font-weight: bold;">زیادکردن</button>
-        </div>
-      </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
+            <button type="submit" class="btn"
+              style="background: var(--seafoam-green); color: white; font-weight: bold;">زیادکردن</button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
-</div>
-<!-- Edit Concrete Receipt Modal -->
-<div class="modal fade" id="editConcreteReceiptModal" tabindex="-1" aria-labelledby="editConcreteReceiptModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <form id="editConcreteReceiptForm">
-        <input type="hidden" id="edit_receipt_id" name="id">
-        <div class="modal-header">
-          <h5 class="modal-title" id="editConcreteReceiptModalLabel">نوێکردنەوەی پسوڵەی کۆنکرێت</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
+  <!-- Edit Concrete Receipt Modal -->
+  <div class="modal fade" id="editConcreteReceiptModal" tabindex="-1" aria-labelledby="editConcreteReceiptModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <form id="editConcreteReceiptForm">
+          <input type="hidden" id="edit_receipt_id" name="id">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editConcreteReceiptModalLabel">نوێکردنەوەی پسوڵەی کۆنکرێت</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
             <div class="row g-3">
               <div class="col-md-6">
                 <label for="edit_receipt_number" class="form-label">ژمارەی پسوڵە</label>
@@ -296,8 +316,13 @@ $mixer_drivers = array_filter($employees, function($emp) use ($mixer_names) {
                 <input type="text" class="form-control" id="edit_location" name="location" required>
               </div>
               <div class="col-md-6">
+                <label for="edit_receiver_name" class="form-label">وەرگر</label>
+                <input type="text" class="form-control" id="edit_receiver_name" name="edit_receiver_name" required>
+              </div>
+              <div class="col-md-6">
                 <label for="edit_meter_amount" class="form-label">بڕی مەتر سێجا</label>
-                <input type="number" class="form-control" id="edit_meter_amount" name="meter_amount" min="0" max="12" step="0.5" required>
+                <input type="number" class="form-control" id="edit_meter_amount" name="meter_amount" min="0" max="12"
+                  step="0.5" required>
               </div>
               <div class="col-md-6">
                 <label for="edit_formulas_id" class="form-label">ڕێژە</label>
@@ -361,66 +386,70 @@ $mixer_drivers = array_filter($employees, function($emp) use ($mixer_names) {
                 </div>
               </div>
             </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
-          <button type="submit" class="btn" style="background: var(--seafoam-green); color: white; font-weight: bold;">نوێکردنەوە</button>
-        </div>
-      </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
+            <button type="submit" class="btn"
+              style="background: var(--seafoam-green); color: white; font-weight: bold;">نوێکردنەوە</button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
-</div>
-<!-- Add Customer Modal -->
-<div class="modal fade" id="addCustomerModal" tabindex="-1" aria-labelledby="addCustomerModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <form id="addCustomerForm">
-        <div class="modal-header">
-          <h5 class="modal-title" id="addCustomerModalLabel">زیادکردنی کڕیار</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="mb-3">
-            <label for="customer_name" class="form-label">ناوی کڕیار</label>
-            <input type="text" class="form-control" id="customer_name" name="name" required>
+  <!-- Add Customer Modal -->
+  <div class="modal fade" id="addCustomerModal" tabindex="-1" aria-labelledby="addCustomerModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form id="addCustomerForm">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addCustomerModalLabel">زیادکردنی کڕیار</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="mb-3">
-            <label for="customer_phone1" class="form-label">ژمارە تەلەفۆنی یەکەم</label>
-            <input type="text" class="form-control" id="customer_phone1" name="mobile1" required>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="customer_name" class="form-label">ناوی کڕیار</label>
+              <input type="text" class="form-control" id="customer_name" name="name" required>
+            </div>
+            <div class="mb-3">
+              <label for="customer_phone1" class="form-label">ژمارە تەلەفۆنی یەکەم</label>
+              <input type="text" class="form-control" id="customer_phone1" name="mobile1" required>
+            </div>
+            <div class="mb-3">
+              <label for="customer_phone2" class="form-label">ژمارە تەلەفۆنی دووەم (ئیختیاری)</label>
+              <input type="text" class="form-control" id="customer_phone2" name="mobile2">
+            </div>
           </div>
-          <div class="mb-3">
-            <label for="customer_phone2" class="form-label">ژمارە تەلەفۆنی دووەم (ئیختیاری)</label>
-            <input type="text" class="form-control" id="customer_phone2" name="mobile2">
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
+            <button type="submit" class="btn"
+              style="background: #1976d2; color: white; font-weight: bold;">زیادکردن</button>
           </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
-          <button type="submit" class="btn" style="background: #1976d2; color: white; font-weight: bold;">زیادکردن</button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   </div>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="../assets/js/swalAlert.js"></script>
-<script src="../assets/js/comon/table-controler.js"></script>
-<script src="../assets/js/comon/select2_script.js"></script>
-<script src="../assets/js/concrete_receipts/add_customer.js"></script>
-<script src="../assets/js/concrete_receipts/filter.js"></script>
-<script src="../assets/js/concrete_receipts/add_concerete_receipts.js"></script>
-<script src="../assets/js/concrete_receipts/select_concrete_receipts.js"></script>
-<script src="../assets/js/concrete_receipts/delete_concrete_receipts.js"></script>
-<script src="../assets/js/concrete_receipts/update_concrete_receipts.js"></script>
-<script src="../assets/js/concrete_receipts/concrete_receipts_custom.js"></script>
-<script>
-// Pass permissions to JavaScript
-window.userPermissions = {
-    canAdd: <?php echo hasPermission('add_concrete_receipts') ? 'true' : 'false'; ?>,
-    canEdit: <?php echo hasPermission('edit_concrete_receipts') ? 'true' : 'false'; ?>,
-    canDelete: <?php echo hasPermission('delete_concrete_receipts') ? 'true' : 'false'; ?>,
-    canPrint: <?php echo hasPermission('print_concrete_receipts') ? 'true' : 'false'; ?>
-};
-</script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="../assets/js/swalAlert.js"></script>
+  <script src="../assets/js/comon/table-controler.js"></script>
+  <script src="../assets/js/comon/select2_script.js"></script>
+  <script src="../assets/js/concrete_receipts/add_customer.js"></script>
+  <script src="../assets/js/concrete_receipts/filter.js"></script>
+  <script src="../assets/js/concrete_receipts/add_concerete_receipts.js"></script>
+  <script src="../assets/js/concrete_receipts/select_concrete_receipts.js"></script>
+  <script src="../assets/js/concrete_receipts/delete_concrete_receipts.js"></script>
+  <script src="../assets/js/concrete_receipts/update_concrete_receipts.js"></script>
+  <script src="../assets/js/concrete_receipts/concrete_receipts_custom.js"></script>
+  <script>
+    // Pass permissions to JavaScript
+    window.userPermissions = {
+      canAdd: <?php echo hasPermission('add_concrete_receipts') ? 'true' : 'false'; ?>,
+      canEdit: <?php echo hasPermission('edit_concrete_receipts') ? 'true' : 'false'; ?>,
+      canDelete: <?php echo hasPermission('delete_concrete_receipts') ? 'true' : 'false'; ?>,
+      canPrint: <?php echo hasPermission('print_concrete_receipts') ? 'true' : 'false'; ?>
+    };
+  </script>
 </body>
+
 </html>

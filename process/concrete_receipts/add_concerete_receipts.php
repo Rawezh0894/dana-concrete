@@ -25,11 +25,12 @@ try {
     $pump_driver_id = $_POST['pump_driver_id'] ?? null;
     $mixer_car_id = $_POST['mixer_car_id'] ?? null;
     $mixer_driver_id = $_POST['mixer_driver_id'] ?? null;
+    $receiver_name = $_POST['receiver_name'] ?? null;
     if (!$receipt_number || !$location || !$meter_amount || !$formulas_id) {
         echo json_encode(['success' => false, 'message' => 'هەموو خانە پڕ بکە']);
         exit;
     }
-    $stmt = $pdo->prepare("INSERT INTO concrete_receipts (receipt_number, customer_id, location, meter_amount, formulas_id, pump_car_id, pump_driver_id, mixer_car_id, mixer_driver_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt = $pdo->prepare("INSERT INTO concrete_receipts (receipt_number, customer_id, location, meter_amount, formulas_id, pump_car_id, pump_driver_id, mixer_car_id, mixer_driver_id , receiver_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ? , ?)");
     $stmt->execute([
         $receipt_number,
         $customer_id ?: null,
@@ -39,7 +40,9 @@ try {
         $pump_car_id ?: null,
         $pump_driver_id ?: null,
         $mixer_car_id ?: null,
-        $mixer_driver_id ?: null
+        $mixer_driver_id ?: null,
+        $receiver_name ?: null
+
     ]);
     $inserted_id = $pdo->lastInsertId();
     require_once __DIR__ . '/../../includes/notify.php';

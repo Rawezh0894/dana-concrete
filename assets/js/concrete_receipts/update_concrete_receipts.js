@@ -9,6 +9,7 @@ $(document).on('click', '.edit-receipt', function() {
             $('#edit_receipt_number').val(receipt.receipt_number);
             $('#edit_customer_id').val(receipt.customer_id).trigger('change');
             $('#edit_location').val(receipt.location);
+            $('#edit_receiver_name').val(receipt.receiver_name);
             $('#edit_meter_amount').val(receipt.meter_amount);
             $('#edit_formulas_id').val(receipt.formulas_id);
             $('#edit_pump_car_id').val(receipt.pump_car_id);
