@@ -60,6 +60,7 @@ try {
     echo json_encode([
         'success' => true,
         'receipt' => $receipt,
+        'receiver_name' => $receipt['receiver_name'], // زیادکردنی وەرگر
         'formatted_quantity' => $formatted_quantity,
         'formatted_date' => $formatted_date,
         'strength_info' => $strength_info
