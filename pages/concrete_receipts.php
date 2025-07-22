@@ -211,8 +211,8 @@ $mixer_drivers = array_filter($employees, function ($emp) use ($mixer_names) {
               </div>
 
               <div class="col-md-6">
-              <label for="receiver_name">ناوی وەرگر</label>
-              <input type="text" class="form-control" name="receiver_name" id="receiver_name" required>
+              <label class="form-label" for="receiver_name">ناوی وەرگر</label>
+              <input type="text" class="form-control" name="receiver_name" id="receiver_name">
                   <label for="formulas_id" class="form-label">ڕێژە</label>
                 <select class="form-select" id="formulas_id" name="formulas_id" required>
                   <option value="">هەڵبژێرە</option>
