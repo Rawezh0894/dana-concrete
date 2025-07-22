@@ -122,7 +122,7 @@ $receipt_id = isset($_GET['id']) ? $_GET['id'] : null;
             </thead>
             <tbody>
                 <tr>
-                    <td style="height: 200px;">
+                    <td style="height: 100px;">
                     <span id="mixer_car_name">-</span>:میکسەر <br>
                         شۆفێر: <span id="mixer_driver_name">-</span><br>
                         ژ.مۆبایل: <span id="mixer_driver_mobile">-</span>
