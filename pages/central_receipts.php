@@ -96,14 +96,15 @@ $receipt_id = isset($_GET['id']) ? $_GET['id'] : null;
                 <strong>کڕیار:</strong> <span id="customer_name">-</span>
             </div>
             <div>
+                <strong>وەرگر:</strong> <span id="receiver_name">-</span>
+            </div>
+            <div>
                 <strong>ژ.م:</strong> <span id="customer_phone">-</span>
             </div>
             <div>
                 <strong>ناونیشان:</strong> <span id="location">-</span>
             </div>
-            <div>
-                <strong>وەرگر:</strong> <span id="receiver_name">-</span>
-            </div>
+           
             <div>
                 <strong>بەروار:</strong> <span id="created_date">-</span>
             </div>
