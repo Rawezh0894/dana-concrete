@@ -38,7 +38,7 @@ function populateReceiptData(data) {
     setElementText('customer_name', receipt.customer_name || '-');
     setElementText('location', receipt.location || '-');
     setElementText('created_date', data.formatted_date || '-');
-    setElementText('receiver_name', receipt.receiver_name || '-'); // ✅ زیادکرا
+    setElementText('receiver_name', receipt.receiver_name || '-'); // ✅ گوێزرایەوە بۆ ئێرە
     
     // Populate customer phone
     let phoneText = receipt.customer_phone || '-';
@@ -59,7 +59,6 @@ function populateReceiptData(data) {
     setElementText('strength_info', data.strength_info || '-');
     setElementText('meter_amount', data.formatted_quantity + ' M³');
 }
-
 
 // Helper function to set element text content
 function setElementText(elementId, text) {
