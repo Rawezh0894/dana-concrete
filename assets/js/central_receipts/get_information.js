@@ -38,7 +38,12 @@ function populateReceiptData(data) {
     setElementText('customer_name', receipt.customer_name || '-');
     setElementText('location', receipt.location || '-');
     setElementText('created_date', data.formatted_date || '-');
-    setElementText('receiver_name', receipt.receiver_name || '-'); // ✅ گوێزرایەوە بۆ ئێرە
+    // Receiver name and dash logic
+    var receiver = (receipt.receiver_name || '').trim();
+    var sep = '';
+    if (receiver) sep = ' - ';
+    setElementText('customer_receiver_sep', sep);
+    setElementText('receiver_name', receiver || '');
     
     // Populate customer phone
     let phoneText = receipt.customer_phone || '-';
