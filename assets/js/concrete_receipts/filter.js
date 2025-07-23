@@ -40,6 +40,7 @@ $(document).ready(function() {
                 <td>${receipt.receipt_number || '-'}</td>
                 <td>${receipt.customer_name || '-'}</td>
                 <td>${receipt.location || '-'}</td>
+                <td>${receipt.receiver_name || '-'}</td>
                 <td>${formatDate(receipt.created_at)}</td>
                 <td>${receipt.meter_amount !== null && receipt.meter_amount !== undefined && receipt.meter_amount !== '' ? formatNumber(receipt.meter_amount) + ' m³' : '-'}</td>
                 <td>${receipt.formula_name || '-'}</td>
