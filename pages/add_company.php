@@ -31,7 +31,7 @@ if (!isset($_SESSION['user_id'])) {
 <body dir="rtl">
 <?php include '../includes/navbar.php'; ?>
 <?php include '../includes/sidebar.php'; ?>
-<div class="container py-5">
+<div class="container-fluid py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">کۆمپانیاکان</h2>
         <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addCompanyModal" style="background: var(--seafoam-green); font-weight: bold;">+ زیادکردنی کۆمپانیا</button>

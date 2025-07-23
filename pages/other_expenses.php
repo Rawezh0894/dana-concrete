@@ -85,6 +85,7 @@ if (!isset($_SESSION['user_id'])) {
                     <th>کەس</th>
                     <th>کارمەند</th>
                     <th>سەیارە</th>
+                    <th>بڕی گاز (لیتر)</th>
                     <th>جۆری مامەڵە</th>
                     <th>جۆری پارە</th>
                     <th>ژمارەی وەسڵ</th>
@@ -120,19 +121,21 @@ if (!isset($_SESSION['user_id'])) {
             <textarea class="form-control" id="purpose" name="purpose" rows="2" required></textarea>
           </div>
           <div class="mb-3 row">
-          <div class="col-md-6">
+            <div class="col-md-4">
               <label for="employee_id" class="form-label">کارمەند</label>
               <select class="form-control" id="employee_id" name="employee_id"></select>
             </div>
-            
-            <div class="col-md-6">
+            <div class="col-md-4">
               <label for="car_id" class="form-label">سەیارە</label>
               <select class="form-control" id="car_id" name="car_id"></select>
             </div>
-          
+            <div class="col-md-4">
+              <label for="gas_liters" class="form-label">بڕی گاز (لیتر)</label>
+              <input type="number" step="0.01" class="form-control" id="gas_liters" name="gas_liters" placeholder="0">
+            </div>
           </div>
           <div class="mb-3 row">
-          <div class="col-md-6">
+            <div class="col-md-4">
               <label for="person_id" class="form-label">کەس</label>
               <div class="input-group">
                 <select class="form-control" id="person_id" name="person_id" required></select>
@@ -140,63 +143,59 @@ if (!isset($_SESSION['user_id'])) {
                 </button>
               </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
               <label for="payment_type" class="form-label">جۆری مامەڵە</label>
               <select class="form-control" id="payment_type" name="payment_type" required>
                 <option value="نەقد">نەقد</option>
                 <option value="قەرز">قەرز</option>
               </select>
             </div>
-          </div>
-          <div class="mb-3 row">
-            <div class="col-md-6">
+            <div class="col-md-4">
               <label for="currency_type" class="form-label">جۆری پارە</label>
               <select class="form-control" id="currency_type" name="currency_type" required>
                 <option value="دینار">دینار</option>
                 <option value="دۆلار">دۆلار</option>
               </select>
             </div>
-            <div class="col-md-6">
+          </div>
+          <div class="mb-3 row">
+            <div class="col-md-4">
               <label for="invoice_number" class="form-label">ژمارەی وەسڵ</label>
               <input type="text" class="form-control" id="invoice_number" name="invoice_number">
             </div>
-          </div>
-          <div class="mb-3 row">
-            <div class="col-md-6">
+            <div class="col-md-4">
               <label for="amount_iqd" class="form-label">بڕی پارە بە دینار</label>
               <input type="number" step="0.01" class="form-control" id="amount_iqd" name="amount_iqd" value="0">
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
               <label for="amount_usd" class="form-label">بڕی پارە بە دۆلار</label>
               <input type="number" step="0.01" class="form-control" id="amount_usd" name="amount_usd" value="0">
             </div>
           </div>
           <div class="mb-3 row">
-            <div class="col-md-6">
+            <div class="col-md-4">
               <label for="paid_iqd" class="form-label">پارەی دراو بە دینار</label>
               <input type="number" step="0.01" class="form-control" id="paid_iqd" name="paid_iqd" value="0">
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
               <label for="paid_usd" class="form-label">پارەی دراو بە دۆلار</label>
               <input type="number" step="0.01" class="form-control" id="paid_usd" name="paid_usd" value="0">
             </div>
-          </div>
-          <div class="mb-3 row">
-            <div class="col-md-6">
+            <div class="col-md-4">
               <label for="exchange_rate" class="form-label">نرخی 100 دۆلار بە دینار</label>
               <input type="number" step="0.01" class="form-control" id="exchange_rate" name="exchange_rate" value="150000">
             </div>
-            <div class="col-md-6">
+          </div>
+          <div class="mb-3 row">
+            <div class="col-md-4">
               <label for="remaining_iqd" class="form-label">بڕی ماوە بە دینار</label>
               <input type="number" step="0.01" class="form-control" id="remaining_iqd" name="remaining_iqd" value="0" readonly>
             </div>
-          </div>
-          <div class="mb-3 row">
-            <div class="col-md-6">
+            <div class="col-md-4">
               <label for="remaining_usd" class="form-label">بڕی ماوە بە دۆلار</label>
               <input type="number" step="0.01" class="form-control" id="remaining_usd" name="remaining_usd" value="0" readonly>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
               <label for="date" class="form-label">بەروار</label>
               <input type="date" class="form-control" id="date" name="date" required>
             </div>
@@ -257,77 +256,77 @@ if (!isset($_SESSION['user_id'])) {
             <textarea class="form-control" id="edit_purpose" name="purpose" rows="2" required></textarea>
           </div>
           <div class="mb-3 row">
-            <div class="col-md-6">
+            <div class="col-md-4">
               <label for="edit_employee_id" class="form-label">کارمەند</label>
               <select class="form-control" id="edit_employee_id" name="employee_id"></select>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
               <label for="edit_car_id" class="form-label">سەیارە</label>
               <select class="form-control" id="edit_car_id" name="car_id"></select>
             </div>
+            <div class="col-md-4">
+              <label for="edit_gas_liters" class="form-label">بڕی گاز (لیتر)</label>
+              <input type="number" step="0.01" class="form-control" id="edit_gas_liters" name="gas_liters" placeholder="0">
+            </div>
           </div>
           <div class="mb-3 row">
-            <div class="col-md-6">
+            <div class="col-md-4">
               <label for="edit_person_id" class="form-label">کەس</label>
               <select class="form-control" id="edit_person_id" name="person_id" required></select>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
               <label for="edit_payment_type" class="form-label">جۆری مامەڵە</label>
               <select class="form-control" id="edit_payment_type" name="payment_type" required>
                 <option value="نەقد">نەقد</option>
                 <option value="قەرز">قەرز</option>
               </select>
             </div>
-          </div>
-          <div class="mb-3 row">
-            <div class="col-md-6">
+            <div class="col-md-4">
               <label for="edit_currency_type" class="form-label">جۆری پارە</label>
               <select class="form-control" id="edit_currency_type" name="currency_type" required>
                 <option value="دینار">دینار</option>
                 <option value="دۆلار">دۆلار</option>
               </select>
             </div>
-            <div class="col-md-6">
+          </div>
+          <div class="mb-3 row">
+            <div class="col-md-4">
               <label for="edit_invoice_number" class="form-label">ژمارەی وەسڵ</label>
               <input type="text" class="form-control" id="edit_invoice_number" name="invoice_number">
             </div>
-          </div>
-          <div class="mb-3 row">
-            <div class="col-md-6">
+            <div class="col-md-4">
               <label for="edit_amount_iqd" class="form-label">بڕی پارە بە دینار</label>
               <input type="number" step="0.01" class="form-control" id="edit_amount_iqd" name="amount_iqd" value="0">
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
               <label for="edit_amount_usd" class="form-label">بڕی پارە بە دۆلار</label>
               <input type="number" step="0.01" class="form-control" id="edit_amount_usd" name="amount_usd" value="0">
             </div>
           </div>
           <div class="mb-3 row">
-            <div class="col-md-6">
+            <div class="col-md-4">
               <label for="edit_paid_iqd" class="form-label">پارەی دراو بە دینار</label>
               <input type="number" step="0.01" class="form-control" id="edit_paid_iqd" name="paid_iqd" value="0">
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
               <label for="edit_paid_usd" class="form-label">پارەی دراو بە دۆلار</label>
               <input type="number" step="0.01" class="form-control" id="edit_paid_usd" name="paid_usd" value="0">
             </div>
-          </div>
-          <div class="mb-3 row">
-            <div class="col-md-6">
+            <div class="col-md-4">
               <label for="edit_exchange_rate" class="form-label">نرخی 100 دۆلار بە دینار</label>
               <input type="number" step="0.01" class="form-control" id="edit_exchange_rate" name="exchange_rate" value="150000">
             </div>
-            <div class="col-md-6">
+          </div>
+          <div class="mb-3 row">
+            <div class="col-md-4">
               <label for="edit_remaining_iqd" class="form-label">بڕی ماوە بە دینار</label>
               <input type="number" step="0.01" class="form-control" id="edit_remaining_iqd" name="remaining_iqd" value="0" readonly>
             </div>
-          </div>
-          <div class="mb-3 row">
-            <div class="col-md-6">
+            <div class="col-md-4">
               <label for="edit_remaining_usd" class="form-label">بڕی ماوە بە دۆلار</label>
               <input type="number" step="0.01" class="form-control" id="edit_remaining_usd" name="remaining_usd" value="0" readonly>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
               <label for="edit_date" class="form-label">بەروار</label>
               <input type="date" class="form-control" id="edit_date" name="date" required>
             </div>

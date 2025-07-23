@@ -25,6 +25,10 @@ if (addExpenseForm) {
             }
         }
         const formData = new FormData(addExpenseForm);
+        // Add gas_liters if present in the form
+        if (document.getElementById('gas_liters')) {
+            formData.append('gas_liters', document.getElementById('gas_liters').value);
+        }
         try {
             const res = await fetch('../process/other_expenses/add_expenses.php', {
                 method: 'POST',

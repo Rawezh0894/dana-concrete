@@ -6,7 +6,7 @@ if (!hasPermission('view_other_expenses')) {
     echo json_encode(['success' => false, 'msg' => 'ڕێگە پێنەدراو']);
     exit;
 }
-$sql = "SELECT oe.*, p.name AS person_name, e.name AS employee_name, c.name AS car_name, oe.car_id
+$sql = "SELECT oe.*, p.name AS person_name, e.name AS employee_name, c.name AS car_name, oe.car_id, oe.gas_liters
         FROM other_expenses oe
         LEFT JOIN other_expense_persons p ON oe.person_id = p.id
         LEFT JOIN employees e ON oe.employee_id = e.id

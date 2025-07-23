@@ -32,7 +32,7 @@ if (!isset($_SESSION['user_id'])) {
         <h2 style="color:#888;">توانای دەست گەیشتنت نییە بەم پەیجە</h2>
     </div>
 <?php else: ?>
-    <div class="container py-4">
+    <div class="container-fluid py-4">
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
             <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">داشبۆرد</h2>
             <div class="quick-actions d-flex gap-2">

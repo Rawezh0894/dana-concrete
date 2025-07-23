@@ -3,6 +3,10 @@ async function editExpense(id, data) {
     for (const key in data) {
         formData.append(key, data[key]);
     }
+    // Add gas_liters if present in the form
+    if (document.getElementById('edit_gas_liters')) {
+        formData.append('gas_liters', document.getElementById('edit_gas_liters').value);
+    }
     formData.append('id', id);
     const res = await fetch('../process/other_expenses/update_expenses.php', {
         method: 'POST',

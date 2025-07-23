@@ -13,6 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $person_id = $_POST['person_id'] ?? null;
     $employee_id = $_POST['employee_id'] ?? null;
     $car_id = $_POST['car_id'] ?? null;
+    $gas_liters = isset($_POST['gas_liters']) ? floatval($_POST['gas_liters']) : null;
     $payment_type = $_POST['payment_type'] ?? '';
     $currency_type = $_POST['currency_type'] ?? '';
     $invoice_number = $_POST['invoice_number'] ?? '';
@@ -40,8 +41,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    // Fetch old gas_liters value for this expense
+    $stmt_old = $pdo->prepare('SELECT gas_liters FROM other_expenses WHERE id=?');
+    $stmt_old->execute([$id]);
+    $old_gas_liters = $stmt_old->fetchColumn();
+
     $sql = "UPDATE other_expenses SET
-        purpose=?, person_id=?, employee_id=?, car_id=?, payment_type=?, currency_type=?, invoice_number=?,
+        purpose=?, person_id=?, employee_id=?, car_id=?, gas_liters=?, payment_type=?, currency_type=?, invoice_number=?,
         amount_iqd=?, amount_usd=?, paid_iqd=?, paid_usd=?, exchange_rate=?, remaining_iqd=?, remaining_usd=?, date=?
         WHERE id=?";
     $stmt = $pdo->prepare($sql);
@@ -50,6 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $person_id,
         $employee_id ?: null,
         $car_id ?: null,
+        $gas_liters,
         $payment_type,
         $currency_type,
         $invoice_number,
@@ -64,6 +71,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id
     ]);
     if ($ok) {
+        // If gas_liters is set and > 0, update bins_silos (gas tank)
+        if (($gas_liters && $gas_liters > 0) || ($old_gas_liters && $old_gas_liters > 0)) {
+            $stmt_gas = $pdo->prepare("SELECT id, amount, total_value, average_price FROM bins_silos WHERE type='تەنکی' AND material_type='گاز' LIMIT 1");
+            $stmt_gas->execute();
+            $gas_tank = $stmt_gas->fetch(PDO::FETCH_ASSOC);
+            if ($gas_tank) {
+                $new_amount = $gas_tank['amount'];
+                // Restore old gas_liters if any
+                if ($old_gas_liters && $old_gas_liters > 0) {
+                    $new_amount += $old_gas_liters;
+                }
+                // Subtract new gas_liters if any
+                if ($gas_liters && $gas_liters > 0) {
+                    if ($new_amount < $gas_liters) {
+                        echo json_encode(['success' => false, 'msg' => 'بڕی گاز لە تەنکی کەمە!']);
+                        exit;
+                    }
+                    $new_amount -= $gas_liters;
+                }
+                $update_gas = $pdo->prepare("UPDATE bins_silos SET amount=? WHERE id=?");
+                $update_gas->execute([$new_amount, $gas_tank['id']]);
+            }
+        }
         require_once __DIR__ . '/../../includes/notify.php';
         notify('update', 'other_expenses', $id, 'خەرجی تر نوێکرایەوە (ID: ' . $id . ')');
         echo json_encode(['success' => true]);

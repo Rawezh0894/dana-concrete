@@ -41,6 +41,7 @@ async function loadOtherExpenses() {
         person_name: row.person_name || '',
         employee_name: row.employee_name || '',
         car_name: row.car_name || '',
+        gas_liters: row.gas_liters ? formatNumber(row.gas_liters) : '',
         payment_type: row.payment_type,
         currency_type: row.currency_type,
         invoice_number: row.invoice_number || '',
@@ -55,7 +56,7 @@ async function loadOtherExpenses() {
         actions: `<button class="btn btn-sm btn-danger delete-expense" data-id="${row.id}"><i class="fa fa-trash"></i></button> <button class="btn btn-sm btn-primary edit-expense" data-id="${row.id}"><i class="fa fa-edit"></i></button>`
     }));
     TableController.renderWithPagination('#otherExpensesTable', tableData, [
-        '#', 'purpose', 'person_name', 'employee_name', 'car_name', 'payment_type', 'currency_type',
+        '#', 'purpose', 'person_name', 'employee_name', 'car_name', 'gas_liters', 'payment_type', 'currency_type',
         'invoice_number', 'amount_iqd', 'amount_usd', 'paid_iqd', 'paid_usd', 'exchange_rate',
         'remaining_iqd', 'remaining_usd', 'date', 'actions'
     ]);
@@ -93,6 +94,10 @@ async function loadOtherExpenses() {
                 document.getElementById('edit_exchange_rate').value = row.exchange_rate;
                 document.getElementById('edit_remaining_iqd').value = row.remaining_iqd;
                 document.getElementById('edit_remaining_usd').value = row.remaining_usd;
+                // Add gas_liters to edit modal if present
+                if (document.getElementById('edit_gas_liters')) {
+                    document.getElementById('edit_gas_liters').value = row.gas_liters || '';
+                }
                 document.getElementById('edit_date').value = row.date;
                 // Show modal
                 const modal = new bootstrap.Modal(document.getElementById('editExpenseModal'));

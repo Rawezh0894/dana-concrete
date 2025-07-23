@@ -36,7 +36,7 @@ require_once '../config/db_conected.php';
 <body dir="rtl">
 <?php include '../includes/navbar.php'; ?>
 <?php include '../includes/sidebar.php'; ?>
-<div class="container mt-4">
+<div class="container-fluid mt-4">
     <h3 class="mb-4">ئاگادارکردنەوەکان</h3>
     <div class="row mb-3">
         <div class="col-md-3 mb-2">

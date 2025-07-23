@@ -45,7 +45,7 @@ if (!hasPermission('view_users')) {
 <body dir="rtl">
 <?php include '../includes/navbar.php'; ?>
 <?php include '../includes/sidebar.php'; ?>
-<div class="container py-5">
+<div class="container-fluid py-5">
     <ul class="nav nav-tabs mb-4" id="userTabs" role="tablist">
         <li class="nav-item" role="presentation">
             <button class="nav-link active" id="users-tab" data-bs-toggle="tab" data-bs-target="#usersTabPane" type="button" role="tab" aria-controls="usersTabPane" aria-selected="true">

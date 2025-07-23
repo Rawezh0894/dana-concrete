@@ -16,7 +16,7 @@ require_once 'config/db_conected.php';
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 <body class="login-page" dir="rtl">
-    <div class="container">
+    <div class="container-fluid">
         <div class="login-container mt-5">
             <div class="text-center mb-3">
                 <img src="assets/images/logo.png" alt="Dana Concrete Logo" style="width: 140px;">
