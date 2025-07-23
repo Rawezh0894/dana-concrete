@@ -93,11 +93,9 @@ $receipt_id = isset($_GET['id']) ? $_GET['id'] : null;
         <!-- Date, Location, Customer info -->
         <div class="customer-info" style="margin-top:5px;margin-buttom:5px;">
             <div>
-                <strong>کڕیار:</strong> <span id="customer_name">-</span>
+                <strong>کڕیار:</strong> <span id="customer_name">-</span> - <span id="receiver_name">-</span>
             </div>
-            <div>
-                <strong>وەرگر:</strong> <span id="receiver_name">-</span>
-            </div>
+          
             <div>
                 <strong>ژ.م:</strong> <span id="customer_phone">-</span>
             </div>
@@ -122,7 +120,7 @@ $receipt_id = isset($_GET['id']) ? $_GET['id'] : null;
             </thead>
             <tbody>
                 <tr>
-                    <td style="height: 100px;">
+                    <td>
                     <span id="mixer_car_name">-</span>:میکسەر <br>
                         شۆفێر: <span id="mixer_driver_name">-</span><br>
                         ژ.مۆبایل: <span id="mixer_driver_mobile">-</span>

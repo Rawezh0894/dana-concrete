@@ -129,13 +129,13 @@ foreach ($sales as $sale) {
                             <td><?= $i+1 ?></td>
                             <td><?= htmlspecialchars($s['recipient']) ?></td>
                             <td><?= htmlspecialchars($s['location']) ?></td>
-                            <td><?= number_format($s['quantity'], 2) ?></td>
-                            <td><?= number_format($s['price_per_unit'], 2) ?></td>
-                            <td><?= number_format($s['total_price'], 2) ?></td>
-                            <td><?= number_format($s['amount_paid_usd'], 2) ?></td>
-                            <td><?= number_format($s['amount_paid_iq'], 0) ?></td>
-                            <td><?= number_format($s['remaining_amount'], 2) ?></td>
-                            <td><?= number_format($s['discount'], 2) ?></td>
+                            <td><?= number_format($s['quantity'], 2) ?> م³</td>
+                            <td><?= number_format($s['price_per_unit'], 2) ?> $</td>
+                            <td><?= number_format($s['total_price'], 2) ?> $</td>
+                            <td><?= number_format($s['amount_paid_usd'], 2) ?> $</td>
+                            <td><?= number_format($s['amount_paid_iq'], 0) ?> د.ع</td>
+                            <td><?= number_format($s['remaining_amount'], 2) ?> $</td>
+                            <td><?= number_format($s['discount'], 2) ?> $</td>
                             <td><?= htmlspecialchars($s['invoice_number']) ?></td>
                             <td><?= htmlspecialchars($s['order_date']) ?></td>
                         </tr>
