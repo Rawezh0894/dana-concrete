@@ -17,7 +17,7 @@ if (!hasPermission('view_concrete_receipts')) {
     . '</div>';
   exit;
 }
-$customers = $pdo->query("SELECT id, name FROM customers")->fetchAll(PDO::FETCH_ASSOC);
+$customers = $pdo->query("SELECT id, name, mobile1 FROM customers")->fetchAll(PDO::FETCH_ASSOC);
 $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO::FETCH_ASSOC);
 $cars = $pdo->query("SELECT id, name FROM cars")->fetchAll(PDO::FETCH_ASSOC);
 $employees = $pdo->query("SELECT id, name, role FROM employees")->fetchAll(PDO::FETCH_ASSOC);
@@ -193,7 +193,7 @@ $mixer_drivers = array_filter($employees, function ($emp) use ($mixer_names) {
                 <select class="form-select" id="customer_id" name="customer_id" required>
                   <option value="">هەڵبژێرە</option>
                   <?php foreach ($customers as $c): ?>
-                    <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['name']) ?></option>
+                    <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['name']) ?><?php if (!empty($c['mobile1'])): ?> (<?= htmlspecialchars($c['mobile1']) ?>)<?php endif; ?></option>
                   <?php endforeach; ?>
                 </select>
               </div>
