@@ -48,6 +48,14 @@ $(document).ready(function() {
                 timerProgressBar: true,
                 didClose: () => {
                     if (data.id) {
+                        // Save all fields except meter_amount, mixer_car_id, mixer_driver_id
+                        const allData = {};
+                        $form.serializeArray().forEach(({name, value}) => {
+                            if (!["meter_amount","mixer_car_id","mixer_driver_id","receipt_number"].includes(name)) {
+                                allData[name] = value;
+                            }
+                        });
+                        localStorage.setItem(storageKey, JSON.stringify(allData));
                         window.open('../pages/central_receipts.php?id=' + data.id + '&auto_print=1', '_self');
                     }
                     // Always reset form and close modal
@@ -55,7 +63,7 @@ $(document).ready(function() {
                     $('#addConcreteReceiptModal').modal('hide');
                     if (window.reloadConcreteReceipts) window.reloadConcreteReceipts();
                     if (window.reloadConcreteReceiptsSummary) window.reloadConcreteReceiptsSummary();
-                    localStorage.removeItem(storageKey);
+                    // Do NOT clear localStorage here, it is handled above
                 }
             });
         } else {
