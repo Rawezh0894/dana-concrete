@@ -457,9 +457,19 @@ $mixer_drivers = array_filter($employees, function ($emp) {
         const modalEl = document.getElementById('addConcreteReceiptModal');
         const modal = new bootstrap.Modal(modalEl);
         modal.show();
-        // Manually trigger the show.bs.modal event to ensure receipt number is fetched
-        var event = new window.Event('show.bs.modal', { bubbles: true, cancelable: true });
-        modalEl.dispatchEvent(event);
+        // Manually fetch and set the next receipt number
+        fetch('../process/concrete_receipts/get_next_receipt_number.php')
+          .then(res => res.json())
+          .then(res => {
+            if (res && res.success && res.next) {
+              document.getElementById('receipt_number').value = res.next;
+            } else {
+              document.getElementById('receipt_number').value = 'A-0001';
+            }
+          })
+          .catch(() => {
+            document.getElementById('receipt_number').value = 'A-0001';
+          });
       }
     });
   </script>
