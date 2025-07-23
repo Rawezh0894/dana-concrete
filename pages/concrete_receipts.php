@@ -454,8 +454,12 @@ $mixer_drivers = array_filter($employees, function ($emp) {
     document.addEventListener('DOMContentLoaded', function() {
       const params = new URLSearchParams(window.location.search);
       if (params.get('open_add') === '1') {
-        const modal = new bootstrap.Modal(document.getElementById('addConcreteReceiptModal'));
+        const modalEl = document.getElementById('addConcreteReceiptModal');
+        const modal = new bootstrap.Modal(modalEl);
         modal.show();
+        // Manually trigger the show.bs.modal event to ensure receipt number is fetched
+        var event = new window.Event('show.bs.modal', { bubbles: true, cancelable: true });
+        modalEl.dispatchEvent(event);
       }
     });
   </script>
