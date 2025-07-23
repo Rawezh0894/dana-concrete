@@ -36,8 +36,9 @@ $mixer_names = ['بەرزان', 'شاڵاو', 'سەربەست', 'بازیان', 
 $pump_drivers = array_filter($employees, function ($emp) use ($pump_names) {
   return $emp['role'] === 'شۆفێر' && in_array(trim($emp['name']), $pump_names, true);
 });
-$mixer_drivers = array_filter($employees, function ($emp) use ($mixer_names) {
-  return $emp['role'] === 'شۆفێر' && in_array(trim($emp['name']), $mixer_names, true);
+$mixer_drivers = array_filter($employees, function ($emp) {
+    $excluded = ['بەرزان', 'شاڵاو', 'سەربەست'];
+    return $emp['role'] === 'شۆفێر' && !in_array(trim($emp['name']), $excluded, true);
 });
 ?>
 <!DOCTYPE html>

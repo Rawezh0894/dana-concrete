@@ -94,5 +94,19 @@ $logout_pages = ['logout.php'];
         <?php endif; ?>
       </ul>
     </li>
+    <!-- New Koga (Materials) Dropdown -->
+    <li class="sidebar-group">
+      <button class="sidebar-group-toggle d-flex align-items-center w-100" data-bs-toggle="collapse" data-bs-target="#materialsMenu" aria-expanded="false">
+        <i class="bi bi-boxes me-2"></i> کۆگا
+      </button>
+      <ul class="collapse sidebar-submenu" id="materialsMenu">
+        <?php if (hasPermission('add_materials')): ?>
+          <li><a href="../pages/add_material.php" class="sidebar-link<?php if($current_page == 'add_material.php') echo ' active'; ?>"><i class="bi bi-plus-square me-2"></i> زیادکردنی کاڵا</a></li>
+        <?php endif; ?>
+        <?php if (hasPermission('view_materials')): ?>
+          <li><a href="../pages/list_materials.php" class="sidebar-link<?php if($current_page == 'list_materials.php') echo ' active'; ?>"><i class="bi bi-list-ul me-2"></i> کڕینی کاڵا</a></li>
+        <?php endif; ?>
+      </ul>
+    </li>
   </ul>
 </aside>
