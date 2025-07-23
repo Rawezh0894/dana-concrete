@@ -453,16 +453,7 @@ $mixer_drivers = array_filter($employees, function ($emp) use ($mixer_names) {
     document.addEventListener('DOMContentLoaded', function() {
       const params = new URLSearchParams(window.location.search);
       if (params.get('open_add') === '1') {
-        const modalEl = document.getElementById('addConcreteReceiptModal');
-        const modal = new bootstrap.Modal(modalEl);
-        // Only reset meter_amount, mixer_car_id, mixer_driver_id
-        modalEl.addEventListener('shown.bs.modal', function handler() {
-          document.getElementById('meter_amount').value = '';
-          document.getElementById('mixer_car_id').value = '';
-          document.getElementById('mixer_driver_id').value = '';
-          // Remove this handler after first run to avoid double reset
-          modalEl.removeEventListener('shown.bs.modal', handler);
-        });
+        const modal = new bootstrap.Modal(document.getElementById('addConcreteReceiptModal'));
         modal.show();
       }
     });
