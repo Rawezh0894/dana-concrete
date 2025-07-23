@@ -14,7 +14,8 @@ function enableSelect2(selector, modalSelector) {
             dropdownParent: $(modalSelector),
             width: '100%',
             placeholder: "هەڵبژێرە",
-            dir: "rtl"
+            dir: "rtl",
+            matcher: customMatcher
         });
     } catch (e) {
         console.log('Error initializing select2:', e);
@@ -33,6 +34,63 @@ function enableSelect2(selector, modalSelector) {
             console.log('Select2 modal error:', e);
         }
     });
+}
+
+// Normalize Arabic/Kurdish characters for search
+function normalizeArabicKurdish(str) {
+    if (!str) return '';
+    return str
+        .replace(/[كڪ]/g, 'ک')
+        .replace(/[يى]/g, 'ی')
+        .replace(/[ةە]/g, 'ە')
+        .replace(/[ؤ]/g, 'ۆ')
+        .replace(/[إأآا]/g, 'ا')
+        .replace(/[ئء]/g, 'ئ')
+        .replace(/[و]/g, 'و')
+        .replace(/[ذ]/g, 'ذ')
+        .replace(/[ز]/g, 'ز')
+        .replace(/[ر]/g, 'ر')
+        .replace(/[ط]/g, 'ط')
+        .replace(/[ظ]/g, 'ظ')
+        .replace(/[ص]/g, 'ص')
+        .replace(/[ض]/g, 'ض')
+        .replace(/[ث]/g, 'ث')
+        .replace(/[ق]/g, 'ق')
+        .replace(/[ف]/g, 'ف')
+        .replace(/[غ]/g, 'غ')
+        .replace(/[ع]/g, 'ع')
+        .replace(/[س]/g, 'س')
+        .replace(/[ش]/g, 'ش')
+        .replace(/[ن]/g, 'ن')
+        .replace(/[م]/g, 'م')
+        .replace(/[ل]/g, 'ل')
+        .replace(/[ب]/g, 'ب')
+        .replace(/[ت]/g, 'ت')
+        .replace(/[ج]/g, 'ج')
+        .replace(/[ح]/g, 'ح')
+        .replace(/[د]/g, 'د')
+        .replace(/[پ]/g, 'پ')
+        .replace(/[چ]/g, 'چ')
+        .replace(/[ژ]/g, 'ژ')
+        .replace(/[گ]/g, 'گ')
+        .replace(/[ڕ]/g, 'ڕ')
+        .replace(/[ڵ]/g, 'ڵ')
+        .replace(/[ێ]/g, 'ێ')
+        .replace(/[ۆ]/g, 'ۆ')
+        .replace(/[ە]/g, 'ە')
+        .replace(/[ی]/g, 'ی')
+        .replace(/[ق]/g, 'ق');
+}
+function customMatcher(params, data) {
+    if ($.trim(params.term) === '') {
+        return data;
+    }
+    var term = normalizeArabicKurdish(params.term);
+    var text = normalizeArabicKurdish(data.text);
+    if (text.indexOf(term) > -1) {
+        return data;
+    }
+    return null;
 }
 
 // چالاککردنی select2 بۆ کڕیار لە مۆداڵی زیادکردن
