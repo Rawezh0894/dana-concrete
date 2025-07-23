@@ -449,6 +449,14 @@ $mixer_drivers = array_filter($employees, function ($emp) use ($mixer_names) {
       canDelete: <?php echo hasPermission('delete_concrete_receipts') ? 'true' : 'false'; ?>,
       canPrint: <?php echo hasPermission('print_concrete_receipts') ? 'true' : 'false'; ?>
     };
+    // Auto-open add modal if redirected with ?open_add=1
+    document.addEventListener('DOMContentLoaded', function() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('open_add') === '1') {
+        const modal = new bootstrap.Modal(document.getElementById('addConcreteReceiptModal'));
+        modal.show();
+      }
+    });
   </script>
 </body>
 
