@@ -190,7 +190,7 @@ $mixer_drivers = array_filter($employees, function ($emp) use ($mixer_names) {
               </div>
               <div class="col-md-6">
                 <label for="customer_id" class="form-label">ناوی کڕیار</label>
-                <select class="form-select" id="customer_id" name="customer_id">
+                <select class="form-select" id="customer_id" name="customer_id" required>
                   <option value="">هەڵبژێرە</option>
                   <?php foreach ($customers as $c): ?>
                     <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['name']) ?></option>
@@ -304,7 +304,7 @@ $mixer_drivers = array_filter($employees, function ($emp) use ($mixer_names) {
               </div>
               <div class="col-md-6">
                 <label for="edit_customer_id" class="form-label">ناوی کڕیار</label>
-                <select class="form-select" id="edit_customer_id" name="customer_id">
+                <select class="form-select" id="edit_customer_id" name="customer_id" required>
                   <option value="">هەڵبژێرە</option>
                   <?php foreach ($customers as $c): ?>
                     <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['name']) ?></option>
