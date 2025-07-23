@@ -36,7 +36,8 @@ const TableController = {
                     const val = parseFloat(row[col]);
                     td.textContent = (val && val !== 0) ? (val.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' Kg') : '-';
                 } else {
-                    td.textContent = (row[col] !== undefined && row[col] !== null && row[col] !== '') ? row[col] : '-';
+                    // Always render a cell, even if row[col] is undefined/null/empty
+                    td.textContent = (typeof row[col] !== 'undefined' && row[col] !== null && row[col] !== '') ? row[col] : '-';
                 }
                 tr.appendChild(td);
             });
