@@ -93,7 +93,7 @@ $receipt_id = isset($_GET['id']) ? $_GET['id'] : null;
         <!-- Date, Location, Customer info -->
         <div class="customer-info" style="margin-top:5px;margin-buttom:5px;">
             <div>
-                <strong>کڕیار:</strong> <span id="customer_name">-</span> <span id="receiver_name">-</span>
+                <strong>کڕیار:</strong> <span id="customer_name">-</span><span id="receiver_name"></span>
             </div>
           
             <div>
@@ -213,6 +213,18 @@ $receipt_id = isset($_GET['id']) ? $_GET['id'] : null;
     window.addEventListener('afterprint', function() {
         window.location.href = '../pages/concrete_receipts.php?open_add=1';
     });
+
+    // Patch: Hide dash if receiver_name is empty
+    function setCustomerAndReceiver(customer, receiver) {
+        var customerSpan = document.getElementById('customer_name');
+        var receiverSpan = document.getElementById('receiver_name');
+        customerSpan.textContent = customer || '-';
+        if (receiver && receiver.trim() !== '') {
+            receiverSpan.textContent = ' - ' + receiver;
+        } else {
+            receiverSpan.textContent = '';
+        }
+    }
     </script>
 <?php if (isset($_GET['auto_print'])): ?>
     <script>

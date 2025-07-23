@@ -38,9 +38,7 @@ function populateReceiptData(data) {
     setElementText('customer_name', receipt.customer_name || '-');
     setElementText('location', receipt.location || '-');
     setElementText('created_date', data.formatted_date || '-');
-    // receiver_name: show empty if falsy or only whitespace
-    let receiverName = (receipt.receiver_name || '').trim();
-    setElementText('receiver_name', receiverName ? receiverName : '');
+    setElementText('receiver_name', receipt.receiver_name || '-'); // ✅ گوێزرایەوە بۆ ئێرە
     
     // Populate customer phone
     let phoneText = receipt.customer_phone || '-';
