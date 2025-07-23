@@ -65,67 +65,6 @@ async function loadConcreteReceiptsTable() {
 document.addEventListener('DOMContentLoaded', loadConcreteReceiptsTable);
 window.reloadConcreteReceipts = loadConcreteReceiptsTable;
 
-$(document).ready(function() {
-    function loadConcreteReceipts() {
-        $.ajax({
-            url: '../process/concrete_receipts/select_concrete_receipts.php',
-            method: 'GET',
-            dataType: 'json',
-            success: function(response) {
-                if (response.success) {
-                    if (response.data.length === 0) {
-                        $('#concreteReceiptsTable tbody').html('<tr><td colspan="13">هیچ پسوڵەیەک نیە</td></tr>');
-                        return;
-                    }
-
-                    let rows = '';
-                    response.data.forEach(function(receipt, idx) {
-                        function formatNumber(n) {
-                            if (n === null || n === undefined || n === '') return '';
-                            return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-                        }
-
-                        rows += `<tr>
-                            <td>${idx + 1}</td>
-                            <td>${receipt.receipt_number || '-'}</td>
-                            <td>${receipt.customer_name || '-'}</td>
-                            <td>${receipt.location || '-'}</td>
-                            <td>${receipt.receiver_name || '-'}</td> <!-- ✅ نوێ -->
-                            <td>${(function(dt) {
-                                if (!dt) return '-';
-                                const d = new Date(dt);
-                                if (isNaN(d)) return dt;
-                                return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0') + ' ' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
-                            })(receipt.created_at)}</td>
-                            <td>${receipt.meter_amount !== null && receipt.meter_amount !== undefined && receipt.meter_amount !== '' ? formatNumber(receipt.meter_amount) + ' m³' : '-'}</td>
-                            <td>${receipt.formula_name || '-'}</td>
-                            <td>${receipt.pump_car_name || '-'}</td>
-                            <td>${receipt.pump_driver_name || '-'}</td>
-                            <td>${receipt.mixer_car_name || '-'}</td>
-                            <td>${receipt.mixer_driver_name || '-'}</td>
-                            <td>
-                                ${window.userPermissions && window.userPermissions.canEdit ? `<button class='btn btn-sm btn-warning edit-receipt' data-id='${receipt.id}' title='نوێکردنەوە'><i class='fa fa-edit'></i></button>` : ''}
-                                ${window.userPermissions && window.userPermissions.canDelete ? `<button class='btn btn-sm btn-danger delete-receipt' data-id='${receipt.id}' title='سڕینەوە'><i class='fa fa-trash'></i></button>` : ''}
-                                ${window.userPermissions && window.userPermissions.canPrint ? `<button class='btn btn-sm btn-info print-receipt' data-id='${receipt.id}' title='پرێنت'><i class='fa fa-print'></i></button>` : ''}
-                            </td>
-                        </tr>`;
-                    });
-
-                    $('#concreteReceiptsTable tbody').html(rows);
-                } else {
-                    $('#concreteReceiptsTable tbody').html('<tr><td colspan="13">هەڵەیەک روویدا</td></tr>');
-                }
-            },
-            error: function() {
-                $('#concreteReceiptsTable tbody').html('<tr><td colspan="13">هەڵەیەک روویدا</td></tr>');
-            }
-        });
-    }
-
-    loadConcreteReceipts();
-    window.reloadConcreteReceipts = loadConcreteReceipts;
-});
-
 $(document).on('click', '.print-receipt', function() {
     var id = $(this).data('id');
     if (typeof Swal !== 'undefined') {
