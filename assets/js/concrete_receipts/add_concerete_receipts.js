@@ -1,5 +1,32 @@
 let submitting = false;
 $(document).ready(function() {
+    // Restore form data from localStorage
+    const storageKey = 'addConcreteReceiptFormData';
+    const $form = $('#addConcreteReceiptForm');
+    const saved = localStorage.getItem(storageKey);
+    if (saved) {
+        try {
+            const data = JSON.parse(saved);
+            Object.entries(data).forEach(([k, v]) => {
+                if (k === 'receipt_number') return; // never restore receipt_number
+                const $el = $form.find(`[name="${k}"]`);
+                if ($el.is('select')) {
+                    $el.val(v).trigger('change');
+                } else {
+                    $el.val(v);
+                }
+            });
+        } catch(e) {}
+    }
+    // Save form data on change
+    $form.on('input change', 'input, select, textarea', function() {
+        const data = {};
+        $form.serializeArray().forEach(({name, value}) => {
+            if (name !== 'receipt_number') data[name] = value;
+        });
+        localStorage.setItem(storageKey, JSON.stringify(data));
+    });
+
     $('#addConcreteReceiptForm').on('submit', async function(e) {
         if (submitting) return false;
         submitting = true;
@@ -28,6 +55,7 @@ $(document).ready(function() {
                     $('#addConcreteReceiptModal').modal('hide');
                     if (window.reloadConcreteReceipts) window.reloadConcreteReceipts();
                     if (window.reloadConcreteReceiptsSummary) window.reloadConcreteReceiptsSummary();
+                    localStorage.removeItem(storageKey);
                 }
             });
         } else {
