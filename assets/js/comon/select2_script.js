@@ -1,6 +1,6 @@
 // گشتی: چالاککردنی select2 بۆ هەر select ـێک
 function enableSelect2(selector, modalSelector) {
-    // چێککردنی select2 ئەگەر پێشتر چالاک نەبووبێت
+    // Destroy previous select2 instance if exists
     if ($(selector).hasClass('select2-hidden-accessible')) {
         try {
             $(selector).select2('destroy');
@@ -8,12 +8,10 @@ function enableSelect2(selector, modalSelector) {
             console.log('Error destroying select2:', e);
         }
     }
-    
-    // چێککردنی select2
+    // Initialize select2 (no theme for max compatibility)
     try {
         $(selector).select2({
             dropdownParent: $(modalSelector),
-            theme: 'bootstrap-5',
             width: '100%',
             placeholder: "هەڵبژێرە",
             dir: "rtl"
@@ -22,8 +20,7 @@ function enableSelect2(selector, modalSelector) {
         console.log('Error initializing select2:', e);
         return;
     }
-    
-    // بۆ ئەوەی dropdown لە مۆداڵی bootstrap 5 کار بکات
+    // Fix: Only initialize once per modal show
     $(modalSelector).off('shown.bs.modal.select2').on('shown.bs.modal.select2', function () {
         try {
             if ($(selector).length > 0 && $(selector).hasClass('select2-hidden-accessible')) {
@@ -64,3 +61,10 @@ $(document).ready(function() {
         enableSelect2('#edit_customer_id', '#editConcreteReceiptModal');
     }
 });
+
+// Add CSS for select2 dropdown scroll
+if (typeof window !== 'undefined') {
+    var style = document.createElement('style');
+    style.innerHTML = '.select2-results__options { max-height: 220px !important; overflow-y: auto !important; }';
+    document.head.appendChild(style);
+}
