@@ -43,7 +43,7 @@ try {
         $pump_driver_id !== '' ? $pump_driver_id : null,
         $mixer_car_id ?: null,
         $mixer_driver_id ?: null,
-        $receiver_name,
+        $receiver_name !== '' ? $receiver_name : null,
         $id
     ]);
     require_once __DIR__ . '/../../includes/notify.php';

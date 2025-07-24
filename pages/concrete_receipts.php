@@ -318,7 +318,7 @@ $mixer_drivers = array_filter($employees, function ($emp) {
               </div>
               <div class="col-md-6">
                 <label for="edit_receiver_name" class="form-label">وەرگر</label>
-                <input type="text" class="form-control" id="edit_receiver_name" name="edit_receiver_name" required>
+                <input type="text" class="form-control" id="edit_receiver_name" name="edit_receiver_name">
               </div>
               <div class="col-md-6">
                 <label for="edit_meter_amount" class="form-label">بڕی مەتر سێجا</label>
