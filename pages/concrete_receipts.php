@@ -40,15 +40,6 @@ $mixer_drivers = array_filter($employees, function ($emp) {
     $excluded = ['بەرزان', 'شاڵاو', 'سەربەست'];
     return $emp['role'] === 'شۆفێر' && !in_array(trim($emp['name']), $excluded, true);
 });
-
-// Find if there is a car named 'بەبێ پەمپ' in the cars table
-$has_no_pump_car = false;
-foreach ($cars as $car) {
-  if (trim($car['name']) === 'بەبێ پەمپ') {
-    $has_no_pump_car = true;
-    break;
-  }
-}
 ?>
 <!DOCTYPE html>
 <html lang="ku">
@@ -267,16 +258,12 @@ foreach ($cars as $car) {
                       <label for="pump_car_id" class="form-label">کۆدی پەمپ</label>
                       <select class="form-select" id="pump_car_id" name="pump_car_id" required>
                         <option value="">هەڵبژێرە</option>
-                        <?php if ($has_no_pump_car): ?>
-                          <?php foreach ($cars as $car): ?>
-                            <?php if (trim($car['name']) === 'بەبێ پەمپ'): ?>
-                              <option value="<?= $car['id'] ?>">بەبێ پەمپ</option>
-                            <?php endif; ?>
-                          <?php endforeach; ?>
-                        <?php endif; ?>
-                        <?php foreach ($pump_cars as $car): ?>
+                        <?php foreach ($pump_cars as $car):
+                          $name = trim($car['name']);
+                          if (in_array($name, ['P1', 'P2', 'P3', 'بێ پەمپ'], true)):
+                        ?>
                           <option value="<?= $car['id'] ?>"><?= htmlspecialchars($car['name']) ?></option>
-                        <?php endforeach; ?>
+                        <?php endif; endforeach; ?>
                       </select>
                     </div>
                     <div class="mb-3">
@@ -385,13 +372,6 @@ foreach ($cars as $car) {
                       <label for="edit_pump_car_id" class="form-label">کۆدی پەمپ</label>
                       <select class="form-select" id="edit_pump_car_id" name="pump_car_id" required>
                         <option value="">هەڵبژێرە</option>
-                        <?php if ($has_no_pump_car): ?>
-                          <?php foreach ($cars as $car): ?>
-                            <?php if (trim($car['name']) === 'بەبێ پەمپ'): ?>
-                              <option value="<?= $car['id'] ?>">بەبێ پەمپ</option>
-                            <?php endif; ?>
-                          <?php endforeach; ?>
-                        <?php endif; ?>
                         <?php foreach ($pump_cars as $car): ?>
                           <option value="<?= $car['id'] ?>"><?= htmlspecialchars($car['name']) ?></option>
                         <?php endforeach; ?>
