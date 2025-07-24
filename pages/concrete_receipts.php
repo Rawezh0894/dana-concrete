@@ -256,19 +256,16 @@ $mixer_drivers = array_filter($employees, function ($emp) {
                   <div class="card-body">
                     <div class="mb-3">
                       <label for="pump_car_id" class="form-label">کۆدی پەمپ</label>
-                      <select class="form-select" id="pump_car_id" name="pump_car_id" required>
+                      <select class="form-select" id="pump_car_id" name="pump_car_id">
                         <option value="">هەڵبژێرە</option>
-                        <?php foreach ($pump_cars as $car):
-                          $name = trim($car['name']);
-                          if (in_array($name, ['P1', 'P2', 'P3', 'بێ پەمپ'], true)):
-                        ?>
+                        <?php foreach ($pump_cars as $car): ?>
                           <option value="<?= $car['id'] ?>"><?= htmlspecialchars($car['name']) ?></option>
-                        <?php endif; endforeach; ?>
+                        <?php endforeach; ?>
                       </select>
                     </div>
                     <div class="mb-3">
                       <label for="pump_driver_id" class="form-label">شۆفێری پەمپ</label>
-                      <select class="form-select" id="pump_driver_id" name="pump_driver_id" required>
+                      <select class="form-select" id="pump_driver_id" name="pump_driver_id">
                         <option value="">هەڵبژێرە</option>
                         <?php foreach ($pump_drivers as $emp): ?>
                           <option value="<?= $emp['id'] ?>"><?= htmlspecialchars($emp['name']) ?></option>
@@ -370,7 +367,7 @@ $mixer_drivers = array_filter($employees, function ($emp) {
                   <div class="card-body">
                     <div class="mb-3">
                       <label for="edit_pump_car_id" class="form-label">کۆدی پەمپ</label>
-                      <select class="form-select" id="edit_pump_car_id" name="pump_car_id" required>
+                      <select class="form-select" id="edit_pump_car_id" name="pump_car_id">
                         <option value="">هەڵبژێرە</option>
                         <?php foreach ($pump_cars as $car): ?>
                           <option value="<?= $car['id'] ?>"><?= htmlspecialchars($car['name']) ?></option>
@@ -379,7 +376,7 @@ $mixer_drivers = array_filter($employees, function ($emp) {
                     </div>
                     <div class="mb-3">
                       <label for="edit_pump_driver_id" class="form-label">شۆفێری پەمپ</label>
-                      <select class="form-select" id="edit_pump_driver_id" name="pump_driver_id" required>
+                      <select class="form-select" id="edit_pump_driver_id" name="pump_driver_id">
                         <option value="">هەڵبژێرە</option>
                         <?php foreach ($pump_drivers as $emp): ?>
                           <option value="<?= $emp['id'] ?>"><?= htmlspecialchars($emp['name']) ?></option>
