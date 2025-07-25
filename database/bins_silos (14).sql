@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 23, 2025 at 07:16 AM
+-- Generation Time: Jul 25, 2025 at 08:31 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -42,14 +42,15 @@ CREATE TABLE `bins_silos` (
 --
 
 INSERT INTO `bins_silos` (`id`, `name`, `type`, `material_type`, `amount`, `total_value`, `average_price`) VALUES
-(1, 'چاوی ١', 'چاو', 'لمی ڕەش', 10380.00, 0.00, 0.00),
-(2, 'چاوی ٢', 'چاو', 'لمی کەسارە', 47540.00, 0.00, 0.00),
-(3, 'چاوی ٣', 'چاو', 'چەو', 25190.00, 0.00, 0.00),
-(4, 'چاوی ٤', 'چاو', 'چەو', 28980.00, 0.00, 0.00),
-(5, 'سایلۆی ١', 'سایلۆ', 'چیمەنتۆ', 120870.00, 0.00, 0.00),
-(6, 'سایلۆی ٢', 'سایلۆ', 'چیمەنتۆ', 219460.00, 0.00, 0.00),
-(7, 'تەنکی دەرمان ١', 'تەنکی', 'دەرمان', 521986.00, 0.00, 0.00),
-(8, 'تەکی گاز ١', 'تەنکی', 'گاز', 67000.00, 0.00, 0.00);
+(1, 'چاوی ١', 'چاو', 'لمی ڕەش', 66000.00, 669000.00, 10093.75),
+(2, 'چاوی ٢', 'چاو', 'لمی کەسارە', 0.00, 0.00, 0.00),
+(3, 'چاوی ٣', 'چاو', 'چەو', 0.00, 0.00, 0.00),
+(4, 'چاوی ٤', 'چاو', 'چەو', 0.00, 0.00, 0.00),
+(5, 'سایلۆی ١', 'سایلۆ', 'چیمەنتۆ', 0.00, 0.00, 0.00),
+(6, 'سایلۆی ٢', 'سایلۆ', 'چیمەنتۆ', 0.00, 0.00, 0.00),
+(7, 'تەنکی دەرمان ١', 'تەنکی', 'دەرمان', 0.00, 0.00, 0.00),
+(8, 'تەکی گاز ١', 'تەنکی', 'گاز', 0.00, 0.00, 0.00),
+(11, 'تەنکی گازی 2', 'تەنکی', 'گاز', 0.00, 0.00, 0.00);
 
 --
 -- Triggers `bins_silos`
@@ -67,23 +68,6 @@ CREATE TRIGGER `trg_bins_silos_no_negative_amount` BEFORE UPDATE ON `bins_silos`
   IF NEW.amount < 0 THEN
     SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'بڕی ستۆک نابێت منفی بێت!';
   END IF;
-END
-$$
-DELIMITER ;
-DELIMITER $$
-CREATE TRIGGER trg_update_total_value_bins_silos BEFORE UPDATE ON bins_silos FOR EACH ROW BEGIN
-    SET NEW.total_value = NEW.amount * NEW.average_price;
-END
-$$
-DELIMITER ;
-DELIMITER $$
-CREATE TRIGGER trg_restore_gas_on_delete_other_expenses AFTER DELETE ON other_expenses FOR EACH ROW BEGIN
-    IF OLD.gas_liters IS NOT NULL AND OLD.gas_liters > 0 THEN
-        UPDATE bins_silos
-        SET amount = amount + OLD.gas_liters
-        WHERE type = 'تەنکی' AND material_type = 'گاز'
-        LIMIT 1;
-    END IF;
 END
 $$
 DELIMITER ;
@@ -106,7 +90,7 @@ ALTER TABLE `bins_silos`
 -- AUTO_INCREMENT for table `bins_silos`
 --
 ALTER TABLE `bins_silos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

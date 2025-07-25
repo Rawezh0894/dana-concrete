@@ -193,12 +193,12 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
             </div>
             <div class="col-md-6 mb-3">
                 <div id="pricePerKgIqdGroup">
-                    <label for="price_per_kg_iqd" class="form-label">نرخی یەک کیلۆ بە دینار</label>
-                    <input type="number" class="form-control" id="price_per_kg_iqd" name="price_per_kg_iqd" min="0" step="0.01">
+                    <label for="price_per_kg_iqd" class="form-label">نرخی یەک طەن بە دینار</label>
+                    <input type="number" class="form-control" id="price_per_kg_iqd" name="price_per_kg_iqd" min="0" step="0.01" value="0">
                 </div>
                 <div id="pricePerKgUsdGroup">
-                    <label for="price_per_kg_usd" class="form-label">نرخی یەک کیلۆ بە دۆلار</label>
-                    <input type="number" class="form-control" id="price_per_kg_usd" name="price_per_kg_usd" min="0" step="0.01">
+                    <label for="price_per_kg_usd" class="form-label">نرخی یەک طەن بە دۆلار</label>
+                    <input type="number" class="form-control" id="price_per_kg_usd" name="price_per_kg_usd" min="0" step="0.01" value="0">
                 </div>
             </div>
           </div>

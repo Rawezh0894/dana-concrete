@@ -53,6 +53,9 @@ $logout_pages = ['logout.php'];
         <?php if (hasPermission('view_materials')): ?>
           <li><a href="../pages/stock_adjustments.php" class="sidebar-link<?php if($current_page == 'stock_adjustments.php') echo ' active'; ?>"><i class="bi bi-gear me-2"></i> گۆڕانکاری مەواد</a></li>
         <?php endif; ?>
+        <?php if (hasPermission('view_bins_silos')): ?>
+          <li><a href="../pages/bins_silos.php" class="sidebar-link<?php if($current_page == 'bins_silos.php') echo ' active'; ?>"><i class="bi bi-box me-2"></i> بین/سایلۆکان</a></li>
+        <?php endif; ?>
         <?php if (hasPermission('view_accounts')): ?>
           <li><a href="../pages/add_company.php" class="sidebar-link<?php if($current_page == 'add_company.php') echo ' active'; ?>"><i class="bi bi-building me-2"></i> کۆمپانیا</a></li>
           <li><a href="../pages/add_car.php" class="sidebar-link<?php if($current_page == 'add_car.php') echo ' active'; ?>"><i class="bi bi-truck me-2"></i> سەیارەکان</a></li>

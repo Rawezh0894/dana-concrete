@@ -18,9 +18,13 @@ $(document).on('click', '.delete-purchase', function() {
                     Swal.fire('سڕایەوە!', 'کڕینەکە سڕایەوە.', 'success');
                     if (typeof loadPurchases === 'function') loadPurchases();
                 } else {
+                    console.error('Delete error:', res);
                     Swal.fire('هەڵە!', res.msg || 'هەڵەیەک ڕویدا', 'error');
                 }
-            }, 'json');
+            }, 'json').fail(function(xhr, status, error) {
+                console.error('AJAX fail:', status, error, xhr.responseText);
+                Swal.fire('هەڵە!', 'هەڵەیەک ڕویدا (AJAX)', 'error');
+            });
         }
     });
 });
