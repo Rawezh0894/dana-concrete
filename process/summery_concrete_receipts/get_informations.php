@@ -10,8 +10,8 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// Check if user has permission to view concrete receipts
-if (!hasPermission('view_concrete_receipts')) {
+// Check if user has permission to view summery concrete receipts
+if (!hasPermission('view_summery_concrete_receipts')) {
     http_response_code(403);
     echo json_encode(['error' => 'Permission denied']);
     exit;
@@ -56,7 +56,8 @@ try {
             COUNT(DISTINCT cr.id) as total_receipts,
             SUM(cr.meter_amount) as total_meter,
             COUNT(DISTINCT cr.customer_id) as total_customers,
-            AVG(cr.meter_amount) as average_meter
+            AVG(cr.meter_amount) as average_meter,
+            SUM(CASE WHEN cr.price_per_meter IS NOT NULL THEN cr.meter_amount * cr.price_per_meter ELSE 0 END) as total_price
         FROM concrete_receipts cr
         $where_clause
     ";
@@ -74,6 +75,7 @@ try {
             COUNT(cr.id) as receipt_count,
             SUM(cr.meter_amount) as total_meter,
             AVG(cr.meter_amount) as average_meter,
+            SUM(CASE WHEN cr.price_per_meter IS NOT NULL THEN cr.meter_amount * cr.price_per_meter ELSE 0 END) as total_price,
             GROUP_CONCAT(DISTINCT cf.name) as formulas_used
         FROM customers c
         LEFT JOIN concrete_receipts cr ON c.id = cr.customer_id
@@ -91,6 +93,27 @@ try {
     // Get detailed receipts for a specific customer (if requested)
     $customer_details = null;
     if (isset($_GET['get_customer_details']) && !empty($_GET['customer_id'])) {
+        // Build WHERE clause for customer details with same filters
+        $customer_details_where_conditions = ["cr.customer_id = ?"];
+        $customer_details_params = [$_GET['customer_id']];
+
+        if (!empty($formulas_id)) {
+            $customer_details_where_conditions[] = "cr.formulas_id = ?";
+            $customer_details_params[] = $formulas_id;
+        }
+
+        if (!empty($date_from)) {
+            $customer_details_where_conditions[] = "DATE(cr.created_at) >= ?";
+            $customer_details_params[] = $date_from;
+        }
+
+        if (!empty($date_to)) {
+            $customer_details_where_conditions[] = "DATE(cr.created_at) <= ?";
+            $customer_details_params[] = $date_to;
+        }
+
+        $customer_details_where_clause = "WHERE " . implode(" AND ", $customer_details_where_conditions);
+
         $customer_details_query = "
             SELECT 
                 cr.id,
@@ -98,6 +121,7 @@ try {
                 cr.location,
                 cr.receiver_name,
                 cr.meter_amount,
+                cr.price_per_meter,
                 cr.created_at,
                 cf.name as formula_name,
                 CONCAT(mc.name, ' - ', md.name) as mixer_info,
@@ -108,12 +132,12 @@ try {
             LEFT JOIN employees md ON cr.mixer_driver_id = md.id
             LEFT JOIN cars pc ON cr.pump_car_id = pc.id
             LEFT JOIN employees pd ON cr.pump_driver_id = pd.id
-            WHERE cr.customer_id = ?
+            $customer_details_where_clause
             ORDER BY cr.created_at DESC
         ";
         
         $customer_details_stmt = $pdo->prepare($customer_details_query);
-        $customer_details_stmt->execute([$_GET['customer_id']]);
+        $customer_details_stmt->execute($customer_details_params);
         $customer_details = $customer_details_stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -124,7 +148,8 @@ try {
             'total_receipts' => (int)($summary['total_receipts'] ?? 0),
             'total_meter' => round((float)($summary['total_meter'] ?? 0), 2),
             'total_customers' => (int)($summary['total_customers'] ?? 0),
-            'average_meter' => round((float)($summary['average_meter'] ?? 0), 2)
+            'average_meter' => round((float)($summary['average_meter'] ?? 0), 2),
+            'total_price' => round((float)($summary['total_price'] ?? 0), 2)
         ],
         'customer_summary' => array_map(function($customer) {
             return [
@@ -134,6 +159,7 @@ try {
                 'receipt_count' => (int)($customer['receipt_count'] ?? 0),
                 'total_meter' => round((float)($customer['total_meter'] ?? 0), 2),
                 'average_meter' => round((float)($customer['average_meter'] ?? 0), 2),
+                'total_price' => round((float)($customer['total_price'] ?? 0), 2),
                 'formulas_used' => $customer['formulas_used'] ? explode(',', $customer['formulas_used']) : []
             ];
         }, $customer_summary)
@@ -147,6 +173,7 @@ try {
                 'location' => $receipt['location'],
                 'receiver_name' => $receipt['receiver_name'],
                 'meter_amount' => round((float)$receipt['meter_amount'], 2),
+                'price_per_meter' => $receipt['price_per_meter'] ? round((float)$receipt['price_per_meter'], 2) : null,
                 'created_at' => $receipt['created_at'],
                 'formula_name' => $receipt['formula_name'],
                 'mixer_info' => $receipt['mixer_info'],

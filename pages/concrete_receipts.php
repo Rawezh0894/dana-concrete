@@ -70,12 +70,14 @@ $mixer_drivers = array_filter($employees, function ($emp) {
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">پسوڵەی کۆنکرێت</h2>
       <div class="d-flex gap-2">
-        <a href="summery_concrete_receipts.php" class="btn" style="background: #ff9800; color:white; font-weight: bold;">
-          <i class="fas fa-chart-bar me-1"></i>پوختەی پسووڵەکان
-        </a>
+        <?php if (hasPermission('view_summery_concrete_receipts')): ?>
+          <a href="summery_concrete_receipts.php" class="btn" style="background: var(--seafoam-green); color:white; font-weight: bold;">
+            <i class="fas fa-chart-bar me-1"></i>پوختەی پسووڵەکان
+          </a>
+        <?php endif; ?>
         <?php if (hasPermission('add_customer')): ?>
           <button class="btn" data-bs-toggle="modal" data-bs-target="#addCustomerModal"
-            style="background: #1976d2; color:white; font-weight: bold;">+ زیادکردنی کڕیار</button>
+            style="background: var(--seafoam-green); color:white; font-weight: bold;">+ زیادکردنی کڕیار</button>
         <?php endif; ?>
         <?php if (hasPermission('add_concrete_receipts')): ?>
           <button class="btn" data-bs-toggle="modal" data-bs-target="#addConcreteReceiptModal"

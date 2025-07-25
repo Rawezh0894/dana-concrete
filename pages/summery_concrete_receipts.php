@@ -9,8 +9,8 @@ if (!isset($_SESSION['user_id'])) {
   exit;
 }
 
-// Check if user has permission to view concrete receipts
-if (!hasPermission('view_concrete_receipts')) {
+// Check if user has permission to view summery concrete receipts
+if (!hasPermission('view_summery_concrete_receipts')) {
   echo '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;">'
     . '<i class="bi bi-lock-fill" style="font-size:5rem;color:#ccc;"></i>'
     . '<h2 style="color:#888;">توانای دەست گەیشتنت نییە بەم پەیجە</h2>'
@@ -40,50 +40,7 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-  <style>
-    @media print {
-      body * {
-        visibility: hidden;
-      }
-      #printSection, #printSection * {
-        visibility: visible;
-      }
-      #printSection {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 210mm;
-        height: 297mm;
-        margin: 0;
-        padding: 20mm;
-        font-size: 12pt;
-      }
-      .no-print {
-        display: none !important;
-      }
-    }
-    
-    .summary-card {
-      background: linear-gradient(135deg, var(--seafoam-green), var(--kelly-green));
-      color: white;
-      border-radius: 15px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    }
-    
-    .customer-summary {
-      background: #f8f9fa;
-      border-radius: 10px;
-      border-left: 4px solid var(--seafoam-green);
-    }
-    
-    .formula-badge {
-      background: var(--kelly-green);
-      color: white;
-      padding: 4px 8px;
-      border-radius: 15px;
-      font-size: 0.8rem;
-    }
-  </style>
+  
 </head>
 
 <body dir="rtl">
@@ -97,9 +54,7 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
         <a href="concrete_receipts.php" class="btn btn-secondary">
           <i class="fas fa-arrow-right me-1"></i>گەڕانەوە بۆ پسووڵەکان
         </a>
-        <button class="btn btn-success" onclick="printReport()">
-          <i class="fas fa-print me-1"></i>چاپکردن
-        </button>
+
       </div>
     </div>
 
@@ -122,19 +77,19 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
         </select>
       </div>
       <div class="col-md-2">
-        <input type="date" class="form-control" id="filter_date_from" placeholder="لە بەرواری">
+        <input type="date" class="form-control" id="filter_date_from" value="<?= date('Y-m-d') ?>" placeholder="لە بەرواری">
       </div>
       <div class="col-md-2">
-        <input type="date" class="form-control" id="filter_date_to" placeholder="بۆ بەرواری">
+        <input type="date" class="form-control" id="filter_date_to" value="<?= date('Y-m-d') ?>" placeholder="بۆ بەرواری">
       </div>
       <div class="col-md-2 d-flex gap-2">
-        <button type="button" class="btn btn-sm btn-primary" id="filter_today" data-filter="today">
+        <button type="button" class="btn btn-sm btn-primary filter-btn" id="filter_today" data-filter="today">
           <i class="fas fa-calendar-day me-1"></i>ئەمڕۆ
         </button>
-        <button type="button" class="btn btn-sm btn-warning" id="filter_yesterday" data-filter="yesterday">
+        <button type="button" class="btn btn-sm btn-warning filter-btn" id="filter_yesterday" data-filter="yesterday">
           <i class="fas fa-calendar-minus me-1"></i>دوێنێ
         </button>
-        <button type="button" class="btn btn-sm btn-secondary" id="filter_reset" data-filter="reset">
+        <button type="button" class="btn btn-sm btn-secondary filter-btn" id="filter_reset" data-filter="reset">
           <i class="fas fa-redo me-1"></i>ڕیفڕێش
         </button>
       </div>
@@ -166,14 +121,7 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
           </div>
         </div>
       </div>
-      <div class="col-md-3 mb-3">
-        <div class="card summary-card text-center">
-          <div class="card-body">
-            <h5 class="card-title">بڕی تێکڕای مەتر سێجا</h5>
-            <span id="average_meter" style="font-size:2.5rem;font-weight:bold;">0</span>
-          </div>
-        </div>
-      </div>
+
     </div>
 
     <!-- Customer Summary Table -->
@@ -190,7 +138,7 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
                 <th>ناوی کڕیار</th>
                 <th>ژمارەی پسووڵەکان</th>
                 <th>کۆی مەتر سێجا</th>
-                <th>تێکڕای مەتر سێجا</th>
+                <th>کۆی نرخ</th>
                 <th>فۆرمۆلاکان</th>
                 <th>کردارەکان</th>
               </tr>
@@ -215,6 +163,40 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
             <div id="customerDetailsContent">
               <!-- Customer details will be loaded here -->
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Price Setting Modal -->
+    <div class="modal fade" id="priceSettingModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">دانانی نرخی مەتر سێجا</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="price_per_meter" class="form-label">نرخی یەک مەتر سێجا ($)</label>
+              <input type="number" class="form-control" id="price_per_meter" step="0.01" min="0" placeholder="نرخی مەتر سێجا">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">پسووڵەکان:</label>
+              <div id="selected_receipts_list" class="border rounded p-2" style="max-height: 200px; overflow-y: auto;">
+                <!-- Selected receipts will be listed here -->
+              </div>
+            </div>
+            <div class="alert alert-info">
+              <i class="fas fa-info-circle me-2"></i>
+              ئەم نرخە بۆ هەموو پسووڵە هەڵبژێردراوەکان دانراوەتەوە
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">هەڵوەشاندنەوە</button>
+            <button type="button" class="btn btn-primary" onclick="savePricePerMeter()">
+              <i class="fas fa-save me-1"></i>پاشەکەوتکردن
+            </button>
           </div>
         </div>
       </div>

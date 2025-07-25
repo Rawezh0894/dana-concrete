@@ -32,12 +32,6 @@ $logout_pages = ['logout.php'];
     <?php if (hasPermission('view_cash_box')): ?>
       <li><a href="../pages/cash_box.php" class="sidebar-link<?php if($current_page == 'cash_box.php') echo ' active'; ?>"><i class="bi bi-cash-stack me-2"></i> قاسەکە</a></li>
     <?php endif; ?>
-    <?php if (hasPermission('view_concrete_receipts')): ?>
-      <li><a href="../pages/concrete_receipts.php" class="sidebar-link<?php if($current_page == 'concrete_receipts.php') echo ' active'; ?>"><i class="bi bi-file-earmark-text me-2"></i> پسوڵەی کۆنکرێت</a></li>
-    <?php endif; ?>
-    <?php if (hasPermission('view_concrete_formulas')): ?>
-      <li><a href="../pages/concrete_formulas.php" class="sidebar-link<?php if($current_page == 'concrete_formulas.php') echo ' active'; ?>"><i class="bi bi-calculator me-2"></i> فۆرمولای کۆنکرێت</a></li>
-    <?php endif; ?>
     <?php if (hasPermission('view_users')): ?>
       <li><a href="../pages/users.php" class="sidebar-link<?php if($current_page == 'users.php') echo ' active'; ?>"><i class="bi bi-people me-2"></i> بەکارهێنەران</a></li>
     <?php endif; ?>
@@ -45,6 +39,22 @@ $logout_pages = ['logout.php'];
       <li><a href="../pages/notifications.php" class="sidebar-link<?php if($current_page == 'notifications.php') echo ' active'; ?>"><i class="bi bi-bell me-2"></i> ئاگادارکردنەوەکان</a></li>
     <?php endif; ?>
     <!-- All dropdowns at the end -->
+    <li class="sidebar-group">
+      <button class="sidebar-group-toggle d-flex align-items-center w-100" data-bs-toggle="collapse" data-bs-target="#concreteMenu" aria-expanded="false">
+        <i class="bi bi-building me-2"></i> کۆنکرێت
+      </button>
+      <ul class="collapse sidebar-submenu" id="concreteMenu">
+        <?php if (hasPermission('view_concrete_receipts')): ?>
+          <li><a href="../pages/concrete_receipts.php" class="sidebar-link<?php if($current_page == 'concrete_receipts.php') echo ' active'; ?>"><i class="bi bi-file-earmark-text me-2"></i> پسووڵەی ناردن</a></li>
+        <?php endif; ?>
+        <?php if (hasPermission('view_summery_concrete_receipts')): ?>
+          <li><a href="../pages/summery_concrete_receipts.php" class="sidebar-link<?php if($current_page == 'summery_concrete_receipts.php') echo ' active'; ?>"><i class="bi bi-graph-up me-2"></i>پوختەی پسووڵە</a></li>
+        <?php endif; ?>
+        <?php if (hasPermission('view_concrete_formulas')): ?>
+          <li><a href="../pages/concrete_formulas.php" class="sidebar-link<?php if($current_page == 'concrete_formulas.php') echo ' active'; ?>"><i class="bi bi-calculator me-2"></i> فۆرمولاکان</a></li>
+        <?php endif; ?>
+      </ul>
+    </li>
     <li class="sidebar-group">
       <button class="sidebar-group-toggle d-flex align-items-center w-100" data-bs-toggle="collapse" data-bs-target="#materialsAccountsMenu" aria-expanded="false">
         <i class="bi bi-box-seam me-2"></i> مەواد و هەژمارەکان
