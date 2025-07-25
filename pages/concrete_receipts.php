@@ -78,6 +78,9 @@ $mixer_drivers = array_filter($employees, function ($emp) {
           <button class="btn" data-bs-toggle="modal" data-bs-target="#addConcreteReceiptModal"
             style="background: var(--seafoam-green); color:white; font-weight: bold;">+ زیادکردنی پسوڵە</button>
         <?php endif; ?>
+        <a href="summery_concrete_receipts.php" class="btn" style="background: #ff6b35; color:white; font-weight: bold;">
+          <i class="fas fa-chart-bar me-2"></i>پوختە
+        </a>
       </div>
     </div>
     <!-- Summary Cards Row -->

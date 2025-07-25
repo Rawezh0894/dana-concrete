@@ -9,7 +9,7 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// Check if user has permission to view concrete receipts summary
+// Check if user has permission to view concrete receipts
 if (!hasPermission('view_concrete_receipts')) {
     echo '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;">'
         . '<i class="bi bi-lock-fill" style="font-size:5rem;color:#ccc;"></i>'
@@ -34,7 +34,6 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
     <link href="../assets/css/comon/table.css" rel="stylesheet">
     <link href="../assets/css/comon/style.css" rel="stylesheet">
     <link href="../assets/css/comon/select2_design.css" rel="stylesheet">
-    <link href="../assets/css/summery_concrete_receipts.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
@@ -46,55 +45,60 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">پوختەی پسووڵەکانی کۆنکرێت</h2>
             <div class="d-flex gap-2">
-                <button class="btn btn-outline-primary" onclick="exportToExcel()">
-                    <i class="fas fa-file-excel me-1"></i>هەناردەکردن
+                <button class="btn btn-success" id="export_excel">
+                    <i class="fas fa-file-excel me-2"></i>ئێکسێل
                 </button>
-                <button class="btn btn-outline-success" onclick="printSummary()">
-                    <i class="fas fa-print me-1"></i>پرینت
+                <button class="btn btn-danger" id="export_pdf">
+                    <i class="fas fa-file-pdf me-2"></i>پی دی ئێف
                 </button>
+                <button class="btn btn-info" id="print_summary">
+                    <i class="fas fa-print me-2"></i>پرینت
+                </button>
+                <a href="concrete_receipts.php" class="btn btn-secondary">
+                    <i class="fas fa-arrow-right me-2"></i>گەڕانەوە
+                </a>
             </div>
         </div>
 
         <!-- Summary Cards Row -->
         <div class="row mb-4" id="summary-cards">
             <div class="col-md-3 mb-3">
-                <div class="card text-center shadow h-100 summary-card">
+                <div class="card text-center shadow h-100">
                     <div class="card-body">
                         <h5 class="card-title">کۆی گشتی پسووڵەکان</h5>
-                        <div class="summary-value" id="total_receipts" style="color:var(--seafoam-green);">0</div>
+                        <span id="total_receipts" style="font-size:2rem;font-weight:bold;color: var(--seafoam-green);">0</span>
                     </div>
                 </div>
             </div>
             <div class="col-md-3 mb-3">
-                <div class="card text-center shadow h-100 summary-card">
+                <div class="card text-center shadow h-100">
                     <div class="card-body">
                         <h5 class="card-title">کۆی گشتی بڕی مەتر سێجا</h5>
-                        <div class="summary-value" id="total_meter_cubic" style="color:var(--kelly-green);">0</div>
-                        <div class="summary-unit">م³</div>
+                        <span id="total_meter_cubic" style="font-size:2rem;font-weight:bold;color: var(--kelly-green);">0</span>
                     </div>
                 </div>
             </div>
             <div class="col-md-3 mb-3">
-                <div class="card text-center shadow h-100 summary-card">
+                <div class="card text-center shadow h-100">
                     <div class="card-body">
                         <h5 class="card-title">کۆی کڕیاران</h5>
-                        <div class="summary-value" id="total_customers" style="color:#1976d2;">0</div>
+                        <span id="total_customers" style="font-size:2rem;font-weight:bold;color: #1976d2;">0</span>
                     </div>
                 </div>
             </div>
             <div class="col-md-3 mb-3">
-                <div class="card text-center shadow h-100 summary-card">
+                <div class="card text-center shadow h-100">
                     <div class="card-body">
-                        <h5 class="card-title">کۆی فۆرمۆلاکان</h5>
-                        <div class="summary-value" id="total_formulas" style="color:#ff6b35;">0</div>
+                        <h5 class="card-title">نرخی مامناوەند</h5>
+                        <span id="average_price" style="font-size:2rem;font-weight:bold;color: #ff6b35;">0</span>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Filter Row -->
-        <div class="row g-3 mb-4 filter-section" id="filters">
-            <div class="col-md-3">
+        <div class="row g-2 mb-3">
+            <div class="col-md-2">
                 <select class="form-select" id="filter_customer_id">
                     <option value="">کڕیار: هەموو</option>
                     <?php foreach ($customers as $c): ?>
@@ -102,7 +106,7 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
                     <?php endforeach; ?>
                 </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <select class="form-select" id="filter_formula_id">
                     <option value="">فۆرمۆلا: هەموو</option>
                     <?php foreach ($formulas as $f): ?>
@@ -116,12 +120,21 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
             <div class="col-md-2">
                 <input type="date" class="form-control" id="filter_date_to" placeholder="بۆ بەرواری">
             </div>
-            <div class="col-md-2">
+            <div class="col-md-4">
                 <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-sm btn-primary" id="filter_today">
+                    <button type="button" class="btn btn-sm btn-outline-primary" id="filter_today">
                         <i class="fas fa-calendar-day me-1"></i>ئەمڕۆ
                     </button>
-                    <button type="button" class="btn btn-sm btn-secondary" id="filter_reset">
+                    <button type="button" class="btn btn-sm btn-outline-primary" id="filter_yesterday">
+                        <i class="fas fa-calendar-minus me-1"></i>دوێنێ
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-primary" id="filter_this_week">
+                        <i class="fas fa-calendar-week me-1"></i>ئەم هەفتانە
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-primary" id="filter_this_month">
+                        <i class="fas fa-calendar-alt me-1"></i>ئەم مانگانە
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="filter_reset">
                         <i class="fas fa-redo me-1"></i>ڕیفڕێش
                     </button>
                 </div>
@@ -129,30 +142,36 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
         </div>
 
         <!-- Customer Summary Table -->
-        <div class="table-responsive">
-            <table class="table table-bordered table-hover align-middle text-center summary-table" id="summaryTable">
-                <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
-                    <tr>
-                        <th>#</th>
-                        <th>ناوی کڕیار</th>
-                        <th>ژمارە تەلەفۆن</th>
-                        <th>کۆی پسووڵەکان</th>
-                        <th>کۆی بڕی مەتر سێجا</th>
-                        <th>فۆرمۆلاکان</th>
-                        <th>شوێنەکان</th>
-                        <th>وەرگرەکان</th>
-                        <th>کردارەکان</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Data will be loaded here by JavaScript -->
-                </tbody>
-            </table>
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">پوختەی کڕیاران</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle text-center" id="customerSummaryTable">
+                        <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
+                            <tr>
+                                <th>#</th>
+                                <th>ناوی کڕیار</th>
+                                <th>ژمارەی پسووڵەکان</th>
+                                <th>کۆی بڕی مەتر سێجا</th>
+                                <th>فۆرمۆلا</th>
+                                <th>شوێن</th>
+                                <th>وەرگر</th>
+                                <th>کردارەکان</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data will be loaded here by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- Customer Details Modal -->
-    <div class="modal fade customer-details-modal" id="customerDetailsModal" tabindex="-1" aria-labelledby="customerDetailsModalLabel" aria-hidden="true">
+    <div class="modal fade" id="customerDetailsModal" tabindex="-1" aria-labelledby="customerDetailsModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
@@ -161,36 +180,7 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
                 </div>
                 <div class="modal-body">
                     <div id="customerDetailsContent">
-                        <div class="customer-info">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <h6>ناوی کڕیار: <strong id="modal_customer_name">-</strong></h6>
-                                    <h6>ژمارە تەلەفۆن: <strong id="modal_customer_phone">-</strong></h6>
-                                </div>
-                                <div class="col-md-6">
-                                    <h6>کۆی پسووڵەکان: <strong id="modal_total_receipts">0</strong></h6>
-                                    <h6>کۆی بڕی مەتر سێجا: <strong id="modal_total_meter">0 م³</strong></h6>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-hover">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th>#</th>
-                                        <th>ژمارەی پسووڵە</th>
-                                        <th>بەروار</th>
-                                        <th>شوێن</th>
-                                        <th>وەرگر</th>
-                                        <th>بڕی مەتر سێجا</th>
-                                        <th>فۆرمۆلا</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="modal_receipts_table">
-                                    <!-- Receipts will be loaded here -->
-                                </tbody>
-                            </table>
-                        </div>
+                        <!-- Customer details will be loaded here -->
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -203,8 +193,17 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="../assets/js/swalAlert.js"></script>
-    <script src="../assets/js/comon/table-controler.js"></script>
-    <script src="../assets/js/summery_concrete_receipts/get_informations.js"></script>
     <script src="../assets/js/summery_concrete_receipts/filter.js"></script>
+    <script src="../assets/js/summery_concrete_receipts/get_informations.js"></script>
+    <script>
+        // Load initial data when page loads
+        $(document).ready(function() {
+            setTimeout(function() {
+                if (typeof loadSummaryData === 'function') {
+                    loadSummaryData();
+                }
+            }, 100);
+        });
+    </script>
 </body>
 </html>
