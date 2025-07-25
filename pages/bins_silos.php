@@ -117,7 +117,7 @@ $bins = $pdo->query("SELECT * FROM bins_silos")->fetchAll(PDO::FETCH_ASSOC);
           </div>
           <div class="mb-3">
             <label for="average_price" class="form-label">نرخی مامناوەند</label>
-            <input type="number" class="form-control" id="average_price" name="average_price" min="0" step="0.01" required>
+            <input type="number" class="form-control" id="average_price" name="average_price" min="0" step="0.0000001" required>
           </div>
         </div>
         <div class="modal-footer">
@@ -163,7 +163,7 @@ $bins = $pdo->query("SELECT * FROM bins_silos")->fetchAll(PDO::FETCH_ASSOC);
           </div>
           <div class="mb-3">
             <label for="edit_average_price" class="form-label">نرخی مامناوەند</label>
-            <input type="number" class="form-control" id="edit_average_price" name="average_price" min="0" step="0.01" required>
+            <input type="number" class="form-control" id="edit_average_price" name="average_price" min="0" step="0.0000001" required>
           </div>
         </div>
         <div class="modal-footer">
