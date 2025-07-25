@@ -3,24 +3,26 @@ session_start();
 require_once '../../config/db_conected.php';
 require_once '../../config/permissions.php';
 
-header('Content-Type: application/json');
-
+// Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
-    echo json_encode(['success' => false, 'message' => 'Not authenticated']);
+    http_response_code(401);
+    echo json_encode(['error' => 'Unauthorized']);
     exit;
 }
 
+// Check if user has permission to view concrete receipts
 if (!hasPermission('view_concrete_receipts')) {
-    echo json_encode(['success' => false, 'message' => 'No permission']);
+    http_response_code(403);
+    echo json_encode(['error' => 'Permission denied']);
     exit;
 }
 
 try {
     // Get filter parameters
-    $customer_id = $_GET['customer_id'] ?? '';
-    $formula_id = $_GET['formula_id'] ?? '';
-    $date_from = $_GET['date_from'] ?? '';
-    $date_to = $_GET['date_to'] ?? '';
+    $customer_id = isset($_GET['customer_id']) ? $_GET['customer_id'] : '';
+    $formulas_id = isset($_GET['formulas_id']) ? $_GET['formulas_id'] : '';
+    $date_from = isset($_GET['date_from']) ? $_GET['date_from'] : '';
+    $date_to = isset($_GET['date_to']) ? $_GET['date_to'] : '';
 
     // Build WHERE clause
     $where_conditions = [];
@@ -31,9 +33,9 @@ try {
         $params[] = $customer_id;
     }
 
-    if (!empty($formula_id)) {
+    if (!empty($formulas_id)) {
         $where_conditions[] = "cr.formulas_id = ?";
-        $params[] = $formula_id;
+        $params[] = $formulas_id;
     }
 
     if (!empty($date_from)) {
@@ -46,15 +48,15 @@ try {
         $params[] = $date_to;
     }
 
-    $where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
+    $where_clause = !empty($where_conditions) ? "WHERE " . implode(" AND ", $where_conditions) : "";
 
     // Get summary statistics
     $summary_query = "
         SELECT 
             COUNT(DISTINCT cr.id) as total_receipts,
-            SUM(cr.meter_amount) as total_meter_cubic,
+            SUM(cr.meter_amount) as total_meter,
             COUNT(DISTINCT cr.customer_id) as total_customers,
-            AVG(cr.meter_amount) as average_meter_amount
+            AVG(cr.meter_amount) as average_meter
         FROM concrete_receipts cr
         $where_clause
     ";
@@ -68,52 +70,95 @@ try {
         SELECT 
             c.id as customer_id,
             c.name as customer_name,
-            c.mobile1 as customer_phone,
+            c.mobile1,
             COUNT(cr.id) as receipt_count,
-            SUM(cr.meter_amount) as total_meter_cubic,
-            GROUP_CONCAT(DISTINCT cf.name) as formulas_used,
-            GROUP_CONCAT(DISTINCT cr.location) as locations,
-            GROUP_CONCAT(DISTINCT cr.receiver_name) as receivers
+            SUM(cr.meter_amount) as total_meter,
+            AVG(cr.meter_amount) as average_meter,
+            GROUP_CONCAT(DISTINCT cf.name) as formulas_used
         FROM customers c
         LEFT JOIN concrete_receipts cr ON c.id = cr.customer_id
         LEFT JOIN concrete_formulas cf ON cr.formulas_id = cf.id
         $where_clause
         GROUP BY c.id, c.name, c.mobile1
         HAVING receipt_count > 0
-        ORDER BY total_meter_cubic DESC
+        ORDER BY total_meter DESC
     ";
 
     $customer_summary_stmt = $pdo->prepare($customer_summary_query);
     $customer_summary_stmt->execute($params);
     $customer_summary = $customer_summary_stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Get detailed customer information
-    $customer_details_query = "
-        SELECT 
-            cr.id,
-            cr.receipt_number,
-            cr.location,
-            cr.receiver_name,
-            cr.meter_amount,
-            cr.created_at,
-            cf.name as formula_name
-        FROM concrete_receipts cr
-        LEFT JOIN concrete_formulas cf ON cr.formulas_id = cf.id
-        WHERE cr.customer_id = ?
-        ORDER BY cr.created_at DESC
-    ";
+    // Get detailed receipts for a specific customer (if requested)
+    $customer_details = null;
+    if (isset($_GET['get_customer_details']) && !empty($_GET['customer_id'])) {
+        $customer_details_query = "
+            SELECT 
+                cr.id,
+                cr.receipt_number,
+                cr.location,
+                cr.receiver_name,
+                cr.meter_amount,
+                cr.created_at,
+                cf.name as formula_name,
+                CONCAT(mc.name, ' - ', md.name) as mixer_info,
+                CONCAT(pc.name, ' - ', pd.name) as pump_info
+            FROM concrete_receipts cr
+            LEFT JOIN concrete_formulas cf ON cr.formulas_id = cf.id
+            LEFT JOIN cars mc ON cr.mixer_car_id = mc.id
+            LEFT JOIN employees md ON cr.mixer_driver_id = md.id
+            LEFT JOIN cars pc ON cr.pump_car_id = pc.id
+            LEFT JOIN employees pd ON cr.pump_driver_id = pd.id
+            WHERE cr.customer_id = ?
+            ORDER BY cr.created_at DESC
+        ";
+        
+        $customer_details_stmt = $pdo->prepare($customer_details_query);
+        $customer_details_stmt->execute([$_GET['customer_id']]);
+        $customer_details = $customer_details_stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
-    echo json_encode([
+    // Format the response with null checks
+    $response = [
         'success' => true,
-        'summary' => $summary,
-        'customer_summary' => $customer_summary,
-        'customer_details_query' => $customer_details_query
-    ]);
+        'summary' => [
+            'total_receipts' => (int)($summary['total_receipts'] ?? 0),
+            'total_meter' => round((float)($summary['total_meter'] ?? 0), 2),
+            'total_customers' => (int)($summary['total_customers'] ?? 0),
+            'average_meter' => round((float)($summary['average_meter'] ?? 0), 2)
+        ],
+        'customer_summary' => array_map(function($customer) {
+            return [
+                'customer_id' => (int)($customer['customer_id'] ?? 0),
+                'customer_name' => $customer['customer_name'] ?? 'Unknown',
+                'mobile1' => $customer['mobile1'] ?? '',
+                'receipt_count' => (int)($customer['receipt_count'] ?? 0),
+                'total_meter' => round((float)($customer['total_meter'] ?? 0), 2),
+                'average_meter' => round((float)($customer['average_meter'] ?? 0), 2),
+                'formulas_used' => $customer['formulas_used'] ? explode(',', $customer['formulas_used']) : []
+            ];
+        }, $customer_summary)
+    ];
+
+    if ($customer_details !== null) {
+        $response['customer_details'] = array_map(function($receipt) {
+            return [
+                'id' => (int)$receipt['id'],
+                'receipt_number' => $receipt['receipt_number'],
+                'location' => $receipt['location'],
+                'receiver_name' => $receipt['receiver_name'],
+                'meter_amount' => round((float)$receipt['meter_amount'], 2),
+                'created_at' => $receipt['created_at'],
+                'formula_name' => $receipt['formula_name'],
+                'mixer_info' => $receipt['mixer_info'],
+                'pump_info' => $receipt['pump_info']
+            ];
+        }, $customer_details);
+    }
+
+    echo json_encode($response);
 
 } catch (Exception $e) {
-    echo json_encode([
-        'success' => false,
-        'message' => 'Database error: ' . $e->getMessage()
-    ]);
+    http_response_code(500);
+    echo json_encode(['error' => 'Database error: ' . $e->getMessage()]);
 }
 ?>

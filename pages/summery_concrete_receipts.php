@@ -5,17 +5,17 @@ require_once '../config/permissions.php';
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
-    header('Location: ../index.php');
-    exit;
+  header('Location: ../index.php');
+  exit;
 }
 
 // Check if user has permission to view concrete receipts
 if (!hasPermission('view_concrete_receipts')) {
-    echo '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;">'
-        . '<i class="bi bi-lock-fill" style="font-size:5rem;color:#ccc;"></i>'
-        . '<h2 style="color:#888;">توانای دەست گەیشتنت نییە بەم پەیجە</h2>'
-        . '</div>';
-    exit;
+  echo '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;">'
+    . '<i class="bi bi-lock-fill" style="font-size:5rem;color:#ccc;"></i>'
+    . '<h2 style="color:#888;">توانای دەست گەیشتنت نییە بەم پەیجە</h2>'
+    . '</div>';
+  exit;
 }
 
 $customers = $pdo->query("SELECT id, name, mobile1 FROM customers")->fetchAll(PDO::FETCH_ASSOC);
@@ -23,187 +23,284 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
 ?>
 <!DOCTYPE html>
 <html lang="ku">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>پوختەی پسووڵەکانی کۆنکرێت</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
-    <link href="../assets/css/login.css" rel="stylesheet">
-    <link href="../assets/css/variables.css" rel="stylesheet">
-    <link href="../assets/css/nav.css" rel="stylesheet">
-    <link href="../assets/css/comon/table.css" rel="stylesheet">
-    <link href="../assets/css/comon/style.css" rel="stylesheet">
-    <link href="../assets/css/comon/select2_design.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-</head>
-<body dir="rtl">
-    <?php include '../includes/navbar.php'; ?>
-    <?php include '../includes/sidebar.php'; ?>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>پوختەی پسووڵەکانی کۆنکرێت</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+  <link href="../assets/css/login.css" rel="stylesheet">
+  <link href="../assets/css/variables.css" rel="stylesheet">
+  <link href="../assets/css/nav.css" rel="stylesheet">
+  <link href="../assets/css/comon/table.css" rel="stylesheet">
+  <link href="../assets/css/comon/style.css" rel="stylesheet">
+  <link href="../assets/css/comon/select2_design.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link href="../assets/css/summery_concrete_receipts.css" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <style>
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #printSection, #printSection * {
+        visibility: visible;
+      }
+      #printSection {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 210mm;
+        height: 297mm;
+        margin: 0;
+        padding: 20mm;
+        font-size: 12pt;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
     
-    <div class="container-fluid py-5">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">پوختەی پسووڵەکانی کۆنکرێت</h2>
-            <div class="d-flex gap-2">
-                <button class="btn btn-success" id="export_excel">
-                    <i class="fas fa-file-excel me-2"></i>ئێکسێل
-                </button>
-                <button class="btn btn-danger" id="export_pdf">
-                    <i class="fas fa-file-pdf me-2"></i>پی دی ئێف
-                </button>
-                <button class="btn btn-info" id="print_summary">
-                    <i class="fas fa-print me-2"></i>پرینت
-                </button>
-                <a href="concrete_receipts.php" class="btn btn-secondary">
-                    <i class="fas fa-arrow-right me-2"></i>گەڕانەوە
-                </a>
-            </div>
-        </div>
+    .summary-card {
+      background: linear-gradient(135deg, var(--seafoam-green), var(--kelly-green));
+      color: white;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .customer-summary {
+      background: #f8f9fa;
+      border-radius: 10px;
+      border-left: 4px solid var(--seafoam-green);
+    }
+    
+    .formula-badge {
+      background: var(--kelly-green);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 15px;
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
 
-        <!-- Summary Cards Row -->
-        <div class="row mb-4" id="summary-cards">
-            <div class="col-md-3 mb-3">
-                <div class="card text-center shadow h-100">
-                    <div class="card-body">
-                        <h5 class="card-title">کۆی گشتی پسووڵەکان</h5>
-                        <span id="total_receipts" style="font-size:2rem;font-weight:bold;color: var(--seafoam-green);">0</span>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 mb-3">
-                <div class="card text-center shadow h-100">
-                    <div class="card-body">
-                        <h5 class="card-title">کۆی گشتی بڕی مەتر سێجا</h5>
-                        <span id="total_meter_cubic" style="font-size:2rem;font-weight:bold;color: var(--kelly-green);">0</span>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 mb-3">
-                <div class="card text-center shadow h-100">
-                    <div class="card-body">
-                        <h5 class="card-title">کۆی کڕیاران</h5>
-                        <span id="total_customers" style="font-size:2rem;font-weight:bold;color: #1976d2;">0</span>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 mb-3">
-                <div class="card text-center shadow h-100">
-                    <div class="card-body">
-                        <h5 class="card-title">نرخی مامناوەند</h5>
-                        <span id="average_price" style="font-size:2rem;font-weight:bold;color: #ff6b35;">0</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+<body dir="rtl">
+  <?php include '../includes/navbar.php'; ?>
+  <?php include '../includes/sidebar.php'; ?>
+  
+  <div class="container-fluid py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">پوختەی پسووڵەکانی کۆنکرێت</h2>
+      <div class="d-flex gap-2">
+        <a href="concrete_receipts.php" class="btn btn-secondary">
+          <i class="fas fa-arrow-right me-1"></i>گەڕانەوە بۆ پسووڵەکان
+        </a>
+        <button class="btn btn-success" onclick="printReport()">
+          <i class="fas fa-print me-1"></i>چاپکردن
+        </button>
+      </div>
+    </div>
 
-        <!-- Filter Row -->
-        <div class="row g-2 mb-3">
-            <div class="col-md-2">
-                <select class="form-select" id="filter_customer_id">
-                    <option value="">کڕیار: هەموو</option>
-                    <?php foreach ($customers as $c): ?>
-                        <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['name']) ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <select class="form-select" id="filter_formula_id">
-                    <option value="">فۆرمۆلا: هەموو</option>
-                    <?php foreach ($formulas as $f): ?>
-                        <option value="<?= $f['id'] ?>"><?= htmlspecialchars($f['name']) ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <input type="date" class="form-control" id="filter_date_from" placeholder="لە بەرواری">
-            </div>
-            <div class="col-md-2">
-                <input type="date" class="form-control" id="filter_date_to" placeholder="بۆ بەرواری">
-            </div>
-            <div class="col-md-4">
-                <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-sm btn-outline-primary" id="filter_today">
-                        <i class="fas fa-calendar-day me-1"></i>ئەمڕۆ
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-primary" id="filter_yesterday">
-                        <i class="fas fa-calendar-minus me-1"></i>دوێنێ
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-primary" id="filter_this_week">
-                        <i class="fas fa-calendar-week me-1"></i>ئەم هەفتانە
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-primary" id="filter_this_month">
-                        <i class="fas fa-calendar-alt me-1"></i>ئەم مانگانە
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary" id="filter_reset">
-                        <i class="fas fa-redo me-1"></i>ڕیفڕێش
-                    </button>
-                </div>
-            </div>
-        </div>
+    <!-- Filter Row -->
+    <div class="row g-2 mb-3 no-print">
+      <div class="col-md-3">
+        <select class="form-select" id="filter_customer_id">
+          <option value="">کڕیار: هەموو</option>
+          <?php foreach ($customers as $c): ?>
+            <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['name']) ?></option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <select class="form-select" id="filter_formulas_id">
+          <option value="">ڕێژە: هەموو</option>
+          <?php foreach ($formulas as $f): ?>
+            <option value="<?= $f['id'] ?>"><?= htmlspecialchars($f['name']) ?></option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <input type="date" class="form-control" id="filter_date_from" placeholder="لە بەرواری">
+      </div>
+      <div class="col-md-2">
+        <input type="date" class="form-control" id="filter_date_to" placeholder="بۆ بەرواری">
+      </div>
+      <div class="col-md-2 d-flex gap-2">
+        <button type="button" class="btn btn-sm btn-primary" id="filter_today" data-filter="today">
+          <i class="fas fa-calendar-day me-1"></i>ئەمڕۆ
+        </button>
+        <button type="button" class="btn btn-sm btn-warning" id="filter_yesterday" data-filter="yesterday">
+          <i class="fas fa-calendar-minus me-1"></i>دوێنێ
+        </button>
+        <button type="button" class="btn btn-sm btn-secondary" id="filter_reset" data-filter="reset">
+          <i class="fas fa-redo me-1"></i>ڕیفڕێش
+        </button>
+      </div>
+    </div>
 
-        <!-- Customer Summary Table -->
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">پوختەی کڕیاران</h5>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover align-middle text-center" id="customerSummaryTable">
-                        <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
-                            <tr>
-                                <th>#</th>
-                                <th>ناوی کڕیار</th>
-                                <th>ژمارەی پسووڵەکان</th>
-                                <th>کۆی بڕی مەتر سێجا</th>
-                                <th>فۆرمۆلا</th>
-                                <th>شوێن</th>
-                                <th>وەرگر</th>
-                                <th>کردارەکان</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Data will be loaded here by JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+    <!-- Summary Cards -->
+    <div class="row mb-4" id="summary-cards">
+      <div class="col-md-3 mb-3">
+        <div class="card summary-card text-center">
+          <div class="card-body">
+            <h5 class="card-title">کۆی گشتی پسووڵەکان</h5>
+            <span id="total_receipts" style="font-size:2.5rem;font-weight:bold;">0</span>
+          </div>
         </div>
+      </div>
+      <div class="col-md-3 mb-3">
+        <div class="card summary-card text-center">
+          <div class="card-body">
+            <h5 class="card-title">کۆی گشتی بڕی مەتر سێجا</h5>
+            <span id="total_meter" style="font-size:2.5rem;font-weight:bold;">0</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 mb-3">
+        <div class="card summary-card text-center">
+          <div class="card-body">
+            <h5 class="card-title">کۆی کڕیاران</h5>
+            <span id="total_customers" style="font-size:2.5rem;font-weight:bold;">0</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 mb-3">
+        <div class="card summary-card text-center">
+          <div class="card-body">
+            <h5 class="card-title">بڕی تێکڕای مەتر سێجا</h5>
+            <span id="average_meter" style="font-size:2.5rem;font-weight:bold;">0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Customer Summary Table -->
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">پوختەی کڕیاران</h5>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover" id="customerSummaryTable">
+            <thead style="background: var(--kelly-green); color: white;">
+              <tr>
+                <th>#</th>
+                <th>ناوی کڕیار</th>
+                <th>ژمارەی پسووڵەکان</th>
+                <th>کۆی مەتر سێجا</th>
+                <th>تێکڕای مەتر سێجا</th>
+                <th>فۆرمۆلاکان</th>
+                <th>کردارەکان</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Data will be loaded here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
     <!-- Customer Details Modal -->
-    <div class="modal fade" id="customerDetailsModal" tabindex="-1" aria-labelledby="customerDetailsModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="customerDetailsModalLabel">وردەکاری کڕیار</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="customerDetailsContent">
-                        <!-- Customer details will be loaded here -->
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
-                </div>
+    <div class="modal fade" id="customerDetailsModal" tabindex="-1">
+      <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">وردەکاری کڕیار</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div id="customerDetailsContent">
+              <!-- Customer details will be loaded here -->
             </div>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="../assets/js/swalAlert.js"></script>
-    <script src="../assets/js/summery_concrete_receipts/filter.js"></script>
-    <script src="../assets/js/summery_concrete_receipts/get_informations.js"></script>
-    <script>
-        // Load initial data when page loads
-        $(document).ready(function() {
-            setTimeout(function() {
-                if (typeof loadSummaryData === 'function') {
-                    loadSummaryData();
-                }
-            }, 100);
-        });
-    </script>
+  <!-- Print Section (Hidden) -->
+  <div id="printSection" style="display: none;">
+    <div style="text-align: center; margin-bottom: 30px;">
+      <h2 style="color: var(--seafoam-green); margin-bottom: 10px;">پوختەی پسووڵەکانی کۆنکرێت</h2>
+      <p style="color: #666; margin-bottom: 5px;">بەروار: <span id="print_date"></span></p>
+      <p style="color: #666;">کاتی چاپکردن: <span id="print_time"></span></p>
+    </div>
+    
+    <div style="margin-bottom: 30px;">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+        <div style="text-align: center; flex: 1; margin: 0 10px;">
+          <div style="background: var(--seafoam-green); color: white; padding: 15px; border-radius: 10px;">
+            <h4 style="margin: 0 0 10px 0;">کۆی گشتی پسووڵەکان</h4>
+            <span id="print_total_receipts" style="font-size: 2rem; font-weight: bold;">0</span>
+          </div>
+        </div>
+        <div style="text-align: center; flex: 1; margin: 0 10px;">
+          <div style="background: var(--kelly-green); color: white; padding: 15px; border-radius: 10px;">
+            <h4 style="margin: 0 0 10px 0;">کۆی گشتی مەتر سێجا</h4>
+            <span id="print_total_meter" style="font-size: 2rem; font-weight: bold;">0</span>
+          </div>
+        </div>
+        <div style="text-align: center; flex: 1; margin: 0 10px;">
+          <div style="background: #1976d2; color: white; padding: 15px; border-radius: 10px;">
+            <h4 style="margin: 0 0 10px 0;">کۆی کڕیاران</h4>
+            <span id="print_total_customers" style="font-size: 2rem; font-weight: bold;">0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div id="print_customer_details">
+      <!-- Customer details for print will be loaded here -->
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="../assets/js/swalAlert.js"></script>
+  <script src="../assets/js/comon/select2_script.js"></script>
+  <script src="../assets/js/summery_concrete_receipts/filter.js"></script>
+  <script src="../assets/js/summery_concrete_receipts/get_informations.js"></script>
+  <script>
+    function printReport() {
+      // Update print section with current data
+      document.getElementById('print_date').textContent = new Date().toLocaleDateString('ku-IQ');
+      document.getElementById('print_time').textContent = new Date().toLocaleTimeString('ku-IQ');
+      
+      // Copy summary data to print section
+      document.getElementById('print_total_receipts').textContent = document.getElementById('total_receipts').textContent;
+      document.getElementById('print_total_meter').textContent = document.getElementById('total_meter').textContent;
+      document.getElementById('print_total_customers').textContent = document.getElementById('total_customers').textContent;
+      
+      // Create a better formatted print version of customer details
+      const customerTable = document.getElementById('customerSummaryTable');
+      if (customerTable) {
+        const printTable = customerTable.cloneNode(true);
+        // Remove action buttons from print version
+        const actionCells = printTable.querySelectorAll('td:last-child');
+        actionCells.forEach(cell => cell.remove());
+        
+        // Update header to remove action column
+        const headerRow = printTable.querySelector('thead tr');
+        if (headerRow) {
+          const lastHeader = headerRow.querySelector('th:last-child');
+          if (lastHeader) lastHeader.remove();
+        }
+        
+        document.getElementById('print_customer_details').innerHTML = `
+          <h3 style="margin-bottom: 20px; color: var(--seafoam-green);">پوختەی کڕیاران</h3>
+          <div style="overflow-x: auto;">
+            ${printTable.outerHTML}
+          </div>
+        `;
+      }
+      
+      // Print
+      window.print();
+    }
+  </script>
 </body>
+
 </html>

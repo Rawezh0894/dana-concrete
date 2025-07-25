@@ -70,6 +70,9 @@ $mixer_drivers = array_filter($employees, function ($emp) {
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">پسوڵەی کۆنکرێت</h2>
       <div class="d-flex gap-2">
+        <a href="summery_concrete_receipts.php" class="btn" style="background: #ff9800; color:white; font-weight: bold;">
+          <i class="fas fa-chart-bar me-1"></i>پوختەی پسووڵەکان
+        </a>
         <?php if (hasPermission('add_customer')): ?>
           <button class="btn" data-bs-toggle="modal" data-bs-target="#addCustomerModal"
             style="background: #1976d2; color:white; font-weight: bold;">+ زیادکردنی کڕیار</button>
@@ -78,9 +81,6 @@ $mixer_drivers = array_filter($employees, function ($emp) {
           <button class="btn" data-bs-toggle="modal" data-bs-target="#addConcreteReceiptModal"
             style="background: var(--seafoam-green); color:white; font-weight: bold;">+ زیادکردنی پسوڵە</button>
         <?php endif; ?>
-        <a href="summery_concrete_receipts.php" class="btn" style="background: #ff6b35; color:white; font-weight: bold;">
-          <i class="fas fa-chart-bar me-2"></i>پوختە
-        </a>
       </div>
     </div>
     <!-- Summary Cards Row -->
