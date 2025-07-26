@@ -23,11 +23,11 @@ body {
 
 .receipt {
     width: 100%;
-    max-width: 210mm; /* A4 width */
+    max-width: 202.5mm; /* Custom width as requested */
     min-height: 148mm; /* A5 height (half A4) */
     background-color: var(--white);
     margin: 0 auto;
-    padding: 8px;
+    padding: 6px; /* Reduced padding to fit content better */
     box-shadow: 0 4px 16px rgba(0,0,0,0.1);
     box-sizing: border-box;
     border-radius: var(--border-radius);
@@ -45,20 +45,20 @@ body {
     align-items: center;
 
     background: linear-gradient(90deg, var(--light-green) 0%, #fff 60%, var(--light-green) 100%);
-    padding: 6px;
+    padding: 4px; /* Reduced padding to fit better */
     border-radius: var(--border-radius);
 }
 
 .logo {
     text-align: center;
     flex: 1;
-   margin-left: 50px;
+   margin-left: 30px; /* Reduced margin to fit better */
 }
 
 .logo img {
-    height: 110px;
+    height: 90px; /* Reduced height to fit better */
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
-    margin-right: 30px;
+    margin-right: 20px; /* Reduced margin to fit better */
 }
 
 .contact-info {
@@ -68,9 +68,9 @@ body {
 
 .contact-item {
     display: flex;
-    font-size: 14px;
+    font-size: 12px; /* Reduced font size to fit better */
     align-items: center;
-    margin-bottom: 3px;
+    margin-bottom: 2px; /* Reduced margin to fit better */
     direction: ltr;
 }
 
@@ -86,27 +86,27 @@ body {
 }
 
 .title-arabic {
-    font-size: 32px;
+    font-size: 28px; /* Reduced font size to fit better */
     font-weight: bold;
     color: var(--primary-green);
     margin-bottom: 2px;
 }
 
 .title-english {
-    font-size: 14px;
+    font-size: 12px; /* Reduced font size to fit better */
     color: var(--gray);
 }
 
 .receipt-title {
     text-align: center;
-    margin: 5px 0;
+    margin: 4px 0; /* Reduced margin to fit better */
     font-weight: bold;
-    margin-left: 25px;
-    font-size: 14px;
+    margin-left: 20px; /* Reduced margin to fit better */
+    font-size: 12px; /* Reduced font size to fit better */
     color: var(--primary-green);
     background-color: var(--light-green);
-    padding: 4px 10px;
-    border-radius: 15px;
+    padding: 3px 8px; /* Reduced padding to fit better */
+    border-radius: 12px; /* Reduced border radius to fit better */
     display: inline-block;
 }
 
@@ -157,12 +157,12 @@ body {
 .customer-info {
     display: flex;
     background-color: var(--light-green);
-    padding: 5px 8px;
+    padding: 4px 6px; /* Reduced padding to fit better */
     border-radius: var(--border-radius);
-    margin-bottom: 8px;
+    margin-bottom: 6px; /* Reduced margin to fit better */
     justify-content: space-between;
     align-items: center;
-    font-size: 16px;
+    font-size: 14px; /* Reduced font size to fit better */
 }
 
 .customer-info div {
@@ -177,15 +177,15 @@ body {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    margin-top: 8px;
-    font-size: 15px;
+    margin-top: 6px; /* Reduced margin to fit better */
+    font-size: 13px; /* Reduced font size to fit better */
     border-radius: var(--border-radius);
     overflow: hidden;
 }
 
 .receipt-table th, .receipt-table td {
-    padding-top: 20px;
-    padding-bottom: 20px;
+    padding-top: 15px; /* Reduced padding to fit better */
+    padding-bottom: 15px; /* Reduced padding to fit better */
 }
 
 .receipt-table th {
@@ -213,18 +213,18 @@ body {
 .footer {
     display: flex;
     justify-content: space-between;
-    margin-top: -20px;
+    margin-top: -15px; /* Reduced margin to fit better */
     margin-bottom: 0;
     font-weight: bold;
-    padding: 10px 30px;
+    padding: 8px 25px; /* Reduced padding to fit better */
     color: var(--primary-green);
-    font-size: 16px;
+    font-size: 14px; /* Reduced font size to fit better */
 }
 
 .signature-line {
     border-top: 1px dashed var(--primary-green);
-    width: 120px;
-    margin-top: 10px;
+    width: 100px; /* Reduced width to fit better */
+    margin-top: 8px; /* Reduced margin to fit better */
     display: block;
 }
 
@@ -232,13 +232,13 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin: 0 15px;
-    gap: 24px;
+    margin: 0 12px; /* Reduced margin to fit better */
+    gap: 20px; /* Reduced gap to fit better */
 }
 
 @media print {
     @page {
-        size: 210mm 148mm portrait; /* A5 height, A4 width */
+        size: 202.5mm 148mm portrait; /* Custom width, A5 height */
         margin: 0;
     }
 
@@ -250,10 +250,10 @@ body {
     .receipt {
         width: 100%;
         height: 100%;
-        max-width: 210mm;
+        max-width: 202.5mm; /* Updated to match new width */
         min-height: 148mm;
         box-shadow: none;
-        padding: 5mm;
+        padding: 4mm; /* Reduced padding for print to fit better */
         border-radius: 0;
         border-top: 3px solid var(--primary-green) !important;
         -webkit-print-color-adjust: exact;

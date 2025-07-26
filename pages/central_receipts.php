@@ -77,21 +77,21 @@ $receipt_id = isset($_GET['id']) ? $_GET['id'] : null;
         </div>
         
         <!-- Receipt number and prepared concrete notice -->
-        <div class="info-row1" style="margin-top:5px">
+        <div class="info-row1" style="margin-top:4px">
            
-        <div class="concrete-type" style="font-size:16px;">
+        <div class="concrete-type" style="font-size:14px;">
                 کۆنکرێتی ئامادەکراو
             </div>
-            <div class="receipt-title" style="font-size:16px;">پسوڵەی ناردنی کۆنکرێت</div>
+            <div class="receipt-title" style="font-size:14px;">پسوڵەی ناردنی کۆنکرێت</div>
             
            
-            <div class="receipt-number" style="background: var(--light-green); font-size:16px; color: var(--primary-green); font-weight: bold; border-radius: var(--border-radius); padding: 4px 10px; font-size: 16px; display: inline-block;">
+            <div class="receipt-number" style="background: var(--light-green); font-size:14px; color: var(--primary-green); font-weight: bold; border-radius: var(--border-radius); padding: 3px 8px; font-size: 14px; display: inline-block;">
                 ژ.پسووڵە: <span id="receipt_number">W-0001</span>
             </div>
         </div>
         
         <!-- Date, Location, Customer info -->
-        <div class="customer-info" style="margin-top:5px;margin-buttom:5px;">
+        <div class="customer-info" style="margin-top:4px;margin-bottom:4px;">
             <div>
                 <strong>کڕیار:</strong> <span id="customer_name">-</span><span id="customer_receiver_sep"></span><span id="receiver_name">-</span>
             </div>
@@ -109,7 +109,7 @@ $receipt_id = isset($_GET['id']) ? $_GET['id'] : null;
         </div>
         
         <!-- Main table -->
-        <table class="receipt-table" dir="ltr" style="margin-top:5px">
+        <table class="receipt-table" dir="ltr" style="margin-top:4px">
             <thead>
                 <tr>
                     <th>میکسەر</th>
