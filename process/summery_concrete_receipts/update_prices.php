@@ -10,8 +10,8 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// Check if user has permission to update concrete receipts
-if (!hasPermission('update_concrete_receipts')) {
+// Check if user has permission to edit concrete receipts
+if (!hasPermission('edit_concrete_receipts')) {
     http_response_code(403);
     echo json_encode(['success' => false, 'error' => 'Permission denied']);
     exit;
