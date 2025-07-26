@@ -21,6 +21,40 @@ body {
     padding: 10px;
 }
 
+/* --- Compact layout for 140.5mm height --- */
+.receipt {
+    padding: 4px;
+}
+.header, .footer {
+    padding: 4px 10px;
+    font-size: 14px;
+}
+.receipt-table th, .receipt-table td {
+    padding-top: 8px;
+    padding-bottom: 8px;
+    font-size: 13px;
+}
+.customer-info {
+    font-size: 13px;
+    padding: 3px 5px;
+}
+.logo img {
+    height: 70px;
+}
+.corner {
+    width: 22px;
+    height: 22px;
+}
+.decorative-line-section {
+    margin: 10px 0;
+    padding: 4px 0;
+}
+.decorative-text {
+    font-size: 13px;
+    margin: 0 6px;
+    letter-spacing: 4px;
+}
+
 .receipt {
     width: 100%;
     max-width: 210mm; /* A4 width */
