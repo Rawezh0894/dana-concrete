@@ -13,10 +13,8 @@ if (!hasPermission('view_sale')) {
         .'</div>';
     exit;
 }
-if (!hasPermission('add_sale')) { // پێویستە 'add_purchase' لە permissions بێت
-    header('Location: ../index.php');
-    exit;
-}
+// Note: add_sale permission is checked in the UI, not here
+// Users with only view_sale permission can still access the page
 $customers = $pdo->query("SELECT id, name FROM customers")->fetchAll(PDO::FETCH_ASSOC);
 $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO::FETCH_ASSOC);
 ?>

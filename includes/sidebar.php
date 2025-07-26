@@ -79,8 +79,10 @@ $logout_pages = ['logout.php'];
         <i class="bi bi-receipt me-2"></i> مامەڵەکان
       </button>
       <ul class="collapse sidebar-submenu" id="vouchersMenu">
-        <?php if (hasPermission('view_vouchers')): ?>
+        <?php if (hasPermission('view_purchase')): ?>
           <li><a href="../pages/add_purchase.php" class="sidebar-link<?php if($current_page == 'add_purchase.php') echo ' active'; ?>"><i class="bi bi-cart-plus me-2"></i> کڕین</a></li>
+        <?php endif; ?>
+        <?php if (hasPermission('view_sale')): ?>
           <li><a href="../pages/add_sale.php" class="sidebar-link<?php if($current_page == 'add_sale.php') echo ' active'; ?>"><i class="bi bi-cart-check me-2"></i> فرۆشتن</a></li>
           <li><a href="../pages/cash_sales.php" class="sidebar-link<?php if($current_page == 'cash_sales.php') echo ' active'; ?>"><i class="bi bi-cash-coin me-2"></i> فرۆشتنی نەقد</a></li>
           <li><a href="../pages/credit_sales.php" class="sidebar-link<?php if($current_page == 'credit_sales.php') echo ' active'; ?>"><i class="bi bi-credit-card-2-front me-2"></i> فرۆشتنی قەرز</a></li>

@@ -13,10 +13,8 @@ if (!hasPermission('view_purchase')) {
         .'</div>';
     exit;
 }
-if (!hasPermission('add_purchase')) { // پێویستە 'add_purchase' لە permissions بێت
-    header('Location: ../index.php');
-    exit;
-}
+// Note: add_purchase permission is checked in the UI, not here
+// Users with only view_purchase permission can still access the page
 $bins = $pdo->query("SELECT id, name FROM bins_silos")->fetchAll(PDO::FETCH_ASSOC);
 $materials = $pdo->query("SELECT id, name FROM materials")->fetchAll(PDO::FETCH_ASSOC);
 $locations = $pdo->query("SELECT id, name FROM locations")->fetchAll(PDO::FETCH_ASSOC);
