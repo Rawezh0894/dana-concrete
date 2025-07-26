@@ -118,6 +118,16 @@ $(document).ready(function() {
     if ($('#editConcreteReceiptModal').length > 0) {
         enableSelect2('#edit_customer_id', '#editConcreteReceiptModal');
     }
+    
+    // بۆ purchase materials - تەنها ئەگەر مۆداڵەکە هەبێت
+    if ($('#addPurchaseModal').length > 0) {
+        enableSelect2('#person_id', '#addPurchaseModal');
+        enableSelect2('#currency_type', '#addPurchaseModal');
+    }
+    if ($('#editPurchaseModal').length > 0) {
+        enableSelect2('#edit_person_id', '#editPurchaseModal');
+        enableSelect2('#edit_currency_type', '#editPurchaseModal');
+    }
 });
 
 // Focus select2 search input when dropdown opens for customer select in addConcreteReceiptModal

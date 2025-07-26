@@ -60,9 +60,9 @@ $logout_pages = ['logout.php'];
         <i class="bi bi-box-seam me-2"></i> مەواد و هەژمارەکان
       </button>
       <ul class="collapse sidebar-submenu" id="materialsAccountsMenu">
-        <?php if (hasPermission('view_materials')): ?>
+        <!-- <?php if (hasPermission('view_materials')): ?>
           <li><a href="../pages/stock_adjustments.php" class="sidebar-link<?php if($current_page == 'stock_adjustments.php') echo ' active'; ?>"><i class="bi bi-gear me-2"></i> گۆڕانکاری مەواد</a></li>
-        <?php endif; ?>
+        <?php endif; ?> -->
         <?php if (hasPermission('view_bins_silos')): ?>
           <li><a href="../pages/bins_silos.php" class="sidebar-link<?php if($current_page == 'bins_silos.php') echo ' active'; ?>"><i class="bi bi-box me-2"></i> بین/سایلۆکان</a></li>
         <?php endif; ?>
@@ -119,7 +119,7 @@ $logout_pages = ['logout.php'];
           <li><a href="../pages/add_material.php" class="sidebar-link<?php if($current_page == 'add_material.php') echo ' active'; ?>"><i class="bi bi-plus-square me-2"></i> زیادکردنی کاڵا</a></li>
         <?php endif; ?>
         <?php if (hasPermission('view_materials')): ?>
-          <li><a href="../pages/list_materials.php" class="sidebar-link<?php if($current_page == 'list_materials.php') echo ' active'; ?>"><i class="bi bi-list-ul me-2"></i> کڕینی کاڵا</a></li>
+          <li><a href="../pages/purchase_materila.php" class="sidebar-link<?php if($current_page == 'purchase_materila.php') echo ' active'; ?>"><i class="bi bi-list-ul me-2"></i> کڕینی کاڵا</a></li>
         <?php endif; ?>
       </ul>
     </li>

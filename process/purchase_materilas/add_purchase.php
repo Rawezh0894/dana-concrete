@@ -1,0 +1,134 @@
+<?php
+session_start();
+require_once '../../config/db_conected.php';
+require_once '../../config/permissions.php';
+
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'error' => 'Not authenticated']);
+    exit;
+}
+
+// Check permission
+if (!hasPermission('add_material')) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'error' => 'Permission denied']);
+    exit;
+}
+
+// Check if it's a POST request
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(['success' => false, 'error' => 'Method not allowed']);
+    exit;
+}
+
+try {
+    // Validate required fields
+    $required_fields = ['receipt_number', 'person_id', 'purchase_date', 'currency_type'];
+    foreach ($required_fields as $field) {
+        if (!isset($_POST[$field]) || empty($_POST[$field])) {
+            throw new Exception("Field '$field' is required");
+        }
+    }
+    
+    // Check if receipt number already exists
+    $stmt = $pdo->prepare("SELECT id FROM purchase_materials WHERE receipt_number = ? LIMIT 1");
+    $stmt->execute([$_POST['receipt_number']]);
+    if ($stmt->fetch()) {
+        throw new Exception("ژمارەی پسووڵە دووبارەیە، تکایە ژمارەیەکی تر هەڵبژێرە");
+    }
+    
+    // Get optional fields
+    $transfer_loss = $_POST['transfer_loss'] ?? 0;
+    $other_loss = $_POST['other_loss'] ?? 0;
+    $usd_to_iqd_rate = $_POST['usd_to_iqd_rate'] ?? 0;
+    
+    // Validate materials data
+    if (!isset($_POST['materials']) || empty($_POST['materials'])) {
+        throw new Exception('At least one material is required');
+    }
+    
+    $materials = json_decode($_POST['materials'], true);
+    if (!is_array($materials) || empty($materials)) {
+        throw new Exception('Invalid materials data');
+    }
+    
+    // Validate each material
+    foreach ($materials as $material) {
+        if (!isset($material['material_id']) || !isset($material['quantity']) || 
+            !isset($material['price_per_unit_usd']) || !isset($material['price_per_unit_iqd'])) {
+            throw new Exception('Invalid material data structure');
+        }
+        
+        if (empty($material['material_id']) || $material['quantity'] <= 0) {
+            throw new Exception('Invalid material quantity or ID');
+        }
+    }
+    
+    // Start transaction
+    $pdo->beginTransaction();
+    
+    // Insert main purchase record
+    $stmt = $pdo->prepare("
+        INSERT INTO purchase_materials 
+        (receipt_number, material_id, person_id, quantity, price_per_unit_usd, price_per_unit_iqd, 
+         total_price_usd, total_price_iqd, currency_type, purchase_date, notes, transfer_loss, other_loss, usd_to_iqd_rate, created_by) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ");
+    
+    $total_usd = 0;
+    $total_iqd = 0;
+    
+    foreach ($materials as $material) {
+        $total_price_usd = $material['quantity'] * $material['price_per_unit_usd'];
+        $total_price_iqd = $material['quantity'] * $material['price_per_unit_iqd'];
+        
+        $stmt->execute([
+            $_POST['receipt_number'],
+            $material['material_id'],
+            $_POST['person_id'],
+            $material['quantity'],
+            $material['price_per_unit_usd'],
+            $material['price_per_unit_iqd'],
+            $total_price_usd,
+            $total_price_iqd,
+            $_POST['currency_type'],
+            $_POST['purchase_date'],
+            $_POST['notes'] ?? '',
+            $transfer_loss,
+            $other_loss,
+            $usd_to_iqd_rate,
+            $_SESSION['user_id']
+        ]);
+        
+        $total_usd += $total_price_usd;
+        $total_iqd += $total_price_iqd;
+    }
+    
+    // Commit transaction
+    $pdo->commit();
+    
+    echo json_encode([
+        'success' => true,
+        'message' => 'کڕینەکە بە سەرکەوتووی زیاد کراوە',
+        'data' => [
+            'total_usd' => $total_usd,
+            'total_iqd' => $total_iqd
+        ]
+    ]);
+    
+} catch (Exception $e) {
+    // Rollback transaction on error
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    
+    error_log("Error in add_purchase.php: " . $e->getMessage());
+    echo json_encode([
+        'success' => false,
+        'error' => $e->getMessage()
+    ]);
+}
+?>

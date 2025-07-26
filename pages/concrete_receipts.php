@@ -140,13 +140,13 @@ $mixer_drivers = array_filter($employees, function ($emp) {
         <input type="date" class="form-control" id="filter_date_to" placeholder="بۆ بەرواری">
       </div>
       <div class="col-md-2 d-flex gap-2">
-        <button type="button" class="btn btn-sm filter-btn" id="filter_today" data-filter="today">
+        <button type="button" class="btn btn-sm" id="filter_today" data-filter="today" style="background: var(--seafoam-green); color: white; font-weight: bold;">
           <i class="fas fa-calendar-day me-1"></i>ئەمڕۆ
         </button>
-        <button type="button" class="btn btn-sm filter-btn" id="filter_yesterday" data-filter="yesterday">
+        <button type="button" class="btn btn-sm" id="filter_yesterday" data-filter="yesterday" style="background: var(--kelly-green); color: white; font-weight: bold;">
           <i class="fas fa-calendar-minus me-1"></i>دوێنێ
         </button>
-        <button type="button" class="btn btn-sm filter-btn" id="filter_reset" data-filter="reset">
+        <button type="button" class="btn btn-sm" id="filter_reset" data-filter="reset" style="background: var(--lime-green); color: white; font-weight: bold;">
           <i class="fas fa-redo me-1"></i>ڕیفڕێش
         </button>
       </div>

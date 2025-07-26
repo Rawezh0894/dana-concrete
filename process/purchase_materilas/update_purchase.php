@@ -1,0 +1,156 @@
+<?php
+session_start();
+require_once '../../config/db_conected.php';
+require_once '../../config/permissions.php';
+
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'error' => 'Not authenticated']);
+    exit;
+}
+
+// Check permission
+if (!hasPermission('edit_material')) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'error' => 'Permission denied']);
+    exit;
+}
+
+// Check if it's a POST request
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(['success' => false, 'error' => 'Method not allowed']);
+    exit;
+}
+
+try {
+    // Validate required fields
+    $required_fields = ['id', 'receipt_number', 'person_id', 'purchase_date', 'currency_type'];
+    foreach ($required_fields as $field) {
+        if (!isset($_POST[$field]) || empty($_POST[$field])) {
+            throw new Exception("Field '$field' is required");
+        }
+    }
+    
+    // Check if receipt number already exists for different purchase
+    $stmt = $pdo->prepare("SELECT id FROM purchase_materials WHERE receipt_number = ? AND id != ? LIMIT 1");
+    $stmt->execute([$_POST['receipt_number'], $_POST['id']]);
+    if ($stmt->fetch()) {
+        throw new Exception("ژمارەی پسووڵە دووبارەیە، تکایە ژمارەیەکی تر هەڵبژێرە");
+    }
+    
+    // Get optional fields
+    $transfer_loss = $_POST['transfer_loss'] ?? 0;
+    $other_loss = $_POST['other_loss'] ?? 0;
+    $usd_to_iqd_rate = $_POST['usd_to_iqd_rate'] ?? 0;
+    
+    // Validate materials data
+    if (!isset($_POST['materials']) || empty($_POST['materials'])) {
+        throw new Exception('At least one material is required');
+    }
+    
+    $materials = json_decode($_POST['materials'], true);
+    if (!is_array($materials) || empty($materials)) {
+        throw new Exception('Invalid materials data');
+    }
+    
+    // Validate each material
+    foreach ($materials as $material) {
+        if (!isset($material['material_id']) || !isset($material['quantity']) || 
+            !isset($material['price_per_unit_usd']) || !isset($material['price_per_unit_iqd'])) {
+            throw new Exception('Invalid material data structure');
+        }
+        
+        if (empty($material['material_id']) || $material['quantity'] <= 0) {
+            throw new Exception('Invalid material quantity or ID');
+        }
+    }
+    
+    $purchase_id = $_POST['id'];
+    
+    // Get the receipt number for this purchase
+    $stmt = $pdo->prepare("SELECT receipt_number FROM purchase_materials WHERE id = ? LIMIT 1");
+    $stmt->execute([$purchase_id]);
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if (!$result) {
+        throw new Exception('Purchase not found');
+    }
+    
+    $old_receipt_number = $result['receipt_number'];
+    
+    // Start transaction
+    $pdo->beginTransaction();
+    
+    // Delete all existing materials for this receipt number
+    $stmt = $pdo->prepare("DELETE FROM purchase_materials WHERE receipt_number = ?");
+    $stmt->execute([$old_receipt_number]);
+    
+    // Insert all materials as new records
+    $stmt = $pdo->prepare("
+        INSERT INTO purchase_materials 
+        (receipt_number, material_id, person_id, quantity, price_per_unit_usd, price_per_unit_iqd, 
+         total_price_usd, total_price_iqd, currency_type, purchase_date, notes, transfer_loss, other_loss, usd_to_iqd_rate, created_by) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ");
+    
+    foreach ($materials as $material) {
+        $total_price_usd = $material['quantity'] * $material['price_per_unit_usd'];
+        $total_price_iqd = $material['quantity'] * $material['price_per_unit_iqd'];
+        
+        $stmt->execute([
+            $_POST['receipt_number'],
+            $material['material_id'],
+            $_POST['person_id'],
+            $material['quantity'],
+            $material['price_per_unit_usd'],
+            $material['price_per_unit_iqd'],
+            $total_price_usd,
+            $total_price_iqd,
+            $_POST['currency_type'],
+            $_POST['purchase_date'],
+            $_POST['notes'] ?? '',
+            $transfer_loss,
+            $other_loss,
+            $usd_to_iqd_rate,
+            $_SESSION['user_id']
+        ]);
+    }
+    
+    // Calculate totals for all materials
+    $total_usd = 0;
+    $total_iqd = 0;
+    
+    foreach ($materials as $material) {
+        $total_price_usd = $material['quantity'] * $material['price_per_unit_usd'];
+        $total_price_iqd = $material['quantity'] * $material['price_per_unit_iqd'];
+        $total_usd += $total_price_usd;
+        $total_iqd += $total_price_iqd;
+    }
+    
+    // Commit transaction
+    $pdo->commit();
+    
+    echo json_encode([
+        'success' => true,
+        'message' => 'کڕینەکە بە سەرکەوتووی نوێ کراوەتەوە',
+        'data' => [
+            'total_usd' => $total_usd,
+            'total_iqd' => $total_iqd
+        ]
+    ]);
+    
+} catch (Exception $e) {
+    // Rollback transaction on error
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    
+    error_log("Error in update_purchase.php: " . $e->getMessage());
+    echo json_encode([
+        'success' => false,
+        'error' => $e->getMessage()
+    ]);
+}
+?>

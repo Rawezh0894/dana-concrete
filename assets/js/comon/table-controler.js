@@ -20,6 +20,8 @@ const TableController = {
             const tr = document.createElement('tr');
             columns.forEach(col => {
                 const td = document.createElement('td');
+                td.setAttribute('data-col', col);
+                
                 if (col === '#') {
                     td.textContent = (options.rowOffset ? options.rowOffset : 0) + idx + 1;
                 } else if (col === 'actions') {
@@ -35,6 +37,8 @@ const TableController = {
                 } else if (col === 'adjustment') {
                     const val = parseFloat(row[col]);
                     td.textContent = (val && val !== 0) ? (val.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' Kg') : '-';
+                } else if (col === 'total_prices') {
+                    td.innerHTML = (row[col] !== undefined && row[col] !== null && row[col] !== '') ? row[col] : '-';
                 } else {
                     td.textContent = (row[col] !== undefined && row[col] !== null && row[col] !== '') ? row[col] : '-';
                 }
