@@ -13,10 +13,15 @@ if (!hasPermission('view_customer')) {
         .'</div>';
     exit;
 }
-if (!hasPermission('add_customer')) {
-    header('Location: ../index.php');
+if (!hasPermission('view_customer')) {
+    echo '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;">'
+        .'<i class="bi bi-lock-fill" style="font-size:5rem;color:#ccc;"></i>'
+        .'<h2 style="color:#888;">توانای دەست گەیشتنت نییە بەم پەیجە</h2>'
+        .'</div>';
     exit;
 }
+// Note: add_customer permission is checked in the UI, not here
+// Users with only view_customer permission can still access the page
 ?>
 <!DOCTYPE html>
 <html lang="ku">
@@ -42,7 +47,9 @@ if (!hasPermission('add_customer')) {
             <button class="btn btn-success me-2" style="background: var(--kelly-green); font-weight: bold;" onclick="window.location.href='credit_of_all_customers.php'">
                 <i class="fa fa-print"></i> پرینتی قەرزی کڕیارەکان
             </button>
+            <?php if (hasPermission('add_customer')): ?>
             <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addCustomerModal" style="background: var(--seafoam-green); font-weight: bold;">+ زیادکردنی کڕیار</button>
+            <?php endif; ?>
         </div>
     </div>
     <div class="table-responsive">

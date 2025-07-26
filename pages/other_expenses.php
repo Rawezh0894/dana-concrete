@@ -34,7 +34,9 @@ if (!isset($_SESSION['user_id'])) {
 <div class="container-fluid py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">خەرجی تر</h2>
+        <?php if (hasPermission('add_other_expenses')): ?>
         <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addExpenseModal" style="background: var(--seafoam-green); font-weight: bold;">+ زیادکردنی خەرجی تر</button>
+        <?php endif; ?>
     </div>
     <div class="mb-4 d-flex flex-wrap align-items-center gap-3">
       <div>

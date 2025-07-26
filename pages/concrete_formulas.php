@@ -35,7 +35,9 @@ if (!hasPermission('view_concrete_formulas')) {
 <div class="container-fluid py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">فۆرمولای کۆنکرێت</h2>
+        <?php if (hasPermission('add_concrete_formulas')): ?>
         <button class="btn btn-success" id="addFormulaBtn" style="background: var(--seafoam-green); font-weight: bold;">+ زیادکردنی فۆرمولا</button>
+        <?php endif; ?>
     </div>
     <div class="table-responsive">
         <table class="table table-bordered table-hover align-middle text-center" id="formulasTable">

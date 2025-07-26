@@ -13,10 +13,15 @@ if (!hasPermission('view_materials')) {
         .'</div>';
     exit;
 }
-if (!hasPermission('add_materials')) {
-    header('Location: ../index.php');
+if (!hasPermission('view_materials')) {
+    echo '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;">'
+        .'<i class="bi bi-lock-fill" style="font-size:5rem;color:#ccc;"></i>'
+        .'<h2 style="color:#888;">توانای دەست گەیشتنت نییە بەم پەیجە</h2>'
+        .'</div>';
     exit;
 }
+// Note: add_material permission is checked in the UI, not here
+// Users with only view_materials permission can still access the page
 $materials = $pdo->query("SELECT id, name, quantity, currency_type, purchase_price_usd, purchase_price_iqd FROM list_materials")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
@@ -42,7 +47,9 @@ $materials = $pdo->query("SELECT id, name, quantity, currency_type, purchase_pri
 <div class="container-fluid py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">کۆگا (کەل و پەل)</h2>
+        <?php if (hasPermission('add_material')): ?>
         <button class="btn" data-bs-toggle="modal" data-bs-target="#addMaterialModal" style="background: var(--seafoam-green); color:white; font-weight: bold;">+ زیادکردنی کاڵا</button>
+        <?php endif; ?>
     </div>
     <div class="table-responsive">
         <table class="table table-bordered table-hover align-middle text-center" id="materialTable">
@@ -72,8 +79,12 @@ $materials = $pdo->query("SELECT id, name, quantity, currency_type, purchase_pri
                         <td><?= htmlspecialchars($mat['purchase_price_usd']) ?></td>
                         <td><?= htmlspecialchars($mat['purchase_price_iqd']) ?></td>
                         <td>
+                            <?php if (hasPermission('edit_material')): ?>
                             <button class="btn btn-sm btn-primary edit-btn" data-id="<?= $mat['id'] ?>" data-name="<?= htmlspecialchars($mat['name']) ?>" data-quantity="<?= htmlspecialchars($mat['quantity']) ?>" data-currency_type="<?= htmlspecialchars($mat['currency_type']) ?>" data-purchase_price_usd="<?= htmlspecialchars($mat['purchase_price_usd']) ?>" data-purchase_price_iqd="<?= htmlspecialchars($mat['purchase_price_iqd']) ?>" aria-label="نوێکردنەوە"><i class="bi bi-pencil"></i></button>
+                            <?php endif; ?>
+                            <?php if (hasPermission('delete_material')): ?>
                             <button class="btn btn-sm btn-danger delete-btn" data-id="<?= $mat['id'] ?>" aria-label="سڕینەوە"><i class="bi bi-trash"></i></button>
+                            <?php endif; ?>
                         </td>
                     </tr>
                     <?php endforeach; ?>

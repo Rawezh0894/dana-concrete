@@ -13,10 +13,15 @@ if (!hasPermission('view_bins_silos')) {
         .'</div>';
     exit;
 }
-if (!hasPermission('add_bins_silos')) {
-    header('Location: ../index.php');
+if (!hasPermission('view_bins_silos')) {
+    echo '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;">'
+        .'<i class="bi bi-lock-fill" style="font-size:5rem;color:#ccc;"></i>'
+        .'<h2 style="color:#888;">توانای دەست گەیشتنت نییە بەم پەیجە</h2>'
+        .'</div>';
     exit;
 }
+// Note: add_bins_silos permission is checked in the UI, not here
+// Users with only view_bins_silos permission can still access the page
 $bins = $pdo->query("SELECT * FROM bins_silos")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
@@ -42,7 +47,9 @@ $bins = $pdo->query("SELECT * FROM bins_silos")->fetchAll(PDO::FETCH_ASSOC);
 <div class="container-fluid py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">بین/سایلۆکان</h2>
+        <?php if (hasPermission('add_material')): ?>
         <button class="btn" data-bs-toggle="modal" data-bs-target="#addBinModal" style="background: var(--seafoam-green); color:white; font-weight: bold;">+ زیادکردن</button>
+        <?php endif; ?>
     </div>
     <div class="table-responsive">
         <table class="table table-bordered table-hover align-middle text-center" id="binsTable">
@@ -74,7 +81,9 @@ $bins = $pdo->query("SELECT * FROM bins_silos")->fetchAll(PDO::FETCH_ASSOC);
                         <td><?= htmlspecialchars($bin['total_value']) ?></td>
                         <td><?= htmlspecialchars($bin['average_price']) ?></td>
                         <td>
+                            <?php if (hasPermission('edit_material')): ?>
                             <button class="btn btn-sm btn-primary edit-btn" data-id="<?= $bin['id'] ?>" data-name="<?= htmlspecialchars($bin['name']) ?>" data-type="<?= htmlspecialchars($bin['type']) ?>" data-material_type="<?= htmlspecialchars($bin['material_type']) ?>" data-amount="<?= htmlspecialchars($bin['amount']) ?>" data-total_value="<?= htmlspecialchars($bin['total_value']) ?>" data-average_price="<?= htmlspecialchars($bin['average_price']) ?>" aria-label="نوێکردنەوە"><i class="bi bi-pencil"></i></button>
+                            <?php endif; ?>
                         </td>
                     </tr>
                     <?php endforeach; ?>

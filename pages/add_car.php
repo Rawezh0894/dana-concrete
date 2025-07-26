@@ -13,10 +13,15 @@ if (!hasPermission('view_accounts')) {
         .'</div>';
     exit;
 }
-if (!hasPermission('add_car')) {
-    header('Location: ../index.php');
+if (!hasPermission('view_car')) {
+    echo '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;">'
+        .'<i class="bi bi-lock-fill" style="font-size:5rem;color:#ccc;"></i>'
+        .'<h2 style="color:#888;">توانای دەست گەیشتنت نییە بەم پەیجە</h2>'
+        .'</div>';
     exit;
 }
+// Note: add_car permission is checked in the UI, not here
+// Users with only view_car permission can still access the page
 ?>
 <!DOCTYPE html>
 <html lang="ku">
@@ -38,7 +43,9 @@ if (!hasPermission('add_car')) {
 <div class="container-fluid py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">سەیارەکان</h2>
+        <?php if (hasPermission('add_car')): ?>
         <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addCarModal" style="background: var(--seafoam-green); font-weight: bold;">+ زیادکردنی سەیارە</button>
+        <?php endif; ?>
     </div>
     <div class="table-responsive">
         <table class="table table-bordered table-hover align-middle text-center" id="carTable">

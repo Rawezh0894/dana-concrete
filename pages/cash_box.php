@@ -13,10 +13,15 @@ if (!hasPermission('view_cash_box')) {
         .'</div>';
     exit;
 }
-if (!hasPermission('add_cash_box')) {
-    header('Location: ../index.php');
+if (!hasPermission('view_cash_box')) {
+    echo '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;">'
+        .'<i class="bi bi-lock-fill" style="font-size:5rem;color:#ccc;"></i>'
+        .'<h2 style="color:#888;">توانای دەست گەیشتنت نییە بەم پەیجە</h2>'
+        .'</div>';
     exit;
 }
+// Note: add_cash_box permission is checked in the UI, not here
+// Users with only view_cash_box permission can still access the page
 ?>
 <!DOCTYPE html>
 <html lang="ku">
@@ -40,7 +45,9 @@ if (!hasPermission('add_cash_box')) {
 <div class="container-fluid py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">قاسەکە</h2>
+        <?php if (hasPermission('add_cash_box')): ?>
         <button class="btn" data-bs-toggle="modal" data-bs-target="#addCashBoxModal" style="background: var(--seafoam-green); color:white; font-weight: bold;">+ زیادکردن</button>
+        <?php endif; ?>
     </div>
     <!-- Summary Cards -->
     <div class="row mb-4" id="cashBoxSummaryCards">
