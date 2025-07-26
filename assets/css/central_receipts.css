@@ -58,7 +58,7 @@ body {
 .receipt {
     width: 100%;
     max-width: 210mm; /* A4 width */
-    min-height: 141mm; /* Half of 282mm (A4 - 15mm) */
+    min-height: 140.5mm; /* Half of 281mm */
     background-color: var(--white);
     margin: 0 auto;
     padding: 8px;
@@ -272,7 +272,7 @@ body {
 
 @media print {
     @page {
-        size: 210mm 141mm portrait; /* Half of 282mm (A4 - 15mm) height, 210mm width */
+        size: 210mm 140.5mm portrait; /* Half of 281mm height, 210mm width */
         margin: 0;
     }
 
@@ -285,7 +285,7 @@ body {
         width: 100%;
         height: 100%;
         max-width: 210mm;
-        min-height: 141mm; /* Half of 282mm (A4 - 15mm) */
+        min-height: 140.5mm; /* Half of 281mm */
         box-shadow: none;
         padding: 5mm;
         border-radius: 0;
