@@ -47,7 +47,7 @@ async function loadPurchases() {
         remaining_usd: formatUSD(row.remaining_usd),
         remaining_iqd: formatIQD(row.remaining_iqd),
         bin_name: row.bin_name || row.bin_id || '',
-        actions: `<button class='btn btn-primary btn-sm edit-purchase' data-id='${row.id}' title='دەستکاری'><i class='fa fa-edit'></i></button> <button class='btn btn-danger btn-sm delete-purchase' data-id='${row.id}' title='سڕینەوە'><i class='fa fa-trash'></i></button>`
+        actions: `${window.userPermissions && window.userPermissions.canEdit ? `<button class='btn btn-primary btn-sm edit-purchase' data-id='${row.id}' title='دەستکاری'><i class='fa fa-edit'></i></button>` : ''} ${window.userPermissions && window.userPermissions.canDelete ? `<button class='btn btn-danger btn-sm delete-purchase' data-id='${row.id}' title='سڕینەوە'><i class='fa fa-trash'></i></button>` : ''}`
     }));
     TableController.renderWithPagination('#purchaseTable', mapped, columns, { pageSize: 10 });
 }
@@ -133,7 +133,7 @@ async function loadPurchasesFiltered() {
         remaining_usd: formatUSD(row.remaining_usd),
         remaining_iqd: formatIQD(row.remaining_iqd),
         bin_name: row.bin_name || row.bin_id || '',
-        actions: `<button class='btn btn-primary btn-sm edit-purchase' data-id='${row.id}' title='دەستکاری'><i class='fa fa-edit'></i></button> <button class='btn btn-danger btn-sm delete-purchase' data-id='${row.id}' title='سڕینەوە'><i class='fa fa-trash'></i></button>`
+        actions: `${window.userPermissions && window.userPermissions.canEdit ? `<button class='btn btn-primary btn-sm edit-purchase' data-id='${row.id}' title='دەستکاری'><i class='fa fa-edit'></i></button>` : ''} ${window.userPermissions && window.userPermissions.canDelete ? `<button class='btn btn-danger btn-sm delete-purchase' data-id='${row.id}' title='سڕینەوە'><i class='fa fa-trash'></i></button>` : ''}`
     }));
     TableController.renderWithPagination('#purchaseTable', mapped, columns, { pageSize: 10 });
 }

@@ -100,8 +100,8 @@ $(document).ready(function() {
                             <td>${sale.notes || '-'}</td>
                             <td>${sale.discount !== null && sale.discount !== undefined && sale.discount !== '' ? formatUSD(sale.discount) : '-'}</td>
                             <td>
-                                <button class='btn btn-sm btn-warning edit-sale' data-id='${sale.id}' title='نوێکردنەوە'><i class='fa fa-edit'></i></button>
-                                <button class='btn btn-sm btn-danger delete-sale' data-id='${sale.id}' title='سڕینەوە'><i class='fa fa-trash'></i></button>
+                                ${window.userPermissions && window.userPermissions.canEdit ? `<button class='btn btn-sm btn-warning edit-sale' data-id='${sale.id}' title='نوێکردنەوە'><i class='fa fa-edit'></i></button>` : ''}
+                                ${window.userPermissions && window.userPermissions.canDelete ? `<button class='btn btn-sm btn-danger delete-sale' data-id='${sale.id}' title='سڕینەوە'><i class='fa fa-trash'></i></button>` : ''}
                             </td>
                         </tr>`;
                     });
@@ -176,7 +176,7 @@ async function loadSalesFiltered() {
         dolar_rate: row.dolar_rate !== null && row.dolar_rate !== undefined && row.dolar_rate !== '' ? formatNumber(row.dolar_rate) : '-',
         notes: row.notes || '-',
         discount: row.discount !== null && row.discount !== undefined && row.discount !== '' ? formatUSD(row.discount) : '-',
-        actions: `<button class='btn btn-warning btn-sm edit-sale' data-id='${row.id}' title='نوێکردنەوە'><i class='fa fa-edit'></i></button> <button class='btn btn-danger btn-sm delete-sale' data-id='${row.id}' title='سڕینەوە'><i class='fa fa-trash'></i></button>`
+        actions: `${window.userPermissions && window.userPermissions.canEdit ? `<button class='btn btn-warning btn-sm edit-sale' data-id='${row.id}' title='نوێکردنەوە'><i class='fa fa-edit'></i></button>` : ''} ${window.userPermissions && window.userPermissions.canDelete ? `<button class='btn btn-danger btn-sm delete-sale' data-id='${row.id}' title='سڕینەوە'><i class='fa fa-trash'></i></button>` : ''}`
     }));
     TableController.renderWithPagination('#saleTable', mapped, columns, { pageSize: 10 });
 }

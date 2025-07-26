@@ -6,14 +6,14 @@ if (!isset($_SESSION['user_id'])) {
     header('Location: ../index.php');
     exit;
 }
-if (!hasPermission('view_vouchers')) {
+if (!hasPermission('view_purchase')) {
     echo '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;">'
         .'<i class="bi bi-lock-fill" style="font-size:5rem;color:#ccc;"></i>'
         .'<h2 style="color:#888;">توانای دەست گەیشتنت نییە بەم پەیجە</h2>'
         .'</div>';
     exit;
 }
-if (!hasPermission('add_material')) { // پێویستە 'add_purchase' لە permissions بێت
+if (!hasPermission('add_purchase')) { // پێویستە 'add_purchase' لە permissions بێت
     header('Location: ../index.php');
     exit;
 }
@@ -50,7 +50,9 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
 <div class="container-fluid py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">کڕین</h2>
+        <?php if (hasPermission('add_purchase')): ?>
         <button class="btn" data-bs-toggle="modal" data-bs-target="#addPurchaseModal" style="background: var(--seafoam-green); color:white; font-weight: bold;">+ زیادکردنی کڕین</button>
+        <?php endif; ?>
     </div>
     <div class="row mb-3">
       <div class="col-md-3">
@@ -445,6 +447,14 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
 <script src="../assets/js/swalAlert.js"></script>
 <script src="../assets/js/comon/table-controler.js"></script>
 <script src="../assets/js/comon/select2_script.js"></script>
+<script>
+    // Pass permissions to JavaScript
+    window.userPermissions = {
+      canAdd: <?php echo hasPermission('add_purchase') ? 'true' : 'false'; ?>,
+      canEdit: <?php echo hasPermission('edit_purchase') ? 'true' : 'false'; ?>,
+      canDelete: <?php echo hasPermission('delete_purchase') ? 'true' : 'false'; ?>
+    };
+</script>
 <script src="../assets/js/purchase/add_purchase.js"></script>
 <script src="../assets/js/purchase/select_purchase.js"></script>
 <script src="../assets/js/location_driver/driver.js"></script>

@@ -46,7 +46,9 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
 <div class="container-fluid py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">فرۆشتن</h2>
+        <?php if (hasPermission('add_sale')): ?>
         <button class="btn" data-bs-toggle="modal" data-bs-target="#addSaleModal" style="background: var(--seafoam-green); color:white; font-weight: bold;">+ زیادکردنی فرۆشتن</button>
+        <?php endif; ?>
     </div>
     <div class="row mb-3">
       <div class="col-md-3">
@@ -306,6 +308,14 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
 <script src="../assets/js/swalAlert.js"></script>
 <script src="../assets/js/comon/table-controler.js"></script>
 <script src="../assets/js/comon/select2_script.js"></script>
+<script>
+    // Pass permissions to JavaScript
+    window.userPermissions = {
+      canAdd: <?php echo hasPermission('add_sale') ? 'true' : 'false'; ?>,
+      canEdit: <?php echo hasPermission('update_sale') ? 'true' : 'false'; ?>,
+      canDelete: <?php echo hasPermission('delete_sale') ? 'true' : 'false'; ?>
+    };
+</script>
 <script src="../assets/js/sale/add_sale.js"></script>
 <script src="../assets/js/sale/select_sale.js"></script>
 <script src="../assets/js/sale/delete_sale.js"></script>
