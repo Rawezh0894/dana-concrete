@@ -47,7 +47,11 @@ if (addExpenseForm) {
             formData.append('expense_type', document.getElementById('expense_type').value);
         }
         if (document.getElementById('material_id')) {
-            formData.append('material_id', document.getElementById('material_id').value);
+            const materialId = document.getElementById('material_id').value;
+            // Only append if not empty
+            if (materialId && materialId.trim() !== '') {
+                formData.append('material_id', materialId);
+            }
         }
         if (document.getElementById('material_quantity')) {
             formData.append('material_quantity', document.getElementById('material_quantity').value);

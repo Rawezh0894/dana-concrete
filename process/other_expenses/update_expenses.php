@@ -16,11 +16,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = $_POST['id'] ?? null;
     $purpose = $_POST['purpose'] ?? '';
     $person_id = $_POST['person_id'] ?? null;
+    // Convert empty string to null for foreign key constraint
+    if ($person_id === '') {
+        $person_id = null;
+    }
     $employee_id = $_POST['employee_id'] ?? null;
+    // Convert empty string to null for foreign key constraint
+    if ($employee_id === '') {
+        $employee_id = null;
+    }
     $car_id = $_POST['car_id'] ?? null;
+    // Convert empty string to null for foreign key constraint
+    if ($car_id === '') {
+        $car_id = null;
+    }
     $gas_liters = isset($_POST['gas_liters']) ? floatval($_POST['gas_liters']) : null;
     $expense_type = $_POST['expense_type'] ?? '';
     $material_id = $_POST['material_id'] ?? null;
+    // Convert empty string to null for foreign key constraint
+    if ($material_id === '') {
+        $material_id = null;
+    }
     $material_quantity = isset($_POST['material_quantity']) ? floatval($_POST['material_quantity']) : null;
     $material_purchase_price_iqd = isset($_POST['material_purchase_price_iqd']) ? floatval($_POST['material_purchase_price_iqd']) : null;
     $material_purchase_price_usd = isset($_POST['material_purchase_price_usd']) ? floatval($_POST['material_purchase_price_usd']) : null;
@@ -85,6 +101,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    // Check gas availability for gas usage expenses
+    if ($expense_type === 'بەکارهێنانی گاز' && $gas_liters && $gas_liters > 0) {
+        // Get current gas amount in the tank
+        $gas_sql = "SELECT amount FROM bins_silos WHERE type = 'تەنکی' AND material_type = 'گاز' LIMIT 1";
+        $gas_stmt = $pdo->prepare($gas_sql);
+        $gas_stmt->execute();
+        $gas_tank = $gas_stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$gas_tank) {
+            echo json_encode(['success' => false, 'msg' => 'تەنکی گاز لە سیستەمەکەدا نییە']);
+            exit;
+        }
+        
+        $available_gas = floatval($gas_tank['amount']);
+        $required_gas = floatval($gas_liters);
+
+        // Get the current expense record to see if we need to adjust the check
+        $current_gas_sql = "SELECT gas_liters FROM other_expenses WHERE id = ?";
+        $current_gas_stmt = $pdo->prepare($current_gas_sql);
+        $current_gas_stmt->execute([$id]);
+        $current_gas_expense = $current_gas_stmt->fetch(PDO::FETCH_ASSOC);
+
+        $current_gas = $current_gas_expense ? floatval($current_gas_expense['gas_liters']) : 0;
+        $gas_difference = $required_gas - $current_gas;
+
+        // Only check if we're requesting more gas than what was already used
+        if ($gas_difference > 0 && $available_gas < $gas_difference) {
+            echo json_encode([
+                'success' => false,
+                'msg' => "بڕی گاز لە تەنکی کەمە. بڕی بەردەست: {$available_gas} لیتر، بڕی پێویست: {$gas_difference} لیتر"
+            ]);
+            exit;
+        }
+    }
+
     // Check for duplicate invoice_number (except for this record)
     if ($invoice_number) {
         $stmt = $pdo->prepare('SELECT COUNT(*) FROM other_expenses WHERE invoice_number = ? AND id != ?');
@@ -132,30 +183,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $date,
         $id
     ]);
-    if ($ok) {
-        // If gas_liters is set and > 0, update bins_silos (gas tank)
-        if (($gas_liters && $gas_liters > 0) || ($old_gas_liters && $old_gas_liters > 0)) {
-            $stmt_gas = $pdo->prepare("SELECT id, amount, total_value, average_price FROM bins_silos WHERE type='تەنکی' AND material_type='گاز' LIMIT 1");
-            $stmt_gas->execute();
-            $gas_tank = $stmt_gas->fetch(PDO::FETCH_ASSOC);
-            if ($gas_tank) {
-                $new_amount = $gas_tank['amount'];
-                // Restore old gas_liters if any
-                if ($old_gas_liters && $old_gas_liters > 0) {
-                    $new_amount += $old_gas_liters;
-                }
-                // Subtract new gas_liters if any
-                if ($gas_liters && $gas_liters > 0) {
-                    if ($new_amount < $gas_liters) {
-                        echo json_encode(['success' => false, 'msg' => 'بڕی گاز لە تەنکی کەمە!']);
-                        exit;
-                    }
-                    $new_amount -= $gas_liters;
-                }
-                $update_gas = $pdo->prepare("UPDATE bins_silos SET amount=? WHERE id=?");
-                $update_gas->execute([$new_amount, $gas_tank['id']]);
-            }
-        }
+                    if ($ok) {
+                    // Note: Gas consumption is now handled automatically by database triggers
+                    // when expense_type = 'بەکارهێنانی گاز' and gas_liters > 0
         require_once __DIR__ . '/../../includes/notify.php';
         notify('update', 'other_expenses', $id, 'خەرجی تر نوێکرایەوە (ID: ' . $id . ')');
         echo json_encode(['success' => true]);
@@ -165,16 +195,61 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 echo json_encode(['success' => false, 'msg' => 'POST تەنها ڕێگەپێدراوە']);
-} catch (Exception $e) {
-    error_log('Error in update_expenses.php: ' . $e->getMessage());
-    error_log('Stack trace: ' . $e->getTraceAsString());
-    echo json_encode([
-        'success' => false, 
-        'msg' => 'هەڵەی سیستەم: ' . $e->getMessage(),
-        'debug_info' => [
-            'file' => $e->getFile(),
-            'line' => $e->getLine(),
-            'trace' => $e->getTraceAsString()
-        ]
-    ]);
-}
+    } catch (Exception $e) {
+        error_log('Error in update_expenses.php: ' . $e->getMessage());
+        error_log('Stack trace: ' . $e->getTraceAsString());
+        
+        // Check for specific foreign key constraint violations
+        if (strpos($e->getMessage(), 'foreign key constraint fails') !== false) {
+            if (strpos($e->getMessage(), 'person_id') !== false) {
+                echo json_encode([
+                    'success' => false, 
+                    'msg' => 'کەسی هەڵبژێردراو لە سیستەمەکەدا نییە. تکایە کەسێکی تر هەڵبژێرە یان کەسێکی نوێ زیاد بکە.',
+                    'debug_info' => [
+                        'error_type' => 'foreign_key_violation',
+                        'field' => 'person_id',
+                        'message' => $e->getMessage()
+                    ]
+                ]);
+            } elseif (strpos($e->getMessage(), 'employee_id') !== false) {
+                echo json_encode([
+                    'success' => false, 
+                    'msg' => 'کارمەندی هەڵبژێردراو لە سیستەمەکەدا نییە. تکایە کارمەندێکی تر هەڵبژێرە.',
+                    'debug_info' => [
+                        'error_type' => 'foreign_key_violation',
+                        'field' => 'employee_id',
+                        'message' => $e->getMessage()
+                    ]
+                ]);
+            } elseif (strpos($e->getMessage(), 'car_id') !== false) {
+                echo json_encode([
+                    'success' => false, 
+                    'msg' => 'سەیارەی هەڵبژێردراو لە سیستەمەکەدا نییە. تکایە سەیارەیەکی تر هەڵبژێرە.',
+                    'debug_info' => [
+                        'error_type' => 'foreign_key_violation',
+                        'field' => 'car_id',
+                        'message' => $e->getMessage()
+                    ]
+                ]);
+            } else {
+                echo json_encode([
+                    'success' => false, 
+                    'msg' => 'هەڵەی پەیوەندی داتا: بەهای هەڵبژێردراو لە سیستەمەکەدا نییە.',
+                    'debug_info' => [
+                        'error_type' => 'foreign_key_violation',
+                        'message' => $e->getMessage()
+                    ]
+                ]);
+            }
+        } else {
+            echo json_encode([
+                'success' => false, 
+                'msg' => 'هەڵەی سیستەم: ' . $e->getMessage(),
+                'debug_info' => [
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                    'trace' => $e->getTraceAsString()
+                ]
+            ]);
+        }
+    }

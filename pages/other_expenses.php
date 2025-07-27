@@ -147,11 +147,15 @@ if (!isset($_SESSION['user_id'])) {
           <div class="mb-3 row">
             <div class="col-md-4">
               <label for="employee_id" class="form-label">کارمەند</label>
-              <select class="form-control" id="employee_id" name="employee_id"></select>
+              <select class="form-control" id="employee_id" name="employee_id">
+                <option value="">-- هەلبژێرە --</option>
+              </select>
             </div>
             <div class="col-md-4">
               <label for="car_id" class="form-label">سەیارە</label>
-              <select class="form-control" id="car_id" name="car_id"></select>
+              <select class="form-control" id="car_id" name="car_id">
+                <option value="">-- هەلبژێرە --</option>
+              </select>
             </div>
             <div class="col-md-4 gas-material-field">
               <label for="gas_liters" class="form-label">بڕی گاز (لیتر)</label>
@@ -205,7 +209,9 @@ if (!isset($_SESSION['user_id'])) {
             <div class="col-md-4 warehouse-hidden-field">
               <label for="person_id" class="form-label">کەس</label>
               <div class="input-group">
-                <select class="form-control" id="person_id" name="person_id"></select>
+                <select class="form-control" id="person_id" name="person_id">
+                  <option value="">-- هەلبژێرە --</option>
+                </select>
                 <button class="btn" type="button" id="addPersonBtn" data-bs-toggle="modal" data-bs-target="#addPersonModal" style="background: var(--seafoam-green); color: white; font-weight: bold;">+
                 </button>
               </div>
@@ -325,11 +331,15 @@ if (!isset($_SESSION['user_id'])) {
           <div class="mb-3 row">
             <div class="col-md-4">
               <label for="edit_employee_id" class="form-label">کارمەند</label>
-              <select class="form-control" id="edit_employee_id" name="employee_id"></select>
+              <select class="form-control" id="edit_employee_id" name="employee_id">
+                <option value="">-- هەلبژێرە --</option>
+              </select>
             </div>
             <div class="col-md-4">
               <label for="edit_car_id" class="form-label">سەیارە</label>
-              <select class="form-control" id="edit_car_id" name="car_id"></select>
+              <select class="form-control" id="edit_car_id" name="car_id">
+                <option value="">-- هەلبژێرە --</option>
+              </select>
             </div>
             <div class="col-md-4 gas-material-field">
               <label for="edit_gas_liters" class="form-label">بڕی گاز (لیتر)</label>
@@ -382,7 +392,9 @@ if (!isset($_SESSION['user_id'])) {
           <div class="mb-3 row">
             <div class="col-md-4 warehouse-hidden-field">
               <label for="edit_person_id" class="form-label">کەس</label>
-              <select class="form-control" id="edit_person_id" name="person_id"></select>
+              <select class="form-control" id="edit_person_id" name="person_id">
+                <option value="">-- هەلبژێرە --</option>
+              </select>
             </div>
             <div class="col-md-4 warehouse-hidden-field">
               <label for="edit_payment_type" class="form-label">جۆری مامەڵە</label>

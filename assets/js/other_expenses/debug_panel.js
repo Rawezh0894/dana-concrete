@@ -168,6 +168,49 @@ window.OtherExpensesDebug = {
         form.dispatchEvent(submitEvent);
     },
 
+    // Test foreign key constraint handling
+    testForeignKeyHandling: function() {
+        console.group('🔗 Testing Foreign Key Constraint Handling');
+        
+        const form = document.getElementById('addExpenseForm');
+        if (!form) {
+            console.error('Add expense form not found');
+            console.groupEnd();
+            return;
+        }
+
+        // Test with empty foreign key fields
+        console.log('Testing with empty foreign key fields...');
+        
+        // Set required field
+        const expenseType = document.getElementById('expense_type');
+        if (expenseType) {
+            expenseType.value = 'خەرجی تر';
+        }
+
+        // Clear foreign key fields
+        const personId = document.getElementById('person_id');
+        const employeeId = document.getElementById('employee_id');
+        const carId = document.getElementById('car_id');
+        const materialId = document.getElementById('material_id');
+
+        if (personId) personId.value = '';
+        if (employeeId) employeeId.value = '';
+        if (carId) carId.value = '';
+        if (materialId) materialId.value = '';
+
+        console.log('Foreign key fields cleared');
+        console.log('Form state:', {
+            expense_type: expenseType?.value,
+            person_id: personId?.value,
+            employee_id: employeeId?.value,
+            car_id: carId?.value,
+            material_id: materialId?.value
+        });
+
+        console.groupEnd();
+    },
+
     // Test field visibility
     testFieldVisibility: function() {
         console.group('👁️ Testing Field Visibility');
@@ -247,6 +290,7 @@ window.OtherExpensesDebug = {
         console.log('  OtherExpensesDebug.showAllFormData() - Show all form data');
         console.log('  OtherExpensesDebug.simulateSubmit(formId) - Simulate form submit');
         console.log('  OtherExpensesDebug.testFieldVisibility() - Test field visibility');
+        console.log('  OtherExpensesDebug.testForeignKeyHandling() - Test foreign key handling');
         console.log('  OtherExpensesDebug.showLogs() - Show recent logs');
         console.log('  OtherExpensesDebug.clearLogs() - Clear logs');
         console.log('  OtherExpensesDebug.exportLogs() - Export logs');
