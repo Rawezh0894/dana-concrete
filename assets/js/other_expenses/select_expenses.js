@@ -1,7 +1,21 @@
 async function loadOtherExpenses() {
-    const monthFilter = document.getElementById('monthFilter');
-    const res = await fetch('../process/other_expenses/select_expenses.php');
-    const data = await res.json();
+    try {
+        console.log('Loading other expenses...');
+        
+        const monthFilter = document.getElementById('monthFilter');
+        console.log('Month filter element:', monthFilter);
+        
+        const res = await fetch('../process/other_expenses/select_expenses.php');
+        
+        console.log('Response status:', res.status);
+        console.log('Response headers:', res.headers);
+        
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        
+        const data = await res.json();
+        console.log('Expenses data received:', data);
     function formatNumber(num) {
         return Number(num).toLocaleString('en-US');
     }
@@ -42,6 +56,14 @@ async function loadOtherExpenses() {
         employee_name: row.employee_name || '',
         car_name: row.car_name || '',
         gas_liters: row.gas_liters ? formatNumber(row.gas_liters) : '',
+        expense_type: row.expense_type || '',
+        material_name: row.material_name || '',
+        material_quantity: row.material_quantity ? formatNumber(row.material_quantity) : '',
+        material_purchase_price_iqd: row.material_purchase_price_iqd ? formatIQD(row.material_purchase_price_iqd) : '',
+        material_purchase_price_usd: row.material_purchase_price_usd ? formatUSD(row.material_purchase_price_usd) : '',
+        material_total_cost: row.material_total_cost ? formatNumber(row.material_total_cost) : '',
+        gas_purchase_price_input: row.gas_purchase_price_input ? formatIQD(row.gas_purchase_price_input) : '',
+        gas_total_cost: row.gas_total_cost ? formatNumber(row.gas_total_cost) : '',
         payment_type: row.payment_type,
         currency_type: row.currency_type,
         invoice_number: row.invoice_number || '',
@@ -56,7 +78,7 @@ async function loadOtherExpenses() {
         actions: `<button class="btn btn-sm btn-danger delete-expense" data-id="${row.id}"><i class="fa fa-trash"></i></button> <button class="btn btn-sm btn-primary edit-expense" data-id="${row.id}"><i class="fa fa-edit"></i></button>`
     }));
     TableController.renderWithPagination('#otherExpensesTable', tableData, [
-        '#', 'purpose', 'person_name', 'employee_name', 'car_name', 'gas_liters', 'payment_type', 'currency_type',
+        '#', 'purpose', 'person_name', 'employee_name', 'car_name', 'gas_liters', 'expense_type', 'material_name', 'material_quantity', 'material_purchase_price_iqd', 'material_purchase_price_usd', 'material_total_cost', 'gas_purchase_price_input', 'gas_total_cost', 'payment_type', 'currency_type',
         'invoice_number', 'amount_iqd', 'amount_usd', 'paid_iqd', 'paid_usd', 'exchange_rate',
         'remaining_iqd', 'remaining_usd', 'date', 'actions'
     ]);
@@ -98,7 +120,84 @@ async function loadOtherExpenses() {
                 if (document.getElementById('edit_gas_liters')) {
                     document.getElementById('edit_gas_liters').value = row.gas_liters || '';
                 }
+                // Add new fields to edit modal
+                if (document.getElementById('edit_expense_type')) {
+                    document.getElementById('edit_expense_type').value = row.expense_type || '';
+                    // Trigger change event to show/hide appropriate fields
+                    const event = new Event('change');
+                    document.getElementById('edit_expense_type').dispatchEvent(event);
+                    
+                    // If it's a gas usage expense, populate gas price
+                    if (row.expense_type === 'بەکارهێنانی گاز') {
+                        setTimeout(() => {
+                            populateGasPurchasePrice('edit');
+                        }, 100);
+                    }
+                }
+                // Populate material dropdown
+                if (document.getElementById('edit_material_id')) {
+                    populateSelect('../process/other_expenses/select_materials.php', 'edit_material_id', row.material_id);
+                    // Populate material prices after a short delay to ensure dropdown is populated
+                    setTimeout(() => {
+                        if (row.material_id) {
+                            populateMaterialPrices(row.material_id, 'edit');
+                        }
+                    }, 100);
+                }
+                if (document.getElementById('edit_material_quantity')) {
+                    document.getElementById('edit_material_quantity').value = row.material_quantity || '';
+                }
+                if (document.getElementById('edit_material_purchase_price_iqd')) {
+                    document.getElementById('edit_material_purchase_price_iqd').value = row.material_purchase_price_iqd || '';
+                }
+                if (document.getElementById('edit_material_purchase_price_usd')) {
+                    document.getElementById('edit_material_purchase_price_usd').value = row.material_purchase_price_usd || '';
+                }
+                if (document.getElementById('edit_material_total_cost')) {
+                    document.getElementById('edit_material_total_cost').value = row.material_total_cost || '';
+                }
+                if (document.getElementById('edit_gas_purchase_price_input')) {
+                    document.getElementById('edit_gas_purchase_price_input').value = row.gas_purchase_price_input || '';
+                }
+                if (document.getElementById('edit_gas_total_cost')) {
+                    document.getElementById('edit_gas_total_cost').value = row.gas_total_cost || '';
+                }
                 document.getElementById('edit_date').value = row.date;
+                
+                // Add event listeners for automatic total cost calculation in edit form
+                const editQuantityField = document.getElementById('edit_material_quantity');
+                const editIqdPriceField = document.getElementById('edit_material_purchase_price_iqd');
+                const editUsdPriceField = document.getElementById('edit_material_purchase_price_usd');
+                
+                if (editQuantityField) {
+                    editQuantityField.removeEventListener('input', calculateEditTotalCost);
+                    editQuantityField.addEventListener('input', function() {
+                        calculateEditTotalCost();
+                        checkMaterialAvailability('edit');
+                    });
+                }
+
+                // Add event listeners for gas total cost calculation in edit form
+                const editGasLitersField = document.getElementById('edit_gas_liters');
+                const editGasPriceField = document.getElementById('edit_gas_purchase_price_input');
+                
+                if (editGasLitersField) {
+                    editGasLitersField.removeEventListener('input', calculateEditGasTotalCost);
+                    editGasLitersField.addEventListener('input', calculateEditGasTotalCost);
+                }
+                if (editGasPriceField) {
+                    editGasPriceField.removeEventListener('input', calculateEditGasTotalCost);
+                    editGasPriceField.addEventListener('input', calculateEditGasTotalCost);
+                }
+                if (editIqdPriceField) {
+                    editIqdPriceField.removeEventListener('input', calculateEditTotalCost);
+                    editIqdPriceField.addEventListener('input', calculateEditTotalCost);
+                }
+                if (editUsdPriceField) {
+                    editUsdPriceField.removeEventListener('input', calculateEditTotalCost);
+                    editUsdPriceField.addEventListener('input', calculateEditTotalCost);
+                }
+                
                 // Show modal
                 const modal = new bootstrap.Modal(document.getElementById('editExpenseModal'));
                 modal.show();
@@ -118,6 +217,14 @@ async function loadOtherExpenses() {
             };
         }
     }, 0);
+    } catch (err) {
+        console.error('Error loading other expenses:', err);
+        console.error('Error details:', {
+            message: err.message,
+            stack: err.stack,
+            name: err.name
+        });
+    }
 }
 document.addEventListener('DOMContentLoaded', function() {
     loadOtherExpenses();
@@ -128,15 +235,55 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 // Helper for populating selects with selected value
 async function populateSelect(url, selectId, selectedId) {
-    const res = await fetch(url);
-    const data = await res.json();
-    const select = document.getElementById(selectId);
-    select.innerHTML = '<option value="">-- هەلبژێرە --</option>';
-    data.forEach(item => {
-        const opt = document.createElement('option');
-        opt.value = item.id;
-        opt.textContent = item.name;
-        if (selectedId && String(item.id) === String(selectedId)) opt.selected = true;
-        select.appendChild(opt);
-    });
+    try {
+        console.log('Populating select:', { url, selectId, selectedId });
+        
+        const res = await fetch(url);
+        
+        console.log('Select population response status:', res.status);
+        
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        
+        const data = await res.json();
+        console.log('Select data received:', data);
+        
+        const select = document.getElementById(selectId);
+        if (!select) {
+            console.warn('Select element not found:', selectId);
+            return;
+        }
+        
+        select.innerHTML = '<option value="">-- هەلبژێرە --</option>';
+        data.forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = item.id;
+            opt.textContent = item.name;
+            if (selectedId && String(item.id) === String(selectedId)) opt.selected = true;
+            select.appendChild(opt);
+        });
+        
+        console.log('Select populated successfully');
+    } catch (err) {
+        console.error('Error populating select:', err);
+        console.error('Error details:', {
+            message: err.message,
+            stack: err.stack,
+            name: err.name,
+            url,
+            selectId,
+            selectedId
+        });
+    }
+}
+
+// Function to calculate edit form total cost
+function calculateEditTotalCost() {
+    calculateMaterialTotalCost('edit');
+}
+
+// Function to calculate edit form gas total cost
+function calculateEditGasTotalCost() {
+    calculateGasTotalCost('edit');
 }

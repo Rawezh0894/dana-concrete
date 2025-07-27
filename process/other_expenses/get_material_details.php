@@ -6,23 +6,34 @@ ini_set('display_errors', 1);
 try {
     require_once '../../config/db_conected.php';
     require_once '../../config/permissions.php';
+    header('Content-Type: application/json');
+
     if (!hasPermission('view_other_expenses')) {
         http_response_code(403);
         echo json_encode(['success' => false, 'msg' => 'ڕێگە پێنەدراو']);
         exit;
     }
-$sql = "SELECT oe.*, p.name AS person_name, e.name AS employee_name, c.name AS car_name, lm.name AS material_name, oe.car_id, oe.gas_liters
-        FROM other_expenses oe
-        LEFT JOIN other_expense_persons p ON oe.person_id = p.id
-        LEFT JOIN employees e ON oe.employee_id = e.id
-        LEFT JOIN cars c ON oe.car_id = c.id
-        LEFT JOIN list_materials lm ON oe.material_id = lm.id
-        ORDER BY oe.id DESC";
-$stmt = $pdo->query($sql);
-$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-echo json_encode($data);
+
+$material_id = $_GET['material_id'] ?? null;
+
+if (!$material_id) {
+    echo json_encode(['success' => false, 'msg' => 'ناسنامەی کاڵا پێویستە']);
+    exit;
+}
+
+$sql = "SELECT id, name, currency_type, purchase_price_usd, purchase_price_iqd FROM list_materials WHERE id = ?";
+$stmt = $pdo->prepare($sql);
+$stmt->execute([$material_id]);
+$material = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$material) {
+    echo json_encode(['success' => false, 'msg' => 'کاڵا نەدۆزرایەوە']);
+    exit;
+}
+
+echo json_encode(['success' => true, 'data' => $material]);
 } catch (Exception $e) {
-    error_log('Error in select_expenses.php: ' . $e->getMessage());
+    error_log('Error in get_material_details.php: ' . $e->getMessage());
     error_log('Stack trace: ' . $e->getTraceAsString());
     echo json_encode([
         'success' => false, 
@@ -33,4 +44,4 @@ echo json_encode($data);
             'trace' => $e->getTraceAsString()
         ]
     ]);
-}
+} 

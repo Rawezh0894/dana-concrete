@@ -6,23 +6,33 @@ ini_set('display_errors', 1);
 try {
     require_once '../../config/db_conected.php';
     require_once '../../config/permissions.php';
+    header('Content-Type: application/json');
+
     if (!hasPermission('view_other_expenses')) {
         http_response_code(403);
         echo json_encode(['success' => false, 'msg' => 'ڕێگە پێنەدراو']);
         exit;
     }
-$sql = "SELECT oe.*, p.name AS person_name, e.name AS employee_name, c.name AS car_name, lm.name AS material_name, oe.car_id, oe.gas_liters
-        FROM other_expenses oe
-        LEFT JOIN other_expense_persons p ON oe.person_id = p.id
-        LEFT JOIN employees e ON oe.employee_id = e.id
-        LEFT JOIN cars c ON oe.car_id = c.id
-        LEFT JOIN list_materials lm ON oe.material_id = lm.id
-        ORDER BY oe.id DESC";
+
+// Get the average price from BINS_SILOS table
+$sql = "SELECT AVERAGE_PRICE FROM BINS_SILOS WHERE AVERAGE_PRICE IS NOT NULL AND AVERAGE_PRICE > 0 ORDER BY id DESC LIMIT 1";
 $stmt = $pdo->query($sql);
-$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-echo json_encode($data);
+$result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if ($result && $result['AVERAGE_PRICE']) {
+    echo json_encode([
+        'success' => true, 
+        'average_price' => floatval($result['AVERAGE_PRICE']),
+        'msg' => 'نرخی گاز بەردەستە'
+    ]);
+} else {
+    echo json_encode([
+        'success' => false, 
+        'msg' => 'نرخی گاز لە سیستەمەکەدا نییە'
+    ]);
+}
 } catch (Exception $e) {
-    error_log('Error in select_expenses.php: ' . $e->getMessage());
+    error_log('Error in get_gas_average_price.php: ' . $e->getMessage());
     error_log('Stack trace: ' . $e->getTraceAsString());
     echo json_encode([
         'success' => false, 
@@ -33,4 +43,4 @@ echo json_encode($data);
             'trace' => $e->getTraceAsString()
         ]
     ]);
-}
+} 

@@ -1,4 +1,16 @@
 async function editExpense(id, data) {
+    // Check if there's an error message indicating insufficient material
+    const errorMessage = document.querySelector('.material-availability-message.text-danger');
+    if (errorMessage) {
+        Swal.fire({
+            icon: 'error',
+            title: 'هەڵە',
+            text: 'ناتوانرێت خەرجی نوێ بکرێتەوە - بڕی پێویست لە کۆگا نەماوە',
+            confirmButtonText: 'باشە'
+        });
+        return;
+    }
+
     const formData = new FormData();
     for (const key in data) {
         formData.append(key, data[key]);
@@ -7,17 +19,72 @@ async function editExpense(id, data) {
     if (document.getElementById('edit_gas_liters')) {
         formData.append('gas_liters', document.getElementById('edit_gas_liters').value);
     }
+    // Add new fields
+    if (document.getElementById('edit_expense_type')) {
+        formData.append('expense_type', document.getElementById('edit_expense_type').value);
+    }
+    if (document.getElementById('edit_material_id')) {
+        formData.append('material_id', document.getElementById('edit_material_id').value);
+    }
+    if (document.getElementById('edit_material_quantity')) {
+        formData.append('material_quantity', document.getElementById('edit_material_quantity').value);
+    }
+    if (document.getElementById('edit_material_purchase_price_iqd')) {
+        formData.append('material_purchase_price_iqd', document.getElementById('edit_material_purchase_price_iqd').value);
+    }
+    if (document.getElementById('edit_material_purchase_price_usd')) {
+        formData.append('material_purchase_price_usd', document.getElementById('edit_material_purchase_price_usd').value);
+    }
+    if (document.getElementById('edit_material_total_cost')) {
+        formData.append('material_total_cost', document.getElementById('edit_material_total_cost').value);
+    }
+    if (document.getElementById('edit_gas_purchase_price_input')) {
+        formData.append('gas_purchase_price_input', document.getElementById('edit_gas_purchase_price_input').value);
+    }
+    if (document.getElementById('edit_gas_total_cost')) {
+        formData.append('gas_total_cost', document.getElementById('edit_gas_total_cost').value);
+    }
     formData.append('id', id);
-    const res = await fetch('../process/other_expenses/update_expenses.php', {
-        method: 'POST',
-        body: formData
-    });
-    const result = await res.json();
-    if (result.success) {
-        Swal.fire('سەرکەوتوو!', 'خەرجیەکە نوێکرایەوە', 'success');
-        if (typeof loadOtherExpenses === 'function') loadOtherExpenses();
-    } else {
-        Swal.fire('هەڵە!', result.msg || 'هەڵەیەک ڕویدا', 'error');
+    
+    try {
+        console.log('Updating expense with ID:', id);
+        console.log('Form data entries:');
+        for (let [key, value] of formData.entries()) {
+            console.log(`${key}: ${value}`);
+        }
+        
+        const res = await fetch('../process/other_expenses/update_expenses.php', {
+            method: 'POST',
+            body: formData
+        });
+        
+        console.log('Response status:', res.status);
+        console.log('Response headers:', res.headers);
+        
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        
+        const result = await res.json();
+        console.log('Response data:', result);
+        
+        if (result.success) {
+            console.log('Expense updated successfully');
+            Swal.fire('سەرکەوتوو!', 'خەرجیەکە نوێکرایەوە', 'success');
+            if (typeof loadOtherExpenses === 'function') loadOtherExpenses();
+        } else {
+            console.error('Server returned error:', result.msg);
+            Swal.fire('هەڵە!', result.msg || 'هەڵەیەک ڕویدا', 'error');
+        }
+    } catch (err) {
+        console.error('Error updating expense:', err);
+        console.error('Error details:', {
+            message: err.message,
+            stack: err.stack,
+            name: err.name,
+            expenseId: id
+        });
+        Swal.fire('هەڵە!', 'هەڵەیەک ڕویدا', 'error');
     }
 }
 window.editExpense = editExpense;

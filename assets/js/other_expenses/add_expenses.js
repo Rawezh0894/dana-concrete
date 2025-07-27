@@ -18,33 +18,95 @@ if (addExpenseForm) {
                     }
                 }
             }
-            if (duplicate) {
-                Swal.fire('هەڵە!', 'ئەم ژمارەی پسوڵەیە پێشتر تۆمارکراوە!', 'error');
-                submittingExpense = false;
-                return;
-            }
+                    if (duplicate) {
+            Swal.fire('هەڵە!', 'ئەم ژمارەی پسوڵەیە پێشتر تۆمارکراوە!', 'error');
+            submittingExpense = false;
+            return;
+        }
+
+        // Check if there's an error message indicating insufficient material
+        const errorMessage = document.querySelector('.material-availability-message.text-danger');
+        if (errorMessage) {
+            Swal.fire({
+                icon: 'error',
+                title: 'هەڵە',
+                text: 'ناتوانرێت خەرجی تۆمار بکرێت - بڕی پێویست لە کۆگا نەماوە',
+                confirmButtonText: 'باشە'
+            });
+            submittingExpense = false;
+            return;
+        }
         }
         const formData = new FormData(addExpenseForm);
         // Add gas_liters if present in the form
         if (document.getElementById('gas_liters')) {
             formData.append('gas_liters', document.getElementById('gas_liters').value);
         }
+        // Add new fields
+        if (document.getElementById('expense_type')) {
+            formData.append('expense_type', document.getElementById('expense_type').value);
+        }
+        if (document.getElementById('material_id')) {
+            formData.append('material_id', document.getElementById('material_id').value);
+        }
+        if (document.getElementById('material_quantity')) {
+            formData.append('material_quantity', document.getElementById('material_quantity').value);
+        }
+        if (document.getElementById('material_purchase_price_iqd')) {
+            formData.append('material_purchase_price_iqd', document.getElementById('material_purchase_price_iqd').value);
+        }
+        if (document.getElementById('material_purchase_price_usd')) {
+            formData.append('material_purchase_price_usd', document.getElementById('material_purchase_price_usd').value);
+        }
+        if (document.getElementById('material_total_cost')) {
+            formData.append('material_total_cost', document.getElementById('material_total_cost').value);
+        }
+        if (document.getElementById('gas_purchase_price_input')) {
+            formData.append('gas_purchase_price_input', document.getElementById('gas_purchase_price_input').value);
+        }
+        if (document.getElementById('gas_total_cost')) {
+            formData.append('gas_total_cost', document.getElementById('gas_total_cost').value);
+        }
         try {
+            console.log('Submitting expense form...');
+            console.log('Form data entries:');
+            for (let [key, value] of formData.entries()) {
+                console.log(`${key}: ${value}`);
+            }
+            
             const res = await fetch('../process/other_expenses/add_expenses.php', {
                 method: 'POST',
                 body: formData
             });
+            
+            console.log('Response status:', res.status);
+            console.log('Response headers:', res.headers);
+            
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
+            
             const data = await res.json();
+            console.log('Response data:', data);
+            
             if (data.success) {
+                console.log('Expense added successfully');
                 Swal.fire('سەرکەوتوو!', 'خەرجی تر زیادکرا', 'success');
                 var modal = bootstrap.Modal.getInstance(document.getElementById('addExpenseModal'));
                 modal.hide();
                 if (typeof loadOtherExpenses === 'function') loadOtherExpenses();
                 addExpenseForm.reset();
             } else {
+                console.error('Server returned error:', data.msg);
                 Swal.fire('هەڵە!', data.msg || 'هەڵەیەک ڕویدا', 'error');
             }
         } catch (err) {
+            console.error('Error submitting expense form:', err);
+            console.error('Error details:', {
+                message: err.message,
+                stack: err.stack,
+                name: err.name
+            });
             Swal.fire('هەڵە!', 'هەڵەیەک ڕویدا', 'error');
         }
         submittingExpense = false;
@@ -69,6 +131,7 @@ if (addExpenseModal) {
         populateSelect('../process/other_expenses/select_persons.php', 'person_id');
         populateSelect('../process/other_expenses/select_employees.php', 'employee_id');
         populateSelect('../process/other_expenses/select_cars.php', 'car_id');
+        populateSelect('../process/other_expenses/select_materials.php', 'material_id');
     });
 }
 
