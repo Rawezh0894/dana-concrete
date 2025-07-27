@@ -7,10 +7,31 @@ $(document).ready(function() {
         var quantity = parseFloat($('#quantity').val()) || 0;
         var pricePerUnit = parseFloat($('#price_per_unit').val()) || 0;
         var total = quantity * pricePerUnit;
-        $('#total_price').val(total.toFixed(2));
+        $('#total_price').val(total.toFixed(4));
+    }
+
+    function calculatePricePerUnit() {
+        var quantity = parseFloat($('#quantity').val()) || 0;
+        var paidUSD = parseFloat($('#amount_paid_usd').val()) || 0;
+        var paidIQD = parseFloat($('#amount_paid_iq').val()) || 0;
+        var dolarRate = parseFloat($('#dolar_rate').val()) || 1;
+        
+        if (quantity > 0) {
+            // فۆرمۆلە: (پارەی دراو بە دۆلار + (پارەی دراو بە دینار / (نرخی100 دۆلار بە دینار/100))) / بڕ م3
+            var paidIQD_inUSD = paidIQD / (dolarRate / 100);
+            var totalPaid = paidUSD + paidIQD_inUSD;
+            var pricePerUnit = totalPaid / quantity;
+            $('#price_per_unit').val(pricePerUnit.toFixed(4));
+        }
     }
 
     $('#quantity, #price_per_unit').on('input', calculateTotalPrice);
+    
+    // ژماردنی نرخی یەکە کاتێک پارەی دراو یان نرخی دۆلار دەگۆڕدرێت
+    $('#amount_paid_usd, #amount_paid_iq, #dolar_rate').on('input', function() {
+        calculatePricePerUnit();
+        calculateTotalPrice();
+    });
 
     // Initial calculation in case values are pre-filled
     calculateTotalPrice();
@@ -28,7 +49,7 @@ $(document).ready(function() {
         // Convert IQD to USD based on rate for 100 USD
         var paidIQD_inUSD = paidIQD / (dolarRate / 100);
         var remaining = (total - paidIQD_inUSD - paidUSD) - discount;
-        $('#remaining_amount').val(remaining.toFixed(2));
+        $('#remaining_amount').val(remaining.toFixed(4));
     }
 
     // Update remaining amount when any relevant field changes
@@ -38,6 +59,11 @@ $(document).ready(function() {
     $('#quantity, #price_per_unit').on('input', function() {
         calculateTotalPrice();
         calculateRemainingAmount();
+    });
+    
+    // ژماردنی نرخی یەکە کاتێک بڕ دەگۆڕدرێت
+    $('#quantity').on('input', function() {
+        calculatePricePerUnit();
     });
 
     // Initial calculation

@@ -143,15 +143,15 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
           <div class="row">
             <div class="col-md-4 mb-3">
               <label for="quantity" class="form-label">بڕ (م³)</label>
-              <input type="number" class="form-control" id="quantity" name="quantity" min="0" step="0.01" required>
+              <input type="number" class="form-control" id="quantity" name="quantity" min="0" step="0.0001" required>
             </div>
             <div class="col-md-4 mb-3">
               <label for="price_per_unit" class="form-label">نرخی یەکە</label>
-              <input type="number" class="form-control" id="price_per_unit" name="price_per_unit" min="0" step="0.01" required>
+              <input type="number" class="form-control" id="price_per_unit" name="price_per_unit" min="0" step="0.0001" required>
             </div>
             <div class="col-md-4 mb-3">
               <label for="total_price" class="form-label">کۆی نرخ</label>
-              <input type="number" class="form-control" id="total_price" name="total_price" min="0" step="0.01" required>
+              <input type="number" class="form-control" id="total_price" name="total_price" min="0" step="0.0001" required>
             </div>
           </div>
           <div class="row">
@@ -165,25 +165,30 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
             </div>
             <div class="col-md-4 mb-3">
               <label for="amount_paid_iq" class="form-label">پارەی دراو بە دینار</label>
-              <input type="number" class="form-control" id="amount_paid_iq" name="amount_paid_iq" min="0" step="0.01" value="0">
+              <input type="number" class="form-control" id="amount_paid_iq" name="amount_paid_iq" min="0" step="0.0001" value="0">
             </div>
             <div class="col-md-4 mb-3">
               <label for="amount_paid_usd" class="form-label">پارەی دراو بە دۆلار</label>
-              <input type="number" class="form-control" id="amount_paid_usd" name="amount_paid_usd" min="0" step="0.01" value="0">
+              <input type="number" class="form-control" id="amount_paid_usd" name="amount_paid_usd" min="0" step="0.0001" value="0">
             </div>
           </div>
           <div class="row">
             <div class="col-md-4 mb-3">
               <label for="remaining_amount" class="form-label">پارەی ماوە</label>
-              <input type="number" class="form-control" id="remaining_amount" name="remaining_amount" min="0" step="0.01" value="0">
+              <input type="number" class="form-control" id="remaining_amount" name="remaining_amount" min="0" step="0.0001" value="0">
             </div>
             <div class="col-md-4 mb-3">
               <label for="dolar_rate" class="form-label">نرخی ١٠٠ دۆلار</label>
-              <input type="number" class="form-control" id="dolar_rate" name="dolar_rate" min="0" step="0.01" value="150000">
+              <div class="input-group">
+                <input type="number" class="form-control" id="dolar_rate" name="dolar_rate" min="0" step="0.0001" value="150000">
+                <button type="button" class="btn btn-outline-secondary" id="refreshDollarRate" title="نوێکردنەوەی نرخی دۆلار">
+                  <i class="fas fa-sync-alt"></i>
+                </button>
+              </div>
             </div>
             <div class="col-md-4 mb-3">
               <label for="discount" class="form-label">داشکاندن</label>
-              <input type="number" class="form-control" id="discount" name="discount" min="0" step="0.01" value="0">
+              <input type="number" class="form-control" id="discount" name="discount" min="0" step="0.0001" value="0">
             </div>
           </div>
           <div class="row">
@@ -243,15 +248,15 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
           <div class="row">
             <div class="col-md-4 mb-3">
               <label for="edit_quantity" class="form-label">بڕ (m³)</label>
-              <input type="number" class="form-control" id="edit_quantity" name="edit_quantity" min="0" step="0.01" required>
+              <input type="number" class="form-control" id="edit_quantity" name="edit_quantity" min="0" step="0.0001" required>
             </div>
             <div class="col-md-4 mb-3">
               <label for="edit_price_per_unit" class="form-label">نرخی یەکە</label>
-              <input type="number" class="form-control" id="edit_price_per_unit" name="edit_price_per_unit" min="0" step="0.01" required>
+              <input type="number" class="form-control" id="edit_price_per_unit" name="edit_price_per_unit" min="0" step="0.0001" required>
             </div>
             <div class="col-md-4 mb-3">
               <label for="edit_total_price" class="form-label">کۆی نرخ</label>
-              <input type="number" class="form-control" id="edit_total_price" name="edit_total_price" min="0" step="0.01" required readonly>
+              <input type="number" class="form-control" id="edit_total_price" name="edit_total_price" min="0" step="0.0001" required readonly>
             </div>
           </div>
           <div class="row">
@@ -265,25 +270,30 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
             </div>
             <div class="col-md-4 mb-3">
               <label for="edit_amount_paid_iq" class="form-label">پارەی دراو بە دینار</label>
-              <input type="number" class="form-control" id="edit_amount_paid_iq" name="edit_amount_paid_iq" min="0" step="0.01" value="0">
+              <input type="number" class="form-control" id="edit_amount_paid_iq" name="edit_amount_paid_iq" min="0" step="0.0001" value="0">
             </div>
             <div class="col-md-4 mb-3">
               <label for="edit_amount_paid_usd" class="form-label">پارەی دراو بە دۆلار</label>
-              <input type="number" class="form-control" id="edit_amount_paid_usd" name="edit_amount_paid_usd" min="0" step="0.01" value="0">
+              <input type="number" class="form-control" id="edit_amount_paid_usd" name="edit_amount_paid_usd" min="0" step="0.0001" value="0">
             </div>
           </div>
           <div class="row">
             <div class="col-md-4 mb-3">
               <label for="edit_remaining_amount" class="form-label">پارەی ماوە</label>
-              <input type="number" class="form-control" id="edit_remaining_amount" name="edit_remaining_amount" min="0" step="0.01" value="0" readonly>
+              <input type="number" class="form-control" id="edit_remaining_amount" name="edit_remaining_amount" min="0" step="0.0001" value="0" readonly>
             </div>
             <div class="col-md-4 mb-3">
               <label for="edit_dolar_rate" class="form-label">نرخی ١٠٠ دۆلار</label>
-              <input type="number" class="form-control" id="edit_dolar_rate" name="edit_dolar_rate" min="0" step="0.01" value="150000">
+              <div class="input-group">
+                <input type="number" class="form-control" id="edit_dolar_rate" name="edit_dolar_rate" min="0" step="0.0001" value="150000">
+                <button type="button" class="btn btn-outline-secondary" id="refreshDollarRateEdit" title="نوێکردنەوەی نرخی دۆلار">
+                  <i class="fas fa-sync-alt"></i>
+                </button>
+              </div>
             </div>
             <div class="col-md-4 mb-3">
               <label for="edit_discount" class="form-label">داشکاندن</label>
-              <input type="number" class="form-control" id="edit_discount" name="edit_discount" min="0" step="0.01" value="0">
+              <input type="number" class="form-control" id="edit_discount" name="edit_discount" min="0" step="0.0001" value="0">
             </div>
           </div>
           <div class="row">
