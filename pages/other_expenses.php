@@ -454,6 +454,8 @@ if (!isset($_SESSION['user_id'])) {
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="../assets/js/comon/table-controler.js"></script>
 <script src="../assets/js/swalAlert.js"></script>
+<script src="../assets/js/other_expenses/error_logger.js"></script>
+<script src="../assets/js/other_expenses/debug_panel.js"></script>
 <script src="../assets/js/other_expenses/add_expenses.js"></script>
 <script src="../assets/js/other_expenses/select_expenses.js"></script>
 <script src="../assets/js/other_expenses/other_expenses.js"></script>
