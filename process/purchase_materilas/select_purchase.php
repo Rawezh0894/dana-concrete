@@ -48,23 +48,23 @@ try {
     // Main query to get purchase summaries
     $query = "
         SELECT 
-            pm.id,
+            ANY_VALUE(pm.id) as id,
             pm.receipt_number,
-            pm.purchase_date,
-            pm.currency_type,
-            pm.notes,
-            pm.transfer_loss,
-            pm.other_loss,
-            pm.usd_to_iqd_rate,
-            oep.name as person_name,
+            ANY_VALUE(pm.purchase_date) as purchase_date,
+            ANY_VALUE(pm.currency_type) as currency_type,
+            ANY_VALUE(pm.notes) as notes,
+            ANY_VALUE(pm.transfer_loss) as transfer_loss,
+            ANY_VALUE(pm.other_loss) as other_loss,
+            ANY_VALUE(pm.usd_to_iqd_rate) as usd_to_iqd_rate,
+            ANY_VALUE(oep.name) as person_name,
             COUNT(pm.material_id) as materials_count,
             SUM(pm.total_price_usd) as total_usd,
             SUM(pm.total_price_iqd) as total_iqd
         FROM purchase_materials pm
         LEFT JOIN other_expense_persons oep ON pm.person_id = oep.id
         $where_clause
-        GROUP BY pm.receipt_number, pm.purchase_date, pm.currency_type, pm.notes, pm.transfer_loss, pm.other_loss, pm.usd_to_iqd_rate, oep.name
-        ORDER BY pm.purchase_date DESC, pm.id DESC
+        GROUP BY pm.receipt_number
+        ORDER BY purchase_date DESC, id DESC
     ";
     
     $stmt = $pdo->prepare($query);
