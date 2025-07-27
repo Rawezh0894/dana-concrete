@@ -1,12 +1,15 @@
 <?php
 // Enable error reporting for debugging
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set('display_errors', 0); // Disable HTML error output
+ini_set('log_errors', 1);
+
+// Set JSON content type before any output
+header('Content-Type: application/json');
 
 try {
     require_once '../../config/db_conected.php';
     require_once '../../config/permissions.php';
-    header('Content-Type: application/json');
 
     if (!hasPermission('view_other_expenses')) {
         http_response_code(403);
@@ -19,10 +22,10 @@ try {
 $stmt = $pdo->query($sql);
 $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-if ($result && $result['AVERAGE_PRICE']) {
+if ($result && $result['average_price']) {
     echo json_encode([
         'success' => true, 
-        'average_price' => floatval($result['AVERAGE_PRICE']),
+        'average_price' => floatval($result['average_price']),
         'msg' => 'نرخی گاز بەردەستە'
     ]);
 } else {
