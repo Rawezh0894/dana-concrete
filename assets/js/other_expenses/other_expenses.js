@@ -480,7 +480,7 @@ document.addEventListener('DOMContentLoaded', function() {
         quantityField.style.borderColor = '';
     }
 
-    // Function to populate gas purchase price from BINS_SILOS
+    // Function to populate gas purchase price from bins_silos
     window.populateGasPurchasePrice = function(formType) {
         try {
             console.log('populateGasPurchasePrice called with:', { formType });
@@ -497,7 +497,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             console.log('Gas purchase price field found, fetching average price...');
             
-            // Fetch average gas price from BINS_SILOS
+            // Fetch average gas price from bins_silos
             fetch('../process/other_expenses/get_gas_average_price.php')
                 .then(response => {
                     console.log('Gas price response status:', response.status);
@@ -672,7 +672,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
             
-            // Populate gas purchase price from BINS_SILOS
+            // Populate gas purchase price from bins_silos
             populateGasPurchasePrice(formType);
         } else {
             // Hide all gas and material fields for empty or other selections

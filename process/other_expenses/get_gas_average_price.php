@@ -14,8 +14,8 @@ try {
         exit;
     }
 
-// Get the average price from BINS_SILOS table
-$sql = "SELECT AVERAGE_PRICE FROM BINS_SILOS WHERE AVERAGE_PRICE IS NOT NULL AND AVERAGE_PRICE > 0 ORDER BY id DESC LIMIT 1";
+    // Get the average price from bins_silos table
+    $sql = "SELECT average_price FROM bins_silos WHERE average_price IS NOT NULL AND average_price > 0 ORDER BY id DESC LIMIT 1";
 $stmt = $pdo->query($sql);
 $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
