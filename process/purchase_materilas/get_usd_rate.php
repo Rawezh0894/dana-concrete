@@ -10,12 +10,12 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// Check if user has permission to view materials
-if (!hasPermission('view_materials')) {
-    http_response_code(403);
-    echo json_encode(['success' => false, 'error' => 'Forbidden']);
-    exit;
-}
+// Check if user has permission to view materials (optional for USD rate)
+// if (!hasPermission('view_materials')) {
+//     http_response_code(403);
+//     echo json_encode(['success' => false, 'error' => 'Forbidden']);
+//     exit;
+// }
 
 // Check if request method is GET
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {

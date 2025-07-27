@@ -553,7 +553,7 @@ function refreshMaterialDropdowns() {
 }
 
 // Load materials data on page load
-loadMaterialsData();
+loadMaterials();
 
 // Load next receipt number
 function loadNextReceiptNumber() {
