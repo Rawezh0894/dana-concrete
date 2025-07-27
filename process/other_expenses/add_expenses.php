@@ -18,7 +18,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $purpose = $_POST['purpose'] ?? '';
     $person_id = $_POST['person_id'] ?? null;
     // Convert empty string to null for foreign key constraint
-    if ($person_id === '') {
+    if ($person_id === '' || $person_id === 'null' || $person_id === 'NULL') {
+        $person_id = null;
+    }
+    // Ensure person_id is either a valid integer or null
+    if ($person_id !== null && !is_numeric($person_id)) {
         $person_id = null;
     }
     $employee_id = $_POST['employee_id'] ?? null;
