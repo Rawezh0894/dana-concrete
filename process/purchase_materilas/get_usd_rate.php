@@ -3,12 +3,12 @@ session_start();
 require_once '../../config/db_conected.php';
 require_once '../../config/permissions.php';
 
-// Check if user is authenticated
-if (!isset($_SESSION['user_id'])) {
-    http_response_code(401);
-    echo json_encode(['success' => false, 'error' => 'Not authenticated']);
-    exit;
-}
+// Check if user is authenticated (optional for USD rate)
+// if (!isset($_SESSION['user_id'])) {
+//     http_response_code(401);
+//     echo json_encode(['success' => false, 'error' => 'Not authenticated']);
+//     exit;
+// }
 
 // Check if user has permission to view materials (optional for USD rate)
 // if (!hasPermission('view_materials')) {

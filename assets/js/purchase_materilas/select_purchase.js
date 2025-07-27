@@ -392,16 +392,23 @@ function populateViewMaterialsTable(materials) {
 }
 
 function calculateViewTotals(materials, transferLoss, otherLoss, currencyType, usdToIqdRate) {
+    console.log('calculateViewTotals called with:', {materials, transferLoss, otherLoss, currencyType, usdToIqdRate});
+    
     let totalUsd = 0;
     let totalIqd = 0;
     
     // Calculate materials totals
     if (materials && materials.length > 0) {
         materials.forEach(function(material) {
-            totalUsd += parseFloat(material.total_price_usd || 0);
-            totalIqd += parseFloat(material.total_price_iqd || 0);
+            const materialUsd = parseFloat(material.total_price_usd || 0) || 0;
+            const materialIqd = parseFloat(material.total_price_iqd || 0) || 0;
+            totalUsd += materialUsd;
+            totalIqd += materialIqd;
+            console.log('Material:', material.name, 'USD:', materialUsd, 'IQD:', materialIqd);
         });
     }
+    
+    console.log('After materials calculation - Total USD:', totalUsd, 'Total IQD:', totalIqd);
     
     // Convert losses to appropriate currency based on currency type
     let transferLossUsd = 0;
@@ -409,28 +416,41 @@ function calculateViewTotals(materials, transferLoss, otherLoss, currencyType, u
     let otherLossUsd = 0;
     let otherLossIqd = 0;
     
+    // Ensure losses are numbers
+    const transferLossNum = parseFloat(transferLoss || 0) || 0;
+    const otherLossNum = parseFloat(otherLoss || 0) || 0;
+    const usdToIqdRateNum = parseFloat(usdToIqdRate || 0) || 0;
+    
+    console.log('Losses:', {transferLossNum, otherLossNum, usdToIqdRateNum});
+    
     if (currencyType === 'دۆلار') {
         // If currency is USD, convert IQD losses to USD
-        if (usdToIqdRate > 0) {
-            transferLossUsd = transferLoss / (usdToIqdRate / 100);
-            otherLossUsd = otherLoss / (usdToIqdRate / 100);
+        if (usdToIqdRateNum > 0) {
+            transferLossUsd = transferLossNum / (usdToIqdRateNum / 100);
+            otherLossUsd = otherLossNum / (usdToIqdRateNum / 100);
         }
-        transferLossIqd = transferLoss;
-        otherLossIqd = otherLoss;
+        transferLossIqd = transferLossNum;
+        otherLossIqd = otherLossNum;
     } else {
         // If currency is IQD, losses are already in IQD
-        transferLossIqd = transferLoss;
-        otherLossIqd = otherLoss;
+        transferLossIqd = transferLossNum;
+        otherLossIqd = otherLossNum;
         // Convert to USD if rate is available
-        if (usdToIqdRate > 0) {
-            transferLossUsd = transferLoss / (usdToIqdRate / 100);
-            otherLossUsd = otherLoss / (usdToIqdRate / 100);
+        if (usdToIqdRateNum > 0) {
+            transferLossUsd = transferLossNum / (usdToIqdRateNum / 100);
+            otherLossUsd = otherLossNum / (usdToIqdRateNum / 100);
         }
     }
     
     // Add losses to totals
     totalUsd += transferLossUsd + otherLossUsd;
     totalIqd += transferLossIqd + otherLossIqd;
+    
+    console.log('Final totals - USD:', totalUsd, 'IQD:', totalIqd);
+    
+    // Ensure totals are numbers before using toFixed
+    totalUsd = parseFloat(totalUsd) || 0;
+    totalIqd = parseFloat(totalIqd) || 0;
     
     // Display totals based on currency type
     if (currencyType === 'دۆلار') {
