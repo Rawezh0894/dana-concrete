@@ -223,17 +223,36 @@ function attachActionHandlers() {
 }
 
 function loadPurchaseForView(purchaseId) {
+    console.log('Loading purchase for view:', purchaseId);
+    
     $.ajax({
         url: '../process/purchase_materilas/get_purchase.php',
         type: 'GET',
         data: { id: purchaseId },
         success: function(response) {
+            console.log('View response:', response);
+            
             try {
                 const result = JSON.parse(response);
+                console.log('Parsed result:', result);
                 
                 if (result.success) {
+                    console.log('Populating view form with data:', result.data);
                     populateViewForm(result.data);
-                    $('#viewPurchaseModal').modal('show');
+                    
+                    // Check if modal exists
+                    if ($('#viewPurchaseModal').length > 0) {
+                        console.log('Modal found, showing...');
+                        $('#viewPurchaseModal').modal('show');
+                    } else {
+                        console.error('Modal not found: #viewPurchaseModal');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'هەڵە',
+                            text: 'مۆداڵەکە نەدۆزرایەوە',
+                            confirmButtonText: 'باشە'
+                        });
+                    }
                 } else {
                     Swal.fire({
                         icon: 'error',
@@ -243,6 +262,7 @@ function loadPurchaseForView(purchaseId) {
                     });
                 }
             } catch (e) {
+                console.error('Error parsing response:', e);
                 Swal.fire({
                     icon: 'error',
                     title: 'هەڵە',
@@ -253,6 +273,7 @@ function loadPurchaseForView(purchaseId) {
             }
         },
         error: function(xhr, status, error) {
+            console.error('AJAX Error:', {xhr, status, error});
             Swal.fire({
                 icon: 'error',
                 title: 'هەڵە',
