@@ -839,38 +839,3 @@
     color: white;
     box-shadow: 0 2px 4px rgba(52, 152, 219, 0.3);
 }
-
-
-
-
-
-#addNoteModal .modal-backdrop {
-    z-index: 9998 !important;
-}
-
-#addNoteModal .modal {
-    z-index: 9999 !important;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* Ensure edit modal backdrop doesn't interfere */
-#editNoteModal .modal-backdrop {
-    z-index: 9998 !important;
-}
-
-#editNoteModal .modal {
-    z-index: 9999 !important;
-}
-
-/* Mobile specific adjustments for edit modal */

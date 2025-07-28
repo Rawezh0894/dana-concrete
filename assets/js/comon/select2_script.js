@@ -132,19 +132,9 @@ $(document).ready(function() {
     // بۆ notes - تەنها ئەگەر مۆداڵەکە هەبێت
     if ($('#addNoteModal').length > 0) {
         enableSelect2('#customer_id', '#addNoteModal');
-        enableSelect2('#formula_id', '#addNoteModal');
-        enableSelect2('#mixer_car_id', '#addNoteModal');
-        enableSelect2('#mixer_driver_id', '#addNoteModal');
-        enableSelect2('#pump_car_id', '#addNoteModal');
-        enableSelect2('#pump_driver_id', '#addNoteModal');
     }
     if ($('#editNoteModal').length > 0) {
         enableSelect2('#edit_customer_id', '#editNoteModal');
-        enableSelect2('#edit_formula_id', '#editNoteModal');
-        enableSelect2('#edit_mixer_car_id', '#editNoteModal');
-        enableSelect2('#edit_mixer_driver_id', '#editNoteModal');
-        enableSelect2('#edit_pump_car_id', '#editNoteModal');
-        enableSelect2('#edit_pump_driver_id', '#editNoteModal');
     }
     
     // بۆ notes filters - تەنها ئەگەر پەیجەکە هەبێت
