@@ -166,6 +166,71 @@ $(document).on('select2:open', function(e) {
     }
 });
 
+// Mobile-specific Select2 handling
+$(document).ready(function() {
+    // Check if device is mobile
+    const isMobile = window.innerWidth <= 768;
+    
+    if (isMobile) {
+        // Handle mobile Select2 dropdown positioning
+        $(document).on('select2:open', function(e) {
+            setTimeout(function() {
+                const dropdown = $('.select2-container--open .select2-dropdown');
+                if (dropdown.length > 0) {
+                    // Force dropdown to bottom of screen on mobile
+                    dropdown.css({
+                        'position': 'fixed',
+                        'bottom': '0',
+                        'top': 'auto',
+                        'left': '0',
+                        'right': '0',
+                        'width': '100%',
+                        'max-width': '100vw',
+                        'z-index': '9999'
+                    });
+                    
+                    // Add close button functionality
+                    const closeBtn = $('<div class="mobile-select2-close">✕</div>');
+                    closeBtn.css({
+                        'position': 'absolute',
+                        'top': '8px',
+                        'right': '12px',
+                        'font-size': '18px',
+                        'color': '#666',
+                        'z-index': '10000',
+                        'cursor': 'pointer',
+                        'background': 'white',
+                        'padding': '4px 8px',
+                        'border-radius': '4px',
+                        'border': '1px solid #ddd'
+                    });
+                    
+                    dropdown.prepend(closeBtn);
+                    
+                    // Close dropdown when close button is clicked
+                    closeBtn.on('click', function() {
+                        $(e.target).select2('close');
+                    });
+                    
+                    // Close dropdown when clicking outside
+                    $(document).on('click.mobileSelect2', function(event) {
+                        if (!$(event.target).closest('.select2-container').length) {
+                            $(e.target).select2('close');
+                            $(document).off('click.mobileSelect2');
+                        }
+                    });
+                }
+            }, 100);
+        });
+        
+        // Clean up when dropdown closes
+        $(document).on('select2:close', function(e) {
+            $(document).off('click.mobileSelect2');
+            $('.mobile-select2-close').remove();
+        });
+    }
+});
+
 // Add CSS for select2 dropdown scroll
 if (typeof window !== 'undefined') {
     var style = document.createElement('style');
