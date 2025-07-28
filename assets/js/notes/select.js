@@ -372,8 +372,20 @@ function convertToReceipt(noteId) {
     window.location.href = `concrete_receipts.php?${params.toString()}`;
 }
 
+// Flag to prevent multiple mark as read operations
+let isMarkingAsRead = false;
+
 // Mark note as read function
 async function markAsRead(noteId) {
+    // Prevent multiple mark as read operations
+    if (isMarkingAsRead) {
+        showAlert('warning', 'تکایە چاوەڕوان بە...');
+        return;
+    }
+
+    // Set marking as read flag
+    isMarkingAsRead = true;
+
     try {
         const response = await fetch('../process/notes/mark_as_read.php', {
             method: 'POST',
@@ -417,5 +429,8 @@ async function markAsRead(noteId) {
     } catch (error) {
         console.error('Error marking note as read:', error);
         showAlert('error', 'هەڵەیەک لە پەیوەندی بە سێرڤەرەوە هەیە');
+    } finally {
+        // Reset marking as read flag
+        isMarkingAsRead = false;
     }
 }

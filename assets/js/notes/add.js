@@ -8,8 +8,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const tomorrowFormatted = tomorrow.toISOString().split('T')[0];
     document.getElementById('date').value = tomorrowFormatted;
 
+    // Flag to prevent multiple submissions
+    let isSubmitting = false;
+
     addNoteForm.addEventListener('submit', async function(e) {
         e.preventDefault();
+        
+        // Prevent multiple submissions
+        if (isSubmitting) {
+            showAlert('warning', 'تکایە چاوەڕوان بە...');
+            return;
+        }
         
         const formData = new FormData(addNoteForm);
         
@@ -28,6 +37,13 @@ document.addEventListener('DOMContentLoaded', function() {
             showAlert('error', 'بڕی مەتر دەبێت ژمارەیەکی دروست بێت');
             return;
         }
+
+        // Set submitting flag and disable submit button
+        isSubmitting = true;
+        const submitBtn = addNoteForm.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>چاوەڕوان بە...';
 
         try {
             const response = await fetch('../process/notes/add.php', {
@@ -58,6 +74,11 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             console.error('Error adding note:', error);
             showAlert('error', 'هەڵەیەک لە پەیوەندی بە سێرڤەرەوە هەیە');
+        } finally {
+            // Reset submitting flag and enable submit button
+            isSubmitting = false;
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
         }
     });
 });

@@ -1,3 +1,6 @@
+// Flag to prevent multiple delete operations
+let isDeleting = false;
+
 // Handle delete button clicks
 document.addEventListener('click', function(e) {
     if (e.target.closest('.delete-note')) {
@@ -8,6 +11,12 @@ document.addEventListener('click', function(e) {
 
 // Function to delete a note
 async function deleteNote(noteId) {
+    // Prevent multiple delete operations
+    if (isDeleting) {
+        showAlert('warning', 'تکایە چاوەڕوان بە...');
+        return;
+    }
+
     // Show confirmation dialog
     const result = await Swal.fire({
         title: 'دڵنیای لە سڕینەوە؟',
@@ -21,6 +30,9 @@ async function deleteNote(noteId) {
     });
 
     if (result.isConfirmed) {
+        // Set deleting flag
+        isDeleting = true;
+        
         try {
             const formData = new FormData();
             formData.append('id', noteId);
@@ -45,6 +57,9 @@ async function deleteNote(noteId) {
         } catch (error) {
             console.error('Error deleting note:', error);
             showAlert('error', 'هەڵەیەک لە پەیوەندی بە سێرڤەرەوە هەیە');
+        } finally {
+            // Reset deleting flag
+            isDeleting = false;
         }
     }
 }
