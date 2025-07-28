@@ -353,6 +353,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Set tomorrow button as active by default
     document.getElementById('filterTomorrow')?.classList.add('active');
     
+    // Initialize Select2 for filters if not already done
+    if ($('#filter_customer').length > 0 && !$('#filter_customer').hasClass('select2-hidden-accessible')) {
+        enableSelect2('#filter_customer', 'body');
+    }
+    if ($('#filter_read').length > 0 && !$('#filter_read').hasClass('select2-hidden-accessible')) {
+        enableSelect2('#filter_read', 'body');
+    }
+    
     loadNotes();
     
     // Add event listeners for convert to receipt buttons

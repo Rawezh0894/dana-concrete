@@ -65,11 +65,18 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
 <div class="container-fluid py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">تێبینیەکان</h2>
-        <?php if (hasPermission('add_notes')): ?>
-        <button class="btn" data-bs-toggle="modal" data-bs-target="#addNoteModal" style="background: var(--seafoam-green); color:white; font-weight: bold;">
-            <i class="fas fa-plus me-2"></i>زیادکردنی تێبینی
-        </button>
-        <?php endif; ?>
+        <div class="d-flex gap-2">
+            <?php if (hasPermission('view_concrete_receipts')): ?>
+            <a href="concrete_receipts.php" class="btn" style="background: var(--seafoam-green); color:white; font-weight: bold;">
+                <i class="fas fa-file-alt me-1"></i>پسووڵەی کۆنکرێت
+            </a>
+            <?php endif; ?>
+            <?php if (hasPermission('add_notes')): ?>
+            <button class="btn" data-bs-toggle="modal" data-bs-target="#addNoteModal" style="background: var(--seafoam-green); color:white; font-weight: bold;">
+                <i class="fas fa-plus me-2"></i>زیادکردنی تێبینی
+            </button>
+            <?php endif; ?>
+        </div>
     </div>
 
     <!-- Summary Cards Row -->
@@ -112,7 +119,7 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
         </div>
         <div class="col-md-2">
             <label>کڕیار:</label>
-            <select id="filter_customer" class="form-control">
+            <select id="filter_customer" class="form-select">
                 <option value="">هەموو کڕیارەکان</option>
                 <?php foreach ($customers as $customer): ?>
                     <option value="<?= $customer['id'] ?>"><?= htmlspecialchars($customer['name']) ?></option>
@@ -121,7 +128,7 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
         </div>
         <div class="col-md-2">
             <label>خوێنراوە:</label>
-            <select id="filter_read" class="form-control">
+            <select id="filter_read" class="form-select">
                 <option value="">هەموو</option>
                 <option value="0">نەخوێندراو</option>
                 <option value="1">خوێندرا</option>
