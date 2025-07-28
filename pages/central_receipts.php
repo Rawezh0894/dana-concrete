@@ -58,6 +58,11 @@ $receipt_id = isset($_GET['id']) ? $_GET['id'] : null;
             
             <!-- Right: Phone numbers -->
             <div class="contact-info">
+            <div class="contact-item">
+                <span class="phone-icon"><i class="bi bi-telephone"></i></span>
+                    <span style="margin-left: 5px;">0770 152 8120</span>
+                  
+                </div>
                 <div class="contact-item">
                 <span class="phone-icon"><i class="bi bi-telephone"></i></span>
                     <span style="margin-left: 5px;">0773 144 5414</span>
