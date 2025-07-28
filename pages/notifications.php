@@ -64,14 +64,7 @@ require_once '../config/db_conected.php';
                 <option value="yesterday">دوێنێ</option>
             </select>
         </div>
-        <div class="col-md-2 mb-2">
-            <select id="notificationPageSize" class="table-page-size">
-                <option value="5">5</option>
-                <option value="10">10</option>
-                <option value="20">20</option>
-                <option value="50">50</option>
-            </select>
-        </div>
+
         <div class="col-md-1 mb-2 d-flex align-items-center">
             <span id="notificationsTotal" class="text-secondary"></span>
         </div>
@@ -84,19 +77,20 @@ require_once '../config/db_conected.php';
                     <th><input type="checkbox" id="selectAllNotifications"></th>
                     <th>جۆر</th>
                     <th>خشتە</th>
-                    <th class="description-col">وردەکاری</th>
+                    <th>وردەکاری</th>
                     <th>بەکارهێنەر</th>
                     <th>کات</th>
                     <th>بار</th>
                     <th>کردار</th>
                 </tr>
             </thead>
-            <tbody id="notificationsList"></tbody>
+            <tbody></tbody>
         </table>
     </div>
-    <div id="notificationsPagination" class="mt-3"></div>
+
 </div>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="../assets/js/comon/table-controler.js"></script>
 <script src="../assets/js/notifications/select_notifications.js"></script>
 
 </body>

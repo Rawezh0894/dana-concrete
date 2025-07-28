@@ -1,72 +1,4 @@
 $(document).ready(function() {
-    let currentPage = 1;
-    let totalPages = 1;
-    function fetchNotifications(page = 1) {
-        currentPage = page;
-        const search = $('#notificationSearch').val();
-        const type = $('#notificationTypeFilter').val();
-        const seen = $('#notificationSeenFilter').val();
-        const date_filter = $('#notificationDateFilter').val();
-        const limit = $('#notificationPageSize').val() || 5;
-        $.ajax({
-            url: '../process/notifications/select_notifications.php',
-            method: 'GET',
-            data: { search, type, seen, date_filter, page, limit },
-            dataType: 'json',
-            success: function(res) {
-                if (!res.success) {
-                    let msg = res.error ? res.error : 'هەڵەیەک ڕویدا!';
-                    $('#notificationsList').html('<tr><td colspan="8"><div class="alert alert-danger">'+msg+'</div></td></tr>');
-                    $('#notificationsPagination').html('');
-                    Swal.fire({icon:'error',title:'هەڵە',text:msg});
-                    return;
-                }
-                let html = '';
-                if (res.notifications.length === 0) {
-                    html = '<tr><td colspan="8"><div class="alert alert-info">هیچ ئاگادارکردنەوەیەک نەدۆزرایەوە</div></td></tr>';
-                } else {
-                    res.notifications.forEach(function(n) {
-                        html += `<tr>
-                            <td><input type="checkbox" class="notification-checkbox" value="${n.id}"></td>
-                            <td><span class="badge bg-${n.action === 'insert' ? 'success' : n.action === 'update' ? 'warning text-dark' : 'danger'}">${n.action_ku}</span></td>
-                            <td>${n.table_name}</td>
-                            <td class="description-col">${n.description}</td>
-                            <td>${n.username ? n.username : 'سیستەم'}</td>
-                            <td><small>${n.created_at}</small></td>
-                            <td>${n.seen == 0 ? '<span class="badge bg-warning text-dark">نەخوێندراو</span>' : '<span class="badge bg-secondary">خوێندرا</span>'}</td>
-                            <td>${n.seen == 0 ? `<button class="btn btn-sm btn-outline-primary mark-seen-btn" data-id="${n.id}">خوێندرا</button>` : ''}</td>
-                        </tr>`;
-                    });
-                }
-                $('#notificationsList').html(html);
-                // Pagination
-                let total = res.total;
-                totalPages = Math.ceil(total / limit);
-                let pagHtml = '';
-                if (totalPages > 1) {
-                    pagHtml += `<div class="table-pagination">`;
-                    pagHtml += `<button class="prev-btn" ${currentPage === 1 ? 'disabled' : ''} data-page="${currentPage-1}"><</button>`;
-                    for (let i = 1; i <= totalPages; i++) {
-                        pagHtml += `<button class="${i === currentPage ? 'active' : ''}" data-page="${i}">${i}</button>`;
-                    }
-                    pagHtml += `<button class="next-btn" ${currentPage === totalPages ? 'disabled' : ''} data-page="${currentPage+1}">></button>`;
-                    pagHtml += `</div>`;
-                }
-                $('#notificationsPagination').html(pagHtml);
-                $('#notificationsTotal').html(`گشتی: ${total} | پەڕە: ${currentPage} / ${totalPages}`);
-                // Reset select all
-                $('#selectAllNotifications').prop('checked', false);
-                $('#deleteSelectedNotifications').prop('disabled', true);
-            },
-            error: function(xhr, status, err) {
-                $('#notificationsList').html('<tr><td colspan="8"><div class="alert alert-danger">هەڵەیەک ڕویدا!</div></td></tr>');
-                $('#notificationsPagination').html('');
-                Swal.fire({icon:'error',title:'هەڵە',text:'هەڵەیەک ڕویدا!'});
-                console.error('AJAX هەڵە:', err);
-            }
-        });
-    }
-
     // Kurdish action names
     const actionMap = {
         'insert': 'زیادکردن',
@@ -74,30 +6,79 @@ $(document).ready(function() {
         'delete': 'سڕینەوە'
     };
 
+    async function loadNotifications() {
+        const search = $('#notificationSearch').val();
+        const type = $('#notificationTypeFilter').val();
+        const seen = $('#notificationSeenFilter').val();
+        const date_filter = $('#notificationDateFilter').val();
+        const pageSize = 10; // Default page size
+        
+        let url = '../process/notifications/select_notifications.php';
+        const params = [];
+        if (search) params.push('search=' + encodeURIComponent(search));
+        if (type) params.push('type=' + encodeURIComponent(type));
+        if (seen) params.push('seen=' + encodeURIComponent(seen));
+        if (date_filter) params.push('date_filter=' + encodeURIComponent(date_filter));
+        if (params.length) url += '?' + params.join('&');
+
+        try {
+            let res = await fetch(url);
+            let text = await res.text();
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (e) {
+                console.error('Raw response from select_notifications.php:', text);
+                alert('هەڵەیەک لە وەڵامەکەی سێرڤەر هەیە. زانیاری زیاتر لە console.');
+                return;
+            }
+
+            if (!data.success) {
+                TableController.renderWithPagination('#notificationsTable', [], columns, { pageSize: pageSize });
+                return;
+            }
+
+            const columns = [
+                'select', 'action', 'table_name', 'description', 'username', 'created_at', 'seen', 'actions'
+            ];
+
+            const mapped = data.notifications.map((row, idx) => ({
+                select: `<input type="checkbox" class="notification-checkbox" value="${row.id}">`,
+                action: `<span class="badge bg-${row.action === 'insert' ? 'success' : row.action === 'update' ? 'warning text-dark' : 'danger'}">${row.action_ku}</span>`,
+                table_name: row.table_name || '-',
+                description: row.description || '-',
+                username: row.username ? row.username : 'سیستەم',
+                created_at: `<small>${row.created_at}</small>`,
+                seen: row.seen == 0 ? '<span class="badge bg-warning text-dark">نەخوێندراو</span>' : '<span class="badge bg-secondary">خوێندرا</span>',
+                actions: row.seen == 0 ? `<button class="btn btn-sm btn-outline-primary mark-seen-btn" data-id="${row.id}">خوێندرا</button>` : ''
+            }));
+
+            TableController.renderWithPagination('#notificationsTable', mapped, columns, { pageSize: pageSize });
+            
+            // Update total count
+            $('#notificationsTotal').html(`گشتی: ${data.total}`);
+            
+            // Reset select all
+            $('#selectAllNotifications').prop('checked', false);
+            $('#deleteSelectedNotifications').prop('disabled', true);
+        } catch (error) {
+            console.error('Error loading notifications:', error);
+            TableController.renderWithPagination('#notificationsTable', [], columns, { pageSize: pageSize });
+        }
+    }
+
     // Search/filter events
     $('#notificationSearch, #notificationTypeFilter, #notificationSeenFilter, #notificationDateFilter').on('input change', function() {
-        fetchNotifications(1);
+        loadNotifications();
     });
 
-    // Page size change
-    $('#notificationPageSize').on('change', function() {
-        fetchNotifications(1);
-    });
 
-    // Pagination click
-    $(document).on('click', '.table-pagination button', function(e) {
-        e.preventDefault();
-        let page = parseInt($(this).data('page'));
-        if (!isNaN(page) && page !== currentPage && page >= 1 && page <= totalPages) {
-            fetchNotifications(page);
-        }
-    });
 
     // Mark as seen
     $(document).on('click', '.mark-seen-btn', function() {
         let id = $(this).data('id');
         $.post('../process/notifications/mark_seen.php', {id}, function(res) {
-            fetchNotifications(currentPage);
+            loadNotifications();
         });
     });
 
@@ -136,7 +117,7 @@ $(document).ready(function() {
                     success: function(res) {
                         if (res.success) {
                             Swal.fire({icon:'success',title:'سڕایەوە',text:'هەموو هەڵبژێردراوەکان سڕایەوە'});
-                            fetchNotifications(currentPage);
+                            loadNotifications();
                         } else {
                             Swal.fire({icon:'error',title:'هەڵە',text:res.error || 'هەڵەیەک ڕویدا!'});
                         }
@@ -150,5 +131,5 @@ $(document).ready(function() {
     });
 
     // Initial load
-    fetchNotifications(1);
+    loadNotifications();
 }); 

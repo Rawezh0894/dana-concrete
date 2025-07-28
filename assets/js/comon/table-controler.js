@@ -26,6 +26,8 @@ const TableController = {
                     td.textContent = (options.rowOffset ? options.rowOffset : 0) + idx + 1;
                 } else if (col === 'actions') {
                     td.innerHTML = row[col] !== undefined ? row[col] : '';
+                } else if (col === 'select') {
+                    td.innerHTML = row[col] !== undefined ? row[col] : '';
                 } else if (["admin", "user", "accountant", "manager"].includes(col)) {
                     td.innerHTML = row[col] !== undefined ? row[col] : '';
                 } else if (col === 'price_usd') {
@@ -40,7 +42,7 @@ const TableController = {
                 } else if (col === 'total_prices') {
                     td.innerHTML = (row[col] !== undefined && row[col] !== null && row[col] !== '') ? row[col] : '-';
                 } else {
-                    td.textContent = (row[col] !== undefined && row[col] !== null && row[col] !== '') ? row[col] : '-';
+                    td.innerHTML = (row[col] !== undefined && row[col] !== null && row[col] !== '') ? row[col] : '-';
                 }
                 tr.appendChild(td);
             });
@@ -82,7 +84,7 @@ const TableController = {
             if (!th) return;
             // Remove all old <br> and .table-search-input from th
             Array.from(th.querySelectorAll('br, .table-search-input')).forEach(e => e.remove());
-            if (col !== 'actions' && col !== '#' && !["admin", "user", "accountant", "manager"].includes(col)) {
+            if (col !== 'actions' && col !== '#' && col !== 'select' && !["admin", "user", "accountant", "manager"].includes(col)) {
                 const input = document.createElement('input');
                 input.type = 'text';
                 input.className = 'form-control form-control-sm table-search-input';
@@ -155,7 +157,7 @@ const TableController = {
             if (!th) return;
             // Remove all old <br> and .table-search-input from th
             Array.from(th.querySelectorAll('br, .table-search-input')).forEach(e => e.remove());
-            if (col !== 'actions' && col !== '#' && !["admin", "user", "accountant", "manager"].includes(col)) {
+            if (col !== 'actions' && col !== '#' && col !== 'select' && !["admin", "user", "accountant", "manager"].includes(col)) {
                 const input = document.createElement('input');
                 input.type = 'text';
                 input.className = 'form-control form-control-sm table-search-input';

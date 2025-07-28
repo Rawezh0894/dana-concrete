@@ -7,3 +7,129 @@
 )
 
 [28-Jul-2025 11:00:42 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[28-Jul-2025 14:06:02 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753704362
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[28-Jul-2025 14:06:02 Europe/Berlin] Permissions retrieved successfully: Count=72
+[28-Jul-2025 14:06:02 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753704362
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[28-Jul-2025 14:06:02 Europe/Berlin] Users retrieved successfully: Count=3
+[28-Jul-2025 14:06:24 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753704384
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[28-Jul-2025 14:06:24 Europe/Berlin] update_role_permissions.php POST: Array
+(
+    [role] => user
+    [permission_id] => 86
+    [value] => 1
+)
+
+[28-Jul-2025 14:06:24 Europe/Berlin] Parsed vars: role='user', permission_id='86', value='1'
+[28-Jul-2025 14:06:24 Europe/Berlin] Permission added successfully: Role=user, Permission ID=86
+[28-Jul-2025 14:06:29 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753704389
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[28-Jul-2025 14:06:29 Europe/Berlin] update_role_permissions.php POST: Array
+(
+    [role] => user
+    [permission_id] => 82
+    [value] => 1
+)
+
+[28-Jul-2025 14:06:29 Europe/Berlin] Parsed vars: role='user', permission_id='82', value='1'
+[28-Jul-2025 14:06:29 Europe/Berlin] Permission added successfully: Role=user, Permission ID=82
+[28-Jul-2025 14:06:42 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753704402
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[28-Jul-2025 14:06:42 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[28-Jul-2025 14:07:06 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753704426
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[28-Jul-2025 14:07:06 Europe/Berlin] Permissions retrieved successfully: Count=72
+[28-Jul-2025 14:07:06 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753704426
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[28-Jul-2025 14:07:06 Europe/Berlin] Users retrieved successfully: Count=3
+[28-Jul-2025 14:07:12 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753704432
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[28-Jul-2025 14:07:12 Europe/Berlin] update_user.php POST: Array
+(
+    [id] => 4
+    [username] => test
+    [password] => test
+    [role] => user
+)
+
+[28-Jul-2025 14:07:12 Europe/Berlin] Parsed vars: id='4', username='test', role='user', has_password='yes'
+[28-Jul-2025 14:07:12 Europe/Berlin] User updated with password: ID=4, Username=test, Role=user
+[28-Jul-2025 14:07:12 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753704432
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[28-Jul-2025 14:07:12 Europe/Berlin] Users retrieved successfully: Count=3
+[28-Jul-2025 14:07:29 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753704449
+    [user_id] => 4
+    [username] => test
+    [role] => user
+)
+
+[28-Jul-2025 14:07:29 Europe/Berlin] DEBUG: role=user, perm=view_dashboard
+[28-Jul-2025 14:07:29 Europe/Berlin] DEBUG: SQL result=0
+[28-Jul-2025 14:07:29 Europe/Berlin] Permission denied for user: 4 to view dashboard
+[28-Jul-2025 14:08:02 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753704482
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[28-Jul-2025 14:08:02 Europe/Berlin] Dashboard data loaded successfully for user: 1

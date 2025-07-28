@@ -38,6 +38,9 @@ $logout_pages = ['logout.php'];
     <?php if (hasPermission('view_notifications')): ?>
       <li><a href="../pages/notifications.php" class="sidebar-link<?php if($current_page == 'notifications.php') echo ' active'; ?>"><i class="bi bi-bell me-2"></i> ئاگادارکردنەوەکان</a></li>
     <?php endif; ?>
+    <?php if (hasPermission('view_notes')): ?>
+      <li><a href="../pages/notes.php" class="sidebar-link<?php if($current_page == 'notes.php') echo ' active'; ?>"><i class="bi bi-sticky me-2"></i> تێبینیەکان</a></li>
+    <?php endif; ?>
     <!-- All dropdowns at the end -->
     <li class="sidebar-group">
       <button class="sidebar-group-toggle d-flex align-items-center w-100" data-bs-toggle="collapse" data-bs-target="#concreteMenu" aria-expanded="false">

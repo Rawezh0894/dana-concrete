@@ -462,6 +462,37 @@ $mixer_drivers = array_filter($employees, function ($emp) {
         const modalEl = document.getElementById('addConcreteReceiptModal');
         const modal = new bootstrap.Modal(modalEl);
         modal.show();
+        
+        // Fill form with data from URL parameters
+        if (params.get('customer_id')) {
+          document.getElementById('customer_id').value = params.get('customer_id');
+        }
+        if (params.get('location')) {
+          document.getElementById('location').value = params.get('location');
+        }
+        if (params.get('receiver_name')) {
+          document.getElementById('receiver_name').value = params.get('receiver_name');
+        }
+        // Note: meter_amount is intentionally not filled from notes to allow manual entry
+        // if (params.get('meter_amount')) {
+        //   document.getElementById('meter_amount').value = params.get('meter_amount');
+        // }
+        if (params.get('formula_id')) {
+          document.getElementById('formulas_id').value = params.get('formula_id');
+        }
+        if (params.get('mixer_car_id')) {
+          document.getElementById('mixer_car_id').value = params.get('mixer_car_id');
+        }
+        if (params.get('mixer_driver_id')) {
+          document.getElementById('mixer_driver_id').value = params.get('mixer_driver_id');
+        }
+        if (params.get('pump_car_id')) {
+          document.getElementById('pump_car_id').value = params.get('pump_car_id');
+        }
+        if (params.get('pump_driver_id')) {
+          document.getElementById('pump_driver_id').value = params.get('pump_driver_id');
+        }
+        
         // Manually fetch and set the next receipt number
         fetch('../process/concrete_receipts/get_next_receipt_number.php')
           .then(res => res.json())
