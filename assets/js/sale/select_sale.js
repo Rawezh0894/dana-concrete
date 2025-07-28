@@ -48,76 +48,14 @@ async function loadSalesTable() {
         dolar_rate: row.dolar_rate !== null && row.dolar_rate !== undefined && row.dolar_rate !== '' ? formatNumber(row.dolar_rate) : '-',
         notes: row.notes || '-',
         discount: row.discount !== null && row.discount !== undefined && row.discount !== '' ? formatUSD(row.discount) : '-',
-        actions: `<button class='btn btn-warning btn-sm edit-sale' data-id='${row.id}' title='نوێکردنەوە'><i class='fa fa-edit'></i></button> <button class='btn btn-danger btn-sm delete-sale' data-id='${row.id}' title='سڕینەوە'><i class='fa fa-trash'></i></button>`
+        actions: `${window.userPermissions && window.userPermissions.canEdit ? `<button class='btn btn-warning btn-sm edit-sale' data-id='${row.id}' title='نوێکردنەوە'><i class='fa fa-edit'></i></button>` : ''} ${window.userPermissions && window.userPermissions.canDelete ? `<button class='btn btn-danger btn-sm delete-sale' data-id='${row.id}' title='سڕینەوە'><i class='fa fa-trash'></i></button>` : ''}`
     }));
     TableController.renderWithPagination('#saleTable', mapped, columns, { pageSize: 10 });
 }
 document.addEventListener('DOMContentLoaded', loadSalesTable);
 window.reloadSales = loadSalesTable;
 
-$(document).ready(function() {
-    function loadSales() {
-        $.ajax({
-            url: '../process/sale/select_sale.php',
-            method: 'GET',
-            dataType: 'json',
-            success: function(response) {
-                if (response.success) {
-                    if (response.data.length === 0) {
-                        $('#saleTable tbody').html('<tr><td colspan="18">هیچ فرۆشتنێک نیە</td></tr>');
-                        return;
-                    }
-                    let rows = '';
-                    response.data.forEach(function(sale, idx) {
-                        function formatNumber(n) {
-                            if (n === null || n === undefined || n === '') return '';
-                            return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-                        }
-                        function formatUSD(n) {
-                            if (!n || isNaN(n)) return '';
-                            return formatNumber(Number(n).toFixed(2)) + ' $';
-                        }
-                        function formatIQD(n) {
-                            if (!n || isNaN(n)) return '';
-                            return formatNumber(Number(n).toFixed(0)) + ' د.ع';
-                        }
-                        rows += `<tr>
-                            <td>${idx + 1}</td>
-                            <td>${sale.customer_name || '-'}</td>
-                            <td>${sale.recipient || '-'}</td>
-                            <td>${sale.location || '-'}</td>
-                            <td>${sale.invoice_number || '-'}</td>
-                            <td>${sale.formula_name || '-'}</td>
-                            <td>${sale.order_date || '-'}</td>
-                            <td>${sale.payment_type || '-'}</td>
-                            <td>${sale.quantity !== null && sale.quantity !== undefined && sale.quantity !== '' ? formatNumber(sale.quantity) + ' m³' : '-'}</td>
-                            <td>${sale.price_per_unit !== null && sale.price_per_unit !== undefined && sale.price_per_unit !== '' ? formatUSD(sale.price_per_unit) : '-'}</td>
-                            <td>${sale.total_price !== null && sale.total_price !== undefined && sale.total_price !== '' ? formatUSD(sale.total_price) : '-'}</td>
-                            <td>${sale.amount_paid_iq !== null && sale.amount_paid_iq !== undefined && sale.amount_paid_iq !== '' ? formatIQD(sale.amount_paid_iq) : '-'}</td>
-                            <td>${sale.amount_paid_usd !== null && sale.amount_paid_usd !== undefined && sale.amount_paid_usd !== '' ? formatUSD(sale.amount_paid_usd) : '-'}</td>
-                            <td>${sale.remaining_amount !== null && sale.remaining_amount !== undefined && sale.remaining_amount !== '' ? formatUSD(sale.remaining_amount) : '-'}</td>
-                            <td>${sale.dolar_rate !== null && sale.dolar_rate !== undefined && sale.dolar_rate !== '' ? formatNumber(sale.dolar_rate) : '-'}</td>
-                            <td>${sale.notes || '-'}</td>
-                            <td>${sale.discount !== null && sale.discount !== undefined && sale.discount !== '' ? formatUSD(sale.discount) : '-'}</td>
-                            <td>
-                                ${window.userPermissions && window.userPermissions.canEdit ? `<button class='btn btn-sm btn-warning edit-sale' data-id='${sale.id}' title='نوێکردنەوە'><i class='fa fa-edit'></i></button>` : ''}
-                                ${window.userPermissions && window.userPermissions.canDelete ? `<button class='btn btn-sm btn-danger delete-sale' data-id='${sale.id}' title='سڕینەوە'><i class='fa fa-trash'></i></button>` : ''}
-                            </td>
-                        </tr>`;
-                    });
-                    $('#saleTable tbody').html(rows);
-                } else {
-                    $('#saleTable tbody').html('<tr><td colspan="18">هەڵەیەک روویدا</td></tr>');
-                }
-            },
-            error: function() {
-                $('#saleTable tbody').html('<tr><td colspan="18">هەڵەیەک روویدا</td></tr>');
-            }
-        });
-    }
-    loadSales();
-    window.reloadSales = loadSales;
-});
+
 
 async function loadSalesFiltered() {
     const from = document.getElementById('filter_from').value;
@@ -192,7 +130,7 @@ if (clearBtn) {
     clearBtn.addEventListener('click', function() {
         if (fromInput) fromInput.value = '';
         if (toInput) toInput.value = '';
-        loadSalesFiltered();
+        loadSalesTable();
     });
 }
-document.addEventListener('DOMContentLoaded', loadSalesFiltered);
+
