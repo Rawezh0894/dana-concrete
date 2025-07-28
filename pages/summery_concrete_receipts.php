@@ -37,6 +37,20 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
   <link href="../assets/css/comon/select2_design.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <link href="../assets/css/summery_concrete_receipts.css" rel="stylesheet">
+  <style>
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+      #printSection {
+        display: block !important;
+      }
+      body {
+        margin: 0;
+        padding: 20px;
+      }
+    }
+  </style>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -49,12 +63,14 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
   
   <div class="container-fluid py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-   
+      <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">پوختەی پسووڵەکانی کۆنکرێت</h2>
       <div class="d-flex gap-2">
+        <button type="button" class="btn btn-primary" onclick="printReport()">
+          <i class="fas fa-print me-1"></i>چاپکردن
+        </button>
         <a href="concrete_receipts.php" class="btn btn-secondary">
           <i class="fas fa-arrow-right me-1"></i>گەڕانەوە بۆ پسووڵەکان
         </a>
-
       </div>
     </div>
 
@@ -96,7 +112,7 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
     </div>
 
     <!-- Summary Cards -->
-    <div class="row mb-4" id="summary-cards">
+    <div class="row mb-4 no-print" id="summary-cards">
       <div class="col-md-3 mb-3">
         <div class="card summary-card text-center">
           <div class="card-body">
@@ -125,7 +141,7 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
     </div>
 
     <!-- Customer Summary Table -->
-    <div class="card">
+    <div class="card no-print">
       <div class="card-header">
         <h5 class="mb-0">پوختەی کڕیاران</h5>
       </div>
@@ -138,8 +154,10 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
                 <th>ناوی کڕیار</th>
                 <th>ژمارەی پسووڵەکان</th>
                 <th>کۆی مەتر سێجا</th>
+                <?php if (hasPermission('view_concrete_prices')): ?>
                 <th>کۆی نرخ</th>
                 <th>تێبینی</th>
+                <?php endif; ?>
                 <th>فۆرمۆلاکان</th>
                 <th>کردارەکان</th>
               </tr>
@@ -251,6 +269,12 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
   <script src="../assets/js/summery_concrete_receipts/filter.js"></script>
   <script src="../assets/js/summery_concrete_receipts/get_informations.js"></script>
   <script>
+    // Pass permissions to JavaScript
+    window.userPermissions = {
+      canViewPrices: <?php echo hasPermission('view_concrete_prices') ? 'true' : 'false'; ?>,
+      canSetPrices: <?php echo hasPermission('set_concrete_prices') ? 'true' : 'false'; ?>,
+      canEditPrices: <?php echo hasPermission('edit_concrete_prices') ? 'true' : 'false'; ?>
+    };
     function printReport() {
       // Update print section with current data
       document.getElementById('print_date').textContent = new Date().toLocaleDateString('ku-IQ');
@@ -265,6 +289,7 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
       const customerTable = document.getElementById('customerSummaryTable');
       if (customerTable) {
         const printTable = customerTable.cloneNode(true);
+        
         // Remove action buttons from print version
         const actionCells = printTable.querySelectorAll('td:last-child');
         actionCells.forEach(cell => cell.remove());
@@ -274,6 +299,26 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
         if (headerRow) {
           const lastHeader = headerRow.querySelector('th:last-child');
           if (lastHeader) lastHeader.remove();
+        }
+        
+        // Remove price-related columns from print if user doesn't have permission
+        if (!window.userPermissions.canViewPrices) {
+          // Remove price and notes columns from header
+          const headers = headerRow.querySelectorAll('th');
+          if (headers.length >= 6) {
+            headers[4].remove(); // Remove price column
+            headers[4].remove(); // Remove notes column (now at index 4 after removing price)
+          }
+          
+          // Remove price and notes columns from all rows
+          const rows = printTable.querySelectorAll('tbody tr');
+          rows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            if (cells.length >= 6) {
+              cells[4].remove(); // Remove price column
+              cells[4].remove(); // Remove notes column (now at index 4 after removing price)
+            }
+          });
         }
         
         document.getElementById('print_customer_details').innerHTML = `

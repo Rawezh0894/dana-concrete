@@ -76,10 +76,16 @@ function updateCustomerSummaryTable(customerSummary) {
     const tbody = $('#customerSummaryTable tbody');
     tbody.empty();
     
+    // Calculate colspan based on permissions
+    const baseCols = 5; // #, customer name, receipt count, total meter, formulas
+    const priceCols = window.userPermissions.canViewPrices ? 2 : 0; // total price, notes
+    const actionCols = 1; // actions
+    const totalCols = baseCols + priceCols + actionCols;
+    
     if (customerSummary.length === 0) {
         tbody.append(`
             <tr>
-                <td colspan="8" class="text-center text-muted">
+                <td colspan="${totalCols}" class="text-center text-muted">
                     هیچ داتایەک نەدۆزرایەوە
                 </td>
             </tr>
@@ -100,7 +106,7 @@ function updateCustomerSummaryTable(customerSummary) {
             customer.latest_notes : 
             '-';
         
-        const row = `
+        let row = `
             <tr>
                 <td>${index + 1}</td>
                 <td>
@@ -113,12 +119,21 @@ function updateCustomerSummaryTable(customerSummary) {
                 <td class="text-center">
                     <strong>${customer.total_meter}</strong> م³
                 </td>
+        `;
+        
+        // Add price-related columns only if user has permission
+        if (window.userPermissions.canViewPrices) {
+            row += `
                 <td class="text-center">
                     ${totalPrice}
                 </td>
                 <td class="notes-cell">
                     ${notesDisplay}
                 </td>
+            `;
+        }
+        
+        row += `
                 <td>
                     ${formulasHtml}
                 </td>
@@ -156,9 +171,11 @@ function displayCustomerDetails(customerName, receipts) {
                 <button class="btn btn-warning btn-sm ms-2" onclick="deselectAllReceipts()">
                     <i class="fas fa-square me-1"></i>هەڵوەشاندنەوەی هەموو
                 </button>
+                ${window.userPermissions.canSetPrices ? `
                 <button class="btn btn-primary btn-sm ms-2" onclick="openPriceSettingModal()">
                     <i class="fas fa-dollar-sign me-1"></i>دانانی نرخ
                 </button>
+                ` : ''}
             </div>
             <div class="table-responsive">
                 <table class="table table-bordered table-hover">
@@ -171,8 +188,8 @@ function displayCustomerDetails(customerName, receipts) {
                             <th>شوێن</th>
                             <th>وەرگر</th>
                             <th>بڕی مەتر سێجا</th>
-                            <th>نرخی مەتر سێجا</th>
-                            <th>تێبینی</th>
+                            ${window.userPermissions.canViewPrices ? '<th>نرخی مەتر سێجا</th>' : ''}
+                            ${window.userPermissions.canViewPrices ? '<th>تێبینی</th>' : ''}
                             <th>فۆرمۆلا</th>
                             <th>میکسەر</th>
                             <th>پەمپ</th>
@@ -198,10 +215,19 @@ function displayCustomerDetails(customerName, receipts) {
                     <td class="text-center">
                         <span class="badge bg-info">${receipt.meter_amount} م³</span>
                     </td>
+            `;
+            
+            // Add price-related columns only if user has permission
+            if (window.userPermissions.canViewPrices) {
+                html += `
                     <td class="text-center">
                         ${priceDisplay}
                     </td>
                     <td class="notes-cell">${receipt.notes || ''}</td>
+                `;
+            }
+            
+            html += `
                     <td>
                         <span class="formula-badge">${receipt.formula_name || '-'}</span>
                     </td>
@@ -289,6 +315,17 @@ function deselectAllReceipts() {
 }
 
 function openPriceSettingModal() {
+    // Check permission
+    if (!window.userPermissions.canSetPrices) {
+        Swal.fire({
+            icon: 'error',
+            title: 'هەڵە',
+            text: 'توانای دەست گەیشتنت نییە بۆ دانانی نرخ',
+            confirmButtonText: 'باشە'
+        });
+        return;
+    }
+    
     const selectedReceipts = $('.receipt-checkbox:checked');
     
     if (selectedReceipts.length === 0) {
@@ -315,6 +352,17 @@ function openPriceSettingModal() {
 }
 
 function savePricePerMeter() {
+    // Check permission
+    if (!window.userPermissions.canSetPrices) {
+        Swal.fire({
+            icon: 'error',
+            title: 'هەڵە',
+            text: 'توانای دەست گەیشتنت نییە بۆ دانانی نرخ',
+            confirmButtonText: 'باشە'
+        });
+        return;
+    }
+    
     const price = parseFloat($('#price_per_meter').val());
     const notes = $('#notes').val();
     const selectedReceipts = $('.receipt-checkbox:checked');
