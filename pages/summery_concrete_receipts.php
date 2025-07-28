@@ -63,7 +63,7 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
   
   <div class="container-fluid py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">پوختەی پسووڵەکانی کۆنکرێت</h2>
+  
       <div class="d-flex gap-2">
         <?php if (hasPermission('view_notes')): ?>
           <a href="notes.php" class="btn" style="background: var(--kelly-green); color:white; font-weight: bold;">
