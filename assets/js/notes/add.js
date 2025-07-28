@@ -11,14 +11,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Flag to prevent multiple submissions
     let isSubmitting = false;
     
-    // Initialize Select2 for all select elements in the add modal
+    // Initialize Select2 for customer and formula select elements in the add modal
     if ($('#addNoteModal').length > 0) {
         enableSelect2('#customer_id', '#addNoteModal');
         enableSelect2('#formula_id', '#addNoteModal');
-        enableSelect2('#mixer_car_id', '#addNoteModal');
-        enableSelect2('#mixer_driver_id', '#addNoteModal');
-        enableSelect2('#pump_car_id', '#addNoteModal');
-        enableSelect2('#pump_driver_id', '#addNoteModal');
     }
 
     addNoteForm.addEventListener('submit', async function(e) {
@@ -71,10 +67,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Reset Select2 dropdowns
                 $('#customer_id').val('').trigger('change');
                 $('#formula_id').val('').trigger('change');
-                $('#mixer_car_id').val('').trigger('change');
-                $('#mixer_driver_id').val('').trigger('change');
-                $('#pump_car_id').val('').trigger('change');
-                $('#pump_driver_id').val('').trigger('change');
                 
                 // Close modal
                 const modal = bootstrap.Modal.getInstance(document.getElementById('addNoteModal'));

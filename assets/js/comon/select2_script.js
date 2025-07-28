@@ -8,17 +8,14 @@ function enableSelect2(selector, modalSelector) {
             console.log('Error destroying select2:', e);
         }
     }
-    // Initialize select2 with proper configuration
+    // Initialize select2 (no theme for max compatibility)
     try {
         $(selector).select2({
             dropdownParent: $(modalSelector),
             width: '100%',
             placeholder: "هەڵبژێرە",
             dir: "rtl",
-            matcher: customMatcher,
-            dropdownPosition: 'below',
-            closeOnSelect: true,
-            allowClear: true
+            matcher: customMatcher
         });
     } catch (e) {
         console.log('Error initializing select2:', e);
@@ -136,18 +133,10 @@ $(document).ready(function() {
     if ($('#addNoteModal').length > 0) {
         enableSelect2('#customer_id', '#addNoteModal');
         enableSelect2('#formula_id', '#addNoteModal');
-        enableSelect2('#mixer_car_id', '#addNoteModal');
-        enableSelect2('#mixer_driver_id', '#addNoteModal');
-        enableSelect2('#pump_car_id', '#addNoteModal');
-        enableSelect2('#pump_driver_id', '#addNoteModal');
     }
     if ($('#editNoteModal').length > 0) {
         enableSelect2('#edit_customer_id', '#editNoteModal');
         enableSelect2('#edit_formula_id', '#editNoteModal');
-        enableSelect2('#edit_mixer_car_id', '#editNoteModal');
-        enableSelect2('#edit_mixer_driver_id', '#editNoteModal');
-        enableSelect2('#edit_pump_car_id', '#editNoteModal');
-        enableSelect2('#edit_pump_driver_id', '#editNoteModal');
     }
     
     // بۆ notes filters - تەنها ئەگەر پەیجەکە هەبێت
@@ -169,40 +158,69 @@ $(document).on('select2:open', function(e) {
     }
 });
 
-// Professional Select2 mobile handling
+// Mobile-specific Select2 handling
 $(document).ready(function() {
-    // Handle Select2 dropdown positioning for all devices
-    $(document).on('select2:open', function(e) {
-        // Ensure proper positioning for all Select2 dropdowns
-        setTimeout(function() {
-            const dropdown = $('.select2-container--open .select2-dropdown');
-            const container = $('.select2-container--open');
-            
-            if (dropdown.length > 0) {
-                // Reset any inline styles that might interfere
-                dropdown.removeAttr('style');
-                container.removeAttr('style');
-                
-                // Ensure dropdown is positioned correctly relative to its container
-                if (window.innerWidth <= 768) {
-                    // For mobile, ensure dropdown appears below the select
+    // Check if device is mobile
+    const isMobile = window.innerWidth <= 768;
+    
+    if (isMobile) {
+        // Handle mobile Select2 dropdown positioning
+        $(document).on('select2:open', function(e) {
+            setTimeout(function() {
+                const dropdown = $('.select2-container--open .select2-dropdown');
+                if (dropdown.length > 0) {
+                    // Force dropdown to bottom of screen on mobile
                     dropdown.css({
-                        'position': 'absolute',
-                        'top': '100%',
+                        'position': 'fixed',
+                        'bottom': '0',
+                        'top': 'auto',
                         'left': '0',
+                        'right': '0',
                         'width': '100%',
+                        'max-width': '100vw',
                         'z-index': '9999'
                     });
+                    
+                    // Add close button functionality
+                    const closeBtn = $('<div class="mobile-select2-close">✕</div>');
+                    closeBtn.css({
+                        'position': 'absolute',
+                        'top': '8px',
+                        'right': '12px',
+                        'font-size': '18px',
+                        'color': '#666',
+                        'z-index': '10000',
+                        'cursor': 'pointer',
+                        'background': 'white',
+                        'padding': '4px 8px',
+                        'border-radius': '4px',
+                        'border': '1px solid #ddd'
+                    });
+                    
+                    dropdown.prepend(closeBtn);
+                    
+                    // Close dropdown when close button is clicked
+                    closeBtn.on('click', function() {
+                        $(e.target).select2('close');
+                    });
+                    
+                    // Close dropdown when clicking outside
+                    $(document).on('click.mobileSelect2', function(event) {
+                        if (!$(event.target).closest('.select2-container').length) {
+                            $(e.target).select2('close');
+                            $(document).off('click.mobileSelect2');
+                        }
+                    });
                 }
-            }
-        }, 50);
-    });
-    
-    // Clean up when dropdown closes
-    $(document).on('select2:close', function(e) {
-        // Remove any temporary styles
-        $('.select2-container--open .select2-dropdown').removeAttr('style');
-    });
+            }, 100);
+        });
+        
+        // Clean up when dropdown closes
+        $(document).on('select2:close', function(e) {
+            $(document).off('click.mobileSelect2');
+            $('.mobile-select2-close').remove();
+        });
+    }
 });
 
 // Add CSS for select2 dropdown scroll
