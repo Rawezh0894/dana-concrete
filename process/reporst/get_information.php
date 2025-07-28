@@ -3,24 +3,6 @@ require_once '../../config/db_conected.php';
 header('Content-Type: application/json');
 
 try {
-    // Customers
-    $stmt = $pdo->query('SELECT SUM(debt_usd) as usd, SUM(debt_iqd) as iqd FROM customers');
-    $row = $stmt->fetch();
-    $customer_debt_usd = $row['usd'] ?? 0;
-    $customer_debt_iqd = $row['iqd'] ?? 0;
-
-    // Companies
-    $stmt = $pdo->query('SELECT SUM(debt_usd) as usd, SUM(debt_iqd) as iqd FROM company');
-    $row = $stmt->fetch();
-    $company_debt_usd = $row['usd'] ?? 0;
-    $company_debt_iqd = $row['iqd'] ?? 0;
-
-    // Other expense persons
-    $stmt = $pdo->query('SELECT SUM(expense_usd) as usd, SUM(expense_iqd) as iqd FROM other_expense_persons');
-    $row = $stmt->fetch();
-    $person_debt_usd = $row['usd'] ?? 0;
-    $person_debt_iqd = $row['iqd'] ?? 0;
-
     // Get exchange rate from settings table
     $usd_iqd_rate = 150000;
     try {
@@ -30,6 +12,44 @@ try {
             $usd_iqd_rate = floatval($row['value']);
         }
     } catch (Exception $e) {}
+
+    // Customers - Calculate debt using new method (opening_debt + remaining from sales)
+    $customer_debt_query = "
+        SELECT 
+            SUM(c.opening_debt_usd) as opening_debt_usd,
+            SUM(c.opening_debt_iqd) as opening_debt_iqd,
+            COALESCE(SUM(s.remaining_amount), 0) as remaining_from_sales
+        FROM customers c
+        LEFT JOIN sales s ON c.id = s.customer_id AND s.payment_type = 'قەرز'
+    ";
+    $stmt = $pdo->query($customer_debt_query);
+    $row = $stmt->fetch();
+    $customer_debt_usd = floatval($row['opening_debt_usd'] ?? 0) + floatval($row['remaining_from_sales'] ?? 0);
+    $customer_debt_iqd = floatval($row['opening_debt_iqd'] ?? 0);
+    $customer_debt_iqd_converted = ($usd_iqd_rate > 0) ? ($customer_debt_iqd / ($usd_iqd_rate / 100)) : 0;
+    $customer_debt_total_usd = $customer_debt_usd + $customer_debt_iqd_converted;
+
+    // Companies - Calculate debt using new method (opening_debt + remaining from purchases)
+    $company_debt_query = "
+        SELECT 
+            SUM(c.opening_debt_usd) as opening_debt_usd,
+            SUM(c.opening_debt_iqd) as opening_debt_iqd,
+            COALESCE(SUM(p.remaining_usd), 0) as remaining_from_purchases
+        FROM company c
+        LEFT JOIN purchases p ON c.id = p.company_id AND p.payment_type = 'قەرز'
+    ";
+    $stmt = $pdo->query($company_debt_query);
+    $row = $stmt->fetch();
+    $company_debt_usd = floatval($row['opening_debt_usd'] ?? 0) + floatval($row['remaining_from_purchases'] ?? 0);
+    $company_debt_iqd = floatval($row['opening_debt_iqd'] ?? 0);
+    $company_debt_iqd_converted = ($usd_iqd_rate > 0) ? ($company_debt_iqd / ($usd_iqd_rate / 100)) : 0;
+    $company_debt_total_usd = $company_debt_usd + $company_debt_iqd_converted;
+
+    // Other expense persons
+    $stmt = $pdo->query('SELECT SUM(expense_usd) as usd, SUM(expense_iqd) as iqd FROM other_expense_persons');
+    $row = $stmt->fetch();
+    $person_debt_usd = $row['usd'] ?? 0;
+    $person_debt_iqd = $row['iqd'] ?? 0;
 
     // Purchases (کڕین)
     $purchases = [
@@ -225,18 +245,48 @@ try {
     while ($row = $stmt->fetch()) {
         $monthly_income_expenses[$row['month']]['expenses'] = (float)$row['expenses'];
     }
-    // 2. Debts by type
+    
+    // 2. Debts by type - Updated to use new calculation method
     $debts_by_type = [
         'customers' => 0,
         'companies' => 0,
         'persons' => 0
     ];
-    $stmt = $pdo->query('SELECT SUM(debt_usd) as usd FROM customers');
-    $debts_by_type['customers'] = (float)($stmt->fetch()['usd'] ?? 0);
-    $stmt = $pdo->query('SELECT SUM(debt_usd) as usd FROM company');
-    $debts_by_type['companies'] = (float)($stmt->fetch()['usd'] ?? 0);
+    
+    // Customers debt (opening_debt + remaining from sales)
+    $stmt = $pdo->query("
+        SELECT 
+            SUM(c.opening_debt_usd) as opening_debt_usd,
+            SUM(c.opening_debt_iqd) as opening_debt_iqd,
+            COALESCE(SUM(s.remaining_amount), 0) as remaining_from_sales
+        FROM customers c
+        LEFT JOIN sales s ON c.id = s.customer_id AND s.payment_type = 'قەرز'
+    ");
+    $row = $stmt->fetch();
+    $customer_total_debt = floatval($row['opening_debt_usd'] ?? 0) + floatval($row['remaining_from_sales'] ?? 0);
+    $customer_iqd_debt = floatval($row['opening_debt_iqd'] ?? 0);
+    $customer_iqd_converted = ($usd_iqd_rate > 0) ? ($customer_iqd_debt / ($usd_iqd_rate / 100)) : 0;
+    $debts_by_type['customers'] = $customer_total_debt + $customer_iqd_converted;
+    
+    // Companies debt (opening_debt + remaining from purchases)
+    $stmt = $pdo->query("
+        SELECT 
+            SUM(c.opening_debt_usd) as opening_debt_usd,
+            SUM(c.opening_debt_iqd) as opening_debt_iqd,
+            COALESCE(SUM(p.remaining_usd), 0) as remaining_from_purchases
+        FROM company c
+        LEFT JOIN purchases p ON c.id = p.company_id AND p.payment_type = 'قەرز'
+    ");
+    $row = $stmt->fetch();
+    $company_total_debt = floatval($row['opening_debt_usd'] ?? 0) + floatval($row['remaining_from_purchases'] ?? 0);
+    $company_iqd_debt = floatval($row['opening_debt_iqd'] ?? 0);
+    $company_iqd_converted = ($usd_iqd_rate > 0) ? ($company_iqd_debt / ($usd_iqd_rate / 100)) : 0;
+    $debts_by_type['companies'] = $company_total_debt + $company_iqd_converted;
+    
+    // Persons debt
     $stmt = $pdo->query('SELECT SUM(expense_usd) as usd FROM other_expense_persons');
     $debts_by_type['persons'] = (float)($stmt->fetch()['usd'] ?? 0);
+    
     // 3. Stock by material
     $stock_by_material = [];
     $stmt = $pdo->query('SELECT material_type, SUM(amount) as total FROM bins_silos GROUP BY material_type');
@@ -279,8 +329,8 @@ try {
     echo json_encode([
         'success' => true,
         'data' => [
-            'customer' => ['usd' => $customer_debt_usd, 'iqd' => $customer_debt_iqd],
-            'company' => ['usd' => $company_debt_usd, 'iqd' => $company_debt_iqd],
+            'customer' => ['usd' => $customer_debt_total_usd, 'iqd' => $customer_debt_iqd],
+            'company' => ['usd' => $company_debt_total_usd, 'iqd' => $company_debt_iqd],
             'person' => [
                 'cash' => ['usd' => $person_cash_total_usd, 'iqd' => $person_cash_iqd],
                 'credit' => ['usd' => $person_credit_total_usd, 'iqd' => $person_credit_iqd],

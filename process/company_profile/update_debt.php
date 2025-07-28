@@ -68,10 +68,6 @@ try {
     }
 
     if ($old_from_purchases > 0) {
-        // زیادکردنی بۆ debt_usd
-        $upd = $pdo->prepare('UPDATE company SET debt_usd = debt_usd + ? WHERE id = ?');
-        $upd->execute([$old_from_purchases, $company_id]);
-        
         // زیادکردنی بۆ purchases.remaining_usd بە FIFO
         $usd_left = $old_from_purchases;
         $stmt = $pdo->prepare("SELECT id, remaining_usd, paid_usd FROM purchases WHERE company_id = ? ORDER BY date ASC, id ASC");
@@ -138,8 +134,7 @@ try {
         }
 
         if ($from_purchases_usd > 0) {
-            $upd = $pdo->prepare('UPDATE company SET debt_usd = debt_usd - ? WHERE id = ?');
-            $upd->execute([$from_purchases_usd, $company_id]);
+            // No need to update company debt_usd anymore - it's handled by purchases.remaining_usd
         }
 
         require_once __DIR__ . '/../../includes/notify.php';
