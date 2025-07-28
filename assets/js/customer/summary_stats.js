@@ -1,7 +1,7 @@
 // Load summary statistics for customer cards
 function loadSummaryStats() {
     $.ajax({
-        url: '../process/customer/get_summary_stats.php',
+        url: '../process/customer/get_summary_stats_simple.php', // Using simple version for testing
         method: 'GET',
         dataType: 'json',
         success: function(response) {
@@ -29,6 +29,7 @@ function loadSummaryStats() {
         },
         error: function(xhr, status, error) {
             console.error('Error loading summary stats:', error);
+            console.error('Response:', xhr.responseText);
             // Set default values on error
             $('#total_debt').text('$0.00');
             $('#total_customers').text('0');
