@@ -128,11 +128,37 @@ $(document).ready(function() {
         enableSelect2('#edit_person_id', '#editPurchaseModal');
         enableSelect2('#edit_currency_type', '#editPurchaseModal');
     }
+    
+    // بۆ notes - تەنها ئەگەر مۆداڵەکە هەبێت
+    if ($('#addNoteModal').length > 0) {
+        enableSelect2('#customer_id', '#addNoteModal');
+        enableSelect2('#formula_id', '#addNoteModal');
+        enableSelect2('#mixer_car_id', '#addNoteModal');
+        enableSelect2('#mixer_driver_id', '#addNoteModal');
+        enableSelect2('#pump_car_id', '#addNoteModal');
+        enableSelect2('#pump_driver_id', '#addNoteModal');
+    }
+    if ($('#editNoteModal').length > 0) {
+        enableSelect2('#edit_customer_id', '#editNoteModal');
+        enableSelect2('#edit_formula_id', '#editNoteModal');
+        enableSelect2('#edit_mixer_car_id', '#editNoteModal');
+        enableSelect2('#edit_mixer_driver_id', '#editNoteModal');
+        enableSelect2('#edit_pump_car_id', '#editNoteModal');
+        enableSelect2('#edit_pump_driver_id', '#editNoteModal');
+    }
+    
+    // بۆ notes filters - تەنها ئەگەر پەیجەکە هەبێت
+    if ($('#filter_customer').length > 0) {
+        enableSelect2('#filter_customer', 'body');
+    }
+    if ($('#filter_read').length > 0) {
+        enableSelect2('#filter_read', 'body');
+    }
 });
 
 // Focus select2 search input when dropdown opens for customer select in addConcreteReceiptModal
 $(document).on('select2:open', function(e) {
-    if (e.target && e.target.id === 'customer_id') {
+    if (e.target && (e.target.id === 'customer_id' || e.target.id === 'edit_customer_id')) {
         setTimeout(function() {
             let searchBox = document.querySelector('.select2-container--open .select2-search__field');
             if (searchBox) searchBox.focus();

@@ -23,8 +23,25 @@ $(document).on('click', '.edit-receipt', function() {
     }, 'json');
 });
 
+// Multiple submission prevention flag
+let isUpdating = false;
+
 $('#editConcreteReceiptForm').on('submit', function(e) {
     e.preventDefault();
+    
+    // Prevent multiple submissions
+    if (isUpdating) {
+        showAlert('warning', 'تکایە چاوەڕوان بە...');
+        return false;
+    }
+    
+    // Set updating flag and disable submit button
+    isUpdating = true;
+    const submitBtn = $(this).find('button[type="submit"]');
+    const originalBtnText = submitBtn.html();
+    submitBtn.prop('disabled', true);
+    submitBtn.html('<span class="spinner-border spinner-border-sm me-2"></span>چاوەڕوان بە...');
+    
     var formData = $(this).serialize();
     $.post('../process/concrete_receipts/update_concrete_receipts.php', formData, function(res) {
         if (res.success) {
@@ -36,5 +53,10 @@ $('#editConcreteReceiptForm').on('submit', function(e) {
         }
     }, 'json').fail(function(xhr) {
         Swal.fire('هەڵە!', xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'هەڵەیەک ڕویدا', 'error');
+    }).always(function() {
+        // Reset updating flag and restore submit button
+        isUpdating = false;
+        submitBtn.prop('disabled', false);
+        submitBtn.html(originalBtnText);
     });
 });

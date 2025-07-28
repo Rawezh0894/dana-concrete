@@ -14,13 +14,31 @@ $(function() {
         $('#edit_employee_salary').val(salary);
         $('#editEmployeeModal').modal('show');
     });
+    // Multiple submission prevention flag
+    let isUpdating = false;
+    
     $('#editEmployeeForm').on('submit', function(e) {
         e.preventDefault();
+        
+        // Prevent multiple submissions
+        if (isUpdating) {
+            showAlert('warning', 'تکایە چاوەڕوان بە...');
+            return false;
+        }
+        
         var mobile = $('#edit_employee_mobile').val().trim();
         if (!/^07\d{9}$/.test(mobile)) {
             swalAlert('هەڵە', 'ژمارەی مۆبایل دەبێت بە 07 دەست پێبکات و 11 ژمارە بێت.', 'error');
             return;
         }
+        
+        // Set updating flag and disable submit button
+        isUpdating = true;
+        const submitBtn = $(this).find('button[type="submit"]');
+        const originalBtnText = submitBtn.html();
+        submitBtn.prop('disabled', true);
+        submitBtn.html('<span class="spinner-border spinner-border-sm me-2"></span>چاوەڕوان بە...');
+        
         var formData = $(this).serialize();
         $.post('../process/employee/update_employee.php', formData, function(response) {
             if (response.success) {
@@ -32,6 +50,11 @@ $(function() {
             }
         }, 'json').fail(function() {
             swalAlert('هەڵە', 'هەڵەیەک هەیە لە پەیوەندیدا.', 'error');
+        }).always(function() {
+            // Reset updating flag and restore submit button
+            isUpdating = false;
+            submitBtn.prop('disabled', false);
+            submitBtn.html(originalBtnText);
         });
     });
 });

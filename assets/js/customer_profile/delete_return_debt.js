@@ -1,7 +1,16 @@
+// Multiple deletion prevention flag
+let isDeleting = false;
+
 document.addEventListener('click', async function(e) {
     if (e.target.classList.contains('delete-return-debt') || e.target.closest('.delete-return-debt')) {
         e.preventDefault();
         e.stopPropagation();
+        
+        // Prevent multiple delete operations
+        if (isDeleting) {
+            showAlert('warning', 'تکایە چاوەڕوان بە...');
+            return;
+        }
         
         const button = e.target.classList.contains('delete-return-debt') ? e.target : e.target.closest('.delete-return-debt');
         const id = button.getAttribute('data-id');
@@ -24,10 +33,11 @@ document.addEventListener('click', async function(e) {
         });
         
         if (result.isConfirmed) {
-            // Show loading state
+            // Set deleting flag and disable button
+            isDeleting = true;
             button.disabled = true;
             const originalHTML = button.innerHTML;
-            button.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+            button.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>چاوەڕوان بە...';
             
             try {
                 const formData = new FormData();
@@ -68,7 +78,8 @@ document.addEventListener('click', async function(e) {
                 console.error('Error deleting debt:', error);
                 Swal.fire('هەڵە', 'هەڵەیەک ڕووی دا لە پەیوەندی بە سێرڤەرەوە', 'error');
             } finally {
-                // Restore button state
+                // Reset deleting flag and restore button state
+                isDeleting = false;
                 button.disabled = false;
                 button.innerHTML = originalHTML;
             }

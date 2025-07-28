@@ -1,10 +1,20 @@
+// Multiple submission prevention flag
+let isUpdating = false;
+
 document.getElementById('editCustomerDebtForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
-    // Show loading state
+    // Prevent multiple submissions
+    if (isUpdating) {
+        showAlert('warning', 'تکایە چاوەڕوان بە...');
+        return false;
+    }
+    
+    // Set updating flag and disable submit button
+    isUpdating = true;
     const submitBtn = this.querySelector('button[type="submit"]');
     const originalText = submitBtn.innerHTML;
-    submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> چاوەڕوان...';
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>چاوەڕوان بە...';
     submitBtn.disabled = true;
     
     try {
@@ -70,7 +80,8 @@ document.getElementById('editCustomerDebtForm').addEventListener('submit', async
         console.error('Error updating debt:', error);
         Swal.fire('هەڵە', 'هەڵەیەک ڕووی دا لە پەیوەندی بە سێرڤەرەوە', 'error');
     } finally {
-        // Restore button state
+        // Reset updating flag and restore button state
+        isUpdating = false;
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
     }

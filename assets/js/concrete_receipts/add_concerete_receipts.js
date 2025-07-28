@@ -1,3 +1,4 @@
+// Multiple submission prevention flag
 let submitting = false;
 $(document).ready(function() {
     // Restore form data from localStorage
@@ -28,52 +29,77 @@ $(document).ready(function() {
     });
 
     $('#addConcreteReceiptForm').on('submit', async function(e) {
-        if (submitting) return false;
-        submitting = true;
         e.preventDefault();
-        const formData = new FormData(this);
-        const res = await fetch('../process/concrete_receipts/add_concerete_receipts.php', {
-            method: 'POST',
-            body: formData
-        });
-        const data = await res.json();
-        if (data.success) {
-            Swal.fire({
-                icon: 'success',
-                title: 'پسوڵە زیادکرا',
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 1000,
-                timerProgressBar: true,
-                didClose: () => {
-                    if (data.id) {
-                        // Save all fields except meter_amount, mixer_car_id, mixer_driver_id
-                        const allData = {};
-                        $form.serializeArray().forEach(({name, value}) => {
-                            if (!["meter_amount","mixer_car_id","mixer_driver_id","receipt_number"].includes(name)) {
-                                allData[name] = value;
-                            }
-                        });
-                        localStorage.setItem(storageKey, JSON.stringify(allData));
-                        window.open('../pages/central_receipts.php?id=' + data.id + '&auto_print=1', '_self');
-                    }
-                    // Always reset form and close modal
-                    $('#addConcreteReceiptForm')[0].reset();
-                    $('#addConcreteReceiptModal').modal('hide');
-                    if (window.reloadConcreteReceipts) window.reloadConcreteReceipts();
-                    if (window.reloadConcreteReceiptsSummary) window.reloadConcreteReceiptsSummary();
-                    // Do NOT clear localStorage here, it is handled above
-                }
+        
+        // Prevent multiple submissions
+        if (submitting) {
+            showAlert('warning', 'تکایە چاوەڕوان بە...');
+            return false;
+        }
+        
+        // Set submitting flag and disable submit button
+        submitting = true;
+        const submitBtn = $(this).find('button[type="submit"]');
+        const originalBtnText = submitBtn.html();
+        submitBtn.prop('disabled', true);
+        submitBtn.html('<span class="spinner-border spinner-border-sm me-2"></span>چاوەڕوان بە...');
+        
+        try {
+            const formData = new FormData(this);
+            const res = await fetch('../process/concrete_receipts/add_concerete_receipts.php', {
+                method: 'POST',
+                body: formData
             });
-        } else {
+            const data = await res.json();
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'پسوڵە زیادکرا',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 1000,
+                    timerProgressBar: true,
+                    didClose: () => {
+                        if (data.id) {
+                            // Save all fields except meter_amount, mixer_car_id, mixer_driver_id
+                            const allData = {};
+                            $form.serializeArray().forEach(({name, value}) => {
+                                if (!["meter_amount","mixer_car_id","mixer_driver_id","receipt_number"].includes(name)) {
+                                    allData[name] = value;
+                                }
+                            });
+                            localStorage.setItem(storageKey, JSON.stringify(allData));
+                            window.open('../pages/central_receipts.php?id=' + data.id + '&auto_print=1', '_self');
+                        }
+                        // Always reset form and close modal
+                        $('#addConcreteReceiptForm')[0].reset();
+                        $('#addConcreteReceiptModal').modal('hide');
+                        if (window.reloadConcreteReceipts) window.reloadConcreteReceipts();
+                        if (window.reloadConcreteReceiptsSummary) window.reloadConcreteReceiptsSummary();
+                        // Do NOT clear localStorage here, it is handled above
+                    }
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'هەڵە',
+                    text: data.message || 'هەڵەیەک ڕویدا لە زیادکردنی پسوڵە!'
+                });
+            }
+        } catch (error) {
+            console.error('Error adding concrete receipt:', error);
             Swal.fire({
                 icon: 'error',
                 title: 'هەڵە',
-                text: data.message || 'هەڵەیەک ڕویدا لە زیادکردنی پسوڵە!'
+                text: 'هەڵەیەک لە پەیوەندی بە سێرڤەرەوە هەیە'
             });
+        } finally {
+            // Reset submitting flag and restore submit button
+            submitting = false;
+            submitBtn.prop('disabled', false);
+            submitBtn.html(originalBtnText);
         }
-        submitting = false;
     });
 
     $('#addConcreteReceiptModal').on('show.bs.modal', function() {

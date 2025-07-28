@@ -1,6 +1,7 @@
 // Global variable to store current customer debt
 let CUSTOMER_CURRENT_DEBT = 0;
 let CUSTOMER_OPENING_DEBT_USD = 0;
+// Multiple submission prevention flag
 let submitting = false;
 
 // Function to fetch customer current debt
@@ -98,9 +99,23 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 document.getElementById('addCustomerDebtForm').addEventListener('submit', async function(e) {
-    if (submitting) return false;
-    submitting = true;
     e.preventDefault();
+    
+    // Prevent multiple submissions
+    if (submitting) {
+        showAlert('warning', 'تکایە چاوەڕوان بە...');
+        return false;
+    }
+    
+    // Set submitting flag and disable submit button
+    submitting = true;
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalBtnText = submitBtn ? submitBtn.innerHTML : '';
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>چاوەڕوان بە...';
+    }
+    
     const customer_id = typeof CUSTOMER_ID !== 'undefined' ? CUSTOMER_ID : null;
     const date = document.getElementById('customer_debt_date').value;
     const dolar_rate = parseFloat(document.getElementById('customer_debt_dolar_rate').value) || 0;
@@ -116,6 +131,10 @@ document.getElementById('addCustomerDebtForm').addEventListener('submit', async 
     if (!customer_id || !date || (paid_usd <= 0 && paid_iqd <= 0 && discount <= 0)) {
         Swal.fire('هەڵە', 'هەموو خانەکان پڕ بکە!', 'error');
         submitting = false;
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+        }
         return;
     }
 
@@ -160,6 +179,12 @@ document.getElementById('addCustomerDebtForm').addEventListener('submit', async 
         }
     } catch (err) {
         Swal.fire('هەڵە', 'هەڵەیەک ڕووی دا', 'error');
+    } finally {
+        // Reset submitting flag and restore submit button
+        submitting = false;
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+        }
     }
-    submitting = false;
 });

@@ -15,8 +15,18 @@ $(document).on('click', '.edit-debt', function() {
     }, 'json');
 });
 
+// Multiple submission prevention flag
+let isUpdating = false;
+
 $('#editDebtForm').on('submit', function(e) {
     e.preventDefault();
+    
+    // Prevent multiple submissions
+    if (isUpdating) {
+        showAlert('warning', 'تکایە چاوەڕوان بە...');
+        return false;
+    }
+    
     const form = this;
     const amount_usd = parseFloat(form.amount_usd.value) || 0;
     const amount_iqd = parseFloat(form.amount_iqd.value) || 0;
@@ -24,6 +34,14 @@ $('#editDebtForm').on('submit', function(e) {
         Swal.fire('هەڵە!', 'بە لایەنی کەم یەک بڕ پڕبکە (دۆلار یان دینار)', 'error');
         return;
     }
+    
+    // Set updating flag and disable submit button
+    isUpdating = true;
+    const submitBtn = $(this).find('button[type="submit"]');
+    const originalBtnText = submitBtn.html();
+    submitBtn.prop('disabled', true);
+    submitBtn.html('<span class="spinner-border spinner-border-sm me-2"></span>چاوەڕوان بە...');
+    
     $.post('../process/company_profile/update_debt.php', $(form).serialize(), function(res) {
         if (res.success) {
             Swal.fire('سەرکەوتوو!', 'دانەوەی قەرز نوێکرایەوە', 'success');
@@ -42,7 +60,12 @@ $('#editDebtForm').on('submit', function(e) {
         } else {
             Swal.fire('هەڵە!', res.msg || 'هەڵەیەک ڕویدا', 'error');
         }
-    }, 'json');
+    }, 'json').always(function() {
+        // Reset updating flag and restore submit button
+        isUpdating = false;
+        submitBtn.prop('disabled', false);
+        submitBtn.html(originalBtnText);
+    });
 });
 
 document.addEventListener('click', function(e) {

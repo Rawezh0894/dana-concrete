@@ -1,8 +1,24 @@
+// Multiple submission prevention flag
 let submitting = false;
+
 document.getElementById('addPurchaseForm').onsubmit = async function(e) {
-    if (submitting) return false;
-    submitting = true;
     e.preventDefault();
+    
+    // Prevent multiple submissions
+    if (submitting) {
+        showAlert('warning', 'تکایە چاوەڕوان بە...');
+        return false;
+    }
+    
+    // Set submitting flag and disable submit button
+    submitting = true;
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalBtnText = submitBtn ? submitBtn.innerHTML : '';
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>چاوەڕوان بە...';
+    }
+    
     const form = e.target;
     let hasNegative = false;
     form.querySelectorAll('input[type="number"]').forEach(input => {
@@ -13,24 +29,39 @@ document.getElementById('addPurchaseForm').onsubmit = async function(e) {
             input.classList.remove('is-invalid');
         }
     });
+    
     const type = form.querySelector('[name="type"]').value;
     const pricePerKgIqd = parseFloat(form.querySelector('[name="price_per_kg_iqd"]').value) || 0;
     const pricePerKgUsd = parseFloat(form.querySelector('[name="price_per_kg_usd"]').value) || 0;
+    
     if (type === 'دینار' && pricePerKgIqd < 0) {
         Swal.fire('هەڵە!', 'بڕی price_per_kg_iqd نابێت منفی بێت!', 'error');
         submitting = false;
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+        }
         return;
     }
     if (type === 'دۆلار' && pricePerKgUsd < 0) {
         Swal.fire('هەڵە!', 'بڕی price_per_kg_usd نابێت منفی بێت!', 'error');
         submitting = false;
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+        }
         return;
     }
     if (hasNegative) {
         Swal.fire('هەڵە!', 'نابێت هیچ بڕێک منفی بێت!', 'error');
         submitting = false;
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+        }
         return;
     }
+    
     // Prevent remaining_usd or remaining_iqd if payment_type is 'نەقد'
     const paymentType = form.querySelector('[name="payment_type"]').value;
     const remainingUsd = parseFloat(form.querySelector('[name="remaining_usd"]').value) || 0;
@@ -38,8 +69,13 @@ document.getElementById('addPurchaseForm').onsubmit = async function(e) {
     if (paymentType === 'نەقد' && (remainingUsd !== 0 || remainingIqd !== 0)) {
         Swal.fire('هەڵە!', 'بڕی پارەی ماوە نابێت بێت کاتێک جۆری پارەدان نەقدە!', 'error');
         submitting = false;
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+        }
         return;
     }
+    
     const formData = new FormData(form);
     try {
         const res = await fetch('../process/purchase/add_purchase.php', {
@@ -53,7 +89,6 @@ document.getElementById('addPurchaseForm').onsubmit = async function(e) {
         } catch (e) {
             console.error('Raw response:', text);
             Swal.fire('هەڵە!', text || 'هەڵەیەک لە وەڵامەکەی سێرڤەر هەیە. زانیاری زیاتر لە console.', 'error');
-            submitting = false;
             return;
         }
         if (data.success) {
@@ -67,6 +102,12 @@ document.getElementById('addPurchaseForm').onsubmit = async function(e) {
         }
     } catch (err) {
         Swal.fire('هەڵە!', 'هەڵەیەک ڕویدا', 'error');
+    } finally {
+        // Reset submitting flag and restore submit button
+        submitting = false;
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+        }
     }
-    submitting = false;
 };

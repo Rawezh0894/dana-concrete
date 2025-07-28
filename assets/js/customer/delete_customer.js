@@ -1,6 +1,16 @@
+// Multiple deletion prevention flag
+let isDeleting = false;
+
 $(document).on('click', '.delete-customer-btn', function() {
+    // Prevent multiple delete operations
+    if (isDeleting) {
+        showAlert('warning', 'تکایە چاوەڕوان بە...');
+        return;
+    }
+    
     const btn = $(this);
     const id = btn.data('id');
+    const originalBtnText = btn.html();
     
     Swal.fire({
         title: 'دڵنیایت؟',
@@ -11,6 +21,11 @@ $(document).on('click', '.delete-customer-btn', function() {
         cancelButtonText: 'نەخێر'
     }).then((result) => {
         if (result.isConfirmed) {
+            // Set deleting flag and disable button
+            isDeleting = true;
+            btn.prop('disabled', true);
+            btn.html('<span class="spinner-border spinner-border-sm me-2"></span>چاوەڕوان بە...');
+            
             $.ajax({
                 url: '../process/customer/delete_customer.php',
                 method: 'POST',
@@ -28,6 +43,12 @@ $(document).on('click', '.delete-customer-btn', function() {
                 },
                 error: function() {
                     Swal.fire('هەڵە!', 'هەڵەیەک ڕووی دا', 'error');
+                },
+                complete: function() {
+                    // Reset deleting flag and restore button
+                    isDeleting = false;
+                    btn.prop('disabled', false);
+                    btn.html(originalBtnText);
                 }
             });
         }

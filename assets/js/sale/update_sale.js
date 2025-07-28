@@ -195,8 +195,25 @@ $(document).ready(function() {
     calculateRemainingAmount();
 });
 
+// Multiple submission prevention flag
+let isUpdating = false;
+
 $('#editSaleForm').on('submit', function(e) {
     e.preventDefault();
+    
+    // Prevent multiple submissions
+    if (isUpdating) {
+        showAlert('warning', 'تکایە چاوەڕوان بە...');
+        return false;
+    }
+    
+    // Set updating flag and disable submit button
+    isUpdating = true;
+    const submitBtn = $(this).find('button[type="submit"]');
+    const originalBtnText = submitBtn.html();
+    submitBtn.prop('disabled', true);
+    submitBtn.html('<span class="spinner-border spinner-border-sm me-2"></span>چاوەڕوان بە...');
+    
     var formData = $(this).serialize();
     $.ajax({
         url: '../process/sale/update_sale.php',
@@ -228,6 +245,12 @@ $('#editSaleForm').on('submit', function(e) {
                 title: 'هەڵە',
                 text: xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'هەڵەیەک ڕووی دا لە پەیوەندیکردن!'
             });
+        },
+        complete: function() {
+            // Reset updating flag and restore submit button
+            isUpdating = false;
+            submitBtn.prop('disabled', false);
+            submitBtn.html(originalBtnText);
         }
     });
 });

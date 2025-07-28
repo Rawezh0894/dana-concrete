@@ -1,10 +1,24 @@
+// Multiple submission prevention flag
 let submittingExpense = false;
 const addExpenseForm = document.getElementById('addExpenseForm');
 if (addExpenseForm) {
     addExpenseForm.onsubmit = async function(e) {
-        if (submittingExpense) return false;
-        submittingExpense = true;
         e.preventDefault();
+        
+        // Prevent multiple submissions
+        if (submittingExpense) {
+            showAlert('warning', 'تکایە چاوەڕوان بە...');
+            return false;
+        }
+        
+        // Set submitting flag and disable submit button
+        submittingExpense = true;
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn ? submitBtn.innerHTML : '';
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>چاوەڕوان بە...';
+        }
         const invoiceNumber = document.getElementById('invoice_number').value.trim();
         if (invoiceNumber) {
             // Check for duplicate in current table (client-side)
@@ -112,8 +126,14 @@ if (addExpenseForm) {
                 name: err.name
             });
             Swal.fire('هەڵە!', 'هەڵەیەک ڕویدا', 'error');
+        } finally {
+            // Reset submitting flag and restore submit button
+            submittingExpense = false;
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+            }
         }
-        submittingExpense = false;
     }
 }
 
@@ -139,13 +159,28 @@ if (addExpenseModal) {
     });
 }
 
+// Multiple submission prevention flag for add person
 let submittingPerson = false;
 const addPersonForm = document.getElementById('addPersonForm');
 if (addPersonForm) {
     addPersonForm.onsubmit = async function(e) {
-        if (submittingPerson) return false;
-        submittingPerson = true;
         e.preventDefault();
+        
+        // Prevent multiple submissions
+        if (submittingPerson) {
+            showAlert('warning', 'تکایە چاوەڕوان بە...');
+            return false;
+        }
+        
+        // Set submitting flag and disable submit button
+        submittingPerson = true;
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn ? submitBtn.innerHTML : '';
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>چاوەڕوان بە...';
+        }
+        
         const formData = new FormData(addPersonForm);
         try {
             const res = await fetch('../process/other_expenses/add_person.php', {
@@ -170,7 +205,13 @@ if (addPersonForm) {
             }
         } catch (err) {
             Swal.fire('هەڵە!', 'هەڵەیەک ڕویدا', 'error');
+        } finally {
+            // Reset submitting flag and restore submit button
+            submittingPerson = false;
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+            }
         }
-        submittingPerson = false;
     }
 }

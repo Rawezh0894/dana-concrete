@@ -1,3 +1,4 @@
+// Multiple submission prevention flag
 let submitting = false;
 
 // Function to fetch dollar rate from API
@@ -83,8 +84,21 @@ $(document).ready(function() {
     });
 
     $('#addSaleForm').on('submit', function(e) {
-        if (submitting) return false;
+        e.preventDefault();
+        
+        // Prevent multiple submissions
+        if (submitting) {
+            showAlert('warning', 'تکایە چاوەڕوان بە...');
+            return false;
+        }
+        
+        // Set submitting flag and disable submit button
         submitting = true;
+        const submitBtn = $(this).find('button[type="submit"]');
+        const originalBtnText = submitBtn.html();
+        submitBtn.prop('disabled', true);
+        submitBtn.html('<span class="spinner-border spinner-border-sm me-2"></span>چاوەڕوان بە...');
+        
         var paymentType = $('#payment_type').val();
         var remaining = parseFloat($('#remaining_amount').val()) || 0;
         var total = parseFloat($('#total_price').val()) || 0;
@@ -92,14 +106,16 @@ $(document).ready(function() {
         var paidUSD = parseFloat($('#amount_paid_usd').val()) || 0;
         var dolarRate = parseFloat($('#dolar_rate').val()) || 1;
         var paidIQD_inUSD = paidIQD / (dolarRate / 100);
+        
         if (paymentType === 'نەقد' && remaining > 0) {
             Swal.fire({
                 icon: 'error',
                 title: 'هەڵە',
                 text: 'کاتێک جۆری پارەدان نەقدە، نابێت پارەی ماوە بێت!'
             });
-            e.preventDefault();
             submitting = false;
+            submitBtn.prop('disabled', false);
+            submitBtn.html(originalBtnText);
             return false;
         }
         if (paidIQD_inUSD > total) {
@@ -108,8 +124,9 @@ $(document).ready(function() {
                 title: 'هەڵە',
                 text: 'پارەی دراو بە دینار (بە دۆلار) نابێت لە کۆی نرخ زیاتربێت!'
             });
-            e.preventDefault();
             submitting = false;
+            submitBtn.prop('disabled', false);
+            submitBtn.html(originalBtnText);
             return false;
         }
         if (paidUSD > total) {
@@ -118,11 +135,12 @@ $(document).ready(function() {
                 title: 'هەڵە',
                 text: 'پارەی دراو بە دۆلار نابێت لە کۆی نرخ زیاتربێت!'
             });
-            e.preventDefault();
             submitting = false;
+            submitBtn.prop('disabled', false);
+            submitBtn.html(originalBtnText);
             return false;
         }
-        e.preventDefault();
+        
         var formData = $(this).serialize();
         $.ajax({
             url: '../process/sale/add_sale.php',
@@ -151,7 +169,6 @@ $(document).ready(function() {
                         text: response.message || 'هەڵەیەک ڕوویدا لە زیادکردنی فرۆشتن!'
                     });
                 }
-                submitting = false;
             },
             error: function(xhr) {
                 console.error('AJAX error:', xhr, xhr.responseText);
@@ -160,7 +177,12 @@ $(document).ready(function() {
                     title: 'هەڵە',
                     text: xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'هەڵەیەک ڕوویدا لە پەیوەندیکردن!'
                 });
+            },
+            complete: function() {
+                // Reset submitting flag and restore submit button
                 submitting = false;
+                submitBtn.prop('disabled', false);
+                submitBtn.html(originalBtnText);
             }
         });
     });

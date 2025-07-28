@@ -41,8 +41,25 @@ $(document).ready(function () {
 // Handle update submit
     const editCustomerForm = $('#editCustomerForm');
     if (editCustomerForm.length) {
+        // Multiple submission prevention flag
+        let isUpdating = false;
+        
         editCustomerForm.on('submit', function (e) {
-        e.preventDefault();
+            e.preventDefault();
+            
+            // Prevent multiple submissions
+            if (isUpdating) {
+                showAlert('warning', 'تکایە چاوەڕوان بە...');
+                return false;
+            }
+            
+            // Set updating flag and disable submit button
+            isUpdating = true;
+            const submitBtn = $(this).find('button[type="submit"]');
+            const originalBtnText = submitBtn.html();
+            submitBtn.prop('disabled', true);
+            submitBtn.html('<span class="spinner-border spinner-border-sm me-2"></span>چاوەڕوان بە...');
+            
             const formData = new FormData(this);
             
             $.ajax({
@@ -66,6 +83,12 @@ $(document).ready(function () {
                 },
                 error: function() {
                     swalAlert('هەڵە', 'هەڵەیەک هەیە لە پەیوەندیدا.', 'error');
+                },
+                complete: function() {
+                    // Reset updating flag and restore submit button
+                    isUpdating = false;
+                    submitBtn.prop('disabled', false);
+                    submitBtn.html(originalBtnText);
                 }
             });
         });

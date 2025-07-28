@@ -1,8 +1,25 @@
 $(document).ready(function () {
     const addCustomerForm = $('#addCustomerForm');
     if (addCustomerForm.length) {
+        // Multiple submission prevention flag
+        let isSubmitting = false;
+        
         addCustomerForm.on('submit', function (e) {
-        e.preventDefault();
+            e.preventDefault();
+            
+            // Prevent multiple submissions
+            if (isSubmitting) {
+                showAlert('warning', 'تکایە چاوەڕوان بە...');
+                return false;
+            }
+            
+            // Set submitting flag and disable submit button
+            isSubmitting = true;
+            const submitBtn = $(this).find('button[type="submit"]');
+            const originalBtnText = submitBtn.html();
+            submitBtn.prop('disabled', true);
+            submitBtn.html('<span class="spinner-border spinner-border-sm me-2"></span>چاوەڕوان بە...');
+            
             const formData = new FormData(this);
             
             $.ajax({
@@ -23,10 +40,16 @@ $(document).ready(function () {
                         swalAlert('سەرکەوتوو', 'کڕیار بەسەرکەوتوویی زیادکرا!', 'success');
                     } else {
                         swalAlert('هەڵە', data.message || 'هەڵەیەک هەیە', 'error');
-        }
+                    }
                 },
                 error: function() {
                     swalAlert('هەڵە', 'هەڵەیەک هەیە لە پەیوەندیدا.', 'error');
+                },
+                complete: function() {
+                    // Reset submitting flag and restore submit button
+                    isSubmitting = false;
+                    submitBtn.prop('disabled', false);
+                    submitBtn.html(originalBtnText);
                 }
             });
         });

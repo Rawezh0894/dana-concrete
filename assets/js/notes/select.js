@@ -256,6 +256,11 @@ document.getElementById('filterToday')?.addEventListener('click', function() {
     document.getElementById('filter_to').value = today;
     document.getElementById('filter_customer').value = '';
     document.getElementById('filter_read').value = '';
+    
+    // Reset Select2 dropdowns
+    $('#filter_customer').val('').trigger('change');
+    $('#filter_read').val('').trigger('change');
+    
     currentPage = 1;
     
     // Add active class to this button
@@ -277,6 +282,11 @@ document.getElementById('filterTomorrow')?.addEventListener('click', function() 
     document.getElementById('filter_to').value = tomorrowFormatted;
     document.getElementById('filter_customer').value = '';
     document.getElementById('filter_read').value = '';
+    
+    // Reset Select2 dropdowns
+    $('#filter_customer').val('').trigger('change');
+    $('#filter_read').val('').trigger('change');
+    
     currentPage = 1;
     
     // Add active class to this button
@@ -298,6 +308,11 @@ document.getElementById('filterYesterday')?.addEventListener('click', function()
     document.getElementById('filter_to').value = yesterdayFormatted;
     document.getElementById('filter_customer').value = '';
     document.getElementById('filter_read').value = '';
+    
+    // Reset Select2 dropdowns
+    $('#filter_customer').val('').trigger('change');
+    $('#filter_read').val('').trigger('change');
+    
     currentPage = 1;
     
     // Add active class to this button
@@ -317,6 +332,11 @@ document.getElementById('clearFilterBtn')?.addEventListener('click', function() 
     document.getElementById('filter_to').value = '';
     document.getElementById('filter_customer').value = '';
     document.getElementById('filter_read').value = '';
+    
+    // Reset Select2 dropdowns
+    $('#filter_customer').val('').trigger('change');
+    $('#filter_read').val('').trigger('change');
+    
     currentPage = 1;
     loadNotes();
 });

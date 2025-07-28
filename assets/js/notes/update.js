@@ -37,7 +37,7 @@ async function populateEditModal(noteId) {
         document.getElementById('edit_recipient').value = noteData.recipient;
         document.getElementById('edit_meter_amount').value = noteData.meter_amount;
         
-        // Set customer dropdown
+        // Set customer dropdown with Select2
         const customerSelect = document.getElementById('edit_customer_id');
         for (let option of customerSelect.options) {
             if (option.textContent.trim() === noteData.customer_name.trim()) {
@@ -45,8 +45,9 @@ async function populateEditModal(noteId) {
                 break;
             }
         }
+        $(customerSelect).trigger('change');
         
-        // Set formula dropdown
+        // Set formula dropdown with Select2
         const formulaSelect = document.getElementById('edit_formula_id');
         for (let option of formulaSelect.options) {
             if (option.textContent.trim() === noteData.formula_name.trim()) {
@@ -54,8 +55,9 @@ async function populateEditModal(noteId) {
                 break;
             }
         }
+        $(formulaSelect).trigger('change');
         
-        // Set mixer car dropdown
+        // Set mixer car dropdown with Select2
         const mixerCarSelect = document.getElementById('edit_mixer_car_id');
         for (let option of mixerCarSelect.options) {
             if (option.textContent.trim() === noteData.mixer_car_name.trim()) {
@@ -63,8 +65,9 @@ async function populateEditModal(noteId) {
                 break;
             }
         }
+        $(mixerCarSelect).trigger('change');
         
-        // Set mixer driver dropdown
+        // Set mixer driver dropdown with Select2
         const mixerDriverSelect = document.getElementById('edit_mixer_driver_id');
         for (let option of mixerDriverSelect.options) {
             if (option.textContent.trim() === noteData.mixer_driver_name.trim()) {
@@ -72,8 +75,9 @@ async function populateEditModal(noteId) {
                 break;
             }
         }
+        $(mixerDriverSelect).trigger('change');
         
-        // Set pump car dropdown
+        // Set pump car dropdown with Select2
         const pumpCarSelect = document.getElementById('edit_pump_car_id');
         for (let option of pumpCarSelect.options) {
             if (option.textContent.trim() === noteData.pump_car_name.trim()) {
@@ -81,8 +85,9 @@ async function populateEditModal(noteId) {
                 break;
             }
         }
+        $(pumpCarSelect).trigger('change');
         
-        // Set pump driver dropdown
+        // Set pump driver dropdown with Select2
         const pumpDriverSelect = document.getElementById('edit_pump_driver_id');
         for (let option of pumpDriverSelect.options) {
             if (option.textContent.trim() === noteData.pump_driver_name.trim()) {
@@ -90,6 +95,7 @@ async function populateEditModal(noteId) {
                 break;
             }
         }
+        $(pumpDriverSelect).trigger('change');
         
         // Show the edit modal
         const editModal = new bootstrap.Modal(document.getElementById('editNoteModal'));
@@ -116,6 +122,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Flag to prevent multiple submissions
     let isSubmitting = false;
+    
+    // Initialize Select2 for all select elements in the edit modal
+    if ($('#editNoteModal').length > 0) {
+        enableSelect2('#edit_customer_id', '#editNoteModal');
+        enableSelect2('#edit_formula_id', '#editNoteModal');
+        enableSelect2('#edit_mixer_car_id', '#editNoteModal');
+        enableSelect2('#edit_mixer_driver_id', '#editNoteModal');
+        enableSelect2('#edit_pump_car_id', '#editNoteModal');
+        enableSelect2('#edit_pump_driver_id', '#editNoteModal');
+    }
 
     editNoteForm.addEventListener('submit', async function(e) {
         e.preventDefault();

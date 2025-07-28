@@ -1,6 +1,7 @@
 let companyCurrencyType = null;
 let lastTotalRemainingUSD = 0;
 let lastTotalRemainingIQD = 0;
+// Multiple submission prevention flag
 let submitting = false;
 
 function fetchCompanyCurrencyType() {
@@ -85,9 +86,23 @@ $('#addDebtForm').on('submit', function(e) {
 });
 
 document.getElementById('addDebtForm').onsubmit = async function(e) {
-    if (submitting) return false;
-    submitting = true;
     e.preventDefault();
+    
+    // Prevent multiple submissions
+    if (submitting) {
+        showAlert('warning', 'تکایە چاوەڕوان بە...');
+        return false;
+    }
+    
+    // Set submitting flag and disable submit button
+    submitting = true;
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalBtnText = submitBtn ? submitBtn.innerHTML : '';
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>چاوەڕوان بە...';
+    }
+    
     const form = e.target;
     const formData = new FormData(form);
     formData.append('company_id', COMPANY_ID);
@@ -102,8 +117,13 @@ document.getElementById('addDebtForm').onsubmit = async function(e) {
     if (amount_usd <= 0 && amount_iqd <= 0) {
         Swal.fire('هەڵە!', 'بە لایەنی کەم یەک بڕ پڕبکە (دۆلار یان دینار)', 'error');
         submitting = false;
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+        }
         return;
     }
+    
     try {
         console.log('Sending request to add_debt.php');
         const res = await fetch('../process/company_profile/add_debt.php', {
@@ -122,7 +142,6 @@ document.getElementById('addDebtForm').onsubmit = async function(e) {
             console.error('JSON parse error:', parseError);
             console.error('Response text:', responseText);
             Swal.fire('هەڵە!', 'هەڵە لە وەرگرتنی وەڵام لە سێرڤەر', 'error');
-            submitting = false;
             return;
         }
         
@@ -150,6 +169,12 @@ document.getElementById('addDebtForm').onsubmit = async function(e) {
     } catch (err) {
         console.error('Network error:', err);
         Swal.fire('هەڵە!', 'هەڵەیەک ڕویدا: ' + err.message, 'error');
+    } finally {
+        // Reset submitting flag and restore submit button
+        submitting = false;
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+        }
     }
-    submitting = false;
 };
