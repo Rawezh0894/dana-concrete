@@ -69,31 +69,41 @@ try {
     $companiesWithDebtQuery = "
         SELECT COUNT(DISTINCT c.id) as count 
         FROM company c
-        LEFT JOIN purchases p ON c.id = p.company_id AND p.payment_type = 'قەرز'
-        WHERE (c.opening_debt_usd > 0 OR c.opening_debt_iqd > 0 OR 
-               COALESCE(p.remaining_usd, 0) > 0 OR COALESCE(p.remaining_iqd, 0) > 0)
+        WHERE c.opening_debt_usd > 0 OR c.opening_debt_iqd > 0
+        UNION
+        SELECT COUNT(DISTINCT p.company_id) as count
+        FROM purchases p
+        WHERE p.payment_type = 'قەرز' AND (p.remaining_usd > 0 OR p.remaining_iqd > 0)
     ";
     $companiesWithDebtStmt = $pdo->query($companiesWithDebtQuery);
     $companiesWithDebt = $companiesWithDebtStmt->fetchColumn();
 
     // Get total debt (opening_debt + remaining from purchases converted to USD)
-    $totalDebtQuery = "
+    // Fixed: Use separate queries to avoid duplicate counting
+    $openingDebtQuery = "
         SELECT 
-            SUM(c.opening_debt_usd) as total_opening_debt_usd,
-            SUM(c.opening_debt_iqd) as total_opening_debt_iqd,
-            COALESCE(SUM(p.remaining_usd), 0) as total_remaining_usd,
-            COALESCE(SUM(p.remaining_iqd), 0) as total_remaining_iqd
-        FROM company c
-        LEFT JOIN purchases p ON c.id = p.company_id AND p.payment_type = 'قەرز'
+            SUM(opening_debt_usd) as total_opening_debt_usd,
+            SUM(opening_debt_iqd) as total_opening_debt_iqd
+        FROM company
     ";
-    $totalDebtStmt = $pdo->query($totalDebtQuery);
-    $totalDebtData = $totalDebtStmt->fetch(PDO::FETCH_ASSOC);
+    $openingDebtStmt = $pdo->query($openingDebtQuery);
+    $openingDebtData = $openingDebtStmt->fetch(PDO::FETCH_ASSOC);
+    
+    $remainingQuery = "
+        SELECT 
+            COALESCE(SUM(remaining_usd), 0) as total_remaining_usd,
+            COALESCE(SUM(remaining_iqd), 0) as total_remaining_iqd
+        FROM purchases 
+        WHERE payment_type = 'قەرز'
+    ";
+    $remainingStmt = $pdo->query($remainingQuery);
+    $remainingData = $remainingStmt->fetch(PDO::FETCH_ASSOC);
 
     // Calculate total debt in USD
-    $totalDebtUSD = floatval($totalDebtData['total_opening_debt_usd'] ?? 0) + 
-                   floatval($totalDebtData['total_remaining_usd'] ?? 0) +
-                   (floatval($totalDebtData['total_opening_debt_iqd'] ?? 0) / ($usdRate / 100)) +
-                   (floatval($totalDebtData['total_remaining_iqd'] ?? 0) / ($usdRate / 100));
+    $totalDebtUSD = floatval($openingDebtData['total_opening_debt_usd'] ?? 0) + 
+                   floatval($remainingData['total_remaining_usd'] ?? 0) +
+                   (floatval($openingDebtData['total_opening_debt_iqd'] ?? 0) / ($usdRate / 100)) +
+                   (floatval($remainingData['total_remaining_iqd'] ?? 0) / ($usdRate / 100));
 
     error_log('Company summary stats calculated: Total Companies=' . $totalCompanies . ', Companies with Debt=' . $companiesWithDebt . ', Total Debt USD=' . $totalDebtUSD);
 
