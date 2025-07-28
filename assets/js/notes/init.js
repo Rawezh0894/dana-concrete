@@ -6,57 +6,61 @@
 
 // Ensure Select2 is destroyed for specific dropdowns when page loads
 document.addEventListener('DOMContentLoaded', function() {
-    // Destroy Select2 for formula, mixer, and pump dropdowns in add modal
-    if ($('#formula_id').length > 0) {
-        try { $('#formula_id').select2('destroy'); } catch(e) {}
-    }
-    if ($('#mixer_car_id').length > 0) {
-        try { $('#mixer_car_id').select2('destroy'); } catch(e) {}
-    }
-    if ($('#mixer_driver_id').length > 0) {
-        try { $('#mixer_driver_id').select2('destroy'); } catch(e) {}
-    }
-    if ($('#pump_car_id').length > 0) {
-        try { $('#pump_car_id').select2('destroy'); } catch(e) {}
-    }
-    if ($('#pump_driver_id').length > 0) {
-        try { $('#pump_driver_id').select2('destroy'); } catch(e) {}
+    // Helper function to safely destroy Select2
+    function safeDestroySelect2(selector) {
+        try {
+            const element = $(selector);
+            if (element.length > 0 && element.hasClass('select2-hidden-accessible')) {
+                element.select2('destroy');
+            }
+        } catch(e) {
+            // Silently ignore errors
+        }
     }
     
+    // Destroy Select2 for formula, mixer, and pump dropdowns in add modal
+    safeDestroySelect2('#formula_id');
+    safeDestroySelect2('#mixer_car_id');
+    safeDestroySelect2('#mixer_driver_id');
+    safeDestroySelect2('#pump_car_id');
+    safeDestroySelect2('#pump_driver_id');
+    
     // Destroy Select2 for formula, mixer, and pump dropdowns in edit modal
-    if ($('#edit_formula_id').length > 0) {
-        try { $('#edit_formula_id').select2('destroy'); } catch(e) {}
-    }
-    if ($('#edit_mixer_car_id').length > 0) {
-        try { $('#edit_mixer_car_id').select2('destroy'); } catch(e) {}
-    }
-    if ($('#edit_mixer_driver_id').length > 0) {
-        try { $('#edit_mixer_driver_id').select2('destroy'); } catch(e) {}
-    }
-    if ($('#edit_pump_car_id').length > 0) {
-        try { $('#edit_pump_car_id').select2('destroy'); } catch(e) {}
-    }
-    if ($('#edit_pump_driver_id').length > 0) {
-        try { $('#edit_pump_driver_id').select2('destroy'); } catch(e) {}
-    }
+    safeDestroySelect2('#edit_formula_id');
+    safeDestroySelect2('#edit_mixer_car_id');
+    safeDestroySelect2('#edit_mixer_driver_id');
+    safeDestroySelect2('#edit_pump_car_id');
+    safeDestroySelect2('#edit_pump_driver_id');
 });
 
 // Prevent Select2 from being initialized on specific dropdowns when modals are shown
 $(document).on('shown.bs.modal', function(e) {
+    // Helper function to safely destroy Select2
+    function safeDestroySelect2(selector) {
+        try {
+            const element = $(selector);
+            if (element.length > 0 && element.hasClass('select2-hidden-accessible')) {
+                element.select2('destroy');
+            }
+        } catch(e) {
+            // Silently ignore errors
+        }
+    }
+    
     if (e.target.id === 'addNoteModal') {
         // Destroy Select2 for formula, mixer, and pump dropdowns in add modal
-        try { $('#formula_id').select2('destroy'); } catch(e) {}
-        try { $('#mixer_car_id').select2('destroy'); } catch(e) {}
-        try { $('#mixer_driver_id').select2('destroy'); } catch(e) {}
-        try { $('#pump_car_id').select2('destroy'); } catch(e) {}
-        try { $('#pump_driver_id').select2('destroy'); } catch(e) {}
+        safeDestroySelect2('#formula_id');
+        safeDestroySelect2('#mixer_car_id');
+        safeDestroySelect2('#mixer_driver_id');
+        safeDestroySelect2('#pump_car_id');
+        safeDestroySelect2('#pump_driver_id');
     }
     if (e.target.id === 'editNoteModal') {
         // Destroy Select2 for formula, mixer, and pump dropdowns in edit modal
-        try { $('#edit_formula_id').select2('destroy'); } catch(e) {}
-        try { $('#edit_mixer_car_id').select2('destroy'); } catch(e) {}
-        try { $('#edit_mixer_driver_id').select2('destroy'); } catch(e) {}
-        try { $('#edit_pump_car_id').select2('destroy'); } catch(e) {}
-        try { $('#edit_pump_driver_id').select2('destroy'); } catch(e) {}
+        safeDestroySelect2('#edit_formula_id');
+        safeDestroySelect2('#edit_mixer_car_id');
+        safeDestroySelect2('#edit_mixer_driver_id');
+        safeDestroySelect2('#edit_pump_car_id');
+        safeDestroySelect2('#edit_pump_driver_id');
     }
 }); 

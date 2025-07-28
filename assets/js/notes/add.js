@@ -15,16 +15,29 @@ document.addEventListener('DOMContentLoaded', function() {
     if ($('#addNoteModal').length > 0) {
         enableSelect2('#customer_id', '#addNoteModal');
         
+        // Helper function to safely destroy Select2
+        function safeDestroySelect2(selector) {
+            try {
+                const element = $(selector);
+                if (element.length > 0 && element.hasClass('select2-hidden-accessible')) {
+                    element.select2('destroy');
+                }
+            } catch(e) {
+                // Silently ignore errors
+            }
+        }
+        
         // Destroy any existing Select2 instances on other dropdowns
-        $('#formula_id').select2('destroy');
-        $('#mixer_car_id').select2('destroy');
-        $('#mixer_driver_id').select2('destroy');
-        $('#pump_car_id').select2('destroy');
-        $('#pump_driver_id').select2('destroy');
+        safeDestroySelect2('#formula_id');
+        safeDestroySelect2('#mixer_car_id');
+        safeDestroySelect2('#mixer_driver_id');
+        safeDestroySelect2('#pump_car_id');
+        safeDestroySelect2('#pump_driver_id');
     }
 
     addNoteForm.addEventListener('submit', async function(e) {
         e.preventDefault();
+        console.log('Form submission started');
         
         // Prevent multiple submissions
         if (isSubmitting) {
@@ -37,8 +50,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Validate required fields
         const requiredFields = ['date', 'time', 'customer_id', 'location', 'meter_amount', 'formula_id'];
         for (let field of requiredFields) {
-            if (!formData.get(field)) {
-                showAlert('error', 'تکایە هەموو خانە پێویستەکان پڕبکەرەوە');
+            const value = formData.get(field);
+            console.log(`Field ${field}:`, value);
+            if (!value) {
+                showAlert('error', `تکایە خانەی ${field} پڕبکەرەوە`);
                 return;
             }
         }
@@ -58,12 +73,25 @@ document.addEventListener('DOMContentLoaded', function() {
         submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>چاوەڕوان بە...';
 
         try {
+            console.log('Submitting form data:', Object.fromEntries(formData));
+            
             const response = await fetch('../process/notes/add.php', {
                 method: 'POST',
                 body: formData
             });
 
-            const result = await response.json();
+            console.log('Response status:', response.status);
+            const responseText = await response.text();
+            console.log('Response text:', responseText);
+            
+            let result;
+            try {
+                result = JSON.parse(responseText);
+            } catch (parseError) {
+                console.error('JSON parse error:', parseError);
+                showAlert('error', 'هەڵەیەک لە وەڵامەکە هەیە');
+                return;
+            }
 
             if (result.success) {
                 showAlert('success', result.message);

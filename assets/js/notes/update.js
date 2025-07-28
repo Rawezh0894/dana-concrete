@@ -122,12 +122,24 @@ document.addEventListener('DOMContentLoaded', function() {
     if ($('#editNoteModal').length > 0) {
         enableSelect2('#edit_customer_id', '#editNoteModal');
         
+        // Helper function to safely destroy Select2
+        function safeDestroySelect2(selector) {
+            try {
+                const element = $(selector);
+                if (element.length > 0 && element.hasClass('select2-hidden-accessible')) {
+                    element.select2('destroy');
+                }
+            } catch(e) {
+                // Silently ignore errors
+            }
+        }
+        
         // Destroy any existing Select2 instances on other dropdowns
-        $('#edit_formula_id').select2('destroy');
-        $('#edit_mixer_car_id').select2('destroy');
-        $('#edit_mixer_driver_id').select2('destroy');
-        $('#edit_pump_car_id').select2('destroy');
-        $('#edit_pump_driver_id').select2('destroy');
+        safeDestroySelect2('#edit_formula_id');
+        safeDestroySelect2('#edit_mixer_car_id');
+        safeDestroySelect2('#edit_mixer_driver_id');
+        safeDestroySelect2('#edit_pump_car_id');
+        safeDestroySelect2('#edit_pump_driver_id');
     }
 
     editNoteForm.addEventListener('submit', async function(e) {
