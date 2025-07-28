@@ -32,85 +32,6 @@ require_once '../config/db_conected.php';
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <style>
-        .table-pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 5px;
-            margin-top: 20px;
-        }
-        
-        .table-pagination button {
-            min-width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 6px;
-            transition: all 0.2s ease;
-        }
-        
-        .table-pagination button:hover:not(:disabled) {
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .table-pagination button.active {
-            transform: scale(1.05);
-        }
-        
-        .table-pagination span {
-            color: #6c757d;
-            font-weight: 500;
-        }
-        
-        .table-responsive {
-            overflow-x: auto;
-        }
-        
-        #notificationsTable {
-            min-width: 800px;
-        }
-        
-        .description-col {
-            max-width: 300px;
-            word-wrap: break-word;
-        }
-        
-        /* Responsive pagination */
-        @media (max-width: 768px) {
-            .table-pagination {
-                gap: 3px;
-            }
-            
-            .table-pagination button {
-                min-width: 35px;
-                height: 35px;
-                font-size: 0.875rem;
-            }
-            
-            #goToPageContainer {
-                flex-direction: column;
-                align-items: flex-start !important;
-            }
-            
-            #goToPageContainer label {
-                margin-bottom: 5px;
-            }
-        }
-        
-        /* Smooth transitions */
-        .table-pagination button {
-            transition: all 0.2s ease;
-        }
-        
-        .table-pagination button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-    </style>
 </head>
 <body dir="rtl">
 <?php include '../includes/navbar.php'; ?>
@@ -154,11 +75,6 @@ require_once '../config/db_conected.php';
         <div class="col-md-1 mb-2 d-flex align-items-center">
             <span id="notificationsTotal" class="text-secondary"></span>
         </div>
-        <div class="col-md-2 mb-2 d-flex align-items-center" id="goToPageContainer" style="display: none;">
-            <label class="me-2">بڕۆ بۆ پەڕە:</label>
-            <input type="number" id="goToPageInput" class="form-control form-control-sm" min="1" style="width: 60px;">
-            <button id="goToPageBtn" class="btn btn-sm btn-outline-primary ms-2">بڕۆ</button>
-        </div>
     </div>
     <button class="btn btn-danger mb-2" id="deleteSelectedNotifications" disabled>سڕینەوەی هەڵبژێردراو</button>
     <div class="table-responsive">
@@ -182,8 +98,6 @@ require_once '../config/db_conected.php';
 </div>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="../assets/js/notifications/select_notifications.js"></script>
-<script src="../assets/js/nav/nav.js"></script>
-<script src="../assets/js/nav/sidebar.js"></script>
 
 </body>
 </html> 
