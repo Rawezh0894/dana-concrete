@@ -839,3 +839,163 @@
     color: white;
     box-shadow: 0 2px 4px rgba(52, 152, 219, 0.3);
 }
+
+/* Select2 Dropdown Fixes for Add Note Modal on Mobile */
+#addNoteModal .select2-container {
+    width: 100% !important;
+}
+
+#addNoteModal .select2-dropdown {
+    z-index: 9999 !important;
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 90vw !important;
+    max-width: 400px !important;
+    max-height: 60vh !important;
+    overflow-y: auto !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+#addNoteModal .select2-results {
+    max-height: 50vh !important;
+    overflow-y: auto !important;
+}
+
+#addNoteModal .select2-results__option {
+    padding: 12px 16px !important;
+    font-size: 16px !important;
+    border-bottom: 1px solid #eee !important;
+}
+
+#addNoteModal .select2-results__option:last-child {
+    border-bottom: none !important;
+}
+
+#addNoteModal .select2-results__option--highlighted {
+    background-color: #3498db !important;
+    color: white !important;
+}
+
+#addNoteModal .select2-search__field {
+    font-size: 16px !important;
+    padding: 12px !important;
+    border: 1px solid #ddd !important;
+    border-radius: 4px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Ensure modal backdrop doesn't interfere */
+#addNoteModal .modal-backdrop {
+    z-index: 9998 !important;
+}
+
+#addNoteModal .modal {
+    z-index: 9999 !important;
+}
+
+/* Mobile specific adjustments */
+@media (max-width: 768px) {
+    #addNoteModal .select2-dropdown {
+        width: 95vw !important;
+        max-width: none !important;
+        max-height: 70vh !important;
+    }
+    
+    #addNoteModal .select2-results {
+        max-height: 60vh !important;
+    }
+    
+    #addNoteModal .select2-results__option {
+        padding: 16px 20px !important;
+        font-size: 18px !important;
+    }
+    
+    #addNoteModal .select2-search__field {
+        font-size: 18px !important;
+        padding: 16px !important;
+    }
+}
+
+/* Select2 Dropdown Fixes for Edit Note Modal on Mobile */
+#editNoteModal .select2-container {
+    width: 100% !important;
+}
+
+#editNoteModal .select2-dropdown {
+    z-index: 9999 !important;
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 90vw !important;
+    max-width: 400px !important;
+    max-height: 60vh !important;
+    overflow-y: auto !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+#editNoteModal .select2-results {
+    max-height: 50vh !important;
+    overflow-y: auto !important;
+}
+
+#editNoteModal .select2-results__option {
+    padding: 12px 16px !important;
+    font-size: 16px !important;
+    border-bottom: 1px solid #eee !important;
+}
+
+#editNoteModal .select2-results__option:last-child {
+    border-bottom: none !important;
+}
+
+#editNoteModal .select2-results__option--highlighted {
+    background-color: #3498db !important;
+    color: white !important;
+}
+
+#editNoteModal .select2-search__field {
+    font-size: 16px !important;
+    padding: 12px !important;
+    border: 1px solid #ddd !important;
+    border-radius: 4px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Ensure edit modal backdrop doesn't interfere */
+#editNoteModal .modal-backdrop {
+    z-index: 9998 !important;
+}
+
+#editNoteModal .modal {
+    z-index: 9999 !important;
+}
+
+/* Mobile specific adjustments for edit modal */
+@media (max-width: 768px) {
+    #editNoteModal .select2-dropdown {
+        width: 95vw !important;
+        max-width: none !important;
+        max-height: 70vh !important;
+    }
+    
+    #editNoteModal .select2-results {
+        max-height: 60vh !important;
+    }
+    
+    #editNoteModal .select2-results__option {
+        padding: 16px 20px !important;
+        font-size: 18px !important;
+    }
+    
+    #editNoteModal .select2-search__field {
+        font-size: 18px !important;
+        padding: 16px !important;
+    }
+}
