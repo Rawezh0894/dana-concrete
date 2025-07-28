@@ -121,6 +121,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize Select2 for customer dropdown only in the edit modal
     if ($('#editNoteModal').length > 0) {
         enableSelect2('#edit_customer_id', '#editNoteModal');
+        
+        // Destroy any existing Select2 instances on other dropdowns
+        $('#edit_formula_id').select2('destroy');
+        $('#edit_mixer_car_id').select2('destroy');
+        $('#edit_mixer_driver_id').select2('destroy');
+        $('#edit_pump_car_id').select2('destroy');
+        $('#edit_pump_driver_id').select2('destroy');
     }
 
     editNoteForm.addEventListener('submit', async function(e) {
