@@ -162,7 +162,7 @@ function createNoteCard(note) {
                             <i class='fa fa-trash'></i> سڕینەوە
                         </button>` : ''
                     }
-                    <button class='btn-convert convert-to-receipt' data-id='${note.id}' title='گۆڕین بۆ پسووڵە'>
+                    <button class='btn-convert convert-to-receipt ${!isRead ? 'disabled' : ''}' data-id='${note.id}' title='${isRead ? 'گۆڕین بۆ پسووڵە' : 'تێبینیەکە پێویستە خوێندراوەتەوە پێش گۆڕینی بۆ پسووڵە'}'>
                         <i class='fa fa-file-invoice'></i> پسووڵە
                     </button>
                     ${!isRead && window.userPermissions && window.userPermissions.canMarkRead ? 
@@ -366,7 +366,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add event listeners for convert to receipt buttons
     document.addEventListener('click', function(e) {
         if (e.target.closest('.convert-to-receipt')) {
-            const noteId = e.target.closest('.convert-to-receipt').getAttribute('data-id');
+            const button = e.target.closest('.convert-to-receipt');
+            
+            // Check if button is disabled
+            if (button.classList.contains('disabled')) {
+                return; // Prevent action if disabled
+            }
+            
+            const noteId = button.getAttribute('data-id');
             convertToReceipt(noteId);
         }
     });
@@ -379,6 +386,12 @@ function convertToReceipt(noteId) {
     const note = allNotes.find(n => n.id == noteId);
     if (!note) {
         showAlert('error', 'تێبینیەکە نەدۆزرایەوە');
+        return;
+    }
+    
+    // Check if note is read before allowing conversion
+    if (note.is_read != 1) {
+        showAlert('warning', 'تێبینیەکە پێویستە خوێندراوەتەوە پێش گۆڕینی بۆ پسووڵە');
         return;
     }
     
