@@ -62,15 +62,12 @@ try {
     // Get customers with debt count (opening debt + remaining from sales)
     $customersWithDebt = 0;
     try {
-        // Fixed: Use separate queries to avoid duplicate counting
         $customersWithDebtQuery = "
             SELECT COUNT(DISTINCT c.id) as count 
             FROM customers c
-            WHERE c.opening_debt_usd > 0 OR c.opening_debt_iqd > 0
-            UNION
-            SELECT COUNT(DISTINCT s.customer_id) as count
-            FROM sales s
-            WHERE s.payment_type = 'قەرز' AND s.remaining_amount > 0
+            LEFT JOIN sales s ON c.id = s.customer_id AND s.payment_type = 'قەرز'
+            WHERE (c.opening_debt_usd > 0 OR c.opening_debt_iqd > 0 OR 
+                   COALESCE(s.remaining_amount, 0) > 0)
         ";
         $customersWithDebtStmt = $pdo->query($customersWithDebtQuery);
         $customersWithDebt = $customersWithDebtStmt->fetchColumn();
@@ -81,28 +78,21 @@ try {
     // Get total debt (opening_debt + remaining from sales converted to USD)
     $totalDebtUSD = 0;
     try {
-        // Fixed: Use separate queries to avoid duplicate counting
-        $openingDebtQuery = "
+        $totalDebtQuery = "
             SELECT 
-                SUM(opening_debt_usd) as total_opening_debt_usd,
-                SUM(opening_debt_iqd) as total_opening_debt_iqd
-            FROM customers
+                SUM(c.opening_debt_usd) as total_opening_debt_usd,
+                SUM(c.opening_debt_iqd) as total_opening_debt_iqd,
+                COALESCE(SUM(s.remaining_amount), 0) as total_remaining_amount
+            FROM customers c
+            LEFT JOIN sales s ON c.id = s.customer_id AND s.payment_type = 'قەرز'
         ";
-        $openingDebtStmt = $pdo->query($openingDebtQuery);
-        $openingDebtData = $openingDebtStmt->fetch(PDO::FETCH_ASSOC);
-        
-        $remainingQuery = "
-            SELECT COALESCE(SUM(remaining_amount), 0) as total_remaining_amount
-            FROM sales 
-            WHERE payment_type = 'قەرز'
-        ";
-        $remainingStmt = $pdo->query($remainingQuery);
-        $remainingData = $remainingStmt->fetch(PDO::FETCH_ASSOC);
+        $totalDebtStmt = $pdo->query($totalDebtQuery);
+        $totalDebtData = $totalDebtStmt->fetch(PDO::FETCH_ASSOC);
 
         // Calculate total debt in USD
-        $totalDebtUSD = floatval($openingDebtData['total_opening_debt_usd'] ?? 0) + 
-                       floatval($remainingData['total_remaining_amount'] ?? 0) +
-                       (floatval($openingDebtData['total_opening_debt_iqd'] ?? 0) / ($usdRate / 100));
+        $totalDebtUSD = floatval($totalDebtData['total_opening_debt_usd'] ?? 0) + 
+                       floatval($totalDebtData['total_remaining_amount'] ?? 0) +
+                       (floatval($totalDebtData['total_opening_debt_iqd'] ?? 0) / ($usdRate / 100));
     } catch (Exception $e) {
         error_log('Total debt query failed: ' . $e->getMessage());
     }

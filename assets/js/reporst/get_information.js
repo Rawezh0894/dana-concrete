@@ -137,24 +137,6 @@ function fetchAndRenderReportData() {
                     }
                 },
                 {
-                    key: 'remaining_sales',
-                    label: 'کۆی پارەی ماوەی فرۆشتن',
-                    icon: 'fa-wallet',
-                    color: 'var(--sales-accent)',
-                    cardClass: 'sales-card',
-                    html: function() {
-                        return `
-                            <div class=\"d-flex justify-content-center align-items-center gap-2\">
-                                <div>
-                                    
-                                    <div class=\"card-value\">${formatCurrency(data.remaining_sales.usd, 'USD')}</div>
-                                </div>
-                           
-                            </div>
-                        `;
-                    }
-                },
-                {
                     key: 'other_expenses',
                     label: 'خەرجی تر',
                     icon: 'fa-wallet',

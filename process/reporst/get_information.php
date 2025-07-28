@@ -14,55 +14,35 @@ try {
     } catch (Exception $e) {}
 
     // Customers - Calculate debt using new method (opening_debt + remaining from sales)
-    // Fix: Separate queries to avoid duplicate counting
-    $customer_opening_debt_query = "
+    $customer_debt_query = "
         SELECT 
-            SUM(opening_debt_usd) as opening_debt_usd,
-            SUM(opening_debt_iqd) as opening_debt_iqd
-        FROM customers
+            SUM(c.opening_debt_usd) as opening_debt_usd,
+            SUM(c.opening_debt_iqd) as opening_debt_iqd,
+            COALESCE(SUM(s.remaining_amount), 0) as remaining_from_sales
+        FROM customers c
+        LEFT JOIN sales s ON c.id = s.customer_id AND s.payment_type = 'قەرز'
     ";
-    $stmt = $pdo->query($customer_opening_debt_query);
-    $opening_debt_row = $stmt->fetch();
-    $customer_opening_debt_usd = floatval($opening_debt_row['opening_debt_usd'] ?? 0);
-    $customer_opening_debt_iqd = floatval($opening_debt_row['opening_debt_iqd'] ?? 0);
-    
-    $customer_remaining_query = "
-        SELECT COALESCE(SUM(remaining_amount), 0) as remaining_from_sales
-        FROM sales 
-        WHERE payment_type = 'قەرز'
-    ";
-    $stmt = $pdo->query($customer_remaining_query);
-    $remaining_row = $stmt->fetch();
-    $customer_remaining_from_sales = floatval($remaining_row['remaining_from_sales'] ?? 0);
-    
-    $customer_debt_usd = $customer_opening_debt_usd + $customer_remaining_from_sales;
-    $customer_debt_iqd_converted = ($usd_iqd_rate > 0) ? ($customer_opening_debt_iqd / ($usd_iqd_rate / 100)) : 0;
+    $stmt = $pdo->query($customer_debt_query);
+    $row = $stmt->fetch();
+    $customer_debt_usd = floatval($row['opening_debt_usd'] ?? 0) + floatval($row['remaining_from_sales'] ?? 0);
+    $customer_debt_iqd = floatval($row['opening_debt_iqd'] ?? 0);
+    $customer_debt_iqd_converted = ($usd_iqd_rate > 0) ? ($customer_debt_iqd / ($usd_iqd_rate / 100)) : 0;
     $customer_debt_total_usd = $customer_debt_usd + $customer_debt_iqd_converted;
 
     // Companies - Calculate debt using new method (opening_debt + remaining from purchases)
-    // Fix: Separate queries to avoid duplicate counting
-    $company_opening_debt_query = "
+    $company_debt_query = "
         SELECT 
-            SUM(opening_debt_usd) as opening_debt_usd,
-            SUM(opening_debt_iqd) as opening_debt_iqd
-        FROM company
+            SUM(c.opening_debt_usd) as opening_debt_usd,
+            SUM(c.opening_debt_iqd) as opening_debt_iqd,
+            COALESCE(SUM(p.remaining_usd), 0) as remaining_from_purchases
+        FROM company c
+        LEFT JOIN purchases p ON c.id = p.company_id AND p.payment_type = 'قەرز'
     ";
-    $stmt = $pdo->query($company_opening_debt_query);
-    $company_opening_debt_row = $stmt->fetch();
-    $company_opening_debt_usd = floatval($company_opening_debt_row['opening_debt_usd'] ?? 0);
-    $company_opening_debt_iqd = floatval($company_opening_debt_row['opening_debt_iqd'] ?? 0);
-    
-    $company_remaining_query = "
-        SELECT COALESCE(SUM(remaining_usd), 0) as remaining_from_purchases
-        FROM purchases 
-        WHERE payment_type = 'قەرز'
-    ";
-    $stmt = $pdo->query($company_remaining_query);
-    $company_remaining_row = $stmt->fetch();
-    $company_remaining_from_purchases = floatval($company_remaining_row['remaining_from_purchases'] ?? 0);
-    
-    $company_debt_usd = $company_opening_debt_usd + $company_remaining_from_purchases;
-    $company_debt_iqd_converted = ($usd_iqd_rate > 0) ? ($company_opening_debt_iqd / ($usd_iqd_rate / 100)) : 0;
+    $stmt = $pdo->query($company_debt_query);
+    $row = $stmt->fetch();
+    $company_debt_usd = floatval($row['opening_debt_usd'] ?? 0) + floatval($row['remaining_from_purchases'] ?? 0);
+    $company_debt_iqd = floatval($row['opening_debt_iqd'] ?? 0);
+    $company_debt_iqd_converted = ($usd_iqd_rate > 0) ? ($company_debt_iqd / ($usd_iqd_rate / 100)) : 0;
     $company_debt_total_usd = $company_debt_usd + $company_debt_iqd_converted;
 
     // Other expense persons
@@ -273,53 +253,35 @@ try {
         'persons' => 0
     ];
     
-    // Customers debt (opening_debt + remaining from sales) - Fixed to avoid duplicates
-    $customer_opening_debt_chart_query = "
+    // Customers debt (opening_debt + remaining from sales)
+    $stmt = $pdo->query("
         SELECT 
-            SUM(opening_debt_usd) as opening_debt_usd,
-            SUM(opening_debt_iqd) as opening_debt_iqd
-        FROM customers
-    ";
-    $stmt = $pdo->query($customer_opening_debt_chart_query);
-    $customer_chart_row = $stmt->fetch();
-    $customer_chart_opening_debt = floatval($customer_chart_row['opening_debt_usd'] ?? 0);
-    $customer_chart_iqd_debt = floatval($customer_chart_row['opening_debt_iqd'] ?? 0);
+            SUM(c.opening_debt_usd) as opening_debt_usd,
+            SUM(c.opening_debt_iqd) as opening_debt_iqd,
+            COALESCE(SUM(s.remaining_amount), 0) as remaining_from_sales
+        FROM customers c
+        LEFT JOIN sales s ON c.id = s.customer_id AND s.payment_type = 'قەرز'
+    ");
+    $row = $stmt->fetch();
+    $customer_total_debt = floatval($row['opening_debt_usd'] ?? 0) + floatval($row['remaining_from_sales'] ?? 0);
+    $customer_iqd_debt = floatval($row['opening_debt_iqd'] ?? 0);
+    $customer_iqd_converted = ($usd_iqd_rate > 0) ? ($customer_iqd_debt / ($usd_iqd_rate / 100)) : 0;
+    $debts_by_type['customers'] = $customer_total_debt + $customer_iqd_converted;
     
-    $customer_chart_remaining_query = "
-        SELECT COALESCE(SUM(remaining_amount), 0) as remaining_from_sales
-        FROM sales 
-        WHERE payment_type = 'قەرز'
-    ";
-    $stmt = $pdo->query($customer_chart_remaining_query);
-    $customer_chart_remaining_row = $stmt->fetch();
-    $customer_chart_remaining = floatval($customer_chart_remaining_row['remaining_from_sales'] ?? 0);
-    
-    $customer_chart_iqd_converted = ($usd_iqd_rate > 0) ? ($customer_chart_iqd_debt / ($usd_iqd_rate / 100)) : 0;
-    $debts_by_type['customers'] = $customer_chart_opening_debt + $customer_chart_remaining + $customer_chart_iqd_converted;
-    
-    // Companies debt (opening_debt + remaining from purchases) - Fixed to avoid duplicates
-    $company_opening_debt_chart_query = "
+    // Companies debt (opening_debt + remaining from purchases)
+    $stmt = $pdo->query("
         SELECT 
-            SUM(opening_debt_usd) as opening_debt_usd,
-            SUM(opening_debt_iqd) as opening_debt_iqd
-        FROM company
-    ";
-    $stmt = $pdo->query($company_opening_debt_chart_query);
-    $company_chart_row = $stmt->fetch();
-    $company_chart_opening_debt = floatval($company_chart_row['opening_debt_usd'] ?? 0);
-    $company_chart_iqd_debt = floatval($company_chart_row['opening_debt_iqd'] ?? 0);
-    
-    $company_chart_remaining_query = "
-        SELECT COALESCE(SUM(remaining_usd), 0) as remaining_from_purchases
-        FROM purchases 
-        WHERE payment_type = 'قەرز'
-    ";
-    $stmt = $pdo->query($company_chart_remaining_query);
-    $company_chart_remaining_row = $stmt->fetch();
-    $company_chart_remaining = floatval($company_chart_remaining_row['remaining_from_purchases'] ?? 0);
-    
-    $company_chart_iqd_converted = ($usd_iqd_rate > 0) ? ($company_chart_iqd_debt / ($usd_iqd_rate / 100)) : 0;
-    $debts_by_type['companies'] = $company_chart_opening_debt + $company_chart_remaining + $company_chart_iqd_converted;
+            SUM(c.opening_debt_usd) as opening_debt_usd,
+            SUM(c.opening_debt_iqd) as opening_debt_iqd,
+            COALESCE(SUM(p.remaining_usd), 0) as remaining_from_purchases
+        FROM company c
+        LEFT JOIN purchases p ON c.id = p.company_id AND p.payment_type = 'قەرز'
+    ");
+    $row = $stmt->fetch();
+    $company_total_debt = floatval($row['opening_debt_usd'] ?? 0) + floatval($row['remaining_from_purchases'] ?? 0);
+    $company_iqd_debt = floatval($row['opening_debt_iqd'] ?? 0);
+    $company_iqd_converted = ($usd_iqd_rate > 0) ? ($company_iqd_debt / ($usd_iqd_rate / 100)) : 0;
+    $debts_by_type['companies'] = $company_total_debt + $company_iqd_converted;
     
     // Persons debt
     $stmt = $pdo->query('SELECT SUM(expense_usd) as usd FROM other_expense_persons');
