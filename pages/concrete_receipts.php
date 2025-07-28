@@ -77,7 +77,7 @@ $mixer_drivers = array_filter($employees, function ($emp) {
         <?php endif; ?>
         <?php if (hasPermission('view_summery_concrete_receipts')): ?>
           <a href="summery_concrete_receipts.php" class="btn" style="background: var(--seafoam-green); color:white; font-weight: bold;">
-            <i class="fas fa-chart-bar me-1"></i>پوختەی پسووڵەکان
+            <i class="fas fa-chart-bar me-1"></i>پوختە
           </a>
         <?php endif; ?>
         <?php if (hasPermission('add_customer')): ?>
