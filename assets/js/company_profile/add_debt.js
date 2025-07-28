@@ -30,7 +30,24 @@ function recalculateAmounts() {
 
 $('#debt_amount_usd, #debt_amount_iqd, #debt_dollar_rate').on('input', recalculateAmounts);
 
+async function fetchAndSetDollarRate(inputId) {
+    try {
+        const res = await fetch('../process/purchase_materilas/get_usd_rate.php');
+        const data = await res.json();
+        if (data.success && data.rate) {
+            document.getElementById(inputId).value = data.rate;
+        } else if (data.default_rate) {
+            document.getElementById(inputId).value = data.default_rate;
+        } else {
+            document.getElementById(inputId).value = 139250;
+        }
+    } catch (e) {
+        document.getElementById(inputId).value = 139250;
+    }
+}
+
 $('#addDebtModal').on('show.bs.modal', function() {
+    fetchAndSetDollarRate('debt_dollar_rate');
     fetchCompanyCurrencyType().then(() => {
         fetch(`../process/company_profile/select_debt.php?company_id=${COMPANY_ID}&total_remaining=1`)
             .then(res => res.json())
@@ -76,30 +93,63 @@ document.getElementById('addDebtForm').onsubmit = async function(e) {
     formData.append('company_id', COMPANY_ID);
     const amount_usd = parseFloat(form.amount_usd.value) || 0;
     const amount_iqd = parseFloat(form.amount_iqd.value) || 0;
+    
+    console.log('Form submission started');
+    console.log('Amount USD:', amount_usd);
+    console.log('Amount IQD:', amount_iqd);
+    console.log('Company ID:', COMPANY_ID);
+    
     if (amount_usd <= 0 && amount_iqd <= 0) {
         Swal.fire('هەڵە!', 'بە لایەنی کەم یەک بڕ پڕبکە (دۆلار یان دینار)', 'error');
         submitting = false;
         return;
     }
     try {
+        console.log('Sending request to add_debt.php');
         const res = await fetch('../process/company_profile/add_debt.php', {
             method: 'POST',
             body: formData
         });
-        const data = await res.json();
+        
+        console.log('Response status:', res.status);
+        const responseText = await res.text();
+        console.log('Response text:', responseText);
+        
+        let data;
+        try {
+            data = JSON.parse(responseText);
+        } catch (parseError) {
+            console.error('JSON parse error:', parseError);
+            console.error('Response text:', responseText);
+            Swal.fire('هەڵە!', 'هەڵە لە وەرگرتنی وەڵام لە سێرڤەر', 'error');
+            submitting = false;
+            return;
+        }
+        
+        console.log('Parsed response:', data);
+        
         if (data.success) {
             Swal.fire('سەرکەوتوو!', 'دانەوەی قەرز تۆمارکرا', 'success');
             form.reset();
             var modal = bootstrap.Modal.getInstance(document.getElementById('addDebtModal'));
             modal.hide();
+            
+            // Refresh all data without page reload
             if (typeof loadDebts === 'function') loadDebts();
             if (typeof loadPurchases === 'function') loadPurchases();
             if (typeof loadCompanyInfoCards === 'function') loadCompanyInfoCards();
+            
+            // Also refresh the debt table if it's currently visible
+            if ($('#debt').hasClass('active')) {
+                loadDebts();
+            }
         } else {
+            console.error('Server error:', data.msg);
             Swal.fire('هەڵە!', data.msg || 'هەڵەیەک ڕویدا', 'error');
         }
     } catch (err) {
-        Swal.fire('هەڵە!', 'هەڵەیەک ڕویدا', 'error');
+        console.error('Network error:', err);
+        Swal.fire('هەڵە!', 'هەڵەیەک ڕویدا: ' + err.message, 'error');
     }
     submitting = false;
 };

@@ -1,49 +1,99 @@
 // Handle edit button click for customers
-document.addEventListener('click', function(e) {
-    if (e.target.closest('.edit-customer-btn')) {
-        const btn = e.target.closest('.edit-customer-btn');
-        const id = btn.getAttribute('data-id');
-        fetch(`../process/customer/select_customer.php?id=${id}`)
-            .then(res => res.json())
-            .then(row => {
-                var modal = new bootstrap.Modal(document.getElementById('editCustomerModal'));
-                modal.show();
-                document.getElementById('editCustomerId').value = row.id;
-                document.getElementById('editCustomerName').value = row.name || '';
-                document.getElementById('editCustomerMobile1').value = row.mobile1 || '';
-                document.getElementById('editCustomerMobile2').value = row.mobile2 || '';
-                document.getElementById('editCustomerOpeningDebtUsd').value = row.opening_debt_usd || 0;
-                document.getElementById('editCustomerOpeningDebtIqd').value = row.opening_debt_iqd || 0;
-            });
-    }
+$(document).on('click', '.edit-customer-btn', function() {
+    const btn = $(this);
+    const id = btn.data('id');
+    
+    $.get(`../process/customer/get_customer.php?id=${id}`, function(response) {
+        if (response.success && response.data) {
+            const customer = response.data;
+            $('#editCustomerModal').modal('show');
+            $('#editCustomerId').val(customer.id);
+            $('#editCustomerName').val(customer.name || '');
+            $('#editCustomerMobile1').val(customer.mobile1 || '');
+            $('#editCustomerMobile2').val(customer.mobile2 || '');
+            
+            // Handle numeric values properly
+            const usdValue = parseFloat(customer.opening_debt_usd || 0);
+            const iqdValue = parseFloat(customer.opening_debt_iqd || 0);
+            
+            $('#editCustomerOpeningDebtUsd').val(usdValue > 0 ? usdValue : '');
+            $('#editCustomerOpeningDebtIqd').val(iqdValue > 0 ? iqdValue : '');
+            
+            // Enable/disable fields based on values
+            if (usdValue > 0) {
+                $('#editCustomerOpeningDebtIqd').prop('disabled', true);
+            } else if (iqdValue > 0) {
+                $('#editCustomerOpeningDebtUsd').prop('disabled', true);
+            } else {
+                $('#editCustomerOpeningDebtUsd, #editCustomerOpeningDebtIqd').prop('disabled', false);
+            }
+        } else {
+            console.error('Error loading customer data:', response.error);
+            swalAlert('هەڵە', 'هەڵەیەک هەیە لە وەرگرتنی داتای کڕیار', 'error');
+        }
+    }, 'json').fail(function() {
+        console.error('Error:', 'Network error');
+        swalAlert('هەڵە', 'هەڵەیەک هەیە لە پەیوەندیدا', 'error');
+    });
 });
 
+$(document).ready(function () {
 // Handle update submit
-const editCustomerForm = document.getElementById('editCustomerForm');
-if (editCustomerForm) {
-    editCustomerForm.addEventListener('submit', function(e) {
+    const editCustomerForm = $('#editCustomerForm');
+    if (editCustomerForm.length) {
+        editCustomerForm.on('submit', function (e) {
         e.preventDefault();
-        const formData = new FormData(editCustomerForm);
-        fetch('../process/customer/update_customer.php', {
-            method: 'POST',
-            body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                Swal.fire('نوێکرایەوە!', data.message || 'کڕیار نوێکرایەوە', 'success');
-                editCustomerForm.reset();
-                if (typeof loadCustomers === 'function') loadCustomers();
-                const modal = bootstrap.Modal.getInstance(document.getElementById('editCustomerModal'));
-                if (modal) modal.hide();
-            } else {
-                Swal.fire('هەڵە!', data.message || 'هەڵەیەک ڕووی دا', 'error');
-            }
-        })
-        .catch(() => {
-            Swal.fire('هەڵە!', 'هەڵەیەک ڕووی دا', 'error');
+            const formData = new FormData(this);
+            
+            $.ajax({
+                url: '../process/customer/update_customer.php',
+                method: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                dataType: 'json',
+                success: function(data) {
+                    const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('editCustomerModal'));
+                    if (data.success) {
+                        modal.hide();
+                        loadCustomers();
+                        // Refresh summary stats
+                        if (typeof loadSummaryStats === 'function') loadSummaryStats();
+                        swalAlert('سەرکەوتوو', 'زانیاری کڕیار نوێکرایەوە!', 'success');
+                    } else {
+                        swalAlert('هەڵە', data.message || 'هەڵەیەک هەیە', 'error');
+                    }
+                },
+                error: function() {
+                    swalAlert('هەڵە', 'هەڵەیەک هەیە لە پەیوەندیدا.', 'error');
+                }
+            });
         });
+    }
+    
+    // Handle currency type change for edit modal opening debt
+    const editOpeningDebtUsd = $('#editCustomerOpeningDebtUsd');
+    const editOpeningDebtIqd = $('#editCustomerOpeningDebtIqd');
+    
+    if (editOpeningDebtUsd.length && editOpeningDebtIqd.length) {
+        editOpeningDebtUsd.on('input', function() {
+            if ($(this).val() > 0) {
+                editOpeningDebtIqd.val('');
+                editOpeningDebtIqd.prop('disabled', true);
+            } else {
+                editOpeningDebtIqd.prop('disabled', false);
+            }
+        });
+        
+        editOpeningDebtIqd.on('input', function() {
+            if ($(this).val() > 0) {
+                editOpeningDebtUsd.val('');
+                editOpeningDebtUsd.prop('disabled', true);
+            } else {
+                editOpeningDebtUsd.prop('disabled', false);
+            }
+        });
+    }
     });
-}
 
 // Handle delete button click for customers

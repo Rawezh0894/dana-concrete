@@ -52,6 +52,38 @@ if (!hasPermission('view_customer')) {
             <?php endif; ?>
         </div>
     </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4" id="summary-cards">
+        <div class="col-md-4 mb-3">
+            <div class="card text-center shadow" style="background: linear-gradient(135deg, #00b894, #00cec9); color: white;">
+                <div class="card-body">
+                    <h5 class="card-title">کۆی قەرزی کڕیارەکان</h5>
+                    <span id="total_debt" style="font-size:2.5rem;font-weight:bold;">$0</span>
+                    <small class="text-light">دۆلار</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card text-center shadow" style="background: linear-gradient(135deg, #fdcb6e, #e17055); color: white;">
+                <div class="card-body">
+                    <h5 class="card-title">کۆی کڕیاران</h5>
+                    <span id="total_customers" style="font-size:2.5rem;font-weight:bold;">0</span>
+                    <small class="text-light">کڕیار</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card text-center shadow" style="background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: white;">
+                <div class="card-body">
+                    <h5 class="card-title">کڕیارانی قەرز</h5>
+                    <span id="customers_with_debt" style="font-size:2.5rem;font-weight:bold;">0</span>
+                    <small class="text-light">کڕیار</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="table-responsive">
         <table class="table table-bordered table-hover align-middle text-center" id="customerTable">
             <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
@@ -154,10 +186,12 @@ if (!hasPermission('view_customer')) {
     </div>
   </div>
 </div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="../assets/js/swalAlert.js"></script>
 <script src="../assets/js/comon/table-controler.js"></script>
+<script src="../assets/js/customer/summary_stats.js"></script>
 <script src="../assets/js/customer/add_customer.js"></script>
 <script src="../assets/js/customer/select_customer.js"></script>
 <script src="../assets/js/customer/update_customer.js"></script>

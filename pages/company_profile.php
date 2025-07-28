@@ -183,7 +183,7 @@ if ($company_id) {
                         </div>
                         <div class="mb-3">
                             <label for="debt_dollar_rate" class="form-label">نرخی دۆلار</label>
-                            <input type="number" class="form-control" id="debt_dollar_rate" name="dollar_rate" min="0" step="0.01" value="150000">
+                            <input type="number" class="form-control" id="debt_dollar_rate" name="dollar_rate" min="0" step="0.01">
                         </div>
                         <div class="mb-3">
                             <label for="debt_note" class="form-label">تێبینی</label>
@@ -240,7 +240,7 @@ if ($company_id) {
                         </div>
                         <div class="mb-3">
                             <label for="edit_debt_dollar_rate" class="form-label">نرخی دۆلار</label>
-                            <input type="number" class="form-control" id="edit_debt_dollar_rate" name="dollar_rate" min="0" step="0.01" value="150000">
+                            <input type="number" class="form-control" id="edit_debt_dollar_rate" name="dollar_rate" min="0" step="0.01">
                         </div>
                         <div class="mb-3">
                             <label for="edit_debt_note" class="form-label">تێبینی</label>

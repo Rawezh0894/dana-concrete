@@ -29,6 +29,10 @@ async function fetchCustomerOpeningDebt(customerId) {
     }
 }
 
+// Make functions globally available
+window.fetchCustomerDebt = fetchCustomerDebt;
+window.fetchCustomerOpeningDebt = fetchCustomerOpeningDebt;
+
 // Function to calculate and display remaining debt
 function calculateRemainingDebt() {
     const dolar_rate = parseFloat(document.getElementById('customer_debt_dolar_rate').value) || 0;
@@ -61,6 +65,9 @@ function calculateRemainingDebt() {
         }
     }
 }
+
+// Make function globally available
+window.calculateRemainingDebt = calculateRemainingDebt;
 
 // Add event listeners for real-time calculation
 document.addEventListener('DOMContentLoaded', function() {
@@ -138,7 +145,16 @@ document.getElementById('addCustomerDebtForm').addEventListener('submit', async 
             }, 100);
             const modal = bootstrap.Modal.getInstance(document.getElementById('addCustomerDebtModal'));
             if (modal) modal.hide();
-            if (typeof loadCustomerReturnDebts === 'function') loadCustomerReturnDebts(customer_id);
+            
+            // Automatically refresh all customer data
+            if (typeof refreshCustomerData === 'function') {
+                refreshCustomerData();
+            } else {
+                // Fallback to individual refresh functions
+                if (typeof loadCustomerReturnDebts === 'function') loadCustomerReturnDebts(customer_id);
+                if (typeof loadCustomerSales === 'function') loadCustomerSales(customer_id);
+                if (typeof loadCustomerSummaryCards === 'function') loadCustomerSummaryCards();
+            }
         } else {
             Swal.fire('هەڵە', data.msg || 'هەڵەیەک ڕووی دا', 'error');
         }

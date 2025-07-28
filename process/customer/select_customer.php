@@ -1,25 +1,27 @@
 <?php
+session_start();
 require_once '../../config/db_conected.php';
 require_once '../../config/permissions.php';
 
 if (!hasPermission('view_customer')) {
-    echo json_encode(['success' => false, 'message' => 'ڕێگەت پێنەدراوە!']);
+    http_response_code(403);
+    echo json_encode(['error' => 'Permission denied']);
     exit;
 }
 
-header('Content-Type: application/json');
-
-if (isset($_GET['id']) && is_numeric($_GET['id'])) {
-    $id = (int)$_GET['id'];
-    $sql = "SELECT * FROM customers WHERE id = ?";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([$id]);
-    $data = $stmt->fetch(PDO::FETCH_ASSOC);
-    echo json_encode($data);
+if (!isset($_SESSION['user_id'])) {
+    http_response_code(401);
+    echo json_encode(['error' => 'Unauthorized']);
     exit;
 }
 
-$sql = "SELECT id, name, mobile1, mobile2, debt_usd, debt_iqd, opening_debt_usd, opening_debt_iqd FROM customers ORDER BY id DESC";
-$stmt = $pdo->query($sql);
-$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-echo json_encode($data);
+try {
+    $sql = "SELECT id, name, mobile1, mobile2, opening_debt_usd, opening_debt_iqd FROM customers ORDER BY id DESC";
+    $stmt = $pdo->query($sql);
+    $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    echo json_encode(['success' => true, 'data' => $customers]);
+} catch (Exception $e) {
+    echo json_encode(['success' => false, 'error' => 'Database error: ' . $e->getMessage()]);
+}
+?>

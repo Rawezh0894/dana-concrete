@@ -29,9 +29,16 @@ $('#editDebtForm').on('submit', function(e) {
             Swal.fire('سەرکەوتوو!', 'دانەوەی قەرز نوێکرایەوە', 'success');
             var modal = bootstrap.Modal.getInstance(document.getElementById('editDebtModal'));
             modal.hide();
+            
+            // Refresh all data without page reload
             if (typeof loadDebts === 'function') loadDebts();
             if (typeof loadPurchases === 'function') loadPurchases();
-            if (typeof loadCompanyStats === 'function') loadCompanyStats();
+            if (typeof loadCompanyInfoCards === 'function') loadCompanyInfoCards();
+            
+            // Also refresh the debt table if it's currently visible
+            if ($('#debt').hasClass('active')) {
+                loadDebts();
+            }
         } else {
             Swal.fire('هەڵە!', res.msg || 'هەڵەیەک ڕویدا', 'error');
         }
@@ -50,4 +57,24 @@ document.addEventListener('click', function(e) {
         const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('editDebtModal'));
         modal.show();
     }
+});
+
+async function fetchAndSetDollarRate(inputId) {
+    try {
+        const res = await fetch('../process/purchase_materilas/get_usd_rate.php');
+        const data = await res.json();
+        if (data.success && data.rate) {
+            document.getElementById(inputId).value = data.rate;
+        } else if (data.default_rate) {
+            document.getElementById(inputId).value = data.default_rate;
+        } else {
+            document.getElementById(inputId).value = 139250;
+        }
+    } catch (e) {
+        document.getElementById(inputId).value = 139250;
+    }
+}
+
+$('#editDebtModal').on('show.bs.modal', function() {
+    fetchAndSetDollarRate('edit_debt_dollar_rate');
 });

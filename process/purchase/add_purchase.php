@@ -109,14 +109,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $date, $invoice_number, $driver, $location, $material_id, $amount_iqd, $kg, $price, $payment_type, $exchange_rate, $company_id, $type, $paid_usd, $paid_iqd, $remaining_usd, $remaining_iqd, $bin_id, $price_per_kg_iqd, $price_per_kg_usd
         ]);
         if ($ok) {
-            // Update company debt only if payment_type is 'قەرز'
+            // Update company debt
             if ($payment_type === 'قەرز') {
                 if ($type === 'دۆلار') {
-                    $updateDebt = $pdo->prepare('UPDATE company SET debt_usd = debt_usd + ? WHERE id = ?');
-                    $updateDebt->execute([$remaining_usd, $company_id]);
-                } elseif ($type === 'دینار') {
-                    $updateDebt = $pdo->prepare('UPDATE company SET debt_iqd = debt_iqd + ? WHERE id = ?');
-                    $updateDebt->execute([$remaining_iqd, $company_id]);
+                    // No need to update company debt_usd/debt_iqd anymore
+                    // The remaining amount is tracked in the purchases table
+                } else {
+                    // No need to update company debt_usd/debt_iqd anymore
+                    // The remaining amount is tracked in the purchases table
                 }
             }
             require_once __DIR__ . '/../../includes/notify.php';

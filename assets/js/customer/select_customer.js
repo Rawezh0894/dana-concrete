@@ -1,33 +1,39 @@
-async function loadCustomers() {
-    const res = await fetch('../process/customer/select_customer.php');
-    const data = await res.json();
-    const tableData = data.map((row, idx) => ({
-        '#': idx + 1,
-        name: row.name || '',
-        mobile1: row.mobile1 || '',
-        mobile2: row.mobile2 || '',
-        opening_debt_usd: row.opening_debt_usd || 0,
-        opening_debt_iqd: row.opening_debt_iqd || 0,
-        actions: `
-            <button class="btn btn-sm btn-primary edit-customer-btn" data-id="${row.id}"><i class="fa fa-edit"></i></button>
-            <button class="btn btn-sm btn-danger delete-customer-btn" data-id="${row.id}"><i class="fa fa-trash"></i></button>
-            <button class="btn btn-sm btn-info person-customer-btn" data-id="${row.id}"><i class="fa fa-user"></i></button>
-        `
-    }));
-    TableController.renderWithPagination(
-        '#customerTable',
-        tableData,
-        ['#', 'name', 'mobile1', 'mobile2', 'opening_debt_usd', 'opening_debt_iqd', 'actions']
-    );
-}
-document.addEventListener('DOMContentLoaded', () => {
-    loadCustomers();
-    // Delegate click for person-customer-btn
-    document.querySelector('#customerTable').addEventListener('click', function(e) {
-        if (e.target.closest('.person-customer-btn')) {
-            const btn = e.target.closest('.person-customer-btn');
-            const id = btn.getAttribute('data-id');
-            window.location.href = `customer_profile.php?id=${id}`;
+function loadCustomers() {
+    TableController.showLoading('#customerTable', ['#', 'name', 'mobile1', 'mobile2', 'opening_debt_usd', 'opening_debt_iqd', 'actions']);
+    
+    $.get('../process/customer/select_customer.php', function(response) {
+        if (response.success && response.data) {
+            const data = response.data.map((customer, index) => ({
+                '#': index + 1,
+                name: customer.name,
+                mobile1: customer.mobile1,
+                mobile2: customer.mobile2 || '-',
+                opening_debt_usd: Number(customer.opening_debt_usd || 0).toLocaleString('en-US') + ' $',
+                opening_debt_iqd: Number(customer.opening_debt_iqd || 0).toLocaleString('en-US') + ' د.ع',
+                actions: `
+                    <button class="btn btn-sm btn-primary edit-customer-btn" 
+                            data-id="${customer.id}">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger delete-customer-btn" data-id="${customer.id}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    <a href="customer_profile.php?id=${customer.id}" class="btn btn-sm btn-info">
+                        <i class="fas fa-eye"></i>
+                    </a>
+                `
+            }));
+            
+            TableController.renderWithPagination('#customerTable', data, ['#', 'name', 'mobile1', 'mobile2', 'opening_debt_usd', 'opening_debt_iqd', 'actions'], { pageSize: 10 });
+        } else {
+            TableController.showError('#customerTable', 'هەڵە لە وەرگرتنی داتا');
         }
+    }, 'json').fail(function() {
+        TableController.showError('#customerTable', 'هەڵە لە پەیوەندی داتابەیس');
     });
+}
+
+// Load customers when page loads
+$(document).ready(function() {
+    loadCustomers();
 });

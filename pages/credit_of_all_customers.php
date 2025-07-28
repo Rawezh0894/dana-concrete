@@ -15,12 +15,17 @@ if (!hasPermission('view_customer')) {
 }
 
 // گەڕانەوەی هەموو کڕیارە قەرزارەکان
-$sql = "SELECT c.id, c.name, c.mobile1, c.mobile2, c.debt_usd, c.debt_iqd,
+$sql = "SELECT c.id, c.name, c.mobile1, c.mobile2, c.opening_debt_usd, c.opening_debt_iqd,
     (
         SELECT IFNULL(SUM(quantity),0) FROM sales s WHERE s.customer_id = c.id AND s.payment_type = 'قەرز' AND s.remaining_amount > 0
-    ) as total_credit_meter
+    ) as total_credit_meter,
+    (
+        SELECT IFNULL(SUM(remaining_amount),0) FROM sales s WHERE s.customer_id = c.id AND s.payment_type = 'قەرز' AND s.remaining_amount > 0
+    ) as total_sales_debt
 FROM customers c
-WHERE c.debt_usd > 0 OR c.debt_iqd > 0
+WHERE c.opening_debt_usd > 0 OR c.opening_debt_iqd > 0 OR EXISTS (
+    SELECT 1 FROM sales s WHERE s.customer_id = c.id AND s.payment_type = 'قەرز' AND s.remaining_amount > 0
+)
 ORDER BY c.name ASC";
 $stmt = $pdo->query($sql);
 $customers = $stmt->fetchAll();
@@ -79,6 +84,9 @@ foreach ($sales as $sale) {
                     $total_sales_amount += floatval($s['total_price']);
                 }
             }
+            
+            // کۆی قەرز (قەرزی سەرەتای + پارەی ماوەی مامەڵەکان)
+            $total_debt = floatval($c['opening_debt_usd']) + floatval($c['total_sales_debt']);
         ?>
         <div class="customer-card print-break-inside-avoid">
             <div class="customer-info">
@@ -92,7 +100,7 @@ foreach ($sales as $sale) {
                 </span>
                 <span>
                     <i class="fa fa-cube"></i>
-                    مەتر سێجا: <?= number_format($c['total_credit_meter'], 2) ?> م٣
+                    مەتر سێجا: <?= number_format($c['total_credit_meter'], 2) ?> م³
                 </span>
                 <span>
                     <i class="fa fa-calculator"></i>
@@ -100,7 +108,15 @@ foreach ($sales as $sale) {
                 </span>
                 <span>
                     <i class="fa fa-money-bill-wave"></i>
-                    قەرز: <?= number_format($c['debt_usd'], 2) ?> $
+                    قەرزی سەرەتای: <?= number_format($c['opening_debt_usd'], 2) ?> $
+                </span>
+                <span>
+                    <i class="fa fa-credit-card"></i>
+                    پارەی ماوەی مامەڵەکان: <?= number_format($c['total_sales_debt'], 2) ?> $
+                </span>
+                <span class="text-danger fw-bold">
+                    <i class="fa fa-exclamation-triangle"></i>
+                    کۆی قەرز: <?= number_format($total_debt, 2) ?> $
                 </span>
             </div>
 

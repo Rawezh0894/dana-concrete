@@ -52,6 +52,14 @@ async function loadCustomerSalesTable(customerId) {
     TableController.renderWithPagination('#salesTable', mapped, columns, { pageSize: 10 });
 }
 
+// Global function to load customer sales (for use in other scripts)
+async function loadCustomerSales(customerId) {
+    await loadCustomerSalesTable(customerId);
+}
+
+// Make function globally available
+window.loadCustomerSales = loadCustomerSales;
+
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof CUSTOMER_ID !== 'undefined' && CUSTOMER_ID) {
         loadCustomerSalesTable(CUSTOMER_ID);

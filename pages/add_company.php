@@ -36,6 +36,38 @@ if (!isset($_SESSION['user_id'])) {
         <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">کۆمپانیاکان</h2>
         <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addCompanyModal" style="background: var(--seafoam-green); font-weight: bold;">+ زیادکردنی کۆمپانیا</button>
     </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4" id="summary-cards">
+        <div class="col-md-4 mb-3">
+            <div class="card text-center shadow" style="background: linear-gradient(135deg, #00b894, #00cec9); color: white;">
+                <div class="card-body">
+                    <h5 class="card-title">کۆی قەرزی ئێمە لەگەڵ کۆمپانیان</h5>
+                    <span id="total_debt" style="font-size:2.5rem;font-weight:bold;">$0</span>
+                    <small class="text-light">دۆلار</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card text-center shadow" style="background: linear-gradient(135deg, #fdcb6e, #e17055); color: white;">
+                <div class="card-body">
+                    <h5 class="card-title">کۆی کۆمپانیان</h5>
+                    <span id="total_companies" style="font-size:2.5rem;font-weight:bold;">0</span>
+                    <small class="text-light">کۆمپانیا</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card text-center shadow" style="background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: white;">
+                <div class="card-body">
+                    <h5 class="card-title">کۆمپانیاکانی قەرز</h5>
+                    <span id="companies_with_debt" style="font-size:2.5rem;font-weight:bold;">0</span>
+                    <small class="text-light">کۆمپانیا</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="table-responsive">
         <table class="table table-bordered table-hover align-middle text-center" id="companyTable">
             <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
@@ -85,14 +117,6 @@ if (!isset($_SESSION['user_id'])) {
             <label for="opening_debt_iqd" class="form-label">قەرزی سەرەتایی (IQD)</label>
             <input type="number" class="form-control" id="opening_debt_iqd" name="opening_debt_iqd" min="0" step="1" value="0">
           </div>
-          <div class="mb-3">
-            <label for="debt_usd" class="form-label d-none">بڕی قەرز (USD)</label>
-            <input type="number" class="form-control d-none" id="debt_usd" name="debt_usd" min="0" step="0.01" value="0">
-          </div>
-          <div class="mb-3">
-            <label for="debt_iqd" class="form-label d-none">بڕی قەرز (IQD)</label>
-            <input type="number" class="form-control d-none" id="debt_iqd" name="debt_iqd" min="0" step="1" value="0">
-          </div>
           
         </div>
         <div class="modal-footer">
@@ -135,14 +159,6 @@ if (!isset($_SESSION['user_id'])) {
             <label for="editOpeningDebtIqd" class="form-label">قەرزی سەرەتایی (IQD)</label>
             <input type="number" class="form-control" id="editOpeningDebtIqd" name="opening_debt_iqd" min="0" step="1">
           </div>
-          <div class="mb-3">
-            <label for="editDebtUsd" class="form-label d-none">بڕی قەرز (USD)</label>
-            <input type="number" class="form-control d-none" id="editDebtUsd" name="debt_usd" min="0" step="0.01">
-          </div>
-          <div class="mb-3">
-            <label for="editDebtIqd" class="form-label d-none">بڕی قەرز (IQD)</label>
-            <input type="number" class="form-control d-none" id="editDebtIqd" name="debt_iqd" min="0" step="1">
-          </div>
        
         </div>
         <div class="modal-footer">
@@ -158,6 +174,7 @@ if (!isset($_SESSION['user_id'])) {
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="../assets/js/swalAlert.js"></script>
 <script src="../assets/js/comon/table-controler.js"></script>
+<script src="../assets/js/company/summary_stats.js"></script>
 <script src="../assets/js/company/add_company.js"></script>
 <script src="../assets/js/company/select_company.js"></script>
 <script src="../assets/js/company/update_company.js"></script>

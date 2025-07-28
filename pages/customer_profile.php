@@ -38,7 +38,18 @@ if ($customer_id) {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-</head>
+<!-- Placeholder for customer profile JS includes -->
+<style>
+.nav-tabs .nav-link {
+    color: var(--seafoam-green) !important;
+}
+.nav-tabs .nav-link.active {
+    background: var(--seafoam-green) !important;
+    color: #fff !important;
+    border-color: var(--seafoam-green) var(--seafoam-green) #fff !important;
+}
+</style>
+  </head>
 <body dir="rtl">
 <?php include '../includes/navbar.php'; ?>
 <?php include '../includes/sidebar.php'; ?>
@@ -193,10 +204,6 @@ if ($customer_id) {
                 </div>
               </div>
               <div class="mb-3">
-                <label for="customer_debt_remaining" class="form-label">قەرزی ماوە (USD)</label>
-                <input type="text" class="form-control" id="customer_debt_remaining" readonly style="background-color: #f8f9fa;">
-              </div>
-              <div class="mb-3">
                 <label for="customer_debt_note" class="form-label">تێبینی</label>
                 <textarea class="form-control" id="customer_debt_note" name="note" rows="2"></textarea>
               </div>
@@ -262,6 +269,7 @@ if ($customer_id) {
 </div>
 <script>
     const CUSTOMER_ID = <?php echo $customer_id; ?>;
+    
     function loadCustomerSummaryCards() {
         $.get('../process/customer_profile/select_sale.php', { customer_id: CUSTOMER_ID, stats: 1 }, function(data) {
             if (!data || !data.stats) {
@@ -293,8 +301,103 @@ if ($customer_id) {
             console.error('AJAX error loading customer summary cards:', textStatus, errorThrown, jqXHR.responseText);
         });
     }
+    
+    // Make loadCustomerSummaryCards globally available
+    window.loadCustomerSummaryCards = loadCustomerSummaryCards;
+    
     $(function() { loadCustomerSummaryCards(); });
 </script>
+
+<script>
+    // Function to refresh all customer data after any activity
+    function refreshCustomerData() {
+        if (typeof CUSTOMER_ID !== 'undefined' && CUSTOMER_ID) {
+            // Refresh summary cards
+            if (typeof loadCustomerSummaryCards === 'function') {
+                loadCustomerSummaryCards();
+            }
+            
+            // Refresh sales data
+            if (typeof loadCustomerSales === 'function') {
+                loadCustomerSales(CUSTOMER_ID);
+            }
+            
+            // Refresh debt payments data
+            if (typeof loadCustomerReturnDebts === 'function') {
+                loadCustomerReturnDebts(CUSTOMER_ID);
+            }
+            
+            console.log('Customer data refreshed automatically');
+        }
+    }
+    
+    // Make refreshCustomerData globally available
+    window.refreshCustomerData = refreshCustomerData;
+</script>
+
+<script>
+    // Modal improvement functions
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize modals with better event handling
+        const addModal = document.getElementById('addCustomerDebtModal');
+        const editModal = document.getElementById('editCustomerDebtModal');
+        
+        if (addModal) {
+            addModal.addEventListener('show.bs.modal', function() {
+                // Reset form when opening add modal
+                document.getElementById('addCustomerDebtForm').reset();
+                document.getElementById('customer_debt_date').value = new Date().toISOString().split('T')[0];
+                document.getElementById('customer_debt_dolar_rate').value = '150000';
+            });
+        }
+        
+        if (editModal) {
+            editModal.addEventListener('show.bs.modal', function() {
+                // Clear any previous error states
+                const inputs = editModal.querySelectorAll('.form-control');
+                inputs.forEach(input => input.classList.remove('is-invalid'));
+            });
+            
+            editModal.addEventListener('hidden.bs.modal', function() {
+                // Reset form when closing edit modal
+                document.getElementById('editCustomerDebtForm').reset();
+                document.getElementById('edit_customer_debt_id').value = '';
+            });
+        }
+        
+        // Add automatic calculation for remaining debt in add modal
+        const addForm = document.getElementById('addCustomerDebtForm');
+        if (addForm) {
+            const paidUsdInput = addForm.querySelector('#customer_debt_paid_usd');
+            const paidIqdInput = addForm.querySelector('#customer_debt_paid_iqd');
+            const discountInput = addForm.querySelector('#customer_debt_discount');
+            const dolarRateInput = addForm.querySelector('#customer_debt_dolar_rate');
+            const remainingInput = addForm.querySelector('#customer_debt_remaining');
+            
+            function calculateRemaining() {
+                const paidUsd = parseFloat(paidUsdInput.value) || 0;
+                const paidIqd = parseFloat(paidIqdInput.value) || 0;
+                const discount = parseFloat(discountInput.value) || 0;
+                const dolarRate = parseFloat(dolarRateInput.value) || 150000;
+                
+                const paidIqdUsd = dolarRate > 0 ? paidIqd / (dolarRate / 100) : 0;
+                const totalPaid = paidUsd + paidIqdUsd + discount;
+                
+                // Get customer's total debt (this would need to be fetched from server)
+                // For now, just show the calculated total
+                remainingInput.value = totalPaid.toFixed(2) + ' USD';
+            }
+            
+            [paidUsdInput, paidIqdInput, discountInput, dolarRateInput].forEach(input => {
+                input.addEventListener('input', calculateRemaining);
+            });
+        }
+    });
+</script>
+
+
+
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="../assets/js/swalAlert.js"></script>
@@ -306,17 +409,44 @@ if ($customer_id) {
 <script src="../assets/js/customer_profile/delete_return_debt.js"></script>
 <script src="../assets/js/customer_profile/update_return_debt.js"></script>
 
+<script>
+    // Debugging script to help identify issues
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('=== Customer Profile Debug Info ===');
+        console.log('CUSTOMER_ID:', typeof CUSTOMER_ID !== 'undefined' ? CUSTOMER_ID : 'undefined');
+        console.log('Bootstrap available:', typeof bootstrap !== 'undefined');
+        console.log('jQuery available:', typeof $ !== 'undefined');
+        console.log('Swal available:', typeof Swal !== 'undefined');
+        
+        // Check if all required elements exist
+        const requiredElements = [
+            'editCustomerDebtModal',
+            'editCustomerDebtForm',
+            'addCustomerDebtModal',
+            'addCustomerDebtForm',
+            'customerDebtTable'
+        ];
+        
+        requiredElements.forEach(id => {
+            const element = document.getElementById(id);
+            console.log(`Element #${id}:`, element ? 'Found' : 'Missing');
+        });
+        
+        // Check if all required functions are available
+        const requiredFunctions = [
+            'loadCustomerReturnDebts',
+            'loadCustomerSales',
+            'loadCustomerSummaryCards',
+            'refreshCustomerData'
+        ];
+        
+        requiredFunctions.forEach(funcName => {
+            console.log(`Function ${funcName}:`, typeof window[funcName] === 'function' ? 'Available' : 'Missing');
+        });
+        
+        console.log('=== End Debug Info ===');
+    });
+</script>
 
-<!-- Placeholder for customer profile JS includes -->
-<style>
-.nav-tabs .nav-link {
-    color: var(--seafoam-green) !important;
-}
-.nav-tabs .nav-link.active {
-    background: var(--seafoam-green) !important;
-    color: #fff !important;
-    border-color: var(--seafoam-green) var(--seafoam-green) #fff !important;
-}
-</style>
 </body>
 </html>

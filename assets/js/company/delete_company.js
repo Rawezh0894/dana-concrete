@@ -15,6 +15,8 @@ $(function() {
                 $.post('../process/company/delete_company.php', {id: id}, function(response) {
                     if (response.success) {
                         if (window.loadCompanies) window.loadCompanies();
+                        // Refresh summary stats
+                        if (typeof loadSummaryStats === 'function') loadSummaryStats();
                         swalAlert('سەرکەوتوو', 'کۆمپانیا سڕایەوە!', 'success');
                     } else {
                         swalAlert('هەڵە', response.message || 'هەڵەیەک هەیە', 'error');

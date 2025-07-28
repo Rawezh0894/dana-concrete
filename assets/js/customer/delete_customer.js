@@ -1,34 +1,35 @@
-document.addEventListener('click', function(e) {
-    if (e.target.closest('.delete-customer-btn')) {
-        const btn = e.target.closest('.delete-customer-btn');
-        const id = btn.getAttribute('data-id');
-        Swal.fire({
-            title: 'دڵنیایت؟',
-            text: 'ئایا دەتەوێت ئەم کڕیارە بسڕیتەوە؟',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'بەڵێ',
-            cancelButtonText: 'نەخێر'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                fetch('../process/customer/delete_customer.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `id=${encodeURIComponent(id)}`
-                })
-                .then(res => res.json())
-                .then(data => {
+$(document).on('click', '.delete-customer-btn', function() {
+    const btn = $(this);
+    const id = btn.data('id');
+    
+    Swal.fire({
+        title: 'دڵنیایت؟',
+        text: 'ئایا دەتەوێت ئەم کڕیارە بسڕیتەوە؟',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'بەڵێ',
+        cancelButtonText: 'نەخێر'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: '../process/customer/delete_customer.php',
+                method: 'POST',
+                data: { id: id },
+                dataType: 'json',
+                success: function(data) {
                     if (data.success) {
                         Swal.fire('سڕایەوە!', data.message || 'کڕیار سڕایەوە', 'success');
                         if (typeof loadCustomers === 'function') loadCustomers();
+                        // Refresh summary stats
+                        if (typeof loadSummaryStats === 'function') loadSummaryStats();
                     } else {
                         Swal.fire('هەڵە!', data.message || 'هەڵەیەک ڕووی دا', 'error');
                     }
-                })
-                .catch(() => {
+                },
+                error: function() {
                     Swal.fire('هەڵە!', 'هەڵەیەک ڕووی دا', 'error');
-                });
-            }
-        });
-    }
+                }
+            });
+        }
+    });
 });

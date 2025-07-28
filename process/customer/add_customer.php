@@ -1,66 +1,54 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+session_start();
 require_once '../../config/db_conected.php';
 require_once '../../config/permissions.php';
+
 if (!hasPermission('add_customer')) {
-    echo json_encode(['success' => false, 'message' => 'ڕێگەت پێنەدراوە!']);
+    http_response_code(403);
+    echo json_encode(['error' => 'Permission denied']);
     exit;
 }
-header('Content-Type: application/json; charset=utf-8');
+
+if (!isset($_SESSION['user_id'])) {
+    http_response_code(401);
+    echo json_encode(['error' => 'Unauthorized']);
+    exit;
+}
 
 $name = $_POST['name'] ?? '';
 $mobile1 = $_POST['mobile1'] ?? '';
 $mobile2 = $_POST['mobile2'] ?? '';
-$debt_usd = $_POST['debt_usd'] ?? 0;
-$debt_iqd = $_POST['debt_iqd'] ?? 0;
-$opening_debt_usd = $_POST['opening_debt_usd'] ?? 0;
-$opening_debt_iqd = $_POST['opening_debt_iqd'] ?? 0;
+$opening_debt_usd = floatval($_POST['opening_debt_usd'] ?? 0);
+$opening_debt_iqd = floatval($_POST['opening_debt_iqd'] ?? 0);
 
+// Validate required fields
 if (empty($name) || empty($mobile1)) {
-    echo json_encode(['success' => false, 'message' => 'تکایە ناو و ژمارە مۆبایلی یەکەم پڕبکەوە']);
+    echo json_encode(['success' => false, 'message' => 'تکایە هەموو خانە پێویستەکان پڕبکەرەوە']);
     exit;
 }
 
-// Check for duplicate customer name
-$name_trimmed = trim(mb_strtolower($name));
-$stmt = $pdo->prepare("SELECT COUNT(*) FROM customers WHERE TRIM(LOWER(name)) = ?");
-$stmt->execute([$name_trimmed]);
-if ($stmt->fetchColumn() > 0) {
-    echo json_encode(['success' => false, 'message' => 'ئەم ناوی کڕیار پێشتر تۆمارکراوە']);
-    exit;
-}
-
-// Check for duplicate mobile numbers
-if ($mobile2) {
-    $sql = "SELECT COUNT(*) FROM customers WHERE mobile1 = ? OR mobile2 = ? OR mobile1 = ? OR mobile2 = ?";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([$mobile1, $mobile1, $mobile2, $mobile2]);
-} else {
-    $sql = "SELECT COUNT(*) FROM customers WHERE mobile1 = ? OR mobile2 = ?";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([$mobile1, $mobile1]);
-}
-$count = $stmt->fetchColumn();
-if ($count > 0) {
-    echo json_encode(['success' => false, 'message' => 'ئەم ژمارە مۆبایلە پێشتر تۆمار کراوە']);
-    exit;
-}
+// Only one of opening_debt_usd or opening_debt_iqd should be nonzero
+if ($opening_debt_usd > 0) $opening_debt_iqd = 0;
+if ($opening_debt_iqd > 0) $opening_debt_usd = 0;
 
 try {
-    $stmt = $pdo->prepare("INSERT INTO customers (name, mobile1, mobile2, debt_usd, debt_iqd, opening_debt_usd, opening_debt_iqd) VALUES (?, ?, ?, ?, ?, ?, ?)");
-    $result = $stmt->execute([$name, $mobile1, $mobile2, $debt_usd, $debt_iqd, $opening_debt_usd, $opening_debt_iqd]);
+    // Check for duplicate mobile number
+    $stmt = $pdo->prepare("SELECT id FROM customers WHERE mobile1 = ?");
+    $stmt->execute([$mobile1]);
+    if ($stmt->fetch()) {
+        echo json_encode(['success' => false, 'message' => 'ئەم ژمارەی مۆبایل پێشتر تۆمارکراوە!']);
+        exit;
+    }
+
+    $stmt = $pdo->prepare("INSERT INTO customers (name, mobile1, mobile2, opening_debt_usd, opening_debt_iqd) VALUES (?, ?, ?, ?, ?)");
+    $result = $stmt->execute([$name, $mobile1, $mobile2, $opening_debt_usd, $opening_debt_iqd]);
+    
     if ($result) {
-        echo json_encode([
-            'success' => true,
-            'id' => $pdo->lastInsertId(),
-            'name' => $name,
-            'message' => 'کڕیار بە سەرکەوتوویی زیادکرا'
-        ]);
+        echo json_encode(['success' => true, 'message' => 'کڕیار بەسەرکەوتوویی زیادکرا!']);
     } else {
-        echo json_encode(['success' => false, 'message' => 'هەڵە لە زیادکردنەوەی کڕیار']);
+        echo json_encode(['success' => false, 'message' => 'هەڵە لە زیادکردن!']);
     }
 } catch (Exception $e) {
-    echo json_encode(['success' => false, 'message' => 'هەڵەیەک ڕووی دا: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'هەڵەی داتابەیس: ' . $e->getMessage()]);
 }
+?>

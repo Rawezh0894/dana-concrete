@@ -22,9 +22,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     addCompanyForm.reset();
                     modal.hide();
                     loadCompanies();
+                    // Refresh summary stats
+                    if (typeof loadSummaryStats === 'function') loadSummaryStats();
                     swalAlert('سەرکەوتوو', 'کۆمپانیا بەسەرکەوتوویی زیادکرا!', 'success');
-                    var editCurrencyType = $('#editCurrencyType').val();
-                    formData.append('currency_type', editCurrencyType);
                     $('#editCurrencyType').val(data.currency_type);
                 } else {
                     swalAlert('هەڵە', data.message || 'هەڵەیەک هەیە', 'error');
@@ -42,13 +42,13 @@ document.addEventListener('DOMContentLoaded', function () {
 function handleCurrencyTypeChange() {
     var currency = $('#currency_type').val();
     if (currency === 'دینار') {
-        $('#opening_debt_usd, #debt_usd').val(0).prop('disabled', true);
-        $('#opening_debt_iqd, #debt_iqd').prop('disabled', false);
+        $('#opening_debt_usd').val(0).prop('disabled', true);
+        $('#opening_debt_iqd').prop('disabled', false);
     } else if (currency === 'دۆلار') {
-        $('#opening_debt_iqd, #debt_iqd').val(0).prop('disabled', true);
-        $('#opening_debt_usd, #debt_usd').prop('disabled', false);
+        $('#opening_debt_iqd').val(0).prop('disabled', true);
+        $('#opening_debt_usd').prop('disabled', false);
     } else {
-        $('#opening_debt_usd, #debt_usd, #opening_debt_iqd, #debt_iqd').val(0).prop('disabled', true);
+        $('#opening_debt_usd, #opening_debt_iqd').val(0).prop('disabled', true);
     }
 }
 $('#currency_type').on('change', handleCurrencyTypeChange);

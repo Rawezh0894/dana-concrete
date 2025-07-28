@@ -1,8 +1,26 @@
 document.addEventListener('DOMContentLoaded', function() {
     fetch('../process/dashboard/select_information.php')
-        .then(res => res.json())
-        .then(data => {
-            if (!data.success) return;
+        .then(res => {
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
+            return res.text(); // Get response as text first
+        })
+        .then(text => {
+            // Try to parse as JSON
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (e) {
+                console.error('Failed to parse JSON response:', text);
+                console.error('JSON parse error:', e);
+                throw new Error('Invalid JSON response from server');
+            }
+            
+            if (!data.success) {
+                console.error('Server returned error:', data.message);
+                return;
+            }
             
             // Render summary cards
             const cards = [
@@ -21,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="card-body">
                             <div class="mb-2"><i class="fa ${card.icon}" style="font-size:2rem;color:${card.color}"></i></div>
                             <h5 class="card-title">${card.label}</h5>
-                            <span style="font-size:2rem;font-weight:bold;">${data.summary[card.key]}</span>
+                            <span style="font-size:2rem;font-weight:bold;">${data.summary[card.key] || 0}</span>
                         </div>
                     </div>
                 </div>`;
@@ -30,23 +48,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Render stock status cards
             let stockHtml = '';
-            data.stock_status.forEach(item => {
-                const statusClass = item.status === 'high' ? 'high' : item.status === 'medium' ? 'medium' : 'low';
-                const statusText = item.status === 'high' ? 'بەرز' : item.status === 'medium' ? 'مامناوەند' : 'کەم';
-                stockHtml += `<div class="col-md-3 col-sm-6">
-                    <div class="card text-center shadow stock-card" style="border: none;">
-                        <div class="card-body">
-                            <div class="mb-2"><i class="fa fa-boxes" style="font-size:2rem;color:var(--stock-accent)"></i></div>
-                            <h5 class="card-title">${item.name}</h5>
-                            <div style="font-size:1.2rem;font-weight:bold;margin-bottom:0.5rem;">${item.amount.toLocaleString()} kg</div>
-                            <div class="stock-progress">
-                                <div class="stock-progress-bar ${statusClass}" style="width: ${item.percentage}%"></div>
+            if (data.stock_status && Array.isArray(data.stock_status)) {
+                data.stock_status.forEach(item => {
+                    const statusClass = item.status === 'high' ? 'high' : item.status === 'medium' ? 'medium' : 'low';
+                    const statusText = item.status === 'high' ? 'بەرز' : item.status === 'medium' ? 'مامناوەند' : 'کەم';
+                    stockHtml += `<div class="col-md-3 col-sm-6">
+                        <div class="card text-center shadow stock-card" style="border: none;">
+                            <div class="card-body">
+                                <div class="mb-2"><i class="fa fa-boxes" style="font-size:2rem;color:var(--stock-accent)"></i></div>
+                                <h5 class="card-title">${item.name}</h5>
+                                <div style="font-size:1.2rem;font-weight:bold;margin-bottom:0.5rem;">${item.amount.toLocaleString()} kg</div>
+                                <div class="stock-progress">
+                                    <div class="stock-progress-bar ${statusClass}" style="width: ${item.percentage}%"></div>
+                                </div>
+                                <div style="font-size:0.9rem;color:#666;margin-top:0.5rem;">${item.percentage}% - ${statusText}</div>
                             </div>
-                            <div style="font-size:0.9rem;color:#666;margin-top:0.5rem;">${item.percentage}% - ${statusText}</div>
                         </div>
-                    </div>
-                </div>`;
-            });
+                    </div>`;
+                });
+            }
             document.getElementById('stock-status-cards').innerHTML = stockHtml;
 
             // Render statistics
@@ -65,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="stat-icon">
                             <i class="${stat.icon}"></i>
                         </div>
-                        <div class="stat-value">${data.stats[stat.key]}</div>
+                        <div class="stat-value">${data.stats[stat.key] || 0}</div>
                         <div class="stat-label">${stat.label}</div>
                     </div>
                 </div>`;
@@ -74,17 +94,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Render notifications
             let notificationsHtml = '';
-            data.notifications.forEach(notification => {
-                notificationsHtml += `<div class="notification-item ${notification.type}">
-                    <div class="d-flex align-items-start">
-                        <i class="${notification.icon} notification-icon"></i>
-                        <div class="flex-grow-1">
-                            <div class="notification-title">${notification.title}</div>
-                            <div class="notification-text">${notification.text}</div>
+            if (data.notifications && Array.isArray(data.notifications)) {
+                data.notifications.forEach(notification => {
+                    notificationsHtml += `<div class="notification-item ${notification.type}">
+                        <div class="d-flex align-items-start">
+                            <i class="${notification.icon} notification-icon"></i>
+                            <div class="flex-grow-1">
+                                <div class="notification-title">${notification.title}</div>
+                                <div class="notification-text">${notification.text}</div>
+                            </div>
                         </div>
-                    </div>
-                </div>`;
-            });
+                    </div>`;
+                });
+            }
             document.getElementById('dashboard-notifications').innerHTML = notificationsHtml;
 
             // Quick links
@@ -116,29 +138,42 @@ document.addEventListener('DOMContentLoaded', function() {
                 'purchase': { icon: 'fa-cart-plus', color: 'var(--lime-green)' }
             };
             let ra = '';
-            data.recent.forEach(act => {
-                let who = act.customer || act.company || '-';
-                let label = act.type === 'receipt' ? 'پسوڵە' : act.type === 'sale' ? 'فرۆشتن' : 'کڕین';
-                let amount = '';
-                if (act.amount) {
-                    if (act.type === 'receipt') {
-                        amount = `<span style='font-weight:bold;'>${act.amount} m³</span>`;
-                    } else {
-                        amount = `<span style='font-weight:bold;'>${act.amount}</span>`;
+            if (data.recent && Array.isArray(data.recent)) {
+                data.recent.forEach(act => {
+                    let who = act.customer || act.company || '-';
+                    let label = act.type === 'receipt' ? 'پسوڵە' : act.type === 'sale' ? 'فرۆشتن' : 'کڕین';
+                    let amount = '';
+                    if (act.amount) {
+                        if (act.type === 'receipt') {
+                            amount = `<span style='font-weight:bold;'>${act.amount} m³</span>`;
+                        } else {
+                            amount = `<span style='font-weight:bold;'>${act.amount}</span>`;
+                        }
                     }
-                }
-                let date = act.date ? `<span style='font-size:0.9rem;color:#888;'>${act.date.split(' ')[0]}</span>` : '';
-                ra += `<li class="list-group-item d-flex align-items-center justify-content-between" style="border:none;background: #f6f7fb; margin-bottom: 8px; border-radius: 0.7rem;">
-                    <div class="d-flex align-items-center gap-2">
-                        <i class="fa ${icons[act.type].icon}" style="color:${icons[act.type].color};font-size:1.3rem;"></i>
-                        <div>
-                            <div style="font-weight:bold;">${label} <span style='color:var(--seafoam-green)'>${act.name}</span></div>
-                            <div style="font-size:0.95rem;">${who} ${amount}</div>
+                    let date = act.date ? `<span style='font-size:0.9rem;color:#888;'>${act.date.split(' ')[0]}</span>` : '';
+                    ra += `<li class="list-group-item d-flex align-items-center justify-content-between" style="border:none;background: #f6f7fb; margin-bottom: 8px; border-radius: 0.7rem;">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fa ${icons[act.type].icon}" style="color:${icons[act.type].color};font-size:1.3rem;"></i>
+                            <div>
+                                <div style="font-weight:bold;">${label} <span style='color:var(--seafoam-green)'>${act.name}</span></div>
+                                <div style="font-size:0.95rem;">${who} ${amount}</div>
+                            </div>
                         </div>
-                    </div>
-                    ${date}
-                </li>`;
-            });
+                        ${date}
+                    </li>`;
+                });
+            }
             document.getElementById('dashboard-recent-activities').innerHTML = ra;
+        })
+        .catch(error => {
+            console.error('Error loading dashboard data:', error);
+            // Show error message to user
+            const errorMessage = `
+                <div class="alert alert-danger" role="alert">
+                    <i class="fa fa-exclamation-triangle"></i>
+                    هەڵە لە بارکردنی داتای داشبۆرد: ${error.message}
+                </div>
+            `;
+            document.getElementById('dashboard-summary-cards').innerHTML = errorMessage;
         });
 });

@@ -97,8 +97,8 @@ function updateCustomerSummaryTable(customerSummary) {
             `<span class="badge bg-secondary">نەدەراوە</span>`;
         
         const notesDisplay = customer.latest_notes ? 
-            `<span class="notes-cell">${customer.latest_notes}</span>` : 
-            `<span class="text-muted">-</span>`;
+            customer.latest_notes : 
+            '-';
         
         const row = `
             <tr>

@@ -1,15 +1,18 @@
 <?php
 session_start();
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+// Only log errors, don't display them in JSON response
 ini_set('log_errors', 1);
 ini_set('error_log', __DIR__ . '/../../php-error.log');
-error_log('SESSION: ' . print_r($_SESSION, true));
 
 require_once '../../config/db_conected.php';
 require_once '../../config/permissions.php';
+
+// Log session and POST data for debugging
+error_log('SESSION: ' . print_r($_SESSION, true));
+error_log('add_sale.php POST: ' . print_r($_POST, true));
+
 if (!hasPermission('add_sale')) {
-    error_log('Permission denied for user: ' . (isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 'unknown') . ' role: ' . (isset($_SESSION['role']) ? $_SESSION['role'] : 'unknown'));
+    error_log('Permission denied for user: ' . (isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 'unknown'));
     echo json_encode(['success' => false, 'message' => 'ڕێگەت پێنەدراوە!']);
     exit;
 }
@@ -37,9 +40,8 @@ try {
     $formula_id = $_POST['formula_id'] ?? null;
     $discount = $_POST['discount'] ?? 0;
 
-    // Log all input variables for debugging
-    error_log('add_sale.php POST: ' . print_r($_POST, true));
-    error_log('Parsed vars: customer_id=' . var_export($customer_id, true) . ', recipient=' . var_export($recipient, true) . ', location=' . var_export($location, true) . ', quantity=' . var_export($quantity, true) . ', price_per_unit=' . var_export($price_per_unit, true) . ', total_price=' . var_export($total_price, true) . ', payment_type=' . var_export($payment_type, true) . ', amount_paid_usd=' . var_export($amount_paid_usd, true) . ', amount_paid_iq=' . var_export($amount_paid_iq, true) . ', dolar_rate=' . var_export($dolar_rate, true) . ', remaining_amount=' . var_export($remaining_amount, true) . ', invoice_number=' . var_export($invoice_number, true) . ', order_date=' . var_export($order_date, true) . ', notes=' . var_export($notes, true) . ', formula_id=' . var_export($formula_id, true) . ', discount=' . var_export($discount, true));
+    // Log parsed variables for debugging
+    error_log("Parsed vars: customer_id='$customer_id', recipient='$recipient', location='$location', quantity='$quantity', price_per_unit='$price_per_unit', total_price='$total_price', payment_type='$payment_type', amount_paid_usd='$amount_paid_usd', amount_paid_iq='$amount_paid_iq', dolar_rate='$dolar_rate', remaining_amount='$remaining_amount', invoice_number='$invoice_number', order_date='$order_date', notes='$notes', formula_id='$formula_id', discount='$discount'");
 
     if (!$location || !$quantity || !$price_per_unit || !$total_price || !$payment_type || !$invoice_number || !$order_date || !$formula_id) {
         echo json_encode(['success' => false, 'message' => 'هەموو خانە پڕ بکە']);
@@ -75,10 +77,11 @@ try {
     ]);
     $sale_id = $pdo->lastInsertId();
 
-    // Update customer debt if needed
-    if ($customer_id !== null && $payment_type === 'قەرز') {
-        $stmt2 = $pdo->prepare("UPDATE customers SET debt_usd = IFNULL(debt_usd,0) + ? WHERE id = ?");
-        $stmt2->execute([$remaining_amount, $customer_id]);
+    // Update customer debt
+    if ($payment_type === 'قەرز') {
+        // No need to update customer debt_usd/debt_iqd anymore
+        // The remaining amount is tracked in the sales table itself
+        // This is handled by the remaining_amount field in the sales table
     }
 
     require_once __DIR__ . '/../../includes/notify.php';

@@ -1,84 +1,103 @@
-let submitting = false;
-const addCustomerForm = document.getElementById('addCustomerForm');
-if (addCustomerForm) {
-    addCustomerForm.addEventListener('submit', function(e) {
-        if (submitting) return false;
-        submitting = true;
+$(document).ready(function () {
+    const addCustomerForm = $('#addCustomerForm');
+    if (addCustomerForm.length) {
+        addCustomerForm.on('submit', function (e) {
         e.preventDefault();
-        const name = document.getElementById('customer_name').value.trim();
-        const mobile1 = document.getElementById('customer_mobile1').value.trim();
-        const mobile2 = document.getElementById('customer_mobile2').value.trim();
-        // Validation: mobile1 and mobile2 must start with 07 and be 11 digits
-        const mobileRegex = /^07\d{9}$/;
-        if (!mobileRegex.test(mobile1)) {
-            Swal.fire({ icon: 'error', title: 'هەڵە', text: 'ژمارە مۆبایلی یەکەم دەبێت بە 07 دەست پێ بکات و 11 ژمارە بێت.' });
-            submitting = false;
-            return;
+            const formData = new FormData(this);
+            
+            $.ajax({
+                url: '../process/customer/add_customer.php',
+                method: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                dataType: 'json',
+                success: function(data) {
+                    const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('addCustomerModal'));
+                    if (data.success) {
+                        addCustomerForm[0].reset();
+                        modal.hide();
+                        loadCustomers();
+                        // Refresh summary stats
+                        if (typeof loadSummaryStats === 'function') loadSummaryStats();
+                        swalAlert('سەرکەوتوو', 'کڕیار بەسەرکەوتوویی زیادکرا!', 'success');
+                    } else {
+                        swalAlert('هەڵە', data.message || 'هەڵەیەک هەیە', 'error');
         }
-        if (mobile2 && !mobileRegex.test(mobile2)) {
-            Swal.fire({ icon: 'error', title: 'هەڵە', text: 'ژمارە مۆبایلی دووەم دەبێت بە 07 دەست پێ بکات و 11 ژمارە بێت.' });
-            submitting = false;
-            return;
-        }
-        if (mobile2 && mobile1 === mobile2) {
-            Swal.fire({ icon: 'error', title: 'هەڵە', text: 'ژمارە مۆبایلی یەکەم و دووەم نابێت یەکسان بن.' });
-            submitting = false;
-            return;
-        }
-        const formData = new FormData(addCustomerForm);
-        fetch('../process/customer/add_customer.php', {
-            method: 'POST',
-            body: formData
-        })
-        .then(res => {
-            // Log raw response for debugging
-            res.clone().text().then(txt => console.log('Raw response from add_customer.php:', txt));
-            return res.json();
-        })
-        .then(data => {
-            console.log('Parsed JSON:', data); // Debug
-            if (data.success) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'سەرکەوتوو بوو',
-                    text: data.message || 'کڕیار بە سەرکەوتوویی زیادکرا',
-                    timer: 1500,
-                    showConfirmButton: false
-                });
-                const modal = bootstrap.Modal.getInstance(document.getElementById('addCustomerModal'));
-                if (modal) modal.hide();
-                addCustomerForm.reset();
-                if (typeof loadCustomers === 'function') loadCustomers();
+                },
+                error: function() {
+                    swalAlert('هەڵە', 'هەڵەیەک هەیە لە پەیوەندیدا.', 'error');
+                }
+            });
+        });
+    }
+});
+
+// Handle currency type change for opening debt
+function handleOpeningDebtCurrencyChange() {
+    const openingDebtUsd = $('#customer_opening_debt_usd');
+    const openingDebtIqd = $('#customer_opening_debt_iqd');
+    
+    if (openingDebtUsd.length && openingDebtIqd.length) {
+        openingDebtUsd.on('input', function() {
+            if ($(this).val() > 0) {
+                openingDebtIqd.val('');
+                openingDebtIqd.prop('disabled', true);
             } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'هەڵە',
-                    text: data.message || 'هەڵەیەک ڕووی دا',
+                openingDebtIqd.prop('disabled', false);
+            }
+        });
+        
+        openingDebtIqd.on('input', function() {
+            if ($(this).val() > 0) {
+                openingDebtUsd.val('');
+                openingDebtUsd.prop('disabled', true);
+            } else {
+                openingDebtUsd.prop('disabled', false);
+            }
                 });
             }
-            submitting = false;
-        })
-        .catch((err) => {
-            console.error('Fetch or JSON error:', err);
-            Swal.fire({
-                icon: 'error',
-                title: 'هەڵە',
-                text: 'هەڵەیەک ڕووی دا',
-            });
-            submitting = false;
-        });
-    });
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Set default value for opening debt fields
-    const openingDebtUsd = document.getElementById('customer_opening_debt_usd');
-    const openingDebtIqd = document.getElementById('customer_opening_debt_iqd');
-    if (openingDebtUsd) openingDebtUsd.value = 0;
-    if (openingDebtIqd) openingDebtIqd.value = 0;
-    // Set placeholder for mobile fields
-    const mobile1 = document.getElementById('customer_mobile1');
-    const mobile2 = document.getElementById('customer_mobile2');
-    if (mobile1) mobile1.placeholder = '07xxxxxxxxx';
-    if (mobile2) mobile2.placeholder = '07xxxxxxxxx';
+// Handle currency type change for edit modal opening debt
+function handleEditOpeningDebtCurrencyChange() {
+    const editOpeningDebtUsd = $('#editCustomerOpeningDebtUsd');
+    const editOpeningDebtIqd = $('#editCustomerOpeningDebtIqd');
+    
+    if (editOpeningDebtUsd.length && editOpeningDebtIqd.length) {
+        editOpeningDebtUsd.on('input', function() {
+            if ($(this).val() > 0) {
+                editOpeningDebtIqd.val('');
+                editOpeningDebtIqd.prop('disabled', true);
+            } else {
+                editOpeningDebtIqd.prop('disabled', false);
+            }
+        });
+        
+        editOpeningDebtIqd.on('input', function() {
+            if ($(this).val() > 0) {
+                editOpeningDebtUsd.val('');
+                editOpeningDebtUsd.prop('disabled', true);
+            } else {
+                editOpeningDebtUsd.prop('disabled', false);
+            }
+        });
+    }
+}
+
+// Initialize currency handling
+$(document).ready(function() {
+    handleOpeningDebtCurrencyChange();
+    handleEditOpeningDebtCurrencyChange();
+    
+    // Reset form when modal is shown
+    $('#addCustomerModal').on('show.bs.modal', function() {
+        $('#addCustomerForm')[0].reset();
+        $('#customer_opening_debt_usd, #customer_opening_debt_iqd').prop('disabled', false);
+    });
+    
+    // Reset edit form when modal is shown
+    $('#editCustomerModal').on('show.bs.modal', function() {
+        $('#editCustomerOpeningDebtUsd, #editCustomerOpeningDebtIqd').prop('disabled', false);
+    });
 });

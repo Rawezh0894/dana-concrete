@@ -59,14 +59,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
     $stmt = $pdo->prepare('DELETE FROM purchases WHERE id = ?');
     $ok = $stmt->execute([$id]);
     if ($ok && $stmt->rowCount() > 0) {
-        // If credit, update company debt
+        // Update company debt
         if ($purchase['payment_type'] === 'قەرز') {
             if ($purchase['type'] === 'دۆلار') {
-                $updateDebt = $pdo->prepare('UPDATE company SET debt_usd = debt_usd - ? WHERE id = ?');
-                $updateDebt->execute([$purchase['remaining_usd'], $purchase['company_id']]);
+                // No need to update company debt_usd/debt_iqd anymore
+                // The remaining amount is tracked in the purchases table
             } elseif ($purchase['type'] === 'دینار') {
-                $updateDebt = $pdo->prepare('UPDATE company SET debt_iqd = debt_iqd - ? WHERE id = ?');
-                $updateDebt->execute([$purchase['remaining_iqd'], $purchase['company_id']]);
+                // No need to update company debt_usd/debt_iqd anymore
+                // The remaining amount is tracked in the purchases table
             }
         }
         require_once __DIR__ . '/../../includes/notify.php';
