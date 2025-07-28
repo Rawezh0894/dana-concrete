@@ -313,11 +313,23 @@
   background: var(--spearmint);
 }
 
+/* Bootstrap collapse compatibility */
 .collapse {
   display: none;
 }
 .collapse.show {
   display: block;
+}
+
+/* Ensure Bootstrap collapse works properly */
+.collapse:not(.show) {
+  display: none;
+}
+
+.collapsing {
+  height: 0;
+  overflow: hidden;
+  transition: height 0.35s ease;
 }
 
 .sidebar-link.active {

@@ -8,6 +8,10 @@ $(document).ready(function() {
         const seen = $('#notificationSeenFilter').val();
         const date_filter = $('#notificationDateFilter').val();
         const limit = $('#notificationPageSize').val() || 5;
+        
+        // Show loading state
+        $('#notificationsList').html('<tr><td colspan="8" class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">چاوەڕوان بە...</span></div></td></tr>');
+        $('#notificationsPagination').html('');
         $.ajax({
             url: '../process/notifications/select_notifications.php',
             method: 'GET',
@@ -45,15 +49,42 @@ $(document).ready(function() {
                 let pagHtml = '';
                 if (totalPages > 1) {
                     pagHtml += `<div class="table-pagination">`;
-                    pagHtml += `<button class="prev-btn" ${currentPage === 1 ? 'disabled' : ''} data-page="${currentPage-1}"><</button>`;
+                    
+                    // Previous button
+                    pagHtml += `<button class="btn btn-sm btn-outline-secondary mx-1" ${currentPage === 1 ? 'disabled' : ''} data-page="${currentPage-1}" aria-label="پەڕەی پێشوو">`;
+                    pagHtml += `<svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 15L8 10L13 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+                    pagHtml += `</button>`;
+                    
+                    // Page numbers with smart ellipsis
+                    let lastEllipsis = false;
                     for (let i = 1; i <= totalPages; i++) {
-                        pagHtml += `<button class="${i === currentPage ? 'active' : ''}" data-page="${i}">${i}</button>`;
+                        if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 2) {
+                            pagHtml += `<button class="btn btn-sm ${i === currentPage ? 'btn-success active' : 'btn-outline-secondary'} mx-1" data-page="${i}">${i}</button>`;
+                            lastEllipsis = false;
+                        } else if (!lastEllipsis && (i === currentPage - 3 || i === currentPage + 3)) {
+                            pagHtml += `<span class="mx-1">...</span>`;
+                            lastEllipsis = true;
+                        }
                     }
-                    pagHtml += `<button class="next-btn" ${currentPage === totalPages ? 'disabled' : ''} data-page="${currentPage+1}">></button>`;
+                    
+                    // Next button
+                    pagHtml += `<button class="btn btn-sm btn-outline-secondary mx-1" ${currentPage === totalPages ? 'disabled' : ''} data-page="${currentPage+1}" aria-label="پەڕەی دواتر">`;
+                    pagHtml += `<svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 5L12 10L7 15" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+                    pagHtml += `</button>`;
+                    
                     pagHtml += `</div>`;
                 }
                 $('#notificationsPagination').html(pagHtml);
-                $('#notificationsTotal').html(`گشتی: ${total} | پەڕە: ${currentPage} / ${totalPages}`);
+                $('#notificationsTotal').html(`گشتی: ${total} ئاگادارکردنەوە | پەڕە: ${currentPage} لە ${totalPages}`);
+                
+                // Show/hide go to page container based on total pages
+                if (totalPages > 5) {
+                    $('#goToPageContainer').show();
+                    $('#goToPageInput').attr('max', totalPages);
+                } else {
+                    $('#goToPageContainer').hide();
+                }
+                
                 // Reset select all
                 $('#selectAllNotifications').prop('checked', false);
                 $('#deleteSelectedNotifications').prop('disabled', true);
@@ -90,6 +121,22 @@ $(document).ready(function() {
         let page = parseInt($(this).data('page'));
         if (!isNaN(page) && page !== currentPage && page >= 1 && page <= totalPages) {
             fetchNotifications(page);
+        }
+    });
+    
+    // Go to page functionality
+    $('#goToPageBtn').on('click', function() {
+        let page = parseInt($('#goToPageInput').val());
+        if (!isNaN(page) && page >= 1 && page <= totalPages && page !== currentPage) {
+            fetchNotifications(page);
+            $('#goToPageInput').val('');
+        }
+    });
+    
+    // Go to page on Enter key
+    $('#goToPageInput').on('keypress', function(e) {
+        if (e.which === 13) { // Enter key
+            $('#goToPageBtn').click();
         }
     });
 
