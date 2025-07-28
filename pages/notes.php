@@ -64,7 +64,7 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
 
 <div class="container-fluid py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-
+        <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">تێبینیەکان</h2>
         <div class="d-flex gap-2">
             <?php if (hasPermission('view_concrete_receipts')): ?>
             <a href="concrete_receipts.php" class="btn" style="background: var(--seafoam-green); color:white; font-weight: bold;">
