@@ -79,7 +79,7 @@ function updateCustomerSummaryTable(customerSummary) {
     if (customerSummary.length === 0) {
         tbody.append(`
             <tr>
-                <td colspan="6" class="text-center text-muted">
+                <td colspan="8" class="text-center text-muted">
                     هیچ داتایەک نەدۆزرایەوە
                 </td>
             </tr>
@@ -96,6 +96,10 @@ function updateCustomerSummaryTable(customerSummary) {
             `<span class="badge bg-success">$${customer.total_price.toLocaleString()}</span>` : 
             `<span class="badge bg-secondary">نەدەراوە</span>`;
         
+        const notesDisplay = customer.latest_notes ? 
+            `<span class="notes-cell">${customer.latest_notes}</span>` : 
+            `<span class="text-muted">-</span>`;
+        
         const row = `
             <tr>
                 <td>${index + 1}</td>
@@ -111,6 +115,9 @@ function updateCustomerSummaryTable(customerSummary) {
                 </td>
                 <td class="text-center">
                     ${totalPrice}
+                </td>
+                <td class="notes-cell">
+                    ${notesDisplay}
                 </td>
                 <td>
                     ${formulasHtml}

@@ -176,12 +176,24 @@
     white-space: pre-wrap;
     font-size: 0.9rem;
     line-height: 1.4;
+    padding: 8px;
 }
 
 .notes-cell:empty::before {
     content: '-';
     color: #999;
     font-style: italic;
+}
+
+/* Customer summary table notes styling */
+#customerSummaryTable .notes-cell {
+    max-width: 150px;
+    font-size: 0.85rem;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    padding: 4px 8px;
+    margin: 2px 0;
+    display: inline-block;
 }
 
 /* Filter improvements */

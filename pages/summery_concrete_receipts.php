@@ -49,7 +49,7 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
   
   <div class="container-fluid py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">پوختەی پسووڵەکانی کۆنکرێت</h2>
+   
       <div class="d-flex gap-2">
         <a href="concrete_receipts.php" class="btn btn-secondary">
           <i class="fas fa-arrow-right me-1"></i>گەڕانەوە بۆ پسووڵەکان
@@ -139,6 +139,7 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
                 <th>ژمارەی پسووڵەکان</th>
                 <th>کۆی مەتر سێجا</th>
                 <th>کۆی نرخ</th>
+                <th>تێبینی</th>
                 <th>فۆرمۆلاکان</th>
                 <th>کردارەکان</th>
               </tr>
@@ -210,7 +211,7 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
   <!-- Print Section (Hidden) -->
   <div id="printSection" style="display: none;">
     <div style="text-align: center; margin-bottom: 30px;">
-      <h2 style="color: var(--seafoam-green); margin-bottom: 10px;">پوختەی پسووڵەکانی کۆنکرێت</h2>
+
       <p style="color: #666; margin-bottom: 5px;">بەروار: <span id="print_date"></span></p>
       <p style="color: #666;">کاتی چاپکردن: <span id="print_time"></span></p>
     </div>

@@ -76,7 +76,8 @@ try {
             SUM(cr.meter_amount) as total_meter,
             AVG(cr.meter_amount) as average_meter,
             SUM(CASE WHEN cr.price_per_meter IS NOT NULL THEN cr.meter_amount * cr.price_per_meter ELSE 0 END) as total_price,
-            GROUP_CONCAT(DISTINCT cf.name) as formulas_used
+            GROUP_CONCAT(DISTINCT cf.name) as formulas_used,
+            MAX(cr.notes) as latest_notes
         FROM customers c
         LEFT JOIN concrete_receipts cr ON c.id = cr.customer_id
         LEFT JOIN concrete_formulas cf ON cr.formulas_id = cf.id
@@ -161,7 +162,8 @@ try {
                 'total_meter' => round((float)($customer['total_meter'] ?? 0), 2),
                 'average_meter' => round((float)($customer['average_meter'] ?? 0), 2),
                 'total_price' => round((float)($customer['total_price'] ?? 0), 2),
-                'formulas_used' => $customer['formulas_used'] ? explode(',', $customer['formulas_used']) : []
+                'formulas_used' => $customer['formulas_used'] ? explode(',', $customer['formulas_used']) : [],
+                'latest_notes' => $customer['latest_notes'] ?? null
             ];
         }, $customer_summary)
     ];
