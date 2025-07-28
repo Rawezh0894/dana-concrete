@@ -24,7 +24,6 @@ require_once '../config/db_conected.php';
     <link href="../assets/css/login.css" rel="stylesheet">
     <link href="../assets/css/variables.css" rel="stylesheet">
     <link href="../assets/css/nav.css" rel="stylesheet">
-    <link href="../assets/css/sidebar.css" rel="stylesheet">
     <link href="../assets/css/comon/table.css" rel="stylesheet">
     <link href="../assets/css/comon/style.css" rel="stylesheet">
     <link href="../assets/css/comon/select2_design.css" rel="stylesheet">
@@ -181,11 +180,10 @@ require_once '../config/db_conected.php';
     </div>
     <div id="notificationsPagination" class="mt-3"></div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="../assets/js/notifications/select_notifications.js"></script>
 <script src="../assets/js/nav/nav.js"></script>
 <script src="../assets/js/nav/sidebar.js"></script>
-<script src="../assets/js/notifications/select_notifications.js"></script>
 
 </body>
 </html> 
