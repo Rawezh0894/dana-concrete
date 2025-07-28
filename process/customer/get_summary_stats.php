@@ -3,6 +3,10 @@ session_start();
 require_once '../../config/db_conected.php';
 require_once '../../config/permissions.php';
 
+// Enable error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
     http_response_code(401);
@@ -18,6 +22,11 @@ if (!hasPermission('view_customer')) {
 }
 
 try {
+    // Test database connection first
+    if (!$pdo) {
+        throw new Exception('Database connection failed');
+    }
+
     // Get USD exchange rate from API
     $apiUrl = 'https://dinarapi.hediworks.site/api/get-price';
     $apiToken = 'S3gl9SVEkZ1Vvc93cCjsbLLmwDvgzk';
@@ -47,6 +56,9 @@ try {
     // Get total customers count
     $totalCustomersQuery = "SELECT COUNT(*) as total FROM customers";
     $totalCustomersStmt = $pdo->query($totalCustomersQuery);
+    if (!$totalCustomersStmt) {
+        throw new Exception('Failed to execute total customers query: ' . implode(', ', $pdo->errorInfo()));
+    }
     $totalCustomers = $totalCustomersStmt->fetchColumn();
 
     // Get customers with debt count (opening debt + remaining from sales)
@@ -58,6 +70,9 @@ try {
                COALESCE(s.remaining_amount, 0) > 0)
     ";
     $customersWithDebtStmt = $pdo->query($customersWithDebtQuery);
+    if (!$customersWithDebtStmt) {
+        throw new Exception('Failed to execute customers with debt query: ' . implode(', ', $pdo->errorInfo()));
+    }
     $customersWithDebt = $customersWithDebtStmt->fetchColumn();
 
     // Get total debt (opening_debt + remaining from sales converted to USD)
@@ -70,6 +85,9 @@ try {
         LEFT JOIN sales s ON c.id = s.customer_id AND s.payment_type = 'قەرز'
     ";
     $totalDebtStmt = $pdo->query($totalDebtQuery);
+    if (!$totalDebtStmt) {
+        throw new Exception('Failed to execute total debt query: ' . implode(', ', $pdo->errorInfo()));
+    }
     $totalDebtData = $totalDebtStmt->fetch(PDO::FETCH_ASSOC);
 
     // Calculate total debt in USD
@@ -87,10 +105,17 @@ try {
         ]
     ];
 
+    header('Content-Type: application/json; charset=utf-8');
     echo json_encode($response);
 
 } catch (Exception $e) {
+    error_log('Error in get_summary_stats.php: ' . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['error' => 'Database error: ' . $e->getMessage()]);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode([
+        'success' => false,
+        'error' => 'Database error: ' . $e->getMessage(),
+        'details' => $e->getTraceAsString()
+    ]);
 }
 ?> 

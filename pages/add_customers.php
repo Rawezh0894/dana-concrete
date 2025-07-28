@@ -42,9 +42,9 @@ if (!hasPermission('view_customer')) {
 <?php include '../includes/sidebar.php'; ?>
 <div class="container-fluid py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">کڕیارەکان</h2>
+
         <div>
-            <button class="btn btn-success me-2" style="background: var(--kelly-green); font-weight: bold;" onclick="window.location.href='credit_of_all_customers.php'">
+            <button class="btn btn-success me-2" style="background: var(--seafoam-green); font-weight: bold;" onclick="window.location.href='credit_of_all_customers.php'">
                 <i class="fa fa-print"></i> پرینتی قەرزی کڕیارەکان
             </button>
             <?php if (hasPermission('add_customer')): ?>
