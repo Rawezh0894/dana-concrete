@@ -11,16 +11,89 @@ try {
         echo json_encode(['success' => false, 'msg' => 'ڕێگە پێنەدراو']);
         exit;
     }
-$sql = "SELECT oe.*, p.name AS person_name, e.name AS employee_name, c.name AS car_name, lm.name AS material_name, oe.car_id, oe.gas_liters
+    // Build WHERE clause based on filters
+    $whereConditions = [];
+    $params = [];
+    
+    // Date filters
+    if (!empty($_GET['dateFrom'])) {
+        $whereConditions[] = "oe.date >= ?";
+        $params[] = $_GET['dateFrom'];
+    }
+    
+    if (!empty($_GET['dateTo'])) {
+        $whereConditions[] = "oe.date <= ?";
+        $params[] = $_GET['dateTo'];
+    }
+    
+    // Entity filters
+    if (!empty($_GET['car'])) {
+        $whereConditions[] = "oe.car_id = ?";
+        $params[] = $_GET['car'];
+    }
+    
+    if (!empty($_GET['employee'])) {
+        $whereConditions[] = "oe.employee_id = ?";
+        $params[] = $_GET['employee'];
+    }
+    
+    if (!empty($_GET['person'])) {
+        $whereConditions[] = "oe.person_id = ?";
+        $params[] = $_GET['person'];
+    }
+    
+    if (!empty($_GET['expenseTypes']) && is_array($_GET['expenseTypes'])) {
+        $placeholders = str_repeat('?,', count($_GET['expenseTypes']) - 1) . '?';
+        $whereConditions[] = "oe.expense_type IN ($placeholders)";
+        $params = array_merge($params, $_GET['expenseTypes']);
+    }
+    
+
+    
+    // Build SQL query
+    $sql = "SELECT oe.*, p.name AS person_name, e.name AS employee_name, c.name AS car_name, lm.name AS material_name, oe.car_id, oe.gas_liters
         FROM other_expenses oe
         LEFT JOIN other_expense_persons p ON oe.person_id = p.id
         LEFT JOIN employees e ON oe.employee_id = e.id
         LEFT JOIN cars c ON oe.car_id = c.id
-        LEFT JOIN list_materials lm ON oe.material_id = lm.id
-        ORDER BY oe.id DESC";
-$stmt = $pdo->query($sql);
-$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-echo json_encode($data);
+        LEFT JOIN list_materials lm ON oe.material_id = lm.id";
+    
+    if (!empty($whereConditions)) {
+        $sql .= " WHERE " . implode(" AND ", $whereConditions);
+    }
+    
+    $sql .= " ORDER BY oe.date DESC, oe.id DESC";
+    
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    $expenses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Calculate summary including car expenses (material and gas usage)
+    $summarySql = "SELECT 
+        -- Other expenses (non-car expenses)
+        SUM(CASE WHEN (car_id IS NULL OR (expense_type != 'بەکارهێنانی کاڵای کۆگا' AND expense_type != 'بەکارهێنانی گاز')) AND currency_type = 'دینار' THEN amount_iqd ELSE 0 END) as total_other_expenses_iqd,
+        SUM(CASE WHEN (car_id IS NULL OR (expense_type != 'بەکارهێنانی کاڵای کۆگا' AND expense_type != 'بەکارهێنانی گاز')) AND currency_type = 'دۆلار' THEN amount_usd ELSE 0 END) as total_other_expenses_usd,
+        -- Car material expenses (has both IQD and USD)
+        SUM(CASE WHEN car_id IS NOT NULL AND expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN material_purchase_price_iqd * material_quantity ELSE 0 END) as total_car_material_cost_iqd,
+        SUM(CASE WHEN car_id IS NOT NULL AND expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN material_purchase_price_usd * material_quantity ELSE 0 END) as total_car_material_cost_usd,
+        -- Car gas expenses (only IQD)
+        SUM(CASE WHEN car_id IS NOT NULL AND expense_type = 'بەکارهێنانی گاز' THEN gas_total_cost ELSE 0 END) as total_car_gas_cost
+        FROM other_expenses oe";
+    
+    if (!empty($whereConditions)) {
+        $summarySql .= " WHERE " . implode(" AND ", $whereConditions);
+    }
+    
+    $summaryStmt = $pdo->prepare($summarySql);
+    $summaryStmt->execute($params);
+    $summary = $summaryStmt->fetch(PDO::FETCH_ASSOC);
+    
+    echo json_encode([
+        'success' => true,
+        'expenses' => $expenses,
+        'summary' => $summary,
+        'total_count' => count($expenses)
+    ]);
 } catch (Exception $e) {
     error_log('Error in select_expenses.php: ' . $e->getMessage());
     error_log('Stack trace: ' . $e->getTraceAsString());

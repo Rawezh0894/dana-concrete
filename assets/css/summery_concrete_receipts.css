@@ -169,6 +169,21 @@
     z-index: 1;
 }
 
+/* Notes field styling */
+.notes-cell {
+    max-width: 200px;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.notes-cell:empty::before {
+    content: '-';
+    color: #999;
+    font-style: italic;
+}
+
 /* Filter improvements */
 .filter-section {
     background: #f8f9fa;

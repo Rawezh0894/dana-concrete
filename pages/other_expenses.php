@@ -24,69 +24,186 @@ if (!isset($_SESSION['user_id'])) {
     <link href="../assets/css/login.css" rel="stylesheet">
     <link href="../assets/css/variables.css" rel="stylesheet">
     <link href="../assets/css/nav.css" rel="stylesheet">
+    <link href="../assets/css/other_expenses.css" rel="stylesheet">
     <link href="../assets/css/comon/table.css" rel="stylesheet">
     <link href="../assets/css/comon/style.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <style>
-        .gas-material-field {
-            display: none;
-        }
-        .gas-material-field.show {
-            display: block;
-        }
-        .warehouse-hidden-field {
-            display: block;
-        }
-        .warehouse-hidden-field.hide {
-            display: none;
-        }
-    </style>
+  
 </head>
 <body dir="rtl">
 <?php include '../includes/navbar.php'; ?>
 <?php include '../includes/sidebar.php'; ?>
 <div class="container-fluid py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">خەرجی تر</h2>
+        <div>
+            <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">خەرجی تر</h2>
+            <small class="text-muted">فلتەری ورد - خەرجی سەیارەکان + خەرجی تر</small>
+        </div>
         <?php if (hasPermission('add_other_expenses')): ?>
         <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addExpenseModal" style="background: var(--seafoam-green); font-weight: bold;">+ زیادکردنی خەرجی تر</button>
         <?php endif; ?>
     </div>
-    <div class="mb-4 d-flex flex-wrap align-items-center gap-3">
-      <div>
-        <label for="monthFilter" class="form-label mb-0">فلتەر بە مانگ:</label>
-        <input type="month" id="monthFilter" class="form-control" style="width: 180px; display: inline-block;">
+    <div class="mb-4">
+      <!-- Advanced Filter Section -->
+      <div class="card shadow-sm">
+        <div class="card-header" style="background: var(--kelly-green); color: var(--seafoam-green);">
+          <h6 class="mb-0">
+            <i class="fas fa-filter me-2"></i>فلتەر - خەرجی سەیارەکان + خەرجی تر
+          </h6>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <!-- Date Range Filters -->
+            <div class="col-md-3">
+              <label for="dateFrom" class="form-label">لە بەروار:</label>
+              <input type="date" id="dateFrom" class="form-control">
+              <div class="auto-filter-indicator mt-1">
+                <i class="fas fa-bolt me-1"></i>
+                خودکار - سەیارەکان + خەرجی تر
+              </div>
+            </div>
+            <div class="col-md-3">
+              <label for="dateTo" class="form-label">بۆ بەروار:</label>
+              <input type="date" id="dateTo" class="form-control">
+              <div class="auto-filter-indicator mt-1">
+                <i class="fas fa-bolt me-1"></i>
+                خودکار - سەیارەکان + خەرجی تر
+              </div>
+            </div>
+            <div class="col-md-3">
+              <label for="monthFilter" class="form-label">مانگ:</label>
+              <input type="month" id="monthFilter" class="form-control">
+              <div class="auto-filter-indicator mt-1">
+                <i class="fas fa-bolt me-1"></i>
+                خودکار - سەیارەکان + خەرجی تر
+              </div>
+            </div>
+
+            
+            <!-- Entity Filters -->
+            <div class="col-md-3">
+              <label for="carFilter" class="form-label">سەیارە:</label>
+              <select id="carFilter" class="form-control">
+                <option value="">هەموو سەیارەکان</option>
+              </select>
+              <div class="auto-filter-indicator mt-1">
+                <i class="fas fa-bolt me-1"></i>
+                خودکار - سەیارەکان + خەرجی تر
+              </div>
+            </div>
+            <div class="col-md-3">
+              <label for="employeeFilter" class="form-label">کارمەند:</label>
+              <select id="employeeFilter" class="form-control">
+                <option value="">هەموو کارمەندەکان</option>
+              </select>
+              <div class="auto-filter-indicator mt-1">
+                <i class="fas fa-bolt me-1"></i>
+                خودکار - سەیارەکان + خەرجی تر
+              </div>
+            </div>
+            <div class="col-md-3">
+              <label for="personFilter" class="form-label">کەس:</label>
+              <select id="personFilter" class="form-control">
+                <option value="">هەموو کەسەکان</option>
+              </select>
+              <div class="auto-filter-indicator mt-1">
+                <i class="fas fa-bolt me-1"></i>
+                خودکار - سەیارەکان + خەرجی تر
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">جۆری خەرجی:</label>
+              <div class="d-flex gap-3 flex-wrap">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="expenseTypeOther" value="خەرجی تر">
+                  <label class="form-check-label" for="expenseTypeOther">
+                    خەرجی تر
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="expenseTypeMaterial" value="بەکارهێنانی کاڵای کۆگا">
+                  <label class="form-check-label" for="expenseTypeMaterial">
+                    بەکارهێنانی کاڵای کۆگا
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="expenseTypeGas" value="بەکارهێنانی گاز">
+                  <label class="form-check-label" for="expenseTypeGas">
+                    بەکارهێنانی گاز
+                  </label>
+                </div>
+              </div>
+              <div class="auto-filter-indicator mt-1">
+                <i class="fas fa-check-square me-1"></i>
+                چۆیس - سەیارەکان + خەرجی تر
+              </div>
+            </div>
+            
+
+
+            
+            <!-- Action Buttons -->
+            <div class="col-12">
+              <div class="d-flex gap-2 flex-wrap">
+                <button type="button" id="clearFilters" class="btn btn-secondary">
+                  <i class="fas fa-times me-1"></i>سڕینەوەی فلتەر
+                </button>
+                <button type="button" id="exportReport" class="btn btn-success">
+                  <i class="fas fa-download me-1"></i>داگرتنی ڕاپۆرت
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
+    </div>
       <div class="row w-100 mt-3 g-3">
         <div class="col-md-3">
-          <div class="card text-center shadow">
+          <div class="card text-center shadow" style="background: linear-gradient(135deg, #00b894, #00cec9); color: white;">
             <div class="card-body">
-              <h6 class="card-title">کۆی خەرجی نەقد بە دینار</h6>
-              <div id="totalCashIqd" class="fs-4 fw-bold">0 د.ع</div>
+              <h6 class="card-title">خەرجی سەیارەکان (کاڵا)</h6>
+              <div id="totalCarMaterialCost" class="fs-4 fw-bold">$0</div>
+              <small class="text-light">بەکارهێنانی کاڵای کۆگا</small>
             </div>
           </div>
         </div>
         <div class="col-md-3">
-          <div class="card text-center shadow">
+          <div class="card text-center shadow" style="background: linear-gradient(135deg, #fdcb6e, #e17055); color: white;">
             <div class="card-body">
-              <h6 class="card-title">کۆی خەرجی نەقد بە دۆلار</h6>
-              <div id="totalCashUsd" class="fs-4 fw-bold">$0</div>
+              <h6 class="card-title">خەرجی سەیارەکان (گاز)</h6>
+              <div id="totalCarGasCost" class="fs-4 fw-bold">$0</div>
+              <small class="text-light">بەکارهێنانی گاز</small>
             </div>
           </div>
         </div>
         <div class="col-md-3">
-          <div class="card text-center shadow">
+          <div class="card text-center shadow" style="background: linear-gradient(135deg, #00b894, #00cec9); color: white;">
             <div class="card-body">
-              <h6 class="card-title">کۆی خەرجی قەرز بە دینار</h6>
-              <div id="totalCreditIqd" class="fs-4 fw-bold">0 د.ع</div>
+              <h6 class="card-title">خەرجی تر</h6>
+              <div id="totalOtherExpenses" class="fs-4 fw-bold">$0</div>
+              <small class="text-light">خەرجی تر (نەک سەیارە)</small>
             </div>
           </div>
         </div>
         <div class="col-md-3">
-          <div class="card text-center shadow">
+          <div class="card text-center shadow" style="background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: white;">
             <div class="card-body">
-              <h6 class="card-title">کۆی خەرجی قەرز بە دۆلار</h6>
-              <div id="totalCreditUsd" class="fs-4 fw-bold">$0</div>
+              <h6 class="card-title">کۆی گشتی</h6>
+              <div id="totalCarExpenses" class="fs-4 fw-bold">$0</div>
+              <small class="text-light">کاڵا + گاز + خەرجی تر</small>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Second row for USD exchange rate -->
+      <div class="row w-100 mt-2 g-3">
+        <div class="col-md-4 mx-auto">
+          <div class="card text-center shadow" style="background: linear-gradient(135deg, #e17055, #d63031); color: white;">
+            <div class="card-body">
+              <h6 class="card-title">نرخی دۆلار</h6>
+              <div id="usdExchangeRate" class="fs-4 fw-bold">0 د.ع</div>
+              <small class="text-light">نرخی 100 دۆلار بە دینار</small>
             </div>
           </div>
         </div>
@@ -468,6 +585,7 @@ if (!isset($_SESSION['user_id'])) {
 <script src="../assets/js/swalAlert.js"></script>
 <script src="../assets/js/other_expenses/error_logger.js"></script>
 <script src="../assets/js/other_expenses/debug_panel.js"></script>
+<script src="../assets/js/other_expenses/advanced_filters.js"></script>
 <script src="../assets/js/other_expenses/add_expenses.js"></script>
 <script src="../assets/js/other_expenses/select_expenses.js"></script>
 <script src="../assets/js/other_expenses/other_expenses.js"></script>

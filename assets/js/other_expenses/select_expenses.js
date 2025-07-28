@@ -2,6 +2,20 @@ async function loadOtherExpenses() {
     try {
         console.log('Loading other expenses...');
         
+        // Fetch latest USD rate
+        let usdRate = 139250; // fallback default
+        try {
+            const rateRes = await fetch('../process/purchase_materilas/get_usd_rate.php');
+            const rateData = await rateRes.json();
+            if (rateData.success && rateData.rate) {
+                usdRate = parseFloat(rateData.rate);
+            } else if (rateData.default_rate) {
+                usdRate = parseFloat(rateData.default_rate);
+            }
+        } catch (e) {
+            // fallback to default
+        }
+
         const monthFilter = document.getElementById('monthFilter');
         console.log('Month filter element:', monthFilter);
         
@@ -14,9 +28,23 @@ async function loadOtherExpenses() {
             throw new Error(`HTTP error! status: ${res.status}`);
         }
         
-        const data = await res.json();
-        console.log('Expenses data received:', data);
-    function formatNumber(num) {
+        const result = await res.json();
+        console.log('Expenses data received:', result);
+        
+        // Handle both old format (array) and new format (object with success property)
+        let data;
+        if (Array.isArray(result)) {
+            // Old format - direct array
+            data = result;
+        } else if (result.success && Array.isArray(result.expenses)) {
+            // New format - object with success and expenses properties
+            data = result.expenses;
+        } else {
+            console.error('Unexpected data format:', result);
+            return;
+        }
+        
+        function formatNumber(num) {
         return Number(num).toLocaleString('en-US');
     }
     function formatUSD(num) {
@@ -25,29 +53,66 @@ async function loadOtherExpenses() {
     function formatIQD(num) {
         return num ? `${formatNumber(num)} د.ع` : '0 د.ع';
     }
+    function iqdToUsd(iqd) {
+        return usdRate && iqd ? (parseFloat(iqd) / usdRate * 100) : 0;
+    }
     // Filter by month
     let filtered = data;
     if (monthFilter && monthFilter.value) {
         const [year, month] = monthFilter.value.split('-');
         filtered = data.filter(row => row.date && row.date.startsWith(`${year}-${month}`));
     }
-    // Calculate totals
-    let totalCashIqd = 0, totalCashUsd = 0, totalCreditIqd = 0, totalCreditUsd = 0;
+    // Calculate totals including car expenses
+    // Note: Material usage has both IQD and USD amounts, gas usage is only IQD, 
+    // and other expenses can be either IQD or USD based on currency_type
+    let totalCarMaterialCostIQD = 0, totalCarMaterialCostUSD = 0;
+    let totalCarGasCost = 0;
+    let totalOtherExpensesIQD = 0, totalOtherExpensesUSD = 0;
+    
     filtered.forEach(row => {
-        if (row.payment_type === 'نەقد') {
-            totalCashIqd += parseFloat(row.amount_iqd) || 0;
-            totalCashUsd += parseFloat(row.amount_usd) || 0;
+        // Calculate car material expenses (has both IQD and USD)
+        if (row.car_id && row.expense_type === 'بەکارهێنانی کاڵای کۆگا') {
+            totalCarMaterialCostIQD += parseFloat(row.material_purchase_price_iqd || 0) * parseFloat(row.material_quantity || 0);
+            totalCarMaterialCostUSD += parseFloat(row.material_purchase_price_usd || 0) * parseFloat(row.material_quantity || 0);
         }
-        if (row.payment_type === 'قەرز') {
-            totalCreditIqd += parseFloat(row.amount_iqd) || 0;
-            totalCreditUsd += parseFloat(row.amount_usd) || 0;
+        
+        // Calculate car gas expenses (only IQD)
+        if (row.car_id && row.expense_type === 'بەکارهێنانی گاز') {
+            totalCarGasCost += parseFloat(row.gas_total_cost || 0);
+        }
+        
+        // Calculate other expenses (can be IQD or USD based on currency_type)
+        if (!row.car_id || (row.expense_type !== 'بەکارهێنانی کاڵای کۆگا' && row.expense_type !== 'بەکارهێنانی گاز')) {
+            if (row.currency_type === 'دۆلار') {
+                totalOtherExpensesUSD += parseFloat(row.amount_usd || 0);
+            } else {
+                totalOtherExpensesIQD += parseFloat(row.amount_iqd || 0);
+            }
         }
     });
-    // Update cards
-    document.getElementById('totalCashIqd').textContent = formatIQD(totalCashIqd);
-    document.getElementById('totalCashUsd').textContent = formatUSD(totalCashUsd);
-    document.getElementById('totalCreditIqd').textContent = formatIQD(totalCreditIqd);
-    document.getElementById('totalCreditUsd').textContent = formatUSD(totalCreditUsd);
+    
+    // Calculate totals
+    const totalCarMaterialCost = totalCarMaterialCostIQD + totalCarMaterialCostUSD;
+    const totalCarExpenses = totalCarMaterialCost + totalCarGasCost;
+    const totalOtherExpenses = totalOtherExpensesIQD + totalOtherExpensesUSD;
+    const totalAllExpenses = totalOtherExpenses + totalCarExpenses;
+    
+    // Convert IQD to USD for display
+    // Formula: USD = IQD / (rate/100) where rate is for 100 USD
+    const totalCarMaterialCostUSDConverted = totalCarMaterialCostIQD / usdRate * 100 + totalCarMaterialCostUSD;
+    const totalCarGasCostUSD = totalCarGasCost / usdRate * 100;
+    const totalOtherExpensesUSDConverted = totalOtherExpensesIQD / usdRate * 100 + totalOtherExpensesUSD;
+    const totalCarExpensesUSD = totalCarMaterialCostUSDConverted + totalCarGasCostUSD;
+    const totalAllExpensesUSD = totalOtherExpensesUSDConverted + totalCarExpensesUSD;
+    
+    // Update car expense cards (show only USD)
+    document.getElementById('totalCarMaterialCost').innerHTML = `${formatUSD(totalCarMaterialCostUSDConverted)}`;
+    document.getElementById('totalCarGasCost').innerHTML = `${formatUSD(totalCarGasCostUSD)}`;
+    document.getElementById('totalOtherExpenses').innerHTML = `${formatUSD(totalOtherExpensesUSDConverted)}`;
+    document.getElementById('totalCarExpenses').innerHTML = `${formatUSD(totalAllExpensesUSD)}`;
+    
+    // Update USD exchange rate card
+    document.getElementById('usdExchangeRate').innerHTML = `${formatNumber(usdRate)} د.ع`;
     // Table
     const tableData = filtered.map((row, idx) => ({
         '#': idx + 1,

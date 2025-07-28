@@ -27,6 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 // Get POST data
 $receipt_ids = $_POST['receipt_ids'] ?? [];
 $price_per_meter = $_POST['price_per_meter'] ?? null;
+$notes = $_POST['notes'] ?? '';
 
 // Validate input
 if (empty($receipt_ids) || !is_array($receipt_ids)) {
@@ -43,7 +44,7 @@ try {
     // Prepare the update statement
     $stmt = $pdo->prepare("
         UPDATE concrete_receipts 
-        SET price_per_meter = ?, updated_at = NOW() 
+        SET price_per_meter = ?, notes = ?, updated_at = NOW() 
         WHERE id = ?
     ");
     
@@ -53,7 +54,7 @@ try {
     // Update each receipt
     foreach ($receipt_ids as $receipt_id) {
         if (is_numeric($receipt_id)) {
-            $result = $stmt->execute([$price_per_meter, $receipt_id]);
+            $result = $stmt->execute([$price_per_meter, $notes, $receipt_id]);
             if ($result) {
                 $success_count++;
             } else {

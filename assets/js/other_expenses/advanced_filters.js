@@ -1,0 +1,511 @@
+// Advanced Filters for Other Expenses
+class AdvancedFilters {
+    constructor() {
+        this.filters = {
+            dateFrom: '',
+            dateTo: '',
+            month: '',
+            year: '',
+            car: '',
+            employee: '',
+            person: '',
+            expenseTypes: [], // Changed to array for multiple selection
+            amountFromIqd: '',
+            amountToIqd: '',
+            amountFromUsd: '',
+            amountToUsd: ''
+        };
+        this.debounceTimer = null;
+        this.init();
+    }
+
+    init() {
+        this.setupEventListeners();
+
+        this.populateEntityFilters();
+        this.setDefaultDates();
+    }
+
+    setupEventListeners() {
+        // Filter buttons
+        document.getElementById('clearFilters')?.addEventListener('click', () => this.clearFilters());
+        document.getElementById('exportReport')?.addEventListener('click', () => this.exportReport());
+
+
+        // Date filters - auto apply with debouncing
+        document.getElementById('dateFrom')?.addEventListener('change', (e) => {
+            this.filters.dateFrom = e.target.value;
+            this.updateMonthFilter();
+            this.debouncedApplyFilters();
+        });
+
+        document.getElementById('dateTo')?.addEventListener('change', (e) => {
+            this.filters.dateTo = e.target.value;
+            this.updateMonthFilter();
+            this.debouncedApplyFilters();
+        });
+
+        document.getElementById('monthFilter')?.addEventListener('change', (e) => {
+            this.filters.month = e.target.value;
+            this.updateDateRangeFromMonth();
+            this.debouncedApplyFilters();
+        });
+
+
+
+        // Entity filters - auto apply with debouncing
+        document.getElementById('carFilter')?.addEventListener('change', (e) => {
+            this.filters.car = e.target.value;
+            this.debouncedApplyFilters();
+        });
+
+        document.getElementById('employeeFilter')?.addEventListener('change', (e) => {
+            this.filters.employee = e.target.value;
+            this.debouncedApplyFilters();
+        });
+
+        document.getElementById('personFilter')?.addEventListener('change', (e) => {
+            this.filters.person = e.target.value;
+            this.debouncedApplyFilters();
+        });
+
+        // Expense type checkboxes - auto apply with debouncing
+        document.getElementById('expenseTypeOther')?.addEventListener('change', (e) => {
+            this.updateExpenseTypeFilters();
+            this.debouncedApplyFilters();
+        });
+        document.getElementById('expenseTypeMaterial')?.addEventListener('change', (e) => {
+            this.updateExpenseTypeFilters();
+            this.debouncedApplyFilters();
+        });
+        document.getElementById('expenseTypeGas')?.addEventListener('change', (e) => {
+            this.updateExpenseTypeFilters();
+            this.debouncedApplyFilters();
+        });
+
+
+    }
+
+    setDefaultDates() {
+        const today = new Date();
+        const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+        
+        document.getElementById('dateFrom').value = this.formatDate(firstDayOfMonth);
+        document.getElementById('dateTo').value = this.formatDate(today);
+        
+        this.filters.dateFrom = this.formatDate(firstDayOfMonth);
+        this.filters.dateTo = this.formatDate(today);
+    }
+
+    updateExpenseTypeFilters() {
+        this.filters.expenseTypes = [];
+        const checkboxes = [
+            'expenseTypeOther',
+            'expenseTypeMaterial', 
+            'expenseTypeGas'
+        ];
+        
+        checkboxes.forEach(id => {
+            const checkbox = document.getElementById(id);
+            if (checkbox && checkbox.checked) {
+                this.filters.expenseTypes.push(checkbox.value);
+            }
+        });
+    }
+
+    debouncedApplyFilters() {
+        // Clear existing timer
+        if (this.debounceTimer) {
+            clearTimeout(this.debounceTimer);
+        }
+        
+        // Set new timer
+        this.debounceTimer = setTimeout(() => {
+            this.applyFilters();
+        }, 300); // 300ms delay
+    }
+
+
+
+    async populateEntityFilters() {
+        try {
+            // Populate car filter
+            const carsResponse = await fetch('../process/car/select_car.php');
+            const cars = await carsResponse.json();
+            this.populateSelect('carFilter', cars, 'id', 'name');
+
+            // Populate employee filter
+            const employeesResponse = await fetch('../process/employee/select_employee.php');
+            const employees = await employeesResponse.json();
+            this.populateSelect('employeeFilter', employees, 'id', 'name');
+
+            // Populate person filter
+            const personsResponse = await fetch('../process/other_expenses/select_persons.php');
+            const persons = await personsResponse.json();
+            this.populateSelect('personFilter', persons, 'id', 'name');
+
+        } catch (error) {
+            console.error('Error populating entity filters:', error);
+        }
+    }
+
+    populateSelect(selectId, data, valueKey, textKey) {
+        const select = document.getElementById(selectId);
+        if (!select) return;
+
+        // Keep the first option (default)
+        const defaultOption = select.querySelector('option');
+        select.innerHTML = '';
+        if (defaultOption) {
+            select.appendChild(defaultOption);
+        }
+
+        data.forEach(item => {
+            const option = document.createElement('option');
+            option.value = item[valueKey];
+            option.textContent = item[textKey];
+            select.appendChild(option);
+        });
+    }
+
+    updateMonthFilter() {
+        if (this.filters.dateFrom && this.filters.dateTo) {
+            const fromDate = new Date(this.filters.dateFrom);
+            const toDate = new Date(this.filters.dateTo);
+            
+            // If both dates are in the same month, set month filter
+            if (fromDate.getFullYear() === toDate.getFullYear() && 
+                fromDate.getMonth() === toDate.getMonth()) {
+                const monthValue = `${fromDate.getFullYear()}-${String(fromDate.getMonth() + 1).padStart(2, '0')}`;
+                document.getElementById('monthFilter').value = monthValue;
+                this.filters.month = monthValue;
+            } else {
+                document.getElementById('monthFilter').value = '';
+                this.filters.month = '';
+            }
+        }
+    }
+
+    updateDateRangeFromMonth() {
+        if (this.filters.month) {
+            const [year, month] = this.filters.month.split('-');
+            const firstDay = new Date(parseInt(year), parseInt(month) - 1, 1);
+            const lastDay = new Date(parseInt(year), parseInt(month), 0);
+            
+            document.getElementById('dateFrom').value = this.formatDate(firstDay);
+            document.getElementById('dateTo').value = this.formatDate(lastDay);
+            
+            this.filters.dateFrom = this.formatDate(firstDay);
+            this.filters.dateTo = this.formatDate(lastDay);
+        }
+    }
+
+
+
+    formatDate(date) {
+        return date.toISOString().split('T')[0];
+    }
+
+    async applyFilters() {
+        try {
+            console.log('Applying filters:', this.filters);
+            
+            // Show loading
+            this.showLoading();
+            
+            // Build query string
+            const queryParams = new URLSearchParams();
+            Object.entries(this.filters).forEach(([key, value]) => {
+                if (value) {
+                    if (key === 'expenseTypes' && Array.isArray(value) && value.length > 0) {
+                        // Handle array of expense types
+                        value.forEach(type => {
+                            queryParams.append('expenseTypes[]', type);
+                        });
+                    } else if (key !== 'expenseTypes') {
+                        queryParams.append(key, value);
+                    }
+                }
+            });
+
+            // Fetch filtered data
+            const response = await fetch(`../process/other_expenses/select_expenses.php?${queryParams}`);
+            const data = await response.json();
+
+            if (data.success) {
+                this.displayFilteredData(data.expenses);
+                await this.updateSummaryCards(data.summary);
+                // No success message for auto-apply
+            } else {
+                this.showError(data.msg || 'هەڵەیەک ڕویدا لە جێبەجێکردنی فلتەرەکان');
+            }
+
+        } catch (error) {
+            console.error('Error applying filters:', error);
+            this.showError('هەڵەیەک ڕویدا لە جێبەجێکردنی فلتەرەکان');
+        } finally {
+            this.hideLoading();
+        }
+    }
+
+    displayFilteredData(expenses) {
+        const tbody = document.querySelector('#otherExpensesTable tbody');
+        if (!tbody) return;
+
+        tbody.innerHTML = '';
+
+        if (expenses.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="25" class="text-center text-muted py-4">
+                        <div class="d-flex align-items-center justify-content-center">
+                            <i class="fas fa-search me-3" style="color: #ccc; font-size: 1.2rem;"></i>
+                            <span style="color: #888; font-weight: 500;">هیچ داتایەک نەدۆزرایەوە</span>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        expenses.forEach((expense, index) => {
+            const row = this.createExpenseRow(expense, index + 1);
+            tbody.appendChild(row);
+        });
+    }
+
+    createExpenseRow(expense, index) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${index}</td>
+            <td>${expense.purpose || '-'}</td>
+            <td>${expense.person_name || '-'}</td>
+            <td>${expense.employee_name || '-'}</td>
+            <td>${expense.car_name || '-'}</td>
+            <td>${expense.gas_liters || '-'}</td>
+            <td>${expense.expense_type || '-'}</td>
+            <td>${expense.material_name || '-'}</td>
+            <td>${expense.material_quantity || '-'}</td>
+            <td>${expense.material_purchase_price_iqd || '-'}</td>
+            <td>${expense.material_purchase_price_usd || '-'}</td>
+            <td>${expense.material_total_cost || '-'}</td>
+            <td>${expense.gas_purchase_price_input || '-'}</td>
+            <td>${expense.gas_total_cost || '-'}</td>
+            <td>${expense.payment_type || '-'}</td>
+            <td>${expense.currency_type || '-'}</td>
+            <td>${expense.invoice_number || '-'}</td>
+            <td>${expense.amount_iqd || '-'}</td>
+            <td>${expense.amount_usd || '-'}</td>
+            <td>${expense.paid_iqd || '-'}</td>
+            <td>${expense.paid_usd || '-'}</td>
+            <td>${expense.exchange_rate || '-'}</td>
+            <td>${expense.remaining_iqd || '-'}</td>
+            <td>${expense.remaining_usd || '-'}</td>
+            <td>${expense.date || '-'}</td>
+            <td>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="editExpense(${expense.id})">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteExpense(${expense.id})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </td>
+        `;
+        return row;
+    }
+
+    async updateSummaryCards(summary) {
+        if (summary) {
+            // Fetch latest USD rate
+            let usdRate = 139250; // fallback default
+            try {
+                const rateRes = await fetch('../process/purchase_materilas/get_usd_rate.php');
+                const rateData = await rateRes.json();
+                if (rateData.success && rateData.rate) {
+                    usdRate = parseFloat(rateData.rate);
+                } else if (rateData.default_rate) {
+                    usdRate = parseFloat(rateData.default_rate);
+                }
+            } catch (e) {
+                // fallback to default
+            }
+
+            function formatUSD(num) {
+                return num ? `$${Number(num).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : '$0.00';
+            }
+
+            function iqdToUsd(iqd) {
+                return usdRate && iqd ? (parseFloat(iqd) / usdRate * 100) : 0;
+            }
+            
+            // Calculate totals using the same logic as select_expenses.js
+            const totalCarMaterialCostIQD = parseFloat(summary.total_car_material_cost_iqd || 0);
+            const totalCarMaterialCostUSD = parseFloat(summary.total_car_material_cost_usd || 0);
+            const totalCarGasCost = parseFloat(summary.total_car_gas_cost || 0);
+            const totalOtherExpensesIQD = parseFloat(summary.total_other_expenses_iqd || 0);
+            const totalOtherExpensesUSD = parseFloat(summary.total_other_expenses_usd || 0);
+            
+            // Convert IQD to USD for display (same formula as select_expenses.js)
+            const totalCarMaterialCostUSDConverted = iqdToUsd(totalCarMaterialCostIQD) + totalCarMaterialCostUSD;
+            const totalCarGasCostUSD = iqdToUsd(totalCarGasCost);
+            const totalOtherExpensesUSDConverted = iqdToUsd(totalOtherExpensesIQD) + totalOtherExpensesUSD;
+            const totalCarExpensesUSD = totalCarMaterialCostUSDConverted + totalCarGasCostUSD;
+            const totalAllExpensesUSD = totalOtherExpensesUSDConverted + totalCarExpensesUSD;
+            
+            // Update car expense cards (only the 4 cards that exist)
+            const elements = {
+                'totalCarMaterialCost': formatUSD(totalCarMaterialCostUSDConverted),
+                'totalCarGasCost': formatUSD(totalCarGasCostUSD),
+                'totalOtherExpenses': formatUSD(totalOtherExpensesUSDConverted),
+                'totalCarExpenses': formatUSD(totalAllExpensesUSD)
+            };
+            
+            // Safely update each element
+            Object.entries(elements).forEach(([id, value]) => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = value;
+                }
+            });
+            
+            // Update USD exchange rate card
+            const usdRateElement = document.getElementById('usdExchangeRate');
+            if (usdRateElement) {
+                usdRateElement.textContent = `${Number(usdRate).toLocaleString('en-US')} د.ع`;
+            }
+        }
+    }
+
+    clearFilters() {
+        // Reset all filter values
+        Object.keys(this.filters).forEach(key => {
+            if (key === 'expenseTypes') {
+                this.filters[key] = []; // Reset to empty array
+            } else {
+                this.filters[key] = '';
+            }
+        });
+
+        // Clear form inputs
+        const formElements = [
+            'dateFrom', 'dateTo', 'monthFilter', 'carFilter', 'employeeFilter', 'personFilter'
+        ];
+        
+        formElements.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.value = '';
+            }
+        });
+        
+        // Clear expense type checkboxes
+        const checkboxes = [
+            'expenseTypeOther', 'expenseTypeMaterial', 'expenseTypeGas'
+        ];
+        
+        checkboxes.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.checked = false;
+            }
+        });
+
+        // Set default dates
+        this.setDefaultDates();
+
+        // Reload original data
+        if (typeof loadOtherExpenses === 'function') {
+            loadOtherExpenses();
+        }
+
+        this.showSuccess('فلتەرەکان سڕایەوە');
+    }
+
+    async exportReport() {
+        try {
+            const queryParams = new URLSearchParams();
+            Object.entries(this.filters).forEach(([key, value]) => {
+                if (value) {
+                    if (key === 'expenseTypes' && Array.isArray(value) && value.length > 0) {
+                        // Handle array of expense types
+                        value.forEach(type => {
+                            queryParams.append('expenseTypes[]', type);
+                        });
+                    } else if (key !== 'expenseTypes') {
+                        queryParams.append(key, value);
+                    }
+                }
+            });
+
+            const response = await fetch(`../process/other_expenses/export_report.php?${queryParams}`);
+            const blob = await response.blob();
+            
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `other_expenses_report_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+
+            this.showSuccess('ڕاپۆرت بە سەرکەوتوویی داگرا');
+        } catch (error) {
+            console.error('Error exporting report:', error);
+            this.showError('هەڵەیەک ڕویدا لە داگرتنی ڕاپۆرت');
+        }
+    }
+
+
+
+    showLoading() {
+        // Show loading indicator in the table area
+        const table = document.getElementById('otherExpensesTable');
+        if (table) {
+            const loadingRow = document.createElement('tr');
+            loadingRow.id = 'loadingRow';
+            loadingRow.innerHTML = `
+                <td colspan="25" class="text-center py-4">
+                    <div class="d-flex align-items-center justify-content-center">
+                        <i class="fas fa-spinner fa-spin me-3" style="color: var(--seafoam-green); font-size: 1.2rem;"></i>
+                        <span style="color: var(--seafoam-green); font-weight: 500;">جێبەجێکردنی فلتەر...</span>
+                    </div>
+                </td>
+            `;
+            table.querySelector('tbody').appendChild(loadingRow);
+        }
+    }
+
+    hideLoading() {
+        // Remove loading indicator
+        const loadingRow = document.getElementById('loadingRow');
+        if (loadingRow) {
+            loadingRow.remove();
+        }
+    }
+
+    showSuccess(message) {
+        Swal.fire({
+            icon: 'success',
+            title: 'سەرکەوتوو!',
+            text: message,
+            timer: 2000,
+            showConfirmButton: false
+        });
+    }
+
+    showError(message) {
+        Swal.fire({
+            icon: 'error',
+            title: 'هەڵە!',
+            text: message
+        });
+    }
+}
+
+// Initialize advanced filters when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    window.advancedFilters = new AdvancedFilters();
+}); 

@@ -165,6 +165,7 @@ function displayCustomerDetails(customerName, receipts) {
                             <th>وەرگر</th>
                             <th>بڕی مەتر سێجا</th>
                             <th>نرخی مەتر سێجا</th>
+                            <th>تێبینی</th>
                             <th>فۆرمۆلا</th>
                             <th>میکسەر</th>
                             <th>پەمپ</th>
@@ -193,6 +194,7 @@ function displayCustomerDetails(customerName, receipts) {
                     <td class="text-center">
                         ${priceDisplay}
                     </td>
+                    <td class="notes-cell">${receipt.notes || ''}</td>
                     <td>
                         <span class="formula-badge">${receipt.formula_name || '-'}</span>
                     </td>
@@ -301,11 +303,13 @@ function openPriceSettingModal() {
     
     $('#selected_receipts_list').html(receiptsList);
     $('#price_per_meter').val('');
+    $('#notes').val('');
     $('#priceSettingModal').modal('show');
 }
 
 function savePricePerMeter() {
     const price = parseFloat($('#price_per_meter').val());
+    const notes = $('#notes').val();
     const selectedReceipts = $('.receipt-checkbox:checked');
     
     if (!price || price <= 0) {
@@ -349,7 +353,8 @@ function savePricePerMeter() {
         method: 'POST',
         data: {
             receipt_ids: receiptIds,
-            price_per_meter: price
+            price_per_meter: price,
+            notes: notes
         },
         dataType: 'json',
         success: function(response) {

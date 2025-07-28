@@ -182,6 +182,10 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
               <input type="number" class="form-control" id="price_per_meter" step="0.01" min="0" placeholder="نرخی مەتر سێجا">
             </div>
             <div class="mb-3">
+              <label for="notes" class="form-label">تێبینی</label>
+              <textarea class="form-control" id="notes" rows="3" placeholder="تێبینی دەربارەی نرخەکە..."></textarea>
+            </div>
+            <div class="mb-3">
               <label class="form-label">پسووڵەکان:</label>
               <div id="selected_receipts_list" class="border rounded p-2" style="max-height: 200px; overflow-y: auto;">
                 <!-- Selected receipts will be listed here -->
