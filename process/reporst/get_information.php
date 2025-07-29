@@ -127,7 +127,7 @@ try {
         'cash' => ['usd' => 0],
         'credit' => ['usd' => 0]
     ];
-    $sales_query = "SELECT payment_type, SUM(total_price) as usd FROM sales WHERE 1 $date_condition_sales GROUP BY payment_type";
+    $sales_query = "SELECT payment_type, SUM(total_price) as usd FROM sales WHERE 1=1 $date_condition_sales GROUP BY payment_type";
     $stmt = $pdo->query($sales_query);
     while ($row = $stmt->fetch()) {
         if ($row['payment_type'] === 'نەقد') {
@@ -154,34 +154,34 @@ try {
     $other_expenses_total_usd = $other_expenses_usd + $other_expenses_iqd_converted;
 
     // Employee Expenses (خەرجی کارمەند)
-    $employee_expenses_query = "SELECT SUM(total) as total_expenses FROM employee_payments WHERE 1 $date_condition_employee_payments";
+    $employee_expenses_query = "SELECT SUM(total) as total_expenses FROM employee_payments WHERE 1=1 $date_condition_employee_payments";
     $stmt = $pdo->query($employee_expenses_query);
     $row = $stmt->fetch();
     $employee_expenses = $row['total_expenses'] ?? 0;
     $employee_expenses_usd = ($usd_iqd_rate > 0) ? ($employee_expenses / ($usd_iqd_rate / 100)) : 0;
 
     // Discounts (کۆی داشکاندن)
-    $discounts_query = "SELECT SUM(discount) as total_discount FROM sales WHERE 1 $date_condition_sales";
+    $discounts_query = "SELECT SUM(discount) as total_discount FROM sales WHERE 1=1 $date_condition_sales";
     $stmt = $pdo->query($discounts_query);
     $row = $stmt->fetch();
     $total_discount = $row['total_discount'] ?? 0;
 
     // Debt payments (company)
-    $debt_payments_query = "SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd FROM debt_payments WHERE 1 $date_condition_date";
+    $debt_payments_query = "SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd FROM debt_payments WHERE 1=1 $date_condition_date";
     $stmt = $pdo->query($debt_payments_query);
     $row = $stmt->fetch();
     $debt_payments_usd = $row['usd'] ?? 0;
     $debt_payments_iqd = $row['iqd'] ?? 0;
 
     // Customer debt payments
-    $customer_debt_payments_query = "SELECT SUM(paid_usd) as usd, SUM(paid_iqd) as iqd FROM customer_debt_payments WHERE 1 $date_condition_date";
+    $customer_debt_payments_query = "SELECT SUM(paid_usd) as usd, SUM(paid_iqd) as iqd FROM customer_debt_payments WHERE 1=1 $date_condition_date";
     $stmt = $pdo->query($customer_debt_payments_query);
     $row = $stmt->fetch();
     $customer_debt_payments_usd = $row['usd'] ?? 0;
     $customer_debt_payments_iqd = $row['iqd'] ?? 0;
 
     // Person other expenses debt payments
-    $person_debt_payments_query = "SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd FROM person_other_expenses_debt_payments WHERE 1 $date_condition_date";
+    $person_debt_payments_query = "SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd FROM person_other_expenses_debt_payments WHERE 1=1 $date_condition_date";
     $stmt = $pdo->query($person_debt_payments_query);
     $row = $stmt->fetch();
     $person_debt_payments_usd = $row['usd'] ?? 0;
@@ -225,7 +225,7 @@ try {
     ];
 
     // Employee payments with date filter
-    $employee_payments_query = "SELECT SUM(total) as total_expenses FROM employee_payments WHERE 1 $date_condition_employee_payments";
+    $employee_payments_query = "SELECT SUM(total) as total_expenses FROM employee_payments WHERE 1=1 $date_condition_employee_payments";
     $stmt = $pdo->query($employee_payments_query);
     $row = $stmt->fetch();
     $total_employee_expenses = $row['total_expenses'] ?? 0;
@@ -250,7 +250,7 @@ try {
     $total_expenses_breakdown['purchases'] = $purchases_cash_usd;
 
     // Purchase materials (کڕینی مەواد) with date filter
-    $purchase_materials_query = "SELECT SUM(total_price_usd) as usd, SUM(total_price_iqd) as iqd FROM purchase_materials WHERE 1";
+    $purchase_materials_query = "SELECT SUM(total_price_usd) as usd, SUM(total_price_iqd) as iqd FROM purchase_materials WHERE 1=1";
     if ($use_range) {
         $from = $from_date ? $from_date : '1000-01-01';
         $to = $to_date ? $to_date : '9999-12-31';
@@ -277,7 +277,7 @@ try {
     $total_expenses_usd = array_sum($total_expenses_breakdown);
 
     $total_discounts = 0;
-    $stmt = $pdo->query("SELECT SUM(discount) as total_discount FROM sales $date_condition_sales");
+    $stmt = $pdo->query("SELECT SUM(discount) as total_discount FROM sales WHERE 1=1 $date_condition_sales");
     $row = $stmt->fetch();
     $total_discounts = $row['total_discount'] ?? 0;
 
