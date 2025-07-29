@@ -281,9 +281,9 @@ try {
     $row = $stmt->fetch();
     $total_discounts = $row['total_discount'] ?? 0;
 
-    // Calculate net profit: کۆی فرۆشتن - کۆی خەرجی
+    // Calculate net profit: کۆی فرۆشتن - کۆی خەرجی - داشکاندن
     $total_sales_amount = ($sales['cash']['usd'] ?? 0) + ($sales['credit']['usd'] ?? 0);
-    $net_profit = $total_sales_amount - $total_expenses_usd;
+    $net_profit = $total_sales_amount - $total_expenses_usd - $total_discounts;
 
     // 1. Monthly Income/Expenses (last 6 months)
     $monthly_income_expenses = [];
