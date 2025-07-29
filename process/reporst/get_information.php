@@ -216,6 +216,40 @@ try {
     if ($row && $row['rate']) $avg_rate = $row['rate'];
     $total_employee_expenses_usd = ($avg_rate > 0 ? ($total_employee_expenses / $avg_rate) : 0);
 
+    // Calculate total expenses (کۆی خەرجی)
+    $total_expenses_breakdown = [
+        'employee_payments' => $total_employee_expenses_usd,
+        'other_expenses' => 0,
+        'purchases' => 0,
+        'purchase_materials' => 0
+    ];
+
+    // Other expenses - only خەرجی تر (not بەکارهێنانی کاڵای کۆگا or بەکارهێنانی گاز)
+    $stmt = $pdo->query("SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd FROM other_expenses WHERE expense_type = 'خەرجی تر'");
+    $row = $stmt->fetch();
+    $other_expenses_usd = $row['usd'] ?? 0;
+    $other_expenses_iqd = $row['iqd'] ?? 0;
+    $other_expenses_total_usd = $other_expenses_usd + (($usd_iqd_rate > 0) ? ($other_expenses_iqd / ($usd_iqd_rate / 100)) : 0);
+    $total_expenses_breakdown['other_expenses'] = $other_expenses_total_usd;
+
+    // Purchases (کڕین) - only cash payments
+    $stmt = $pdo->query("SELECT SUM(amount_iqd) as iqd FROM purchases WHERE payment_type = 'نەقد' AND type = 'دینار'");
+    $row = $stmt->fetch();
+    $purchases_cash_iqd = $row['iqd'] ?? 0;
+    $purchases_cash_usd = ($usd_iqd_rate > 0) ? ($purchases_cash_iqd / ($usd_iqd_rate / 100)) : 0;
+    $total_expenses_breakdown['purchases'] = $purchases_cash_usd;
+
+    // Purchase materials (کڕینی مەواد)
+    $stmt = $pdo->query("SELECT SUM(total_price_usd) as usd, SUM(total_price_iqd) as iqd FROM purchase_materials");
+    $row = $stmt->fetch();
+    $purchase_materials_usd = $row['usd'] ?? 0;
+    $purchase_materials_iqd = $row['iqd'] ?? 0;
+    $purchase_materials_total_usd = $purchase_materials_usd + (($usd_iqd_rate > 0) ? ($purchase_materials_iqd / ($usd_iqd_rate / 100)) : 0);
+    $total_expenses_breakdown['purchase_materials'] = $purchase_materials_total_usd;
+
+    // Total expenses
+    $total_expenses_usd = array_sum($total_expenses_breakdown);
+
     $total_discounts = 0;
     $stmt = $pdo->query("SELECT SUM(discount) as total_discount FROM sales");
     $row = $stmt->fetch();
@@ -345,6 +379,10 @@ try {
             'other_expenses' => ['usd' => $other_expenses_total_usd, 'iqd' => $other_expenses_iqd],
             'discounts' => ['usd' => $total_discount],
             'employee_expenses' => ['usd' => $employee_expenses_usd, 'iqd' => $employee_expenses],
+            'total_expenses' => [
+                'usd' => $total_expenses_usd,
+                'breakdown' => $total_expenses_breakdown
+            ],
             'net_profit' => ['usd' => $net_profit],
             'charts' => [
                 'monthly_income_expenses' => $monthly_income_expenses,

@@ -133,3 +133,12 @@
 )
 
 [28-Jul-2025 14:08:02 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[29-Jul-2025 08:02:46 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753768966
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[29-Jul-2025 08:02:46 Europe/Berlin] Dashboard data loaded successfully for user: 1

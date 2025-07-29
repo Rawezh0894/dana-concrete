@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Flag to prevent multiple submissions
     let isSubmitting = false;
-    
+
     // Initialize Select2 for customer dropdown only in the add modal
     if ($('#addNoteModal').length > 0) {
         enableSelect2('#customer_id', '#addNoteModal');

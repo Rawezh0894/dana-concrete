@@ -71,11 +71,11 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
                 <i class="fas fa-file-alt me-1"></i>پسووڵەی کۆنکرێت
             </a>
             <?php endif; ?>
-            <?php if (hasPermission('add_notes')): ?>
-            <button class="btn" data-bs-toggle="modal" data-bs-target="#addNoteModal" style="background: var(--seafoam-green); color:white; font-weight: bold;">
-                <i class="fas fa-plus me-2"></i>زیادکردنی تێبینی
-            </button>
-            <?php endif; ?>
+        <?php if (hasPermission('add_notes')): ?>
+        <button class="btn" data-bs-toggle="modal" data-bs-target="#addNoteModal" style="background: var(--seafoam-green); color:white; font-weight: bold;">
+            <i class="fas fa-plus me-2"></i>زیادکردنی تێبینی
+        </button>
+        <?php endif; ?>
         </div>
     </div>
 
@@ -220,22 +220,22 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
                                 <div class="card-body">
                                     <div class="mb-3">
                                         <label for="mixer_car_id" class="form-label">کۆدی میکسەر</label>
-                                        <select class="form-select" id="mixer_car_id" name="mixer_car_id">
-                                            <option value="">هەڵبژێرە</option>
-                                            <?php foreach ($mixer_cars as $car): ?>
-                                                <option value="<?= $car['id'] ?>"><?= htmlspecialchars($car['name']) ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </div>
+                            <select class="form-select" id="mixer_car_id" name="mixer_car_id">
+                                <option value="">هەڵبژێرە</option>
+                                <?php foreach ($mixer_cars as $car): ?>
+                                    <option value="<?= $car['id'] ?>"><?= htmlspecialchars($car['name']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
                                     <div class="mb-3">
-                                        <label for="mixer_driver_id" class="form-label">شۆفێری میکسەر</label>
-                                        <select class="form-select" id="mixer_driver_id" name="mixer_driver_id">
-                                            <option value="">هەڵبژێرە</option>
-                                            <?php foreach ($mixer_drivers as $driver): ?>
-                                                <option value="<?= $driver['id'] ?>"><?= htmlspecialchars($driver['name']) ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </div>
+                            <label for="mixer_driver_id" class="form-label">شۆفێری میکسەر</label>
+                            <select class="form-select" id="mixer_driver_id" name="mixer_driver_id">
+                                <option value="">هەڵبژێرە</option>
+                                <?php foreach ($mixer_drivers as $driver): ?>
+                                    <option value="<?= $driver['id'] ?>"><?= htmlspecialchars($driver['name']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
                                 </div>
                             </div>
                         </div>
@@ -245,21 +245,21 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
                                 <div class="card-body">
                                     <div class="mb-3">
                                         <label for="pump_car_id" class="form-label">کۆدی پەمپ</label>
-                                        <select class="form-select" id="pump_car_id" name="pump_car_id">
-                                            <option value="">هەڵبژێرە</option>
-                                            <?php foreach ($pump_cars as $car): ?>
-                                                <option value="<?= $car['id'] ?>"><?= htmlspecialchars($car['name']) ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </div>
+                            <select class="form-select" id="pump_car_id" name="pump_car_id">
+                                <option value="">هەڵبژێرە</option>
+                                <?php foreach ($pump_cars as $car): ?>
+                                    <option value="<?= $car['id'] ?>"><?= htmlspecialchars($car['name']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
                                     <div class="mb-3">
-                                        <label for="pump_driver_id" class="form-label">شۆفێری پەمپ</label>
-                                        <select class="form-select" id="pump_driver_id" name="pump_driver_id">
-                                            <option value="">هەڵبژێرە</option>
-                                            <?php foreach ($pump_drivers as $driver): ?>
-                                                <option value="<?= $driver['id'] ?>"><?= htmlspecialchars($driver['name']) ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
+                            <label for="pump_driver_id" class="form-label">شۆفێری پەمپ</label>
+                            <select class="form-select" id="pump_driver_id" name="pump_driver_id">
+                                <option value="">هەڵبژێرە</option>
+                                <?php foreach ($pump_drivers as $driver): ?>
+                                    <option value="<?= $driver['id'] ?>"><?= htmlspecialchars($driver['name']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
                                     </div>
                                 </div>
                             </div>
@@ -340,22 +340,22 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
                                 <div class="card-body">
                                     <div class="mb-3">
                                         <label for="edit_mixer_car_id" class="form-label">کۆدی میکسەر</label>
-                                        <select class="form-select" id="edit_mixer_car_id" name="edit_mixer_car_id">
-                                            <option value="">هەڵبژێرە</option>
-                                            <?php foreach ($mixer_cars as $car): ?>
-                                                <option value="<?= $car['id'] ?>"><?= htmlspecialchars($car['name']) ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </div>
+                            <select class="form-select" id="edit_mixer_car_id" name="edit_mixer_car_id">
+                                <option value="">هەڵبژێرە</option>
+                                <?php foreach ($mixer_cars as $car): ?>
+                                    <option value="<?= $car['id'] ?>"><?= htmlspecialchars($car['name']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
                                     <div class="mb-3">
-                                        <label for="edit_mixer_driver_id" class="form-label">شۆفێری میکسەر</label>
-                                        <select class="form-select" id="edit_mixer_driver_id" name="edit_mixer_driver_id">
-                                            <option value="">هەڵبژێرە</option>
-                                            <?php foreach ($mixer_drivers as $driver): ?>
-                                                <option value="<?= $driver['id'] ?>"><?= htmlspecialchars($driver['name']) ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </div>
+                            <label for="edit_mixer_driver_id" class="form-label">شۆفێری میکسەر</label>
+                            <select class="form-select" id="edit_mixer_driver_id" name="edit_mixer_driver_id">
+                                <option value="">هەڵبژێرە</option>
+                                <?php foreach ($mixer_drivers as $driver): ?>
+                                    <option value="<?= $driver['id'] ?>"><?= htmlspecialchars($driver['name']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
                                 </div>
                             </div>
                         </div>
@@ -365,21 +365,21 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
                                 <div class="card-body">
                                     <div class="mb-3">
                                         <label for="edit_pump_car_id" class="form-label">کۆدی پەمپ</label>
-                                        <select class="form-select" id="edit_pump_car_id" name="edit_pump_car_id">
-                                            <option value="">هەڵبژێرە</option>
-                                            <?php foreach ($pump_cars as $car): ?>
-                                                <option value="<?= $car['id'] ?>"><?= htmlspecialchars($car['name']) ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </div>
+                            <select class="form-select" id="edit_pump_car_id" name="edit_pump_car_id">
+                                <option value="">هەڵبژێرە</option>
+                                <?php foreach ($pump_cars as $car): ?>
+                                    <option value="<?= $car['id'] ?>"><?= htmlspecialchars($car['name']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
                                     <div class="mb-3">
-                                        <label for="edit_pump_driver_id" class="form-label">شۆفێری پەمپ</label>
-                                        <select class="form-select" id="edit_pump_driver_id" name="edit_pump_driver_id">
-                                            <option value="">هەڵبژێرە</option>
-                                            <?php foreach ($pump_drivers as $driver): ?>
-                                                <option value="<?= $driver['id'] ?>"><?= htmlspecialchars($driver['name']) ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
+                            <label for="edit_pump_driver_id" class="form-label">شۆفێری پەمپ</label>
+                            <select class="form-select" id="edit_pump_driver_id" name="edit_pump_driver_id">
+                                <option value="">هەڵبژێرە</option>
+                                <?php foreach ($pump_drivers as $driver): ?>
+                                    <option value="<?= $driver['id'] ?>"><?= htmlspecialchars($driver['name']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
                                     </div>
                                 </div>
                             </div>

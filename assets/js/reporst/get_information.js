@@ -182,6 +182,41 @@ function fetchAndRenderReportData() {
                     html: function() {
                         return `<div class=\"card-value\">${formatCurrency(data.net_profit.usd, 'USD')}</div>`;
                     }
+                },
+                {
+                    key: 'total_expenses',
+                    label: 'کۆی خەرجی',
+                    icon: 'fa-money-bill-wave',
+                    color: '#dc3545',
+                    cardClass: 'total-expenses-card',
+                    html: function() {
+                        const total_expenses = Number(data.total_expenses.usd) || 0;
+                        const breakdown = data.total_expenses.breakdown || {};
+                        
+                        return `
+                            <div class=\"card-value\" style=\"font-weight:bold;\">${formatCurrency(total_expenses, 'USD')}</div>
+                            <div class=\"d-flex justify-content-between align-items-center gap-2\">
+                                <div>
+                                    <div class=\"section-label\">پارەدان بە کارمەند</div>
+                                    <div class=\"card-value\">${formatCurrency(breakdown.employee_payments || 0, 'USD')}</div>
+                                </div>
+                                <div>
+                                    <div class=\"section-label\">خەرجی تر</div>
+                                    <div class=\"card-value\">${formatCurrency(breakdown.other_expenses || 0, 'USD')}</div>
+                                </div>
+                            </div>
+                            <div class=\"d-flex justify-content-between align-items-center gap-2 mt-2\">
+                                <div>
+                                    <div class=\"section-label\">کڕین</div>
+                                    <div class=\"card-value\">${formatCurrency(breakdown.purchases || 0, 'USD')}</div>
+                                </div>
+                                <div>
+                                    <div class=\"section-label\">کڕینی مەواد</div>
+                                    <div class=\"card-value\">${formatCurrency(breakdown.purchase_materials || 0, 'USD')}</div>
+                                </div>
+                            </div>
+                        `;
+                    }
                 }
             ];
             let html = '';
