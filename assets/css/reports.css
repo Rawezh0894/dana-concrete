@@ -152,6 +152,21 @@
   margin-bottom: 0.3rem;
 }
 
+/* Dollar Rate Card */
+.report-card.dollar-rate-card {
+  border-top: 6px solid #28a745;
+  background: linear-gradient(135deg, #e8f5e9 0%, #f8fffa 100%);
+}
+.report-card.dollar-rate-card .card-title,
+.report-card.dollar-rate-card .fa {
+  color: #28a745;
+}
+.report-card.dollar-rate-card .card-subtitle {
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 0.5rem;
+}
+
 @media (max-width: 768px) {
   .report-card {
     padding: 1.2rem 0.7rem 0.7rem 0.7rem;

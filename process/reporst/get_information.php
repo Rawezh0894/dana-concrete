@@ -3,15 +3,41 @@ require_once '../../config/db_conected.php';
 header('Content-Type: application/json');
 
 try {
-    // Get exchange rate from settings table
-    $usd_iqd_rate = 150000;
-    try {
-        $stmt = $pdo->query("SELECT value FROM settings WHERE name = 'usd_iqd_rate'");
-        $row = $stmt->fetch();
-        if ($row && is_numeric($row['value'])) {
-            $usd_iqd_rate = floatval($row['value']);
+    // Get exchange rate from API
+    $usd_iqd_rate = 150000; // Default fallback value
+    
+    // Function to fetch dollar rate from API
+    function fetchDollarRateFromAPI() {
+        $apiUrl = 'https://dinarapi.hediworks.site/api/get-price';
+        $apiToken = 'S3gl9SVEkZ1Vvc93cCjsbLLmwDvgzk';
+        $id = '8'; // 100 dollar ID
+        
+        $url = $apiUrl . '?id=' . $id . '&api_token=' . $apiToken;
+        
+        $context = stream_context_create([
+            'http' => [
+                'timeout' => 10,
+                'user_agent' => 'DanaConcrete/1.0'
+            ]
+        ]);
+        
+        $response = @file_get_contents($url, false, $context);
+        
+        if ($response !== false) {
+            $data = json_decode($response, true);
+            if ($data && isset($data['value']) && is_numeric($data['value'])) {
+                return floatval($data['value']);
+            }
         }
-    } catch (Exception $e) {}
+        
+        return null;
+    }
+    
+    // Try to get rate from API
+    $api_rate = fetchDollarRateFromAPI();
+    if ($api_rate !== null) {
+        $usd_iqd_rate = $api_rate;
+    }
 
     // Customers - Calculate debt using new method (opening_debt + remaining from sales)
     $customer_debt_query = "

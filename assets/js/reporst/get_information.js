@@ -217,6 +217,20 @@ function fetchAndRenderReportData() {
                             </div>
                         `;
                     }
+                },
+                {
+                    key: 'dollar_rate',
+                    label: 'نرخی ١٠٠ دۆلار',
+                    icon: 'fa-dollar-sign',
+                    color: '#28a745',
+                    cardClass: 'dollar-rate-card',
+                    html: function() {
+                        const rate = data.usd_iqd_rate || 150000;
+                        return `
+                            <div class=\"card-value\">${formatNumber(rate)} د.ع</div>
+                            <div class=\"card-subtitle\">نرخی ئێستا</div>
+                        `;
+                    }
                 }
             ];
             let html = '';
@@ -311,4 +325,12 @@ function formatCurrency(amount, currency) {
     } else {
         return Number(amount).toLocaleString('en-US', {maximumFractionDigits: 0}) + ' دینار';
     }
+}
+
+function formatNumber(amount) {
+    if (amount === null || amount === undefined || isNaN(amount)) {
+        return '0';
+    }
+    const num = parseFloat(amount);
+    return num.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 }
