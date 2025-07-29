@@ -97,14 +97,17 @@ try {
     // Low stock notifications
     $low_stock_stmt = $pdo->query('SELECT name, type, amount, material_type FROM bins_silos WHERE amount < 10000 ORDER BY amount ASC LIMIT 3');
     while ($row = $low_stock_stmt->fetch(PDO::FETCH_ASSOC)) {
-        // Format amount for display - show full numbers
-        $amountText = number_format($row['amount']);
+        // Format amount for display in tons
+        $amountInTons = $row['amount'] / 1000;
+        $amountText = $amountInTons >= 1 ? 
+            number_format($amountInTons, 1) : 
+            number_format($amountInTons, 2);
             
         $notifications[] = [
             'type' => 'warning',
             'icon' => 'bi-exclamation-triangle',
             'title' => 'ستۆکی کەم',
-            'text' => "{$row['name']} ({$row['type']} - {$row['material_type']}) تەنها {$amountText} کگم ماوەتەوە"
+            'text' => "{$row['name']} ({$row['type']} - {$row['material_type']}) تەنها {$amountText} طەن ماوەتەوە"
         ];
     }
 
