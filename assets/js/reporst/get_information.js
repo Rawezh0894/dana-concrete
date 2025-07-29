@@ -211,7 +211,7 @@ function fetchAndRenderReportData() {
                                     <div class=\"card-value\">${formatCurrency(breakdown.purchases || 0, 'USD')}</div>
                                 </div>
                                 <div>
-                                    <div class=\"section-label\">کڕینی مەواد</div>
+                                    <div class=\"section-label\">کڕینی کاڵا</div>
                                     <div class=\"card-value\">${formatCurrency(breakdown.purchase_materials || 0, 'USD')}</div>
                                 </div>
                             </div>
