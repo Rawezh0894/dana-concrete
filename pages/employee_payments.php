@@ -30,6 +30,78 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
     <link href="../assets/css/comon/style.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .summary-card {
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: none;
+        }
+        .summary-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .summary-card .card-body {
+            padding: 1.5rem;
+        }
+        .summary-card .card-title {
+            font-size: 1rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+        .summary-card .card-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #003b73;
+        }
+        .summary-card i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Card Colors */
+        .total-payments-card {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f8fffa 100%);
+            border-top: 4px solid #1976d2;
+        }
+        .total-payments-card i, .total-payments-card .card-title {
+            color: #1976d2;
+        }
+        
+        .salary-card {
+            background: linear-gradient(135deg, #e8f5e9 0%, #f8fffa 100%);
+            border-top: 4px solid #43a047;
+        }
+        .salary-card i, .salary-card .card-title {
+            color: #43a047;
+        }
+        
+        .bonus-card {
+            background: linear-gradient(135deg, #fff3e0 0%, #f8fffa 100%);
+            border-top: 4px solid #ff9800;
+        }
+        .bonus-card i, .bonus-card .card-title {
+            color: #ff9800;
+        }
+        
+        .karwanhisabi-card {
+            background: linear-gradient(135deg, #f3e5f5 0%, #f8fffa 100%);
+            border-top: 4px solid #8e24aa;
+        }
+        .karwanhisabi-card i, .karwanhisabi-card .card-title {
+            color: #8e24aa;
+        }
+        
+        @media (max-width: 768px) {
+            .summary-card .card-value {
+                font-size: 1.2rem;
+            }
+            .summary-card .card-title {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
 </head>
 <body dir="rtl">
 <?php include '../includes/navbar.php'; ?>
@@ -38,6 +110,62 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">پارەدان بە کارمەندەکان</h2>
         <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addPaymentModal" style="background: var(--seafoam-green); font-weight: bold;">+ زیادکردنی پارەدان</button>
+    </div>
+    
+    <!-- Summary Cards -->
+    <div class="row mb-4" id="summary-cards">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card summary-card total-payments-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-money-bill-wave mb-2"></i>
+                    <h5 class="card-title">کۆی پارەدان</h5>
+                    <div class="card-value" id="total-payments">0 د.ع</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card summary-card salary-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-user-tie mb-2"></i>
+                    <h5 class="card-title">کۆی مووچە</h5>
+                    <div class="card-value" id="total-salary">0 د.ع</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card summary-card bonus-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-gift mb-2"></i>
+                    <h5 class="card-title">کۆی بەخشیش</h5>
+                    <div class="card-value" id="total-bonus">0 د.ع</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card summary-card karwanhisabi-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-calculator mb-2"></i>
+                    <h5 class="card-title">کۆی کاروانحیسابی</h5>
+                    <div class="card-value" id="total-karwanhisabi">0 د.ع</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Filters -->
+    <div class="row mb-4">
+        <div class="col-md-6 mb-3">
+            <label for="month-filter" class="form-label">فلتەر بە مانگ:</label>
+            <select class="form-select" id="month-filter">
+                <option value="">هەموو مانگەکان</option>
+            </select>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label for="employee-filter" class="form-label">فلتەر بە کارمەند:</label>
+            <select class="form-select" id="employee-filter">
+                <option value="">هەموو کارمەندەکان</option>
+            </select>
+        </div>
     </div>
     <div class="table-responsive">
         <table class="table table-bordered table-hover align-middle text-center" id="employeePaymentsTable">
@@ -165,6 +293,7 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
 <script src="../assets/js/employee_payments/select.js"></script>
 <script src="../assets/js/employee_payments/update.js"></script>
 <script src="../assets/js/employee_payments/delete.js"></script>
+<script src="../assets/js/employee_payments/summary.js"></script>
 <script>
 $(function() {
     function calcTotalAdd() {

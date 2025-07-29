@@ -5,7 +5,19 @@ $(function() {
     function loadPayments() {
         const columns = ['#', 'employee_name', 'salary', 'karwanhisabi', 'bonus', 'total', 'pay_month', 'created_at', 'actions'];
         TableController.showLoading('#employeePaymentsTable', columns);
-        $.get('../process/employee_payments/select.php', function(res) {
+        
+        // Get filter values
+        const monthFilter = $('#month-filter').val();
+        const employeeFilter = $('#employee-filter').val();
+        
+        // Build query parameters
+        const params = new URLSearchParams();
+        if (monthFilter) params.append('month', monthFilter);
+        if (employeeFilter) params.append('employee', employeeFilter);
+        
+        const url = '../process/employee_payments/select.php' + (params.toString() ? '?' + params.toString() : '');
+        
+        $.get(url, function(res) {
             if (!res || !Array.isArray(res)) {
                 TableController.render('#employeePaymentsTable', [], columns);
                 return;
@@ -24,5 +36,5 @@ $(function() {
         }, 'json');
     }
     loadPayments();
-    window.loadPayments = loadPayments;
+    window.loadEmployeePayments = loadPayments;
 });
