@@ -38,6 +38,9 @@ try {
     if ($api_rate !== null) {
         $usd_iqd_rate = $api_rate;
     }
+    
+    // Debug: Log the rate being used
+    error_log("Using USD/IQD rate: " . $usd_iqd_rate);
 
     // Customers - Calculate debt using new method (opening_debt + remaining from sales)
     $customer_debt_query = "
@@ -76,6 +79,8 @@ try {
     $row = $stmt->fetch();
     $person_debt_usd = $row['usd'] ?? 0;
     $person_debt_iqd = $row['iqd'] ?? 0;
+    $person_debt_iqd_converted = ($usd_iqd_rate > 0) ? ($person_debt_iqd / ($usd_iqd_rate / 100)) : 0;
+    $person_debt_total_usd = $person_debt_usd + $person_debt_iqd_converted;
 
     // Purchases (کڕین)
     $purchases = [
@@ -198,6 +203,8 @@ try {
     $row = $stmt->fetch();
     $debt_payments_usd = $row['usd'] ?? 0;
     $debt_payments_iqd = $row['iqd'] ?? 0;
+    $debt_payments_iqd_converted = ($usd_iqd_rate > 0) ? ($debt_payments_iqd / ($usd_iqd_rate / 100)) : 0;
+    $debt_payments_total_usd = $debt_payments_usd + $debt_payments_iqd_converted;
 
     // Customer debt payments
     $customer_debt_payments_query = "SELECT SUM(paid_usd) as usd, SUM(paid_iqd) as iqd FROM customer_debt_payments WHERE 1=1 $date_condition_date";
@@ -205,6 +212,8 @@ try {
     $row = $stmt->fetch();
     $customer_debt_payments_usd = $row['usd'] ?? 0;
     $customer_debt_payments_iqd = $row['iqd'] ?? 0;
+    $customer_debt_payments_iqd_converted = ($usd_iqd_rate > 0) ? ($customer_debt_payments_iqd / ($usd_iqd_rate / 100)) : 0;
+    $customer_debt_payments_total_usd = $customer_debt_payments_usd + $customer_debt_payments_iqd_converted;
 
     // Person other expenses debt payments
     $person_debt_payments_query = "SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd FROM person_other_expenses_debt_payments WHERE 1=1 $date_condition_date";
@@ -212,6 +221,8 @@ try {
     $row = $stmt->fetch();
     $person_debt_payments_usd = $row['usd'] ?? 0;
     $person_debt_payments_iqd = $row['iqd'] ?? 0;
+    $person_debt_payments_iqd_converted = ($usd_iqd_rate > 0) ? ($person_debt_payments_iqd / ($usd_iqd_rate / 100)) : 0;
+    $person_debt_payments_total_usd = $person_debt_payments_usd + $person_debt_payments_iqd_converted;
 
     // Net Profit (قازانجی خاوێن)
     $total_sales = 0;
@@ -224,23 +235,18 @@ try {
     $stmt = $pdo->query("SELECT SUM(paid_usd + IFNULL(remaining_usd,0)) as total_purchases FROM purchases WHERE type='دۆلار'");
     $row = $stmt->fetch();
     $total_purchases = $row['total_purchases'] ?? 0;
-    // Add IQD purchases converted to USD
-    $stmt = $pdo->query("SELECT SUM(amount_iqd) as iqd, AVG(exchange_rate) as rate FROM purchases WHERE type='دینار'");
+    // Add IQD purchases converted to USD using API rate
+    $stmt = $pdo->query("SELECT SUM(amount_iqd) as iqd FROM purchases WHERE type='دینار'");
     $row = $stmt->fetch();
     $iqd = $row['iqd'] ?? 0;
-    $rate = $row['rate'] ?? 150000;
-    $total_purchases += ($rate > 0 ? ($iqd / $rate) : 0);
+    $total_purchases += ($usd_iqd_rate > 0 ? ($iqd / ($usd_iqd_rate / 100)) : 0);
 
     $total_employee_expenses = 0;
     $stmt = $pdo->query("SELECT SUM(total) as total_expenses FROM employee_payments");
     $row = $stmt->fetch();
     $total_employee_expenses = $row['total_expenses'] ?? 0;
-    // Convert IQD to USD for employee expenses
-    $avg_rate = 150000;
-    $stmt = $pdo->query("SELECT AVG(exchange_rate) as rate FROM purchases WHERE exchange_rate > 0");
-    $row = $stmt->fetch();
-    if ($row && $row['rate']) $avg_rate = $row['rate'];
-    $total_employee_expenses_usd = ($avg_rate > 0 ? ($total_employee_expenses / $avg_rate) : 0);
+    // Convert IQD to USD for employee expenses using API rate
+    $total_employee_expenses_usd = ($usd_iqd_rate > 0 ? ($total_employee_expenses / ($usd_iqd_rate / 100)) : 0);
 
     // Calculate total expenses (کۆی خەرجی) with date filter
     $total_expenses_breakdown = [
@@ -255,7 +261,7 @@ try {
     $stmt = $pdo->query($employee_payments_query);
     $row = $stmt->fetch();
     $total_employee_expenses = $row['total_expenses'] ?? 0;
-    $total_employee_expenses_usd = ($avg_rate > 0 ? ($total_employee_expenses / $avg_rate) : 0);
+    $total_employee_expenses_usd = ($usd_iqd_rate > 0 ? ($total_employee_expenses / ($usd_iqd_rate / 100)) : 0);
     $total_expenses_breakdown['employee_payments'] = $total_employee_expenses_usd;
 
     // Other expenses - only خەرجی تر (not بەکارهێنانی کاڵای کۆگا or بەکارهێنانی گاز) with date filter
