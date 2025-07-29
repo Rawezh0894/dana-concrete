@@ -154,5 +154,6 @@ $bins = $pdo->query('SELECT id, name FROM bins_silos ORDER BY name')->fetchAll(P
 <script src="../assets/js/stock_adjustments/select.js"></script>
 <script src="../assets/js/stock_adjustments/add.js"></script>
 <script src="../assets/js/stock_adjustments/delete.js"></script>
+<script src="../assets/js/stock_adjustments/summary_cards.js"></script>
 </body>
 </html>

@@ -497,5 +497,6 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
     <script src="../assets/js/purchase_materilas/select_purchase.js"></script>
     <script src="../assets/js/purchase_materilas/update_purchase.js"></script>
     <script src="../assets/js/purchase_materilas/delete_purchase.js"></script>
+    <script src="../assets/js/purchase_materilas/summary_cards.js"></script>
 </body>
 </html>

@@ -200,6 +200,7 @@ if (!hasPermission('view_customer')) {
 <script src="../assets/js/customer/select_customer.js"></script>
 <script src="../assets/js/customer/update_customer.js"></script>
 <script src="../assets/js/customer/delete_customer.js"></script>
+<script src="../assets/js/add_customers/summary_cards.js"></script>
 <script src="../assets/js/customer/customer.js"></script>
 </body>
 </html>

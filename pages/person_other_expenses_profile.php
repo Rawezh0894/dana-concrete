@@ -270,6 +270,7 @@ if ($person_id) {
     <script src="../assets/js/person_other_expenses_profile/add_debt.js"></script>
     <script src="../assets/js/person_other_expenses_profile/update_debt.js"></script>
     <script src="../assets/js/person_other_expenses_profile/delete_debt.js"></script>
+    <script src="../assets/js/person_other_expenses_profile/summary_cards.js"></script>
 </body>
 
 </html>

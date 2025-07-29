@@ -222,6 +222,7 @@ if (!hasPermission('view_users')) {
 <script src="../assets/js/user/select_user.js"></script>
 <script src="../assets/js/user/update_user.js"></script>
 <script src="../assets/js/user/delete_user.js"></script>
+<script src="../assets/js/user/summary_cards.js"></script>
 <script src="../assets/js/permissions/permissions.js"></script>
 </body>
 </html>

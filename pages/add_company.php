@@ -183,5 +183,6 @@ if (!isset($_SESSION['user_id'])) {
 <script src="../assets/js/company/select_company.js"></script>
 <script src="../assets/js/company/update_company.js"></script>
 <script src="../assets/js/company/delete_company.js"></script>
+<script src="../assets/js/add_company/summary_cards.js"></script>
 </body>
 </html>

@@ -364,6 +364,7 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
 <script src="../assets/js/sale/delete_sale.js"></script>
 <script src="../assets/js/sale/update_sale.js"></script>
 <script src="../assets/js/sale/sale.js"></script>
+<script src="../assets/js/sale/summary_cards.js"></script>
 
 </body>
 </html>
