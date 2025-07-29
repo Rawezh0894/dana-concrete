@@ -85,11 +85,18 @@ try {
         
         // Calculate average price per kg if amount > 0
         $avg_price_per_kg = 0;
+        $price_currency = 'دینار'; // Default currency
+        
         if ($row['amount'] > 0) {
             if ($row['average_price'] > 0) {
                 $avg_price_per_kg = $row['average_price'];
             } elseif ($row['total_value'] > 0) {
                 $avg_price_per_kg = $row['total_value'] / $row['amount'];
+            }
+            
+            // Set currency based on material type
+            if ($row['material_type'] === 'دەرمان' || $row['material_type'] === 'چیمەنتۆ') {
+                $price_currency = 'دۆلار';
             }
         }
         
@@ -101,6 +108,7 @@ try {
             'capacity' => $capacity,
             'percentage' => round($percentage, 1),
             'average_price_per_kg' => round($avg_price_per_kg, 2),
+            'price_currency' => $price_currency,
             'status' => $percentage > 70 ? 'high' : ($percentage > 30 ? 'medium' : 'low')
         ];
     }
@@ -131,16 +139,14 @@ try {
     // Low stock notifications
     $low_stock_stmt = $pdo->query('SELECT name, type, amount, material_type FROM bins_silos WHERE amount < 10000 ORDER BY amount ASC LIMIT 3');
     while ($row = $low_stock_stmt->fetch(PDO::FETCH_ASSOC)) {
-        // Format amount for display
-        $amountText = $row['amount'] >= 1000 ? 
-            number_format($row['amount'] / 1000, 1) . 'K' : 
-            number_format($row['amount']);
+        // Format amount for display - show full numbers
+        $amountText = number_format($row['amount']);
             
         $notifications[] = [
             'type' => 'warning',
             'icon' => 'bi-exclamation-triangle',
             'title' => 'ستۆکی کەم',
-            'text' => "{$row['name']} ({$row['type']} - {$row['material_type']}) تەنها {$amountText} طەن ماوەتەوە"
+            'text' => "{$row['name']} ({$row['type']} - {$row['material_type']}) تەنها {$amountText} کگم ماوەتەوە"
         ];
     }
 

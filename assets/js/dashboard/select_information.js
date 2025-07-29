@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         `${(item.capacity / 1000).toFixed(0)}K` : 
                         item.capacity.toLocaleString();
                     
-                    // Format amount display
+                    // Format amount display - show full numbers for prices, but use K/M for capacity display
                     const amountText = item.amount >= 1000000 ? 
                         `${(item.amount / 1000000).toFixed(1)}M` : 
                         item.amount >= 1000 ? 
@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <div style="font-size:0.8rem;color:#666;margin-bottom:0.5rem;">${item.type} - ${item.material_type}</div>
                                 <div style="font-size:1.1rem;font-weight:bold;margin-bottom:0.3rem;">${amountText} / ${capacityText} طەن</div>
                                 ${window.userPermissions && window.userPermissions.canViewDashboardPrices ? 
-                                    `<div style="font-size:0.9rem;color:#28a745;margin-bottom:0.5rem;">${item.average_price_per_kg} دینار/کگم</div>` : 
+                                    `<div style="font-size:0.9rem;color:#28a745;margin-bottom:0.5rem;">${item.average_price_per_kg.toLocaleString()} ${item.price_currency}/کگم</div>` : 
                                     ''
                                 }
                                 <div class="stock-progress">
