@@ -108,6 +108,13 @@ if (!isset($_SESSION['user_id'])) {
         </div>
     </div>
 <?php endif; ?>
+
+<script>
+    // Pass permissions to JavaScript
+    window.userPermissions = {
+        canViewDashboardPrices: <?php echo hasPermission('view_dashboard_prices') ? 'true' : 'false'; ?>
+    };
+</script>
 <script src="../assets/js/dashboard/select_information.js"></script>
 </body>
 </html>

@@ -1126,7 +1126,11 @@ INSERT INTO `permissions` (`id`, `name`, `description`) VALUES
 (83, 'add_notes', 'زیادکردنی تێبینیەکان'),
 (84, 'update_notes', 'نوێکردنەوەی تێبینیەکان'),
 (85, 'delete_notes', 'سڕینەوەی تێبینیەکان'),
-(86, 'mark_notes_read', 'خوێندنی تێبینیەکان');
+(86, 'mark_notes_read', 'خوێندنی تێبینیەکان'),
+(87, 'view_concrete_prices', 'بینینی نرخی کۆنکرێت'),
+(88, 'set_concrete_prices', 'دانانی نرخی کۆنکرێت'),
+(89, 'edit_concrete_prices', 'دەستکاریکردنی نرخی کۆنکرێت'),
+(90, 'view_dashboard_prices', 'بینینی نرخەکان لە داشبۆرد');
 
 -- --------------------------------------------------------
 
@@ -1915,7 +1919,11 @@ INSERT INTO `role_permissions` (`id`, `role`, `permission_id`) VALUES
 (756, 'admin', 81),
 (757, 'accountant', 81),
 (758, 'user', 86),
-(759, 'user', 82);
+(759, 'user', 82),
+(760, 'admin', 87),
+(761, 'admin', 88),
+(762, 'admin', 89),
+(763, 'admin', 90);
 
 -- --------------------------------------------------------
 

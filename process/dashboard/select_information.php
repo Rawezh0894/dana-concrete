@@ -51,22 +51,56 @@ try {
 
     // Stock Status
     $stock_status = [];
-    $stmt = $pdo->query('SELECT name, amount, material_type FROM bins_silos WHERE amount > 0 ORDER BY amount ASC');
+    $stmt = $pdo->query('SELECT name, type, amount, material_type, average_price, total_value FROM bins_silos WHERE amount > 0 ORDER BY amount ASC');
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $percentage = 0;
-        if ($row['material_type'] === 'چیمەنتۆ') {
-            $percentage = min(100, ($row['amount'] / 100000) * 100); // Assuming 100,000 kg is full capacity
-        } elseif ($row['material_type'] === 'لمی ڕەش' || $row['material_type'] === 'لمی کەسارە') {
-            $percentage = min(100, ($row['amount'] / 200000) * 100); // Assuming 200,000 kg is full capacity
+        // Calculate capacity based on type and material
+        $capacity = 0;
+        if ($row['type'] === 'تەنکی') {
+            if ($row['material_type'] === 'گاز') {
+                $capacity = 10000; // 10,000 kg for gas tanks
+            } elseif ($row['material_type'] === 'دەرمان') {
+                $capacity = 20000; // 20,000 kg for chemical tanks
+            } else {
+                $capacity = 15000; // Default tank capacity
+            }
+        } elseif ($row['type'] === 'سایلۆ') {
+            if ($row['material_type'] === 'چیمەنتۆ') {
+                $capacity = 100000; // 100,000 kg for cement silos
+            } else {
+                $capacity = 80000; // Default silo capacity
+            }
+        } elseif ($row['type'] === 'چاو') {
+            if ($row['material_type'] === 'لمی ڕەش' || $row['material_type'] === 'لمی کەسارە') {
+                $capacity = 200000; // 200,000 kg for sand/gravel pits
+            } elseif ($row['material_type'] === 'چەو') {
+                $capacity = 100000000; // 100,000,000 kg for stone pits
+            } else {
+                $capacity = 150000; // Default pit capacity
+            }
         } else {
-            $percentage = min(100, ($row['amount'] / 150000) * 100); // Default capacity
+            $capacity = 100000; // Default capacity for other types
+        }
+        
+        $percentage = min(100, ($row['amount'] / $capacity) * 100);
+        
+        // Calculate average price per kg if amount > 0
+        $avg_price_per_kg = 0;
+        if ($row['amount'] > 0) {
+            if ($row['average_price'] > 0) {
+                $avg_price_per_kg = $row['average_price'];
+            } elseif ($row['total_value'] > 0) {
+                $avg_price_per_kg = $row['total_value'] / $row['amount'];
+            }
         }
         
         $stock_status[] = [
             'name' => $row['name'],
+            'type' => $row['type'],
             'amount' => $row['amount'],
             'material_type' => $row['material_type'],
+            'capacity' => $capacity,
             'percentage' => round($percentage, 1),
+            'average_price_per_kg' => round($avg_price_per_kg, 2),
             'status' => $percentage > 70 ? 'high' : ($percentage > 30 ? 'medium' : 'low')
         ];
     }
@@ -77,7 +111,17 @@ try {
         'monthly_receipts' => $pdo->query('SELECT COUNT(*) FROM concrete_receipts WHERE MONTH(created_at) = MONTH(CURRENT_DATE()) AND YEAR(created_at) = YEAR(CURRENT_DATE())')->fetchColumn(),
         'monthly_purchases' => $pdo->query('SELECT COUNT(*) FROM purchases WHERE MONTH(date) = MONTH(CURRENT_DATE()) AND YEAR(date) = YEAR(CURRENT_DATE())')->fetchColumn(),
         'pending_debts' => $pdo->query('SELECT COUNT(*) FROM customers WHERE opening_debt_usd > 0 OR opening_debt_iqd > 0')->fetchColumn(),
-        'low_stock_items' => $pdo->query('SELECT COUNT(*) FROM bins_silos WHERE amount < 10000')->fetchColumn(),
+        'low_stock_items' => $pdo->query('SELECT COUNT(*) FROM bins_silos WHERE amount > 0 AND (amount / CASE 
+            WHEN type = "تەنکی" AND material_type = "گاز" THEN 10000
+            WHEN type = "تەنکی" AND material_type = "دەرمان" THEN 20000
+            WHEN type = "تەنکی" THEN 15000
+            WHEN type = "سایلۆ" AND material_type = "چیمەنتۆ" THEN 100000
+            WHEN type = "سایلۆ" THEN 80000
+            WHEN type = "چاو" AND (material_type = "لمی ڕەش" OR material_type = "لمی کەسارە") THEN 200000
+            WHEN type = "چاو" AND material_type = "چەو" THEN 100000000
+            WHEN type = "چاو" THEN 150000
+            ELSE 100000
+        END) < 0.1')->fetchColumn(),
         'active_employees' => $pdo->query('SELECT COUNT(*) FROM employees')->fetchColumn(),
     ];
 
@@ -85,13 +129,18 @@ try {
     $notifications = [];
 
     // Low stock notifications
-    $low_stock_stmt = $pdo->query('SELECT name, amount, material_type FROM bins_silos WHERE amount < 10000 ORDER BY amount ASC LIMIT 3');
+    $low_stock_stmt = $pdo->query('SELECT name, type, amount, material_type FROM bins_silos WHERE amount < 10000 ORDER BY amount ASC LIMIT 3');
     while ($row = $low_stock_stmt->fetch(PDO::FETCH_ASSOC)) {
+        // Format amount for display
+        $amountText = $row['amount'] >= 1000 ? 
+            number_format($row['amount'] / 1000, 1) . 'K' : 
+            number_format($row['amount']);
+            
         $notifications[] = [
             'type' => 'warning',
             'icon' => 'bi-exclamation-triangle',
             'title' => 'ستۆکی کەم',
-            'text' => "{$row['name']} ({$row['material_type']}) تەنها {$row['amount']} kg ماوەتەوە"
+            'text' => "{$row['name']} ({$row['type']} - {$row['material_type']}) تەنها {$amountText} طەن ماوەتەوە"
         ];
     }
 
@@ -173,7 +222,10 @@ try {
         'stock_status' => $stock_status,
         'stats' => $stats,
         'notifications' => $notifications,
-        'recent' => $recent
+        'recent' => $recent,
+        'permissions' => [
+            'view_dashboard_prices' => hasPermission('view_dashboard_prices')
+        ]
     ];
 
     error_log('Dashboard data loaded successfully for user: ' . $_SESSION['user_id']);
