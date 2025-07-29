@@ -70,17 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
             let stockHtml = '';
             if (data.stock_status && Array.isArray(data.stock_status)) {
                 data.stock_status.forEach(item => {
-                    const statusClass = item.status === 'high' ? 'high' : item.status === 'medium' ? 'medium' : 'low';
-                    const statusText = item.status === 'high' ? 'بەرز' : item.status === 'medium' ? 'مامناوەند' : 'کەم';
-                    
-                    // Format capacity display
-                    const capacityText = item.capacity >= 1000000 ? 
-                        `${(item.capacity / 1000000).toFixed(1)}M` : 
-                        item.capacity >= 1000 ? 
-                        `${(item.capacity / 1000).toFixed(0)}K` : 
-                        item.capacity.toLocaleString();
-                    
-                    // Format amount display - show full numbers for prices, but use K/M for capacity display
+                    // Format amount display
                     const amountText = item.amount >= 1000000 ? 
                         `${(item.amount / 1000000).toFixed(1)}M` : 
                         item.amount >= 1000 ? 
@@ -93,16 +83,12 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <div class="mb-2"><i class="fa fa-boxes" style="font-size:2rem;color:var(--stock-accent)"></i></div>
                                 <h6 class="card-title mb-1">${item.name}</h6>
                                 <div style="font-size:0.8rem;color:#666;margin-bottom:0.5rem;">${item.type} - ${item.material_type}</div>
-                                <div style="font-size:1.1rem;font-weight:bold;margin-bottom:0.3rem;">${amountText} / ${capacityText} طەن</div>
+                                <div style="font-size:1.1rem;font-weight:bold;margin-bottom:0.5rem;">${amountText} کگم</div>
                                 ${window.userPermissions && window.userPermissions.canViewDashboardPrices ? 
                                     `<div style="font-size:0.9rem;color:#28a745;margin-bottom:0.3rem;">${formatPrice(item.average_price_per_kg, item.price_currency)}/کگم</div>
                                     <div style="font-size:0.8rem;color:#6c757d;margin-bottom:0.5rem;">کۆی نرخ: ${formatPrice(item.total_value, item.price_currency)}</div>` : 
                                     ''
                                 }
-                                <div class="stock-progress">
-                                    <div class="stock-progress-bar ${statusClass}" style="width: ${item.percentage}%"></div>
-                                </div>
-                                <div style="font-size:0.8rem;color:#666;margin-top:0.5rem;">${item.percentage}% - ${statusText}</div>
                             </div>
                         </div>
                     </div>`;
