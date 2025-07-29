@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', function() {
         function updateRemaining() {
             let paidIqdVal = parseFloat(paidIqd.value) || 0;
             let paidUsdVal = parseFloat(paidUsd.value) || 0;
-            let exRate = parseFloat(exchangeRate.value) || 150000;
+            let exRate = parseFloat(exchangeRate.value) || 0;
             if (currencyType.value === 'دینار') {
                 // If paid_usd entered, convert to IQD and add to paid_iqd
                 if (paidUsdVal > 0) {

@@ -35,9 +35,11 @@ if (!hasPermission('view_cash_box')) {
     <link href="../assets/css/nav.css" rel="stylesheet">
     <link href="../assets/css/comon/table.css" rel="stylesheet">
     <link href="../assets/css/comon/style.css" rel="stylesheet">
-    <link href="../assets/css/reports.css" rel="stylesheet">
+    <link href="../assets/css/comon/cards.css" rel="stylesheet" />
+    <link href="../assets/css/comon/summary_cards.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 </head>
 <body dir="rtl">
 <?php include '../includes/navbar.php'; ?>
@@ -51,11 +53,24 @@ if (!hasPermission('view_cash_box')) {
     </div>
     <!-- Summary Cards -->
     <div class="row mb-4" id="cashBoxSummaryCards">
-        <div class="col-md-6 mb-3 mx-auto">
-            <div class="report-card customer-card" id="card-total-usd-all">
-                <div class="card-title">کۆی پارەی قاسە (دۆلار + دینار بە دۆلار)</div>
-                <div class="card-value" id="totalCashUsdAll">$0</div>
-                <div class="section-label"><i class="fa fa-calculator"></i> هەموو بە دۆلار</div>
+        <div class="col-lg-6 col-md-6 mb-3">
+            <div class="card text-center shadow  card-gradient-info card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-money-bill-wave card-icon"></i>
+                    <h6 class="card-title">کۆی پارەی قاسە</h6>
+                    <div class="fs-4 fw-bold" id="totalCashUsdAll">$0</div>
+                    <small class="text-light">دۆلار + دینار بە دۆلار</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-6 mb-3">
+            <div class="card text-center shadow  card-gradient-success card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-dollar-sign card-icon"></i>
+                    <h6 class="card-title">نرخی ١٠٠ دۆلار</h6>
+                    <div class="fs-4 fw-bold" id="dollarRate">0 د.ع</div>
+                    <small class="text-light">نرخی دۆلار بە دینار</small>
+                </div>
             </div>
         </div>
     </div>

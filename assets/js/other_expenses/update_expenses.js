@@ -119,7 +119,7 @@ function setupEditExpenseModal() {
         function updateRemaining() {
             let paidIqdVal = parseFloat(paidIqd.value) || 0;
             let paidUsdVal = parseFloat(paidUsd.value) || 0;
-            let exRate = parseFloat(exchangeRate.value) || 150000;
+            let exRate = parseFloat(exchangeRate.value) || 0;
             if (currencyType.value === 'دینار') {
                 if (paidUsdVal > 0) {
                     paidIqdVal += paidUsdVal * (exRate / 100);

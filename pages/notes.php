@@ -50,6 +50,7 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
     <link href="../assets/css/nav.css" rel="stylesheet">
     <link href="../assets/css/comon/table.css" rel="stylesheet">
     <link href="../assets/css/comon/style.css" rel="stylesheet">
+    <link href="../assets/css/comon/cards.css" rel="stylesheet" />
     <link href="../assets/css/comon/select2_design.css" rel="stylesheet">
     <link href="../assets/css/notes.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.rtl.min.css" />
@@ -82,26 +83,32 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
     <!-- Summary Cards Row -->
     <div class="row mb-3" id="notes-summary">
         <div class="col-md-4 mb-2">
-            <div class="card text-center shadow">
+            <div class="card text-center shadow card-gradient-info card-animate-hover">
                 <div class="card-body">
-                    <h5 class="card-title">کۆی گشتی تێبینیەکان</h5>
-                    <span id="summary_total_notes" style="font-size:2rem;font-weight:bold;">0</span>
+                    <i class="fas fa-sticky-note card-icon"></i>
+                    <h6 class="card-title">کۆی گشتی تێبینیەکان</h6>
+                    <div class="fs-4 fw-bold" id="summary_total_notes">0</div>
+                    <small class="text-light">هەموو تێبینیەکان</small>
                 </div>
             </div>
         </div>
         <div class="col-md-4 mb-2">
-            <div class="card text-center shadow">
+            <div class="card text-center shadow  card-gradient-success card-animate-hover">
                 <div class="card-body">
-                    <h5 class="card-title">تێبینیە خوێندراوەکان</h5>
-                    <span id="summary_read_notes" style="font-size:2rem;font-weight:bold;color:#27ae60;">0</span>
+                    <i class="fas fa-check-circle card-icon"></i>
+                    <h6 class="card-title">تێبینیە خوێندراوەکان</h6>
+                    <div class="fs-4 fw-bold" id="summary_read_notes">0</div>
+                    <small class="text-light">تێبینیە خوێندراوەکان</small>
                 </div>
             </div>
         </div>
         <div class="col-md-4 mb-2">
-            <div class="card text-center shadow">
+            <div class="card text-center shadow  card-gradient-warning card-animate-hover">
                 <div class="card-body">
-                    <h5 class="card-title">تێبینیە نەخوێندراوەکان</h5>
-                    <span id="summary_unread_notes" style="font-size:2rem;font-weight:bold;color:#f39c12;">0</span>
+                    <i class="fas fa-exclamation-circle card-icon"></i>
+                    <h6 class="card-title">تێبینیە نەخوێندراوەکان</h6>
+                    <div class="fs-4 fw-bold" id="summary_unread_notes">0</div>
+                    <small class="text-light">تێبینیە نەخوێندراوەکان</small>
                 </div>
             </div>
         </div>

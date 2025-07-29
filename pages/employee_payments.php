@@ -28,80 +28,11 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
     <link href="../assets/css/nav.css" rel="stylesheet">
     <link href="../assets/css/comon/table.css" rel="stylesheet">
     <link href="../assets/css/comon/style.css" rel="stylesheet">
+    <link href="../assets/css/comon/cards.css" rel="stylesheet" />
+    <link href="../assets/css/comon/summary_cards.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <style>
-        .summary-card {
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border: none;
-        }
-        .summary-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        }
-        .summary-card .card-body {
-            padding: 1.5rem;
-        }
-        .summary-card .card-title {
-            font-size: 1rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
-            color: #333;
-        }
-        .summary-card .card-value {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #003b73;
-        }
-        .summary-card i {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        /* Card Colors */
-        .total-payments-card {
-            background: linear-gradient(135deg, #e3f2fd 0%, #f8fffa 100%);
-            border-top: 4px solid #1976d2;
-        }
-        .total-payments-card i, .total-payments-card .card-title {
-            color: #1976d2;
-        }
-        
-        .salary-card {
-            background: linear-gradient(135deg, #e8f5e9 0%, #f8fffa 100%);
-            border-top: 4px solid #43a047;
-        }
-        .salary-card i, .salary-card .card-title {
-            color: #43a047;
-        }
-        
-        .bonus-card {
-            background: linear-gradient(135deg, #fff3e0 0%, #f8fffa 100%);
-            border-top: 4px solid #ff9800;
-        }
-        .bonus-card i, .bonus-card .card-title {
-            color: #ff9800;
-        }
-        
-        .karwanhisabi-card {
-            background: linear-gradient(135deg, #f3e5f5 0%, #f8fffa 100%);
-            border-top: 4px solid #8e24aa;
-        }
-        .karwanhisabi-card i, .karwanhisabi-card .card-title {
-            color: #8e24aa;
-        }
-        
-        @media (max-width: 768px) {
-            .summary-card .card-value {
-                font-size: 1.2rem;
-            }
-            .summary-card .card-title {
-                font-size: 0.9rem;
-            }
-        }
-    </style>
+
 </head>
 <body dir="rtl">
 <?php include '../includes/navbar.php'; ?>
@@ -115,38 +46,42 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
     <!-- Summary Cards -->
     <div class="row mb-4" id="summary-cards">
         <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card summary-card total-payments-card">
-                <div class="card-body text-center">
-                    <i class="fas fa-money-bill-wave mb-2"></i>
-                    <h5 class="card-title">کۆی پارەدان</h5>
-                    <div class="card-value" id="total-payments">0 د.ع</div>
+            <div class="card text-center shadow  card-gradient-info card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-money-bill-wave card-icon"></i>
+                    <h6 class="card-title">کۆی پارەدان</h6>
+                    <div class="fs-4 fw-bold" id="total-payments">0 د.ع</div>
+                    <small class="text-light">کۆی پارەدان بە کارمەندەکان</small>
                 </div>
             </div>
         </div>
         <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card summary-card salary-card">
-                <div class="card-body text-center">
-                    <i class="fas fa-user-tie mb-2"></i>
-                    <h5 class="card-title">کۆی مووچە</h5>
-                    <div class="card-value" id="total-salary">0 د.ع</div>
+            <div class="card text-center shadow  card-gradient-success card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-user-tie card-icon"></i>
+                    <h6 class="card-title">کۆی مووچە</h6>
+                    <div class="fs-4 fw-bold" id="total-salary">0 د.ع</div>
+                    <small class="text-light">کۆی مووچەی کارمەندەکان</small>
                 </div>
             </div>
         </div>
         <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card summary-card bonus-card">
-                <div class="card-body text-center">
-                    <i class="fas fa-gift mb-2"></i>
-                    <h5 class="card-title">کۆی بەخشیش</h5>
-                    <div class="card-value" id="total-bonus">0 د.ع</div>
+            <div class="card text-center shadow  card-gradient-warning card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-gift card-icon"></i>
+                    <h6 class="card-title">کۆی بەخشیش</h6>
+                    <div class="fs-4 fw-bold" id="total-bonus">0 د.ع</div>
+                    <small class="text-light">کۆی بەخشیشی کارمەندەکان</small>
                 </div>
             </div>
         </div>
         <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card summary-card karwanhisabi-card">
-                <div class="card-body text-center">
-                    <i class="fas fa-calculator mb-2"></i>
-                    <h5 class="card-title">کۆی کاروانحیسابی</h5>
-                    <div class="card-value" id="total-karwanhisabi">0 د.ع</div>
+            <div class="card text-center shadow  card-gradient-purple card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-calculator card-icon"></i>
+                    <h6 class="card-title">کۆی کاروانحیسابی</h6>
+                    <div class="fs-4 fw-bold" id="total-karwanhisabi">0 د.ع</div>
+                    <small class="text-light">کۆی کاروانحیسابی</small>
                 </div>
             </div>
         </div>

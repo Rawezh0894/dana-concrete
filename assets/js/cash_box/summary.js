@@ -1,3 +1,11 @@
+function formatNumber(amount) {
+    if (amount === null || amount === undefined || isNaN(amount)) {
+        return '0';
+    }
+    const num = parseFloat(amount);
+    return num.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
 function updateCashBoxSummary(from, to) {
     $.ajax({
         url: '../process/cash_box/summary.php',
@@ -11,12 +19,21 @@ function updateCashBoxSummary(from, to) {
                 } else {
                     $('#totalCashUsdAll').text('$0');
                 }
+                
+                // Update dollar rate card
+                if (response.data.usd_iqd_rate !== undefined) {
+                    $('#dollarRate').text(formatNumber(response.data.usd_iqd_rate) + ' د.ع');
+                } else {
+                    $('#dollarRate').text('0 د.ع');
+                }
             } else {
                 $('#totalCashUsdAll').text('$0');
+                $('#dollarRate').text('0 د.ع');
             }
         },
         error: function() {
             $('#totalCashUsdAll').text('$0');
+            $('#dollarRate').text('0 د.ع');
         }
     });
 }

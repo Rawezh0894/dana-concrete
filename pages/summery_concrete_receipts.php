@@ -34,6 +34,7 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
   <link href="../assets/css/nav.css" rel="stylesheet">
   <link href="../assets/css/comon/table.css" rel="stylesheet">
   <link href="../assets/css/comon/style.css" rel="stylesheet">
+  <link href="../assets/css/comon/cards.css" rel="stylesheet" />
   <link href="../assets/css/comon/select2_design.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <link href="../assets/css/summery_concrete_receipts.css" rel="stylesheet">
@@ -119,26 +120,32 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
     <!-- Summary Cards -->
     <div class="row mb-4 no-print" id="summary-cards">
       <div class="col-md-3 mb-3">
-        <div class="card summary-card text-center">
+        <div class="card text-center shadow  card-gradient-info card-animate-hover">
           <div class="card-body">
-            <h5 class="card-title">کۆی گشتی پسووڵەکان</h5>
-            <span id="total_receipts" style="font-size:2.5rem;font-weight:bold;">0</span>
+            <i class="fas fa-file-alt card-icon"></i>
+            <h6 class="card-title">کۆی گشتی پسووڵەکان</h6>
+            <div class="fs-4 fw-bold" id="total_receipts">0</div>
+            <small class="text-light">ژمارەی پسووڵەکان</small>
           </div>
         </div>
       </div>
       <div class="col-md-3 mb-3">
-        <div class="card summary-card text-center">
+        <div class="card text-center shadow  card-gradient-success card-animate-hover">
           <div class="card-body">
-            <h5 class="card-title">کۆی گشتی بڕی مەتر سێجا</h5>
-            <span id="total_meter" style="font-size:2.5rem;font-weight:bold;">0</span>
+            <i class="fas fa-cube card-icon"></i>
+            <h6 class="card-title">کۆی گشتی بڕی مەتر سێجا</h6>
+            <div class="fs-4 fw-bold" id="total_meter">0</div>
+            <small class="text-light">بڕی کۆنکرێت</small>
           </div>
         </div>
       </div>
       <div class="col-md-3 mb-3">
-        <div class="card summary-card text-center">
+        <div class="card text-center shadow  card-gradient-warning card-animate-hover">
           <div class="card-body">
-            <h5 class="card-title">کۆی کڕیاران</h5>
-            <span id="total_customers" style="font-size:2.5rem;font-weight:bold;">0</span>
+            <i class="fas fa-users card-icon"></i>
+            <h6 class="card-title">کۆی کڕیاران</h6>
+            <div class="fs-4 fw-bold" id="total_customers">0</div>
+            <small class="text-light">ژمارەی کڕیارەکان</small>
           </div>
         </div>
       </div>

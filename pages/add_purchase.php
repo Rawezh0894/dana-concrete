@@ -34,6 +34,8 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
     <link href="../assets/css/comon/table.css" rel="stylesheet">
     <link href="../assets/css/comon/style.css" rel="stylesheet">
     <link href="../assets/css/comon/select2_design.css" rel="stylesheet">
+    <link href="../assets/css/comon/cards.css" rel="stylesheet" />
+   
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.rtl.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <!-- jQuery (پێش هەموو شت) -->
@@ -41,6 +43,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
     <!-- select2 -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
 </head>
 <body dir="rtl">
 <?php include '../includes/navbar.php'; ?>
@@ -51,6 +54,40 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
         <?php if (hasPermission('add_purchase')): ?>
         <button class="btn" data-bs-toggle="modal" data-bs-target="#addPurchaseModal" style="background: var(--seafoam-green); color:white; font-weight: bold;">+ زیادکردنی کڕین</button>
         <?php endif; ?>
+    </div>
+    
+    <!-- Summary Cards -->
+    <div class="row mb-4" id="purchaseSummaryCards">
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card text-center shadow  card-gradient-danger card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-money-bill-wave card-icon"></i>
+                    <h6 class="card-title">کۆی قەرزی ئێمە</h6>
+                    <div class="fs-4 fw-bold" id="total-debt">$0</div>
+                    <small class="text-light">کۆی قەرزی کۆمپانیاکان</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card text-center shadow  card-gradient-info card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-building card-icon"></i>
+                    <h6 class="card-title">کۆی ژمارەی کۆمپانیاکان</h6>
+                    <div class="fs-4 fw-bold" id="total-companies">0</div>
+                    <small class="text-light">ژمارەی هەموو کۆمپانیاکان</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card text-center shadow  card-gradient-warning card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-hand-holding-usd card-icon"></i>
+                    <h6 class="card-title">کۆمپانیاکانی قەرزدار</h6>
+                    <div class="fs-4 fw-bold" id="indebted-companies">0</div>
+                    <small class="text-light">کۆمپانیاکانی قەرزدار</small>
+                </div>
+            </div>
+        </div>
     </div>
     <div class="row mb-3">
       <div class="col-md-3">
@@ -205,7 +242,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
           <div class="row">
             <div class="col-md-6 mb-3">
               <label for="exchange_rate" class="form-label">نرخی 100 دۆلار بە دینار</label>
-              <input type="number" class="form-control" id="exchange_rate" name="exchange_rate" min="0" step="1" value="150000" required>
+              <input type="number" class="form-control" id="exchange_rate" name="exchange_rate" min="0" step="1" required>
             </div>
            
             <div class="col-md-6 mb-3">
@@ -390,7 +427,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
           <div class="row">
             <div class="col-md-6 mb-3">
               <label for="edit_exchange_rate" class="form-label">نرخی 100 دۆلار بە دینار</label>
-              <input type="number" class="form-control" id="edit_exchange_rate" name="exchange_rate" min="0" step="1" value="150000" required>
+              <input type="number" class="form-control" id="edit_exchange_rate" name="exchange_rate" min="0" step="1" required>
             </div>
             <div class="col-md-6 mb-3">
               <label for="edit_payment_type" class="form-label">جۆری پارەدان</label>
@@ -455,6 +492,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
 </script>
 <script src="../assets/js/purchase/add_purchase.js"></script>
 <script src="../assets/js/purchase/select_purchase.js"></script>
+<script src="../assets/js/purchase/summary.js"></script>
 <script src="../assets/js/location_driver/driver.js"></script>
 <script src="../assets/js/location_driver/location.js"></script>
 <script src="../assets/js/purchase/delete_purchase.js"></script>

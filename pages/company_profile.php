@@ -35,6 +35,7 @@ if ($company_id) {
     <link href="../assets/css/nav.css" rel="stylesheet">
     <link href="../assets/css/comon/table.css" rel="stylesheet">
     <link href="../assets/css/comon/style.css" rel="stylesheet">
+    <link href="../assets/css/comon/cards.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <!-- jQuery (پێش هەموو شت) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -62,26 +63,32 @@ if ($company_id) {
 
     <div class="row mb-3" id="company-info-cards">
         <div class="col-md-4 mb-2">
-            <div class="card text-center shadow">
+            <div class="card text-center shadow  card-gradient-danger card-animate-hover">
                 <div class="card-body">
-                    <h5 class="card-title">کۆی قەرز</h5>
-                    <span class="fs-4" id="total-debt">...</span>
+                    <i class="fas fa-money-bill-wave card-icon"></i>
+                    <h6 class="card-title">کۆی قەرز</h6>
+                    <div class="fs-4 fw-bold" id="total-debt">...</div>
+                    <small class="text-light">کۆی قەرزی کۆمپانیا</small>
                 </div>
             </div>
         </div>
         <div class="col-md-4 mb-2">
-            <div class="card text-center shadow">
+            <div class="card text-center shadow  card-gradient-info card-animate-hover">
                 <div class="card-body">
-                    <h5 class="card-title">ژمارەی کڕینە قەرزەکان</h5>
-                    <span class="fs-4" id="credit-count">...</span>
+                    <i class="fas fa-shopping-cart card-icon"></i>
+                    <h6 class="card-title">ژمارەی کڕینە قەرزەکان</h6>
+                    <div class="fs-4 fw-bold" id="credit-count">...</div>
+                    <small class="text-light">ژمارەی کڕینەکان</small>
                 </div>
             </div>
         </div>
         <div class="col-md-4 mb-2">
-            <div class="card text-center shadow">
+            <div class="card text-center shadow  card-gradient-warning card-animate-hover">
                 <div class="card-body">
-                    <h5 class="card-title">کۆی قەرزی سەرەتایی</h5>
-                    <span class="fs-4" id="opening-debt">...</span>
+                    <i class="fas fa-credit-card card-icon"></i>
+                    <h6 class="card-title">کۆی قەرزی سەرەتایی</h6>
+                    <div class="fs-4 fw-bold" id="opening-debt">...</div>
+                    <small class="text-light">قەرزی سەرەتایی</small>
                 </div>
             </div>
         </div>

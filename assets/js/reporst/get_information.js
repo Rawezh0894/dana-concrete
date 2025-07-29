@@ -14,7 +14,7 @@ function fetchAndRenderReportData() {
                 return;
             }
             const data = result.data;
-            const usd_iqd_rate = data.usd_iqd_rate || 150000;
+                            const usd_iqd_rate = data.usd_iqd_rate || 0;
             const company_debt_usd = Number(data.company.usd) + (Number(data.company.iqd) / (usd_iqd_rate / 100));
             const person_debt_usd = Number(data.person.usd) + (Number(data.person.iqd) / (usd_iqd_rate / 100));
             const purchases_usd = Number(data.purchases.usd) + (Number(data.purchases.iqd) / (usd_iqd_rate / 100));
@@ -225,7 +225,7 @@ function fetchAndRenderReportData() {
                     color: '#28a745',
                     cardClass: 'dollar-rate-card',
                     html: function() {
-                        const rate = data.usd_iqd_rate || 150000;
+                        const rate = data.usd_iqd_rate || 0;
                         return `
                             <div class=\"card-value\">${formatNumber(rate)} د.ع</div>
                             <div class=\"card-subtitle\">نرخی ئێستا</div>

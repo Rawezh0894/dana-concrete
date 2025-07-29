@@ -4,6 +4,37 @@ let CUSTOMER_OPENING_DEBT_USD = 0;
 // Multiple submission prevention flag
 let submitting = false;
 
+// Function to fetch dollar rate from API
+async function fetchDollarRateFromAPI() {
+    try {
+        const response = await fetch('https://dinarapi.hediworks.site/api/get-price?id=8&api_token=S3gl9SVEkZ1Vvc93cCjsbLLmwDvgzk');
+        const data = await response.json();
+        if (data && data.value && !isNaN(data.value)) {
+            return parseFloat(data.value);
+        }
+    } catch (error) {
+        console.error('Error fetching dollar rate from API:', error);
+    }
+    return null; // No default fallback value
+}
+
+// Function to update dollar rate in modal
+async function updateDollarRateInModal() {
+    const rateInput = document.getElementById('customer_debt_dolar_rate');
+    if (rateInput) {
+        const apiRate = await fetchDollarRateFromAPI();
+        if (apiRate !== null) {
+            rateInput.value = apiRate;
+            // Trigger calculation after updating rate
+            calculateRemainingDebt();
+        } else {
+            // Show error if API fails
+            console.error('Failed to fetch dollar rate from API');
+            rateInput.value = '';
+        }
+    }
+}
+
 // Function to fetch customer current debt
 async function fetchCustomerDebt(customerId) {
     try {
@@ -33,6 +64,7 @@ async function fetchCustomerOpeningDebt(customerId) {
 // Make functions globally available
 window.fetchCustomerDebt = fetchCustomerDebt;
 window.fetchCustomerOpeningDebt = fetchCustomerOpeningDebt;
+window.updateDollarRateInModal = updateDollarRateInModal;
 
 // Function to calculate and display remaining debt
 function calculateRemainingDebt() {
@@ -94,6 +126,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 fetchCustomerDebt(CUSTOMER_ID);
                 fetchCustomerOpeningDebt(CUSTOMER_ID);
             }
+            // Update dollar rate from API when modal opens
+            updateDollarRateInModal();
         });
     }
 });

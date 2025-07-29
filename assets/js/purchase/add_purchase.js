@@ -1,6 +1,45 @@
 // Multiple submission prevention flag
 let submitting = false;
 
+// Function to fetch dollar rate from API
+async function fetchDollarRateFromAPI() {
+    try {
+        const response = await fetch('https://dinarapi.hediworks.site/api/get-price?id=8&api_token=S3gl9SVEkZ1Vvc93cCjsbLLmwDvgzk');
+        const data = await response.json();
+        if (data && data.value && !isNaN(data.value)) {
+            return parseFloat(data.value);
+        }
+    } catch (error) {
+        console.error('Error fetching dollar rate from API:', error);
+    }
+    return null; // No default fallback value
+}
+
+// Function to update dollar rate in modal
+async function updateDollarRateInModal() {
+    const rateInput = document.getElementById('exchange_rate');
+    if (rateInput) {
+        const apiRate = await fetchDollarRateFromAPI();
+        if (apiRate !== null) {
+            rateInput.value = apiRate;
+        } else {
+            // Show error if API fails
+            console.error('Failed to fetch dollar rate from API');
+            rateInput.value = '';
+        }
+    }
+}
+
+// Initialize modal with API rate
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('addPurchaseModal');
+    if (modal) {
+        modal.addEventListener('shown.bs.modal', function() {
+            updateDollarRateInModal();
+        });
+    }
+});
+
 document.getElementById('addPurchaseForm').onsubmit = async function(e) {
     e.preventDefault();
     
@@ -97,6 +136,7 @@ document.getElementById('addPurchaseForm').onsubmit = async function(e) {
             var modal = bootstrap.Modal.getInstance(document.getElementById('addPurchaseModal'));
             modal.hide();
             if (typeof loadPurchases === 'function') loadPurchases();
+            if (typeof loadPurchaseSummary === 'function') loadPurchaseSummary();
         } else {
             Swal.fire('هەڵە!', data.msg || 'هەڵەیەک ڕویدا', 'error');
         }

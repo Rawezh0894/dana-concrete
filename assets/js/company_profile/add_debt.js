@@ -71,15 +71,15 @@ $('#addDebtForm').on('submit', function(e) {
     if (companyCurrencyType === 'دۆلار') {
         let amount_usd = parseFloat($('#debt_amount_usd').val()) || 0;
         let amount_iqd = parseFloat($('#debt_amount_iqd').val()) || 0;
-        let dollar_rate = parseFloat($('#debt_dollar_rate').val()) || 150000;
-        let effective_usd = amount_usd + (amount_iqd / (dollar_rate / 100));
+        let dollar_rate = parseFloat($('#debt_dollar_rate').val()) || 0;
+        let effective_usd = amount_usd + (dollar_rate > 0 ? (amount_iqd / (dollar_rate / 100)) : 0);
         $('#debt_amount_usd').val(effective_usd);
         $('#debt_amount_iqd').val(0);
     } else if (companyCurrencyType === 'دینار') {
         let amount_usd = parseFloat($('#debt_amount_usd').val()) || 0;
         let amount_iqd = parseFloat($('#debt_amount_iqd').val()) || 0;
-        let dollar_rate = parseFloat($('#debt_dollar_rate').val()) || 150000;
-        let effective_iqd = amount_iqd + (amount_usd * (dollar_rate / 100));
+        let dollar_rate = parseFloat($('#debt_dollar_rate').val()) || 0;
+        let effective_iqd = amount_iqd + (dollar_rate > 0 ? (amount_usd * (dollar_rate / 100)) : 0);
         $('#debt_amount_iqd').val(effective_iqd);
         $('#debt_amount_usd').val(0);
     }

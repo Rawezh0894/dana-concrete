@@ -1,16 +1,5 @@
 /* Summary Concrete Receipts Styles */
 
-.summary-card {
-    background: linear-gradient(135deg, var(--seafoam-green), var(--kelly-green));
-    color: white;
-    border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    transition: transform 0.3s ease;
-}
-
-.summary-card:hover {
-    transform: translateY(-5px);
-}
 
 .customer-summary {
     background: #f8f9fa;
@@ -113,9 +102,7 @@
 
 /* Responsive design */
 @media (max-width: 768px) {
-    .summary-card {
-        margin-bottom: 15px;
-    }
+ 
     
     .table-responsive {
         font-size: 0.9rem;
@@ -237,13 +224,7 @@
     }
   }
   
-  .summary-card {
-    background: white;
-    color: var(--seafoam-green);
-    border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    border: 2px solid var(--seafoam-green);
-  }
+  
   
   .customer-summary {
     background: #f8f9fa;

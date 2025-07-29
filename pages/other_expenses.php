@@ -27,6 +27,7 @@ if (!isset($_SESSION['user_id'])) {
     <link href="../assets/css/other_expenses.css" rel="stylesheet">
     <link href="../assets/css/comon/table.css" rel="stylesheet">
     <link href="../assets/css/comon/style.css" rel="stylesheet">
+    <link href="../assets/css/comon/summary_cards.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   
 </head>
@@ -159,38 +160,38 @@ if (!isset($_SESSION['user_id'])) {
     </div>
       <div class="row w-100 mt-3 g-3">
         <div class="col-md-3">
-          <div class="card text-center shadow" style="background: linear-gradient(135deg, #00b894, #00cec9); color: white;">
+          <div class="card gradient-card green-gradient">
             <div class="card-body">
               <h6 class="card-title">خەرجی سەیارەکان (کاڵا)</h6>
-              <div id="totalCarMaterialCost" class="fs-4 fw-bold">$0</div>
-              <small class="text-light">بەکارهێنانی کاڵای کۆگا</small>
+              <div id="totalCarMaterialCost" class="card-value">$0</div>
+              <small>بەکارهێنانی کاڵای کۆگا</small>
             </div>
           </div>
         </div>
         <div class="col-md-3">
-          <div class="card text-center shadow" style="background: linear-gradient(135deg, #fdcb6e, #e17055); color: white;">
+          <div class="card gradient-card orange-gradient">
             <div class="card-body">
               <h6 class="card-title">خەرجی سەیارەکان (گاز)</h6>
-              <div id="totalCarGasCost" class="fs-4 fw-bold">$0</div>
-              <small class="text-light">بەکارهێنانی گاز</small>
+              <div id="totalCarGasCost" class="card-value">$0</div>
+              <small>بەکارهێنانی گاز</small>
             </div>
           </div>
         </div>
         <div class="col-md-3">
-          <div class="card text-center shadow" style="background: linear-gradient(135deg, #00b894, #00cec9); color: white;">
+          <div class="card gradient-card teal-gradient">
             <div class="card-body">
               <h6 class="card-title">خەرجی تر</h6>
-              <div id="totalOtherExpenses" class="fs-4 fw-bold">$0</div>
-              <small class="text-light">خەرجی تر (نەک سەیارە)</small>
+              <div id="totalOtherExpenses" class="card-value">$0</div>
+              <small>خەرجی تر (نەک سەیارە)</small>
             </div>
           </div>
         </div>
         <div class="col-md-3">
-          <div class="card text-center shadow" style="background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: white;">
+          <div class="card gradient-card purple-gradient">
             <div class="card-body">
               <h6 class="card-title">کۆی گشتی</h6>
-              <div id="totalCarExpenses" class="fs-4 fw-bold">$0</div>
-              <small class="text-light">کاڵا + گاز + خەرجی تر</small>
+              <div id="totalCarExpenses" class="card-value">$0</div>
+              <small>کاڵا + گاز + خەرجی تر</small>
             </div>
           </div>
         </div>
@@ -199,11 +200,11 @@ if (!isset($_SESSION['user_id'])) {
       <!-- Second row for USD exchange rate -->
       <div class="row w-100 mt-2 g-3">
         <div class="col-md-4 mx-auto">
-          <div class="card text-center shadow" style="background: linear-gradient(135deg, #e17055, #d63031); color: white;">
+          <div class="card gradient-card red-gradient">
             <div class="card-body">
               <h6 class="card-title">نرخی دۆلار</h6>
-              <div id="usdExchangeRate" class="fs-4 fw-bold">0 د.ع</div>
-              <small class="text-light">نرخی 100 دۆلار بە دینار</small>
+              <div id="usdExchangeRate" class="card-value">0 د.ع</div>
+              <small>نرخی 100 دۆلار بە دینار</small>
             </div>
           </div>
         </div>

@@ -55,6 +55,7 @@ $mixer_drivers = array_filter($employees, function ($emp) {
   <link href="../assets/css/comon/table.css" rel="stylesheet">
   <link href="../assets/css/comon/style.css" rel="stylesheet">
   <link href="../assets/css/comon/style.css" rel="stylesheet">
+  <link href="../assets/css/comon/cards.css" rel="stylesheet" />
   <link href="../assets/css/comon/select2_design.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <link href="../assets/css/concrete_receipts_custom.css" rel="stylesheet">
@@ -93,26 +94,32 @@ $mixer_drivers = array_filter($employees, function ($emp) {
     <!-- Summary Cards Row -->
     <div class="row mb-3" id="concrete-receipts-summary">
       <div class="col-md-4 mb-2">
-        <div class="card text-center shadow">
+        <div class="card text-center shadow  card-gradient-info card-animate-hover">
           <div class="card-body">
-            <h5 class="card-title">کۆی گشتی پسوڵەکان</h5>
-            <span id="summary_total_receipts" style="font-size:2rem;font-weight:bold;">0</span>
+            <i class="fas fa-file-alt card-icon"></i>
+            <h6 class="card-title">کۆی گشتی پسوڵەکان</h6>
+            <div class="fs-4 fw-bold" id="summary_total_receipts">0</div>
+            <small class="text-light">ژمارەی پسوڵەکان</small>
           </div>
         </div>
       </div>
       <div class="col-md-4 mb-2">
-        <div class="card text-center shadow">
+        <div class="card text-center shadow  card-gradient-success card-animate-hover">
           <div class="card-body">
-            <h5 class="card-title">کۆی گشتی بڕی مەتر سێجا</h5>
-            <span id="summary_total_meter" style="font-size:2rem;font-weight:bold;">0</span>
+            <i class="fas fa-cube card-icon"></i>
+            <h6 class="card-title">کۆی گشتی بڕی مەتر سێجا</h6>
+            <div class="fs-4 fw-bold" id="summary_total_meter">0</div>
+            <small class="text-light">بڕی کۆنکرێت</small>
           </div>
         </div>
       </div>
       <div class="col-md-4 mb-2">
-        <div class="card text-center shadow">
+        <div class="card text-center shadow  card-gradient-warning card-animate-hover">
           <div class="card-body">
-            <h5 class="card-title">کۆی کڕیاران</h5>
-            <span id="summary_total_customers" style="font-size:2rem;font-weight:bold;">0</span>
+            <i class="fas fa-users card-icon"></i>
+            <h6 class="card-title">کۆی کڕیاران</h6>
+            <div class="fs-4 fw-bold" id="summary_total_customers">0</div>
+            <small class="text-light">ژمارەی کڕیارەکان</small>
           </div>
         </div>
       </div>

@@ -35,6 +35,7 @@ if (!hasPermission('view_customer')) {
     <link href="../assets/css/nav.css" rel="stylesheet">
     <link href="../assets/css/comon/table.css" rel="stylesheet">
     <link href="../assets/css/comon/style.css" rel="stylesheet">
+    <link href="../assets/css/comon/cards.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 <body dir="rtl">
@@ -56,28 +57,31 @@ if (!hasPermission('view_customer')) {
     <!-- Summary Cards -->
     <div class="row mb-4" id="summary-cards">
         <div class="col-md-4 mb-3">
-            <div class="card text-center shadow" style="background: linear-gradient(135deg, #00b894, #00cec9); color: white;">
+            <div class="card text-center shadow  card-gradient-success card-animate-hover">
                 <div class="card-body">
-                    <h5 class="card-title">کۆی قەرزی کڕیارەکان</h5>
-                    <span id="total_debt" style="font-size:2.5rem;font-weight:bold;">$0</span>
+                    <i class="fas fa-dollar-sign card-icon"></i>
+                    <h6 class="card-title">کۆی قەرزی کڕیارەکان</h6>
+                    <div class="fs-4 fw-bold" id="total_debt">$0</div>
                     <small class="text-light">دۆلار</small>
                 </div>
             </div>
         </div>
         <div class="col-md-4 mb-3">
-            <div class="card text-center shadow" style="background: linear-gradient(135deg, #fdcb6e, #e17055); color: white;">
+            <div class="card text-center shadow  card-gradient-warning card-animate-hover">
                 <div class="card-body">
-                    <h5 class="card-title">کۆی کڕیاران</h5>
-                    <span id="total_customers" style="font-size:2.5rem;font-weight:bold;">0</span>
+                    <i class="fas fa-users card-icon"></i>
+                    <h6 class="card-title">کۆی کڕیاران</h6>
+                    <div class="fs-4 fw-bold" id="total_customers">0</div>
                     <small class="text-light">کڕیار</small>
                 </div>
             </div>
         </div>
         <div class="col-md-4 mb-3">
-            <div class="card text-center shadow" style="background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: white;">
+            <div class="card text-center shadow  card-gradient-info card-animate-hover">
                 <div class="card-body">
-                    <h5 class="card-title">کڕیارانی قەرز</h5>
-                    <span id="customers_with_debt" style="font-size:2.5rem;font-weight:bold;">0</span>
+                    <i class="fas fa-user-times card-icon"></i>
+                    <h6 class="card-title">کڕیارانی قەرز</h6>
+                    <div class="fs-4 fw-bold" id="customers_with_debt">0</div>
                     <small class="text-light">کڕیار</small>
                 </div>
             </div>

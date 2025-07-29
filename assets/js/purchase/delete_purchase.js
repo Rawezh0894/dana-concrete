@@ -34,6 +34,7 @@ $(document).on('click', '.delete-purchase', function() {
                 if (res.success) {
                     Swal.fire('سڕایەوە!', 'کڕینەکە سڕایەوە.', 'success');
                     if (typeof loadPurchases === 'function') loadPurchases();
+                    if (typeof loadPurchaseSummary === 'function') loadPurchaseSummary();
                 } else {
                     console.error('Delete error:', res);
                     Swal.fire('هەڵە!', res.msg || 'هەڵەیەک ڕویدا', 'error');
