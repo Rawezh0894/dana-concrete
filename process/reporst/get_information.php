@@ -187,60 +187,67 @@ try {
     $person_debt_payments_usd = $row['usd'] ?? 0;
     $person_debt_payments_iqd = $row['iqd'] ?? 0;
 
-    // Net Profit (قازانجی خاوێن)
+    // Net Profit (قازانجی خاوێن) with date filtering
     $total_sales = 0;
-    $stmt = $pdo->query("SELECT SUM(total_price) as total_sales FROM sales");
+    $sales_query = "SELECT SUM(total_price) as total_sales FROM sales WHERE 1 $date_condition_sales";
+    $stmt = $pdo->query($sales_query);
     $row = $stmt->fetch();
     $total_sales = $row['total_sales'] ?? 0;
 
-    $total_expenses = $other_expenses_usd; // already in USD
-    $total_purchases = 0;
-    $stmt = $pdo->query("SELECT SUM(paid_usd + IFNULL(remaining_usd,0)) as total_purchases FROM purchases WHERE type='دۆلار'");
-    $row = $stmt->fetch();
-    $total_purchases = $row['total_purchases'] ?? 0;
-    // Add IQD purchases converted to USD
-    $stmt = $pdo->query("SELECT SUM(amount_iqd) as iqd, AVG(exchange_rate) as rate FROM purchases WHERE type='دینار'");
-    $row = $stmt->fetch();
-    $iqd = $row['iqd'] ?? 0;
-    $rate = $row['rate'] ?? 150000;
-    $total_purchases += ($rate > 0 ? ($iqd / $rate) : 0);
+    // Use the calculated total expenses from above
+    $total_expenses = $total_expenses_usd; // already calculated with date filtering
 
-    $total_employee_expenses = 0;
-    $stmt = $pdo->query("SELECT SUM(total) as total_expenses FROM employee_payments");
-    $row = $stmt->fetch();
-    $total_employee_expenses = $row['total_expenses'] ?? 0;
-    // Convert IQD to USD for employee expenses
-    $avg_rate = 150000;
-    $stmt = $pdo->query("SELECT AVG(exchange_rate) as rate FROM purchases WHERE exchange_rate > 0");
-    $row = $stmt->fetch();
-    if ($row && $row['rate']) $avg_rate = $row['rate'];
-    $total_employee_expenses_usd = ($avg_rate > 0 ? ($total_employee_expenses / $avg_rate) : 0);
-
-    // Calculate total expenses (کۆی خەرجی)
+    // Calculate total expenses (کۆی خەرجی) with date filtering
     $total_expenses_breakdown = [
-        'employee_payments' => $total_employee_expenses_usd,
+        'employee_payments' => 0,
         'other_expenses' => 0,
         'purchases' => 0,
         'purchase_materials' => 0
     ];
 
-    // Other expenses - only خەرجی تر (not بەکارهێنانی کاڵای کۆگا or بەکارهێنانی گاز)
-    $stmt = $pdo->query("SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd FROM other_expenses WHERE expense_type = 'خەرجی تر'");
+    // Employee payments with date filtering
+    $employee_payments_query = "SELECT SUM(total) as total_expenses FROM employee_payments WHERE 1 $date_condition_employee_payments";
+    $stmt = $pdo->query($employee_payments_query);
+    $row = $stmt->fetch();
+    $total_employee_expenses = $row['total_expenses'] ?? 0;
+    $total_employee_expenses_usd = ($avg_rate > 0 ? ($total_employee_expenses / $avg_rate) : 0);
+    $total_expenses_breakdown['employee_payments'] = $total_employee_expenses_usd;
+
+    // Other expenses - only خەرجی تر (not بەکارهێنانی کاڵای کۆگا or بەکارهێنانی گاز) with date filtering
+    $other_expenses_query = "SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd FROM other_expenses WHERE expense_type = 'خەرجی تر' $date_condition_date";
+    $stmt = $pdo->query($other_expenses_query);
     $row = $stmt->fetch();
     $other_expenses_usd = $row['usd'] ?? 0;
     $other_expenses_iqd = $row['iqd'] ?? 0;
     $other_expenses_total_usd = $other_expenses_usd + (($usd_iqd_rate > 0) ? ($other_expenses_iqd / ($usd_iqd_rate / 100)) : 0);
     $total_expenses_breakdown['other_expenses'] = $other_expenses_total_usd;
 
-    // Purchases (کڕین) - only cash payments
-    $stmt = $pdo->query("SELECT SUM(amount_iqd) as iqd FROM purchases WHERE payment_type = 'نەقد' AND type = 'دینار'");
+    // Purchases (کڕین) - only cash payments with date filtering
+    $purchases_cash_query = "SELECT SUM(amount_iqd) as iqd FROM purchases WHERE payment_type = 'نەقد' AND type = 'دینار' $date_condition_date";
+    $stmt = $pdo->query($purchases_cash_query);
     $row = $stmt->fetch();
     $purchases_cash_iqd = $row['iqd'] ?? 0;
     $purchases_cash_usd = ($usd_iqd_rate > 0) ? ($purchases_cash_iqd / ($usd_iqd_rate / 100)) : 0;
     $total_expenses_breakdown['purchases'] = $purchases_cash_usd;
 
-    // Purchase materials (کڕینی مەواد)
-    $stmt = $pdo->query("SELECT SUM(total_price_usd) as usd, SUM(total_price_iqd) as iqd FROM purchase_materials");
+    // Purchase materials (کڕینی مەواد) with date filtering
+    $purchase_materials_query = "SELECT SUM(total_price_usd) as usd, SUM(total_price_iqd) as iqd FROM purchase_materials WHERE 1";
+    if ($use_range) {
+        $from = $from_date ? $from_date : '1000-01-01';
+        $to = $to_date ? $to_date : '9999-12-31';
+        $purchase_materials_query .= " AND purchase_date >= '$from' AND purchase_date <= '$to'";
+    } else {
+        if ($filter === 'today') {
+            $purchase_materials_query .= " AND purchase_date = CURDATE()";
+        } elseif ($filter === 'week') {
+            $purchase_materials_query .= " AND YEARWEEK(purchase_date, 1) = YEARWEEK(CURDATE(), 1)";
+        } elseif ($filter === 'month') {
+            $purchase_materials_query .= " AND YEAR(purchase_date) = YEAR(CURDATE()) AND MONTH(purchase_date) = MONTH(CURDATE())";
+        } elseif ($filter === 'year') {
+            $purchase_materials_query .= " AND YEAR(purchase_date) = YEAR(CURDATE())";
+        }
+    }
+    $stmt = $pdo->query($purchase_materials_query);
     $row = $stmt->fetch();
     $purchase_materials_usd = $row['usd'] ?? 0;
     $purchase_materials_iqd = $row['iqd'] ?? 0;
@@ -251,11 +258,13 @@ try {
     $total_expenses_usd = array_sum($total_expenses_breakdown);
 
     $total_discounts = 0;
-    $stmt = $pdo->query("SELECT SUM(discount) as total_discount FROM sales");
+    $discounts_query = "SELECT SUM(discount) as total_discount FROM sales WHERE 1 $date_condition_sales";
+    $stmt = $pdo->query($discounts_query);
     $row = $stmt->fetch();
     $total_discounts = $row['total_discount'] ?? 0;
 
-    $net_profit = $total_sales - ($total_expenses + $total_purchases + $total_employee_expenses_usd + $total_discounts);
+    // Net Profit = Total Sales - Total Expenses - Total Discounts
+    $net_profit = $total_sales - $total_expenses - $total_discounts;
 
     // 1. Monthly Income/Expenses (last 6 months)
     $monthly_income_expenses = [];
