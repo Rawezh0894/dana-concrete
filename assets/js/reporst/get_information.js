@@ -207,7 +207,7 @@ function fetchAndRenderReportData() {
                             </div>
                             <div class=\"d-flex justify-content-between align-items-center gap-2 mt-2\">
                                 <div>
-                                    <div class=\"section-label\">کڕین</div>
+                                    <div class=\"section-label\">کڕین مەواد</div>
                                     <div class=\"card-value\">${formatCurrency(breakdown.purchases || 0, 'USD')}</div>
                                 </div>
                                 <div>
