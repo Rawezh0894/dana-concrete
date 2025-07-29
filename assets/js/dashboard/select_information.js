@@ -1,9 +1,20 @@
 // Function to format price with proper currency display
 function formatPrice(price, currency) {
-    if (currency === 'دۆلار') {
-        return `${price.toLocaleString()}$`;
+    let formattedPrice;
+    
+    // Format large numbers with K/M
+    if (price >= 1000000) {
+        formattedPrice = (price / 1000000).toFixed(1) + 'M';
+    } else if (price >= 1000) {
+        formattedPrice = (price / 1000).toFixed(0) + 'K';
     } else {
-        return `${price.toLocaleString()} د.ع`;
+        formattedPrice = price.toLocaleString();
+    }
+    
+    if (currency === 'دۆلار') {
+        return `${formattedPrice}$`;
+    } else {
+        return `${formattedPrice} د.ع`;
     }
 }
 
@@ -84,7 +95,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <div style="font-size:0.8rem;color:#666;margin-bottom:0.5rem;">${item.type} - ${item.material_type}</div>
                                 <div style="font-size:1.1rem;font-weight:bold;margin-bottom:0.3rem;">${amountText} / ${capacityText} طەن</div>
                                 ${window.userPermissions && window.userPermissions.canViewDashboardPrices ? 
-                                    `<div style="font-size:0.9rem;color:#28a745;margin-bottom:0.5rem;">${formatPrice(item.average_price_per_kg, item.price_currency)}/کگم</div>` : 
+                                    `<div style="font-size:0.9rem;color:#28a745;margin-bottom:0.3rem;">${formatPrice(item.average_price_per_kg, item.price_currency)}/کگم</div>
+                                    <div style="font-size:0.8rem;color:#6c757d;margin-bottom:0.5rem;">کۆی نرخ: ${formatPrice(item.total_value, item.price_currency)}</div>` : 
                                     ''
                                 }
                                 <div class="stock-progress">

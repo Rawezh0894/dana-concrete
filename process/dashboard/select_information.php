@@ -109,6 +109,7 @@ try {
             'percentage' => round($percentage, 1),
             'average_price_per_kg' => round($avg_price_per_kg, 2),
             'price_currency' => $price_currency,
+            'total_value' => $row['total_value'],
             'status' => $percentage > 70 ? 'high' : ($percentage > 30 ? 'medium' : 'low')
         ];
     }
