@@ -30,6 +30,7 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
     <link href="../assets/css/nav.css" rel="stylesheet">
     <link href="../assets/css/comon/table.css" rel="stylesheet">
     <link href="../assets/css/comon/style.css" rel="stylesheet">
+    <link href="../assets/css/comon/cards.css" rel="stylesheet" />
     <link href="../assets/css/comon/select2_design.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.rtl.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -47,6 +48,40 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
         <?php if (hasPermission('add_sale')): ?>
         <button class="btn" data-bs-toggle="modal" data-bs-target="#addSaleModal" style="background: var(--seafoam-green); color:white; font-weight: bold;">+ زیادکردنی فرۆشتن</button>
         <?php endif; ?>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4" id="summary-cards">
+        <div class="col-md-4 mb-3">
+            <div class="card text-center shadow summary-card card-gradient-danger card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-money-bill-wave card-icon"></i>
+                    <h6 class="card-title">کۆی قەرزی کڕیاران</h6>
+                    <div class="fs-4 fw-bold" id="total-customer-debt">$0</div>
+                    <small class="text-light">کۆی قەرزی هەموو کڕیارەکان</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card text-center shadow summary-card card-gradient-warning card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-user-times card-icon"></i>
+                    <h6 class="card-title">کڕیارانی قەرزدار</h6>
+                    <div class="fs-4 fw-bold" id="customers-with-debt">0</div>
+                    <small class="text-light">ژمارەی کڕیارانی قەرزدار</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card text-center shadow summary-card card-gradient-success card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-shopping-cart card-icon"></i>
+                    <h6 class="card-title">کۆی فرۆشتنەکان</h6>
+                    <div class="fs-4 fw-bold" id="total-sales">0</div>
+                    <small class="text-light">ژمارەی هەموو فرۆشتنەکان</small>
+                </div>
+            </div>
+        </div>
     </div>
     <div class="row mb-3">
       <div class="col-md-3">

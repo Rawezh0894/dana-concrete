@@ -36,6 +36,7 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
     <link href="../assets/css/nav.css" rel="stylesheet">
     <link href="../assets/css/comon/table.css" rel="stylesheet">
     <link href="../assets/css/comon/style.css" rel="stylesheet">
+    <link href="../assets/css/comon/cards.css" rel="stylesheet" />
     <link href="../assets/css/comon/select2_design.css" rel="stylesheet">
     <link href="../assets/css/purchase_materilas.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.rtl.min.css" />
@@ -54,6 +55,40 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
             <?php if (hasPermission('add_material')): ?>
             <button class="btn" data-bs-toggle="modal" data-bs-target="#addPurchaseModal" style="background: var(--seafoam-green); color:white; font-weight: bold;">+ زیادکردنی کڕین</button>
             <?php endif; ?>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="row mb-4" id="summary-cards">
+            <div class="col-md-4 mb-3">
+                <div class="card text-center shadow summary-card card-gradient-info card-animate-hover">
+                    <div class="card-body">
+                        <i class="fas fa-shopping-bag card-icon"></i>
+                        <h6 class="card-title">کۆی کڕینەکان</h6>
+                        <div class="fs-4 fw-bold" id="total-purchases">0</div>
+                        <small class="text-light">ژمارەی هەموو کڕینەکان</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card text-center shadow summary-card card-gradient-success card-animate-hover">
+                    <div class="card-body">
+                        <i class="fas fa-dollar-sign card-icon"></i>
+                        <h6 class="card-title">کۆی نرخی کڕینەکان</h6>
+                        <div class="fs-4 fw-bold" id="total-purchase-value">$0</div>
+                        <small class="text-light">کۆی نرخی هەموو کڕینەکان</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card text-center shadow summary-card card-gradient-warning card-animate-hover">
+                    <div class="card-body">
+                        <i class="fas fa-users card-icon"></i>
+                        <h6 class="card-title">درووشیارەکان</h6>
+                        <div class="fs-4 fw-bold" id="total-suppliers">0</div>
+                        <small class="text-light">ژمارەی دروشیارەکان</small>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Filter Row -->

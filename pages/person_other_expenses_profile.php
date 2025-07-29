@@ -35,6 +35,7 @@ if ($person_id) {
     <link href="../assets/css/nav.css" rel="stylesheet">
     <link href="../assets/css/comon/table.css" rel="stylesheet">
     <link href="../assets/css/comon/style.css" rel="stylesheet">
+    <link href="../assets/css/comon/cards.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
@@ -69,26 +70,32 @@ if ($person_id) {
         </div>
         <div class="row mb-3" id="person-summary-cards">
           <div class="col-md-4 mb-2">
-            <div class="card text-center shadow">
+            <div class="card text-center shadow summary-card card-gradient-success card-animate-hover">
               <div class="card-body">
-                <h5 class="card-title">کۆی گشتی خەرجی بە دۆلار</h5>
-                <span id="summary_total_usd" style="font-size:2rem;font-weight:bold;">0</span>
+                <i class="fas fa-dollar-sign card-icon"></i>
+                <h6 class="card-title">کۆی گشتی خەرجی بە دۆلار</h6>
+                <div class="fs-4 fw-bold" id="summary_total_usd">0</div>
+                <small class="text-light">کۆی خەرجی بە دۆلار</small>
               </div>
             </div>
           </div>
           <div class="col-md-4 mb-2">
-            <div class="card text-center shadow">
+            <div class="card text-center shadow summary-card card-gradient-warning card-animate-hover">
               <div class="card-body">
-                <h5 class="card-title">کۆی گشتی خەرجی بە دینار</h5>
-                <span id="summary_total_iqd" style="font-size:2rem;font-weight:bold;">0</span>
+                <i class="fas fa-coins card-icon"></i>
+                <h6 class="card-title">کۆی گشتی خەرجی بە دینار</h6>
+                <div class="fs-4 fw-bold" id="summary_total_iqd">0</div>
+                <small class="text-light">کۆی خەرجی بە دینار</small>
               </div>
             </div>
           </div>
           <div class="col-md-4 mb-2">
-            <div class="card text-center shadow">
+            <div class="card text-center shadow summary-card card-gradient-info card-animate-hover">
               <div class="card-body">
-                <h5 class="card-title">ژمارەی خەرجیەکان</h5>
-                <span id="summary_count" style="font-size:2rem;font-weight:bold;">0</span>
+                <i class="fas fa-list-alt card-icon"></i>
+                <h6 class="card-title">ژمارەی خەرجیەکان</h6>
+                <div class="fs-4 fw-bold" id="summary_count">0</div>
+                <small class="text-light">ژمارەی هەموو خەرجیەکان</small>
               </div>
             </div>
           </div>

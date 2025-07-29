@@ -28,6 +28,7 @@ $bins = $pdo->query('SELECT id, name FROM bins_silos ORDER BY name')->fetchAll(P
     <link href="../assets/css/nav.css" rel="stylesheet">
     <link href="../assets/css/comon/table.css" rel="stylesheet">
     <link href="../assets/css/comon/style.css" rel="stylesheet">
+    <link href="../assets/css/comon/cards.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <!-- jQuery (پێش هەموو شت) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -42,6 +43,40 @@ $bins = $pdo->query('SELECT id, name FROM bins_silos ORDER BY name')->fetchAll(P
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">گۆڕانکارییەکانی ستۆک</h2>
         <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addAdjustmentModal" style="background: var(--seafoam-green); font-weight: bold;">+ زیادکردنی گۆڕانکاری</button>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4" id="summary-cards">
+        <div class="col-md-4 mb-3">
+            <div class="card text-center shadow summary-card card-gradient-info card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-exchange-alt card-icon"></i>
+                    <h6 class="card-title">کۆی گۆڕانکارییەکان</h6>
+                    <div class="fs-4 fw-bold" id="total-adjustments">0</div>
+                    <small class="text-light">ژمارەی هەموو گۆڕانکارییەکان</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card text-center shadow summary-card card-gradient-success card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-plus-circle card-icon"></i>
+                    <h6 class="card-title">زیادکردنەکان</h6>
+                    <div class="fs-4 fw-bold" id="total-additions">0</div>
+                    <small class="text-light">ژمارەی زیادکردنەکان</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card text-center shadow summary-card card-gradient-danger card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-minus-circle card-icon"></i>
+                    <h6 class="card-title">کەمکردنەوەکان</h6>
+                    <div class="fs-4 fw-bold" id="total-subtractions">0</div>
+                    <small class="text-light">ژمارەی کەمکردنەوەکان</small>
+                </div>
+            </div>
+        </div>
     </div>
     <div class="table-responsive">
         <table class="table table-bordered table-hover align-middle text-center" id="adjustmentsTable">
