@@ -53,7 +53,7 @@ try {
     $stock_status = [];
     $stmt = $pdo->query('SELECT name, type, amount, material_type, average_price, total_value FROM bins_silos WHERE amount > 0 ORDER BY amount ASC');
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        // Calculate capacity based on type and material
+        // Calculate capacity based on type and material - using more realistic values
         $capacity = 0;
         if ($row['type'] === 'تەنکی') {
             if ($row['material_type'] === 'گاز') {
@@ -65,20 +65,20 @@ try {
             }
         } elseif ($row['type'] === 'سایلۆ') {
             if ($row['material_type'] === 'چیمەنتۆ') {
-                $capacity = 100000; // 100,000 kg for cement silos
+                $capacity = 50000; // 50,000 kg for cement silos (more realistic)
             } else {
-                $capacity = 80000; // Default silo capacity
+                $capacity = 40000; // Default silo capacity
             }
         } elseif ($row['type'] === 'چاو') {
             if ($row['material_type'] === 'لمی ڕەش' || $row['material_type'] === 'لمی کەسارە') {
-                $capacity = 200000; // 200,000 kg for sand/gravel pits
+                $capacity = 100000; // 100,000 kg for sand/gravel pits (more realistic)
             } elseif ($row['material_type'] === 'چەو') {
-                $capacity = 100000000; // 100,000,000 kg for stone pits
+                $capacity = 500000; // 500,000 kg for stone pits (more realistic)
             } else {
-                $capacity = 150000; // Default pit capacity
+                $capacity = 75000; // Default pit capacity
             }
         } else {
-            $capacity = 100000; // Default capacity for other types
+            $capacity = 50000; // Default capacity for other types
         }
         
         $percentage = min(100, ($row['amount'] / $capacity) * 100);
@@ -124,12 +124,12 @@ try {
             WHEN type = "تەنکی" AND material_type = "گاز" THEN 10000
             WHEN type = "تەنکی" AND material_type = "دەرمان" THEN 20000
             WHEN type = "تەنکی" THEN 15000
-            WHEN type = "سایلۆ" AND material_type = "چیمەنتۆ" THEN 100000
-            WHEN type = "سایلۆ" THEN 80000
-            WHEN type = "چاو" AND (material_type = "لمی ڕەش" OR material_type = "لمی کەسارە") THEN 200000
-            WHEN type = "چاو" AND material_type = "چەو" THEN 100000000
-            WHEN type = "چاو" THEN 150000
-            ELSE 100000
+            WHEN type = "سایلۆ" AND material_type = "چیمەنتۆ" THEN 50000
+            WHEN type = "سایلۆ" THEN 40000
+            WHEN type = "چاو" AND (material_type = "لمی ڕەش" OR material_type = "لمی کەسارە") THEN 100000
+            WHEN type = "چاو" AND material_type = "چەو" THEN 500000
+            WHEN type = "چاو" THEN 75000
+            ELSE 50000
         END) < 0.1')->fetchColumn(),
         'active_employees' => $pdo->query('SELECT COUNT(*) FROM employees')->fetchColumn(),
     ];
