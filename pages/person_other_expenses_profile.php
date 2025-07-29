@@ -70,7 +70,7 @@ if ($person_id) {
         </div>
         <div class="row mb-3" id="person-summary-cards">
           <div class="col-md-4 mb-2">
-            <div class="card text-center shadow summary-card card-gradient-success card-animate-hover">
+            <div class="card text-center shadow  card-gradient-success card-animate-hover">
               <div class="card-body">
                 <i class="fas fa-dollar-sign card-icon"></i>
                 <h6 class="card-title">کۆی گشتی خەرجی بە دۆلار</h6>
@@ -80,7 +80,7 @@ if ($person_id) {
             </div>
           </div>
           <div class="col-md-4 mb-2">
-            <div class="card text-center shadow summary-card card-gradient-warning card-animate-hover">
+            <div class="card text-center shadow  card-gradient-warning card-animate-hover">
               <div class="card-body">
                 <i class="fas fa-coins card-icon"></i>
                 <h6 class="card-title">کۆی گشتی خەرجی بە دینار</h6>
@@ -90,7 +90,7 @@ if ($person_id) {
             </div>
           </div>
           <div class="col-md-4 mb-2">
-            <div class="card text-center shadow summary-card card-gradient-info card-animate-hover">
+            <div class="card text-center shadow  card-gradient-info card-animate-hover">
               <div class="card-body">
                 <i class="fas fa-list-alt card-icon"></i>
                 <h6 class="card-title">ژمارەی خەرجیەکان</h6>

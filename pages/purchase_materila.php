@@ -60,7 +60,7 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
         <!-- Summary Cards -->
         <div class="row mb-4" id="summary-cards">
             <div class="col-md-4 mb-3">
-                <div class="card text-center shadow summary-card card-gradient-info card-animate-hover">
+                <div class="card text-center shadow  card-gradient-info card-animate-hover">
                     <div class="card-body">
                         <i class="fas fa-shopping-bag card-icon"></i>
                         <h6 class="card-title">کۆی کڕینەکان</h6>
@@ -70,7 +70,7 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
                 </div>
             </div>
             <div class="col-md-4 mb-3">
-                <div class="card text-center shadow summary-card card-gradient-success card-animate-hover">
+                <div class="card text-center shadow  card-gradient-success card-animate-hover">
                     <div class="card-body">
                         <i class="fas fa-dollar-sign card-icon"></i>
                         <h6 class="card-title">کۆی نرخی کڕینەکان</h6>
@@ -80,7 +80,7 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
                 </div>
             </div>
             <div class="col-md-4 mb-3">
-                <div class="card text-center shadow summary-card card-gradient-warning card-animate-hover">
+                <div class="card text-center shadow  card-gradient-warning card-animate-hover">
                     <div class="card-body">
                         <i class="fas fa-users card-icon"></i>
                         <h6 class="card-title">درووشیارەکان</h6>

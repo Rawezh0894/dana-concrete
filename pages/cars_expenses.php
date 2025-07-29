@@ -33,14 +33,7 @@ if (!isset($_SESSION['user_id'])) {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <style>
-        
-        .summary-value {
-            font-size: 2rem;
-            font-weight: bold;
-            color: var(--seafoam-green);
-        }
-    </style>
+
 </head>
 <body dir="rtl">
 <?php include '../includes/navbar.php'; ?>

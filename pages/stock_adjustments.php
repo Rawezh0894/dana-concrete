@@ -48,7 +48,7 @@ $bins = $pdo->query('SELECT id, name FROM bins_silos ORDER BY name')->fetchAll(P
     <!-- Summary Cards -->
     <div class="row mb-4" id="summary-cards">
         <div class="col-md-4 mb-3">
-            <div class="card text-center shadow summary-card card-gradient-info card-animate-hover">
+            <div class="card text-center shadow  card-gradient-info card-animate-hover">
                 <div class="card-body">
                     <i class="fas fa-exchange-alt card-icon"></i>
                     <h6 class="card-title">کۆی گۆڕانکارییەکان</h6>
@@ -58,7 +58,7 @@ $bins = $pdo->query('SELECT id, name FROM bins_silos ORDER BY name')->fetchAll(P
             </div>
         </div>
         <div class="col-md-4 mb-3">
-            <div class="card text-center shadow summary-card card-gradient-success card-animate-hover">
+            <div class="card text-center shadow  card-gradient-success card-animate-hover">
                 <div class="card-body">
                     <i class="fas fa-plus-circle card-icon"></i>
                     <h6 class="card-title">زیادکردنەکان</h6>
@@ -68,7 +68,7 @@ $bins = $pdo->query('SELECT id, name FROM bins_silos ORDER BY name')->fetchAll(P
             </div>
         </div>
         <div class="col-md-4 mb-3">
-            <div class="card text-center shadow summary-card card-gradient-danger card-animate-hover">
+            <div class="card text-center shadow  card-gradient-danger card-animate-hover">
                 <div class="card-body">
                     <i class="fas fa-minus-circle card-icon"></i>
                     <h6 class="card-title">کەمکردنەوەکان</h6>

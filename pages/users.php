@@ -70,7 +70,7 @@ if (!hasPermission('view_users')) {
             <!-- Summary Cards -->
             <div class="row mb-4" id="summary-cards">
                 <div class="col-md-4 mb-3">
-                    <div class="card text-center shadow summary-card card-gradient-info card-animate-hover">
+                    <div class="card text-center shadow  card-gradient-info card-animate-hover">
                         <div class="card-body">
                             <i class="fas fa-users card-icon"></i>
                             <h6 class="card-title">کۆی بەکارهێنەران</h6>
@@ -80,7 +80,7 @@ if (!hasPermission('view_users')) {
                     </div>
                 </div>
                 <div class="col-md-4 mb-3">
-                    <div class="card text-center shadow summary-card card-gradient-success card-animate-hover">
+                    <div class="card text-center shadow  card-gradient-success card-animate-hover">
                         <div class="card-body">
                             <i class="fas fa-user-shield card-icon"></i>
                             <h6 class="card-title">ئەدمینەکان</h6>
@@ -90,7 +90,7 @@ if (!hasPermission('view_users')) {
                     </div>
                 </div>
                 <div class="col-md-4 mb-3">
-                    <div class="card text-center shadow summary-card card-gradient-warning card-animate-hover">
+                    <div class="card text-center shadow  card-gradient-warning card-animate-hover">
                         <div class="card-body">
                             <i class="fas fa-user-tie card-icon"></i>
                             <h6 class="card-title">بەڕێوەبەران</h6>
