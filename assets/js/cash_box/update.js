@@ -1,15 +1,27 @@
 $(document).ready(function() {
     // Show edit modal and fill data
     $('#cashBoxTable').on('click', '.btn-edit-cashbox', function() {
-        var row = $(this).closest('tr');
         var id = $(this).data('id');
+        var rowData = $(this).data('row');
+        
         $('#edit_id').val(id);
-        $('#edit_date').val(row.find('td:eq(1)').text().trim());
-        $('#edit_type').val(row.find('td:eq(2)').data('type') || '');
-        $('#edit_amount_iqd').val(row.find('td:eq(3)').text().trim());
-        $('#edit_amount_usd').val(row.find('td:eq(4)').text().trim());
-        $('#edit_currency').val(row.find('td:eq(5)').text().trim());
-        $('#edit_note').val(row.find('td:eq(6)').text().trim());
+        $('#edit_date').val(rowData.date || '');
+        
+        // Set type based on the original value
+        var typeValue = '';
+        if (rowData.type === 'deposit') typeValue = 'deposit';
+        else if (rowData.type === 'withdraw') typeValue = 'withdraw';
+        $('#edit_type').val(typeValue);
+        
+        // Clean amount values (remove formatting)
+        var amountIqd = rowData.amount_iqd || 0;
+        var amountUsd = rowData.amount_usd || 0;
+        $('#edit_amount_iqd').val(amountIqd);
+        $('#edit_amount_usd').val(amountUsd);
+        
+        $('#edit_currency').val(rowData.currency || '');
+        $('#edit_note').val(rowData.note || '');
+        
         $('#editCashBoxModal').modal('show');
     });
 

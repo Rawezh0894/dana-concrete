@@ -19,57 +19,83 @@ function formatPrice(price, currency) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    fetch('../process/dashboard/select_information.php')
-        .then(res => {
-            if (!res.ok) {
-                throw new Error(`HTTP error! status: ${res.status}`);
-            }
-            return res.text(); // Get response as text first
-        })
-        .then(text => {
-            // Try to parse as JSON
-            let data;
-            try {
-                data = JSON.parse(text);
-            } catch (e) {
-                console.error('Failed to parse JSON response:', text);
-                console.error('JSON parse error:', e);
-                throw new Error('Invalid JSON response from server');
-            }
-            
-            if (!data.success) {
-                console.error('Server returned error:', data.message);
-                return;
-            }
-            
-            // Render summary cards
-            const cards = [
-                { key: 'customers', label: 'کڕیار', icon: 'fa-users', color: 'var(--kelly-green)' },
-                { key: 'companies', label: 'کۆمپانیا', icon: 'fa-building', color: 'var(--seafoam-green)' },
-                { key: 'employees', label: 'کارمەند', icon: 'fa-user-tie', color: 'var(--lime-green)' },
-                { key: 'receipts', label: 'پسوڵەی کۆنکرێت', icon: 'fa-file-invoice', color: 'var(--spearmint)' },
-                { key: 'sales', label: 'فرۆشتن', icon: 'fa-cash-register', color: 'var(--kelly-green)' },
-                { key: 'materials', label: 'مەواد', icon: 'fa-cubes', color: 'var(--seafoam-green)' },
-                { key: 'cars', label: 'سەیارە', icon: 'fa-truck', color: 'var(--lime-green)' },
-            ];
-            let html = '';
-            cards.forEach(card => {
-                html += `<div class="col-md-3 col-sm-6">
-                    <div class="card text-center shadow" style="border: none;">
-                        <div class="card-body">
-                            <div class="mb-2"><i class="fa ${card.icon}" style="font-size:2rem;color:${card.color}"></i></div>
-                            <h5 class="card-title">${card.label}</h5>
-                            <span style="font-size:2rem;font-weight:bold;">${data.summary[card.key] || 0}</span>
-                        </div>
-                    </div>
-                </div>`;
-            });
-            document.getElementById('dashboard-summary-cards').innerHTML = html;
+    // First fetch USD rate
+    fetch('../process/purchase_materilas/get_usd_rate.php')
+        .then(res => res.json())
+        .then(usdData => {
+            // Then fetch dashboard data
+            return fetch('../process/dashboard/select_information.php')
+                .then(res => {
+                    if (!res.ok) {
+                        throw new Error(`HTTP error! status: ${res.status}`);
+                    }
+                    return res.text(); // Get response as text first
+                })
+                .then(text => {
+                    // Try to parse as JSON
+                    let data;
+                    try {
+                        data = JSON.parse(text);
+                    } catch (e) {
+                        console.error('Failed to parse JSON response:', text);
+                        console.error('JSON parse error:', e);
+                        throw new Error('Invalid JSON response from server');
+                    }
+                    
+                    if (!data.success) {
+                        console.error('Server returned error:', data.message);
+                        return;
+                    }
+                    
+                    // Get USD rate
+                    const usdRate = usdData.success ? usdData.rate : usdData.default_rate || 139250;
+                    
+                    // Render summary cards with USD rate as first card
+                    const cards = [
+                        { 
+                            key: 'usd_rate', 
+                            label: 'نرخی 100 دۆلار', 
+                            icon: 'fa-dollar-sign', 
+                            gradient: 'card-gradient-info',
+                            value: usdRate,
+                            isUsdRate: true
+                        },
+                        { key: 'customers', label: 'کڕیار', icon: 'fa-users', gradient: 'card-gradient-success' },
+                        { key: 'companies', label: 'کۆمپانیا', icon: 'fa-building', gradient: 'card-gradient-warning' },
+                        { key: 'employees', label: 'کارمەند', icon: 'fa-user-tie', gradient: 'card-gradient-purple' },
+                        { key: 'receipts', label: 'پسوڵەی کۆنکرێت', icon: 'fa-file-invoice', gradient: 'card-gradient-teal' },
+                        { key: 'sales', label: 'فرۆشتن', icon: 'fa-cash-register', gradient: 'card-gradient-orange' },
+                        { key: 'materials', label: 'مەواد', icon: 'fa-cubes', gradient: 'card-gradient-red' },
+                        { key: 'cars', label: 'سەیارە', icon: 'fa-truck', gradient: 'card-gradient-dark' },
+                    ];
+                    let html = '';
+                    cards.forEach(card => {
+                        let displayValue;
+                        if (card.isUsdRate) {
+                            // Format USD rate with full number display (no K/M abbreviation)
+                            displayValue = card.value.toLocaleString() + ' د.ع';
+                        } else {
+                            displayValue = data.summary[card.key] || 0;
+                        }
+                        
+                        html += `<div class="col-md-3 col-sm-6 mb-3">
+                            <div class="card text-center shadow ${card.gradient} card-animate-hover">
+                                <div class="card-body">
+                                    <i class="fas ${card.icon} card-icon"></i>
+                                    <h6 class="card-title text-white">${card.label}</h6>
+                                    <div class="fs-4 fw-bold text-white">${displayValue}</div>
+                                    <small class="text-white">${card.isUsdRate ? 'نرخی دۆلار بە دینار' : 'کۆی گشتی'}</small>
+                                </div>
+                            </div>
+                        </div>`;
+                    });
+                    document.getElementById('dashboard-summary-cards').innerHTML = html;
 
             // Render stock status cards
             let stockHtml = '';
+            const stockGradients = ['card-gradient-teal', 'card-gradient-orange', 'card-gradient-red', 'card-gradient-dark', 'card-gradient-info', 'card-gradient-success', 'card-gradient-warning', 'card-gradient-purple'];
             if (data.stock_status && Array.isArray(data.stock_status)) {
-                data.stock_status.forEach(item => {
+                data.stock_status.forEach((item, index) => {
                     // Format amount display in tons
                     const amountInTons = item.amount / 1000; // Convert kg to tons
                     const amountText = amountInTons >= 1000 ? 
@@ -78,16 +104,16 @@ document.addEventListener('DOMContentLoaded', function() {
                         `${amountInTons.toFixed(1)}` : 
                         `${amountInTons.toFixed(2)}`;
                     
-                    stockHtml += `<div class="col-md-3 col-sm-6">
-                        <div class="card text-center shadow stock-card" style="border: none;">
-                            <div class="card-body">
-                                <div class="mb-2"><i class="fa fa-boxes" style="font-size:2rem;color:var(--stock-accent)"></i></div>
-                                <h6 class="card-title mb-1">${item.name}</h6>
-                                <div style="font-size:0.8rem;color:#666;margin-bottom:0.5rem;">${item.type} - ${item.material_type}</div>
-                                <div style="font-size:1.1rem;font-weight:bold;margin-bottom:0.5rem;">${amountText} طەن</div>
+                    const stockGradient = stockGradients[index % stockGradients.length];
+                    stockHtml += `<div class="col-md-3 col-sm-6 mb-3">
+                        <div class="card text-center shadow ${stockGradient} card-animate-hover">
+                                                    <div class="card-body">
+                            <i class="fas fa-boxes card-icon"></i>
+                            <h6 class="card-title text-white">${item.name}</h6>
+                            <div class="fs-4 fw-bold text-white">${amountText} طەن</div>
+                            <small class="text-white">${item.type} - ${item.material_type}</small>
                                 ${window.userPermissions && window.userPermissions.canViewDashboardPrices ? 
-                                    `<div style="font-size:0.9rem;color:#28a745;margin-bottom:0.3rem;">${formatPrice(item.average_price_per_kg, item.price_currency)}/کگم</div>
-                                    <div style="font-size:0.8rem;color:#6c757d;margin-bottom:0.5rem;">کۆی نرخ: ${formatPrice(item.total_value, item.price_currency)}</div>` : 
+                                    `<div class="mt-2"><small class="text-white">${formatPrice(item.average_price_per_kg, item.price_currency)}/کگم</small></div>` : 
                                     ''
                                 }
                             </div>
@@ -107,14 +133,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 { key: 'active_employees', label: 'کارمەندە چالاکەکان', icon: 'bi-people' },
             ];
             let statsHtml = '';
-            statsItems.forEach(stat => {
-                statsHtml += `<div class="col-md-4 col-sm-6">
-                    <div class="stat-item">
-                        <div class="stat-icon">
-                            <i class="${stat.icon}"></i>
+            const gradientClasses = ['card-gradient-info', 'card-gradient-success', 'card-gradient-warning', 'card-gradient-purple', 'card-gradient-teal', 'card-gradient-orange', 'card-gradient-red', 'card-gradient-dark'];
+            statsItems.forEach((stat, index) => {
+                const gradientClass = gradientClasses[index % gradientClasses.length];
+                statsHtml += `<div class="col-md-4 col-sm-6 mb-3">
+                    <div class="card text-center shadow ${gradientClass} card-animate-hover">
+                        <div class="card-body">
+                            <i class="bi ${stat.icon} card-icon"></i>
+                            <h6 class="card-title text-white">${stat.label}</h6>
+                            <div class="fs-4 fw-bold text-white">${data.stats[stat.key] || 0}</div>
+                            <small class="text-white">ئامارەکانی مانگ</small>
                         </div>
-                        <div class="stat-value">${data.stats[stat.key] || 0}</div>
-                        <div class="stat-label">${stat.label}</div>
                     </div>
                 </div>`;
             });
@@ -139,21 +168,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Quick links
             const quickLinks = [
-                { label: 'پسوڵەکان', icon: 'fa-file-invoice', color: 'var(--spearmint)', href: '../pages/concrete_receipts.php' },
-                { label: 'فرۆشتن', icon: 'fa-cash-register', color: 'var(--kelly-green)', href: '../pages/add_sale.php' },
-                { label: 'کڕین', icon: 'fa-cart-plus', color: 'var(--lime-green)', href: '../pages/add_purchase.php' },
-                { label: 'کڕیاران', icon: 'fa-users', color: 'var(--kelly-green)', href: '../pages/add_customers.php' },
-                { label: 'دابینکەر', icon: 'fa-building', color: 'var(--seafoam-green)', href: '../pages/add_company.php' },
-                { label: 'مامەڵەکان', icon: 'fa-list', color: 'var(--spearmint)', href: '../pages/add_sale.php' },
-                { label: 'راپۆرتەکان', icon: 'fa-chart-bar', color: 'var(--seafoam-green)', href: '../pages/reports.php' },
-                { label: 'قاسەکە', icon: 'fa-cash-stack', color: 'var(--financial-accent)', href: '../pages/cash_box.php' },
+                { label: 'پسوڵەکان', icon: 'fa-file-invoice', href: '../pages/concrete_receipts.php' },
+                { label: 'فرۆشتن', icon: 'fa-cash-register', href: '../pages/add_sale.php' },
+                { label: 'کڕین', icon: 'fa-cart-plus', href: '../pages/add_purchase.php' },
+                { label: 'کڕیاران', icon: 'fa-users', href: '../pages/add_customers.php' },
+                { label: 'دابینکەر', icon: 'fa-building', href: '../pages/add_company.php' },
+                { label: 'مامەڵەکان', icon: 'fa-list', href: '../pages/add_sale.php' },
+                { label: 'راپۆرتەکان', icon: 'fa-chart-bar', href: '../pages/reports.php' },
+                { label: 'قاسەکە', icon: 'fa-cash-stack', href: '../pages/cash_box.php' },
             ];
             let ql = '';
-            quickLinks.forEach(link => {
+            const quickGradients = ['card-gradient-info', 'card-gradient-success', 'card-gradient-warning', 'card-gradient-purple', 'card-gradient-teal', 'card-gradient-orange', 'card-gradient-red', 'card-gradient-dark', 'card-gradient-primary', 'card-gradient-secondary'];
+            quickLinks.forEach((link, index) => {
+                const gradientClass = quickGradients[index % quickGradients.length];
                 ql += `<div class="col-6 col-md-4 mb-2">
-                    <a href="${link.href}" class="quick-link-card d-flex flex-column align-items-center justify-content-center" style="background: #f6f7fb; border-radius: 1rem; padding: 1.2rem; text-decoration: none; box-shadow: 0 2px 8px 0 rgba(0,0,0,0.04);">
-                        <i class="fa ${link.icon}" style="font-size:2rem;color:${link.color};margin-bottom:8px;"></i>
-                        <span style="color: var(--seafoam-green); font-weight: bold;">${link.label}</span>
+                    <a href="${link.href}" class="card text-center shadow ${gradientClass} card-animate-hover text-decoration-none">
+                        <div class="card-body">
+                            <i class="fas ${link.icon} card-icon"></i>
+                            <h6 class="card-title text-white">${link.label}</h6>
+                        </div>
                     </a>
                 </div>`;
             });
@@ -192,16 +225,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
             document.getElementById('dashboard-recent-activities').innerHTML = ra;
-        })
-        .catch(error => {
-            console.error('Error loading dashboard data:', error);
-            // Show error message to user
-            const errorMessage = `
-                <div class="alert alert-danger" role="alert">
-                    <i class="fa fa-exclamation-triangle"></i>
-                    هەڵە لە بارکردنی داتای داشبۆرد: ${error.message}
-                </div>
-            `;
-            document.getElementById('dashboard-summary-cards').innerHTML = errorMessage;
         });
+    })
+    .catch(error => {
+        console.error('Error loading dashboard data:', error);
+        // Show error message to user
+        const errorMessage = `
+            <div class="alert alert-danger" role="alert">
+                <i class="fa fa-exclamation-triangle"></i>
+                هەڵە لە بارکردنی داتای داشبۆرد: ${error.message}
+            </div>
+        `;
+        document.getElementById('dashboard-summary-cards').innerHTML = errorMessage;
+    });
 });

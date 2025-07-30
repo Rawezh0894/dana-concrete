@@ -22,7 +22,7 @@ function mapCashBoxRow(row, idx) {
         note: row.note || '',
         created_by_username: row.created_by_username || '',
         created_at: row.created_at || '',
-        actions: `<button class='btn btn-primary btn-sm btn-edit-cashbox' data-id='${row.id}'><i class='fa fa-edit'></i></button> <button class='btn btn-danger btn-sm btn-delete-cashbox' data-id='${row.id}'><i class='fa fa-trash'></i></button>`
+        actions: `<button class='btn btn-primary btn-sm btn-edit-cashbox' data-id='${row.id}' data-row='${JSON.stringify(row)}'><i class='fa fa-edit'></i></button> <button class='btn btn-danger btn-sm btn-delete-cashbox' data-id='${row.id}'><i class='fa fa-trash'></i></button>`
     };
 }
 

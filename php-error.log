@@ -1351,3 +1351,336 @@
 )
 
 [29-Jul-2025 12:40:46 Europe/Berlin] Customer stats retrieved: Customer=32, Total Debt USD=464.04, Total Debt IQD=0, Sales Count=1
+[30-Jul-2025 06:59:34 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753851574
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 06:59:34 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[30-Jul-2025 07:01:13 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753851673
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 07:01:13 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[30-Jul-2025 07:01:14 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753851674
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 07:01:14 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[30-Jul-2025 07:01:14 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753851674
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 07:01:14 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[30-Jul-2025 07:02:33 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753851753
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 07:02:33 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[30-Jul-2025 07:02:54 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753851774
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 07:02:54 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[30-Jul-2025 07:03:28 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753851808
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 07:03:28 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[30-Jul-2025 07:05:26 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753851926
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 07:05:26 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[30-Jul-2025 07:06:53 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753852013
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 07:06:53 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[30-Jul-2025 07:10:44 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753852244
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 07:10:44 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[30-Jul-2025 07:10:45 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753852245
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 07:10:45 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[30-Jul-2025 07:10:49 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753852249
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 07:10:49 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[30-Jul-2025 07:13:15 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753852395
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 07:13:15 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[30-Jul-2025 07:13:17 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753852397
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 07:13:17 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[30-Jul-2025 07:14:15 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753852455
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 07:14:15 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[30-Jul-2025 07:14:26 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753852466
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 07:14:26 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[30-Jul-2025 07:15:30 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753852530
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 07:15:30 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[30-Jul-2025 07:15:51 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753852551
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 07:15:51 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[30-Jul-2025 07:15:52 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753852552
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 07:15:52 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[30-Jul-2025 07:16:49 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753852609
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 07:16:49 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[30-Jul-2025 07:17:30 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753852650
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 07:17:30 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[30-Jul-2025 07:17:58 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753852678
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 07:17:58 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[30-Jul-2025 07:18:36 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753852716
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 07:18:36 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[30-Jul-2025 07:18:47 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753852727
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 07:18:47 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[30-Jul-2025 07:18:57 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753852737
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 07:18:57 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[30-Jul-2025 07:19:15 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753852755
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 07:19:15 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[30-Jul-2025 07:19:51 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753852791
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 07:19:51 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[30-Jul-2025 07:20:04 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753852804
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 07:20:04 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[30-Jul-2025 07:21:21 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753852881
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 07:21:21 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[30-Jul-2025 07:21:40 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753852900
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 07:21:40 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[30-Jul-2025 07:22:24 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753852944
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 07:22:24 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[30-Jul-2025 07:22:38 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753852958
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 07:22:38 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[30-Jul-2025 07:24:31 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753853071
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 07:24:31 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[30-Jul-2025 07:25:20 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753853120
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 07:25:20 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[30-Jul-2025 07:25:44 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753853144
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 07:25:44 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[30-Jul-2025 07:25:44 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753853144
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 07:25:44 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[30-Jul-2025 07:25:48 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753853148
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 07:25:48 Europe/Berlin] Dashboard data loaded successfully for user: 1

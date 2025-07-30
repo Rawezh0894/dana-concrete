@@ -16,6 +16,7 @@ if (!isset($_SESSION['user_id'])) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
     <link href="../assets/css/variables.css" rel="stylesheet">
     <link href="../assets/css/dashboard.css" rel="stylesheet">
+    <link href="../assets/css/comon/cards.css" rel="stylesheet">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -36,9 +37,9 @@ if (!isset($_SESSION['user_id'])) {
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
             <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">داشبۆرد</h2>
             <div class="quick-actions d-flex gap-2">
-                <button class="btn btn-primary quick-action" onclick="location.href='../pages/concrete_receipts.php'"><i class="fa fa-plus"></i> پسوڵە</button>
-                <button class="btn btn-success quick-action" onclick="location.href='../pages/add_sale.php'"><i class="fa fa-plus"></i> فرۆشتن</button>
-                <button class="btn btn-info quick-action" onclick="location.href='../pages/add_purchase.php'"><i class="fa fa-plus"></i> کڕین</button>
+                <button class="btn quick-action" onclick="location.href='../pages/concrete_receipts.php'"><i class="fa fa-plus"></i> پسوڵە</button>
+                <button class="btn  quick-action" onclick="location.href='../pages/add_sale.php'"><i class="fa fa-plus"></i> فرۆشتن</button>
+                <button class="btn  quick-action" onclick="location.href='../pages/add_purchase.php'"><i class="fa fa-plus"></i> کڕین</button>
             </div>
         </div>
         

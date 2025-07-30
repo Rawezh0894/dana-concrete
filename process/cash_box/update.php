@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once '../../config/db_conected.php';
 header('Content-Type: application/json; charset=utf-8');
 
