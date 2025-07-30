@@ -41,8 +41,18 @@ try {
         $stmt->execute([$id]);
         $old_record = $stmt->fetch();
 
+        // Get old employee information
+        $old_employee_name = 'Unknown';
+        if ($old_record['employee_id']) {
+            $stmt = $pdo->prepare("SELECT name FROM employees WHERE id = ?");
+            $stmt->execute([$old_record['employee_id']]);
+            $old_employee = $stmt->fetch();
+            $old_employee_name = $old_employee['name'] ?? 'Unknown';
+        }
+
         $old_values = [
             'employee_id' => $old_record['employee_id'],
+            'employee_name' => $old_employee_name,
             'salary' => $old_record['salary'],
             'karwanhisabi' => $old_record['karwanhisabi'],
             'bonus' => $old_record['bonus'],

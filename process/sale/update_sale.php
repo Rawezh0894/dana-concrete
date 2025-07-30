@@ -116,8 +116,27 @@ try {
         $stmt->execute([$id]);
         $old_record = $stmt->fetch();
 
+        // Get old customer and formula information
+        $old_customer_name = 'Unknown';
+        $old_formula_name = 'Unknown';
+
+        if ($old_record['customer_id']) {
+            $stmt = $pdo->prepare("SELECT name FROM customers WHERE id = ?");
+            $stmt->execute([$old_record['customer_id']]);
+            $old_customer = $stmt->fetch();
+            $old_customer_name = $old_customer['name'] ?? 'Unknown';
+        }
+
+        if ($old_record['formula_id']) {
+            $stmt = $pdo->prepare("SELECT name FROM concrete_formulas WHERE id = ?");
+            $stmt->execute([$old_record['formula_id']]);
+            $old_formula = $stmt->fetch();
+            $old_formula_name = $old_formula['name'] ?? 'Unknown';
+        }
+
         $old_values = [
             'customer_id' => $old_record['customer_id'],
+            'customer_name' => $old_customer_name,
             'recipient' => $old_record['recipient'],
             'location' => $old_record['location'],
             'quantity' => $old_record['quantity'],
@@ -132,6 +151,7 @@ try {
             'order_date' => $old_record['order_date'],
             'notes' => $old_record['notes'],
             'formula_id' => $old_record['formula_id'],
+            'formula_name' => $old_formula_name,
             'discount' => $old_record['discount']
         ];
 

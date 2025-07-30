@@ -230,13 +230,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $stmt->execute([$id]);
                         $old_record = $stmt->fetch();
 
+                        // Get old related information
+                        $old_person_name = 'هیچ کەسێک نییە';
+                        $old_employee_name = 'هیچ کارمەندێک نییە';
+                        $old_car_name = 'هیچ سەیارەیەک نییە';
+                        $old_material_name = 'هیچ مادەیەک نییە';
+
+                        if ($old_record['person_id']) {
+                            $stmt = $pdo->prepare("SELECT name FROM other_expense_persons WHERE id = ?");
+                            $stmt->execute([$old_record['person_id']]);
+                            $old_person = $stmt->fetch();
+                            $old_person_name = $old_person['name'] ?? 'Unknown';
+                        }
+
+                        if ($old_record['employee_id']) {
+                            $stmt = $pdo->prepare("SELECT name FROM employees WHERE id = ?");
+                            $stmt->execute([$old_record['employee_id']]);
+                            $old_employee = $stmt->fetch();
+                            $old_employee_name = $old_employee['name'] ?? 'Unknown';
+                        }
+
+                        if ($old_record['car_id']) {
+                            $stmt = $pdo->prepare("SELECT name FROM cars WHERE id = ?");
+                            $stmt->execute([$old_record['car_id']]);
+                            $old_car = $stmt->fetch();
+                            $old_car_name = $old_car['name'] ?? 'Unknown';
+                        }
+
+                        if ($old_record['material_id']) {
+                            $stmt = $pdo->prepare("SELECT name FROM materials WHERE id = ?");
+                            $stmt->execute([$old_record['material_id']]);
+                            $old_material = $stmt->fetch();
+                            $old_material_name = $old_material['name'] ?? 'Unknown';
+                        }
+
                         $old_values = [
                             'person_id' => $old_record['person_id'],
+                            'person_name' => $old_person_name,
                             'employee_id' => $old_record['employee_id'],
+                            'employee_name' => $old_employee_name,
                             'car_id' => $old_record['car_id'],
+                            'car_name' => $old_car_name,
                             'gas_liters' => $old_record['gas_liters'],
                             'expense_type' => $old_record['expense_type'],
                             'material_id' => $old_record['material_id'],
+                            'material_name' => $old_material_name,
                             'material_quantity' => $old_record['material_quantity'],
                             'material_purchase_price_iqd' => $old_record['material_purchase_price_iqd'],
                             'material_purchase_price_usd' => $old_record['material_purchase_price_usd'],
