@@ -10,6 +10,11 @@ $(document).ready(function() {
         loadPersons();
     }
     
+    // Load USD rate when edit modal is shown
+    $('#editPurchaseModal').on('show.bs.modal', function() {
+        loadEditUsdRate();
+    });
+    
     // Handle edit form submission
     $('#editPurchaseForm').submit(function(e) {
         e.preventDefault();
@@ -321,4 +326,38 @@ function refreshEditMaterialDropdowns() {
             dir: "rtl"
         });
     });
+}
+
+// Load USD to IQD exchange rate for edit modal
+function loadEditUsdRate() {
+    // Use rate from PHP if available, otherwise load from API
+    if (window.usdRate) {
+        $('#edit_usd_to_iqd_rate').val(window.usdRate);
+        calculateEditGrandTotal();
+    } else {
+        $.ajax({
+            url: '../process/purchase_materilas/get_usd_rate.php',
+            type: 'GET',
+            dataType: 'json',
+            success: function(result) {
+                if (result.success) {
+                    $('#edit_usd_to_iqd_rate').val(result.rate);
+                    calculateEditGrandTotal();
+                } else {
+                    // Use default rate if API fails
+                    if (result.default_rate) {
+                        $('#edit_usd_to_iqd_rate').val(result.default_rate);
+                        calculateEditGrandTotal();
+                    }
+                    console.log('Error loading USD rate: ' + result.error);
+                }
+            },
+            error: function(xhr, status, error) {
+                // Use default rate if request fails
+                $('#edit_usd_to_iqd_rate').val(139250);
+                calculateEditGrandTotal();
+                console.error('Error loading USD rate:', error);
+            }
+        });
+    }
 }

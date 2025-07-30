@@ -580,29 +580,35 @@ function loadNextReceiptNumber() {
 
 // Load USD to IQD exchange rate from API
 function loadUsdRate() {
-    $.ajax({
-        url: '../process/purchase_materilas/get_usd_rate.php',
-        type: 'GET',
-        dataType: 'json',
-        success: function(result) {
-            if (result.success) {
-                $('#usd_to_iqd_rate').val(result.rate);
-                // Recalculate totals if there are any existing values
-                calculateGrandTotal();
-            } else {
-                // Use default rate if API fails
-                if (result.default_rate) {
-                    $('#usd_to_iqd_rate').val(result.default_rate);
+    // Use rate from PHP if available, otherwise load from API
+    if (window.usdRate) {
+        $('#usd_to_iqd_rate').val(window.usdRate);
+        calculateGrandTotal();
+    } else {
+        $.ajax({
+            url: '../process/purchase_materilas/get_usd_rate.php',
+            type: 'GET',
+            dataType: 'json',
+            success: function(result) {
+                if (result.success) {
+                    $('#usd_to_iqd_rate').val(result.rate);
+                    // Recalculate totals if there are any existing values
                     calculateGrandTotal();
+                } else {
+                    // Use default rate if API fails
+                    if (result.default_rate) {
+                        $('#usd_to_iqd_rate').val(result.default_rate);
+                        calculateGrandTotal();
+                    }
+                    console.log('Error loading USD rate: ' + result.error);
                 }
-                console.log('Error loading USD rate: ' + result.error);
+            },
+            error: function(xhr, status, error) {
+                // Use default rate if request fails
+                $('#usd_to_iqd_rate').val(139250);
+                calculateGrandTotal();
+                console.error('Error loading USD rate:', error);
             }
-        },
-        error: function(xhr, status, error) {
-            // Use default rate if request fails
-            $('#usd_to_iqd_rate').val(139250);
-            calculateGrandTotal();
-            console.error('Error loading USD rate:', error);
-        }
-    });
+        });
+    }
 }
