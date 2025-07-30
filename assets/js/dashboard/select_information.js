@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
             console.warn('USD rate fetch failed, using default:', error);
-            return { success: false, default_rate: 139250 };
+            return { value: 139250 };
         })
         .then(usdData => {
             // Then fetch dashboard data
