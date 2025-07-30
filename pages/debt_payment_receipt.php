@@ -135,7 +135,7 @@ $debt_id = isset($_GET['id']) ? $_GET['id'] : null;
         <!-- Footer signatures -->
         <div class="footer">
             <div class="signature-box">
-                واژووی کارپێکەر
+                واژووی پێدەر
                 <span class="signature-line"></span>
             </div>
             <div class="signature-box">
