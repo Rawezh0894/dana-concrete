@@ -54,6 +54,10 @@ async function loadCustomerSalesTable(customerId) {
 
 // Global function to load customer sales (for use in other scripts)
 async function loadCustomerSales(customerId) {
+    if (!customerId || customerId <= 0) {
+        console.error('Invalid customer ID for loading sales:', customerId);
+        return;
+    }
     await loadCustomerSalesTable(customerId);
 }
 
@@ -61,7 +65,9 @@ async function loadCustomerSales(customerId) {
 window.loadCustomerSales = loadCustomerSales;
 
 document.addEventListener('DOMContentLoaded', function() {
-    if (typeof CUSTOMER_ID !== 'undefined' && CUSTOMER_ID) {
+    if (typeof CUSTOMER_ID !== 'undefined' && CUSTOMER_ID && CUSTOMER_ID > 0) {
         loadCustomerSalesTable(CUSTOMER_ID);
+    } else {
+        console.error('Invalid CUSTOMER_ID for loading sales:', CUSTOMER_ID);
     }
 });

@@ -1,4 +1,9 @@
 async function loadCustomerReturnDebts(customerId) {
+    if (!customerId || customerId <= 0) {
+        console.error('Invalid customer ID for loading return debts:', customerId);
+        return;
+    }
+    
     try {
         const res = await fetch(`../process/customer_profile/select_return_debt.php?customer_id=${customerId}`);
         if (!res.ok) {
@@ -33,6 +38,9 @@ async function loadCustomerReturnDebts(customerId) {
                 <button class="btn btn-sm btn-danger delete-return-debt" data-id="${row.id}" title="سڕینەوە">
                     <i class="fa fa-trash"></i>
                 </button>
+                <button class="btn btn-sm btn-success print-debt-receipt" data-id="${row.id}" title="پرێنت">
+                    <i class="fa fa-print"></i>
+                </button>
             `
         }));
         TableController.renderWithPagination('#customerDebtTable', rows, columns, { pageSize: 10 });
@@ -46,8 +54,10 @@ async function loadCustomerReturnDebts(customerId) {
 window.loadCustomerReturnDebts = loadCustomerReturnDebts;
 
 document.addEventListener('DOMContentLoaded', function() {
-    if (typeof CUSTOMER_ID !== 'undefined' && CUSTOMER_ID) {
+    if (typeof CUSTOMER_ID !== 'undefined' && CUSTOMER_ID && CUSTOMER_ID > 0) {
         loadCustomerReturnDebts(CUSTOMER_ID);
+    } else {
+        console.error('Invalid CUSTOMER_ID for loading return debts:', CUSTOMER_ID);
     }
 });
 
@@ -111,5 +121,25 @@ document.addEventListener('click', async function(e) {
             button.disabled = false;
             button.innerHTML = originalHTML;
         }
+    }
+});
+
+// Print debt receipt button handler
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('print-debt-receipt') || e.target.closest('.print-debt-receipt')) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const button = e.target.classList.contains('print-debt-receipt') ? e.target : e.target.closest('.print-debt-receipt');
+        const id = button.getAttribute('data-id');
+        
+        if (!id) {
+            console.error('No debt ID found for printing');
+            Swal.fire('هەڵە', 'ناسنامەی قەرز نەدۆزرایەوە!', 'error');
+            return;
+        }
+        
+        // Open debt payment receipt in new window
+        window.open(`../pages/debt_payment_receipt.php?id=${id}&auto_print=1`, '_blank');
     }
 });

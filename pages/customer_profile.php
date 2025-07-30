@@ -5,6 +5,34 @@ if (!isset($_SESSION['user_id'])) {
     header('Location: ../index.php');
     exit;
 }
+
+// Check if customer ID is provided
+if (!isset($_GET['id']) || empty($_GET['id'])) {
+    echo '<!DOCTYPE html>
+    <html lang="ku" dir="rtl">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>هەڵە - ناسنامەی کڕیار دیاری نەکراوە</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+        <link href="../assets/css/variables.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    </head>
+    <body>
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background: linear-gradient(135deg, var(--seafoam-green) 0%, var(--kelly-green) 100%);">
+            <div class="text-center bg-white p-5 rounded shadow" style="max-width: 500px;">
+                <i class="fas fa-exclamation-triangle" style="font-size:5rem;color:#ffc107;margin-bottom:20px;"></i>
+                <h2 style="color:#666;margin-bottom:15px;">ناسنامەی کڕیار دیاری نەکراوە</h2>
+                <p style="color:#888;margin-bottom:25px;">تکایە کڕیارێک هەڵبژێرە لە لیستی کڕیارەکان</p>
+                <a href="add_customers.php" class="btn btn-primary" style="background: var(--seafoam-green); border: none; padding: 10px 25px; font-weight: bold;">
+                    <i class="fas fa-users"></i> گەڕانەوە بۆ لیستی کڕیارەکان
+                </a>
+            </div>
+        </div>
+    </body>
+    </html>';
+    exit;
+}
 // require_once '../config/permissions.php';
 // if (!hasPermission('view_customer')) {
 //     echo '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;">'
@@ -15,11 +43,45 @@ if (!isset($_SESSION['user_id'])) {
 // }
 $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 $customer_name = '';
+
+// Debug: Log the customer ID
+error_log('Customer Profile - Customer ID: ' . $customer_id . ', GET params: ' . print_r($_GET, true));
+
 if ($customer_id) {
     $stmt = $pdo->prepare('SELECT name FROM customers WHERE id = ?');
     $stmt->execute([$customer_id]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
     $customer_name = $row ? $row['name'] : '';
+    
+    if (!$customer_name) {
+        error_log('Customer Profile - Customer not found for ID: ' . $customer_id);
+        echo '<!DOCTYPE html>
+        <html lang="ku" dir="rtl">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>هەڵە - کڕیار نەدۆزرایەوە</title>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+            <link href="../assets/css/variables.css" rel="stylesheet">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+        </head>
+        <body>
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background: linear-gradient(135deg, var(--seafoam-green) 0%, var(--kelly-green) 100%);">
+                <div class="text-center bg-white p-5 rounded shadow" style="max-width: 500px;">
+                    <i class="fas fa-user-times" style="font-size:5rem;color:#dc3545;margin-bottom:20px;"></i>
+                    <h2 style="color:#666;margin-bottom:15px;">کڕیار نەدۆزرایەوە</h2>
+                    <p style="color:#888;margin-bottom:25px;">کڕیارێک بە ناسنامەی ' . $customer_id . ' نەدۆزرایەوە</p>
+                    <a href="add_customers.php" class="btn btn-primary" style="background: var(--seafoam-green); border: none; padding: 10px 25px; font-weight: bold;">
+                        <i class="fas fa-users"></i> گەڕانەوە بۆ لیستی کڕیارەکان
+                    </a>
+                </div>
+            </div>
+        </body>
+        </html>';
+        exit;
+    }
+} else {
+    error_log('Customer Profile - No customer ID provided');
 }
 ?>
 <!DOCTYPE html>
@@ -277,7 +339,17 @@ if ($customer_id) {
 <script>
     const CUSTOMER_ID = <?php echo $customer_id; ?>;
     
+    // Debug: Log the customer ID
+    console.log('PHP Customer ID:', <?php echo $customer_id; ?>);
+    console.log('JavaScript CUSTOMER_ID:', CUSTOMER_ID);
+    console.log('URL Parameters:', window.location.search);
+    
     function loadCustomerSummaryCards() {
+        if (!CUSTOMER_ID || CUSTOMER_ID <= 0) {
+            console.error('Invalid customer ID:', CUSTOMER_ID);
+            return;
+        }
+        
         $.get('../process/customer_profile/select_sale.php', { customer_id: CUSTOMER_ID, stats: 1 }, function(data) {
             if (!data || !data.stats) {
                 console.error('API returned no data or missing stats:', data);
@@ -318,7 +390,7 @@ if ($customer_id) {
 <script>
     // Function to refresh all customer data after any activity
     function refreshCustomerData() {
-        if (typeof CUSTOMER_ID !== 'undefined' && CUSTOMER_ID) {
+        if (typeof CUSTOMER_ID !== 'undefined' && CUSTOMER_ID && CUSTOMER_ID > 0) {
             // Refresh summary cards
             if (typeof loadCustomerSummaryCards === 'function') {
                 loadCustomerSummaryCards();
