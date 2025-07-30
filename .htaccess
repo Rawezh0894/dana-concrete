@@ -24,9 +24,7 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^pages/([^\.]+)$ pages/$1.php [NC,L]
 
 # Handle process directory without .php extension
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^process/([^/]+)/([^\.]+)$ process/$1/$2.php [NC,L]
+
 
 # Allow direct access to assets (CSS, JS, images)
 RewriteRule ^assets/ - [L]
