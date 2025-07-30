@@ -68,6 +68,52 @@ require_once '../config/db_conected.php';
         .json-value {
             color: #6c757d;
         }
+        .detail-row {
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            align-items: flex-start;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        .json-key {
+            font-weight: bold;
+            color: #495057;
+            min-width: 200px;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        .json-value {
+            color: #6c757d;
+            flex: 1;
+        }
+        .nested-object {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 5px;
+        }
+        .nested-item {
+            padding: 4px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .nested-item:last-child {
+            border-bottom: none;
+        }
+        .nested-key {
+            font-weight: 600;
+            color: #495057;
+            margin-right: 8px;
+        }
+        .nested-value {
+            color: #6c757d;
+        }
+        .text-muted {
+            color: #6c757d !important;
+            font-style: italic;
+        }
     </style>
 </head>
 <body dir="rtl">

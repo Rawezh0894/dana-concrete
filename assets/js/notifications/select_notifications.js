@@ -167,12 +167,227 @@ $(document).ready(function() {
         if (typeof data === 'object' && data !== null) {
             let html = '<div class="notification-details">';
             for (const [key, value] of Object.entries(data)) {
-                html += `<div><span class="json-key">${key}:</span> <span class="json-value">${value}</span></div>`;
+                const translatedKey = translateKey(key);
+                const formattedValue = formatValue(key, value);
+                html += `<div class="detail-row"><span class="json-key">${translatedKey}:</span> <span class="json-value">${formattedValue}</span></div>`;
             }
             html += '</div>';
             return html;
         }
         return `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+    }
+
+    function translateKey(key) {
+        const translations = {
+            // Sales
+            'customer_id': 'ناسنامەی کڕیار',
+            'customer_name': 'ناوی کڕیار',
+            'formula_id': 'ناسنامەی فۆرمۆلا',
+            'formula_name': 'ناوی فۆرمۆلا',
+            'quantity': 'بڕ',
+            'price_per_cubic': 'نرخ بۆ هەر مەتر سێج',
+            'total_amount': 'کۆی بڕ',
+            'payment_type': 'جۆری پارەدان',
+            'amount_paid_usd': 'بڕی پارەدەر بە دۆلار',
+            'amount_paid_iq': 'بڕی پارەدەر بە دینار',
+            'order_date': 'بەرواری داواکاری',
+            'invoice_number': 'ژمارەی پسوڵە',
+            'notes': 'تێبینی',
+            'recipient': 'وەرگر',
+            'location': 'شوێن',
+            'remaining_amount': 'بڕی ماوە',
+            'discount': 'داشکاندن',
+
+            // Purchases
+            'company_id': 'ناسنامەی کۆمپانیا',
+            'company_name': 'ناوی کۆمپانیا',
+            'material_id': 'ناسنامەی مادە',
+            'material_name': 'ناوی مادە',
+            'driver': 'شۆفێر',
+            'amount_iqd': 'بڕ بە دینار',
+            'kg': 'کیلۆگرام',
+            'price': 'نرخ',
+            'exchange_rate': 'نرخی گۆڕانکاری',
+            'type': 'جۆر',
+            'paid_usd': 'پارەدەر بە دۆلار',
+            'paid_iqd': 'پارەدەر بە دینار',
+            'remaining_usd': 'ماوە بە دۆلار',
+            'remaining_iqd': 'ماوە بە دینار',
+            'bin_id': 'ناسنامەی بن',
+            'price_per_kg_iqd': 'نرخ بۆ هەر کیلۆ بە دینار',
+            'price_per_kg_usd': 'نرخ بۆ هەر کیلۆ بە دۆلار',
+            'date': 'بەروار',
+
+            // Other Expenses
+            'person_id': 'ناسنامەی کەس',
+            'person_name': 'ناوی کەس',
+            'employee_id': 'ناسنامەی کارمەند',
+            'employee_name': 'ناوی کارمەند',
+            'car_id': 'ناسنامەی سەیارە',
+            'car_name': 'ناوی سەیارە',
+            'gas_liters': 'لیتر گاز',
+            'expense_type': 'جۆری خەرجی',
+            'material_quantity': 'بڕی مادە',
+            'material_purchase_price_iqd': 'نرخی کڕینی مادە بە دینار',
+            'material_purchase_price_usd': 'نرخی کڕینی مادە بە دۆلار',
+            'material_total_cost': 'کۆی تێچووی مادە',
+            'gas_purchase_price_input': 'نرخی کڕینی گاز',
+            'gas_total_cost': 'کۆی تێچووی گاز',
+            'currency_type': 'جۆری دراو',
+
+            // Employee Payments
+            'salary': 'مووچە',
+            'karwanhisabi': 'کاروانحیسابی',
+            'bonus': 'پاداشت',
+            'total': 'کۆی',
+            'pay_month': 'مانگی پارەدان',
+
+            // Concrete Receipts
+            'receipt_number': 'ژمارەی پسوڵە',
+            'meter_amount': 'بڕ بە مەتر سێج',
+            'formulas_id': 'ناسنامەی فۆرمۆلا',
+            'pump_car_id': 'ناسنامەی سەیارەی پۆمپ',
+            'pump_car_name': 'ناوی سەیارەی پۆمپ',
+            'pump_driver_id': 'ناسنامەی شۆفێری پۆمپ',
+            'pump_driver_name': 'ناوی شۆفێری پۆمپ',
+            'mixer_car_id': 'ناسنامەی سەیارەی مایکسەر',
+            'mixer_car_name': 'ناوی سەیارەی مایکسەر',
+            'mixer_driver_id': 'ناسنامەی شۆفێری مایکسەر',
+            'mixer_driver_name': 'ناوی شۆفێری مایکسەر',
+            'receiver_name': 'ناوی وەرگر',
+
+            // Additional Info
+            'action_type': 'جۆری چالاکی',
+            'receipt_type': 'جۆری پسوڵە',
+            'amount_m3': 'بڕ بە مەتر سێج',
+            'delivery_components': 'کۆمپۆنێنتەکانی گەیاندن',
+            'payment_status': 'دۆخی پارەدان',
+            'currency_used': 'دراوی بەکارهێنراو',
+            'total_paid': 'کۆی پارەدەر',
+            'remaining_debt': 'قەرزی ماوە',
+            'expense_category': 'پۆلێنی خەرجی',
+            'payment_components': 'کۆمپۆنێنتەکانی پارەدان',
+            'total_amount': 'کۆی بڕ'
+        };
+        return translations[key] || key;
+    }
+
+    function formatValue(key, value) {
+        // Handle special cases
+        if (key === 'delivery_components' && typeof value === 'object') {
+            let html = '<div class="nested-object">';
+            for (const [subKey, subValue] of Object.entries(value)) {
+                const translatedSubKey = translateKey(subKey);
+                html += `<div class="nested-item"><span class="nested-key">${translatedSubKey}:</span> <span class="nested-value">${subValue}</span></div>`;
+            }
+            html += '</div>';
+            return html;
+        }
+
+        if (key === 'payment_components' && typeof value === 'object') {
+            let html = '<div class="nested-object">';
+            for (const [subKey, subValue] of Object.entries(value)) {
+                const translatedSubKey = translateKey(subKey);
+                html += `<div class="nested-item"><span class="nested-key">${translatedSubKey}:</span> <span class="nested-value">${subValue}</span></div>`;
+            }
+            html += '</div>';
+            return html;
+        }
+
+        // Handle payment types
+        if (key === 'payment_type') {
+            const paymentTypes = {
+                'نەقد': 'نەقد',
+                'قەرز': 'قەرز',
+                'cash': 'نەقد',
+                'credit': 'قەرز'
+            };
+            return paymentTypes[value] || value;
+        }
+
+        // Handle currency types
+        if (key === 'currency_type') {
+            const currencyTypes = {
+                'دۆلار': 'دۆلار',
+                'دینار': 'دینار',
+                'USD': 'دۆلار',
+                'IQD': 'دینار'
+            };
+            return currencyTypes[value] || value;
+        }
+
+        // Handle expense types
+        if (key === 'expense_type') {
+            const expenseTypes = {
+                'بەکارهێنانی گاز': 'بەکارهێنانی گاز',
+                'کڕینی مادە': 'کڕینی مادە',
+                'خەرجی تر': 'خەرجی تر',
+                'gas_consumption': 'بەکارهێنانی گاز',
+                'material_purchase': 'کڕینی مادە',
+                'other_expense': 'خەرجی تر'
+            };
+            return expenseTypes[value] || value;
+        }
+
+        // Handle action types
+        if (key === 'action_type') {
+            const actionTypes = {
+                'sale_creation': 'دروستکردنی فرۆشتن',
+                'sale_update': 'نوێکردنەوەی فرۆشتن',
+                'sale_deletion': 'سڕینەوەی فرۆشتن',
+                'purchase_creation': 'دروستکردنی کڕین',
+                'purchase_update': 'نوێکردنەوەی کڕین',
+                'purchase_deletion': 'سڕینەوەی کڕین',
+                'other_expense_creation': 'دروستکردنی خەرجی تر',
+                'other_expense_update': 'نوێکردنەوەی خەرجی تر',
+                'other_expense_deletion': 'سڕینەوەی خەرجی تر',
+                'employee_payment_creation': 'دروستکردنی پارەدانی کارمەند',
+                'employee_payment_update': 'نوێکردنەوەی پارەدانی کارمەند',
+                'employee_payment_deletion': 'سڕینەوەی پارەدانی کارمەند',
+                'concrete_receipt_creation': 'دروستکردنی پسوڵەی کۆنکرێت',
+                'concrete_receipt_update': 'نوێکردنەوەی پسوڵەی کۆنکرێت',
+                'concrete_receipt_deletion': 'سڕینەوەی پسوڵەی کۆنکرێت',
+                'customer_debt_payment': 'پارەدانی قەرزی کڕیار',
+                'customer_debt_payment_update': 'نوێکردنەوەی پارەدانی قەرزی کڕیار',
+                'customer_debt_payment_deletion': 'سڕینەوەی پارەدانی قەرزی کڕیار',
+                'company_debt_payment': 'پارەدانی قەرزی کۆمپانیا',
+                'company_debt_payment_update': 'نوێکردنەوەی پارەدانی قەرزی کۆمپانیا',
+                'company_debt_payment_deletion': 'سڕینەوەی پارەدانی قەرزی کۆمپانیا'
+            };
+            return actionTypes[value] || value;
+        }
+
+        // Handle receipt types
+        if (key === 'receipt_type') {
+            const receiptTypes = {
+                'concrete_delivery': 'گەیاندنی کۆنکرێت',
+                'material_delivery': 'گەیاندنی مادە'
+            };
+            return receiptTypes[value] || value;
+        }
+
+        // Handle payment status
+        if (key === 'payment_status') {
+            const paymentStatus = {
+                'paid': 'پارەدەر',
+                'credit': 'قەرز'
+            };
+            return paymentStatus[value] || value;
+        }
+
+        // Format numbers
+        if (typeof value === 'number') {
+            if (key.includes('amount') || key.includes('price') || key.includes('total') || key.includes('paid') || key.includes('remaining')) {
+                return value.toLocaleString('ku-IQ');
+            }
+        }
+
+        // Default formatting
+        if (value === null || value === undefined) {
+            return '<span class="text-muted">هیچ</span>';
+        }
+
+        return value;
     }
 
     // Mark as seen
