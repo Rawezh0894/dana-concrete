@@ -81,7 +81,7 @@ async function loadOtherExpenses() {
             totalCarGasCost += parseFloat(row.gas_total_cost || 0);
         }
         
-        // Calculate other expenses (can be IQD or USD based on currency_type)
+        // Calculate other expenses (can be IQD or USD based on currency_type) - includes خواردنگە and ئۆفیس
         if (!row.car_id || (row.expense_type !== 'بەکارهێنانی کاڵای کۆگا' && row.expense_type !== 'بەکارهێنانی گاز')) {
             if (row.currency_type === 'دۆلار') {
                 totalOtherExpensesUSD += parseFloat(row.amount_usd || 0);

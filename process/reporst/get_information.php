@@ -264,8 +264,8 @@ try {
     $total_employee_expenses_usd = ($usd_iqd_rate > 0 ? ($total_employee_expenses / ($usd_iqd_rate / 100)) : 0);
     $total_expenses_breakdown['employee_payments'] = $total_employee_expenses_usd;
 
-    // Other expenses - only خەرجی تر (not بەکارهێنانی کاڵای کۆگا or بەکارهێنانی گاز) with date filter
-    $other_expenses_query = "SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd FROM other_expenses WHERE expense_type = 'خەرجی تر' $date_condition_date";
+    // Other expenses - only خەرجی تر, خواردنگە, ئۆفیس (not بەکارهێنانی کاڵای کۆگا or بەکارهێنانی گاز) with date filter
+    $other_expenses_query = "SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd FROM other_expenses WHERE expense_type IN ('خەرجی تر', 'خواردنگە', 'ئۆفیس') $date_condition_date";
     $stmt = $pdo->query($other_expenses_query);
     $row = $stmt->fetch();
     $other_expenses_usd = $row['usd'] ?? 0;

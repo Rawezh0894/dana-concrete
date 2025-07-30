@@ -288,6 +288,8 @@ if (!isset($_SESSION['user_id'])) {
                 <option value="خەرجی تر">خەرجی تر</option>
                 <option value="بەکارهێنانی کاڵای کۆگا">بەکارهێنانی کاڵای کۆگا</option>
                 <option value="بەکارهێنانی گاز">بەکارهێنانی گاز</option>
+                <option value="خواردنگە">خواردنگە</option>
+                <option value="ئۆفیس">ئۆفیس</option>
               </select>
             </div>
             <div class="col-md-4 gas-material-field">
@@ -472,6 +474,8 @@ if (!isset($_SESSION['user_id'])) {
                 <option value="خەرجی تر">خەرجی تر</option>
                 <option value="بەکارهێنانی کاڵای کۆگا">بەکارهێنانی کاڵای کۆگا</option>
                 <option value="بەکارهێنانی گاز">بەکارهێنانی گاز</option>
+                <option value="خواردنگە">خواردنگە</option>
+                <option value="ئۆفیس">ئۆفیس</option>
               </select>
             </div>
             <div class="col-md-4 gas-material-field">

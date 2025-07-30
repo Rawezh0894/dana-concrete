@@ -706,6 +706,25 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Populate gas purchase price from bins_silos
             populateGasPurchasePrice(formType);
+        } else if (expenseType === 'خواردنگە' || expenseType === 'ئۆفیس') {
+            // Show all fields for "خواردنگە" and "ئۆفیس" (same as "خەرجی تر")
+            gasMaterialFields.forEach(field => {
+                field.style.display = 'none';
+                field.classList.remove('show');
+            });
+            // Show all other fields
+            fieldsToHideForWarehouse.forEach(fieldName => {
+                const field = document.getElementById(fieldName) || document.getElementById(prefix + fieldName);
+                if (field) {
+                    const container = field.closest('.warehouse-hidden-field');
+                    if (container) {
+                        container.classList.remove('hide');
+                    }
+                }
+            });
+            
+            // Clear gas price messages
+            clearGasPriceMessage(formType);
         } else {
             // Hide all gas and material fields for empty or other selections
             gasMaterialFields.forEach(field => {
