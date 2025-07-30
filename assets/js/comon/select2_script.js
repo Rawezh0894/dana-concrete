@@ -13,7 +13,7 @@ function enableSelect2(selector, modalSelector) {
         $(selector).select2({
             dropdownParent: $(modalSelector),
             width: '100%',
-            placeholder: "هەڵبژێرە",
+            placeholder: $(selector).attr('data-placeholder') || "هەڵبژێرە",
             dir: "rtl",
             matcher: customMatcher
         });
@@ -143,6 +143,14 @@ $(document).ready(function() {
     }
     if ($('#filter_read').length > 0) {
         enableSelect2('#filter_read', 'body');
+    }
+    
+    // بۆ concrete receipts filters - تەنها ئەگەر پەیجەکە هەبێت
+    if ($('#filter_customer_id').length > 0) {
+        enableSelect2('#filter_customer_id', 'body');
+    }
+    if ($('#filter_formulas_id').length > 0) {
+        enableSelect2('#filter_formulas_id', 'body');
     }
 });
 

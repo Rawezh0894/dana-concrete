@@ -149,6 +149,31 @@ function populateSelect(url, selectId) {
         });
 }
 
+// Function to fetch and set USD exchange rate
+async function fetchAndSetUsdRate() {
+    try {
+        const response = await fetch('../process/other_expenses/get_usd_rate.php');
+        const data = await response.json();
+        
+        if (data.success && data.rate) {
+            document.getElementById('exchange_rate').value = data.rate;
+            console.log('USD rate fetched successfully:', data.rate);
+        } else {
+            console.warn('Failed to fetch USD rate:', data.error || 'Unknown error');
+            // Set default rate if API fails
+            if (data.default_rate) {
+                document.getElementById('exchange_rate').value = data.default_rate;
+                console.log('Using default USD rate:', data.default_rate);
+            }
+        }
+    } catch (error) {
+        console.error('Error fetching USD rate:', error);
+        // Set default rate on error
+        document.getElementById('exchange_rate').value = '139250';
+        console.log('Using fallback USD rate: 139250');
+    }
+}
+
 const addExpenseModal = document.getElementById('addExpenseModal');
 if (addExpenseModal) {
     addExpenseModal.addEventListener('show.bs.modal', function () {
@@ -156,6 +181,9 @@ if (addExpenseModal) {
         populateSelect('../process/other_expenses/select_employees.php', 'employee_id');
         populateSelect('../process/other_expenses/select_cars.php', 'car_id');
         populateSelect('../process/other_expenses/select_materials.php', 'material_id');
+        
+        // Fetch and set USD exchange rate when modal opens
+        fetchAndSetUsdRate();
     });
 }
 

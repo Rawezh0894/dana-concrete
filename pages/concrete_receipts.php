@@ -127,10 +127,10 @@ $mixer_drivers = array_filter($employees, function ($emp) {
     <!-- Filter Row -->
     <div class="row g-2 mb-3 " id="concrete-receipts-filters">
       <div class="col-md-3">
-        <select class="form-select" id="filter_customer_id">
-          <option value="">کڕیار: هەموو</option>
+        <select class="form-select" id="filter_customer_id" data-placeholder="کڕیار: هەموو">
+          <option value=""></option>
           <?php foreach ($customers as $c): ?>
-            <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['name']) ?></option>
+            <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['name']) ?><?php if (!empty($c['mobile1'])): ?> (<?= htmlspecialchars($c['mobile1']) ?>)<?php endif; ?></option>
           <?php endforeach; ?>
         </select>
       </div>
@@ -138,8 +138,8 @@ $mixer_drivers = array_filter($employees, function ($emp) {
         <input type="text" class="form-control" id="filter_location" placeholder="شوێن...">
       </div>
       <div class="col-md-2">
-        <select class="form-select" id="filter_formulas_id">
-          <option value="">ڕێژە: هەموو</option>
+        <select class="form-select" id="filter_formulas_id" data-placeholder="ڕێژە: هەموو">
+          <option value=""></option>
           <?php foreach ($formulas as $f): ?>
             <option value="<?= $f['id'] ?>"><?= htmlspecialchars($f['name']) ?></option>
           <?php endforeach; ?>

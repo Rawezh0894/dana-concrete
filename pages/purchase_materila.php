@@ -91,6 +91,19 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
             </div>
         </div>
 
+        <!-- USD Exchange Rate Display -->
+        <div class="row mb-3">
+            <div class="col-md-4 mx-auto">
+                <div class="card gradient-card red-gradient">
+                    <div class="card-body">
+                        <h6 class="card-title">نرخی دۆلار</h6>
+                        <div id="usdExchangeRate" class="card-value">0 د.ع</div>
+                        <small>نرخی 100 دۆلار بە دینار</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Filter Row -->
         <div class="row mb-3">
             <div class="col-md-3">

@@ -12,6 +12,11 @@ $(document).ready(function() {
     
     // Load current USD rate
     loadUsdRate();
+    
+    // Load USD rate when add modal is shown
+    $('#addPurchaseModal').on('show.bs.modal', function() {
+        loadUsdRate();
+    });
 
     // Initialize with data from PHP if available, otherwise load via AJAX
     if (window.initialMaterials && window.initialMaterials.length > 0) {
@@ -588,12 +593,15 @@ function loadUsdRate() {
                 const result = JSON.parse(response);
                 if (result.success) {
                     $('#usd_to_iqd_rate').val(result.rate);
+                    // Update display on page
+                    updateUsdRateDisplay(result.rate);
                     // Recalculate totals if there are any existing values
                     calculateGrandTotal();
                 } else {
                     // Use default rate if API fails
                     if (result.default_rate) {
                         $('#usd_to_iqd_rate').val(result.default_rate);
+                        updateUsdRateDisplay(result.default_rate);
                         calculateGrandTotal();
                     }
                     console.log('Error loading USD rate: ' + result.error);
@@ -602,14 +610,25 @@ function loadUsdRate() {
                 console.error('Error parsing USD rate response:', e);
                 // Use default rate if parsing fails
                 $('#usd_to_iqd_rate').val(139250);
+                updateUsdRateDisplay(139250);
                 calculateGrandTotal();
             }
         },
         error: function(xhr, status, error) {
             // Use default rate if request fails
             $('#usd_to_iqd_rate').val(139250);
+            updateUsdRateDisplay(139250);
             calculateGrandTotal();
             console.error('Error loading USD rate:', error);
         }
     });
+}
+
+// Update USD rate display on page
+function updateUsdRateDisplay(rate) {
+    const usdRateElement = document.getElementById('usdExchangeRate');
+    if (usdRateElement) {
+        usdRateElement.textContent = rate + ' د.ع';
+        console.log('USD rate display updated:', rate);
+    }
 }

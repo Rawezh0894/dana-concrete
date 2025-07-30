@@ -107,8 +107,8 @@ $logout_pages = ['logout.php'];
           <li><a href="../pages/employee_payments.php" class="sidebar-link<?php if($current_page == 'employee_payments.php') echo ' active'; ?>"><i class="bi bi-cash-coin me-2"></i> پارەدان بە کارمەند</a></li>
         <?php endif; ?>
         <?php if (hasPermission('view_other_expenses')): ?>
-          <li><a href="../pages/other_expenses.php" class="sidebar-link<?php if($current_page == 'other_expenses.php') echo ' active'; ?>"><i class="bi bi-receipt-cutoff me-2"></i> خەرجی تر</a></li>
-          <li><a href="../pages/cars_expenses.php" class="sidebar-link<?php if($current_page == 'cars_expenses.php') echo ' active'; ?>"><i class="bi bi-truck-front me-2"></i> خەرجی سەیارەکان</a></li>
+          <li><a href="../pages/other_expenses.php" class="sidebar-link<?php if($current_page == 'other_expenses.php') echo ' active'; ?>"><i class="bi bi-receipt-cutoff me-2"></i>خەرجی سەیارەکان</a></li>
+          <!-- <li><a href="../pages/cars_expenses.php" class="sidebar-link<?php if($current_page == 'cars_expenses.php') echo ' active'; ?>"><i class="bi bi-truck-front me-2"></i> خەرجی سەیارەکان</a></li> -->
         <?php endif; ?>
       </ul>
     </li>

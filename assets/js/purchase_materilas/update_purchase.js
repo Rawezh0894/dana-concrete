@@ -25,6 +25,11 @@ $(document).ready(function() {
         // Submit form
         submitEditForm(formData);
     });
+    
+    // Load USD rate when edit modal is shown
+    $('#editPurchaseModal').on('show.bs.modal', function() {
+        loadUsdRateForEdit();
+    });
 });
 
 function validateEditForm() {
@@ -321,4 +326,54 @@ function refreshEditMaterialDropdowns() {
             dir: "rtl"
         });
     });
+}
+
+// Load USD to IQD exchange rate from API for edit modal
+function loadUsdRateForEdit() {
+    $.ajax({
+        url: '../process/purchase_materilas/get_usd_rate.php',
+        type: 'GET',
+        success: function(response) {
+            try {
+                const result = JSON.parse(response);
+                if (result.success) {
+                    $('#edit_usd_to_iqd_rate').val(result.rate);
+                    // Update display on page
+                    updateUsdRateDisplay(result.rate);
+                    // Recalculate totals if there are any existing values
+                    calculateEditGrandTotal();
+                } else {
+                    // Use default rate if API fails
+                    if (result.default_rate) {
+                        $('#edit_usd_to_iqd_rate').val(result.default_rate);
+                        updateUsdRateDisplay(result.default_rate);
+                        calculateEditGrandTotal();
+                    }
+                    console.log('Error loading USD rate for edit: ' + result.error);
+                }
+            } catch (e) {
+                console.error('Error parsing USD rate response for edit:', e);
+                // Use default rate if parsing fails
+                $('#edit_usd_to_iqd_rate').val(139250);
+                updateUsdRateDisplay(139250);
+                calculateEditGrandTotal();
+            }
+        },
+        error: function(xhr, status, error) {
+            // Use default rate if request fails
+            $('#edit_usd_to_iqd_rate').val(139250);
+            updateUsdRateDisplay(139250);
+            calculateEditGrandTotal();
+            console.error('Error loading USD rate for edit:', error);
+        }
+    });
+}
+
+// Update USD rate display on page
+function updateUsdRateDisplay(rate) {
+    const usdRateElement = document.getElementById('usdExchangeRate');
+    if (usdRateElement) {
+        usdRateElement.textContent = rate + ' د.ع';
+        console.log('USD rate display updated:', rate);
+    }
 }

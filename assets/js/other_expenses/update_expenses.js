@@ -143,8 +143,37 @@ function setupEditExpenseModal() {
     }
 }
 
+// Function to fetch and set USD exchange rate for edit modal
+async function fetchAndSetUsdRateForEdit() {
+    try {
+        const response = await fetch('../process/other_expenses/get_usd_rate.php');
+        const data = await response.json();
+        
+        if (data.success && data.rate) {
+            document.getElementById('edit_exchange_rate').value = data.rate;
+            console.log('USD rate fetched successfully for edit:', data.rate);
+        } else {
+            console.warn('Failed to fetch USD rate for edit:', data.error || 'Unknown error');
+            // Set default rate if API fails
+            if (data.default_rate) {
+                document.getElementById('edit_exchange_rate').value = data.default_rate;
+                console.log('Using default USD rate for edit:', data.default_rate);
+            }
+        }
+    } catch (error) {
+        console.error('Error fetching USD rate for edit:', error);
+        // Set default rate on error
+        document.getElementById('edit_exchange_rate').value = '139250';
+        console.log('Using fallback USD rate for edit: 139250');
+    }
+}
+
 // Setup when edit modal is shown
 const editExpenseModal = document.getElementById('editExpenseModal');
 if (editExpenseModal) {
-    editExpenseModal.addEventListener('show.bs.modal', setupEditExpenseModal);
+    editExpenseModal.addEventListener('show.bs.modal', function() {
+        setupEditExpenseModal();
+        // Fetch and set USD exchange rate when edit modal opens
+        fetchAndSetUsdRateForEdit();
+    });
 }

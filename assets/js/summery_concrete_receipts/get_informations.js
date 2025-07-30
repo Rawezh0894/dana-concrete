@@ -166,10 +166,10 @@ function displayCustomerDetails(customerName, receipts) {
         html += `
             <div class="mb-3">
                 <button class="btn btn-success btn-sm" onclick="selectAllReceipts()">
-                    <i class="fas fa-check-square me-1"></i>هەڵبژاردنی هەموو
+                    <i class="fas fa-check-square me-1"></i> هەموو
                 </button>
                 <button class="btn btn-warning btn-sm ms-2" onclick="deselectAllReceipts()">
-                    <i class="fas fa-square me-1"></i>هەڵوەشاندنەوەی هەموو
+                    <i class="fas fa-square me-1"></i>هەڵوەشاندنەوە
                 </button>
                 ${window.userPermissions.canSetPrices ? `
                 <button class="btn btn-primary btn-sm ms-2" onclick="openPriceSettingModal()">

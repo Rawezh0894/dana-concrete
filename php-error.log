@@ -2119,3 +2119,286 @@
 )
 
 [30-Jul-2025 08:29:20 Europe/Berlin] Customer sales retrieved: Customer=32, Count=1
+[30-Jul-2025 08:59:05 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753858745
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 08:59:05 Europe/Berlin] Companies retrieved successfully: Count=3
+[30-Jul-2025 08:59:05 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753858745
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 08:59:06 Europe/Berlin] USD rate retrieved from API: 139000
+[30-Jul-2025 08:59:06 Europe/Berlin] Company summary stats calculated: Total Companies=3, Companies with Debt=2, Total Debt USD=668.34532374101
+[30-Jul-2025 08:59:06 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753858746
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 08:59:07 Europe/Berlin] USD rate retrieved from API: 139000
+[30-Jul-2025 08:59:07 Europe/Berlin] Company summary stats calculated: Total Companies=3, Companies with Debt=2, Total Debt USD=668.34532374101
+[30-Jul-2025 08:59:26 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753858766
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 08:59:26 Europe/Berlin] Cars retrieved successfully: Count=15
+[30-Jul-2025 08:59:26 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753858766
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 08:59:26 Europe/Berlin] Employees retrieved successfully: Count=18
+[30-Jul-2025 08:59:32 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753858772
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 08:59:32 Europe/Berlin] Cars retrieved successfully: Count=15
+[30-Jul-2025 08:59:32 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753858772
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 08:59:32 Europe/Berlin] Employees retrieved successfully: Count=18
+[30-Jul-2025 09:03:27 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753859007
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 09:03:27 Europe/Berlin] Cars retrieved successfully: Count=15
+[30-Jul-2025 09:03:27 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753859007
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 09:03:27 Europe/Berlin] Employees retrieved successfully: Count=18
+[30-Jul-2025 09:05:46 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753859146
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 09:05:46 Europe/Berlin] Cars retrieved successfully: Count=15
+[30-Jul-2025 09:05:46 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753859146
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 09:05:46 Europe/Berlin] Employees retrieved successfully: Count=18
+[30-Jul-2025 09:06:19 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753859179
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 09:06:19 Europe/Berlin] Cars retrieved successfully: Count=15
+[30-Jul-2025 09:06:19 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753859179
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 09:06:19 Europe/Berlin] Employees retrieved successfully: Count=18
+[30-Jul-2025 09:08:08 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753859288
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 09:08:08 Europe/Berlin] Cars retrieved successfully: Count=15
+[30-Jul-2025 09:08:08 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753859288
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 09:08:08 Europe/Berlin] Employees retrieved successfully: Count=18
+[30-Jul-2025 09:08:16 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753859296
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 09:08:16 Europe/Berlin] Cars retrieved successfully: Count=15
+[30-Jul-2025 09:08:16 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753859296
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 09:08:16 Europe/Berlin] Employees retrieved successfully: Count=18
+[30-Jul-2025 09:13:47 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753859627
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 09:13:47 Europe/Berlin] Cars retrieved successfully: Count=15
+[30-Jul-2025 09:13:47 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753859627
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 09:13:47 Europe/Berlin] Employees retrieved successfully: Count=18
+[30-Jul-2025 09:14:55 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753859695
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 09:14:55 Europe/Berlin] Employees retrieved successfully: Count=18
+[30-Jul-2025 09:15:03 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753859703
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 09:15:03 Europe/Berlin] Cars retrieved successfully: Count=15
+[30-Jul-2025 09:15:08 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753859708
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 09:15:08 Europe/Berlin] Companies retrieved successfully: Count=3
+[30-Jul-2025 09:15:08 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753859708
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 09:15:09 Europe/Berlin] USD rate retrieved from API: 139000
+[30-Jul-2025 09:15:09 Europe/Berlin] Company summary stats calculated: Total Companies=3, Companies with Debt=2, Total Debt USD=668.34532374101
+[30-Jul-2025 09:15:09 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753859709
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 09:15:10 Europe/Berlin] USD rate retrieved from API: 139000
+[30-Jul-2025 09:15:10 Europe/Berlin] Company summary stats calculated: Total Companies=3, Companies with Debt=2, Total Debt USD=668.34532374101
+[30-Jul-2025 09:15:28 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753859728
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 09:15:28 Europe/Berlin] Cars retrieved successfully: Count=15
+[30-Jul-2025 09:15:28 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753859728
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 09:15:28 Europe/Berlin] Employees retrieved successfully: Count=18
+[30-Jul-2025 09:15:41 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753859741
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 09:15:41 Europe/Berlin] Materials retrieved successfully: Count=1
+[30-Jul-2025 09:16:05 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753859765
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 09:16:05 Europe/Berlin] Cars retrieved successfully: Count=15
+[30-Jul-2025 09:16:05 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753859765
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 09:16:05 Europe/Berlin] Employees retrieved successfully: Count=18
+[30-Jul-2025 09:17:26 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753859846
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 09:17:26 Europe/Berlin] Cars retrieved successfully: Count=15
+[30-Jul-2025 09:17:26 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753859846
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 09:17:26 Europe/Berlin] Employees retrieved successfully: Count=18

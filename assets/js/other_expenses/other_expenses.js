@@ -1,4 +1,36 @@
+// Function to fetch and update USD exchange rate display
+async function updateUsdRateDisplay() {
+    try {
+        const response = await fetch('../process/other_expenses/get_usd_rate.php');
+        const data = await response.json();
+        
+        const usdRateElement = document.getElementById('usdExchangeRate');
+        if (usdRateElement) {
+            if (data.success && data.rate) {
+                usdRateElement.textContent = data.rate + ' د.ع';
+                console.log('USD rate display updated:', data.rate);
+            } else {
+                console.warn('Failed to fetch USD rate for display:', data.error || 'Unknown error');
+                if (data.default_rate) {
+                    usdRateElement.textContent = data.default_rate + ' د.ع';
+                    console.log('Using default USD rate for display:', data.default_rate);
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error updating USD rate display:', error);
+        const usdRateElement = document.getElementById('usdExchangeRate');
+        if (usdRateElement) {
+            usdRateElement.textContent = '139250 د.ع';
+            console.log('Using fallback USD rate for display: 139250');
+        }
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+    // Update USD rate display when page loads
+    updateUsdRateDisplay();
+    
     const currencyType = document.getElementById('currency_type');
     const amountIqd = document.getElementById('amount_iqd');
     const amountUsd = document.getElementById('amount_usd');
@@ -715,4 +747,7 @@ document.addEventListener('DOMContentLoaded', function() {
             populateSelect('../process/other_expenses/select_materials.php', 'edit_material_id');
         });
     }
+    
+    // Update USD rate display every 5 minutes
+    setInterval(updateUsdRateDisplay, 5 * 60 * 1000);
 });
