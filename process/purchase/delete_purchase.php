@@ -69,8 +69,63 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
                 // The remaining amount is tracked in the purchases table
             }
         }
-        require_once __DIR__ . '/../../includes/notify.php';
-        notify('delete', 'purchases', $id, 'کڕینەکە سڕایەوە (invoice: ' . $purchase['invoice_number'] . ')');
+        // Get company and material information for notification
+        $stmt = $pdo->prepare("SELECT name FROM company WHERE id = ?");
+        $stmt->execute([$purchase['company_id']]);
+        $company = $stmt->fetch();
+        $company_name = $company['name'] ?? 'Unknown';
+
+        $stmt = $pdo->prepare("SELECT name FROM materials WHERE id = ?");
+        $stmt->execute([$purchase['material_id']]);
+        $material = $stmt->fetch();
+        $material_name = $material['name'] ?? 'Unknown';
+
+        // Create old values for notification
+        $old_values = [
+            'company_id' => $purchase['company_id'],
+            'company_name' => $company_name,
+            'driver' => $purchase['driver'],
+            'location' => $purchase['location'],
+            'material_id' => $purchase['material_id'],
+            'material_name' => $material_name,
+            'amount_iqd' => $purchase['amount_iqd'],
+            'kg' => $purchase['kg'],
+            'price' => $purchase['price'],
+            'payment_type' => $purchase['payment_type'],
+            'exchange_rate' => $purchase['exchange_rate'],
+            'type' => $purchase['type'],
+            'paid_usd' => $purchase['paid_usd'],
+            'paid_iqd' => $purchase['paid_iqd'],
+            'remaining_usd' => $purchase['remaining_usd'],
+            'remaining_iqd' => $purchase['remaining_iqd'],
+            'bin_id' => $purchase['bin_id'],
+            'price_per_kg_iqd' => $purchase['price_per_kg_iqd'],
+            'price_per_kg_usd' => $purchase['price_per_kg_usd'],
+            'invoice_number' => $purchase['invoice_number'],
+            'date' => $purchase['date']
+        ];
+
+        $additional_info = [
+            'action_type' => 'purchase_deletion',
+            'payment_status' => $purchase['payment_type'] === 'نەقد' ? 'paid' : 'credit',
+            'currency_used' => $purchase['paid_usd'] > 0 ? 'USD' : ($purchase['paid_iqd'] > 0 ? 'IQD' : 'none'),
+            'total_paid' => $purchase['paid_usd'] + $purchase['paid_iqd'],
+            'remaining_debt' => $purchase['remaining_usd'] + $purchase['remaining_iqd']
+        ];
+
+        createDetailedNotification(
+            $pdo,
+            $_SESSION['user_id'],
+            'delete',
+            'purchases',
+            $id,
+            "کڕینەکە سڕایەوە (invoice: {$purchase['invoice_number']}, کۆمپانیا: $company_name, مادە: $material_name)",
+            $old_values,
+            null, // No new values for delete
+            $additional_info,
+            getUserIP()
+        );
+
         echo json_encode(['success' => true]);
     } else {
         echo json_encode(['success' => false, 'msg' => 'هەڵە لە سڕینەوە یان id نەدۆزرایەوە']);

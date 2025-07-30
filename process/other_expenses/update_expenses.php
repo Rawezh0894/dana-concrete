@@ -188,14 +188,130 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id
     ]);
                     if ($ok) {
-                    // Note: Gas consumption is now handled automatically by database triggers
-                    // when expense_type = 'بەکارهێنانی گاز' and gas_liters > 0
-        require_once __DIR__ . '/../../includes/notify.php';
-        notify('update', 'other_expenses', $id, 'خەرجی تر نوێکرایەوە (ID: ' . $id . ')');
-        echo json_encode(['success' => true]);
-    } else {
-        echo json_encode(['success' => false, 'msg' => 'هەڵە لە نوێکردنەوە']);
-    }
+                        // Note: Gas consumption is now handled automatically by database triggers
+                        // when expense_type = 'بەکارهێنانی گاز' and gas_liters > 0
+
+                        // Get related information for notification
+                        $person_name = 'هیچ کەسێک نییە';
+                        $employee_name = 'هیچ کارمەندێک نییە';
+                        $car_name = 'هیچ سەیارەیەک نییە';
+                        $material_name = 'هیچ مادەیەک نییە';
+
+                        if ($person_id) {
+                            $stmt = $pdo->prepare("SELECT name FROM other_expense_persons WHERE id = ?");
+                            $stmt->execute([$person_id]);
+                            $person = $stmt->fetch();
+                            $person_name = $person['name'] ?? 'Unknown';
+                        }
+
+                        if ($employee_id) {
+                            $stmt = $pdo->prepare("SELECT name FROM employees WHERE id = ?");
+                            $stmt->execute([$employee_id]);
+                            $employee = $stmt->fetch();
+                            $employee_name = $employee['name'] ?? 'Unknown';
+                        }
+
+                        if ($car_id) {
+                            $stmt = $pdo->prepare("SELECT name FROM cars WHERE id = ?");
+                            $stmt->execute([$car_id]);
+                            $car = $stmt->fetch();
+                            $car_name = $car['name'] ?? 'Unknown';
+                        }
+
+                        if ($material_id) {
+                            $stmt = $pdo->prepare("SELECT name FROM materials WHERE id = ?");
+                            $stmt->execute([$material_id]);
+                            $material = $stmt->fetch();
+                            $material_name = $material['name'] ?? 'Unknown';
+                        }
+
+                        // Get old values for notification
+                        $stmt = $pdo->prepare("SELECT * FROM other_expenses WHERE id = ?");
+                        $stmt->execute([$id]);
+                        $old_record = $stmt->fetch();
+
+                        $old_values = [
+                            'person_id' => $old_record['person_id'],
+                            'employee_id' => $old_record['employee_id'],
+                            'car_id' => $old_record['car_id'],
+                            'gas_liters' => $old_record['gas_liters'],
+                            'expense_type' => $old_record['expense_type'],
+                            'material_id' => $old_record['material_id'],
+                            'material_quantity' => $old_record['material_quantity'],
+                            'material_purchase_price_iqd' => $old_record['material_purchase_price_iqd'],
+                            'material_purchase_price_usd' => $old_record['material_purchase_price_usd'],
+                            'material_total_cost' => $old_record['material_total_cost'],
+                            'gas_purchase_price_input' => $old_record['gas_purchase_price_input'],
+                            'gas_total_cost' => $old_record['gas_total_cost'],
+                            'payment_type' => $old_record['payment_type'],
+                            'currency_type' => $old_record['currency_type'],
+                            'invoice_number' => $old_record['invoice_number'],
+                            'amount_iqd' => $old_record['amount_iqd'],
+                            'amount_usd' => $old_record['amount_usd'],
+                            'paid_iqd' => $old_record['paid_iqd'],
+                            'paid_usd' => $old_record['paid_usd'],
+                            'exchange_rate' => $old_record['exchange_rate'],
+                            'remaining_iqd' => $old_record['remaining_iqd'],
+                            'remaining_usd' => $old_record['remaining_usd'],
+                            'date' => $old_record['date']
+                        ];
+
+                        $new_values = [
+                            'person_id' => $person_id,
+                            'person_name' => $person_name,
+                            'employee_id' => $employee_id,
+                            'employee_name' => $employee_name,
+                            'car_id' => $car_id,
+                            'car_name' => $car_name,
+                            'gas_liters' => $gas_liters,
+                            'expense_type' => $expense_type,
+                            'material_id' => $material_id,
+                            'material_name' => $material_name,
+                            'material_quantity' => $material_quantity,
+                            'material_purchase_price_iqd' => $material_purchase_price_iqd,
+                            'material_purchase_price_usd' => $material_purchase_price_usd,
+                            'material_total_cost' => $material_total_cost,
+                            'gas_purchase_price_input' => $gas_purchase_price_input,
+                            'gas_total_cost' => $gas_total_cost,
+                            'payment_type' => $payment_type,
+                            'currency_type' => $currency_type,
+                            'invoice_number' => $invoice_number,
+                            'amount_iqd' => $amount_iqd,
+                            'amount_usd' => $amount_usd,
+                            'paid_iqd' => $paid_iqd,
+                            'paid_usd' => $paid_usd,
+                            'exchange_rate' => $exchange_rate,
+                            'remaining_iqd' => $remaining_iqd,
+                            'remaining_usd' => $remaining_usd,
+                            'date' => $date
+                        ];
+
+                        $additional_info = [
+                            'action_type' => 'other_expense_update',
+                            'payment_status' => $payment_type === 'نەقد' ? 'paid' : 'credit',
+                            'currency_used' => $paid_usd > 0 ? 'USD' : ($paid_iqd > 0 ? 'IQD' : 'none'),
+                            'total_paid' => $paid_usd + $paid_iqd,
+                            'remaining_debt' => $remaining_usd + $remaining_iqd,
+                            'expense_category' => $expense_type
+                        ];
+
+                        createDetailedNotification(
+                            $pdo,
+                            $_SESSION['user_id'],
+                            'update',
+                            'other_expenses',
+                            $id,
+                            "خەرجی تر نوێکرایەوە (ID: $id, جۆر: $expense_type, کەس: $person_name, کارمەند: $employee_name, سەیارە: $car_name)",
+                            $old_values,
+                            $new_values,
+                            $additional_info,
+                            getUserIP()
+                        );
+
+                        echo json_encode(['success' => true]);
+                    } else {
+                        echo json_encode(['success' => false, 'msg' => 'هەڵە لە نوێکردنەوە']);
+                    }
     exit;
 }
 echo json_encode(['success' => false, 'msg' => 'POST تەنها ڕێگەپێدراوە']);

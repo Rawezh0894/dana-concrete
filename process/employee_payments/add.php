@@ -27,10 +27,50 @@ if ($employee_id <= 0 || $salary === 0 || $karwanhisabi === 0 || $pay_month === 
     exit;
 }
 try {
+    // Get employee information for notification
+    $stmt = $pdo->prepare("SELECT name FROM employees WHERE id = ?");
+    $stmt->execute([$employee_id]);
+    $employee = $stmt->fetch();
+    $employee_name = $employee['name'] ?? 'Unknown';
+
     $stmt = $pdo->prepare('INSERT INTO employee_payments (employee_id, salary, karwanhisabi, bonus, total, pay_month, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())');
     if ($stmt->execute([$employee_id, $salary, $karwanhisabi, $bonus, $total, $pay_month])) {
-        require_once __DIR__ . '/../../includes/notify.php';
-        notify('insert', 'employee_payments', $pdo->lastInsertId(), 'پارەدان بە کارمەند زیادکرا (کارمەند: ' . $employee_id . ')');
+        $payment_id = $pdo->lastInsertId();
+
+        // Create detailed notification
+        $new_values = [
+            'employee_id' => $employee_id,
+            'employee_name' => $employee_name,
+            'salary' => $salary,
+            'karwanhisabi' => $karwanhisabi,
+            'bonus' => $bonus,
+            'total' => $total,
+            'pay_month' => $pay_month
+        ];
+
+        $additional_info = [
+            'action_type' => 'employee_payment_creation',
+            'payment_components' => [
+                'salary' => $salary,
+                'karwanhisabi' => $karwanhisabi,
+                'bonus' => $bonus
+            ],
+            'total_amount' => $total
+        ];
+
+        createDetailedNotification(
+            $pdo,
+            $_SESSION['user_id'],
+            'insert',
+            'employee_payments',
+            $payment_id,
+            "پارەدان بە کارمەند زیادکرا (کارمەند: $employee_name, بڕ: $total دینار, مانگ: $pay_month)",
+            null, // No old values for insert
+            $new_values,
+            $additional_info,
+            getUserIP()
+        );
+
         echo json_encode(['success' => true, 'message' => 'پارەدان زیادکرا']);
     } else {
         echo json_encode(['success' => false, 'message' => 'هەڵە لە زیادکردن']);

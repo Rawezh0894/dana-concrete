@@ -119,8 +119,65 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // The remaining amount is tracked in the purchases table
                 }
             }
-            require_once __DIR__ . '/../../includes/notify.php';
-            notify('insert', 'purchases', $pdo->lastInsertId(), 'کڕینێکی نوێ زیادکرا (invoice: ' . $invoice_number . ')');
+            $purchase_id = $pdo->lastInsertId();
+
+            // Get company and material information for notification
+            $stmt = $pdo->prepare("SELECT name FROM company WHERE id = ?");
+            $stmt->execute([$company_id]);
+            $company = $stmt->fetch();
+            $company_name = $company['name'] ?? 'Unknown';
+
+            $stmt = $pdo->prepare("SELECT name FROM materials WHERE id = ?");
+            $stmt->execute([$material_id]);
+            $material = $stmt->fetch();
+            $material_name = $material['name'] ?? 'Unknown';
+
+            // Create detailed notification
+            $new_values = [
+                'company_id' => $company_id,
+                'company_name' => $company_name,
+                'driver' => $driver,
+                'location' => $location,
+                'material_id' => $material_id,
+                'material_name' => $material_name,
+                'amount_iqd' => $amount_iqd,
+                'kg' => $kg,
+                'price' => $price,
+                'payment_type' => $payment_type,
+                'exchange_rate' => $exchange_rate,
+                'type' => $type,
+                'paid_usd' => $paid_usd,
+                'paid_iqd' => $paid_iqd,
+                'remaining_usd' => $remaining_usd,
+                'remaining_iqd' => $remaining_iqd,
+                'bin_id' => $bin_id,
+                'price_per_kg_iqd' => $price_per_kg_iqd,
+                'price_per_kg_usd' => $price_per_kg_usd,
+                'invoice_number' => $invoice_number,
+                'date' => $date
+            ];
+
+            $additional_info = [
+                'action_type' => 'purchase_creation',
+                'payment_status' => $payment_type === 'نەقد' ? 'paid' : 'credit',
+                'currency_used' => $paid_usd > 0 ? 'USD' : ($paid_iqd > 0 ? 'IQD' : 'none'),
+                'total_paid' => $paid_usd + $paid_iqd,
+                'remaining_debt' => $remaining_usd + $remaining_iqd
+            ];
+
+            createDetailedNotification(
+                $pdo,
+                $_SESSION['user_id'],
+                'insert',
+                'purchases',
+                $purchase_id,
+                "کڕینێکی نوێ زیادکرا (invoice: $invoice_number, کۆمپانیا: $company_name, مادە: $material_name, بڕ: $kg کگم)",
+                null, // No old values for insert
+                $new_values,
+                $additional_info,
+                getUserIP()
+            );
+
             echo json_encode(['success' => true]);
         } else {
             $errorInfo = $stmt->errorInfo();

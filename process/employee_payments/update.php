@@ -30,8 +30,59 @@ if ($id <= 0 || $employee_id <= 0 || $salary === 0 || $karwanhisabi === 0 || $pa
 try {
     $stmt = $pdo->prepare('UPDATE employee_payments SET employee_id=?, salary=?, karwanhisabi=?, bonus=?, total=?, pay_month=?, updated_at=NOW() WHERE id=?');
     if ($stmt->execute([$employee_id, $salary, $karwanhisabi, $bonus, $total, $pay_month, $id])) {
-        require_once __DIR__ . '/../../includes/notify.php';
-        notify('update', 'employee_payments', $id, 'پارەدان بە کارمەند نوێکرایەوە (ID: ' . $id . ')');
+        // Get employee information for notification
+        $stmt = $pdo->prepare("SELECT name FROM employees WHERE id = ?");
+        $stmt->execute([$employee_id]);
+        $employee = $stmt->fetch();
+        $employee_name = $employee['name'] ?? 'Unknown';
+
+        // Get old values for notification
+        $stmt = $pdo->prepare("SELECT * FROM employee_payments WHERE id = ?");
+        $stmt->execute([$id]);
+        $old_record = $stmt->fetch();
+
+        $old_values = [
+            'employee_id' => $old_record['employee_id'],
+            'salary' => $old_record['salary'],
+            'karwanhisabi' => $old_record['karwanhisabi'],
+            'bonus' => $old_record['bonus'],
+            'total' => $old_record['total'],
+            'pay_month' => $old_record['pay_month']
+        ];
+
+        $new_values = [
+            'employee_id' => $employee_id,
+            'employee_name' => $employee_name,
+            'salary' => $salary,
+            'karwanhisabi' => $karwanhisabi,
+            'bonus' => $bonus,
+            'total' => $total,
+            'pay_month' => $pay_month
+        ];
+
+        $additional_info = [
+            'action_type' => 'employee_payment_update',
+            'payment_components' => [
+                'salary' => $salary,
+                'karwanhisabi' => $karwanhisabi,
+                'bonus' => $bonus
+            ],
+            'total_amount' => $total
+        ];
+
+        createDetailedNotification(
+            $pdo,
+            $_SESSION['user_id'],
+            'update',
+            'employee_payments',
+            $id,
+            "پارەدان بە کارمەند نوێکرایەوە (کارمەند: $employee_name, بڕ: $total دینار, مانگ: $pay_month)",
+            $old_values,
+            $new_values,
+            $additional_info,
+            getUserIP()
+        );
+
         echo json_encode(['success' => true, 'message' => 'پارەدان نوێکرایەوە']);
     } else {
         echo json_encode(['success' => false, 'message' => 'هەڵە لە نوێکردنەوە']);

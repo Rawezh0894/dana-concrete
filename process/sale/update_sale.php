@@ -100,9 +100,84 @@ try {
     ]);
 
     if ($result && $stmt->rowCount() > 0) {
-        require_once __DIR__ . '/../../includes/notify.php';
-        notify('update', 'sales', $id, 'فرۆشتنەکە نوێکرایەوە (invoice: ' . $invoice_number . ')');
-        error_log('Sale successfully updated: ID=' . $id . ', Invoice=' . $invoice_number);
+        // Get customer and formula information for notification
+        $stmt = $pdo->prepare("SELECT name FROM customers WHERE id = ?");
+        $stmt->execute([$customer_id]);
+        $customer = $stmt->fetch();
+        $customer_name = $customer['name'] ?? 'Unknown';
+
+        $stmt = $pdo->prepare("SELECT name FROM concrete_formulas WHERE id = ?");
+        $stmt->execute([$formula_id]);
+        $formula = $stmt->fetch();
+        $formula_name = $formula['name'] ?? 'Unknown';
+
+        // Get old values for notification
+        $stmt = $pdo->prepare("SELECT * FROM sales WHERE id = ?");
+        $stmt->execute([$id]);
+        $old_record = $stmt->fetch();
+
+        $old_values = [
+            'customer_id' => $old_record['customer_id'],
+            'recipient' => $old_record['recipient'],
+            'location' => $old_record['location'],
+            'quantity' => $old_record['quantity'],
+            'price_per_unit' => $old_record['price_per_unit'],
+            'total_price' => $old_record['total_price'],
+            'payment_type' => $old_record['payment_type'],
+            'amount_paid_usd' => $old_record['amount_paid_usd'],
+            'amount_paid_iq' => $old_record['amount_paid_iq'],
+            'dolar_rate' => $old_record['dolar_rate'],
+            'remaining_amount' => $old_record['remaining_amount'],
+            'invoice_number' => $old_record['invoice_number'],
+            'order_date' => $old_record['order_date'],
+            'notes' => $old_record['notes'],
+            'formula_id' => $old_record['formula_id'],
+            'discount' => $old_record['discount']
+        ];
+
+        $new_values = [
+            'customer_id' => $customer_id,
+            'customer_name' => $customer_name,
+            'recipient' => $recipient,
+            'location' => $location,
+            'quantity' => $quantity,
+            'price_per_unit' => $price_per_unit,
+            'total_price' => $total_price,
+            'payment_type' => $payment_type,
+            'amount_paid_usd' => $amount_paid_usd,
+            'amount_paid_iq' => $amount_paid_iq,
+            'dolar_rate' => $dolar_rate,
+            'remaining_amount' => $remaining_amount,
+            'invoice_number' => $invoice_number,
+            'order_date' => $order_date,
+            'notes' => $notes,
+            'formula_id' => $formula_id,
+            'formula_name' => $formula_name,
+            'discount' => $discount
+        ];
+
+        $additional_info = [
+            'action_type' => 'sale_update',
+            'payment_status' => $payment_type === 'نەقد' ? 'paid' : 'credit',
+            'currency_used' => $amount_paid_usd > 0 ? 'USD' : ($amount_paid_iq > 0 ? 'IQD' : 'none'),
+            'total_paid' => $amount_paid_usd + $amount_paid_iq,
+            'remaining_debt' => $remaining_amount
+        ];
+
+        createDetailedNotification(
+            $pdo,
+            $_SESSION['user_id'],
+            'update',
+            'sales',
+            $id,
+            "فرۆشتنەکە نوێکرایەوە (invoice: $invoice_number, کڕیار: $customer_name, فۆرمۆلا: $formula_name)",
+            $old_values,
+            $new_values,
+            $additional_info,
+            getUserIP()
+        );
+
+        error_log('Sale successfully updated: ID=' . $id . ', Invoice=' . $invoice_number . ', Customer=' . $customer_name);
         echo json_encode(['success' => true, 'message' => 'فرۆشتن نوێکرایەوە!']);
     } else {
         error_log('No rows affected when updating sale: ID=' . $id);

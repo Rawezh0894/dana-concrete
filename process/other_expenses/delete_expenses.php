@@ -13,19 +13,112 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo json_encode(['success' => false, 'msg' => 'ID پێویستە']);
         exit;
     }
-    $stmt = $pdo->prepare('DELETE FROM other_expenses WHERE id = ?');
-    // Get person_id, remaining_usd, remaining_iqd before delete
-    $info = $pdo->prepare('SELECT person_id, remaining_usd, remaining_iqd FROM other_expenses WHERE id = ?');
+    // Get full record before delete
+    $info = $pdo->prepare('SELECT * FROM other_expenses WHERE id = ?');
     $info->execute([$id]);
     $row = $info->fetch(PDO::FETCH_ASSOC);
+    
+    if (!$row) {
+        echo json_encode(['success' => false, 'msg' => 'خەرجی نەدۆزرایەوە']);
+        exit;
+    }
+
+    // Get related information for notification
+    $person_name = 'هیچ کەسێک نییە';
+    $employee_name = 'هیچ کارمەندێک نییە';
+    $car_name = 'هیچ سەیارەیەک نییە';
+    $material_name = 'هیچ مادەیەک نییە';
+
+    if ($row['person_id']) {
+        $stmt = $pdo->prepare("SELECT name FROM other_expense_persons WHERE id = ?");
+        $stmt->execute([$row['person_id']]);
+        $person = $stmt->fetch();
+        $person_name = $person['name'] ?? 'Unknown';
+    }
+
+    if ($row['employee_id']) {
+        $stmt = $pdo->prepare("SELECT name FROM employees WHERE id = ?");
+        $stmt->execute([$row['employee_id']]);
+        $employee = $stmt->fetch();
+        $employee_name = $employee['name'] ?? 'Unknown';
+    }
+
+    if ($row['car_id']) {
+        $stmt = $pdo->prepare("SELECT name FROM cars WHERE id = ?");
+        $stmt->execute([$row['car_id']]);
+        $car = $stmt->fetch();
+        $car_name = $car['name'] ?? 'Unknown';
+    }
+
+    if ($row['material_id']) {
+        $stmt = $pdo->prepare("SELECT name FROM materials WHERE id = ?");
+        $stmt->execute([$row['material_id']]);
+        $material = $stmt->fetch();
+        $material_name = $material['name'] ?? 'Unknown';
+    }
+
+    // Create old values for notification
+    $old_values = [
+        'person_id' => $row['person_id'],
+        'person_name' => $person_name,
+        'employee_id' => $row['employee_id'],
+        'employee_name' => $employee_name,
+        'car_id' => $row['car_id'],
+        'car_name' => $car_name,
+        'gas_liters' => $row['gas_liters'],
+        'expense_type' => $row['expense_type'],
+        'material_id' => $row['material_id'],
+        'material_name' => $material_name,
+        'material_quantity' => $row['material_quantity'],
+        'material_purchase_price_iqd' => $row['material_purchase_price_iqd'],
+        'material_purchase_price_usd' => $row['material_purchase_price_usd'],
+        'material_total_cost' => $row['material_total_cost'],
+        'gas_purchase_price_input' => $row['gas_purchase_price_input'],
+        'gas_total_cost' => $row['gas_total_cost'],
+        'payment_type' => $row['payment_type'],
+        'currency_type' => $row['currency_type'],
+        'invoice_number' => $row['invoice_number'],
+        'amount_iqd' => $row['amount_iqd'],
+        'amount_usd' => $row['amount_usd'],
+        'paid_iqd' => $row['paid_iqd'],
+        'paid_usd' => $row['paid_usd'],
+        'exchange_rate' => $row['exchange_rate'],
+        'remaining_iqd' => $row['remaining_iqd'],
+        'remaining_usd' => $row['remaining_usd'],
+        'date' => $row['date']
+    ];
+
+    $additional_info = [
+        'action_type' => 'other_expense_deletion',
+        'payment_status' => $row['payment_type'] === 'نەقد' ? 'paid' : 'credit',
+        'currency_used' => $row['paid_usd'] > 0 ? 'USD' : ($row['paid_iqd'] > 0 ? 'IQD' : 'none'),
+        'total_paid' => $row['paid_usd'] + $row['paid_iqd'],
+        'remaining_debt' => $row['remaining_usd'] + $row['remaining_iqd'],
+        'expense_category' => $row['expense_type']
+    ];
+
+    $stmt = $pdo->prepare('DELETE FROM other_expenses WHERE id = ?');
     $ok = $stmt->execute([$id]);
+    
     if ($ok) {
-        if ($row && $row['person_id']) {
+        if ($row['person_id']) {
             $update = $pdo->prepare('UPDATE other_expense_persons SET expense_usd = expense_usd - ?, expense_iqd = expense_iqd - ? WHERE id = ?');
             $update->execute([$row['remaining_usd'], $row['remaining_iqd'], $row['person_id']]);
         }
-        require_once __DIR__ . '/../../includes/notify.php';
-        notify('delete', 'other_expenses', $id, 'خەرجی تر سڕایەوە (ID: ' . $id . ')');
+
+        createDetailedNotification(
+            $pdo,
+            $_SESSION['user_id'],
+            'delete',
+            'other_expenses',
+            $id,
+            "خەرجی تر سڕایەوە (ID: $id, جۆر: {$row['expense_type']}, کەس: $person_name, کارمەند: $employee_name, سەیارە: $car_name)",
+            $old_values,
+            null, // No new values for delete
+            $additional_info,
+            getUserIP()
+        );
+
         echo json_encode(['success' => true]);
     } else {
         echo json_encode(['success' => false, 'msg' => 'هەڵە لە سڕینەوە']);

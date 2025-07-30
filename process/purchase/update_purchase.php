@@ -142,9 +142,90 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // This is handled by the remaining_amount field in the purchases table
             }
             
-            require_once __DIR__ . '/../../includes/notify.php';
-            notify('update', 'purchases', $id, 'کڕینەکە نوێکرایەوە (invoice: ' . $invoice_number . ')');
-            error_log('Purchase successfully updated: ID=' . $id . ', Invoice=' . $invoice_number);
+            // Get company and material information for notification
+            $stmt = $pdo->prepare("SELECT name FROM company WHERE id = ?");
+            $stmt->execute([$company_id]);
+            $company = $stmt->fetch();
+            $company_name = $company['name'] ?? 'Unknown';
+
+            $stmt = $pdo->prepare("SELECT name FROM materials WHERE id = ?");
+            $stmt->execute([$material_id]);
+            $material = $stmt->fetch();
+            $material_name = $material['name'] ?? 'Unknown';
+
+            // Get old values for notification
+            $stmt = $pdo->prepare("SELECT * FROM purchases WHERE id = ?");
+            $stmt->execute([$id]);
+            $old_record = $stmt->fetch();
+
+            $old_values = [
+                'company_id' => $old_record['company_id'],
+                'driver' => $old_record['driver'],
+                'location' => $old_record['location'],
+                'material_id' => $old_record['material_id'],
+                'amount_iqd' => $old_record['amount_iqd'],
+                'kg' => $old_record['kg'],
+                'price' => $old_record['price'],
+                'payment_type' => $old_record['payment_type'],
+                'exchange_rate' => $old_record['exchange_rate'],
+                'type' => $old_record['type'],
+                'paid_usd' => $old_record['paid_usd'],
+                'paid_iqd' => $old_record['paid_iqd'],
+                'remaining_usd' => $old_record['remaining_usd'],
+                'remaining_iqd' => $old_record['remaining_iqd'],
+                'bin_id' => $old_record['bin_id'],
+                'price_per_kg_iqd' => $old_record['price_per_kg_iqd'],
+                'price_per_kg_usd' => $old_record['price_per_kg_usd'],
+                'invoice_number' => $old_record['invoice_number'],
+                'date' => $old_record['date']
+            ];
+
+            $new_values = [
+                'company_id' => $company_id,
+                'company_name' => $company_name,
+                'driver' => $driver,
+                'location' => $location,
+                'material_id' => $material_id,
+                'material_name' => $material_name,
+                'amount_iqd' => $amount_iqd,
+                'kg' => $kg,
+                'price' => $price,
+                'payment_type' => $payment_type,
+                'exchange_rate' => $exchange_rate,
+                'type' => $type,
+                'paid_usd' => $paid_usd,
+                'paid_iqd' => $paid_iqd,
+                'remaining_usd' => $remaining_usd,
+                'remaining_iqd' => $remaining_iqd,
+                'bin_id' => $bin_id,
+                'price_per_kg_iqd' => $price_per_kg_iqd,
+                'price_per_kg_usd' => $price_per_kg_usd,
+                'invoice_number' => $invoice_number,
+                'date' => $date
+            ];
+
+            $additional_info = [
+                'action_type' => 'purchase_update',
+                'payment_status' => $payment_type === 'نەقد' ? 'paid' : 'credit',
+                'currency_used' => $paid_usd > 0 ? 'USD' : ($paid_iqd > 0 ? 'IQD' : 'none'),
+                'total_paid' => $paid_usd + $paid_iqd,
+                'remaining_debt' => $remaining_usd + $remaining_iqd
+            ];
+
+            createDetailedNotification(
+                $pdo,
+                $_SESSION['user_id'],
+                'update',
+                'purchases',
+                $id,
+                "کڕینەکە نوێکرایەوە (invoice: $invoice_number, کۆمپانیا: $company_name, مادە: $material_name)",
+                $old_values,
+                $new_values,
+                $additional_info,
+                getUserIP()
+            );
+
+            error_log('Purchase successfully updated: ID=' . $id . ', Invoice=' . $invoice_number . ', Company=' . $company_name);
             echo json_encode(['success' => true, 'msg' => 'کڕین نوێکرایەوە']);
         } else {
             error_log('No rows affected when updating purchase: ID=' . $id);

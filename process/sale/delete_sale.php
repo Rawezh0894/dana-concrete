@@ -77,12 +77,64 @@ try {
         // This is handled by the remaining_amount field in the sales table
     }
 
+    // Get customer and formula information for notification
+    $stmt = $pdo->prepare("SELECT name FROM customers WHERE id = ?");
+    $stmt->execute([$sale['customer_id']]);
+    $customer = $stmt->fetch();
+    $customer_name = $customer['name'] ?? 'Unknown';
+
+    $stmt = $pdo->prepare("SELECT name FROM concrete_formulas WHERE id = ?");
+    $stmt->execute([$sale['formula_id']]);
+    $formula = $stmt->fetch();
+    $formula_name = $formula['name'] ?? 'Unknown';
+
+    // Create old values for notification
+    $old_values = [
+        'customer_id' => $sale['customer_id'],
+        'customer_name' => $customer_name,
+        'recipient' => $sale['recipient'],
+        'location' => $sale['location'],
+        'quantity' => $sale['quantity'],
+        'price_per_unit' => $sale['price_per_unit'],
+        'total_price' => $sale['total_price'],
+        'payment_type' => $sale['payment_type'],
+        'amount_paid_usd' => $sale['amount_paid_usd'],
+        'amount_paid_iq' => $sale['amount_paid_iq'],
+        'dolar_rate' => $sale['dolar_rate'],
+        'remaining_amount' => $sale['remaining_amount'],
+        'invoice_number' => $sale['invoice_number'],
+        'order_date' => $sale['order_date'],
+        'notes' => $sale['notes'],
+        'formula_id' => $sale['formula_id'],
+        'formula_name' => $formula_name,
+        'discount' => $sale['discount']
+    ];
+
+    $additional_info = [
+        'action_type' => 'sale_deletion',
+        'payment_status' => $sale['payment_type'] === 'نەقد' ? 'paid' : 'credit',
+        'currency_used' => $sale['amount_paid_usd'] > 0 ? 'USD' : ($sale['amount_paid_iq'] > 0 ? 'IQD' : 'none'),
+        'total_paid' => $sale['amount_paid_usd'] + $sale['amount_paid_iq'],
+        'remaining_debt' => $sale['remaining_amount']
+    ];
+
     $stmt = $pdo->prepare('DELETE FROM sales WHERE id = ?');
     $stmt->execute([$id]);
     if ($stmt->rowCount()) {
-        require_once __DIR__ . '/../../includes/notify.php';
-        notify('delete', 'sales', $id, 'فرۆشتنەکە سڕایەوە (invoice: ' . $sale['invoice_number'] . ')');
-        error_log('Sale successfully deleted: ID=' . $id . ', Invoice=' . $sale['invoice_number']);
+        createDetailedNotification(
+            $pdo,
+            $_SESSION['user_id'],
+            'delete',
+            'sales',
+            $id,
+            "فرۆشتنەکە سڕایەوە (invoice: {$sale['invoice_number']}, کڕیار: $customer_name, فۆرمۆلا: $formula_name)",
+            $old_values,
+            null, // No new values for delete
+            $additional_info,
+            getUserIP()
+        );
+
+        error_log('Sale successfully deleted: ID=' . $id . ', Invoice=' . $sale['invoice_number'] . ', Customer=' . $customer_name);
         echo json_encode(['success' => true, 'message' => 'فرۆشتن بەسەرکەوتوویی سڕایەوە!']);
     } else {
         error_log('No rows affected when deleting sale: ID=' . $id);
