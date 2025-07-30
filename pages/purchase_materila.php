@@ -3,39 +3,6 @@ session_start();
 require_once '../config/db_conected.php';
 require_once '../config/permissions.php';
 
-// Get USD rate from API
-$usd_rate = 139250; // fallback value
-try {
-    $apiUrl = 'https://dinarapi.hediworks.site/api/get-price';
-    $apiToken = 'S3gl9SVEkZ1Vvc93cCjsbLLmwDvgzk';
-    $dollarId = 8; // ID for 100 USD
-    
-    // Build API URL with parameters
-    $url = $apiUrl . '?id=' . $dollarId . '&api_token=' . $apiToken;
-    
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-    curl_setopt($ch, CURLOPT_USERAGENT, 'DanaConcrete/1.0');
-    
-    $response = curl_exec($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-    
-    if ($httpCode === 200 && $response) {
-        $data = json_decode($response, true);
-        if ($data && isset($data['value'])) {
-            $usd_rate = $data['value'];
-        }
-    }
-} catch (Exception $e) {
-    // Keep fallback value if API fails
-    error_log("Failed to fetch USD rate: " . $e->getMessage());
-}
-
 if (!isset($_SESSION['user_id'])) {
     header('Location: ../index.php');
     exit;
@@ -206,7 +173,7 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
                             </div>
                             <div class="col-md-2 mb-3">
                                 <label for="usd_to_iqd_rate" class="form-label">نرخی 100 دۆلار بە دینار</label>
-                                <input type="number" class="form-control" id="usd_to_iqd_rate" name="usd_to_iqd_rate" min="0" step="0.01" placeholder="139250">
+                                <input type="number" class="form-control" id="usd_to_iqd_rate" name="usd_to_iqd_rate" min="0" step="0.01" placeholder="139250" value="139250">
                             </div>
                         </div>
 
@@ -326,7 +293,7 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
                             </div>
                             <div class="col-md-2 mb-3">
                                 <label for="edit_usd_to_iqd_rate" class="form-label">نرخی 100 دۆلار بە دینار</label>
-                                <input type="number" class="form-control" id="edit_usd_to_iqd_rate" name="edit_usd_to_iqd_rate" min="0" step="0.01" placeholder="139250">
+                                <input type="number" class="form-control" id="edit_usd_to_iqd_rate" name="edit_usd_to_iqd_rate" min="0" step="0.01" placeholder="139250" value="139250">
                             </div>
                         </div>
 
@@ -524,7 +491,6 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
         // Pass initial data to JavaScript
         window.initialMaterials = <?php echo json_encode($materials); ?>;
         window.initialPersons = <?php echo json_encode($persons); ?>;
-        window.usdRate = <?php echo $usd_rate; ?>; // Pass USD rate to JavaScript
     </script>
     
     <script src="../assets/js/purchase_materilas/add_purchase.js"></script>

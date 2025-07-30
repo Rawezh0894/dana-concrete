@@ -10,11 +10,8 @@ $(document).ready(function() {
     // Load next receipt number
     loadNextReceiptNumber();
     
-    // Load current USD rate when modal is shown
-    $('#addPurchaseModal').on('show.bs.modal', function() {
-        console.log('Modal is opening, loading USD rate...');
-        loadUsdRate();
-    });
+    // Load current USD rate
+    loadUsdRate();
 
     // Initialize with data from PHP if available, otherwise load via AJAX
     if (window.initialMaterials && window.initialMaterials.length > 0) {
@@ -583,43 +580,29 @@ function loadNextReceiptNumber() {
 
 // Load USD to IQD exchange rate from API
 function loadUsdRate() {
-    console.log('Loading USD rate...');
-    console.log('window.usdRate:', window.usdRate);
-    
-    // Use rate from PHP if available, otherwise load from API
-    if (window.usdRate) {
-        console.log('Using USD rate from PHP:', window.usdRate);
-        $('#usd_to_iqd_rate').val(window.usdRate);
-        calculateGrandTotal();
+    $.ajax({
+        url: '../process/purchase_materilas/get_usd_rate.php',
+        type: 'GET',
+        dataType: 'json',
+        success: function(result) {
+            if (result.success) {
+                $('#usd_to_iqd_rate').val(result.rate);
+                // Recalculate totals if there are any existing values
+                calculateGrandTotal();
             } else {
-            console.log('Loading USD rate from API...');
-            $.ajax({
-                url: '../process/purchase_materilas/get_usd_rate.php',
-                type: 'GET',
-                dataType: 'json',
-                success: function(result) {
-                    console.log('API response:', result);
-                    if (result.success) {
-                        console.log('Setting USD rate from API:', result.rate);
-                        $('#usd_to_iqd_rate').val(result.rate);
-                        // Recalculate totals if there are any existing values
-                        calculateGrandTotal();
-                    } else {
-                        // Use default rate if API fails
-                        if (result.default_rate) {
-                            $('#usd_to_iqd_rate').val(result.default_rate);
-                            calculateGrandTotal();
-                        }
-                        console.log('Error loading USD rate: ' + result.error);
-                    }
-                },
-                error: function(xhr, status, error) {
-                    // Use default rate if request fails
-                    console.error('API request failed:', error);
-                    $('#usd_to_iqd_rate').val(139250);
+                // Use default rate if API fails
+                if (result.default_rate) {
+                    $('#usd_to_iqd_rate').val(result.default_rate);
                     calculateGrandTotal();
-                    console.error('Error loading USD rate:', error);
                 }
-            });
+                console.log('Error loading USD rate: ' + result.error);
+            }
+        },
+        error: function(xhr, status, error) {
+            // Use default rate if request fails
+            $('#usd_to_iqd_rate').val(139250);
+            calculateGrandTotal();
+            console.error('Error loading USD rate:', error);
         }
+    });
 }
