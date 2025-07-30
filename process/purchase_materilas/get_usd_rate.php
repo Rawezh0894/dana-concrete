@@ -9,6 +9,11 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] !== 'GET') {
 }
 
 try {
+    // Check if cURL is available
+    if (!function_exists('curl_init')) {
+        throw new Exception('cURL is not available');
+    }
+    
     // API configuration
     $apiUrl = 'https://dinarapi.hediworks.site/api/get-price';
     $apiToken = 'S3gl9SVEkZ1Vvc93cCjsbLLmwDvgzk';
@@ -19,10 +24,15 @@ try {
     
     // Initialize cURL
     $ch = curl_init();
+    if ($ch === false) {
+        throw new Exception('Failed to initialize cURL');
+    }
+    
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_TIMEOUT, 10);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_USERAGENT, 'DanaConcrete/1.0');
     
     // Execute cURL request
     $response = curl_exec($ch);
@@ -76,7 +86,7 @@ try {
     error_log("Exception in get_usd_rate.php: " . $e->getMessage());
     echo json_encode([
         'success' => false, 
-        'error' => 'Server error',
+        'error' => 'Server error: ' . $e->getMessage(),
         'default_rate' => 139250 // Default rate from the API response
     ]);
 }

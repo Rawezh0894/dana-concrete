@@ -19,9 +19,18 @@ function formatPrice(price, currency) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    // First fetch USD rate
+    // First fetch USD rate with fallback
     fetch('../process/purchase_materilas/get_usd_rate.php')
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) {
+                throw new Error('USD rate API failed');
+            }
+            return res.json();
+        })
+        .catch(error => {
+            console.warn('USD rate fetch failed, using default:', error);
+            return { success: false, default_rate: 139250 };
+        })
         .then(usdData => {
             // Then fetch dashboard data
             return fetch('../process/dashboard/select_information.php')
