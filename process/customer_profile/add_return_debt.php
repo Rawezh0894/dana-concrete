@@ -120,7 +120,7 @@ try {
         echo json_encode(['success' => false, 'msg' => 'هەڵە لە تۆمارکردن']);
         exit;
     }
-
+    
     $debt_payment_id = $pdo->lastInsertId();
 
     // Create detailed notification with customer information

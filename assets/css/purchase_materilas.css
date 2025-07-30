@@ -1,40 +1,5 @@
 /* Purchase Materials Page Styles */
 
-/* USD Exchange Rate Card */
-.gradient-card {
-    border: none;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.gradient-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-}
-
-.red-gradient {
-    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
-    color: white;
-}
-
-.red-gradient .card-title {
-    color: white;
-    font-weight: 600;
-    margin-bottom: 10px;
-}
-
-.red-gradient .card-value {
-    font-size: 1.5rem;
-    font-weight: bold;
-    margin-bottom: 5px;
-}
-
-.red-gradient small {
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 0.875rem;
-}
-
 /* Table Styles */
 .table-container {
     background: white;
