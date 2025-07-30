@@ -35,7 +35,7 @@ if (!$id) {
 
 try {
     // First check if the receipt exists
-    $checkStmt = $pdo->prepare('SELECT id, receipt_number FROM concrete_receipts WHERE id = ?');
+    $checkStmt = $pdo->prepare('SELECT * FROM concrete_receipts WHERE id = ?');
     $checkStmt->execute([$id]);
     $receipt = $checkStmt->fetch(PDO::FETCH_ASSOC);
     

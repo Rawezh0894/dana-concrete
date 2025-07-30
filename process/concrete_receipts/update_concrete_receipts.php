@@ -86,9 +86,117 @@ try {
     ]);
     
     if ($result && $stmt->rowCount() > 0) {
-        require_once __DIR__ . '/../../includes/notify.php';
-        notify('update', 'concrete_receipts', $id, 'پسوڵەی کۆنکرێت نوێکرایەوە (شماره: ' . $receipt_number . ')');
-        error_log('Concrete receipt successfully updated: ID=' . $id . ', Receipt Number=' . $receipt_number);
+        // Get related information for notification
+        $customer_name = 'هیچ کڕیارێک نییە';
+        $formula_name = 'هیچ فۆرمۆلایەک نییە';
+        $pump_car_name = 'هیچ سەیارەیەک نییە';
+        $pump_driver_name = 'هیچ شۆفێرێک نییە';
+        $mixer_car_name = 'هیچ سەیارەیەک نییە';
+        $mixer_driver_name = 'هیچ شۆفێرێک نییە';
+
+        if ($customer_id) {
+            $stmt = $pdo->prepare("SELECT name FROM customers WHERE id = ?");
+            $stmt->execute([$customer_id]);
+            $customer = $stmt->fetch();
+            $customer_name = $customer['name'] ?? 'Unknown';
+        }
+
+        if ($formulas_id) {
+            $stmt = $pdo->prepare("SELECT name FROM concrete_formulas WHERE id = ?");
+            $stmt->execute([$formulas_id]);
+            $formula = $stmt->fetch();
+            $formula_name = $formula['name'] ?? 'Unknown';
+        }
+
+        if ($pump_car_id) {
+            $stmt = $pdo->prepare("SELECT name FROM cars WHERE id = ?");
+            $stmt->execute([$pump_car_id]);
+            $pump_car = $stmt->fetch();
+            $pump_car_name = $pump_car['name'] ?? 'Unknown';
+        }
+
+        if ($pump_driver_id) {
+            $stmt = $pdo->prepare("SELECT name FROM drivers WHERE id = ?");
+            $stmt->execute([$pump_driver_id]);
+            $pump_driver = $stmt->fetch();
+            $pump_driver_name = $pump_driver['name'] ?? 'Unknown';
+        }
+
+        if ($mixer_car_id) {
+            $stmt = $pdo->prepare("SELECT name FROM cars WHERE id = ?");
+            $stmt->execute([$mixer_car_id]);
+            $mixer_car = $stmt->fetch();
+            $mixer_car_name = $mixer_car['name'] ?? 'Unknown';
+        }
+
+        if ($mixer_driver_id) {
+            $stmt = $pdo->prepare("SELECT name FROM drivers WHERE id = ?");
+            $stmt->execute([$mixer_driver_id]);
+            $mixer_driver = $stmt->fetch();
+            $mixer_driver_name = $mixer_driver['name'] ?? 'Unknown';
+        }
+
+        // Get old values for notification
+        $stmt = $pdo->prepare("SELECT * FROM concrete_receipts WHERE id = ?");
+        $stmt->execute([$id]);
+        $old_record = $stmt->fetch();
+
+        $old_values = [
+            'receipt_number' => $old_record['receipt_number'],
+            'customer_id' => $old_record['customer_id'],
+            'location' => $old_record['location'],
+            'meter_amount' => $old_record['meter_amount'],
+            'formulas_id' => $old_record['formulas_id'],
+            'pump_car_id' => $old_record['pump_car_id'],
+            'pump_driver_id' => $old_record['pump_driver_id'],
+            'mixer_car_id' => $old_record['mixer_car_id'],
+            'mixer_driver_id' => $old_record['mixer_driver_id'],
+            'receiver_name' => $old_record['receiver_name']
+        ];
+
+        $new_values = [
+            'receipt_number' => $receipt_number,
+            'customer_id' => $customer_id,
+            'customer_name' => $customer_name,
+            'location' => $location,
+            'meter_amount' => $meter_amount,
+            'formulas_id' => $formulas_id,
+            'formula_name' => $formula_name,
+            'pump_car_id' => $pump_car_id,
+            'pump_car_name' => $pump_car_name,
+            'pump_driver_id' => $pump_driver_id,
+            'pump_driver_name' => $pump_driver_name,
+            'mixer_car_id' => $mixer_car_id,
+            'mixer_car_name' => $mixer_car_name,
+            'mixer_driver_id' => $mixer_driver_id,
+            'mixer_driver_name' => $mixer_driver_name,
+            'receiver_name' => $receiver_name
+        ];
+
+        $additional_info = [
+            'action_type' => 'concrete_receipt_update',
+            'receipt_type' => 'concrete_delivery',
+            'amount_m3' => $meter_amount,
+            'delivery_components' => [
+                'pump_car' => $pump_car_name,
+                'mixer_car' => $mixer_car_name
+            ]
+        ];
+
+        createDetailedNotification(
+            $pdo,
+            $_SESSION['user_id'],
+            'update',
+            'concrete_receipts',
+            $id,
+            "پسوڵەی کۆنکرێت نوێکرایەوە (شماره: $receipt_number, کڕیار: $customer_name, فۆرمۆلا: $formula_name, بڕ: $meter_amount م³)",
+            $old_values,
+            $new_values,
+            $additional_info,
+            getUserIP()
+        );
+
+        error_log('Concrete receipt successfully updated: ID=' . $id . ', Receipt Number=' . $receipt_number . ', Customer=' . $customer_name);
         echo json_encode(['success' => true, 'message' => 'پسوڵە نوێکرایەوە']);
     } else {
         error_log('No rows affected when updating concrete receipt: ID=' . $id);
