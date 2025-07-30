@@ -19,8 +19,12 @@ function formatPrice(price, currency) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    // First fetch USD rate with fallback
-    fetch('../process/purchase_materilas/get_usd_rate.php')
+    // First fetch USD rate directly from API (like other pages)
+    const apiUrl = 'https://dinarapi.hediworks.site/api/get-price';
+    const apiToken = 'S3gl9SVEkZ1Vvc93cCjsbLLmwDvgzk';
+    const id = '8'; // 100 dollar ID
+    
+    fetch(`${apiUrl}?id=${id}&api_token=${apiToken}`)
         .then(res => {
             if (!res.ok) {
                 throw new Error('USD rate API failed');
