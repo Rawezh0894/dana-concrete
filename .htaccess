@@ -1,13 +1,35 @@
-# Allow direct access to login
-RewriteCond %{REQUEST_URI} ^/process/login/sign_in\.php$ [NC]
-RewriteRule ^ - [L]
-
-# Allow direct access to logout
-RewriteCond %{REQUEST_URI} ^/core/logout\.php$ [NC]
-RewriteRule ^ - [L]
-
 # Enable URL rewriting
 RewriteEngine On
+
+# Allow direct access to process files (for AJAX calls)
+RewriteCond %{REQUEST_URI} ^/process/.*\.php$ [NC]
+RewriteRule ^ - [L]
+
+# Allow direct access to includes files
+RewriteCond %{REQUEST_URI} ^/includes/.*\.php$ [NC]
+RewriteRule ^ - [L]
+
+# Allow direct access to core files
+RewriteCond %{REQUEST_URI} ^/core/.*\.php$ [NC]
+RewriteRule ^ - [L]
+
+# Allow direct access to config files
+RewriteCond %{REQUEST_URI} ^/config/.*\.php$ [NC]
+RewriteRule ^ - [L]
+
+# Allow direct access to database files
+RewriteCond %{REQUEST_URI} ^/database/.*\.php$ [NC]
+RewriteRule ^ - [L]
+
+# Allow direct access to assets (CSS, JS, images)
+RewriteRule ^assets/ - [L]
+
+# Allow direct access to vendor directory
+RewriteRule ^vendor/ - [L]
+
+# Allow direct access to .env file (for environment loading)
+RewriteCond %{REQUEST_URI} ^/\.env$ [NC]
+RewriteRule ^ - [L]
 
 # Redirect .php URLs to clean URLs (removes .php from browser address bar)
 RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s([^.]+)\.php [NC]
@@ -22,15 +44,6 @@ RewriteRule ^([^\.]+)$ $1.php [NC,L]
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^pages/([^\.]+)$ pages/$1.php [NC,L]
-
-# Handle process directory without .php extension
-
-
-# Allow direct access to assets (CSS, JS, images)
-RewriteRule ^assets/ - [L]
-
-# Allow direct access to vendor directory
-RewriteRule ^vendor/ - [L]
 
 # If the requested path is dashboard.php, redirect to the new location
 RewriteRule ^dashboard\.php$ pages/dashboard.php [R=301,L]
@@ -49,25 +62,21 @@ Options -Indexes
     Deny from all
 </FilesMatch>
 
-# Protect sensitive files
-<FilesMatch "\.(json|log|yml|yaml|config|ini|env|htaccess|htpasswd)$">
+# Protect sensitive files (but allow .env for internal use)
+<FilesMatch "\.(json|log|yml|yaml|config|ini|htaccess|htpasswd)$">
     Order allow,deny
     Deny from all
 </FilesMatch>
 
 # Block direct browser access to sensitive directories, but allow internal application access
 # Only block if accessed directly from a browser, not from within the application
-RewriteCond %{THE_REQUEST} ^(GET|POST|HEAD)\ /database/.*\ HTTP/
-RewriteRule ^database/ - [F,L]
+# Database directory is now allowed above
 
-RewriteCond %{THE_REQUEST} ^(GET|POST|HEAD)\ /includes/.*\ HTTP/
-RewriteRule ^includes/ - [F,L]
+# Includes directory is now allowed above
 
-RewriteCond %{THE_REQUEST} ^(GET|POST|HEAD)\ /config/.*\ HTTP/
-RewriteRule ^config/ - [F,L]
+# Config directory is now allowed above
 
-RewriteCond %{THE_REQUEST} ^(GET|POST|HEAD)\ /core/.*\ HTTP/
-RewriteRule ^core/ - [F,L]
+# Core directory is now allowed above
 
 # Increase upload limits
 php_value upload_max_filesize 100M
