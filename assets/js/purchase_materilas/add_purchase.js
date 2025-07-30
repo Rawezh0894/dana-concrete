@@ -10,8 +10,11 @@ $(document).ready(function() {
     // Load next receipt number
     loadNextReceiptNumber();
     
-    // Load current USD rate
-    loadUsdRate();
+    // Load current USD rate when modal is shown
+    $('#addPurchaseModal').on('show.bs.modal', function() {
+        console.log('Modal is opening, loading USD rate...');
+        loadUsdRate();
+    });
 
     // Initialize with data from PHP if available, otherwise load via AJAX
     if (window.initialMaterials && window.initialMaterials.length > 0) {
