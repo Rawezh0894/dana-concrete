@@ -11,87 +11,107 @@ require_once '../../config/permissions.php';
 error_log('SESSION: ' . print_r($_SESSION, true));
 error_log('add_sale.php POST: ' . print_r($_POST, true));
 
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+    exit;
+}
+
 if (!hasPermission('add_sale')) {
-    error_log('Permission denied for user: ' . (isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 'unknown'));
-    echo json_encode(['success' => false, 'message' => 'ڕێگەت پێنەدراوە!']);
+    echo json_encode(['success' => false, 'message' => 'Permission denied']);
     exit;
 }
 
 header('Content-Type: application/json');
 
 try {
+    // Get form data
     $customer_id = $_POST['customer_id'] ?? null;
-    if ($customer_id === '' || $customer_id === null) {
-        $customer_id = null;
-    }
-    $recipient = $_POST['recipient'] ?? null;
-    $location = $_POST['location'] ?? null;
-    $quantity = $_POST['quantity'] ?? null;
-    $price_per_unit = $_POST['price_per_unit'] ?? null;
-    $total_price = $_POST['total_price'] ?? null;
-    $payment_type = $_POST['payment_type'] ?? null;
-    $amount_paid_usd = $_POST['amount_paid_usd'] ?? null;
-    $amount_paid_iq = $_POST['amount_paid_iq'] ?? null;
-    $dolar_rate = $_POST['dolar_rate'] ?? null;
-    $remaining_amount = $_POST['remaining_amount'] ?? null;
-    $invoice_number = $_POST['invoice_number'] ?? null;
-    $order_date = $_POST['order_date'] ?? null;
-    $notes = $_POST['notes'] ?? null;
     $formula_id = $_POST['formula_id'] ?? null;
-    $discount = $_POST['discount'] ?? 0;
+    $quantity = $_POST['quantity'] ?? 0;
+    $price_per_cubic = $_POST['price_per_cubic'] ?? 0;
+    $total_amount = $_POST['total_amount'] ?? 0;
+    $payment_type = $_POST['payment_type'] ?? 'قەرز';
+    $amount_paid_usd = $_POST['amount_paid_usd'] ?? 0;
+    $amount_paid_iq = $_POST['amount_paid_iq'] ?? 0;
+    $order_date = $_POST['order_date'] ?? date('Y-m-d');
+    $invoice_number = $_POST['invoice_number'] ?? '';
+    $notes = $_POST['notes'] ?? '';
 
-    // Log parsed variables for debugging
-    error_log("Parsed vars: customer_id='$customer_id', recipient='$recipient', location='$location', quantity='$quantity', price_per_unit='$price_per_unit', total_price='$total_price', payment_type='$payment_type', amount_paid_usd='$amount_paid_usd', amount_paid_iq='$amount_paid_iq', dolar_rate='$dolar_rate', remaining_amount='$remaining_amount', invoice_number='$invoice_number', order_date='$order_date', notes='$notes', formula_id='$formula_id', discount='$discount'");
-
-    if (!$location || !$quantity || !$price_per_unit || !$total_price || !$payment_type || !$invoice_number || !$order_date || !$formula_id) {
-        echo json_encode(['success' => false, 'message' => 'هەموو خانە پڕ بکە']);
+    // Validate required fields
+    if (!$customer_id || !$formula_id || $quantity <= 0) {
+        echo json_encode(['success' => false, 'message' => 'هەموو خانە پێویستەکان پڕبکەرەوە']);
         exit;
     }
 
-    // Check for duplicate invoice_number
-    $check = $pdo->prepare('SELECT COUNT(*) FROM sales WHERE invoice_number = ?');
-    $check->execute([$invoice_number]);
-    if ($check->fetchColumn() > 0) {
-        echo json_encode(['success' => false, 'message' => 'ئەم ژمارەی پسوڵە پێشتر تۆمارکراوە!']);
-        exit;
-    }
+    // Get customer name for notification
+    $stmt = $pdo->prepare("SELECT name FROM customers WHERE id = ?");
+    $stmt->execute([$customer_id]);
+    $customer = $stmt->fetch();
 
-    $stmt = $pdo->prepare("INSERT INTO sales (customer_id, recipient, location, quantity, price_per_unit, total_price, payment_type, amount_paid_usd, amount_paid_iq, dolar_rate, remaining_amount, invoice_number, order_date, notes, formula_id, discount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    // Get formula name for notification
+    $stmt = $pdo->prepare("SELECT name FROM concrete_formulas WHERE id = ?");
+    $stmt->execute([$formula_id]);
+    $formula = $stmt->fetch();
+
+    // Insert sale
+    $sql = "INSERT INTO sales (customer_id, formula_id, quantity, price_per_cubic, total_amount, payment_type, amount_paid_usd, amount_paid_iq, order_date, invoice_number, notes) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $stmt = $pdo->prepare($sql);
     $stmt->execute([
-        $customer_id,
-        $recipient,
-        $location,
-        $quantity,
-        $price_per_unit,
-        $total_price,
-        $payment_type,
-        $amount_paid_usd,
-        $amount_paid_iq,
-        $dolar_rate,
-        $remaining_amount,
-        $invoice_number,
-        $order_date,
-        $notes,
-        $formula_id,
-        $discount
+        $customer_id, $formula_id, $quantity, $price_per_cubic, $total_amount,
+        $payment_type, $amount_paid_usd, $amount_paid_iq, $order_date, $invoice_number, $notes
     ]);
+
     $sale_id = $pdo->lastInsertId();
 
-    // Update customer debt
-    if ($payment_type === 'قەرز') {
-        // No need to update customer debt_usd/debt_iqd anymore
-        // The remaining amount is tracked in the sales table itself
-        // This is handled by the remaining_amount field in the sales table
-    }
+    // Create detailed notification with old and new values
+    $new_values = [
+        'customer_id' => $customer_id,
+        'customer_name' => $customer['name'] ?? 'Unknown',
+        'formula_id' => $formula_id,
+        'formula_name' => $formula['name'] ?? 'Unknown',
+        'quantity' => $quantity,
+        'price_per_cubic' => $price_per_cubic,
+        'total_amount' => $total_amount,
+        'payment_type' => $payment_type,
+        'amount_paid_usd' => $amount_paid_usd,
+        'amount_paid_iq' => $amount_paid_iq,
+        'order_date' => $order_date,
+        'invoice_number' => $invoice_number,
+        'notes' => $notes
+    ];
 
-    require_once __DIR__ . '/../../includes/notify.php';
-    notify('insert', 'sales', $sale_id, 'فرۆشتنێکی نوێ زیادکرا (invoice: ' . $invoice_number . ')');
-    echo json_encode(['success' => true, 'message' => 'فرۆشتن بەسەرکەوتوویی زیادکرا!']);
-} catch (PDOException $e) {
-    error_log('PDOException: ' . $e->getMessage());
-    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    $additional_info = [
+        'action_type' => 'sale_creation',
+        'payment_status' => $payment_type === 'نەقد' ? 'paid' : 'credit',
+        'currency_used' => $amount_paid_usd > 0 ? 'USD' : ($amount_paid_iq > 0 ? 'IQD' : 'none'),
+        'total_paid' => $amount_paid_usd + $amount_paid_iq
+    ];
+
+    createDetailedNotification(
+        $pdo,
+        $_SESSION['user_id'],
+        'insert',
+        'sales',
+        $sale_id,
+        "فرۆشتنێکی نوێ زیادکرا (invoice: $invoice_number, کڕیار: {$customer['name']}, فۆرمۆلا: {$formula['name']}, بڕ: $quantity م³)",
+        null, // No old values for insert
+        $new_values,
+        $additional_info,
+        getUserIP()
+    );
+
+    echo json_encode([
+        'success' => true,
+        'message' => 'فرۆشتنەکە بە سەرکەوتوویی زیادکرا',
+        'sale_id' => $sale_id
+    ]);
+
 } catch (Exception $e) {
-    error_log('Exception: ' . $e->getMessage());
-    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    error_log("Error in add_sale.php: " . $e->getMessage());
+    echo json_encode([
+        'success' => false,
+        'message' => 'هەڵەیەک ڕویدا: ' . $e->getMessage()
+    ]);
 }
 ?>

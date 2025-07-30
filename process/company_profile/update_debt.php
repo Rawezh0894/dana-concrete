@@ -137,9 +137,65 @@ try {
             // No need to update company debt_usd anymore - it's handled by purchases.remaining_usd
         }
 
-        require_once __DIR__ . '/../../includes/notify.php';
-        notify('update', 'debt_payments', $id, 'پارەدانی قەرزی کۆمپانیا نوێکرایەوە (کۆمپانیا: ' . $company_id . ')');
-        error_log('Company debt successfully updated: ID=' . $id . ', Company=' . $company_id);
+        // Get company information for notification
+        $stmt = $pdo->prepare("SELECT name, phone FROM company WHERE id = ?");
+        $stmt->execute([$company_id]);
+        $company = $stmt->fetch();
+        $company_name = $company['name'] ?? 'Unknown';
+        $company_phone = $company['phone'] ?? 'هیچ ژمارەیەک نییە';
+
+        // Get old values for notification
+        $stmt = $pdo->prepare("SELECT * FROM debt_payments WHERE id = ?");
+        $stmt->execute([$id]);
+        $old_record = $stmt->fetch();
+
+        $old_values = [
+            'company_id' => $old_record['company_id'],
+            'date' => $old_record['date'],
+            'dolar_rate' => $old_record['dolar_rate'],
+            'paid_usd' => $old_record['paid_usd'],
+            'paid_iqd' => $old_record['paid_iqd'],
+            'discount' => $old_record['discount'],
+            'note' => $old_record['note'],
+            'from_opening_debt_usd' => $old_record['from_opening_debt_usd'],
+            'from_purchases_usd' => $old_record['from_purchases_usd']
+        ];
+
+        $new_values = [
+            'company_id' => $company_id,
+            'company_name' => $company_name,
+            'company_phone' => $company_phone,
+            'date' => $date,
+            'dolar_rate' => $dolar_rate,
+            'paid_usd' => $paid_usd,
+            'paid_iqd' => $paid_iqd,
+            'discount' => $discount,
+            'note' => $note,
+            'from_opening_debt_usd' => $from_opening_debt_usd,
+            'from_purchases_usd' => $from_purchases_usd
+        ];
+
+        $additional_info = [
+            'action_type' => 'company_debt_payment_update',
+            'payment_method' => $paid_usd > 0 ? 'USD' : ($paid_iqd > 0 ? 'IQD' : 'none'),
+            'total_paid_usd_equivalent' => $paid_usd + ($paid_iqd / $dolar_rate),
+            'debt_reduction_type' => $from_opening_debt_usd > 0 ? 'opening_debt' : 'purchases_debt'
+        ];
+
+        createDetailedNotification(
+            $pdo,
+            $_SESSION['user_id'],
+            'update',
+            'debt_payments',
+            $id,
+            "پارەدانی قەرزی کۆمپانیا نوێکرایەوە (کۆمپانیا: $company_name, تەلەفۆن: $company_phone)",
+            $old_values,
+            $new_values,
+            $additional_info,
+            getUserIP()
+        );
+
+        error_log('Company debt successfully updated: ID=' . $id . ', Company=' . $company_name . ' (ID: ' . $company_id . ')');
         echo json_encode(['success' => true, 'msg' => 'قەرز بەسەرکەوتوویی نوێکرایەوە!']);
     } else {
         error_log('Failed to update company debt: ID=' . $id);

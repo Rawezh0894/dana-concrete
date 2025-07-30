@@ -44,3 +44,43 @@ try {
     // بڵاوکردنەوەی هەڵەی ڕاستی PDO بۆ تاقیکردنەوە
     die("DB ERROR: " . $e->getMessage());
 }
+
+/**
+ * Helper function to create detailed notifications
+ */
+function createDetailedNotification($pdo, $user_id, $action, $table_name, $record_id, $description, $old_values = null, $new_values = null, $additional_info = null, $ip_address = null) {
+    try {
+        $sql = "INSERT INTO notifications (user_id, action, table_name, record_id, description, old_values, new_values, additional_info, ip_address) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([
+            $user_id,
+            $action,
+            $table_name,
+            $record_id,
+            $description,
+            $old_values ? json_encode($old_values, JSON_UNESCAPED_UNICODE) : null,
+            $new_values ? json_encode($new_values, JSON_UNESCAPED_UNICODE) : null,
+            $additional_info ? json_encode($additional_info, JSON_UNESCAPED_UNICODE) : null,
+            $ip_address ?: $_SERVER['REMOTE_ADDR'] ?? null
+        ]);
+        return $pdo->lastInsertId();
+    } catch (Exception $e) {
+        error_log("Error creating notification: " . $e->getMessage());
+        return false;
+    }
+}
+
+/**
+ * Helper function to get user IP address
+ */
+function getUserIP() {
+    if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+        return $_SERVER['HTTP_CLIENT_IP'];
+    } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        return $_SERVER['HTTP_X_FORWARDED_FOR'];
+    } else {
+        return $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    }
+}
+?>

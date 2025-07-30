@@ -34,7 +34,7 @@ try {
     }
 
     // وەرگرتنی زانیاری قەرزەکە
-    $stmt = $pdo->prepare('SELECT customer_id, paid_usd, paid_iqd, discount, dolar_rate, from_opening_debt_usd, from_sales_usd FROM customer_debt_payments WHERE id = ?');
+    $stmt = $pdo->prepare('SELECT customer_id, paid_usd, paid_iqd, discount, dolar_rate, from_opening_debt_usd, from_sales_usd, date, note FROM customer_debt_payments WHERE id = ?');
     $stmt->execute([$id]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
     
@@ -88,9 +88,49 @@ try {
     $ok = $del->execute([$id]);
 
     if ($ok) {
-        require_once __DIR__ . '/../../includes/notify.php';
-        notify('delete', 'customer_debt_payments', $id, 'پارەدانی قەرزی کڕیار سڕایەوە (کڕیار: ' . $customer_id . ')');
-        error_log('Return debt successfully deleted: ID=' . $id . ', Customer=' . $customer_id);
+        // Get customer information for notification
+        $stmt = $pdo->prepare("SELECT name, mobile1 FROM customers WHERE id = ?");
+        $stmt->execute([$customer_id]);
+        $customer = $stmt->fetch();
+        $customer_name = $customer['name'] ?? 'Unknown';
+        $customer_phone = $customer['mobile1'] ?? 'هیچ ژمارەیەک نییە';
+
+        // Create old values for notification
+        $old_values = [
+            'customer_id' => $customer_id,
+            'customer_name' => $customer_name,
+            'customer_phone' => $customer_phone,
+            'date' => $row['date'],
+            'dolar_rate' => $dolar_rate,
+            'paid_usd' => $paid_usd,
+            'paid_iqd' => $paid_iqd,
+            'discount' => $discount,
+            'note' => $row['note'],
+            'from_opening_debt_usd' => $from_opening_debt_usd,
+            'from_sales_usd' => $from_sales_usd
+        ];
+
+        $additional_info = [
+            'action_type' => 'customer_debt_payment_deletion',
+            'payment_method' => $paid_usd > 0 ? 'USD' : ($paid_iqd > 0 ? 'IQD' : 'none'),
+            'total_paid_usd_equivalent' => $total_usd,
+            'debt_reduction_type' => $from_opening_debt_usd > 0 ? 'opening_debt' : 'sales_debt'
+        ];
+
+        createDetailedNotification(
+            $pdo,
+            $_SESSION['user_id'],
+            'delete',
+            'customer_debt_payments',
+            $id,
+            "پارەدانی قەرزی کڕیار سڕایەوە (کڕیار: $customer_name, تەلەفۆن: $customer_phone)",
+            $old_values,
+            null, // No new values for delete
+            $additional_info,
+            getUserIP()
+        );
+
+        error_log('Return debt successfully deleted: ID=' . $id . ', Customer=' . $customer_name . ' (ID: ' . $customer_id . ')');
         echo json_encode(['success' => true, 'msg' => 'قەرز بەسەرکەوتوویی سڕایەوە!']);
     } else {
         error_log('Failed to delete debt payment: ID=' . $id);

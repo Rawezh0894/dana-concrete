@@ -104,6 +104,13 @@ try {
         }
     }
 
+    // Get customer information for notification
+    $stmt = $pdo->prepare("SELECT name, mobile1 FROM customers WHERE id = ?");
+    $stmt->execute([$customer_id]);
+    $customer = $stmt->fetch();
+    $customer_name = $customer['name'] ?? 'Unknown';
+    $customer_phone = $customer['mobile1'] ?? 'هیچ ژمارەیەک نییە';
+
     // زیادکردنی قەرزە گەڕاوەکە لە customer_debt_payments
     $stmt = $pdo->prepare('INSERT INTO customer_debt_payments (customer_id, date, dolar_rate, paid_usd, paid_iqd, discount, note, from_opening_debt_usd, from_sales_usd) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
     $ok = $stmt->execute([$customer_id, $date, $dolar_rate, $paid_usd, $paid_iqd, $discount, $note, $paid_from_opening, $paid_from_sales]);
@@ -113,11 +120,45 @@ try {
         echo json_encode(['success' => false, 'msg' => 'هەڵە لە تۆمارکردن']);
         exit;
     }
+
+    $debt_payment_id = $pdo->lastInsertId();
+
+    // Create detailed notification with customer information
+    $new_values = [
+        'customer_id' => $customer_id,
+        'customer_name' => $customer_name,
+        'customer_phone' => $customer_phone,
+        'date' => $date,
+        'dolar_rate' => $dolar_rate,
+        'paid_usd' => $paid_usd,
+        'paid_iqd' => $paid_iqd,
+        'discount' => $discount,
+        'note' => $note,
+        'from_opening_debt_usd' => $paid_from_opening,
+        'from_sales_usd' => $paid_from_sales
+    ];
+
+    $additional_info = [
+        'action_type' => 'customer_debt_payment',
+        'payment_method' => $paid_usd > 0 ? 'USD' : ($paid_iqd > 0 ? 'IQD' : 'none'),
+        'total_paid_usd_equivalent' => $total_paid_usd,
+        'debt_reduction_type' => $paid_from_opening > 0 ? 'opening_debt' : 'sales_debt'
+    ];
+
+    createDetailedNotification(
+        $pdo,
+        $_SESSION['user_id'],
+        'insert',
+        'customer_debt_payments',
+        $debt_payment_id,
+        "پارەدان بۆ قەرزی کڕیار زیادکرا (کڕیار: $customer_name, تەلەفۆن: $customer_phone)",
+        null, // No old values for insert
+        $new_values,
+        $additional_info,
+        getUserIP()
+    );
     
-    require_once __DIR__ . '/../../includes/notify.php';
-    notify('insert', 'customer_debt_payments', $pdo->lastInsertId(), 'پارەدان بۆ قەرزی کڕیار زیادکرا (کڕیار: ' . $customer_id . ')');
-    
-    error_log('Return debt successfully added: Customer=' . $customer_id . ', Amount=' . $total_paid_usd);
+    error_log('Return debt successfully added: Customer=' . $customer_name . ' (ID: ' . $customer_id . '), Amount=' . $total_paid_usd);
     echo json_encode(['success' => true, 'msg' => 'دانەوەی قەرز بەسەرکەوتوویی تۆمارکرا!']);
     
 } catch (PDOException $e) {

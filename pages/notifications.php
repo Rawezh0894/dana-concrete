@@ -35,6 +35,40 @@ require_once '../config/db_conected.php';
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        .notification-details {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .old-values {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 5px 0;
+        }
+        .new-values {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 5px 0;
+        }
+        .additional-info {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 5px 0;
+        }
+        .json-key {
+            font-weight: bold;
+            color: #495057;
+        }
+        .json-value {
+            color: #6c757d;
+        }
+    </style>
 </head>
 <body dir="rtl">
 <?php include '../includes/navbar.php'; ?>
@@ -92,6 +126,59 @@ require_once '../config/db_conected.php';
     </div>
 
 </div>
+
+<!-- Notification Details Modal -->
+<div class="modal fade" id="notificationDetailsModal" tabindex="-1" aria-labelledby="notificationDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="notificationDetailsModalLabel">وردەکاری چالاکی</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>زانیاری گشتی</h6>
+                        <table class="table table-sm">
+                            <tr><td><strong>جۆری کردار:</strong></td><td id="modal-action"></td></tr>
+                            <tr><td><strong>خشتە:</strong></td><td id="modal-table"></td></tr>
+                            <tr><td><strong>ناسنامە:</strong></td><td id="modal-record-id"></td></tr>
+                            <tr><td><strong>بەکارهێنەر:</strong></td><td id="modal-username"></td></tr>
+                            <tr><td><strong>کات:</strong></td><td id="modal-created-at"></td></tr>
+                            <tr><td><strong>IP:</strong></td><td id="modal-ip"></td></tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>ڕوونکردنەوە</h6>
+                        <p id="modal-description"></p>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <h6>بەهای کۆن</h6>
+                        <div id="modal-old-values" class="old-values"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>بەهای نوێ</h6>
+                        <div id="modal-new-values" class="new-values"></div>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6>زانیاری زیاتر</h6>
+                        <div id="modal-additional-info" class="additional-info"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="../assets/js/swalAlert.js"></script>

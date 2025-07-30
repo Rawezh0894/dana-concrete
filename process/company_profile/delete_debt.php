@@ -26,6 +26,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
     $company_id = $debt['company_id'];
     $amount_usd = floatval($debt['amount_usd']);
     $amount_iqd = floatval($debt['amount_iqd']);
+    // Get company information for notification
+    $stmt = $pdo->prepare("SELECT name, phone FROM company WHERE id = ?");
+    $stmt->execute([$company_id]);
+    $company = $stmt->fetch();
+    $company_name = $company['name'] ?? 'Unknown';
+    $company_phone = $company['phone'] ?? 'هیچ ژمارەیەک نییە';
+
+    // Create old values for notification
+    $old_values = [
+        'company_id' => $company_id,
+        'company_name' => $company_name,
+        'company_phone' => $company_phone,
+        'amount_usd' => $amount_usd,
+        'amount_iqd' => $amount_iqd,
+        'date' => $debt['date'],
+        'note' => $debt['note'] ?? ''
+    ];
+
+    $additional_info = [
+        'action_type' => 'company_debt_payment_deletion',
+        'payment_method' => $amount_usd > 0 ? 'USD' : ($amount_iqd > 0 ? 'IQD' : 'none'),
+        'total_amount' => $amount_usd + $amount_iqd
+    ];
+
     // Delete the debt payment
     $del = $pdo->prepare('DELETE FROM debt_payments WHERE id = ?');
     $ok = $del->execute([$id]);
@@ -33,8 +57,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
         echo json_encode(['success' => false, 'msg' => 'هەڵە لە سڕینەوە']);
         exit;
     }
-    require_once __DIR__ . '/../../includes/notify.php';
-    notify('delete', 'debt_payments', $id, 'پارەدانی قەرزی کۆمپانیا سڕایەوە (کۆمپانیا: ' . $company_id . ')');
+
+    createDetailedNotification(
+        $pdo,
+        $_SESSION['user_id'],
+        'delete',
+        'debt_payments',
+        $id,
+        "پارەدانی قەرزی کۆمپانیا سڕایەوە (کۆمپانیا: $company_name, تەلەفۆن: $company_phone)",
+        $old_values,
+        null, // No new values for delete
+        $additional_info,
+        getUserIP()
+    );
     // Reverse FIFO: add back to purchases first, then opening debt
     if ($amount_usd > 0) {
         $remaining = $amount_usd;

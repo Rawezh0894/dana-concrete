@@ -38,6 +38,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo json_encode(['success' => false, 'msg' => 'نابێت بڕی پارەی گەرەوا زیاتر بێت لە بڕی قەرز!']);
         exit;
     }
+    // Get company information for notification
+    $stmt = $pdo->prepare("SELECT name, phone FROM company WHERE id = ?");
+    $stmt->execute([$company_id]);
+    $company = $stmt->fetch();
+    $company_name = $company['name'] ?? 'Unknown';
+    $company_phone = $company['phone'] ?? 'هیچ ژمارەیەک نییە';
+
     // Insert into debt_payments
     $stmt = $pdo->prepare('INSERT INTO debt_payments (company_id, date, amount_usd, amount_iqd, dollar_rate, note, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)');
     $ok = $stmt->execute([$company_id, $date, $amount_usd, $amount_iqd, $dollar_rate, $note, $user_id]);
@@ -45,8 +52,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo json_encode(['success' => false, 'msg' => 'هەڵە لە تۆمارکردن']);
         exit;
     }
-    require_once __DIR__ . '/../../includes/notify.php';
-    notify('insert', 'debt_payments', $pdo->lastInsertId(), 'پارەدان بۆ قەرزی کۆمپانیا زیادکرا (کۆمپانیا: ' . $company_id . ')');
+
+    $debt_payment_id = $pdo->lastInsertId();
+
+    // Create detailed notification with company information
+    $new_values = [
+        'company_id' => $company_id,
+        'company_name' => $company_name,
+        'company_phone' => $company_phone,
+        'date' => $date,
+        'amount_usd' => $amount_usd,
+        'amount_iqd' => $amount_iqd,
+        'dollar_rate' => $dollar_rate,
+        'note' => $note,
+        'created_by' => $user_id
+    ];
+
+    $additional_info = [
+        'action_type' => 'company_debt_payment',
+        'payment_method' => $amount_usd > 0 ? 'USD' : ($amount_iqd > 0 ? 'IQD' : 'none'),
+        'total_amount' => $amount_usd + $amount_iqd
+    ];
+
+    createDetailedNotification(
+        $pdo,
+        $_SESSION['user_id'],
+        'insert',
+        'debt_payments',
+        $debt_payment_id,
+        "پارەدان بۆ قەرزی کۆمپانیا زیادکرا (کۆمپانیا: $company_name, تەلەفۆن: $company_phone)",
+        null, // No old values for insert
+        $new_values,
+        $additional_info,
+        getUserIP()
+    );
     // FIFO: Reduce opening_debt_usd first, then remaining_usd in purchases
     if ($amount_usd > 0) {
         $remaining = $amount_usd;
