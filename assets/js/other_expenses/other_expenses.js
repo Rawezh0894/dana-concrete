@@ -745,6 +745,19 @@ document.addEventListener('DOMContentLoaded', function() {
             // Clear gas price messages
             clearGasPriceMessage(formType);
         }
+        // Function to toggle car field visibility
+        function toggleCarField(expenseType, formType) {
+            const carField = document.getElementById((formType === 'edit' ? 'edit_' : '') + 'car_id');
+            if (carField) {
+                const container = carField.closest('.col-md-3, .col-md-4');
+                if (expenseType === 'خواردنگە' || expenseType === 'ئۆفیس') {
+                    if (container) container.style.display = 'none';
+                } else {
+                    if (container) container.style.display = '';
+                }
+            }
+        }
+        toggleCarField(expenseType, formType);
     }
 
     // Initialize field visibility when modals are shown

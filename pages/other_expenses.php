@@ -112,8 +112,8 @@ if (!isset($_SESSION['user_id'])) {
                 خودکار - سەیارەکان + خەرجی تر
               </div>
             </div>
-            <div class="col-md-6">
-              <label class="form-label">جۆری خەرجی:</label>
+            <div class="col-md-3">
+              <label class="form-label">جۆری خەرجی</label>
               <div class="d-flex gap-3 flex-wrap">
                 <div class="form-check">
                   <input class="form-check-input" type="checkbox" id="expenseTypeOther" value="خەرجی تر">
@@ -132,6 +132,14 @@ if (!isset($_SESSION['user_id'])) {
                   <label class="form-check-label" for="expenseTypeGas">
                     بەکارهێنانی گاز
                   </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="filter_expense_type_khwardnga" name="expenseTypes[]" value="خواردنگە">
+                  <label class="form-check-label" for="filter_expense_type_khwardnga">خواردنگە</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="filter_expense_type_office" name="expenseTypes[]" value="ئۆفیس">
+                  <label class="form-check-label" for="filter_expense_type_office">ئۆفیس</label>
                 </div>
               </div>
               <div class="auto-filter-indicator mt-1">
