@@ -902,15 +902,15 @@ INSERT INTO `other_expenses` (`id`, `purpose`, `person_id`, `employee_id`, `car_
 --
 DELIMITER $$
 CREATE TRIGGER `trg_after_insert_other_expenses` AFTER INSERT ON `other_expenses` FOR EACH ROW BEGIN
-    -- Handle cash box operations for cash payments
-    IF NEW.payment_type = 'نەقد' THEN
+    -- Handle cash box operations for cash payments (خەرجی تر, خواردنگە, ئۆفیس)
+    IF NEW.payment_type = 'نەقد' AND NEW.expense_type IN ('خەرجی تر', 'خواردنگە', 'ئۆفیس') THEN
         IF NEW.currency_type = 'دۆلار' AND NEW.paid_usd > 0 THEN
             INSERT INTO cash_box (`date`, `type`, `amount_iqd`, `amount_usd`, `currency`, `note`, `created_by`)
-            VALUES (NEW.date, 'withdraw', 0, NEW.paid_usd, 'دۆلار', CONCAT('خەرجی تر: invoice ', NEW.invoice_number), NULL);
+            VALUES (NEW.date, 'withdraw', 0, NEW.paid_usd, 'دۆلار', CONCAT(NEW.expense_type, ': invoice ', NEW.invoice_number), NULL);
         END IF;
         IF NEW.currency_type = 'دینار' AND NEW.paid_iqd > 0 THEN
             INSERT INTO cash_box (`date`, `type`, `amount_iqd`, `amount_usd`, `currency`, `note`, `created_by`)
-            VALUES (NEW.date, 'withdraw', NEW.paid_iqd, 0, 'دینار', CONCAT('خەرجی تر: invoice ', NEW.invoice_number), NULL);
+            VALUES (NEW.date, 'withdraw', NEW.paid_iqd, 0, 'دینار', CONCAT(NEW.expense_type, ': invoice ', NEW.invoice_number), NULL);
         END IF;
     END IF;
     
@@ -933,15 +933,15 @@ $$
 DELIMITER ;
 DELIMITER $$
 CREATE TRIGGER `trg_after_update_other_expenses` AFTER UPDATE ON `other_expenses` FOR EACH ROW BEGIN
-    -- Handle cash box operations for new record
-    IF NEW.payment_type = 'نەقد' THEN
+    -- Handle cash box operations for new record (خەرجی تر, خواردنگە, ئۆفیس)
+    IF NEW.payment_type = 'نەقد' AND NEW.expense_type IN ('خەرجی تر', 'خواردنگە', 'ئۆفیس') THEN
         IF NEW.currency_type = 'دۆلار' AND NEW.paid_usd > 0 THEN
             INSERT INTO cash_box (`date`, `type`, `amount_iqd`, `amount_usd`, `currency`, `note`, `created_by`)
-            VALUES (NEW.date, 'withdraw', 0, NEW.paid_usd, 'دۆلار', CONCAT('خەرجی تر: invoice ', NEW.invoice_number), NULL);
+            VALUES (NEW.date, 'withdraw', 0, NEW.paid_usd, 'دۆلار', CONCAT(NEW.expense_type, ': invoice ', NEW.invoice_number), NULL);
         END IF;
         IF NEW.currency_type = 'دینار' AND NEW.paid_iqd > 0 THEN
             INSERT INTO cash_box (`date`, `type`, `amount_iqd`, `amount_usd`, `currency`, `note`, `created_by`)
-            VALUES (NEW.date, 'withdraw', NEW.paid_iqd, 0, 'دینار', CONCAT('خەرجی تر: invoice ', NEW.invoice_number), NULL);
+            VALUES (NEW.date, 'withdraw', NEW.paid_iqd, 0, 'دینار', CONCAT(NEW.expense_type, ': invoice ', NEW.invoice_number), NULL);
         END IF;
     END IF;
     
@@ -964,15 +964,15 @@ $$
 DELIMITER ;
 DELIMITER $$
 CREATE TRIGGER `trg_before_delete_other_expenses` BEFORE DELETE ON `other_expenses` FOR EACH ROW BEGIN
-    -- Handle cash box operations reversal
-    IF OLD.payment_type = 'نەقد' THEN
+    -- Handle cash box operations reversal (خەرجی تر, خواردنگە, ئۆفیس)
+    IF OLD.payment_type = 'نەقد' AND OLD.expense_type IN ('خەرجی تر', 'خواردنگە', 'ئۆفیس') THEN
         IF OLD.currency_type = 'دۆلار' AND OLD.paid_usd > 0 THEN
             DELETE FROM cash_box
-            WHERE `date` = OLD.date AND `type` = 'withdraw' AND amount_usd = OLD.paid_usd AND currency = 'دۆلار' AND note = CONCAT('خەرجی تر: invoice ', OLD.invoice_number);
+            WHERE `date` = OLD.date AND `type` = 'withdraw' AND amount_usd = OLD.paid_usd AND currency = 'دۆلار' AND note = CONCAT(OLD.expense_type, ': invoice ', OLD.invoice_number);
         END IF;
         IF OLD.currency_type = 'دینار' AND OLD.paid_iqd > 0 THEN
             DELETE FROM cash_box
-            WHERE `date` = OLD.date AND `type` = 'withdraw' AND amount_iqd = OLD.paid_iqd AND currency = 'دینار' AND note = CONCAT('خەرجی تر: invoice ', OLD.invoice_number);
+            WHERE `date` = OLD.date AND `type` = 'withdraw' AND amount_iqd = OLD.paid_iqd AND currency = 'دینار' AND note = CONCAT(OLD.expense_type, ': invoice ', OLD.invoice_number);
         END IF;
     END IF;
     
@@ -995,15 +995,15 @@ $$
 DELIMITER ;
 DELIMITER $$
 CREATE TRIGGER `trg_before_update_other_expenses` BEFORE UPDATE ON `other_expenses` FOR EACH ROW BEGIN
-    -- Handle cash box operations for old record
-    IF OLD.payment_type = 'نەقد' THEN
+    -- Handle cash box operations for old record (خەرجی تر, خواردنگە, ئۆفیس)
+    IF OLD.payment_type = 'نەقد' AND OLD.expense_type IN ('خەرجی تر', 'خواردنگە', 'ئۆفیس') THEN
         IF OLD.currency_type = 'دۆلار' AND OLD.paid_usd > 0 THEN
             DELETE FROM cash_box
-            WHERE `date` = OLD.date AND `type` = 'withdraw' AND amount_usd = OLD.paid_usd AND currency = 'دۆلار' AND note = CONCAT('خەرجی تر: invoice ', OLD.invoice_number);
+            WHERE `date` = OLD.date AND `type` = 'withdraw' AND amount_usd = OLD.paid_usd AND currency = 'دۆلار' AND note = CONCAT(OLD.expense_type, ': invoice ', OLD.invoice_number);
         END IF;
         IF OLD.currency_type = 'دینار' AND OLD.paid_iqd > 0 THEN
             DELETE FROM cash_box
-            WHERE `date` = OLD.date AND `type` = 'withdraw' AND amount_iqd = OLD.paid_iqd AND currency = 'دینار' AND note = CONCAT('خەرجی تر: invoice ', OLD.invoice_number);
+            WHERE `date` = OLD.date AND `type` = 'withdraw' AND amount_iqd = OLD.paid_iqd AND currency = 'دینار' AND note = CONCAT(OLD.expense_type, ': invoice ', OLD.invoice_number);
         END IF;
     END IF;
     
