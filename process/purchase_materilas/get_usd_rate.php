@@ -32,7 +32,10 @@ try {
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_TIMEOUT, 10);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
     curl_setopt($ch, CURLOPT_USERAGENT, 'DanaConcrete/1.0');
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
     
     // Execute cURL request
     $response = curl_exec($ch);
@@ -45,7 +48,7 @@ try {
         error_log("cURL error in get_usd_rate.php: " . $error);
         echo json_encode([
             'success' => false, 
-            'error' => 'Failed to fetch exchange rate',
+            'error' => 'Failed to fetch exchange rate: ' . $error,
             'default_rate' => 139250 // Default rate from the API response
         ]);
         exit;
@@ -53,7 +56,7 @@ try {
     
     // Check HTTP response code
     if ($httpCode !== 200) {
-        error_log("API error in get_usd_rate.php: HTTP " . $httpCode);
+        error_log("API error in get_usd_rate.php: HTTP " . $httpCode . " Response: " . $response);
         echo json_encode([
             'success' => false, 
             'error' => 'API returned error code: ' . $httpCode,
@@ -69,7 +72,7 @@ try {
         error_log("Invalid API response in get_usd_rate.php: " . $response);
         echo json_encode([
             'success' => false, 
-            'error' => 'Invalid API response',
+            'error' => 'Invalid API response: ' . $response,
             'default_rate' => 139250 // Default rate from the API response
         ]);
         exit;
