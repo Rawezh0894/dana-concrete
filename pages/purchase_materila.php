@@ -10,13 +10,16 @@ try {
     $apiToken = 'S3gl9SVEkZ1Vvc93cCjsbLLmwDvgzk';
     $dollarId = 8; // ID for 100 USD
     
+    // Build API URL with parameters
+    $url = $apiUrl . '?id=' . $dollarId . '&api_token=' . $apiToken;
+    
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $apiUrl);
+    curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Authorization: Bearer ' . $apiToken,
-        'Content-Type: application/json'
-    ]);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+    curl_setopt($ch, CURLOPT_USERAGENT, 'DanaConcrete/1.0');
     
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -24,13 +27,8 @@ try {
     
     if ($httpCode === 200 && $response) {
         $data = json_decode($response, true);
-        if ($data && isset($data['data'])) {
-            foreach ($data['data'] as $item) {
-                if (isset($item['id']) && $item['id'] == $dollarId) {
-                    $usd_rate = $item['price'] ?? 139250;
-                    break;
-                }
-            }
+        if ($data && isset($data['value'])) {
+            $usd_rate = $data['value'];
         }
     }
 } catch (Exception $e) {
