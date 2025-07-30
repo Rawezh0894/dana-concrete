@@ -28,6 +28,31 @@ if ($id <= 0 || $employee_id <= 0 || $salary === 0 || $karwanhisabi === 0 || $pa
     exit;
 }
 try {
+    // Get old values BEFORE updating
+    $stmt = $pdo->prepare("SELECT * FROM employee_payments WHERE id = ?");
+    $stmt->execute([$id]);
+    $old_record = $stmt->fetch();
+
+    // Get old employee information
+    $old_employee_name = 'Unknown';
+    if ($old_record['employee_id']) {
+        $stmt = $pdo->prepare("SELECT name FROM employees WHERE id = ?");
+        $stmt->execute([$old_record['employee_id']]);
+        $old_employee = $stmt->fetch();
+        $old_employee_name = $old_employee['name'] ?? 'Unknown';
+    }
+
+    $old_values = [
+        'employee_id' => $old_record['employee_id'],
+        'employee_name' => $old_employee_name,
+        'salary' => $old_record['salary'],
+        'karwanhisabi' => $old_record['karwanhisabi'],
+        'bonus' => $old_record['bonus'],
+        'total' => $old_record['total'],
+        'pay_month' => $old_record['pay_month']
+    ];
+
+    // Now perform the update
     $stmt = $pdo->prepare('UPDATE employee_payments SET employee_id=?, salary=?, karwanhisabi=?, bonus=?, total=?, pay_month=?, updated_at=NOW() WHERE id=?');
     if ($stmt->execute([$employee_id, $salary, $karwanhisabi, $bonus, $total, $pay_month, $id])) {
         // Get employee information for notification

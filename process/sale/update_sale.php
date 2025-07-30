@@ -78,6 +78,51 @@ try {
         // This is handled by the remaining_amount field in the sales table
     }
 
+    // Get old values BEFORE updating
+    $stmt = $pdo->prepare("SELECT * FROM sales WHERE id = ?");
+    $stmt->execute([$id]);
+    $old_record = $stmt->fetch();
+
+    // Get old customer and formula information
+    $old_customer_name = 'Unknown';
+    $old_formula_name = 'Unknown';
+
+    if ($old_record['customer_id']) {
+        $stmt = $pdo->prepare("SELECT name FROM customers WHERE id = ?");
+        $stmt->execute([$old_record['customer_id']]);
+        $old_customer = $stmt->fetch();
+        $old_customer_name = $old_customer['name'] ?? 'Unknown';
+    }
+
+    if ($old_record['formula_id']) {
+        $stmt = $pdo->prepare("SELECT name FROM concrete_formulas WHERE id = ?");
+        $stmt->execute([$old_record['formula_id']]);
+        $old_formula = $stmt->fetch();
+        $old_formula_name = $old_formula['name'] ?? 'Unknown';
+    }
+
+    $old_values = [
+        'customer_id' => $old_record['customer_id'],
+        'customer_name' => $old_customer_name,
+        'recipient' => $old_record['recipient'],
+        'location' => $old_record['location'],
+        'quantity' => $old_record['quantity'],
+        'price_per_unit' => $old_record['price_per_unit'],
+        'total_price' => $old_record['total_price'],
+        'payment_type' => $old_record['payment_type'],
+        'amount_paid_usd' => $old_record['amount_paid_usd'],
+        'amount_paid_iq' => $old_record['amount_paid_iq'],
+        'dolar_rate' => $old_record['dolar_rate'],
+        'remaining_amount' => $old_record['remaining_amount'],
+        'invoice_number' => $old_record['invoice_number'],
+        'order_date' => $old_record['order_date'],
+        'notes' => $old_record['notes'],
+        'formula_id' => $old_record['formula_id'],
+        'formula_name' => $old_formula_name,
+        'discount' => $old_record['discount']
+    ];
+
+    // Now perform the update
     $stmt = $pdo->prepare("UPDATE sales SET customer_id=?, recipient=?, location=?, quantity=?, price_per_unit=?, total_price=?, payment_type=?, amount_paid_usd=?, amount_paid_iq=?, dolar_rate=?, remaining_amount=?, invoice_number=?, order_date=?, notes=?, formula_id=?, discount=? WHERE id=?");
     $result = $stmt->execute([
         $customer_id,
@@ -110,50 +155,6 @@ try {
         $stmt->execute([$formula_id]);
         $formula = $stmt->fetch();
         $formula_name = $formula['name'] ?? 'Unknown';
-
-        // Get old values for notification
-        $stmt = $pdo->prepare("SELECT * FROM sales WHERE id = ?");
-        $stmt->execute([$id]);
-        $old_record = $stmt->fetch();
-
-        // Get old customer and formula information
-        $old_customer_name = 'Unknown';
-        $old_formula_name = 'Unknown';
-
-        if ($old_record['customer_id']) {
-            $stmt = $pdo->prepare("SELECT name FROM customers WHERE id = ?");
-            $stmt->execute([$old_record['customer_id']]);
-            $old_customer = $stmt->fetch();
-            $old_customer_name = $old_customer['name'] ?? 'Unknown';
-        }
-
-        if ($old_record['formula_id']) {
-            $stmt = $pdo->prepare("SELECT name FROM concrete_formulas WHERE id = ?");
-            $stmt->execute([$old_record['formula_id']]);
-            $old_formula = $stmt->fetch();
-            $old_formula_name = $old_formula['name'] ?? 'Unknown';
-        }
-
-        $old_values = [
-            'customer_id' => $old_record['customer_id'],
-            'customer_name' => $old_customer_name,
-            'recipient' => $old_record['recipient'],
-            'location' => $old_record['location'],
-            'quantity' => $old_record['quantity'],
-            'price_per_unit' => $old_record['price_per_unit'],
-            'total_price' => $old_record['total_price'],
-            'payment_type' => $old_record['payment_type'],
-            'amount_paid_usd' => $old_record['amount_paid_usd'],
-            'amount_paid_iq' => $old_record['amount_paid_iq'],
-            'dolar_rate' => $old_record['dolar_rate'],
-            'remaining_amount' => $old_record['remaining_amount'],
-            'invoice_number' => $old_record['invoice_number'],
-            'order_date' => $old_record['order_date'],
-            'notes' => $old_record['notes'],
-            'formula_id' => $old_record['formula_id'],
-            'formula_name' => $old_formula_name,
-            'discount' => $old_record['discount']
-        ];
 
         $new_values = [
             'customer_id' => $customer_id,

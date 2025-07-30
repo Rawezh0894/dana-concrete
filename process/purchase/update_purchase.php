@@ -129,6 +129,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
 
+        // Get old values BEFORE updating
+        $stmt = $pdo->prepare("SELECT * FROM purchases WHERE id = ?");
+        $stmt->execute([$id]);
+        $old_record = $stmt->fetch();
+
+        // Get old company and material information
+        $old_company_name = 'Unknown';
+        $old_material_name = 'Unknown';
+
+        if ($old_record['company_id']) {
+            $stmt = $pdo->prepare("SELECT name FROM company WHERE id = ?");
+            $stmt->execute([$old_record['company_id']]);
+            $old_company = $stmt->fetch();
+            $old_company_name = $old_company['name'] ?? 'Unknown';
+        }
+
+        if ($old_record['material_id']) {
+            $stmt = $pdo->prepare("SELECT name FROM materials WHERE id = ?");
+            $stmt->execute([$old_record['material_id']]);
+            $old_material = $stmt->fetch();
+            $old_material_name = $old_material['name'] ?? 'Unknown';
+        }
+
+        $old_values = [
+            'company_id' => $old_record['company_id'],
+            'company_name' => $old_company_name,
+            'driver' => $old_record['driver'],
+            'location' => $old_record['location'],
+            'material_id' => $old_record['material_id'],
+            'material_name' => $old_material_name,
+            'amount_iqd' => $old_record['amount_iqd'],
+            'kg' => $old_record['kg'],
+            'price' => $old_record['price'],
+            'payment_type' => $old_record['payment_type'],
+            'exchange_rate' => $old_record['exchange_rate'],
+            'type' => $old_record['type'],
+            'paid_usd' => $old_record['paid_usd'],
+            'paid_iqd' => $old_record['paid_iqd'],
+            'remaining_usd' => $old_record['remaining_usd'],
+            'remaining_iqd' => $old_record['remaining_iqd'],
+            'bin_id' => $old_record['bin_id'],
+            'price_per_kg_iqd' => $old_record['price_per_kg_iqd'],
+            'price_per_kg_usd' => $old_record['price_per_kg_usd'],
+            'invoice_number' => $old_record['invoice_number'],
+            'date' => $old_record['date']
+        ];
+
+        // Now perform the update
         $stmt = $pdo->prepare("UPDATE purchases SET date=?, invoice_number=?, driver=?, location=?, material_id=?, amount_iqd=?, kg=?, price=?, payment_type=?, exchange_rate=?, company_id=?, type=?, paid_usd=?, paid_iqd=?, remaining_usd=?, remaining_iqd=?, bin_id=?, price_per_kg_iqd=?, price_per_kg_usd=? WHERE id=?");
         $result = $stmt->execute([
             $date, $invoice_number, $driver, $location, $material_id, $amount_iqd, $kg, $price, $payment_type, $exchange_rate, $company_id, $type, $paid_usd, $paid_iqd, $remaining_usd, $remaining_iqd, $bin_id, $price_per_kg_iqd, $price_per_kg_usd, $id
@@ -152,53 +200,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$material_id]);
             $material = $stmt->fetch();
             $material_name = $material['name'] ?? 'Unknown';
-
-            // Get old values for notification
-            $stmt = $pdo->prepare("SELECT * FROM purchases WHERE id = ?");
-            $stmt->execute([$id]);
-            $old_record = $stmt->fetch();
-
-            // Get old company and material information
-            $old_company_name = 'Unknown';
-            $old_material_name = 'Unknown';
-
-            if ($old_record['company_id']) {
-                $stmt = $pdo->prepare("SELECT name FROM company WHERE id = ?");
-                $stmt->execute([$old_record['company_id']]);
-                $old_company = $stmt->fetch();
-                $old_company_name = $old_company['name'] ?? 'Unknown';
-            }
-
-            if ($old_record['material_id']) {
-                $stmt = $pdo->prepare("SELECT name FROM materials WHERE id = ?");
-                $stmt->execute([$old_record['material_id']]);
-                $old_material = $stmt->fetch();
-                $old_material_name = $old_material['name'] ?? 'Unknown';
-            }
-
-            $old_values = [
-                'company_id' => $old_record['company_id'],
-                'company_name' => $old_company_name,
-                'driver' => $old_record['driver'],
-                'location' => $old_record['location'],
-                'material_id' => $old_record['material_id'],
-                'material_name' => $old_material_name,
-                'amount_iqd' => $old_record['amount_iqd'],
-                'kg' => $old_record['kg'],
-                'price' => $old_record['price'],
-                'payment_type' => $old_record['payment_type'],
-                'exchange_rate' => $old_record['exchange_rate'],
-                'type' => $old_record['type'],
-                'paid_usd' => $old_record['paid_usd'],
-                'paid_iqd' => $old_record['paid_iqd'],
-                'remaining_usd' => $old_record['remaining_usd'],
-                'remaining_iqd' => $old_record['remaining_iqd'],
-                'bin_id' => $old_record['bin_id'],
-                'price_per_kg_iqd' => $old_record['price_per_kg_iqd'],
-                'price_per_kg_usd' => $old_record['price_per_kg_usd'],
-                'invoice_number' => $old_record['invoice_number'],
-                'date' => $old_record['date']
-            ];
 
             $new_values = [
                 'company_id' => $company_id,
