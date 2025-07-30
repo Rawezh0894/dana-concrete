@@ -141,16 +141,72 @@ try {
         $stmt->execute([$id]);
         $old_record = $stmt->fetch();
 
+        // Get old related information
+        $old_customer_name = 'هیچ کڕیارێک نییە';
+        $old_formula_name = 'هیچ فۆرمۆلایەک نییە';
+        $old_pump_car_name = 'هیچ سەیارەیەک نییە';
+        $old_pump_driver_name = 'هیچ شۆفێرێک نییە';
+        $old_mixer_car_name = 'هیچ سەیارەیەک نییە';
+        $old_mixer_driver_name = 'هیچ شۆفێرێک نییە';
+
+        if ($old_record['customer_id']) {
+            $stmt = $pdo->prepare("SELECT name FROM customers WHERE id = ?");
+            $stmt->execute([$old_record['customer_id']]);
+            $old_customer = $stmt->fetch();
+            $old_customer_name = $old_customer['name'] ?? 'Unknown';
+        }
+
+        if ($old_record['formulas_id']) {
+            $stmt = $pdo->prepare("SELECT name FROM concrete_formulas WHERE id = ?");
+            $stmt->execute([$old_record['formulas_id']]);
+            $old_formula = $stmt->fetch();
+            $old_formula_name = $old_formula['name'] ?? 'Unknown';
+        }
+
+        if ($old_record['pump_car_id']) {
+            $stmt = $pdo->prepare("SELECT name FROM cars WHERE id = ?");
+            $stmt->execute([$old_record['pump_car_id']]);
+            $old_pump_car = $stmt->fetch();
+            $old_pump_car_name = $old_pump_car['name'] ?? 'Unknown';
+        }
+
+        if ($old_record['pump_driver_id']) {
+            $stmt = $pdo->prepare("SELECT name FROM drivers WHERE id = ?");
+            $stmt->execute([$old_record['pump_driver_id']]);
+            $old_pump_driver = $stmt->fetch();
+            $old_pump_driver_name = $old_pump_driver['name'] ?? 'Unknown';
+        }
+
+        if ($old_record['mixer_car_id']) {
+            $stmt = $pdo->prepare("SELECT name FROM cars WHERE id = ?");
+            $stmt->execute([$old_record['mixer_car_id']]);
+            $old_mixer_car = $stmt->fetch();
+            $old_mixer_car_name = $old_mixer_car['name'] ?? 'Unknown';
+        }
+
+        if ($old_record['mixer_driver_id']) {
+            $stmt = $pdo->prepare("SELECT name FROM drivers WHERE id = ?");
+            $stmt->execute([$old_record['mixer_driver_id']]);
+            $old_mixer_driver = $stmt->fetch();
+            $old_mixer_driver_name = $old_mixer_driver['name'] ?? 'Unknown';
+        }
+
         $old_values = [
             'receipt_number' => $old_record['receipt_number'],
             'customer_id' => $old_record['customer_id'],
+            'customer_name' => $old_customer_name,
             'location' => $old_record['location'],
             'meter_amount' => $old_record['meter_amount'],
             'formulas_id' => $old_record['formulas_id'],
+            'formula_name' => $old_formula_name,
             'pump_car_id' => $old_record['pump_car_id'],
+            'pump_car_name' => $old_pump_car_name,
             'pump_driver_id' => $old_record['pump_driver_id'],
+            'pump_driver_name' => $old_pump_driver_name,
             'mixer_car_id' => $old_record['mixer_car_id'],
+            'mixer_car_name' => $old_mixer_car_name,
             'mixer_driver_id' => $old_record['mixer_driver_id'],
+            'mixer_driver_name' => $old_mixer_driver_name,
             'receiver_name' => $old_record['receiver_name']
         ];
 
