@@ -76,26 +76,19 @@ function loadEditUsdRate() {
     $.ajax({
         url: '../process/purchase_materilas/get_usd_rate.php',
         type: 'GET',
-        success: function(response) {
-            try {
-                const result = JSON.parse(response);
-                if (result.success) {
-                    $('#edit_usd_to_iqd_rate').val(result.rate);
-                    // Recalculate totals if there are any existing values
-                    calculateEditGrandTotal();
-                } else {
-                    // Use default rate if API fails
-                    if (result.default_rate) {
-                        $('#edit_usd_to_iqd_rate').val(result.default_rate);
-                        calculateEditGrandTotal();
-                    }
-                    console.log('Error loading USD rate: ' + result.error);
-                }
-            } catch (e) {
-                console.error('Error parsing USD rate response:', e);
-                // Use default rate if parsing fails
-                $('#edit_usd_to_iqd_rate').val(139250);
+        dataType: 'json',
+        success: function(result) {
+            if (result.success) {
+                $('#edit_usd_to_iqd_rate').val(result.rate);
+                // Recalculate totals if there are any existing values
                 calculateEditGrandTotal();
+            } else {
+                // Use default rate if API fails
+                if (result.default_rate) {
+                    $('#edit_usd_to_iqd_rate').val(result.default_rate);
+                    calculateEditGrandTotal();
+                }
+                console.log('Error loading USD rate: ' + result.error);
             }
         },
         error: function(xhr, status, error) {
@@ -120,32 +113,21 @@ function loadPurchaseMaterialsTable() {
     $.ajax({
         url: '../process/purchase_materilas/select_purchase.php',
         type: 'GET',
+        dataType: 'json',
         data: {
             filter_from: filterFrom,
             filter_to: filterTo
         },
-        success: function(response) {
-            try {
-                const result = JSON.parse(response);
-                
-                if (result.success) {
-                    renderPurchaseMaterialsTable(result.data);
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'هەڵە',
-                        text: result.error || 'هەڵەیەک ڕوویدا',
-                        confirmButtonText: 'باشە'
-                    });
-                }
-            } catch (e) {
+        success: function(result) {
+            if (result.success) {
+                renderPurchaseMaterialsTable(result.data);
+            } else {
                 Swal.fire({
                     icon: 'error',
                     title: 'هەڵە',
-                    text: 'هەڵەیەک لە وەڵامەکەدا هەیە',
+                    text: result.error || 'هەڵەیەک ڕوویدا',
                     confirmButtonText: 'باشە'
                 });
-                console.error('Response:', response);
             }
         },
         error: function(xhr, status, error) {

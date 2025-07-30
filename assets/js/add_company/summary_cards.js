@@ -16,9 +16,9 @@ function loadSummaryCardsData() {
         success: function(response) {
             if (response.success) {
                 // Update summary cards
-                $('#total_debt').text('$' + response.data.total_debt.toLocaleString());
-                $('#total_companies').text(response.data.total_companies);
-                $('#companies_with_debt').text(response.data.companies_with_debt);
+                $('#total_debt').text('$' + response.summary.total_debt_usd.toLocaleString());
+                $('#total_companies').text(response.summary.total_companies);
+                $('#companies_with_debt').text(response.summary.companies_with_debt);
             } else {
                 console.error('Error loading summary data:', response.message);
                 // Set default values
@@ -31,8 +31,8 @@ function loadSummaryCardsData() {
             console.error('AJAX Error:', error);
             // Set default values on error
             $('#total_debt').text('$0');
-            $('#total_companies').text('0');
-            $('#companies_with_debt').text('0');
+                $('#total_companies').text('0');
+                $('#companies_with_debt').text('0');
         }
     });
 } 

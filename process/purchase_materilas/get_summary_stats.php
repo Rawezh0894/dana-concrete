@@ -9,12 +9,15 @@ try {
     $stmt = $pdo->query("SELECT COUNT(*) as total_purchases FROM purchase_materials");
     $total_purchases = $stmt->fetch(PDO::FETCH_ASSOC)['total_purchases'];
 
-    // Get total purchase value
+    // Get total purchase value (sum of USD and IQD values)
     $stmt = $pdo->query("
-        SELECT COALESCE(SUM(total_price), 0) as total_value 
+        SELECT 
+            COALESCE(SUM(total_price_usd), 0) as total_value_usd,
+            COALESCE(SUM(total_price_iqd), 0) as total_value_iqd
         FROM purchase_materials
     ");
-    $total_purchase_value = $stmt->fetch(PDO::FETCH_ASSOC)['total_value'];
+    $purchase_data = $stmt->fetch(PDO::FETCH_ASSOC);
+    $total_purchase_value = floatval($purchase_data['total_value_usd']) + floatval($purchase_data['total_value_iqd']);
 
     // Get total suppliers count
     $stmt = $pdo->query("

@@ -5354,3 +5354,57 @@
 )
 
 [30-Jul-2025 10:06:01 Europe/Berlin] Customer stats retrieved: Customer=32, Total Debt USD=464.03, Total Debt IQD=0, Sales Count=1
+[30-Jul-2025 10:30:05 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753864205
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 10:30:05 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[30-Jul-2025 10:30:10 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753864210
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 10:30:10 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[30-Jul-2025 10:30:21 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753864221
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 10:30:21 Europe/Berlin] Cars retrieved successfully: Count=15
+[30-Jul-2025 10:30:21 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753864221
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 10:30:21 Europe/Berlin] Employees retrieved successfully: Count=18
+[30-Jul-2025 10:30:24 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753864224
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 10:30:24 Europe/Berlin] Cars retrieved successfully: Count=15
+[30-Jul-2025 10:30:24 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1753864224
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[30-Jul-2025 10:30:24 Europe/Berlin] Employees retrieved successfully: Count=18

@@ -31,6 +31,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             return res.json();
         })
+        .then(usdData => {
+            console.log('USD API response:', usdData); // Debug log
+            return usdData;
+        })
         .catch(error => {
             console.warn('USD rate fetch failed, using default:', error);
             return { value: 139250 };
@@ -60,8 +64,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         return;
                     }
                     
-                    // Get USD rate
-                    const usdRate = usdData.success ? usdData.rate : usdData.default_rate || 139250;
+                    // Get USD rate - fix the property name to match API response
+                    let usdRate = 139250; // Default fallback
+                    if (usdData && usdData.value && !isNaN(usdData.value)) {
+                        usdRate = parseFloat(usdData.value);
+                    } else if (usdData && usdData.rate && !isNaN(usdData.rate)) {
+                        usdRate = parseFloat(usdData.rate);
+                    }
+                    console.log('Final USD rate used:', usdRate); // Debug log
                     
                     // Render summary cards with USD rate as first card
                     const cards = [
