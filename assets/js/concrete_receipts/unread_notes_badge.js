@@ -87,6 +87,8 @@ function playNotificationSound() {
         return;
     }
     
+
+    
     // Check if audio is loaded
     if (audio.readyState < 2) {
         console.log('🔄 Audio not loaded yet, trying to load...');
@@ -111,13 +113,17 @@ function playNotificationSound() {
                 console.log('Error name:', error.name);
                 console.log('Error message:', error.message);
                 
-                // Try alternative approach
-                console.log('🔄 Trying alternative approach...');
-                audio.muted = false;
-                audio.volume = 1;
-                audio.play().catch(e => {
-                    console.error('❌ Alternative approach also failed:', e);
-                });
+                // Only try alternative approach if it's not a user interaction error
+                if (error.name !== 'NotAllowedError') {
+                    console.log('🔄 Trying alternative approach...');
+                    audio.muted = false;
+                    audio.volume = 1;
+                    audio.play().catch(e => {
+                        console.error('❌ Alternative approach also failed:', e);
+                    });
+                } else {
+                    console.log('ℹ️ Skipping alternative approach due to user interaction requirement');
+                }
             });
     } else {
         console.log('⚠️ Audio play() returned undefined');
@@ -138,12 +144,11 @@ function updateUnreadNotesBadge() {
                     badge.textContent = count;
                     badge.style.display = 'inline';
                     
-                                    // Play sound if count increased (new note added)
-                if (count > previousCount) {
-                    console.log('📈 Note count increased, playing notification sound...');
-                    forceEnableAudio();
-                    playNotificationSound();
-                }
+                    // Play sound if count increased (new note added) AND user has interacted
+                    if (count > previousCount && userHasInteracted) {
+                        console.log('📈 Note count increased, playing notification sound...');
+                        playNotificationSound();
+                    }
                 } else {
                     badge.style.display = 'none';
                 }
