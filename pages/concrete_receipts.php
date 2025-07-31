@@ -21,7 +21,6 @@ $customers = $pdo->query("SELECT id, name, mobile1 FROM customers")->fetchAll(PD
 $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO::FETCH_ASSOC);
 $cars = $pdo->query("SELECT id, name FROM cars")->fetchAll(PDO::FETCH_ASSOC);
 $employees = $pdo->query("SELECT id, name, role FROM employees")->fetchAll(PDO::FETCH_ASSOC);
-$all_drivers = $pdo->query("SELECT id, name FROM employees WHERE role = 'شۆفێر' ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 $drivers = array_filter($employees, function ($emp) {
   return $emp['role'] === 'شۆفێر'; });
 $mixer_cars = array_filter($cars, function ($car) {
@@ -93,7 +92,7 @@ $mixer_drivers = array_filter($employees, function ($emp) {
     </div>
     <!-- Summary Cards Row -->
     <div class="row mb-3" id="concrete-receipts-summary">
-      <div class="col-md-2 mb-2">
+      <div class="col-md-4 mb-2">
         <div class="card text-center shadow  card-gradient-info card-animate-hover">
           <div class="card-body">
             <i class="fas fa-file-alt card-icon"></i>
@@ -103,7 +102,7 @@ $mixer_drivers = array_filter($employees, function ($emp) {
           </div>
         </div>
       </div>
-      <div class="col-md-2 mb-2">
+      <div class="col-md-4 mb-2">
         <div class="card text-center shadow  card-gradient-success card-animate-hover">
           <div class="card-body">
             <i class="fas fa-cube card-icon"></i>
@@ -113,7 +112,7 @@ $mixer_drivers = array_filter($employees, function ($emp) {
           </div>
         </div>
       </div>
-      <div class="col-md-2 mb-2">
+      <div class="col-md-4 mb-2">
         <div class="card text-center shadow  card-gradient-warning card-animate-hover">
           <div class="card-body">
             <i class="fas fa-users card-icon"></i>
@@ -123,30 +122,10 @@ $mixer_drivers = array_filter($employees, function ($emp) {
           </div>
         </div>
       </div>
-      <div class="col-md-3 mb-2">
-        <div class="card text-center shadow  card-gradient-purple card-animate-hover">
-          <div class="card-body">
-            <i class="fas fa-truck card-icon"></i>
-            <h6 class="card-title">کۆی کاروان حیسابی شۆفێران</h6>
-            <div class="fs-4 fw-bold" id="summary_total_driver_trips">0</div>
-            <small class="text-light">کۆی کاروان حیسابی هەر شۆفێرێک</small>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-3 mb-2">
-        <div class="card text-center shadow  card-gradient-teal card-animate-hover">
-          <div class="card-body">
-            <i class="fas fa-route card-icon"></i>
-            <h6 class="card-title">کۆی مەتر سێجای شۆفێران</h6>
-            <div class="fs-4 fw-bold" id="summary_total_driver_meters">0</div>
-            <small class="text-light">کۆی مەتر سێجای هەر شۆفێرێک</small>
-          </div>
-        </div>
-      </div>
     </div>
     <!-- Filter Row -->
     <div class="row g-2 mb-3 " id="concrete-receipts-filters">
-      <div class="col-md-2">
+      <div class="col-md-3">
         <select class="form-select" id="filter_customer_id" data-placeholder="کڕیار: هەموو">
           <option value=""></option>
           <?php foreach ($customers as $c): ?>
@@ -154,7 +133,7 @@ $mixer_drivers = array_filter($employees, function ($emp) {
           <?php endforeach; ?>
         </select>
       </div>
-      <div class="col-md-2">
+      <div class="col-md-3">
         <input type="text" class="form-control" id="filter_location" placeholder="شوێن...">
       </div>
       <div class="col-md-2">
@@ -162,14 +141,6 @@ $mixer_drivers = array_filter($employees, function ($emp) {
           <option value=""></option>
           <?php foreach ($formulas as $f): ?>
             <option value="<?= $f['id'] ?>"><?= htmlspecialchars($f['name']) ?></option>
-          <?php endforeach; ?>
-        </select>
-      </div>
-      <div class="col-md-2">
-        <select class="form-select" id="filter_driver_id" data-placeholder="شۆفێر: هەموو">
-          <option value=""></option>
-          <?php foreach ($all_drivers as $driver): ?>
-            <option value="<?= $driver['id'] ?>"><?= htmlspecialchars($driver['name']) ?></option>
           <?php endforeach; ?>
         </select>
       </div>

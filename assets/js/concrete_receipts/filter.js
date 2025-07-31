@@ -4,7 +4,6 @@ $(document).ready(function() {
       customer_id: $('#filter_customer_id').val(),
       location: $('#filter_location').val(),
       formulas_id: $('#filter_formulas_id').val(),
-      driver_id: $('#filter_driver_id').val(),
       date_from: $('#filter_date_from').val(),
       date_to: $('#filter_date_to').val()
     };
@@ -12,7 +11,6 @@ $(document).ready(function() {
 
   function loadFilteredReceipts() {
     const filters = getFilters();
-    console.log('Sending filters:', filters); // Debug log
     $.ajax({
       url: '../process/concrete_receipts/select_concrete_receipts.php',
       method: 'GET',
@@ -73,7 +71,7 @@ $(document).ready(function() {
   }
 
   // Bind filter events
-  $('#filter_customer_id, #filter_formulas_id, #filter_driver_id').on('change', loadFilteredReceipts);
+  $('#filter_customer_id, #filter_formulas_id').on('change', loadFilteredReceipts);
   $('#filter_location').on('input', loadFilteredReceipts);
   $('#filter_date_from, #filter_date_to').on('change', loadFilteredReceipts);
 
@@ -116,7 +114,6 @@ $(document).ready(function() {
     $('#filter_customer_id').val('');
     $('#filter_location').val('');
     $('#filter_formulas_id').val('');
-    $('#filter_driver_id').val('');
     $('#filter_date_from').val('');
     $('#filter_date_to').val('');
     // Remove highlights
@@ -146,26 +143,6 @@ $(document).ready(function() {
     // Update total customers
     const totalCustomers = summary && summary.total_customers !== undefined ? summary.total_customers : 0;
     $('#summary_total_customers').text(totalCustomers);
-    
-    // Check if any filters are applied
-    const filters = getFilters();
-    const hasFilters = filters.customer_id || filters.location || filters.formulas_id || filters.driver_id || filters.date_from || filters.date_to;
-    
-    // Update total driver trips - only show when filters are applied
-    if (hasFilters) {
-      const totalDriverTrips = summary && summary.total_driver_trips !== undefined ? summary.total_driver_trips : 0;
-      $('#summary_total_driver_trips').text(totalDriverTrips);
-    } else {
-      $('#summary_total_driver_trips').text('-');
-    }
-    
-    // Update total driver meters - only show when filters are applied
-    if (hasFilters) {
-      const totalDriverMeters = summary && summary.total_driver_meters !== undefined ? summary.total_driver_meters : 0;
-      $('#summary_total_driver_meters').text(totalDriverMeters + ' m³');
-    } else {
-      $('#summary_total_driver_meters').text('-');
-    }
   }
 
   // On page load, fetch and show the real summary values
