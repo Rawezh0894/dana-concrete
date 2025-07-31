@@ -98,6 +98,11 @@ $mixer_drivers = array_filter($employees, function ($emp) {
           <button class="btn" data-bs-toggle="modal" data-bs-target="#addConcreteReceiptModal"
             style="background: var(--seafoam-green); color:white; font-weight: bold;">+ زیادکردنی پسوڵە</button>
         <?php endif; ?>
+        
+        <!-- Test Sound Button (for debugging) -->
+        <button class="btn btn-warning" onclick="testNotificationSound()" style="font-weight: bold;">
+          <i class="fas fa-volume-up me-1"></i>تاقیکردنەوەی زەنگ
+        </button>
       </div>
     </div>
     <!-- Summary Cards Row -->

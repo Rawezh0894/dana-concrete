@@ -1,13 +1,96 @@
+// Function to check browser audio capabilities
+function checkBrowserAudioSupport() {
+    console.log('Checking browser audio support...');
+    
+    // Check if HTML5 Audio is supported
+    if (typeof Audio !== 'undefined') {
+        console.log('✅ HTML5 Audio is supported');
+    } else {
+        console.error('❌ HTML5 Audio is not supported');
+    }
+    
+    // Check if Web Audio API is supported
+    if (typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined') {
+        console.log('✅ Web Audio API is supported');
+    } else {
+        console.log('⚠️ Web Audio API is not supported');
+    }
+    
+    // Check user interaction requirement
+    console.log('ℹ️ Note: Audio playback may require user interaction in some browsers');
+}
+
+// Function to check if audio file exists
+function checkAudioFile() {
+    const audio = document.getElementById('notificationSound');
+    if (!audio) {
+        console.error('Audio element not found!');
+        return;
+    }
+    
+    console.log('Checking audio file...');
+    console.log('Audio src:', audio.src);
+    
+    // Try to fetch the audio file
+    fetch(audio.src)
+        .then(response => {
+            if (response.ok) {
+                console.log('✅ Audio file exists and is accessible');
+                console.log('File size:', response.headers.get('content-length'), 'bytes');
+            } else {
+                console.error('❌ Audio file not found or not accessible');
+                console.log('Response status:', response.status);
+            }
+        })
+        .catch(error => {
+            console.error('❌ Error checking audio file:', error);
+        });
+}
+
 // Function to play notification sound
 function playNotificationSound() {
+    console.log('Attempting to play notification sound...');
     const audio = document.getElementById('notificationSound');
-    if (audio) {
-        // Reset audio to beginning
-        audio.currentTime = 0;
-        // Play the sound
-        audio.play().catch(error => {
-            console.log('Could not play notification sound:', error);
-        });
+    
+    if (!audio) {
+        console.error('Audio element not found!');
+        return;
+    }
+    
+    console.log('Audio element found:', audio);
+    console.log('Audio readyState:', audio.readyState);
+    console.log('Audio src:', audio.src);
+    
+    // Check if audio is loaded
+    if (audio.readyState < 2) {
+        console.log('Audio not loaded yet, trying to load...');
+        audio.load();
+    }
+    
+    // Reset audio to beginning
+    audio.currentTime = 0;
+    
+    // Play the sound
+    const playPromise = audio.play();
+    
+    if (playPromise !== undefined) {
+        playPromise
+            .then(() => {
+                console.log('Notification sound played successfully!');
+            })
+            .catch(error => {
+                console.error('Could not play notification sound:', error);
+                console.log('Error name:', error.name);
+                console.log('Error message:', error.message);
+                
+                // Try alternative approach
+                console.log('Trying alternative approach...');
+                audio.muted = false;
+                audio.volume = 1;
+                audio.play().catch(e => {
+                    console.error('Alternative approach also failed:', e);
+                });
+            });
     }
 }
 
@@ -43,6 +126,12 @@ function updateUnreadNotesBadge() {
 document.addEventListener('DOMContentLoaded', function() {
     updateUnreadNotesBadge();
     
+    // Check browser audio support
+    checkBrowserAudioSupport();
+    
+    // Check audio file on page load
+    checkAudioFile();
+    
     // Update badge every 30 seconds
     setInterval(updateUnreadNotesBadge, 30000);
 });
@@ -74,4 +163,12 @@ document.addEventListener('noteAddedWithSound', function() {
 
 // Export functions for manual updates
 window.updateUnreadNotesBadge = updateUnreadNotesBadge;
-window.playNotificationSound = playNotificationSound; 
+window.playNotificationSound = playNotificationSound;
+
+// Test function for debugging
+window.testNotificationSound = function() {
+    console.log('Testing notification sound...');
+    checkBrowserAudioSupport();
+    checkAudioFile();
+    playNotificationSound();
+}; 
