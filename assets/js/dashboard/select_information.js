@@ -127,16 +127,23 @@ document.addEventListener('DOMContentLoaded', function() {
                         `${amountInTons.toFixed(1)}` : 
                         `${amountInTons.toFixed(2)}`;
                     
+                    // Calculate total value (average_price * amount)
+                    const totalValue = item.average_price_per_kg * item.amount;
+                    
                     const stockGradient = stockGradients[index % stockGradients.length];
                     stockHtml += `<div class="col-md-3 col-sm-6 mb-3">
                         <div class="card text-center shadow ${stockGradient} card-animate-hover">
-                                                    <div class="card-body">
-                            <i class="fas fa-boxes card-icon"></i>
-                            <h6 class="card-title text-white">${item.name}</h6>
-                            <div class="fs-4 fw-bold text-white">${amountText} طەن</div>
-                            <small class="text-white">${item.type} - ${item.material_type}</small>
+                            <div class="card-body">
+                                <i class="fas fa-boxes card-icon"></i>
+                                <h6 class="card-title text-white">${item.name}</h6>
+                                <div class="fs-4 fw-bold text-white">${amountText} طەن</div>
+                                <small class="text-white">${item.type} - ${item.material_type}</small>
                                 ${window.userPermissions && window.userPermissions.canViewDashboardPrices ? 
-                                    `<div class="mt-2"><small class="text-white">${formatPrice(item.average_price_per_kg, item.price_currency)}/کگم</small></div>` : 
+                                    `<div class="mt-2">
+                                        <small class="text-white">${formatPrice(item.average_price_per_kg, item.price_currency)}/کگم</small>
+                                        <br>
+                                        <small class="text-white" style="font-weight: bold;">کۆی نرخ: ${formatPrice(totalValue, item.price_currency)}</small>
+                                    </div>` : 
                                     ''
                                 }
                             </div>
