@@ -1,28 +1,69 @@
 // Function to fetch and update USD exchange rate display
 async function updateUsdRateDisplay() {
+    const usdRateElement = document.getElementById('usdExchangeRate');
+    const refreshBtn = document.getElementById('refreshUsdRate');
+    const refreshIcon = refreshBtn ? refreshBtn.querySelector('i') : null;
+    
+    // Show loading state
+    if (usdRateElement) {
+        usdRateElement.textContent = 'جێبەجێکردن...';
+    }
+    if (refreshBtn && refreshIcon) {
+        refreshIcon.classList.add('fa-spin');
+        refreshBtn.disabled = true;
+    }
+    
     try {
         const response = await fetch('../process/other_expenses/get_usd_rate.php');
         const data = await response.json();
         
-        const usdRateElement = document.getElementById('usdExchangeRate');
         if (usdRateElement) {
             if (data.success && data.rate) {
-                usdRateElement.textContent = data.rate + ' د.ع';
+                usdRateElement.textContent = data.rate.toLocaleString() + ' د.ع';
                 console.log('USD rate display updated:', data.rate);
+                
+                // Show success notification
+                Swal.fire({
+                    icon: 'success',
+                    title: 'نرخی دۆلار نوێکرایەوە',
+                    text: `نرخی ١٠٠ دۆلار: ${data.rate.toLocaleString()} دینار`,
+                    timer: 2000,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });
             } else {
                 console.warn('Failed to fetch USD rate for display:', data.error || 'Unknown error');
                 if (data.default_rate) {
-                    usdRateElement.textContent = data.default_rate + ' د.ع';
+                    usdRateElement.textContent = data.default_rate.toLocaleString() + ' د.ع';
                     console.log('Using default USD rate for display:', data.default_rate);
+                } else {
+                    usdRateElement.textContent = '139250 د.ع';
                 }
             }
         }
     } catch (error) {
         console.error('Error updating USD rate display:', error);
-        const usdRateElement = document.getElementById('usdExchangeRate');
         if (usdRateElement) {
             usdRateElement.textContent = '139250 د.ع';
             console.log('Using fallback USD rate for display: 139250');
+        }
+        
+        // Show error notification
+        Swal.fire({
+            icon: 'error',
+            title: 'هەڵە لە وەرگرتنی نرخی دۆلار',
+            text: 'نەتوانرا نرخی دۆلار وەربگیرێت',
+            timer: 3000,
+            showConfirmButton: false,
+            toast: true,
+            position: 'top-end'
+        });
+    } finally {
+        // Remove loading state
+        if (refreshBtn && refreshIcon) {
+            refreshIcon.classList.remove('fa-spin');
+            refreshBtn.disabled = false;
         }
     }
 }
@@ -30,6 +71,14 @@ async function updateUsdRateDisplay() {
 document.addEventListener('DOMContentLoaded', function() {
     // Update USD rate display when page loads
     updateUsdRateDisplay();
+    
+    // Add refresh button event listener
+    const refreshUsdRateBtn = document.getElementById('refreshUsdRate');
+    if (refreshUsdRateBtn) {
+        refreshUsdRateBtn.addEventListener('click', function() {
+            updateUsdRateDisplay();
+        });
+    }
     
     const currencyType = document.getElementById('currency_type');
     const amountIqd = document.getElementById('amount_iqd');

@@ -213,6 +213,9 @@ if (!isset($_SESSION['user_id'])) {
               <h6 class="card-title">نرخی دۆلار</h6>
               <div id="usdExchangeRate" class="card-value">0 د.ع</div>
               <small>نرخی 100 دۆلار بە دینار</small>
+              <button class="btn btn-sm btn-outline-light mt-2" id="refreshUsdRate" title="نوێکردنەوەی نرخی دۆلار">
+                <i class="fas fa-sync-alt"></i>
+              </button>
             </div>
           </div>
         </div>
