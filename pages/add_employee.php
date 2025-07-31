@@ -26,6 +26,7 @@ if (!hasPermission('view_employee')) {
     <link href="../assets/css/nav.css" rel="stylesheet">
     <link href="../assets/css/comon/table.css" rel="stylesheet">
     <link href="../assets/css/comon/style.css" rel="stylesheet">
+    <link href="../assets/css/comon/cards.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 <body dir="rtl">
@@ -35,6 +36,30 @@ if (!hasPermission('view_employee')) {
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">کارمەندەکان</h2>
         <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addEmployeeModal" style="background: var(--seafoam-green); font-weight: bold;">+ زیادکردنی کارمەند</button>
+    </div>
+    
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-6 mb-3">
+            <div class="card text-center shadow card-gradient-info card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-users card-icon"></i>
+                    <h6 class="card-title">کۆی ژمارەی کارمەندان</h6>
+                    <div class="fs-4 fw-bold" id="total_employees">0</div>
+                    <small class="text-light">ژمارەی کارمەندان</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="card text-center shadow card-gradient-success card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-money-bill-wave card-icon"></i>
+                    <h6 class="card-title">کۆی مووچەی کارمەندان</h6>
+                    <div class="fs-4 fw-bold" id="total_salary">0</div>
+                    <small class="text-light">دیناری عێراقی</small>
+                </div>
+            </div>
+        </div>
     </div>
     <div class="table-responsive">
         <table class="table table-bordered table-hover align-middle text-center" id="employeeTable">

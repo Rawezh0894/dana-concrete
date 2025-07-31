@@ -2,15 +2,28 @@ $(function() {
     function formatSalary(salary) {
         return Number(salary).toLocaleString('en-US') + ' د.ع';
     }
+    
+    function updateSummaryCards(summary) {
+        $('#total_employees').text(summary.total_employees.toLocaleString());
+        $('#total_salary').text(formatSalary(summary.total_salary));
+    }
+    
     function loadEmployees() {
         TableController.showLoading('#employeeTable', ['#', 'name', 'mobile', 'role', 'salary', 'actions']);
         $.get('../process/employee/select_employee.php', function(res) {
-            if (!res || !Array.isArray(res)) {
+            if (!res || !res.employees || !Array.isArray(res.employees)) {
                 TableController.render('#employeeTable', [], ['#', 'name', 'mobile', 'role', 'salary', 'actions']);
+                updateSummaryCards({ total_employees: 0, total_salary: 0 });
                 return;
             }
+            
+            // Update summary cards
+            if (res.summary) {
+                updateSummaryCards(res.summary);
+            }
+            
             // Add actions column (edit/delete buttons) and format salary
-            res.forEach(emp => {
+            res.employees.forEach(emp => {
                 const rawSalary = emp.salary;
                 emp.salary = formatSalary(emp.salary);
                 emp.actions = `
@@ -18,7 +31,7 @@ $(function() {
                     <button class="btn btn-sm btn-danger delete-employee" data-id="${emp.id}"><i class="fa fa-trash"></i></button>
                 `;
             });
-            TableController.renderWithPagination('#employeeTable', res, ['#', 'name', 'mobile', 'role', 'salary', 'actions']);
+            TableController.renderWithPagination('#employeeTable', res.employees, ['#', 'name', 'mobile', 'role', 'salary', 'actions']);
         }, 'json');
     }
     loadEmployees();

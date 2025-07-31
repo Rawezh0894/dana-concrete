@@ -27,11 +27,22 @@ if (!hasPermission('view_employee')) {
 }
 
 try {
+    // Get employees data
     $stmt = $pdo->query('SELECT id, name, mobile, role, salary FROM employees ORDER BY id DESC');
     $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
+    // Get summary statistics
+    $summary_stmt = $pdo->query('SELECT COUNT(*) as total_employees, SUM(salary) as total_salary FROM employees');
+    $summary = $summary_stmt->fetch(PDO::FETCH_ASSOC);
+    
     error_log('Employees retrieved successfully: Count=' . count($employees));
-    echo json_encode($employees);
+    echo json_encode([
+        'employees' => $employees,
+        'summary' => [
+            'total_employees' => (int)($summary['total_employees'] ?? 0),
+            'total_salary' => (float)($summary['total_salary'] ?? 0)
+        ]
+    ]);
     
 } catch (PDOException $e) {
     error_log('PDOException in select_employee.php: ' . $e->getMessage());
