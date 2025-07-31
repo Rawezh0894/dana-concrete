@@ -67,6 +67,12 @@ $mixer_drivers = array_filter($employees, function ($emp) {
 <body dir="rtl">
   <?php include '../includes/navbar.php'; ?>
   <?php include '../includes/sidebar.php'; ?>
+  
+  <!-- Notification Sound -->
+  <audio id="notificationSound" preload="auto">
+    <source src="../assets/sounds/notification.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
   <div class="container-fluid py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
 

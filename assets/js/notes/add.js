@@ -119,6 +119,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (window.updateUnreadNotesBadge) {
                     window.updateUnreadNotesBadge();
                 }
+                
+                // Play notification sound if we're on the concrete receipts page
+                if (window.playNotificationSound) {
+                    setTimeout(() => {
+                        window.playNotificationSound();
+                    }, 500); // Small delay to ensure badge is updated first
+                }
+                
+                // Dispatch custom event for real-time sound notification
+                document.dispatchEvent(new CustomEvent('noteAddedWithSound'));
             } else {
                 showAlert('error', result.error || 'هەڵەیەک ڕویدا');
             }

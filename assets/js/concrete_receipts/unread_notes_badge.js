@@ -1,3 +1,16 @@
+// Function to play notification sound
+function playNotificationSound() {
+    const audio = document.getElementById('notificationSound');
+    if (audio) {
+        // Reset audio to beginning
+        audio.currentTime = 0;
+        // Play the sound
+        audio.play().catch(error => {
+            console.log('Could not play notification sound:', error);
+        });
+    }
+}
+
 // Function to update unread notes badge
 function updateUnreadNotesBadge() {
     fetch('../process/notes/get_unread_count.php')
@@ -6,10 +19,16 @@ function updateUnreadNotesBadge() {
             if (data.success) {
                 const badge = document.getElementById('unread-notes-badge');
                 const count = data.unread_count;
+                const previousCount = parseInt(badge.textContent) || 0;
                 
                 if (count > 0) {
                     badge.textContent = count;
                     badge.style.display = 'inline';
+                    
+                    // Play sound if count increased (new note added)
+                    if (count > previousCount) {
+                        playNotificationSound();
+                    }
                 } else {
                     badge.style.display = 'none';
                 }
@@ -49,5 +68,10 @@ document.addEventListener('noteUpdated', function() {
     updateUnreadNotesBadge();
 });
 
-// Export function for manual updates
-window.updateUnreadNotesBadge = updateUnreadNotesBadge; 
+document.addEventListener('noteAddedWithSound', function() {
+    playNotificationSound();
+});
+
+// Export functions for manual updates
+window.updateUnreadNotesBadge = updateUnreadNotesBadge;
+window.playNotificationSound = playNotificationSound; 
