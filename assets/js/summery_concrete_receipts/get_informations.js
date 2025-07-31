@@ -77,10 +77,11 @@ function updateCustomerSummaryTable(customerSummary) {
     tbody.empty();
     
     // Calculate colspan based on permissions
-    const baseCols = 6; // #, customer name, receipt count, total meter, payment status, formulas
+    const baseCols = 5; // #, customer name, receipt count, total meter, formulas
     const priceCols = window.userPermissions.canViewPrices ? 2 : 0; // total price, notes
+    const paymentCols = 1; // payment status
     const actionCols = 1; // actions
-    const totalCols = baseCols + priceCols + actionCols;
+    const totalCols = baseCols + priceCols + paymentCols + actionCols;
     
     if (customerSummary.length === 0) {
         tbody.append(`
@@ -134,9 +135,6 @@ function updateCustomerSummaryTable(customerSummary) {
                 <td class="text-center">
                     <strong>${customer.total_meter}</strong> م³
                 </td>
-                <td class="text-center">
-                    ${paymentStatus}
-                </td>
         `;
         
         // Add price-related columns only if user has permission
@@ -152,6 +150,9 @@ function updateCustomerSummaryTable(customerSummary) {
         }
         
         row += `
+                <td class="text-center">
+                    ${paymentStatus}
+                </td>
                 <td>
                     ${formulasHtml}
                 </td>
