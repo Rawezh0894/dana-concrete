@@ -68,23 +68,11 @@ $mixer_drivers = array_filter($employees, function ($emp) {
   <?php include '../includes/navbar.php'; ?>
   <?php include '../includes/sidebar.php'; ?>
   
-  <!-- Notification Sound -->
-  <audio id="notificationSound" preload="auto">
-    <source src="../assets/sounds/notification.mp3" type="audio/mpeg">
-    Your browser does not support the audio element.
-  </audio>
+
   <div class="container-fluid py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
 
       <div class="d-flex gap-2">
-        <?php if (hasPermission('view_notes')): ?>
-          <a href="notes.php" class="btn position-relative" style="background: var(--kelly-green); color:white; font-weight: bold;">
-            <i class="fas fa-sticky-note me-1"></i>تێبینیەکان
-            <span id="unread-notes-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display: none;">
-              0
-            </span>
-          </a>
-        <?php endif; ?>
         <?php if (hasPermission('view_summery_concrete_receipts')): ?>
           <a href="summery_concrete_receipts.php" class="btn" style="background: var(--seafoam-green); color:white; font-weight: bold;">
             <i class="fas fa-chart-bar me-1"></i>پوختە
@@ -99,10 +87,7 @@ $mixer_drivers = array_filter($employees, function ($emp) {
             style="background: var(--seafoam-green); color:white; font-weight: bold;">+ زیادکردنی پسوڵە</button>
         <?php endif; ?>
         
-        <!-- Test Sound Button (for debugging) -->
-        <button class="btn btn-warning" onclick="testNotificationSound()" style="font-weight: bold;">
-          <i class="fas fa-volume-up me-1"></i>تاقیکردنەوەی زەنگ
-        </button>
+
       </div>
     </div>
     <!-- Summary Cards Row -->
@@ -473,7 +458,7 @@ $mixer_drivers = array_filter($employees, function ($emp) {
   <script src="../assets/js/concrete_receipts/delete_concrete_receipts.js"></script>
   <script src="../assets/js/concrete_receipts/update_concrete_receipts.js"></script>
   <script src="../assets/js/concrete_receipts/concrete_receipts_custom.js"></script>
-  <script src="../assets/js/concrete_receipts/unread_notes_badge.js"></script>
+
   <script>
     // Pass permissions to JavaScript
     window.userPermissions = {

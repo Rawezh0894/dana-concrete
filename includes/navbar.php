@@ -1,8 +1,15 @@
 <?php require_once '../config/permissions.php'; ?>
 <link href="../assets/css/variables.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 <link href="../assets/css/nav.css" rel="stylesheet">
 <link href="../assets/css/sidebar.css" rel="stylesheet">
+
+<!-- Global Notification Sound -->
+<audio id="notificationSound" preload="auto">
+  <source src="../assets/sounds/notification.mp3" type="audio/mpeg">
+  Your browser does not support the audio element.
+</audio>
 
 <nav class="navbar navbar-expand-lg sticky-top" style="background: var(--seafoam-green); border-radius: 2rem; box-shadow: 0 2px 16px 0 var(--spearmint, #94c973); margin: 1rem;">
   <div class="container-fluid d-flex align-items-center justify-content-between">
@@ -12,6 +19,16 @@
     </div>
     <!-- Center: User image and username with dropdown -->
     <div class="flex-grow-1 d-flex justify-content-end align-items-center gap-2 position-relative" id="userDropdownContainer">
+      <!-- Notes Badge -->
+      <?php if (hasPermission('view_notes')): ?>
+        <a href="../pages/notes.php" class="btn position-relative" style="background: var(--kelly-green); color:white; font-weight: bold; border-radius: 1rem; padding: 0.5rem 1rem;">
+          <i class="fas fa-sticky-note me-1"></i>تێبینیەکان
+          <span id="unread-notes-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display: none;">
+            0
+          </span>
+        </a>
+      <?php endif; ?>
+      
       <span style="color: #fff; font-weight: bold; font-size: 1rem; cursor: pointer;" id="userDropdownToggle">
             <?php echo $_SESSION['username'] ?? 'User'; ?>
           </span>
@@ -30,6 +47,7 @@
 </nav>
 <script src="../assets/js/nav/nav.js"></script>
 <script src="../assets/js/nav/sidebar.js"></script>
+<script src="../assets/js/global_notifications.js"></script>
 <script>
 // User dropdown logic
 (function() {
