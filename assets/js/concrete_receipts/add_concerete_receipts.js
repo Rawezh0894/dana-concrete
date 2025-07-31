@@ -70,13 +70,19 @@ $(document).ready(function() {
                                 }
                             });
                             localStorage.setItem(storageKey, JSON.stringify(allData));
-                            window.open('../pages/central_receipts.php?id=' + data.id + '&auto_print=1', '_self');
+                            
+                            // Check if auto-print is requested (from notes page)
+                            if (window.autoPrintAfterCreation) {
+                                window.open('../pages/central_receipts.php?id=' + data.id + '&auto_print=1', '_self');
+                                window.autoPrintAfterCreation = false; // Reset flag
+                            } else {
+                                // Normal behavior - just close modal and reload
+                                $('#addConcreteReceiptForm')[0].reset();
+                                $('#addConcreteReceiptModal').modal('hide');
+                                if (window.reloadConcreteReceipts) window.reloadConcreteReceipts();
+                                if (window.reloadConcreteReceiptsSummary) window.reloadConcreteReceiptsSummary();
+                            }
                         }
-                        // Always reset form and close modal
-                        $('#addConcreteReceiptForm')[0].reset();
-                        $('#addConcreteReceiptModal').modal('hide');
-                        if (window.reloadConcreteReceipts) window.reloadConcreteReceipts();
-                        if (window.reloadConcreteReceiptsSummary) window.reloadConcreteReceiptsSummary();
                         // Do NOT clear localStorage here, it is handled above
                     }
                 });

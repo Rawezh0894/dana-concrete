@@ -478,6 +478,10 @@ $mixer_drivers = array_filter($employees, function ($emp) {
         // Fill form with data from URL parameters
         if (params.get('customer_id')) {
           document.getElementById('customer_id').value = params.get('customer_id');
+          // Trigger Select2 update for customer dropdown
+          setTimeout(() => {
+            $('#customer_id').trigger('change');
+          }, 100);
         }
         if (params.get('location')) {
           document.getElementById('location').value = params.get('location');
@@ -485,24 +489,43 @@ $mixer_drivers = array_filter($employees, function ($emp) {
         if (params.get('receiver_name')) {
           document.getElementById('receiver_name').value = params.get('receiver_name');
         }
-        // Note: meter_amount is intentionally not filled from notes to allow manual entry
-        // if (params.get('meter_amount')) {
-        //   document.getElementById('meter_amount').value = params.get('meter_amount');
-        // }
+        if (params.get('meter_amount')) {
+          document.getElementById('meter_amount').value = params.get('meter_amount');
+        }
         if (params.get('formula_id')) {
           document.getElementById('formulas_id').value = params.get('formula_id');
+          // Trigger Select2 update for formula dropdown
+          setTimeout(() => {
+            $('#formulas_id').trigger('change');
+          }, 100);
         }
         if (params.get('mixer_car_id')) {
           document.getElementById('mixer_car_id').value = params.get('mixer_car_id');
+          // Trigger Select2 update for mixer car dropdown
+          setTimeout(() => {
+            $('#mixer_car_id').trigger('change');
+          }, 100);
         }
         if (params.get('mixer_driver_id')) {
           document.getElementById('mixer_driver_id').value = params.get('mixer_driver_id');
+          // Trigger Select2 update for mixer driver dropdown
+          setTimeout(() => {
+            $('#mixer_driver_id').trigger('change');
+          }, 100);
         }
         if (params.get('pump_car_id')) {
           document.getElementById('pump_car_id').value = params.get('pump_car_id');
+          // Trigger Select2 update for pump car dropdown
+          setTimeout(() => {
+            $('#pump_car_id').trigger('change');
+          }, 100);
         }
         if (params.get('pump_driver_id')) {
           document.getElementById('pump_driver_id').value = params.get('pump_driver_id');
+          // Trigger Select2 update for pump driver dropdown
+          setTimeout(() => {
+            $('#pump_driver_id').trigger('change');
+          }, 100);
         }
         
         // Manually fetch and set the next receipt number
@@ -518,6 +541,11 @@ $mixer_drivers = array_filter($employees, function ($emp) {
           .catch(() => {
             document.getElementById('receipt_number').value = 'A-0001';
           });
+        
+        // Store auto-print flag for after form submission
+        if (params.get('auto_print') === '1') {
+          window.autoPrintAfterCreation = true;
+        }
       }
     });
   </script>
