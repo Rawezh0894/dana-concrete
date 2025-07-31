@@ -343,15 +343,8 @@ document.getElementById('clearFilterBtn')?.addEventListener('click', function() 
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    // Set default filter to tomorrow (بەیانی)
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const tomorrowFormatted = tomorrow.toISOString().split('T')[0];
-    document.getElementById('filter_from').value = tomorrowFormatted;
-    document.getElementById('filter_to').value = tomorrowFormatted;
-    
-    // Set tomorrow button as active by default
-    document.getElementById('filterTomorrow')?.classList.add('active');
+    // Set default filter to show unread notes
+    document.getElementById('filter_read').value = '0';
     
     // Initialize Select2 for filters if not already done
     if ($('#filter_customer').length > 0 && !$('#filter_customer').hasClass('select2-hidden-accessible')) {
@@ -360,6 +353,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if ($('#filter_read').length > 0 && !$('#filter_read').hasClass('select2-hidden-accessible')) {
         enableSelect2('#filter_read', 'body');
     }
+    
+    // Trigger change event to update Select2 display
+    $('#filter_read').val('0').trigger('change');
     
     loadNotes();
     
