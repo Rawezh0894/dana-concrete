@@ -2,125 +2,11 @@
 let userHasInteracted = false;
 let audioContext = null;
 let audioBuffer = null;
-let audioReadyNotificationShown = false;
-let audioEnabled = localStorage.getItem('audioNotificationsEnabled') !== 'false'; // Default to true
+let audioEnabled = true; // Always enabled by default
 
-// Function to toggle audio notifications
-function toggleAudioNotifications() {
-    audioEnabled = !audioEnabled;
-    localStorage.setItem('audioNotificationsEnabled', audioEnabled);
-    
-    const status = audioEnabled ? 'enabled' : 'disabled';
-    console.log(`🔊 Audio notifications ${status}`);
-    
-    // Update button status
-    updateAudioButtonStatus();
-    
-    // Show feedback to user
-    const message = audioEnabled ? 'زەنگەکان چالاک کراون' : 'زەنگەکان ناچالاک کراون';
-    showStatusMessage(message, audioEnabled ? 'success' : 'warning');
-}
 
-// Function to show status message
-function showStatusMessage(message, type = 'info') {
-    const colors = {
-        success: '#28a745',
-        warning: '#ffc107',
-        error: '#dc3545',
-        info: '#17a2b8'
-    };
-    
-    const notification = document.createElement('div');
-    notification.innerHTML = `
-        <div style="
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: ${colors[type]};
-            color: white;
-            padding: 10px 15px;
-            border-radius: 5px;
-            font-size: 14px;
-            z-index: 9999;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            animation: slideIn 0.3s ease-out;
-        ">
-            <i class="fas fa-${type === 'success' ? 'check' : type === 'warning' ? 'exclamation-triangle' : 'info'}-circle me-2"></i>
-            ${message}
-        </div>
-    `;
-    
-    document.body.appendChild(notification);
-    
-    // Remove notification after 3 seconds
-    setTimeout(() => {
-        if (notification.parentNode) {
-            notification.style.animation = 'slideOut 0.3s ease-out';
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.parentNode.removeChild(notification);
-                }
-            }, 300);
-        }
-    }, 3000);
-}
 
-// Function to show audio ready notification
-function showAudioReadyNotification() {
-    if (audioReadyNotificationShown) return;
-    
-    // Create a subtle notification
-    const notification = document.createElement('div');
-    notification.id = 'audio-ready-notification';
-    notification.innerHTML = `
-        <div style="
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #28a745;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 5px;
-            font-size: 14px;
-            z-index: 9999;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            animation: slideIn 0.3s ease-out;
-        ">
-            <i class="fas fa-volume-up me-2"></i>
-            زەنگەکە ئێستا دەکرێت بەکاربهێنرێت
-        </div>
-    `;
-    
-    // Add CSS animation
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        @keyframes slideOut {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(100%); opacity: 0; }
-        }
-    `;
-    document.head.appendChild(style);
-    
-    document.body.appendChild(notification);
-    
-    // Remove notification after 3 seconds
-    setTimeout(() => {
-        if (notification.parentNode) {
-            notification.style.animation = 'slideOut 0.3s ease-out';
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.parentNode.removeChild(notification);
-                }
-            }, 300);
-        }
-    }, 3000);
-    
-    audioReadyNotificationShown = true;
-}
+
 
 // Function to mark user interaction
 function markUserInteraction() {
@@ -133,9 +19,29 @@ function markUserInteraction() {
         initializeAudioContext();
     }
     
-    // Show notification that audio is ready
-    if (!audioReadyNotificationShown) {
-        showAudioReadyNotification();
+    // Try to resume audio context immediately
+    if (audioContext && audioContext.state === 'suspended') {
+        audioContext.resume().then(() => {
+            console.log('✅ Audio context resumed on user interaction');
+        }).catch(error => {
+            console.warn('⚠️ Could not resume audio context:', error);
+        });
+    }
+    
+    // Try to play a silent sound to unlock audio
+    try {
+        if (audioContext && audioContext.state === 'running') {
+            const silentOscillator = audioContext.createOscillator();
+            const silentGain = audioContext.createGain();
+            silentGain.gain.setValueAtTime(0, audioContext.currentTime);
+            silentOscillator.connect(silentGain);
+            silentGain.connect(audioContext.destination);
+            silentOscillator.start(audioContext.currentTime);
+            silentOscillator.stop(audioContext.currentTime + 0.001);
+            console.log('🔇 Silent sound played to unlock audio on user interaction');
+        }
+    } catch (error) {
+        console.warn('⚠️ Could not play silent sound on user interaction:', error);
     }
 }
 
@@ -221,6 +127,31 @@ function forceEnableAudio() {
     // Initialize audio context if not already done
     if (!audioContext) {
         initializeAudioContext();
+    }
+    
+    // Try to resume audio context immediately
+    if (audioContext && audioContext.state === 'suspended') {
+        audioContext.resume().then(() => {
+            console.log('✅ Audio context resumed successfully');
+        }).catch(error => {
+            console.warn('⚠️ Could not resume audio context:', error);
+        });
+    }
+    
+    // Try to play a silent sound to unlock audio
+    try {
+        if (audioContext && audioContext.state === 'running') {
+            const silentOscillator = audioContext.createOscillator();
+            const silentGain = audioContext.createGain();
+            silentGain.gain.setValueAtTime(0, audioContext.currentTime);
+            silentOscillator.connect(silentGain);
+            silentGain.connect(audioContext.destination);
+            silentOscillator.start(audioContext.currentTime);
+            silentOscillator.stop(audioContext.currentTime + 0.001);
+            console.log('🔇 Silent sound played to unlock audio');
+        }
+    } catch (error) {
+        console.warn('⚠️ Could not play silent sound:', error);
     }
 }
 
@@ -373,13 +304,6 @@ function playNotificationSoundHTML5() {
 function playNotificationSound() {
     console.log('🎵 Attempting to play notification sound...');
     console.log('User has interacted:', userHasInteracted);
-    console.log('Audio enabled:', audioEnabled);
-    
-    // Check if audio is enabled
-    if (!audioEnabled) {
-        console.log('🔇 Audio notifications are disabled');
-        return;
-    }
     
     // Check if user has interacted with the page
     if (!userHasInteracted) {
@@ -388,13 +312,29 @@ function playNotificationSound() {
         return;
     }
     
-    // Try Web Audio API first (more reliable)
-    if (playNotificationSoundWebAudio()) {
-        return;
+    // Ensure audio context is resumed
+    if (audioContext && audioContext.state === 'suspended') {
+        audioContext.resume().then(() => {
+            console.log('✅ Audio context resumed, now playing sound...');
+            // Try Web Audio API first (more reliable)
+            if (playNotificationSoundWebAudio()) {
+                return;
+            }
+            // Fallback to HTML5 Audio
+            playNotificationSoundHTML5();
+        }).catch(error => {
+            console.warn('⚠️ Could not resume audio context:', error);
+            // Try HTML5 Audio as fallback
+            playNotificationSoundHTML5();
+        });
+    } else {
+        // Try Web Audio API first (more reliable)
+        if (playNotificationSoundWebAudio()) {
+            return;
+        }
+        // Fallback to HTML5 Audio
+        playNotificationSoundHTML5();
     }
-    
-    // Fallback to HTML5 Audio
-    playNotificationSoundHTML5();
 }
 
 // Function to update unread notes badge
@@ -414,8 +354,18 @@ function updateUnreadNotesBadge() {
                     // Play sound if count increased (new note added)
                     if (count > previousCount) {
                         console.log('📈 Note count increased, playing notification sound...');
+                        // Force enable audio and play sound immediately
                         forceEnableAudio();
-                        playNotificationSound();
+                        // Try to play sound with multiple attempts
+                        setTimeout(() => {
+                            playNotificationSound();
+                        }, 50);
+                        setTimeout(() => {
+                            playNotificationSound();
+                        }, 200);
+                        setTimeout(() => {
+                            playNotificationSound();
+                        }, 500);
                     }
                 } else {
                     badge.style.display = 'none';
@@ -439,21 +389,48 @@ document.addEventListener('DOMContentLoaded', function() {
     // Check audio file on page load
     checkAudioFile();
     
-    // Update audio button status
-    updateAudioButtonStatus();
+    // Automatically enable audio on page load
+    forceEnableAudio();
     
-    // Add user interaction listeners
+    // Try to unlock audio immediately
+    setTimeout(() => {
+        forceEnableAudio();
+        if (audioContext && audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
+    }, 100);
+    
+    setTimeout(() => {
+        forceEnableAudio();
+        if (audioContext && audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
+    }, 1000);
+    
+    // Add user interaction listeners with immediate audio enable
     document.addEventListener('click', function(e) {
         console.log('🖱️ Click detected on:', e.target);
         markUserInteraction();
+        // Try to play a silent sound to unlock audio
+        if (audioContext && audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
     });
     document.addEventListener('keydown', function(e) {
         console.log('⌨️ Keydown detected');
         markUserInteraction();
+        // Try to play a silent sound to unlock audio
+        if (audioContext && audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
     });
     document.addEventListener('touchstart', function(e) {
         console.log('👆 Touch detected');
         markUserInteraction();
+        // Try to play a silent sound to unlock audio
+        if (audioContext && audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
     });
     
     console.log('✅ Event listeners added for user interaction');
@@ -461,27 +438,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Update badge every 10 seconds (reduced from 30 seconds)
     setInterval(updateUnreadNotesBadge, 10000);
 });
-
-// Function to update audio button status
-function updateAudioButtonStatus() {
-    const audioButtons = document.querySelectorAll('button[onclick*="toggleAudioNotifications"], button[onclick*="testNotificationSound"]');
-    audioButtons.forEach(button => {
-        if (button.onclick.toString().includes('toggleAudioNotifications')) {
-            const icon = button.querySelector('i');
-            const text = button.textContent;
-            
-            if (audioEnabled) {
-                icon.className = 'fas fa-bell me-1';
-                button.textContent = text.replace(/زەنگەکان.*/, 'زەنگەکان چالاکن');
-                button.className = button.className.replace('btn-secondary', 'btn-info');
-            } else {
-                icon.className = 'fas fa-bell-slash me-1';
-                button.textContent = text.replace(/زەنگەکان.*/, 'زەنگەکان ناچالاکن');
-                button.className = button.className.replace('btn-info', 'btn-secondary');
-            }
-        }
-    });
-}
 
 // Listen for custom events from other parts of the application
 document.addEventListener('noteAdded', function() {
@@ -510,9 +466,18 @@ document.addEventListener('noteUpdated', function() {
 
 document.addEventListener('noteAddedWithSound', function() {
     console.log('🔊 Note added with sound event received');
-    // Force enable audio and play sound
+    // Force enable audio and play sound immediately
     forceEnableAudio();
-    playNotificationSound();
+    // Try to play sound with multiple attempts
+    setTimeout(() => {
+        playNotificationSound();
+    }, 50);
+    setTimeout(() => {
+        playNotificationSound();
+    }, 200);
+    setTimeout(() => {
+        playNotificationSound();
+    }, 500);
 });
 
 // Export functions for manual updates
@@ -521,9 +486,6 @@ window.updateUnreadNotesBadge = updateUnreadNotesBadge;
 window.playNotificationSound = playNotificationSound;
 window.markUserInteraction = markUserInteraction;
 window.forceEnableAudio = forceEnableAudio;
-window.toggleAudioNotifications = toggleAudioNotifications;
-window.showStatusMessage = showStatusMessage;
-window.updateAudioButtonStatus = updateAudioButtonStatus;
 
 // Test function for debugging
 window.testNotificationSound = function() {
@@ -537,9 +499,13 @@ window.testNotificationSound = function() {
     console.log('🔧 Force enabling audio for test...');
     forceEnableAudio();
     
-    // Try to play sound after a short delay
+    // Try to play sound with multiple attempts
+    console.log('🎵 Attempting to play sound...');
+    playNotificationSound();
     setTimeout(() => {
-        console.log('🎵 Attempting to play sound after force enable...');
         playNotificationSound();
     }, 100);
+    setTimeout(() => {
+        playNotificationSound();
+    }, 300);
 }; 
