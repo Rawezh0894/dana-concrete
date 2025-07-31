@@ -40,7 +40,7 @@ if (!hasPermission('view_employee')) {
     
     <!-- Summary Cards -->
     <div class="row mb-4">
-        <div class="col-md-6 mb-3">
+        <div class="col-md-4 mb-3">
             <div class="card text-center shadow card-gradient-info card-animate-hover">
                 <div class="card-body">
                     <i class="fas fa-users card-icon"></i>
@@ -50,13 +50,26 @@ if (!hasPermission('view_employee')) {
                 </div>
             </div>
         </div>
-        <div class="col-md-6 mb-3">
+        <div class="col-md-4 mb-3">
             <div class="card text-center shadow card-gradient-success card-animate-hover">
                 <div class="card-body">
                     <i class="fas fa-money-bill-wave card-icon"></i>
                     <h6 class="card-title">کۆی مووچەی کارمەندان</h6>
                     <div class="fs-4 fw-bold" id="total_salary">0</div>
                     <small class="text-light">دیناری عێراقی</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card text-center shadow card-gradient-warning card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-dollar-sign card-icon"></i>
+                    <h6 class="card-title">نرخی ١٠٠ دۆلار</h6>
+                    <div class="fs-4 fw-bold" id="dollar_rate">0</div>
+                    <small class="text-light">دیناری عێراقی</small>
+                    <button class="btn btn-sm btn-outline-light mt-2" id="refreshDollarRate" title="نوێکردنەوەی نرخی دۆلار">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -168,5 +181,6 @@ if (!hasPermission('view_employee')) {
 <script src="../assets/js/employee/select_employee.js"></script>
 <script src="../assets/js/employee/update_employee.js"></script>
 <script src="../assets/js/employee/delete_employee.js"></script>
+<script src="../assets/js/employee/dollar_rate.js"></script>
 </body>
 </html>
