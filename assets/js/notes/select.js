@@ -350,9 +350,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('filter_from').value = tomorrowFormatted;
     document.getElementById('filter_to').value = tomorrowFormatted;
     
-    // Set default filter to show unread notes
-    document.getElementById('filter_read').value = '0';
-    
     // Set tomorrow button as active by default
     document.getElementById('filterTomorrow')?.classList.add('active');
     
@@ -362,8 +359,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     if ($('#filter_read').length > 0 && !$('#filter_read').hasClass('select2-hidden-accessible')) {
         enableSelect2('#filter_read', 'body');
-        // Set the default value for the read filter Select2
-        $('#filter_read').val('0').trigger('change');
     }
     
     loadNotes();

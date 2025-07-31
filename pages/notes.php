@@ -231,7 +231,7 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
                                 <div class="card-header bg-light fw-bold">میکسەر</div>
                                 <div class="card-body">
                                     <div class="mb-3">
-                                        <label for="mixer_car_id" class="form-label">کۆدی میکسەر</label>
+                                        <label for="mixer_car_id" class="form-label">کۆدی میکسەر (ئیختیاری)</label>
                             <select class="form-select" id="mixer_car_id" name="mixer_car_id">
                                 <option value="">هەڵبژێرە</option>
                                 <?php foreach ($mixer_cars as $car): ?>
@@ -240,7 +240,7 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
                             </select>
                         </div>
                                     <div class="mb-3">
-                            <label for="mixer_driver_id" class="form-label">شۆفێری میکسەر</label>
+                            <label for="mixer_driver_id" class="form-label">شۆفێری میکسەر (ئیختیاری)</label>
                             <select class="form-select" id="mixer_driver_id" name="mixer_driver_id">
                                 <option value="">هەڵبژێرە</option>
                                 <?php foreach ($mixer_drivers as $driver): ?>
@@ -351,7 +351,7 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
                                 <div class="card-header bg-light fw-bold">میکسەر</div>
                                 <div class="card-body">
                                     <div class="mb-3">
-                                        <label for="edit_mixer_car_id" class="form-label">کۆدی میکسەر</label>
+                                        <label for="edit_mixer_car_id" class="form-label">کۆدی میکسەر (ئیختیاری)</label>
                             <select class="form-select" id="edit_mixer_car_id" name="edit_mixer_car_id">
                                 <option value="">هەڵبژێرە</option>
                                 <?php foreach ($mixer_cars as $car): ?>
@@ -360,7 +360,7 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
                             </select>
                         </div>
                                     <div class="mb-3">
-                            <label for="edit_mixer_driver_id" class="form-label">شۆفێری میکسەر</label>
+                            <label for="edit_mixer_driver_id" class="form-label">شۆفێری میکسەر (ئیختیاری)</label>
                             <select class="form-select" id="edit_mixer_driver_id" name="edit_mixer_driver_id">
                                 <option value="">هەڵبژێرە</option>
                                 <?php foreach ($mixer_drivers as $driver): ?>
