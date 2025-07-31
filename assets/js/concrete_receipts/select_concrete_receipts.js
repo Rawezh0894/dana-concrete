@@ -62,7 +62,14 @@ async function loadConcreteReceiptsTable() {
     TableController.renderWithPagination('#concreteReceiptsTable', mapped, columns, { pageSize: 10, currentPage: 1 });
 }
 
-document.addEventListener('DOMContentLoaded', loadConcreteReceiptsTable);
+document.addEventListener('DOMContentLoaded', function() {
+    loadConcreteReceiptsTable();
+    
+    // Also load summary cards to show total values by default
+    if (typeof window.reloadConcreteReceiptsSummary === 'function') {
+        window.reloadConcreteReceiptsSummary();
+    }
+});
 window.reloadConcreteReceipts = loadConcreteReceiptsTable;
 
 $(document).on('click', '.print-receipt', function() {
