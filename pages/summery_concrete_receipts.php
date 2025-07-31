@@ -221,7 +221,7 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
               <div class="form-check">
                 <input class="form-check-input" type="checkbox" id="payment_status" value="paid">
                 <label class="form-check-label" for="payment_status">
-                  پارە داوە
+                  پارەی داوە
                 </label>
               </div>
             </div>

@@ -111,14 +111,14 @@ function updateCustomerSummaryTable(customerSummary) {
         let paymentStatus;
         switch(customer.payment_status) {
             case 'paid':
-                paymentStatus = '<span class="badge bg-success">پارە داوە</span>';
+                paymentStatus = '<span class="badge bg-success">پارەی داوە</span>';
                 break;
             case 'partial':
-                paymentStatus = '<span class="badge bg-info">بەشی پارە داوە</span>';
+                paymentStatus = '<span class="badge bg-info">بەشی پارەی داوە</span>';
                 break;
             case 'unpaid':
             default:
-                paymentStatus = '<span class="badge bg-warning">پارە نەداوە</span>';
+                paymentStatus = '<span class="badge bg-warning">پارەی نەداوە</span>';
                 break;
         }
         
@@ -226,8 +226,8 @@ function displayCustomerDetails(customerName, receipts) {
             
             // Payment status display for individual receipts
             const receiptPaymentStatus = receipt.payment_status === 'paid' ? 
-                '<span class="badge bg-success">پارە داوە</span>' : 
-                '<span class="badge bg-warning">پارە نەداوە</span>';
+                '<span class="badge bg-success">پارەی داوە</span>' : 
+                '<span class="badge bg-warning">پارەی نەداوە</span>';
             
             html += `
                 <tr>
@@ -428,7 +428,7 @@ function savePricePerMeter() {
     
     // Show loading
     const loadingText = isPaymentStatusOnly ? 
-        'دۆخی پارەدان پاشەکەوت دەکرێت' : 
+        'دۆخی پارەی دان پاشەکەوت دەکرێت' : 
         'نرخەکان پاشەکەوت دەکرێن';
     
     Swal.fire({
@@ -456,7 +456,7 @@ function savePricePerMeter() {
             
             if (response.success) {
                 const message = isPaymentStatusOnly ? 
-                    'دۆخی پارەدان بە سەرکەوتوویی پاشەکەوت کرا' : 
+                    'دۆخی پارەی دان بە سەرکەوتوویی پاشەکەوت کرا' : 
                     'نرخەکان بە سەرکەوتوویی پاشەکەوت کران';
                 
                 Swal.fire({
