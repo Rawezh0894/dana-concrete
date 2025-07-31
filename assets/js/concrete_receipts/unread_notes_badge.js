@@ -87,8 +87,6 @@ function playNotificationSound() {
         return;
     }
     
-
-    
     // Check if audio is loaded
     if (audio.readyState < 2) {
         console.log('🔄 Audio not loaded yet, trying to load...');
@@ -113,17 +111,13 @@ function playNotificationSound() {
                 console.log('Error name:', error.name);
                 console.log('Error message:', error.message);
                 
-                // Only try alternative approach if it's not a user interaction error
-                if (error.name !== 'NotAllowedError') {
-                    console.log('🔄 Trying alternative approach...');
-                    audio.muted = false;
-                    audio.volume = 1;
-                    audio.play().catch(e => {
-                        console.error('❌ Alternative approach also failed:', e);
-                    });
-                } else {
-                    console.log('ℹ️ Skipping alternative approach due to user interaction requirement');
-                }
+                // Try alternative approach
+                console.log('🔄 Trying alternative approach...');
+                audio.muted = false;
+                audio.volume = 1;
+                audio.play().catch(e => {
+                    console.error('❌ Alternative approach also failed:', e);
+                });
             });
     } else {
         console.log('⚠️ Audio play() returned undefined');
@@ -144,9 +138,10 @@ function updateUnreadNotesBadge() {
                     badge.textContent = count;
                     badge.style.display = 'inline';
                     
-                    // Play sound if count increased (new note added) AND user has interacted
-                    if (count > previousCount && userHasInteracted) {
+                    // Play sound if count increased (new note added)
+                    if (count > previousCount) {
                         console.log('📈 Note count increased, playing notification sound...');
+                        forceEnableAudio();
                         playNotificationSound();
                     }
                 } else {
@@ -157,6 +152,12 @@ function updateUnreadNotesBadge() {
         .catch(error => {
             console.error('Error fetching unread notes count:', error);
         });
+}
+
+// Function to update badge immediately (for real-time updates)
+function updateBadgeImmediately() {
+    console.log('⚡ Updating badge immediately...');
+    updateUnreadNotesBadge();
 }
 
 // Update badge on page load
@@ -202,26 +203,20 @@ document.addEventListener('noteAdded', function() {
 
 document.addEventListener('noteMarkedAsRead', function() {
     console.log('👁️ Note marked as read event received');
-    // Update badge immediately when a note is marked as read
-    setTimeout(() => {
-        updateUnreadNotesBadge();
-    }, 500); // Update after 0.5 seconds
+    // Update badge when a note is marked as read
+    updateUnreadNotesBadge();
 });
 
 document.addEventListener('noteDeleted', function() {
     console.log('🗑️ Note deleted event received');
-    // Update badge immediately when a note is deleted
-    setTimeout(() => {
-        updateUnreadNotesBadge();
-    }, 500); // Update after 0.5 seconds
+    // Update badge when a note is deleted
+    updateUnreadNotesBadge();
 });
 
 document.addEventListener('noteUpdated', function() {
     console.log('✏️ Note updated event received');
-    // Update badge immediately when a note is updated
-    setTimeout(() => {
-        updateUnreadNotesBadge();
-    }, 500); // Update after 0.5 seconds
+    // Update badge when a note is updated
+    updateUnreadNotesBadge();
 });
 
 document.addEventListener('noteAddedWithSound', function() {
@@ -233,7 +228,7 @@ document.addEventListener('noteAddedWithSound', function() {
     // Update badge immediately
     setTimeout(() => {
         updateUnreadNotesBadge();
-    }, 1000); // Update after 1 second to ensure database is updated
+    }, 500); // Update after 0.5 seconds
 });
 
 // Export functions for manual updates
