@@ -111,13 +111,17 @@ function playNotificationSound() {
                 console.log('Error name:', error.name);
                 console.log('Error message:', error.message);
                 
-                // Try alternative approach
-                console.log('🔄 Trying alternative approach...');
-                audio.muted = false;
-                audio.volume = 1;
-                audio.play().catch(e => {
-                    console.error('❌ Alternative approach also failed:', e);
-                });
+                // Only try alternative approach if it's not a user interaction error
+                if (error.name !== 'NotAllowedError') {
+                    console.log('🔄 Trying alternative approach...');
+                    audio.muted = false;
+                    audio.volume = 1;
+                    audio.play().catch(e => {
+                        console.error('❌ Alternative approach also failed:', e);
+                    });
+                } else {
+                    console.log('ℹ️ Skipping alternative approach due to user interaction requirement');
+                }
             });
     } else {
         console.log('⚠️ Audio play() returned undefined');
@@ -138,12 +142,17 @@ function updateUnreadNotesBadge() {
                     badge.textContent = count;
                     badge.style.display = 'inline';
                     
-                    // Play sound if count increased (new note added)
-                    if (count > previousCount) {
-                        console.log('📈 Note count increased, playing notification sound...');
+                                    // Play sound if count increased (new note added)
+                if (count > previousCount) {
+                    console.log('📈 Note count increased, playing notification sound...');
+                    // Only play sound if user has interacted or it's a forced update
+                    if (userHasInteracted) {
                         forceEnableAudio();
                         playNotificationSound();
+                    } else {
+                        console.log('⚠️ Skipping sound - user has not interacted yet');
                     }
+                }
                 } else {
                     badge.style.display = 'none';
                 }
@@ -189,7 +198,28 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ Event listeners added for user interaction');
     
     // Update badge every 5 seconds (reduced from 30 seconds)
-    setInterval(updateUnreadNotesBadge, 5000);
+    // Only update badge, don't play sound automatically
+    setInterval(function() {
+        // Update badge without playing sound
+        fetch('../process/notes/get_unread_count.php')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const badge = document.getElementById('unread-notes-badge');
+                    const count = data.unread_count;
+                    
+                    if (count > 0) {
+                        badge.textContent = count;
+                        badge.style.display = 'inline';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching unread notes count:', error);
+            });
+    }, 5000);
 });
 
 // Listen for custom events from other parts of the application
