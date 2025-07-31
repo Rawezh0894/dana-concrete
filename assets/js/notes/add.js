@@ -47,6 +47,15 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const formData = new FormData(addNoteForm);
         
+        // Handle optional fields - convert empty strings to null
+        const optionalFields = ['mixer_car_id', 'mixer_driver_id', 'pump_car_id', 'pump_driver_id'];
+        optionalFields.forEach(field => {
+            const value = formData.get(field);
+            if (value === '') {
+                formData.set(field, 'null');
+            }
+        });
+        
         // Validate required fields
         const requiredFields = ['date', 'time', 'customer_id', 'location', 'meter_amount', 'formula_id'];
         for (let field of requiredFields) {

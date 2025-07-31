@@ -35,6 +35,12 @@ $mixer_driver_id = $_POST['mixer_driver_id'] ?? null;
 $pump_car_id = $_POST['pump_car_id'] ?? null;
 $pump_driver_id = $_POST['pump_driver_id'] ?? null;
 
+// Convert 'null' strings to actual null values
+if ($mixer_car_id === 'null' || $mixer_car_id === '') $mixer_car_id = null;
+if ($mixer_driver_id === 'null' || $mixer_driver_id === '') $mixer_driver_id = null;
+if ($pump_car_id === 'null' || $pump_car_id === '') $pump_car_id = null;
+if ($pump_driver_id === 'null' || $pump_driver_id === '') $pump_driver_id = null;
+
 // Validate required fields
 if (empty($date) || empty($time) || empty($customer_id) || empty($location) || empty($meter_amount) || empty($formula_id)) {
     echo json_encode(['success' => false, 'error' => 'تکایە هەموو خانە پێویستەکان پڕبکەرەوە']);
