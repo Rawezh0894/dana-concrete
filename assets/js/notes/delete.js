@@ -51,6 +51,9 @@ async function deleteNote(noteId) {
                 if (window.reloadNotes) {
                     window.reloadNotes();
                 }
+                
+                // Dispatch custom event for real-time badge update
+                document.dispatchEvent(new CustomEvent('noteDeleted'));
             } else {
                 showAlert('error', result.error || 'هەڵەیەک ڕویدا');
             }

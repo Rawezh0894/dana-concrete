@@ -463,6 +463,9 @@ async function markAsRead(noteId) {
             renderNotesCards();
             updateSummary();
             
+            // Dispatch custom event for real-time badge update
+            document.dispatchEvent(new CustomEvent('noteMarkedAsRead'));
+            
             showAlert('success', 'تێبینیەکە وەک خوێندراو نیشانەکرا');
         } else {
             showAlert('error', result.error || 'هەڵەیەک ڕویدا');

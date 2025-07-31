@@ -111,6 +111,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (window.reloadNotes) {
                     window.reloadNotes();
                 }
+                
+                // Dispatch custom event for real-time badge update
+                document.dispatchEvent(new CustomEvent('noteAdded'));
             } else {
                 showAlert('error', result.error || 'هەڵەیەک ڕویدا');
             }

@@ -72,8 +72,11 @@ $mixer_drivers = array_filter($employees, function ($emp) {
 
       <div class="d-flex gap-2">
         <?php if (hasPermission('view_notes')): ?>
-          <a href="notes.php" class="btn" style="background: var(--kelly-green); color:white; font-weight: bold;">
+          <a href="notes.php" class="btn position-relative" style="background: var(--kelly-green); color:white; font-weight: bold;">
             <i class="fas fa-sticky-note me-1"></i>تێبینیەکان
+            <span id="unread-notes-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display: none;">
+              0
+            </span>
           </a>
         <?php endif; ?>
         <?php if (hasPermission('view_summery_concrete_receipts')): ?>
@@ -459,6 +462,7 @@ $mixer_drivers = array_filter($employees, function ($emp) {
   <script src="../assets/js/concrete_receipts/delete_concrete_receipts.js"></script>
   <script src="../assets/js/concrete_receipts/update_concrete_receipts.js"></script>
   <script src="../assets/js/concrete_receipts/concrete_receipts_custom.js"></script>
+  <script src="../assets/js/concrete_receipts/unread_notes_badge.js"></script>
   <script>
     // Pass permissions to JavaScript
     window.userPermissions = {
