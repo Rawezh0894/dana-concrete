@@ -29,14 +29,14 @@ if (!hasPermission('edit_concrete_receipts')) {
 
 try {
     // Validate required fields
-    if (!isset($_POST['receipt_ids']) || !isset($_POST['price_per_meter'])) {
-        error_log('Missing required fields for price update');
-        echo json_encode(['success' => false, 'error' => 'Missing required fields']);
+    if (!isset($_POST['receipt_ids'])) {
+        error_log('Missing receipt_ids for update');
+        echo json_encode(['success' => false, 'error' => 'Missing receipt IDs']);
         exit;
     }
     
     $receipt_ids = $_POST['receipt_ids'];
-    $price_per_meter = floatval($_POST['price_per_meter']);
+    $price_per_meter_input = $_POST['price_per_meter'] ?? '';
     $notes = $_POST['notes'] ?? '';
     $payment_status = $_POST['payment_status'] ?? 'unpaid';
     
@@ -45,8 +45,29 @@ try {
         $payment_status = 'unpaid';
     }
     
+    // Check if this is a payment status only update
+    $is_payment_status_only = empty($price_per_meter_input) && empty($notes);
+    
+    // Handle price validation
+    if (!$is_payment_status_only) {
+        if (empty($price_per_meter_input)) {
+            error_log('Price per meter is required when not updating payment status only');
+            echo json_encode(['success' => false, 'error' => 'Price per meter is required']);
+            exit;
+        }
+        
+        $price_per_meter = floatval($price_per_meter_input);
+        if ($price_per_meter <= 0) {
+            error_log('Invalid price_per_meter: ' . $price_per_meter);
+            echo json_encode(['success' => false, 'error' => 'Price per meter must be greater than 0']);
+            exit;
+        }
+    } else {
+        $price_per_meter = null; // Will not update price field
+    }
+    
     // Log parsed variables for debugging
-    error_log("Parsed vars: receipt_ids='" . print_r($receipt_ids, true) . "', price_per_meter='$price_per_meter', notes='$notes', payment_status='$payment_status'");
+    error_log("Parsed vars: receipt_ids='" . print_r($receipt_ids, true) . "', price_per_meter='$price_per_meter', notes='$notes', payment_status='$payment_status', is_payment_status_only='$is_payment_status_only'");
     
     // Validate receipt_ids
     if (!is_array($receipt_ids) || empty($receipt_ids)) {
@@ -55,19 +76,22 @@ try {
         exit;
     }
     
-    // Validate price_per_meter
-    if ($price_per_meter <= 0) {
-        error_log('Invalid price_per_meter: ' . $price_per_meter);
-        echo json_encode(['success' => false, 'error' => 'Price per meter must be greater than 0']);
-        exit;
+    // Prepare the update statement based on what's being updated
+    if ($is_payment_status_only) {
+        // Only update payment status
+        $stmt = $pdo->prepare("
+            UPDATE concrete_receipts 
+            SET payment_status = ?, updated_at = NOW() 
+            WHERE id = ?
+        ");
+    } else {
+        // Update price, notes, and payment status
+        $stmt = $pdo->prepare("
+            UPDATE concrete_receipts 
+            SET price_per_meter = ?, notes = ?, payment_status = ?, updated_at = NOW() 
+            WHERE id = ?
+        ");
     }
-    
-    // Prepare the update statement
-    $stmt = $pdo->prepare("
-        UPDATE concrete_receipts 
-        SET price_per_meter = ?, notes = ?, payment_status = ?, updated_at = NOW() 
-        WHERE id = ?
-    ");
     
     $success_count = 0;
     $error_count = 0;
@@ -75,19 +99,24 @@ try {
     // Update each receipt
     foreach ($receipt_ids as $receipt_id) {
         if (is_numeric($receipt_id)) {
-                    try {
-            $result = $stmt->execute([$price_per_meter, $notes, $payment_status, $receipt_id]);
-                if ($result) {
-                    $success_count++;
-                    error_log('Successfully updated receipt ID: ' . $receipt_id);
-                } else {
-                    $error_count++;
-                    error_log('Failed to update receipt ID: ' . $receipt_id);
-                }
-            } catch (Exception $e) {
-                $error_count++;
-                error_log('Exception updating receipt ID ' . $receipt_id . ': ' . $e->getMessage());
+                            try {
+            if ($is_payment_status_only) {
+                $result = $stmt->execute([$payment_status, $receipt_id]);
+            } else {
+                $result = $stmt->execute([$price_per_meter, $notes, $payment_status, $receipt_id]);
             }
+            
+            if ($result) {
+                $success_count++;
+                error_log('Successfully updated receipt ID: ' . $receipt_id);
+            } else {
+                $error_count++;
+                error_log('Failed to update receipt ID: ' . $receipt_id);
+            }
+        } catch (Exception $e) {
+            $error_count++;
+            error_log('Exception updating receipt ID ' . $receipt_id . ': ' . $e->getMessage());
+        }
         } else {
             $error_count++;
             error_log('Invalid receipt ID (not numeric): ' . $receipt_id);

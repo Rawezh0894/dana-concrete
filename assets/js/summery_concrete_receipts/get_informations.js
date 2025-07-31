@@ -391,12 +391,17 @@ function savePricePerMeter() {
         return;
     }
     
-    const price = parseFloat($('#price_per_meter').val());
+    const priceInput = $('#price_per_meter').val();
+    const price = priceInput ? parseFloat(priceInput) : null;
     const notes = $('#notes').val();
     const paymentStatus = $('#payment_status').is(':checked') ? 'paid' : 'unpaid';
     const selectedReceipts = $('.receipt-checkbox:checked');
     
-    if (!price || price <= 0) {
+    // Check if user is trying to update payment status only
+    const isPaymentStatusOnly = !priceInput && !notes.trim();
+    
+    // If not payment status only, price is required
+    if (!isPaymentStatusOnly && (!price || price <= 0)) {
         Swal.fire({
             icon: 'error',
             title: 'هەڵە',
@@ -422,9 +427,13 @@ function savePricePerMeter() {
     });
     
     // Show loading
+    const loadingText = isPaymentStatusOnly ? 
+        'دۆخی پارەدان پاشەکەوت دەکرێت' : 
+        'نرخەکان پاشەکەوت دەکرێن';
+    
     Swal.fire({
         title: 'چاوەڕوان...',
-        text: 'نرخەکان پاشەکەوت دەکرێن',
+        text: loadingText,
         allowOutsideClick: false,
         didOpen: () => {
             Swal.showLoading();
@@ -437,7 +446,7 @@ function savePricePerMeter() {
         method: 'POST',
         data: {
             receipt_ids: receiptIds,
-            price_per_meter: price,
+            price_per_meter: price || '',
             notes: notes,
             payment_status: paymentStatus
         },
@@ -446,10 +455,14 @@ function savePricePerMeter() {
             Swal.close();
             
             if (response.success) {
+                const message = isPaymentStatusOnly ? 
+                    'دۆخی پارەدان بە سەرکەوتوویی پاشەکەوت کرا' : 
+                    'نرخەکان بە سەرکەوتوویی پاشەکەوت کران';
+                
                 Swal.fire({
                     icon: 'success',
                     title: 'سەرکەوتوو',
-                    text: 'نرخەکان بە سەرکەوتوویی پاشەکەوت کران',
+                    text: message,
                     confirmButtonText: 'باشە'
                 });
                 
