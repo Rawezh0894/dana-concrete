@@ -21,6 +21,7 @@ $customers = $pdo->query("SELECT id, name, mobile1 FROM customers")->fetchAll(PD
 $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO::FETCH_ASSOC);
 $cars = $pdo->query("SELECT id, name FROM cars")->fetchAll(PDO::FETCH_ASSOC);
 $employees = $pdo->query("SELECT id, name, role FROM employees")->fetchAll(PDO::FETCH_ASSOC);
+$all_drivers = $pdo->query("SELECT id, name FROM employees WHERE role = 'شۆفێر' ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 $drivers = array_filter($employees, function ($emp) {
   return $emp['role'] === 'شۆفێر'; });
 $mixer_cars = array_filter($cars, function ($car) {
