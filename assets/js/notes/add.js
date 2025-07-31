@@ -122,6 +122,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Play notification sound if we're on the concrete receipts page
                 if (window.playNotificationSound) {
+                    // Mark user interaction for audio playback
+                    if (window.markUserInteraction) {
+                        window.markUserInteraction();
+                    }
+                    
                     setTimeout(() => {
                         window.playNotificationSound();
                     }, 500); // Small delay to ensure badge is updated first

@@ -1,3 +1,12 @@
+// Flag to track if user has interacted with the page
+let userHasInteracted = false;
+
+// Function to mark user interaction
+function markUserInteraction() {
+    userHasInteracted = true;
+    console.log('User interaction detected - audio can now play');
+}
+
 // Function to check browser audio capabilities
 function checkBrowserAudioSupport() {
     console.log('Checking browser audio support...');
@@ -50,6 +59,8 @@ function checkAudioFile() {
 // Function to play notification sound
 function playNotificationSound() {
     console.log('Attempting to play notification sound...');
+    console.log('User has interacted:', userHasInteracted);
+    
     const audio = document.getElementById('notificationSound');
     
     if (!audio) {
@@ -60,6 +71,13 @@ function playNotificationSound() {
     console.log('Audio element found:', audio);
     console.log('Audio readyState:', audio.readyState);
     console.log('Audio src:', audio.src);
+    
+    // Check if user has interacted with the page
+    if (!userHasInteracted) {
+        console.log('⚠️ User has not interacted with the page yet. Audio will not play.');
+        console.log('ℹ️ Try clicking somewhere on the page first, then test again.');
+        return;
+    }
     
     // Check if audio is loaded
     if (audio.readyState < 2) {
@@ -76,19 +94,19 @@ function playNotificationSound() {
     if (playPromise !== undefined) {
         playPromise
             .then(() => {
-                console.log('Notification sound played successfully!');
+                console.log('✅ Notification sound played successfully!');
             })
             .catch(error => {
-                console.error('Could not play notification sound:', error);
+                console.error('❌ Could not play notification sound:', error);
                 console.log('Error name:', error.name);
                 console.log('Error message:', error.message);
                 
                 // Try alternative approach
-                console.log('Trying alternative approach...');
+                console.log('🔄 Trying alternative approach...');
                 audio.muted = false;
                 audio.volume = 1;
                 audio.play().catch(e => {
-                    console.error('Alternative approach also failed:', e);
+                    console.error('❌ Alternative approach also failed:', e);
                 });
             });
     }
@@ -132,6 +150,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Check audio file on page load
     checkAudioFile();
     
+    // Add user interaction listeners
+    document.addEventListener('click', markUserInteraction);
+    document.addEventListener('keydown', markUserInteraction);
+    document.addEventListener('touchstart', markUserInteraction);
+    
     // Update badge every 30 seconds
     setInterval(updateUnreadNotesBadge, 30000);
 });
@@ -164,11 +187,19 @@ document.addEventListener('noteAddedWithSound', function() {
 // Export functions for manual updates
 window.updateUnreadNotesBadge = updateUnreadNotesBadge;
 window.playNotificationSound = playNotificationSound;
+window.markUserInteraction = markUserInteraction;
 
 // Test function for debugging
 window.testNotificationSound = function() {
     console.log('Testing notification sound...');
     checkBrowserAudioSupport();
     checkAudioFile();
-    playNotificationSound();
+    
+    // Mark user interaction when test button is clicked
+    markUserInteraction();
+    
+    // Try to play sound
+    setTimeout(() => {
+        playNotificationSound();
+    }, 100);
 }; 
