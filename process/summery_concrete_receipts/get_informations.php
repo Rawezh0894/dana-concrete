@@ -77,7 +77,12 @@ try {
             AVG(cr.meter_amount) as average_meter,
             SUM(CASE WHEN cr.price_per_meter IS NOT NULL THEN cr.meter_amount * cr.price_per_meter ELSE 0 END) as total_price,
             GROUP_CONCAT(DISTINCT cf.name) as formulas_used,
-            MAX(cr.notes) as latest_notes
+            MAX(cr.notes) as latest_notes,
+            CASE 
+                WHEN COUNT(CASE WHEN cr.payment_status = 'paid' THEN 1 END) = COUNT(*) THEN 'paid'
+                WHEN COUNT(CASE WHEN cr.payment_status = 'paid' THEN 1 END) > 0 THEN 'partial'
+                ELSE 'unpaid'
+            END as payment_status
         FROM customers c
         LEFT JOIN concrete_receipts cr ON c.id = cr.customer_id
         LEFT JOIN concrete_formulas cf ON cr.formulas_id = cf.id
@@ -124,6 +129,7 @@ try {
                 cr.meter_amount,
                 cr.price_per_meter,
                 cr.notes,
+                cr.payment_status,
                 cr.created_at,
                 cf.name as formula_name,
                 CONCAT(mc.name, ' - ', md.name) as mixer_info,
@@ -163,7 +169,8 @@ try {
                 'average_meter' => round((float)($customer['average_meter'] ?? 0), 2),
                 'total_price' => round((float)($customer['total_price'] ?? 0), 2),
                 'formulas_used' => $customer['formulas_used'] ? explode(',', $customer['formulas_used']) : [],
-                'latest_notes' => $customer['latest_notes'] ?? null
+                'latest_notes' => $customer['latest_notes'] ?? null,
+                'payment_status' => $customer['payment_status'] ?? 'unpaid'
             ];
         }, $customer_summary)
     ];
@@ -178,6 +185,7 @@ try {
                 'meter_amount' => round((float)$receipt['meter_amount'], 2),
                 'price_per_meter' => $receipt['price_per_meter'] ? round((float)$receipt['price_per_meter'], 2) : null,
                 'notes' => $receipt['notes'],
+                'payment_status' => $receipt['payment_status'] ?? 'unpaid',
                 'created_at' => $receipt['created_at'],
                 'formula_name' => $receipt['formula_name'],
                 'mixer_info' => $receipt['mixer_info'],

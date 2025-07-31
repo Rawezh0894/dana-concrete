@@ -38,9 +38,15 @@ try {
     $receipt_ids = $_POST['receipt_ids'];
     $price_per_meter = floatval($_POST['price_per_meter']);
     $notes = $_POST['notes'] ?? '';
+    $payment_status = $_POST['payment_status'] ?? 'unpaid';
+    
+    // Validate payment status
+    if (!in_array($payment_status, ['paid', 'unpaid'])) {
+        $payment_status = 'unpaid';
+    }
     
     // Log parsed variables for debugging
-    error_log("Parsed vars: receipt_ids='" . print_r($receipt_ids, true) . "', price_per_meter='$price_per_meter', notes='$notes'");
+    error_log("Parsed vars: receipt_ids='" . print_r($receipt_ids, true) . "', price_per_meter='$price_per_meter', notes='$notes', payment_status='$payment_status'");
     
     // Validate receipt_ids
     if (!is_array($receipt_ids) || empty($receipt_ids)) {
@@ -59,7 +65,7 @@ try {
     // Prepare the update statement
     $stmt = $pdo->prepare("
         UPDATE concrete_receipts 
-        SET price_per_meter = ?, notes = ?, updated_at = NOW() 
+        SET price_per_meter = ?, notes = ?, payment_status = ?, updated_at = NOW() 
         WHERE id = ?
     ");
     
@@ -69,8 +75,8 @@ try {
     // Update each receipt
     foreach ($receipt_ids as $receipt_id) {
         if (is_numeric($receipt_id)) {
-            try {
-                $result = $stmt->execute([$price_per_meter, $notes, $receipt_id]);
+                    try {
+            $result = $stmt->execute([$price_per_meter, $notes, $payment_status, $receipt_id]);
                 if ($result) {
                     $success_count++;
                     error_log('Successfully updated receipt ID: ' . $receipt_id);

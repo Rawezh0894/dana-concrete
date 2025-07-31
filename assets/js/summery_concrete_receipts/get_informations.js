@@ -77,7 +77,7 @@ function updateCustomerSummaryTable(customerSummary) {
     tbody.empty();
     
     // Calculate colspan based on permissions
-    const baseCols = 5; // #, customer name, receipt count, total meter, formulas
+    const baseCols = 6; // #, customer name, receipt count, total meter, payment status, formulas
     const priceCols = window.userPermissions.canViewPrices ? 2 : 0; // total price, notes
     const actionCols = 1; // actions
     const totalCols = baseCols + priceCols + actionCols;
@@ -106,6 +106,21 @@ function updateCustomerSummaryTable(customerSummary) {
             customer.latest_notes : 
             '-';
         
+        // Payment status display
+        let paymentStatus;
+        switch(customer.payment_status) {
+            case 'paid':
+                paymentStatus = '<span class="badge bg-success">پارە داوە</span>';
+                break;
+            case 'partial':
+                paymentStatus = '<span class="badge bg-info">بەشی پارە داوە</span>';
+                break;
+            case 'unpaid':
+            default:
+                paymentStatus = '<span class="badge bg-warning">پارە نەداوە</span>';
+                break;
+        }
+        
         let row = `
             <tr>
                 <td>${index + 1}</td>
@@ -118,6 +133,9 @@ function updateCustomerSummaryTable(customerSummary) {
                 </td>
                 <td class="text-center">
                     <strong>${customer.total_meter}</strong> م³
+                </td>
+                <td class="text-center">
+                    ${paymentStatus}
                 </td>
         `;
         
@@ -190,6 +208,7 @@ function displayCustomerDetails(customerName, receipts) {
                             <th>بڕی مەتر سێجا</th>
                             ${window.userPermissions.canViewPrices ? '<th>نرخی مەتر سێجا</th>' : ''}
                             ${window.userPermissions.canViewPrices ? '<th>تێبینی</th>' : ''}
+                            <th>دۆخی پارەدان</th>
                             <th>فۆرمۆلا</th>
                             <th>میکسەر</th>
                             <th>پەمپ</th>
@@ -203,6 +222,11 @@ function displayCustomerDetails(customerName, receipts) {
             const priceDisplay = receipt.price_per_meter ? 
                 `<span class="badge bg-success">$${receipt.price_per_meter.toLocaleString()}</span>` : 
                 `<span class="badge bg-secondary">نەدەراوە</span>`;
+            
+            // Payment status display for individual receipts
+            const receiptPaymentStatus = receipt.payment_status === 'paid' ? 
+                '<span class="badge bg-success">پارە داوە</span>' : 
+                '<span class="badge bg-warning">پارە نەداوە</span>';
             
             html += `
                 <tr>
@@ -228,6 +252,9 @@ function displayCustomerDetails(customerName, receipts) {
             }
             
             html += `
+                    <td class="text-center">
+                        ${receiptPaymentStatus}
+                    </td>
                     <td>
                         <span class="formula-badge">${receipt.formula_name || '-'}</span>
                     </td>
@@ -365,6 +392,7 @@ function savePricePerMeter() {
     
     const price = parseFloat($('#price_per_meter').val());
     const notes = $('#notes').val();
+    const paymentStatus = $('#payment_status').is(':checked') ? 'paid' : 'unpaid';
     const selectedReceipts = $('.receipt-checkbox:checked');
     
     if (!price || price <= 0) {
@@ -409,7 +437,8 @@ function savePricePerMeter() {
         data: {
             receipt_ids: receiptIds,
             price_per_meter: price,
-            notes: notes
+            notes: notes,
+            payment_status: paymentStatus
         },
         dataType: 'json',
         success: function(response) {
