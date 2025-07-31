@@ -471,9 +471,19 @@ $mixer_drivers = array_filter($employees, function ($emp) {
     document.addEventListener('DOMContentLoaded', function() {
       const params = new URLSearchParams(window.location.search);
       if (params.get('open_add') === '1') {
-        // Clear localStorage to prevent restoring old data when coming from notes
-        localStorage.removeItem('addConcreteReceiptFormData');
-        
+        // Only clear meter_amount, mixer_car_id, mixer_driver_id from localStorage
+        const storageKey = 'addConcreteReceiptFormData';
+        const saved = localStorage.getItem(storageKey);
+        if (saved) {
+          try {
+            const data = JSON.parse(saved);
+            delete data['meter_amount'];
+            delete data['mixer_car_id'];
+            delete data['mixer_driver_id'];
+            localStorage.setItem(storageKey, JSON.stringify(data));
+          } catch(e) {}
+        }
+
         const modalEl = document.getElementById('addConcreteReceiptModal');
         const modal = new bootstrap.Modal(modalEl);
         modal.show();
