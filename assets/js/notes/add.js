@@ -114,6 +114,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Dispatch custom event for real-time badge update
                 document.dispatchEvent(new CustomEvent('noteAdded'));
+                
+                // Also update badge immediately if we're on the concrete receipts page
+                if (window.updateUnreadNotesBadge) {
+                    window.updateUnreadNotesBadge();
+                }
             } else {
                 showAlert('error', result.error || 'هەڵەیەک ڕویدا');
             }

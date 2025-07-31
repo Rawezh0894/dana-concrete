@@ -54,6 +54,11 @@ async function deleteNote(noteId) {
                 
                 // Dispatch custom event for real-time badge update
                 document.dispatchEvent(new CustomEvent('noteDeleted'));
+                
+                // Also update badge immediately if we're on the concrete receipts page
+                if (window.updateUnreadNotesBadge) {
+                    window.updateUnreadNotesBadge();
+                }
             } else {
                 showAlert('error', result.error || 'هەڵەیەک ڕویدا');
             }

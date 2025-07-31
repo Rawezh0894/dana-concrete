@@ -31,27 +31,22 @@ document.addEventListener('DOMContentLoaded', function() {
 // Listen for custom events from other parts of the application
 document.addEventListener('noteAdded', function() {
     // Update badge when a new note is added
-    setTimeout(updateUnreadNotesBadge, 1000);
+    updateUnreadNotesBadge();
 });
 
 document.addEventListener('noteMarkedAsRead', function() {
     // Update badge when a note is marked as read
-    setTimeout(updateUnreadNotesBadge, 1000);
+    updateUnreadNotesBadge();
 });
 
 document.addEventListener('noteDeleted', function() {
     // Update badge when a note is deleted
-    setTimeout(updateUnreadNotesBadge, 1000);
+    updateUnreadNotesBadge();
 });
 
 document.addEventListener('noteUpdated', function() {
     // Update badge when a note is updated
-    setTimeout(updateUnreadNotesBadge, 1000);
-});
-
-document.addEventListener('noteMarkedAsRead', function() {
-    // Update badge when a note is marked as read
-    setTimeout(updateUnreadNotesBadge, 1000);
+    updateUnreadNotesBadge();
 });
 
 // Export function for manual updates
