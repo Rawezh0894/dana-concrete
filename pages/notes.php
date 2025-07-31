@@ -72,6 +72,11 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
                 <i class="fas fa-file-alt me-1"></i>پسووڵەی کۆنکرێت
             </a>
             <?php endif; ?>
+            <?php if (hasPermission('add_customer')): ?>
+            <button class="btn" data-bs-toggle="modal" data-bs-target="#addCustomerModal" style="background: var(--seafoam-green); color:white; font-weight: bold;">
+                <i class="fas fa-user-plus me-1"></i>زیادکردنی کڕیار
+            </button>
+            <?php endif; ?>
         <?php if (hasPermission('add_notes')): ?>
         <button class="btn" data-bs-toggle="modal" data-bs-target="#addNoteModal" style="background: var(--seafoam-green); color:white; font-weight: bold;">
             <i class="fas fa-plus me-2"></i>زیادکردنی تێبینی
@@ -402,6 +407,38 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
     </div>
 </div>
 
+<!-- Add Customer Modal -->
+<div class="modal fade" id="addCustomerModal" tabindex="-1" aria-labelledby="addCustomerModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="addCustomerForm">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addCustomerModalLabel">زیادکردنی کڕیار</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="customer_name" class="form-label">ناوی کڕیار</label>
+                        <input type="text" class="form-control" id="customer_name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="customer_phone1" class="form-label">ژمارە تەلەفۆنی یەکەم</label>
+                        <input type="text" class="form-control" id="customer_phone1" name="mobile1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="customer_phone2" class="form-label">ژمارە تەلەفۆنی دووەم (ئیختیاری)</label>
+                        <input type="text" class="form-control" id="customer_phone2" name="mobile2">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
+                    <button type="submit" class="btn" style="background: var(--seafoam-green); color: white; font-weight: bold;">زیادکردن</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="../assets/js/swalAlert.js"></script>
@@ -421,6 +458,7 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
 <script src="../assets/js/notes/select.js"></script>
 <script src="../assets/js/notes/delete.js"></script>
 <script src="../assets/js/notes/update.js"></script>
+<script src="../assets/js/concrete_receipts/add_customer.js"></script>
 
 </body>
 </html>
