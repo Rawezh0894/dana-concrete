@@ -1,15 +1,4 @@
 $(document).ready(function() {
-  // Initialize Select2 for filters
-  if ($('#filter_customer_id').length > 0) {
-    enableSelect2('#filter_customer_id', 'body');
-  }
-  if ($('#filter_formulas_id').length > 0) {
-    enableSelect2('#filter_formulas_id', 'body');
-  }
-  if ($('#filter_driver_id').length > 0) {
-    enableSelect2('#filter_driver_id', 'body');
-  }
-  
   function getFilters() {
     return {
       customer_id: $('#filter_customer_id').val(),
@@ -145,19 +134,6 @@ $(document).ready(function() {
   });
 
   function updateSummaryCards(summary) {
-    const filters = getFilters();
-    const hasFilters = filters.customer_id || filters.location || filters.formulas_id || filters.driver_id || filters.date_from || filters.date_to;
-    
-    if (!hasFilters) {
-      // No filters applied - show placeholder text
-      $('#summary_total_receipts').text('فلتەر دابنێ');
-      $('#summary_total_meter').text('فلتەر دابنێ');
-      $('#summary_total_customers').text('فلتەر دابنێ');
-      $('#summary_total_driver_trips').text('فلتەر دابنێ');
-      $('#summary_total_driver_meters').text('فلتەر دابنێ');
-      return;
-    }
-    
     // Update total receipts
     const totalReceipts = summary && summary.total_receipts !== undefined ? summary.total_receipts : 0;
     $('#summary_total_receipts').text(totalReceipts);
@@ -170,13 +146,25 @@ $(document).ready(function() {
     const totalCustomers = summary && summary.total_customers !== undefined ? summary.total_customers : 0;
     $('#summary_total_customers').text(totalCustomers);
     
-    // Update total driver trips
-    const totalDriverTrips = summary && summary.total_driver_trips !== undefined ? summary.total_driver_trips : 0;
-    $('#summary_total_driver_trips').text(totalDriverTrips);
+    // Check if any filters are applied
+    const filters = getFilters();
+    const hasFilters = filters.customer_id || filters.location || filters.formulas_id || filters.driver_id || filters.date_from || filters.date_to;
     
-    // Update total driver meters
-    const totalDriverMeters = summary && summary.total_driver_meters !== undefined ? summary.total_driver_meters : 0;
-    $('#summary_total_driver_meters').text(totalDriverMeters + ' m³');
+    // Update total driver trips - only show when filters are applied
+    if (hasFilters) {
+      const totalDriverTrips = summary && summary.total_driver_trips !== undefined ? summary.total_driver_trips : 0;
+      $('#summary_total_driver_trips').text(totalDriverTrips);
+    } else {
+      $('#summary_total_driver_trips').text('-');
+    }
+    
+    // Update total driver meters - only show when filters are applied
+    if (hasFilters) {
+      const totalDriverMeters = summary && summary.total_driver_meters !== undefined ? summary.total_driver_meters : 0;
+      $('#summary_total_driver_meters').text(totalDriverMeters + ' m³');
+    } else {
+      $('#summary_total_driver_meters').text('-');
+    }
   }
 
   // On page load, fetch and show the real summary values

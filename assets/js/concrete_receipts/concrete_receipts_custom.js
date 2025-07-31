@@ -1,5 +1,24 @@
 // Filter button active state management
 $(document).ready(function() {
+    // Initialize Select2 for filter dropdowns
+    $('#filter_customer_id').select2({
+        placeholder: 'کڕیار: هەموو',
+        allowClear: true,
+        width: '100%'
+    });
+    
+    $('#filter_formulas_id').select2({
+        placeholder: 'ڕێژە: هەموو',
+        allowClear: true,
+        width: '100%'
+    });
+    
+    $('#filter_driver_id').select2({
+        placeholder: 'شۆفێر: هەموو',
+        allowClear: true,
+        width: '100%'
+    });
+    
     const filterButtons = document.querySelectorAll('.filter-btn');
     filterButtons.forEach(button => {
         button.addEventListener('click', function() {
