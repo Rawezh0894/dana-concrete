@@ -8,6 +8,13 @@ function markUserInteraction() {
     console.log('User interaction flag set to:', userHasInteracted);
 }
 
+// Function to force enable audio (for testing and when notes are added)
+function forceEnableAudio() {
+    userHasInteracted = true;
+    console.log('🔧 Audio forcefully enabled');
+    console.log('User interaction flag set to:', userHasInteracted);
+}
+
 // Function to check browser audio capabilities
 function checkBrowserAudioSupport() {
     console.log('Checking browser audio support...');
@@ -131,10 +138,12 @@ function updateUnreadNotesBadge() {
                     badge.textContent = count;
                     badge.style.display = 'inline';
                     
-                    // Play sound if count increased (new note added)
-                    if (count > previousCount) {
-                        playNotificationSound();
-                    }
+                                    // Play sound if count increased (new note added)
+                if (count > previousCount) {
+                    console.log('📈 Note count increased, playing notification sound...');
+                    forceEnableAudio();
+                    playNotificationSound();
+                }
                 } else {
                     badge.style.display = 'none';
                 }
@@ -179,26 +188,33 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Listen for custom events from other parts of the application
 document.addEventListener('noteAdded', function() {
+    console.log('📝 Note added event received');
     // Update badge when a new note is added
     updateUnreadNotesBadge();
 });
 
 document.addEventListener('noteMarkedAsRead', function() {
+    console.log('👁️ Note marked as read event received');
     // Update badge when a note is marked as read
     updateUnreadNotesBadge();
 });
 
 document.addEventListener('noteDeleted', function() {
+    console.log('🗑️ Note deleted event received');
     // Update badge when a note is deleted
     updateUnreadNotesBadge();
 });
 
 document.addEventListener('noteUpdated', function() {
+    console.log('✏️ Note updated event received');
     // Update badge when a note is updated
     updateUnreadNotesBadge();
 });
 
 document.addEventListener('noteAddedWithSound', function() {
+    console.log('🔊 Note added with sound event received');
+    // Force enable audio and play sound
+    forceEnableAudio();
     playNotificationSound();
 });
 
@@ -206,6 +222,7 @@ document.addEventListener('noteAddedWithSound', function() {
 window.updateUnreadNotesBadge = updateUnreadNotesBadge;
 window.playNotificationSound = playNotificationSound;
 window.markUserInteraction = markUserInteraction;
+window.forceEnableAudio = forceEnableAudio;
 
 // Test function for debugging
 window.testNotificationSound = function() {
@@ -215,13 +232,13 @@ window.testNotificationSound = function() {
     checkBrowserAudioSupport();
     checkAudioFile();
     
-    // Mark user interaction when test button is clicked
-    console.log('🔧 Manually marking user interaction...');
-    markUserInteraction();
+    // Force enable audio for testing
+    console.log('🔧 Force enabling audio for test...');
+    forceEnableAudio();
     
     // Try to play sound after a short delay
     setTimeout(() => {
-        console.log('🎵 Attempting to play sound after user interaction...');
+        console.log('🎵 Attempting to play sound after force enable...');
         playNotificationSound();
     }, 100);
 }; 

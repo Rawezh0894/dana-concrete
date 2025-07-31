@@ -122,9 +122,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Play notification sound if we're on the concrete receipts page
                 if (window.playNotificationSound) {
-                    // Mark user interaction for audio playback
-                    if (window.markUserInteraction) {
-                        window.markUserInteraction();
+                    // Force enable audio for new note notifications
+                    if (window.forceEnableAudio) {
+                        window.forceEnableAudio();
                     }
                     
                     setTimeout(() => {
