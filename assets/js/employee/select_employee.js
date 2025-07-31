@@ -13,7 +13,7 @@ $(function() {
             const dollarRate = parseFloat(dollarRateElement.text().replace(/,/g, ''));
             if (dollarRate > 0) {
                 const salaryInDollars = summary.total_salary / (dollarRate / 100);
-                $('#total_salary').append(` <small class="text-muted">($${salaryInDollars.toFixed(2)})</small>`);
+                $('#total_salary').append(`، <small class="text-muted">$${salaryInDollars.toFixed(2)}</small>`);
             }
         }
     }
