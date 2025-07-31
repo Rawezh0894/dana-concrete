@@ -4,7 +4,8 @@ let userHasInteracted = false;
 // Function to mark user interaction
 function markUserInteraction() {
     userHasInteracted = true;
-    console.log('User interaction detected - audio can now play');
+    console.log('✅ User interaction detected - audio can now play');
+    console.log('User interaction flag set to:', userHasInteracted);
 }
 
 // Function to check browser audio capabilities
@@ -58,17 +59,17 @@ function checkAudioFile() {
 
 // Function to play notification sound
 function playNotificationSound() {
-    console.log('Attempting to play notification sound...');
+    console.log('🎵 Attempting to play notification sound...');
     console.log('User has interacted:', userHasInteracted);
     
     const audio = document.getElementById('notificationSound');
     
     if (!audio) {
-        console.error('Audio element not found!');
+        console.error('❌ Audio element not found!');
         return;
     }
     
-    console.log('Audio element found:', audio);
+    console.log('✅ Audio element found:', audio);
     console.log('Audio readyState:', audio.readyState);
     console.log('Audio src:', audio.src);
     
@@ -81,12 +82,14 @@ function playNotificationSound() {
     
     // Check if audio is loaded
     if (audio.readyState < 2) {
-        console.log('Audio not loaded yet, trying to load...');
+        console.log('🔄 Audio not loaded yet, trying to load...');
         audio.load();
     }
     
     // Reset audio to beginning
     audio.currentTime = 0;
+    
+    console.log('🎯 About to play audio...');
     
     // Play the sound
     const playPromise = audio.play();
@@ -109,6 +112,8 @@ function playNotificationSound() {
                     console.error('❌ Alternative approach also failed:', e);
                 });
             });
+    } else {
+        console.log('⚠️ Audio play() returned undefined');
     }
 }
 
@@ -142,6 +147,8 @@ function updateUnreadNotesBadge() {
 
 // Update badge on page load
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 DOM Content Loaded - Setting up audio system...');
+    
     updateUnreadNotesBadge();
     
     // Check browser audio support
@@ -151,9 +158,20 @@ document.addEventListener('DOMContentLoaded', function() {
     checkAudioFile();
     
     // Add user interaction listeners
-    document.addEventListener('click', markUserInteraction);
-    document.addEventListener('keydown', markUserInteraction);
-    document.addEventListener('touchstart', markUserInteraction);
+    document.addEventListener('click', function(e) {
+        console.log('🖱️ Click detected on:', e.target);
+        markUserInteraction();
+    });
+    document.addEventListener('keydown', function(e) {
+        console.log('⌨️ Keydown detected');
+        markUserInteraction();
+    });
+    document.addEventListener('touchstart', function(e) {
+        console.log('👆 Touch detected');
+        markUserInteraction();
+    });
+    
+    console.log('✅ Event listeners added for user interaction');
     
     // Update badge every 30 seconds
     setInterval(updateUnreadNotesBadge, 30000);
@@ -191,15 +209,19 @@ window.markUserInteraction = markUserInteraction;
 
 // Test function for debugging
 window.testNotificationSound = function() {
-    console.log('Testing notification sound...');
+    console.log('🧪 Testing notification sound...');
+    console.log('Current user interaction state:', userHasInteracted);
+    
     checkBrowserAudioSupport();
     checkAudioFile();
     
     // Mark user interaction when test button is clicked
+    console.log('🔧 Manually marking user interaction...');
     markUserInteraction();
     
-    // Try to play sound
+    // Try to play sound after a short delay
     setTimeout(() => {
+        console.log('🎵 Attempting to play sound after user interaction...');
         playNotificationSound();
     }, 100);
 }; 
