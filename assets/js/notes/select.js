@@ -397,13 +397,13 @@ function convertToReceipt(noteId) {
     params.append('customer_id', note.customer_id);
     params.append('location', note.location);
     params.append('receiver_name', note.recipient || '');
-    params.append('meter_amount', note.meter_amount);
+    // Note: meter_amount is intentionally not sent to allow manual entry
+    // params.append('meter_amount', note.meter_amount);
     params.append('formula_id', note.formula_id);
     params.append('mixer_car_id', note.mixer_car_id || '');
     params.append('mixer_driver_id', note.mixer_driver_id || '');
     params.append('pump_car_id', note.pump_car_id || '');
     params.append('pump_driver_id', note.pump_driver_id || '');
-    params.append('auto_print', '1'); // Flag to auto-print after creation
     
     // Redirect to concrete receipts page with data
     window.location.href = `concrete_receipts.php?${params.toString()}`;
