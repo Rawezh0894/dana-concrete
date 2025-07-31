@@ -470,9 +470,13 @@ $mixer_drivers = array_filter($employees, function ($emp) {
     // Auto-open add modal if redirected with ?open_add=1
     document.addEventListener('DOMContentLoaded', function() {
       const params = new URLSearchParams(window.location.search);
+      const shouldClear = params.get('clear') === '1';
       if (params.get('open_add') === '1') {
-        // Clear localStorage to prevent restoring old data when coming from notes
-        localStorage.removeItem('addConcreteReceiptFormData');
+        // Only clear localStorage if coming from notes or clear=1
+        const hasNoteData = params.get('customer_id') || params.get('location') || params.get('formula_id');
+        if (hasNoteData || shouldClear) {
+          localStorage.removeItem('addConcreteReceiptFormData');
+        }
         
         const modalEl = document.getElementById('addConcreteReceiptModal');
         const modal = new bootstrap.Modal(modalEl);
@@ -480,49 +484,54 @@ $mixer_drivers = array_filter($employees, function ($emp) {
         
         // Wait for modal to be fully shown before filling data
         modalEl.addEventListener('shown.bs.modal', function() {
-          // Fill form with data from URL parameters
-          if (params.get('customer_id')) {
-            $('#customer_id').val(params.get('customer_id')).trigger('change');
-          }
-          if (params.get('location')) {
-            document.getElementById('location').value = params.get('location');
-          }
-          if (params.get('receiver_name')) {
-            document.getElementById('receiver_name').value = params.get('receiver_name');
-          }
-          // Note: meter_amount is intentionally not filled from notes to allow manual entry
-          // if (params.get('meter_amount')) {
-          //   document.getElementById('meter_amount').value = params.get('meter_amount');
-          // }
-          if (params.get('formula_id')) {
-            $('#formulas_id').val(params.get('formula_id')).trigger('change');
-          }
-          if (params.get('mixer_car_id')) {
-            $('#mixer_car_id').val(params.get('mixer_car_id')).trigger('change');
-          }
-          if (params.get('mixer_driver_id')) {
-            $('#mixer_driver_id').val(params.get('mixer_driver_id')).trigger('change');
-          }
-          if (params.get('pump_car_id')) {
-            $('#pump_car_id').val(params.get('pump_car_id')).trigger('change');
-          }
-          if (params.get('pump_driver_id')) {
-            $('#pump_driver_id').val(params.get('pump_driver_id')).trigger('change');
+          // Only fill form with URL parameters if they exist (coming from notes)
+          if (hasNoteData) {
+            // Fill form with data from URL parameters
+            if (params.get('customer_id')) {
+              $('#customer_id').val(params.get('customer_id')).trigger('change');
+            }
+            if (params.get('location')) {
+              document.getElementById('location').value = params.get('location');
+            }
+            if (params.get('receiver_name')) {
+              document.getElementById('receiver_name').value = params.get('receiver_name');
+            }
+            // Note: meter_amount is intentionally not filled from notes to allow manual entry
+            // if (params.get('meter_amount')) {
+            //   document.getElementById('meter_amount').value = params.get('meter_amount');
+            // }
+            if (params.get('formula_id')) {
+              $('#formulas_id').val(params.get('formula_id')).trigger('change');
+            }
+            if (params.get('mixer_car_id')) {
+              $('#mixer_car_id').val(params.get('mixer_car_id')).trigger('change');
+            }
+            if (params.get('mixer_driver_id')) {
+              $('#mixer_driver_id').val(params.get('mixer_driver_id')).trigger('change');
+            }
+            if (params.get('pump_car_id')) {
+              $('#pump_car_id').val(params.get('pump_car_id')).trigger('change');
+            }
+            if (params.get('pump_driver_id')) {
+              $('#pump_driver_id').val(params.get('pump_driver_id')).trigger('change');
+            }
           }
           
-          // Manually fetch and set the next receipt number
-          fetch('../process/concrete_receipts/get_next_receipt_number.php')
-            .then(res => res.json())
-            .then(res => {
-              if (res && res.success && res.next) {
-                document.getElementById('receipt_number').value = res.next;
-              } else {
+          // Manually fetch and set the next receipt number (only if coming from notes)
+          if (hasNoteData) {
+            fetch('../process/concrete_receipts/get_next_receipt_number.php')
+              .then(res => res.json())
+              .then(res => {
+                if (res && res.success && res.next) {
+                  document.getElementById('receipt_number').value = res.next;
+                } else {
+                  document.getElementById('receipt_number').value = 'A-0001';
+                }
+              })
+              .catch(() => {
                 document.getElementById('receipt_number').value = 'A-0001';
-              }
-            })
-            .catch(() => {
-              document.getElementById('receipt_number').value = 'A-0001';
-            });
+              });
+          }
         }, { once: true }); // Use once: true to ensure this only runs once
       }
     });

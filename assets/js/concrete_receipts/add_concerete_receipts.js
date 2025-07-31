@@ -1,25 +1,32 @@
 // Multiple submission prevention flag
 let submitting = false;
 $(document).ready(function() {
-    // Restore form data from localStorage
-    const storageKey = 'addConcreteReceiptFormData';
-    const $form = $('#addConcreteReceiptForm');
-    const saved = localStorage.getItem(storageKey);
-    if (saved) {
-        try {
-            const data = JSON.parse(saved);
-            Object.entries(data).forEach(([k, v]) => {
-                if (k === 'receipt_number') return; // never restore receipt_number
-                // Don't restore fields that should be cleared
-                if (['meter_amount', 'mixer_car_id', 'mixer_driver_id'].includes(k)) return;
-                const $el = $form.find(`[name="${k}"]`);
-                if ($el.is('select')) {
-                    $el.val(v).trigger('change');
-                } else {
-                    $el.val(v);
-                }
-            });
-        } catch(e) {}
+    // Check if we're coming from notes (URL has note data parameters)
+    const params = new URLSearchParams(window.location.search);
+    const hasNoteData = params.get('customer_id') || params.get('location') || params.get('formula_id');
+    
+    // Only restore from localStorage if NOT coming from notes
+    if (!hasNoteData) {
+        // Restore form data from localStorage
+        const storageKey = 'addConcreteReceiptFormData';
+        const $form = $('#addConcreteReceiptForm');
+        const saved = localStorage.getItem(storageKey);
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                Object.entries(data).forEach(([k, v]) => {
+                    if (k === 'receipt_number') return; // never restore receipt_number
+                    // Don't restore fields that should be cleared
+                    if (['meter_amount', 'mixer_car_id', 'mixer_driver_id'].includes(k)) return;
+                    const $el = $form.find(`[name="${k}"]`);
+                    if ($el.is('select')) {
+                        $el.val(v).trigger('change');
+                    } else {
+                        $el.val(v);
+                    }
+                });
+            } catch(e) {}
+        }
     }
     // Save form data on change
     $form.on('input change', 'input, select, textarea', function() {
@@ -108,14 +115,21 @@ $(document).ready(function() {
     });
 
     $('#addConcreteReceiptModal').on('show.bs.modal', function() {
-        $.get('../process/concrete_receipts/get_next_receipt_number.php', function(res) {
-            if (res && res.success && res.next) {
-                $('#receipt_number').val(res.next);
-            } else {
+        // Check if we're coming from notes (URL has note data parameters)
+        const params = new URLSearchParams(window.location.search);
+        const hasNoteData = params.get('customer_id') || params.get('location') || params.get('formula_id');
+        
+        // Only set receipt number if NOT coming from notes (to avoid conflicts)
+        if (!hasNoteData) {
+            $.get('../process/concrete_receipts/get_next_receipt_number.php', function(res) {
+                if (res && res.success && res.next) {
+                    $('#receipt_number').val(res.next);
+                } else {
+                    $('#receipt_number').val('A-0001');
+                }
+            }, 'json').fail(function() {
                 $('#receipt_number').val('A-0001');
-            }
-        }, 'json').fail(function() {
-            $('#receipt_number').val('A-0001');
-        });
+            });
+        }
     });
 });

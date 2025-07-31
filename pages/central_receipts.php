@@ -216,7 +216,7 @@ $receipt_id = isset($_GET['id']) ? $_GET['id'] : null;
 
     // Redirect after print dialog closes (for manual print)
     window.addEventListener('afterprint', function() {
-        window.location.href = '../pages/concrete_receipts.php?open_add=1';
+        window.location.href = '../pages/concrete_receipts.php?open_add=1&clear=1';
     });
     </script>
 <?php if (isset($_GET['auto_print'])): ?>
