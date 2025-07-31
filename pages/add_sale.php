@@ -52,7 +52,7 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
 
     <!-- Summary Cards -->
     <div class="row mb-4" id="summary-cards">
-        <div class="col-md-4 mb-3">
+        <div class="col-md-3 mb-3">
             <div class="card text-center shadow  card-gradient-danger card-animate-hover">
                 <div class="card-body">
                     <i class="fas fa-money-bill-wave card-icon"></i>
@@ -62,7 +62,7 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-3">
+        <div class="col-md-3 mb-3">
             <div class="card text-center shadow  card-gradient-warning card-animate-hover">
                 <div class="card-body">
                     <i class="fas fa-user-times card-icon"></i>
@@ -72,13 +72,26 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-3">
+        <div class="col-md-3 mb-3">
             <div class="card text-center shadow  card-gradient-success card-animate-hover">
                 <div class="card-body">
                     <i class="fas fa-shopping-cart card-icon"></i>
                     <h6 class="card-title">کۆی فرۆشتنەکان</h6>
                     <div class="fs-4 fw-bold" id="total-sales">0</div>
                     <small class="text-light">ژمارەی هەموو فرۆشتنەکان</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center shadow  card-gradient-info card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-dollar-sign card-icon"></i>
+                    <h6 class="card-title">نرخی ١٠٠ دۆلار</h6>
+                    <div class="fs-4 fw-bold" id="usd-rate">0</div>
+                    <small class="text-light">دیناری عێراقی</small>
+                    <button type="button" class="btn btn-sm btn-outline-light mt-2" id="refresh-usd-rate" title="نوێکردنەوەی نرخی دۆلار">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
                 </div>
             </div>
         </div>
