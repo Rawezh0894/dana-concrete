@@ -10,6 +10,8 @@ $(document).ready(function() {
             const data = JSON.parse(saved);
             Object.entries(data).forEach(([k, v]) => {
                 if (k === 'receipt_number') return; // never restore receipt_number
+                // Don't restore fields that should be cleared
+                if (['meter_amount', 'mixer_car_id', 'mixer_driver_id'].includes(k)) return;
                 const $el = $form.find(`[name="${k}"]`);
                 if ($el.is('select')) {
                     $el.val(v).trigger('change');
@@ -23,7 +25,10 @@ $(document).ready(function() {
     $form.on('input change', 'input, select, textarea', function() {
         const data = {};
         $form.serializeArray().forEach(({name, value}) => {
-            if (name !== 'receipt_number') data[name] = value;
+            // Don't save receipt_number and fields that should be cleared
+            if (!['receipt_number', 'meter_amount', 'mixer_car_id', 'mixer_driver_id'].includes(name)) {
+                data[name] = value;
+            }
         });
         localStorage.setItem(storageKey, JSON.stringify(data));
     });
@@ -62,7 +67,7 @@ $(document).ready(function() {
                     timerProgressBar: true,
                     didClose: () => {
                         if (data.id) {
-                            // Save all fields except meter_amount, mixer_car_id, mixer_driver_id
+                            // Save all fields except meter_amount, mixer_car_id, mixer_driver_id, and receipt_number
                             const allData = {};
                             $form.serializeArray().forEach(({name, value}) => {
                                 if (!["meter_amount","mixer_car_id","mixer_driver_id","receipt_number"].includes(name)) {
