@@ -119,16 +119,13 @@ $(document).ready(function() {
     // Remove highlights
     $('#filter_today').removeClass('active btn-primary').addClass('btn-outline-primary');
     $('#filter_yesterday').removeClass('active btn-secondary').addClass('btn-outline-secondary');
-    // Reload table
-    if (typeof window.reloadConcreteReceipts === 'function') {
-      window.reloadConcreteReceipts();
-    } else {
-      loadFilteredReceipts();
-    }
-    // Reload summary cards as well
-    if (typeof window.reloadConcreteReceiptsSummary === 'function') {
-      window.reloadConcreteReceiptsSummary();
-    }
+    
+    // Clear Select2 dropdowns
+    $('#filter_customer_id').val('').trigger('change');
+    $('#filter_formulas_id').val('').trigger('change');
+    
+    // Reload table and summary cards with no filters (showing all data)
+    loadFilteredReceipts();
   });
 
   function updateSummaryCards(summary) {
