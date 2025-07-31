@@ -41,6 +41,15 @@ function fetchDollarRate() {
             if (response && response.value) {
                 $('#dollar_rate').text(response.value.toLocaleString());
                 console.log('Dollar rate fetched successfully:', response.value);
+                
+                // Update salary conversion if summary cards are loaded
+                if (typeof window.updateSummaryCards === 'function' && window.lastSummaryData) {
+                    // Update with existing data to avoid unnecessary API call
+                    window.updateSummaryCards(window.lastSummaryData);
+                } else if (typeof window.loadEmployees === 'function') {
+                    window.loadEmployees();
+                }
+                
                 // Show success notification
                 Swal.fire({
                     icon: 'success',

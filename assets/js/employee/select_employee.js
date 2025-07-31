@@ -6,6 +6,16 @@ $(function() {
     function updateSummaryCards(summary) {
         $('#total_employees').text(summary.total_employees.toLocaleString());
         $('#total_salary').text(formatSalary(summary.total_salary));
+        
+        // Convert salary to dollars if dollar rate is available
+        const dollarRateElement = $('#dollar_rate');
+        if (dollarRateElement.length && dollarRateElement.text() !== '0' && dollarRateElement.text() !== 'جێبەجێکردن...') {
+            const dollarRate = parseFloat(dollarRateElement.text().replace(/,/g, ''));
+            if (dollarRate > 0) {
+                const salaryInDollars = summary.total_salary / (dollarRate / 100);
+                $('#total_salary').append(` <small class="text-muted">($${salaryInDollars.toFixed(2)})</small>`);
+            }
+        }
     }
     
     function loadEmployees() {
@@ -19,6 +29,7 @@ $(function() {
             
             // Update summary cards
             if (res.summary) {
+                window.lastSummaryData = res.summary; // Store for reuse
                 updateSummaryCards(res.summary);
             }
             
@@ -36,4 +47,5 @@ $(function() {
     }
     loadEmployees();
     window.loadEmployees = loadEmployees;
+    window.updateSummaryCards = updateSummaryCards;
 });
