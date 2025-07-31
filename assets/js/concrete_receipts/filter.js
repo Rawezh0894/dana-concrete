@@ -119,33 +119,34 @@ $(document).ready(function() {
     // Remove highlights
     $('#filter_today').removeClass('active btn-primary').addClass('btn-outline-primary');
     $('#filter_yesterday').removeClass('active btn-secondary').addClass('btn-outline-secondary');
-    
-    // Clear Select2 dropdowns
-    $('#filter_customer_id').val('').trigger('change');
-    $('#filter_formulas_id').val('').trigger('change');
-    
-    // Reload table and summary cards with no filters (showing all data)
-    loadFilteredReceipts();
+    // Reload table
+    if (typeof window.reloadConcreteReceipts === 'function') {
+      window.reloadConcreteReceipts();
+    } else {
+      loadFilteredReceipts();
+    }
+    // Reload summary cards as well
+    if (typeof window.reloadConcreteReceiptsSummary === 'function') {
+      window.reloadConcreteReceiptsSummary();
+    }
   });
 
   function updateSummaryCards(summary) {
-    $('#summary_total_receipts').text(summary && summary.total_receipts ? summary.total_receipts : 0);
-    if (summary && summary.total_meter) {
-      $('#summary_total_meter').text(summary.total_meter + ' m³');
-    } else {
-      $('#summary_total_meter').text('0 m³');
-    }
-    if (summary && (summary.total_customers === 'هەموو' || summary.total_customers === 0)) {
-      $('#summary_total_customers').text('هەموو');
-    } else {
-      $('#summary_total_customers').text(summary && summary.total_customers ? summary.total_customers : 0);
-    }
+    // Update total receipts
+    const totalReceipts = summary && summary.total_receipts !== undefined ? summary.total_receipts : 0;
+    $('#summary_total_receipts').text(totalReceipts);
+    
+    // Update total meter
+    const totalMeter = summary && summary.total_meter !== undefined ? summary.total_meter : 0;
+    $('#summary_total_meter').text(totalMeter + ' m³');
+    
+    // Update total customers
+    const totalCustomers = summary && summary.total_customers !== undefined ? summary.total_customers : 0;
+    $('#summary_total_customers').text(totalCustomers);
   }
 
   // On page load, fetch and show the real summary values
-  if (typeof window.reloadConcreteReceiptsSummary === 'function') {
-    window.reloadConcreteReceiptsSummary();
-  }
+  loadFilteredReceipts(); // Load data immediately on page load
 
   // Function to attach event handlers to buttons
   function attachEventHandlers() {
