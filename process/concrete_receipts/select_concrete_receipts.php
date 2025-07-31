@@ -65,7 +65,11 @@ try {
     $summary_sql = '
         SELECT COUNT(*) as total_receipts,
                SUM(cr.meter_amount) as total_meter,
-               COUNT(DISTINCT cr.customer_id) as total_customers
+               COUNT(DISTINCT cr.customer_id) as total_customers,
+               COUNT(DISTINCT CASE WHEN cr.mixer_driver_id IS NOT NULL THEN cr.mixer_driver_id END) + 
+               COUNT(DISTINCT CASE WHEN cr.pump_driver_id IS NOT NULL THEN cr.pump_driver_id END) as total_driver_trips,
+               SUM(CASE WHEN cr.mixer_driver_id IS NOT NULL THEN cr.meter_amount ELSE 0 END) + 
+               SUM(CASE WHEN cr.pump_driver_id IS NOT NULL THEN cr.meter_amount ELSE 0 END) as total_driver_meters
         FROM concrete_receipts cr
         ' . $whereSql . '
     ';
@@ -76,6 +80,8 @@ try {
     $summary["total_receipts"] = (int) ($summary["total_receipts"] ?? 0);
     $summary["total_meter"] = (float) ($summary["total_meter"] ?? 0);
     $summary["total_customers"] = (int) ($summary["total_customers"] ?? 0);
+    $summary["total_driver_trips"] = (int) ($summary["total_driver_trips"] ?? 0);
+    $summary["total_driver_meters"] = (float) ($summary["total_driver_meters"] ?? 0);
 
     echo json_encode(['success' => true, 'data' => $receipts, 'summary' => $summary]);
 } catch (Exception $e) {

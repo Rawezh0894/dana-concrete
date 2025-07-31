@@ -143,6 +143,14 @@ $(document).ready(function() {
     // Update total customers
     const totalCustomers = summary && summary.total_customers !== undefined ? summary.total_customers : 0;
     $('#summary_total_customers').text(totalCustomers);
+    
+    // Update total driver trips
+    const totalDriverTrips = summary && summary.total_driver_trips !== undefined ? summary.total_driver_trips : 0;
+    $('#summary_total_driver_trips').text(totalDriverTrips);
+    
+    // Update total driver meters
+    const totalDriverMeters = summary && summary.total_driver_meters !== undefined ? summary.total_driver_meters : 0;
+    $('#summary_total_driver_meters').text(totalDriverMeters + ' m³');
   }
 
   // On page load, fetch and show the real summary values

@@ -92,7 +92,7 @@ $mixer_drivers = array_filter($employees, function ($emp) {
     </div>
     <!-- Summary Cards Row -->
     <div class="row mb-3" id="concrete-receipts-summary">
-      <div class="col-md-4 mb-2">
+      <div class="col-md-2 mb-2">
         <div class="card text-center shadow  card-gradient-info card-animate-hover">
           <div class="card-body">
             <i class="fas fa-file-alt card-icon"></i>
@@ -102,7 +102,7 @@ $mixer_drivers = array_filter($employees, function ($emp) {
           </div>
         </div>
       </div>
-      <div class="col-md-4 mb-2">
+      <div class="col-md-2 mb-2">
         <div class="card text-center shadow  card-gradient-success card-animate-hover">
           <div class="card-body">
             <i class="fas fa-cube card-icon"></i>
@@ -112,13 +112,33 @@ $mixer_drivers = array_filter($employees, function ($emp) {
           </div>
         </div>
       </div>
-      <div class="col-md-4 mb-2">
+      <div class="col-md-2 mb-2">
         <div class="card text-center shadow  card-gradient-warning card-animate-hover">
           <div class="card-body">
             <i class="fas fa-users card-icon"></i>
             <h6 class="card-title">کۆی کڕیاران</h6>
             <div class="fs-4 fw-bold" id="summary_total_customers">0</div>
             <small class="text-light">ژمارەی کڕیارەکان</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 mb-2">
+        <div class="card text-center shadow  card-gradient-purple card-animate-hover">
+          <div class="card-body">
+            <i class="fas fa-truck card-icon"></i>
+            <h6 class="card-title">کۆی کاروان حیسابی شۆفێران</h6>
+            <div class="fs-4 fw-bold" id="summary_total_driver_trips">0</div>
+            <small class="text-light">کۆی کاروان حیسابی هەر شۆفێرێک</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 mb-2">
+        <div class="card text-center shadow  card-gradient-teal card-animate-hover">
+          <div class="card-body">
+            <i class="fas fa-route card-icon"></i>
+            <h6 class="card-title">کۆی مەتر سێجای شۆفێران</h6>
+            <div class="fs-4 fw-bold" id="summary_total_driver_meters">0</div>
+            <small class="text-light">کۆی مەتر سێجای هەر شۆفێرێک</small>
           </div>
         </div>
       </div>
