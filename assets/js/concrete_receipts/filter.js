@@ -12,6 +12,7 @@ $(document).ready(function() {
 
   function loadFilteredReceipts() {
     const filters = getFilters();
+    console.log('Sending filters:', filters); // Debug log
     $.ajax({
       url: '../process/concrete_receipts/select_concrete_receipts.php',
       method: 'GET',

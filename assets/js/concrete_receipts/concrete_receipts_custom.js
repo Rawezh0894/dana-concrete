@@ -17,6 +17,11 @@ $(document).ready(function() {
         placeholder: 'شۆفێر: هەموو',
         allowClear: true,
         width: '100%'
+    }).on('change', function() {
+        // Trigger the filter function when driver is selected
+        if (typeof loadFilteredReceipts === 'function') {
+            loadFilteredReceipts();
+        }
     });
     
     const filterButtons = document.querySelectorAll('.filter-btn');

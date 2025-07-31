@@ -18,6 +18,9 @@ if (!hasPermission('view_concrete_receipts')) {
 header('Content-Type: application/json; charset=utf-8');
 
 try {
+    // Debug: Log the received parameters
+    error_log("Received filters: " . json_encode($_GET));
+    
     // Gather filters
     $where = [];
     $params = [];
@@ -70,16 +73,21 @@ try {
         SELECT COUNT(*) as total_receipts,
                SUM(cr.meter_amount) as total_meter,
                COUNT(DISTINCT cr.customer_id) as total_customers,
-               COUNT(DISTINCT CASE WHEN cr.mixer_driver_id IS NOT NULL THEN cr.mixer_driver_id END) + 
-               COUNT(DISTINCT CASE WHEN cr.pump_driver_id IS NOT NULL THEN cr.pump_driver_id END) as total_driver_trips,
-               SUM(CASE WHEN cr.mixer_driver_id IS NOT NULL THEN cr.meter_amount ELSE 0 END) + 
-               SUM(CASE WHEN cr.pump_driver_id IS NOT NULL THEN cr.meter_amount ELSE 0 END) as total_driver_meters
+               COUNT(CASE WHEN cr.mixer_driver_id IS NOT NULL OR cr.pump_driver_id IS NOT NULL THEN 1 END) as total_driver_trips,
+               SUM(CASE WHEN cr.mixer_driver_id IS NOT NULL OR cr.pump_driver_id IS NOT NULL THEN cr.meter_amount ELSE 0 END) as total_driver_meters
         FROM concrete_receipts cr
         ' . $whereSql . '
     ';
+    
+    // Debug: Log the SQL query
+    error_log("Summary SQL: " . $summary_sql);
+    error_log("Summary params: " . json_encode($params));
     $summary_stmt = $pdo->prepare($summary_sql);
     $summary_stmt->execute($params);
     $summary = $summary_stmt->fetch(PDO::FETCH_ASSOC);
+    
+    // Debug: Log the summary result
+    error_log("Summary result: " . json_encode($summary));
     // Fallbacks for null
     $summary["total_receipts"] = (int) ($summary["total_receipts"] ?? 0);
     $summary["total_meter"] = (float) ($summary["total_meter"] ?? 0);
