@@ -59,24 +59,42 @@ async function checkForNewNotes() {
         const data = await response.json();
         
         if (data.success && data.unread_count > 0) {
-            // Show notification
-            self.registration.showNotification('تێبینی نوێ', {
-                body: `تێبینی نوێ هەیە (${data.unread_count})`,
-                icon: '../assets/images/logo.png',
-                badge: '../assets/images/logo.png',
-                tag: 'new-note-notification',
-                requireInteraction: true,
-                actions: [
-                    {
-                        action: 'view',
-                        title: 'بینین'
-                    },
-                    {
-                        action: 'dismiss',
-                        title: 'داخستن'
-                    }
-                ]
-            });
+            // Check if user is currently on notes page
+            const clients = await self.clients.matchAll();
+            let isOnNotesPage = false;
+            
+            for (const client of clients) {
+                if (client.url.includes('notes.php') || 
+                    client.url.includes('/notes') ||
+                    client.title.includes('تێبینیەکان')) {
+                    isOnNotesPage = true;
+                    break;
+                }
+            }
+            
+            // Only show notification if not on notes page
+            if (!isOnNotesPage) {
+                console.log('📱 Showing background notification - user not on notes page');
+                self.registration.showNotification('تێبینی نوێ', {
+                    body: `تێبینی نوێ هەیە (${data.unread_count})`,
+                    icon: '../assets/images/logo.png',
+                    badge: '../assets/images/logo.png',
+                    tag: 'new-note-notification',
+                    requireInteraction: true,
+                    actions: [
+                        {
+                            action: 'view',
+                            title: 'بینین'
+                        },
+                        {
+                            action: 'dismiss',
+                            title: 'داخستن'
+                        }
+                    ]
+                });
+            } else {
+                console.log('📱 Not showing notification - user is on notes page');
+            }
         }
     } catch (error) {
         console.error('❌ Error checking for new notes in background:', error);

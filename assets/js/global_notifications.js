@@ -266,6 +266,13 @@ function markGlobalUserInteraction() {
     }
 }
 
+// Check if current page is notes page
+function isNotesPage() {
+    return window.location.pathname.includes('notes.php') || 
+           window.location.pathname.includes('/notes') ||
+           document.title.includes('تێبینیەکان');
+}
+
 // Update unread notes badge globally
 function updateGlobalUnreadNotesBadge() {
     fetch('../process/notes/get_unread_count.php')
@@ -281,9 +288,10 @@ function updateGlobalUnreadNotesBadge() {
                         badge.textContent = count;
                         badge.style.display = 'inline';
                         
-                        // Play sound if count increased (new note added)
-                        if (count > previousCount) {
+                        // Play sound if count increased (new note added) AND not on notes page
+                        if (count > previousCount && !isNotesPage()) {
                             console.log('📈 Global note count increased, playing notification sound...');
+                            console.log('📍 Current page is notes page:', isNotesPage());
                             forceEnableGlobalAudio();
                             
                             // Try to play sound with multiple attempts
@@ -296,6 +304,8 @@ function updateGlobalUnreadNotesBadge() {
                             setTimeout(() => {
                                 playGlobalNotificationSound();
                             }, 500);
+                        } else if (count > previousCount && isNotesPage()) {
+                            console.log('📈 Note count increased but on notes page - no sound played');
                         }
                     } else {
                         badge.style.display = 'none';
@@ -372,6 +382,9 @@ function initializeGlobalNotifications() {
     updateGlobalUnreadNotesBadge();
     notificationInterval = setInterval(updateGlobalUnreadNotesBadge, 10000);
     
+    // Log current page status
+    console.log('📍 Current page detection:', isNotesPage() ? 'Notes page' : 'Other page');
+    
     console.log('✅ Global notification system initialized');
 }
 
@@ -398,18 +411,25 @@ document.addEventListener('noteUpdated', function() {
 
 document.addEventListener('noteAddedWithSound', function() {
     console.log('🔊 Global note added with sound event received');
-    forceEnableGlobalAudio();
     
-    // Try to play sound with multiple attempts
-    setTimeout(() => {
-        playGlobalNotificationSound();
-    }, 50);
-    setTimeout(() => {
-        playGlobalNotificationSound();
-    }, 200);
-    setTimeout(() => {
-        playGlobalNotificationSound();
-    }, 500);
+    // Only play sound if not on notes page
+    if (!isNotesPage()) {
+        console.log('📍 Not on notes page - playing sound');
+        forceEnableGlobalAudio();
+        
+        // Try to play sound with multiple attempts
+        setTimeout(() => {
+            playGlobalNotificationSound();
+        }, 50);
+        setTimeout(() => {
+            playGlobalNotificationSound();
+        }, 200);
+        setTimeout(() => {
+            playGlobalNotificationSound();
+        }, 500);
+    } else {
+        console.log('📍 On notes page - no sound played');
+    }
 });
 
 // Initialize when DOM is loaded
@@ -419,4 +439,20 @@ document.addEventListener('DOMContentLoaded', initializeGlobalNotifications);
 window.playGlobalNotificationSound = playGlobalNotificationSound;
 window.forceEnableGlobalAudio = forceEnableGlobalAudio;
 window.markGlobalUserInteraction = markGlobalUserInteraction;
-window.updateGlobalUnreadNotesBadge = updateGlobalUnreadNotesBadge; 
+window.updateGlobalUnreadNotesBadge = updateGlobalUnreadNotesBadge;
+window.isNotesPage = isNotesPage;
+
+// Test function for debugging
+window.testNotesPageDetection = function() {
+    console.log('🧪 Testing notes page detection...');
+    console.log('Current URL:', window.location.href);
+    console.log('Current pathname:', window.location.pathname);
+    console.log('Current title:', document.title);
+    console.log('Is notes page:', isNotesPage());
+    
+    if (isNotesPage()) {
+        console.log('📍 Currently on notes page - notifications will be disabled');
+    } else {
+        console.log('📍 Not on notes page - notifications will work normally');
+    }
+}; 
