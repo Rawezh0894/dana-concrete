@@ -127,9 +127,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         window.forceEnableAudio();
                     }
                     
+                    // Play sound immediately
                     setTimeout(() => {
                         window.playNotificationSound();
-                    }, 500); // Small delay to ensure badge is updated first
+                    }, 200); // Reduced delay to 200ms
                 }
                 
                 // Dispatch custom event for real-time sound notification

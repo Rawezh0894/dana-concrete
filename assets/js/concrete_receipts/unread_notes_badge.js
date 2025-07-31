@@ -182,40 +182,53 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('✅ Event listeners added for user interaction');
     
-    // Update badge every 30 seconds
-    setInterval(updateUnreadNotesBadge, 30000);
+    // Update badge every 5 seconds (reduced from 30 seconds)
+    setInterval(updateUnreadNotesBadge, 5000);
 });
 
 // Listen for custom events from other parts of the application
 document.addEventListener('noteAdded', function() {
     console.log('📝 Note added event received');
-    // Update badge when a new note is added
-    updateUnreadNotesBadge();
+    // Update badge immediately when a new note is added
+    setTimeout(() => {
+        updateUnreadNotesBadge();
+    }, 1000); // Update after 1 second to ensure database is updated
 });
 
 document.addEventListener('noteMarkedAsRead', function() {
     console.log('👁️ Note marked as read event received');
-    // Update badge when a note is marked as read
-    updateUnreadNotesBadge();
+    // Update badge immediately when a note is marked as read
+    setTimeout(() => {
+        updateUnreadNotesBadge();
+    }, 500); // Update after 0.5 seconds
 });
 
 document.addEventListener('noteDeleted', function() {
     console.log('🗑️ Note deleted event received');
-    // Update badge when a note is deleted
-    updateUnreadNotesBadge();
+    // Update badge immediately when a note is deleted
+    setTimeout(() => {
+        updateUnreadNotesBadge();
+    }, 500); // Update after 0.5 seconds
 });
 
 document.addEventListener('noteUpdated', function() {
     console.log('✏️ Note updated event received');
-    // Update badge when a note is updated
-    updateUnreadNotesBadge();
+    // Update badge immediately when a note is updated
+    setTimeout(() => {
+        updateUnreadNotesBadge();
+    }, 500); // Update after 0.5 seconds
 });
 
 document.addEventListener('noteAddedWithSound', function() {
     console.log('🔊 Note added with sound event received');
-    // Force enable audio and play sound
+    // Force enable audio and play sound immediately
     forceEnableAudio();
     playNotificationSound();
+    
+    // Update badge immediately
+    setTimeout(() => {
+        updateUnreadNotesBadge();
+    }, 1000); // Update after 1 second to ensure database is updated
 });
 
 // Export functions for manual updates
