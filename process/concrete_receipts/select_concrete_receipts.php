@@ -33,6 +33,10 @@ try {
         $where[] = 'cr.formulas_id = :formulas_id';
         $params[':formulas_id'] = $_GET['formulas_id'];
     }
+    if (!empty($_GET['driver_id'])) {
+        $where[] = '(cr.mixer_driver_id = :driver_id OR cr.pump_driver_id = :driver_id)';
+        $params[':driver_id'] = $_GET['driver_id'];
+    }
     if (!empty($_GET['date_from'])) {
         $where[] = 'DATE(cr.created_at) >= :date_from';
         $params[':date_from'] = $_GET['date_from'];

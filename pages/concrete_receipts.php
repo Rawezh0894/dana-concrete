@@ -145,7 +145,7 @@ $mixer_drivers = array_filter($employees, function ($emp) {
     </div>
     <!-- Filter Row -->
     <div class="row g-2 mb-3 " id="concrete-receipts-filters">
-      <div class="col-md-3">
+      <div class="col-md-2">
         <select class="form-select" id="filter_customer_id" data-placeholder="کڕیار: هەموو">
           <option value=""></option>
           <?php foreach ($customers as $c): ?>
@@ -153,7 +153,7 @@ $mixer_drivers = array_filter($employees, function ($emp) {
           <?php endforeach; ?>
         </select>
       </div>
-      <div class="col-md-3">
+      <div class="col-md-2">
         <input type="text" class="form-control" id="filter_location" placeholder="شوێن...">
       </div>
       <div class="col-md-2">
@@ -161,6 +161,14 @@ $mixer_drivers = array_filter($employees, function ($emp) {
           <option value=""></option>
           <?php foreach ($formulas as $f): ?>
             <option value="<?= $f['id'] ?>"><?= htmlspecialchars($f['name']) ?></option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <select class="form-select" id="filter_driver_id" data-placeholder="شۆفێر: هەموو">
+          <option value=""></option>
+          <?php foreach ($all_drivers as $driver): ?>
+            <option value="<?= $driver['id'] ?>"><?= htmlspecialchars($driver['name']) ?></option>
           <?php endforeach; ?>
         </select>
       </div>

@@ -1,9 +1,21 @@
 $(document).ready(function() {
+  // Initialize Select2 for filters
+  if ($('#filter_customer_id').length > 0) {
+    enableSelect2('#filter_customer_id', 'body');
+  }
+  if ($('#filter_formulas_id').length > 0) {
+    enableSelect2('#filter_formulas_id', 'body');
+  }
+  if ($('#filter_driver_id').length > 0) {
+    enableSelect2('#filter_driver_id', 'body');
+  }
+  
   function getFilters() {
     return {
       customer_id: $('#filter_customer_id').val(),
       location: $('#filter_location').val(),
       formulas_id: $('#filter_formulas_id').val(),
+      driver_id: $('#filter_driver_id').val(),
       date_from: $('#filter_date_from').val(),
       date_to: $('#filter_date_to').val()
     };
@@ -71,7 +83,7 @@ $(document).ready(function() {
   }
 
   // Bind filter events
-  $('#filter_customer_id, #filter_formulas_id').on('change', loadFilteredReceipts);
+  $('#filter_customer_id, #filter_formulas_id, #filter_driver_id').on('change', loadFilteredReceipts);
   $('#filter_location').on('input', loadFilteredReceipts);
   $('#filter_date_from, #filter_date_to').on('change', loadFilteredReceipts);
 
@@ -114,6 +126,7 @@ $(document).ready(function() {
     $('#filter_customer_id').val('');
     $('#filter_location').val('');
     $('#filter_formulas_id').val('');
+    $('#filter_driver_id').val('');
     $('#filter_date_from').val('');
     $('#filter_date_to').val('');
     // Remove highlights
@@ -132,6 +145,19 @@ $(document).ready(function() {
   });
 
   function updateSummaryCards(summary) {
+    const filters = getFilters();
+    const hasFilters = filters.customer_id || filters.location || filters.formulas_id || filters.driver_id || filters.date_from || filters.date_to;
+    
+    if (!hasFilters) {
+      // No filters applied - show placeholder text
+      $('#summary_total_receipts').text('فلتەر دابنێ');
+      $('#summary_total_meter').text('فلتەر دابنێ');
+      $('#summary_total_customers').text('فلتەر دابنێ');
+      $('#summary_total_driver_trips').text('فلتەر دابنێ');
+      $('#summary_total_driver_meters').text('فلتەر دابنێ');
+      return;
+    }
+    
     // Update total receipts
     const totalReceipts = summary && summary.total_receipts !== undefined ? summary.total_receipts : 0;
     $('#summary_total_receipts').text(totalReceipts);

@@ -12,7 +12,7 @@ $(document).ready(function() {
             }
         });
     });
-    const filterInputs = document.querySelectorAll('#filter_customer_id, #filter_location, #filter_formulas_id, #filter_date_from, #filter_date_to');
+    const filterInputs = document.querySelectorAll('#filter_customer_id, #filter_location, #filter_formulas_id, #filter_driver_id, #filter_date_from, #filter_date_to');
     filterInputs.forEach(input => {
         input.addEventListener('change', function() {
             filterButtons.forEach(btn => btn.classList.remove('active'));
