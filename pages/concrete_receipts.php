@@ -103,6 +103,11 @@ $mixer_drivers = array_filter($employees, function ($emp) {
         <button class="btn btn-warning" onclick="testNotificationSound()" style="font-weight: bold;">
           <i class="fas fa-volume-up me-1"></i>تاقیکردنەوەی زەنگ
         </button>
+        
+        <!-- Toggle Audio Notifications Button -->
+        <button class="btn btn-info" onclick="toggleAudioNotifications()" style="font-weight: bold;">
+          <i class="fas fa-bell me-1"></i>زەنگەکان
+        </button>
       </div>
     </div>
     <!-- Summary Cards Row -->
