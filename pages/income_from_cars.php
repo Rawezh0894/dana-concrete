@@ -74,11 +74,8 @@ if (!hasPermission('view_income_from_cars')) {
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3>داهاتی سەیارەکان</h3>
         <div>
-            <button class="btn btn-success me-2" onclick="exportToExcel()">
-                <i class="fa fa-file-excel"></i> دانەوەی گشتی
-            </button>
-            <button class="btn btn-info" onclick="exportDriversExcel()">
-                <i class="fa fa-users"></i> دانەوەی شۆفێران
+            <button class="btn btn-success" onclick="exportToExcel()">
+                <i class="fa fa-file-excel"></i> دانەوە بۆ Excel
             </button>
         </div>
     </div>
