@@ -33,6 +33,8 @@ $(document).ready(function() {
         const date_filter = $('#notificationDateFilter').val();
         const pageSize = 10; // Default page size
         
+        console.log('Loading notifications with filters:', { search, type, seen, date_filter });
+        
         let url = '../process/notifications/select_notifications.php';
         const params = [];
         if (search) params.push('search=' + encodeURIComponent(search));
@@ -42,21 +44,27 @@ $(document).ready(function() {
         if (params.length) url += '?' + params.join('&');
 
         try {
+            console.log('Fetching notifications from:', url);
             let res = await fetch(url);
             let text = await res.text();
+            console.log('Raw response:', text);
             let data;
             try {
                 data = JSON.parse(text);
             } catch (e) {
                 console.error('Raw response from select_notifications.php:', text);
+                console.error('JSON parse error:', e);
                 alert('هەڵەیەک لە وەڵامەکەی سێرڤەر هەیە. زانیاری زیاتر لە console.');
                 return;
             }
 
             if (!data.success) {
+                console.error('API returned success: false:', data);
                 TableController.renderWithPagination('#notificationsTable', [], columns, { pageSize: pageSize });
                 return;
             }
+            
+            console.log('API response data:', data);
 
             // Store notifications data globally
             notificationsData = data.notifications;
@@ -87,6 +95,7 @@ $(document).ready(function() {
             
             // Update total count
             $('#notificationsTotal').html(`گشتی: ${data.total}`);
+            console.log(`Successfully loaded ${data.total} notifications`);
             
             // Reset select all
             $('#selectAllNotifications').prop('checked', false);
@@ -446,6 +455,7 @@ $(document).ready(function() {
         });
     });
 
-    // Initial load
+    // Initial load - show all notifications by default
+    console.log('Loading all notifications by default...');
     loadNotifications();
 }); 
