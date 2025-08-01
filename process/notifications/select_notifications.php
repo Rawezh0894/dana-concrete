@@ -8,7 +8,7 @@ if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role'], ['admin', 'mana
 }
 $search = $_GET['search'] ?? '';
 $type = $_GET['type'] ?? '';
-$seen = $_GET['seen'] ?? '';
+$seen = $_GET['seen'] ?? ''; // Empty by default to show all notifications (both read and unread)
 $date_filter = $_GET['date_filter'] ?? '';
 
 $where = [];

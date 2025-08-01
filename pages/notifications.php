@@ -120,7 +120,7 @@ require_once '../config/db_conected.php';
 <?php include '../includes/navbar.php'; ?>
 <?php include '../includes/sidebar.php'; ?>
 <div class="container-fluid mt-4">
-    <h3 class="mb-4">ئاگادارکردنەوەکان</h3>
+    <h3 class="mb-4">ئاگادارکردنەوەکان <small class="text-muted">(هەموو ئاگادارکردنەوەکان نیشان دەدرێن)</small></h3>
     <div class="row mb-3">
         <div class="col-md-3 mb-2">
             <input type="text" id="notificationSearch" class="form-control" placeholder="گەڕان...">
