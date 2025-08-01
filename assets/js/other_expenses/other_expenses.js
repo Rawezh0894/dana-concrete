@@ -109,6 +109,62 @@ async function updateUsdRateDisplay() {
     }
 }
 
+// Function to fetch and populate exchange rate in modals
+async function fetchAndPopulateExchangeRate() {
+    const exchangeRateInput = document.getElementById('exchange_rate');
+    const editExchangeRateInput = document.getElementById('edit_exchange_rate');
+    
+    if (!exchangeRateInput && !editExchangeRateInput) return;
+    
+    try {
+        // Try backend API first
+        const response = await fetch('../process/other_expenses/get_usd_rate.php');
+        
+        if (response.ok) {
+            const responseText = await response.text();
+            if (responseText && responseText.trim() !== '') {
+                const data = JSON.parse(responseText);
+                
+                if (data.success && data.rate) {
+                    const rate = data.rate;
+                    if (exchangeRateInput) exchangeRateInput.value = rate;
+                    if (editExchangeRateInput) editExchangeRateInput.value = rate;
+                    console.log('Exchange rate populated from backend API:', rate);
+                    return;
+                }
+            }
+        }
+        
+        // Fallback to direct API
+        console.log('Trying direct API for exchange rate...');
+        const alternativeResponse = await fetch('https://dinarapi.hediworks.site/api/get-price?id=8&api_token=S3gl9SVEkZ1Vvc93cCjsbLLmwDvgzk');
+        const alternativeData = await alternativeResponse.json();
+        
+        if (alternativeData && alternativeData.value) {
+            const rate = alternativeData.value;
+            if (exchangeRateInput) exchangeRateInput.value = rate;
+            if (editExchangeRateInput) editExchangeRateInput.value = rate;
+            console.log('Exchange rate populated from direct API:', rate);
+            return;
+        }
+        
+        // Use default value
+        const defaultRate = 139250;
+        if (exchangeRateInput) exchangeRateInput.value = defaultRate;
+        if (editExchangeRateInput) editExchangeRateInput.value = defaultRate;
+        console.log('Using default exchange rate:', defaultRate);
+        
+    } catch (error) {
+        console.error('Error fetching exchange rate for modal:', error);
+        
+        // Use default value on error
+        const defaultRate = 139250;
+        if (exchangeRateInput) exchangeRateInput.value = defaultRate;
+        if (editExchangeRateInput) editExchangeRateInput.value = defaultRate;
+        console.log('Using default exchange rate due to error:', defaultRate);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Update USD rate display when page loads
     updateUsdRateDisplay();
@@ -138,6 +194,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const mm = String(today.getMonth() + 1).padStart(2, '0');
             const dd = String(today.getDate()).padStart(2, '0');
             dateInput.value = `${yyyy}-${mm}-${dd}`;
+            
+            // Fetch and populate exchange rate
+            fetchAndPopulateExchangeRate();
         });
     }
     if (currencyType && amountIqd && amountUsd && paidIqd && paidUsd && exchangeRate) {

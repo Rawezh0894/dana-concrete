@@ -145,26 +145,49 @@ function setupEditExpenseModal() {
 
 // Function to fetch and set USD exchange rate for edit modal
 async function fetchAndSetUsdRateForEdit() {
+    const editExchangeRateInput = document.getElementById('edit_exchange_rate');
+    if (!editExchangeRateInput) return;
+    
     try {
+        // Try backend API first
         const response = await fetch('../process/other_expenses/get_usd_rate.php');
-        const data = await response.json();
         
-        if (data.success && data.rate) {
-            document.getElementById('edit_exchange_rate').value = data.rate;
-            console.log('USD rate fetched successfully for edit:', data.rate);
-        } else {
-            console.warn('Failed to fetch USD rate for edit:', data.error || 'Unknown error');
-            // Set default rate if API fails
-            if (data.default_rate) {
-                document.getElementById('edit_exchange_rate').value = data.default_rate;
-                console.log('Using default USD rate for edit:', data.default_rate);
+        if (response.ok) {
+            const responseText = await response.text();
+            if (responseText && responseText.trim() !== '') {
+                const data = JSON.parse(responseText);
+                
+                if (data.success && data.rate) {
+                    editExchangeRateInput.value = data.rate;
+                    console.log('Exchange rate populated for edit from backend API:', data.rate);
+                    return;
+                }
             }
         }
+        
+        // Fallback to direct API
+        console.log('Trying direct API for edit exchange rate...');
+        const alternativeResponse = await fetch('https://dinarapi.hediworks.site/api/get-price?id=8&api_token=S3gl9SVEkZ1Vvc93cCjsbLLmwDvgzk');
+        const alternativeData = await alternativeResponse.json();
+        
+        if (alternativeData && alternativeData.value) {
+            editExchangeRateInput.value = alternativeData.value;
+            console.log('Exchange rate populated for edit from direct API:', alternativeData.value);
+            return;
+        }
+        
+        // Use default value
+        const defaultRate = 139250;
+        editExchangeRateInput.value = defaultRate;
+        console.log('Using default exchange rate for edit:', defaultRate);
+        
     } catch (error) {
-        console.error('Error fetching USD rate for edit:', error);
-        // Set default rate on error
-        document.getElementById('edit_exchange_rate').value = '139250';
-        console.log('Using fallback USD rate for edit: 139250');
+        console.error('Error fetching exchange rate for edit modal:', error);
+        
+        // Use default value on error
+        const defaultRate = 139250;
+        editExchangeRateInput.value = defaultRate;
+        console.log('Using default exchange rate for edit due to error:', defaultRate);
     }
 }
 
