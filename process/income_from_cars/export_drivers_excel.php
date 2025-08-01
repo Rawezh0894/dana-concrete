@@ -83,7 +83,12 @@ LEFT JOIN customers c ON cr.customer_id = c.id
 LEFT JOIN employees md ON cr.mixer_driver_id = md.id
 LEFT JOIN employees pd ON cr.pump_driver_id = pd.id
 $where_sql
-GROUP BY COALESCE(md.id, pd.id), COALESCE(md.name, pd.name)
+GROUP BY COALESCE(md.id, pd.id), COALESCE(md.name, pd.name), 
+         CASE 
+             WHEN md.id IS NOT NULL THEN 'میکسەر'
+             WHEN pd.id IS NOT NULL THEN 'پۆمپ'
+             ELSE 'نامۆ'
+         END
 HAVING driver_name IS NOT NULL
 ORDER BY total_meters DESC";
 
