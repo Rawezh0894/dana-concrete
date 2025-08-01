@@ -286,6 +286,40 @@ $(document).ready(function() {
         document.body.removeChild(form);
     };
 
+    // Export drivers to Excel function
+    window.exportDriversExcel = function() {
+        const filters = {
+            mixer_car_id: $('#mixerCarFilter').val(),
+            mixer_driver_id: $('#mixerDriverFilter').val(),
+            pump_car_id: $('#pumpCarFilter').val(),
+            pump_driver_id: $('#pumpDriverFilter').val(),
+            customer_id: $('#customerFilter').val(),
+            from_date: $('#fromDate').val(),
+            to_date: $('#toDate').val()
+        };
+
+        // Create a temporary form to submit the export request
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '../process/income_from_cars/export_drivers_excel.php';
+        form.target = '_blank';
+
+        // Add filter parameters as hidden inputs
+        Object.keys(filters).forEach(key => {
+            if (filters[key]) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = filters[key];
+                form.appendChild(input);
+            }
+        });
+
+        document.body.appendChild(form);
+        form.submit();
+        document.body.removeChild(form);
+    };
+
     // Make loadData available globally
     window.loadData = loadData;
 });
