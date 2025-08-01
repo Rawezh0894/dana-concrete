@@ -28,7 +28,8 @@ if (!hasPermission('view_income_from_cars')) {
     <link href="../assets/css/nav.css" rel="stylesheet">
     <link href="../assets/css/comon/table.css" rel="stylesheet">
     <link href="../assets/css/comon/style.css" rel="stylesheet">
-    <link href="../assets/css/comon/select2_design.css" rel="stylesheet">
+    <link href="../assets/css/comon/select2_design.css" rel="stylesheet">\
+    <link href="../assets/css/comon/cards.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.rtl.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
