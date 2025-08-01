@@ -136,7 +136,9 @@ class AdvancedFilters {
 
             // Populate employee filter
             const employeesResponse = await fetch('../process/employee/select_employee.php');
-            const employees = await employeesResponse.json();
+            const employeesData = await employeesResponse.json();
+            // Handle new response format with employees and summary
+            const employees = employeesData.employees || employeesData;
             this.populateSelect('employeeFilter', employees, 'id', 'name');
 
             // Populate person filter
@@ -158,6 +160,12 @@ class AdvancedFilters {
         select.innerHTML = '';
         if (defaultOption) {
             select.appendChild(defaultOption);
+        }
+
+        // Ensure data is an array
+        if (!Array.isArray(data)) {
+            console.warn(`Data for ${selectId} is not an array:`, data);
+            return;
         }
 
         data.forEach(item => {
