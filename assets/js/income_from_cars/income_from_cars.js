@@ -164,9 +164,22 @@ $(document).ready(function() {
                 plugins: {
                     legend: {
                         display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.label}: ${context.parsed.y.toLocaleString('ku-IQ')} م³`;
+                            }
+                        }
                     }
                 },
                 scales: {
+                    x: {
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 0
+                        }
+                    },
                     y: {
                         beginAtZero: true,
                         ticks: {
@@ -215,7 +228,11 @@ $(document).ready(function() {
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        position: 'bottom'
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true
+                        }
                     },
                     tooltip: {
                         callbacks: {

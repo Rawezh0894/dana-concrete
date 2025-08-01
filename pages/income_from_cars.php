@@ -69,6 +69,21 @@ if (!hasPermission('view_income_from_cars')) {
             margin-bottom: 20px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
+        .chart-container h5 {
+            margin-bottom: 15px;
+            color: #333;
+            font-weight: 600;
+        }
+        .chart-wrapper {
+            height: 400px;
+            position: relative;
+            margin-top: 10px;
+        }
+        @media (max-width: 768px) {
+            .chart-wrapper {
+                height: 300px;
+            }
+        }
     </style>
 </head>
 <body dir="rtl">
@@ -173,13 +188,17 @@ if (!hasPermission('view_income_from_cars')) {
         <div class="col-md-6">
             <div class="chart-container">
                 <h5>داهاتی سەیارەکان بە پێی مەتر سێج</h5>
-                <canvas id="carsChart"></canvas>
+                <div class="chart-wrapper">
+                    <canvas id="carsChart"></canvas>
+                </div>
             </div>
         </div>
         <div class="col-md-6">
             <div class="chart-container">
                 <h5>داهاتی شۆفێران بە پێی مەتر سێج</h5>
-                <canvas id="driversChart"></canvas>
+                <div class="chart-wrapper">
+                    <canvas id="driversChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
