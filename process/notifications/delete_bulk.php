@@ -10,11 +10,39 @@ if (!isset($_POST['ids']) || !is_array($_POST['ids']) || count($_POST['ids']) ==
     echo json_encode(['success' => false, 'error' => 'هیچ تۆمارێک هەڵبژێردراو نییە']);
     exit;
 }
-$ids = array_map('intval', $_POST['ids']);
-$in = implode(',', array_fill(0, count($ids), '?'));
-$stmt = $pdo->prepare("DELETE FROM notifications WHERE id IN ($in)");
-if ($stmt->execute($ids)) {
+
+$notification_ids = [];
+$note_ids = [];
+
+// Separate notifications and notes
+foreach ($_POST['ids'] as $id) {
+    if (strpos($id, 'note_') === 0) {
+        $note_ids[] = substr($id, 5); // Remove 'note_' prefix
+    } else {
+        $notification_ids[] = intval($id);
+    }
+}
+
+try {
+    $pdo->beginTransaction();
+    
+    // Delete notifications
+    if (!empty($notification_ids)) {
+        $in = implode(',', array_fill(0, count($notification_ids), '?'));
+        $stmt = $pdo->prepare("DELETE FROM notifications WHERE id IN ($in)");
+        $stmt->execute($notification_ids);
+    }
+    
+    // Delete notes
+    if (!empty($note_ids)) {
+        $in = implode(',', array_fill(0, count($note_ids), '?'));
+        $stmt = $pdo->prepare("DELETE FROM notes WHERE id IN ($in)");
+        $stmt->execute($note_ids);
+    }
+    
+    $pdo->commit();
     echo json_encode(['success' => true]);
-} else {
-    echo json_encode(['success' => false, 'error' => 'هەڵە لە سڕینەوە']);
+} catch (Exception $e) {
+    $pdo->rollBack();
+    echo json_encode(['success' => false, 'error' => 'هەڵە لە سڕینەوە: ' . $e->getMessage()]);
 } 

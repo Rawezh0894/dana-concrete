@@ -20,7 +20,8 @@ $(document).ready(function() {
         'company': 'کۆمپانیاکان',
         'employees': 'کارمەندان',
         'materials': 'کاڵاکان',
-        'cars': 'ئۆتۆمبێلەکان'
+        'cars': 'ئۆتۆمبێلەکان',
+        'notes': 'تێبینیەکان'
     };
 
     // Store notifications data globally
@@ -32,8 +33,6 @@ $(document).ready(function() {
         const seen = $('#notificationSeenFilter').val();
         const date_filter = $('#notificationDateFilter').val();
         const pageSize = 10; // Default page size
-        
-        // Ensure we show all notifications by default (no filtering by seen status unless explicitly selected)
         
         let url = '../process/notifications/select_notifications.php';
         const params = [];
@@ -257,6 +256,16 @@ $(document).ready(function() {
             'mixer_driver_id': 'ناسنامەی شۆفێری مایکسەر',
             'mixer_driver_name': 'ناوی شۆفێری مایکسەر',
             'receiver_name': 'ناوی وەرگر',
+
+            // Notes
+            'customer_name': 'ناوی کڕیار',
+            'location': 'شوێن',
+            'recipient': 'وەرگر',
+            'formula_name': 'ناوی فۆرمۆلا',
+            'mixer_car_name': 'ناوی سەیارەی مایکسەر',
+            'mixer_driver_name': 'ناوی شۆفێری مایکسەر',
+            'pump_car_name': 'ناوی سەیارەی پۆمپ',
+            'pump_driver_name': 'ناوی شۆفێری پۆمپ',
 
             // Additional Info
             'action_type': 'جۆری چالاکی',
