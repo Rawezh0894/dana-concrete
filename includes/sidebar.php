@@ -75,6 +75,9 @@ $logout_pages = ['logout.php'];
           <li><a href="../pages/add_customers.php" class="sidebar-link<?php if($current_page == 'add_customers.php') echo ' active'; ?>"><i class="bi bi-person-badge me-2"></i> کڕیار</a></li>
           <li><a href="../pages/add_employee.php" class="sidebar-link<?php if($current_page == 'add_employee.php') echo ' active'; ?>"><i class="bi bi-person-workspace me-2"></i> کارمەند</a></li>
         <?php endif; ?>
+        <?php if (hasPermission('view_person_other_expenses')): ?>
+          <li><a href="../pages/person_other_expenses.php" class="sidebar-link<?php if($current_page == 'person_other_expenses.php') echo ' active'; ?>"><i class="bi bi-person-lines-fill me-2"></i> کەسانی خەرجی تر</a></li>
+        <?php endif; ?>
       </ul>
     </li>
     <li class="sidebar-group">
