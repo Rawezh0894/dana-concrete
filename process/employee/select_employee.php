@@ -19,7 +19,7 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-if (!hasPermission('view_employee')) {
+if (!hasPermission('view_accounts')) {
     error_log('Permission denied for user: ' . $_SESSION['user_id'] . ' to view employees');
     http_response_code(403);
     echo json_encode(['success' => false, 'msg' => 'ڕێگەت پێنەدراوە!']);

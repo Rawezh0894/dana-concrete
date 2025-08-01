@@ -35,27 +35,6 @@ if (!hasPermission('view_income_from_cars')) {
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
-        .summary-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        .summary-card h5 {
-            margin-bottom: 10px;
-            font-weight: 600;
-        }
-        .summary-card .value {
-            font-size: 2rem;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        .summary-card .label {
-            font-size: 0.9rem;
-            opacity: 0.9;
-        }
         .filter-section {
             background: #f8f9fa;
             border-radius: 10px;
@@ -101,33 +80,45 @@ if (!hasPermission('view_income_from_cars')) {
     </div>
 
     <!-- Summary Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="summary-card">
-                <h5><i class="fa fa-truck"></i> کۆی سەیارەکان</h5>
-                <div class="value" id="totalCars">0</div>
-                <div class="label">سەیارەی بەکارهێنراو</div>
+    <div class="row mb-4" id="summary-cards">
+        <div class="col-md-3 mb-3">
+            <div class="card text-center shadow card-gradient-info card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-truck card-icon"></i>
+                    <h6 class="card-title">کۆی سەیارەکان</h6>
+                    <div class="fs-4 fw-bold" id="totalCars">0</div>
+                    <small class="text-light">سەیارەی بەکارهێنراو</small>
+                </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="summary-card">
-                <h5><i class="fa fa-user"></i> کۆی شۆفێران</h5>
-                <div class="value" id="totalDrivers">0</div>
-                <div class="label">شۆفێری بەکارهێنراو</div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center shadow card-gradient-success card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-user card-icon"></i>
+                    <h6 class="card-title">کۆی شۆفێران</h6>
+                    <div class="fs-4 fw-bold" id="totalDrivers">0</div>
+                    <small class="text-light">شۆفێری بەکارهێنراو</small>
+                </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="summary-card">
-                <h5><i class="fa fa-cube"></i> کۆی مەتر سێج</h5>
-                <div class="value" id="totalMeters">0</div>
-                <div class="label">م³ بارکراو</div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center shadow card-gradient-warning card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-cube card-icon"></i>
+                    <h6 class="card-title">کۆی مەتر سێج</h6>
+                    <div class="fs-4 fw-bold" id="totalMeters">0</div>
+                    <small class="text-light">م³ بارکراو</small>
+                </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="summary-card">
-                <h5><i class="fa fa-receipt"></i> کۆی پسوڵەکان</h5>
-                <div class="value" id="totalReceipts">0</div>
-                <div class="label">پسوڵەی بەکارهێنراو</div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center shadow card-gradient-danger card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-receipt card-icon"></i>
+                    <h6 class="card-title">کۆی پسوڵەکان</h6>
+                    <div class="fs-4 fw-bold" id="totalReceipts">0</div>
+                    <small class="text-light">پسوڵەی بەکارهێنراو</small>
+                </div>
             </div>
         </div>
     </div>
@@ -204,30 +195,35 @@ if (!hasPermission('view_income_from_cars')) {
     </div>
 
     <!-- Data Table -->
-    <div class="card">
-        <div class="card-header">
-            <h5 class="mb-0">وردەکاری داهاتی سەیارەکان</h5>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered table-striped" id="incomeTable">
-                    <thead>
-                        <tr>
-                            <th>ژمارەی پسوڵە</th>
-                            <th>کڕیار</th>
-                            <th>شوێن</th>
-                            <th>بڕ (م³)</th>
-                            <th>سەیارەی میکسەر</th>
-                            <th>شۆفێری میکسەر</th>
-                            <th>سەیارەی پۆمپ</th>
-                            <th>شۆفێری پۆمپ</th>
-                            <th>بەروار</th>
-                            <th>وەرگر</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
+    <div class="table-container">
+        <div class="table-search-container">
+            <div class="row">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold text-dark">وردەکاری داهاتی سەیارەکان</label>
+                </div>
+                <div class="col-md-6 text-end">
+                    <span class="text-muted" id="tableInfo">کۆی: 0 تۆمار</span>
+                </div>
             </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table" id="incomeTable">
+                <thead>
+                    <tr>
+                        <th>ژمارەی پسوڵە</th>
+                        <th>کڕیار</th>
+                        <th>شوێن</th>
+                        <th>بڕ (م³)</th>
+                        <th>سەیارەی میکسەر</th>
+                        <th>شۆفێری میکسەر</th>
+                        <th>سەیارەی پۆمپ</th>
+                        <th>شۆفێری پۆمپ</th>
+                        <th>بەروار</th>
+                        <th>وەرگر</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </div>
     </div>
 </div>

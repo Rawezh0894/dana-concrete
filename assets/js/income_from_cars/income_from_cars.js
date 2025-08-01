@@ -53,9 +53,8 @@ $(document).ready(function() {
         try {
             // Load cars
             const carsResponse = await fetch('../process/car/select_car.php');
-            const carsResult = await carsResponse.json();
-            if (carsResult.success) {
-                const cars = carsResult.data;
+            const cars = await carsResponse.json();
+            if (cars && cars.length > 0) {
                 $('#mixerCarFilter, #pumpCarFilter').each(function() {
                     $(this).empty().append('<option value="">هەموو سەیارەکان</option>');
                     cars.forEach(car => {
@@ -67,8 +66,8 @@ $(document).ready(function() {
             // Load drivers (employees)
             const driversResponse = await fetch('../process/employee/select_employee.php');
             const driversResult = await driversResponse.json();
-            if (driversResult.success) {
-                const drivers = driversResult.data;
+            if (driversResult && driversResult.employees && driversResult.employees.length > 0) {
+                const drivers = driversResult.employees;
                 $('#mixerDriverFilter, #pumpDriverFilter').each(function() {
                     $(this).empty().append('<option value="">هەموو شۆفێران</option>');
                     drivers.forEach(driver => {
@@ -79,9 +78,8 @@ $(document).ready(function() {
 
             // Load customers
             const customersResponse = await fetch('../process/customer/select_customer.php');
-            const customersResult = await customersResponse.json();
-            if (customersResult.success) {
-                const customers = customersResult.data;
+            const customers = await customersResponse.json();
+            if (customers && customers.length > 0) {
                 $('#customerFilter').empty().append('<option value="">هەموو کڕیارەکان</option>');
                 customers.forEach(customer => {
                     $('#customerFilter').append(`<option value="${customer.id}">${customer.name}</option>`);
@@ -100,28 +98,29 @@ $(document).ready(function() {
     }
 
     function displayData(data) {
-        const tbody = $('#incomeTable tbody');
-        tbody.empty();
+        const columns = [
+            'receipt_number', 'customer_name', 'location', 'meter_amount', 
+            'mixer_car_name', 'mixer_driver_name', 'pump_car_name', 
+            'pump_driver_name', 'created_at', 'receiver_name'
+        ];
 
-        if (data.length === 0) {
-            tbody.append('<tr><td colspan="10" class="text-center">هیچ زانیارییەک نەدۆزرایەوە</td></tr>');
-            return;
-        }
+        const mappedData = data.map(row => ({
+            receipt_number: row.receipt_number,
+            customer_name: row.customer_name || '-',
+            location: row.location,
+            meter_amount: `${row.meter_amount} م³`,
+            mixer_car_name: row.mixer_car_name || '-',
+            mixer_driver_name: row.mixer_driver_name || '-',
+            pump_car_name: row.pump_car_name || '-',
+            pump_driver_name: row.pump_driver_name || '-',
+            created_at: formatDate(row.created_at),
+            receiver_name: row.receiver_name || '-'
+        }));
 
-        data.forEach(row => {
-            const tr = $('<tr>');
-            tr.append(`<td>${row.receipt_number}</td>`);
-            tr.append(`<td>${row.customer_name || '-'}</td>`);
-            tr.append(`<td>${row.location}</td>`);
-            tr.append(`<td>${row.meter_amount} م³</td>`);
-            tr.append(`<td>${row.mixer_car_name || '-'}</td>`);
-            tr.append(`<td>${row.mixer_driver_name || '-'}</td>`);
-            tr.append(`<td>${row.pump_car_name || '-'}</td>`);
-            tr.append(`<td>${row.pump_driver_name || '-'}</td>`);
-            tr.append(`<td>${formatDate(row.created_at)}</td>`);
-            tr.append(`<td>${row.receiver_name || '-'}</td>`);
-            tbody.append(tr);
-        });
+        TableController.renderWithPagination('#incomeTable', mappedData, columns, { pageSize: 10 });
+        
+        // Update table info
+        $('#tableInfo').text(`کۆی: ${data.length} تۆمار`);
     }
 
     function updateSummary(summary) {
