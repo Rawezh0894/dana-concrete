@@ -43,7 +43,7 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Get notes
+// Get notes - Show all notes by default unless specifically filtered
 $notes_where = [];
 $notes_params = [];
 
@@ -54,6 +54,7 @@ if ($search !== '') {
     $notes_params[] = "%$search%";
 }
 
+// Only apply seen filter if it's explicitly set (not empty)
 if ($seen !== '') {
     $notes_where[] = 'n.is_read = ?';
     $notes_params[] = $seen;
