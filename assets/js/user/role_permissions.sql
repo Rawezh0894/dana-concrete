@@ -103,6 +103,12 @@ INSERT INTO `role_permissions` (`id`, `role`, `permission_id`) VALUES
 (98, 'user', 72),
 (99, 'user', 75);
 
+-- Add new permission for income from cars
+INSERT INTO `permissions` (`id`, `name`, `description`) VALUES (76, 'view_income_from_cars', 'بینینی داهاتی سەیارەکان');
+
+-- Add permission to admin role
+INSERT INTO `role_permissions` (`id`, `role`, `permission_id`) VALUES (100, 'admin', 76);
+
 --
 -- Indexes for dumped tables
 --
@@ -122,7 +128,7 @@ ALTER TABLE `role_permissions`
 -- AUTO_INCREMENT for table `role_permissions`
 --
 ALTER TABLE `role_permissions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=100;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=101;
 
 --
 -- Constraints for dumped tables
