@@ -15,7 +15,27 @@ async function updateUsdRateDisplay() {
     
     try {
         const response = await fetch('../process/other_expenses/get_usd_rate.php');
-        const data = await response.json();
+        
+        // Check if response is ok
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        // Check if response has content
+        const responseText = await response.text();
+        if (!responseText || responseText.trim() === '') {
+            throw new Error('Empty response from server');
+        }
+        
+        // Try to parse JSON
+        let data;
+        try {
+            data = JSON.parse(responseText);
+        } catch (jsonError) {
+            console.error('JSON parsing error:', jsonError);
+            console.error('Response text:', responseText);
+            throw new Error('Invalid JSON response from server');
+        }
         
         if (usdRateElement) {
             if (data.success && data.rate) {
@@ -44,21 +64,42 @@ async function updateUsdRateDisplay() {
         }
     } catch (error) {
         console.error('Error updating USD rate display:', error);
+        
+        // Try alternative API endpoint as fallback
+        try {
+            console.log('Trying alternative API endpoint...');
+            const alternativeResponse = await fetch('https://dinarapi.hediworks.site/api/get-price?id=8&api_token=S3gl9SVEkZ1Vvc93cCjsbLLmwDvgzk');
+            const alternativeData = await alternativeResponse.json();
+            
+            if (alternativeData && alternativeData.value) {
+                if (usdRateElement) {
+                    usdRateElement.textContent = alternativeData.value.toLocaleString() + ' د.ع';
+                    console.log('USD rate updated from alternative API:', alternativeData.value);
+                }
+                return; // Success, don't show error
+            }
+        } catch (fallbackError) {
+            console.error('Alternative API also failed:', fallbackError);
+        }
+        
+        // Use fallback value
         if (usdRateElement) {
             usdRateElement.textContent = '139250 د.ع';
             console.log('Using fallback USD rate for display: 139250');
         }
         
-        // Show error notification
-        Swal.fire({
-            icon: 'error',
-            title: 'هەڵە لە وەرگرتنی نرخی دۆلار',
-            text: 'نەتوانرا نرخی دۆلار وەربگیرێت',
-            timer: 3000,
-            showConfirmButton: false,
-            toast: true,
-            position: 'top-end'
-        });
+        // Show error notification only if it's a manual refresh
+        if (refreshBtn && refreshBtn.disabled) {
+            Swal.fire({
+                icon: 'error',
+                title: 'هەڵە لە وەرگرتنی نرخی دۆلار',
+                text: 'نەتوانرا نرخی دۆلار وەربگیرێت',
+                timer: 3000,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end'
+            });
+        }
     } finally {
         // Remove loading state
         if (refreshBtn && refreshIcon) {
