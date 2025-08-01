@@ -135,7 +135,7 @@ require_once '../config/db_conected.php';
         </div>
         <div class="col-md-2 mb-2">
             <select id="notificationSeenFilter" class="form-control">
-                <option value="">-- هەڵەبژاردنی خوێندرا --</option>
+                <option value="">-- هەموو ئاگادارکردنەوەکان --</option>
                 <option value="0">نەخوێندراو</option>
                 <option value="1">خوێندرا</option>
             </select>
