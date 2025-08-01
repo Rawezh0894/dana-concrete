@@ -232,6 +232,7 @@ if (!hasPermission('view_income_from_cars')) {
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="../assets/js/swalAlert.js"></script>
+<script src="../assets/js/comon/table-controler.js"></script>
 <script src="../assets/js/income_from_cars/income_from_cars.js"></script>
 
 </body>
