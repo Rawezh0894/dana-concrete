@@ -38,7 +38,10 @@ $(function() {
         // If not JSON, treat as plain text
         console.log('Response is not JSON, treating as plain text');
         
-        if (res.trim() === 'success') {
+        // Ensure res is a string before calling trim()
+        var responseText = typeof res === 'string' ? res : String(res);
+        
+        if (responseText.trim() === 'success') {
           Swal.fire({
             icon: 'success',
             title: 'سەرکەوتوو',
@@ -53,7 +56,7 @@ $(function() {
           Swal.fire({
             icon: 'error',
             title: 'هەڵە',
-            text: 'زیادکردن سەرکەوتوو نەبوو! Response: ' + res,
+            text: 'زیادکردن سەرکەوتوو نەبوو! Response: ' + responseText,
             confirmButtonText: 'باشە'
           });
         }
