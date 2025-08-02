@@ -196,9 +196,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initial load
     fetchAndRenderReportData();
     // Filter button click
-    document.querySelectorAll('#report-date-filter button').forEach(btn => {
+    document.querySelectorAll('#report-date-filter .filter-tab').forEach(btn => {
         btn.addEventListener('click', function() {
-            document.querySelectorAll('#report-date-filter button').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('#report-date-filter .filter-tab').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
             currentReportFilter = this.getAttribute('data-filter');
             // Clear date range inputs
@@ -210,11 +210,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Date range change
     document.getElementById('from-date').addEventListener('change', function() {
         // Remove active from filter buttons
-        document.querySelectorAll('#report-date-filter button').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('#report-date-filter .filter-tab').forEach(b => b.classList.remove('active'));
         fetchAndRenderReportData();
     });
     document.getElementById('to-date').addEventListener('change', function() {
-        document.querySelectorAll('#report-date-filter button').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('#report-date-filter .filter-tab').forEach(b => b.classList.remove('active'));
         fetchAndRenderReportData();
     });
     // Clear filters button
@@ -222,8 +222,8 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('from-date').value = '';
         document.getElementById('to-date').value = '';
         // Reset filter buttons to 'year'
-        document.querySelectorAll('#report-date-filter button').forEach(b => b.classList.remove('active'));
-        const yearBtn = document.querySelector('#report-date-filter button[data-filter="year"]');
+        document.querySelectorAll('#report-date-filter .filter-tab').forEach(b => b.classList.remove('active'));
+        const yearBtn = document.querySelector('#report-date-filter .filter-tab[data-filter="year"]');
         if (yearBtn) yearBtn.classList.add('active');
         currentReportFilter = 'year';
         fetchAndRenderReportData();

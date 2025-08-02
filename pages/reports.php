@@ -28,65 +28,261 @@ if (!isset($_SESSION['user_id'])) {
         .card-value { font-size: 2.1rem; font-weight: bold; color: #003b73; }
         .card-currency { font-size: 1.1rem; color: #888; }
         .dashboard-title { font-size: 2rem; font-weight: bold; color: var(--seafoam-green); margin: 2rem 0 1.5rem 0; text-align: center; }
+        
+        /* Professional Filter Section Styles */
+        .filter-section {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(0, 123, 255, 0.1);
+        }
+        
+        .filter-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: var(--seafoam-green);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .filter-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .filter-tab {
+            background: #ffffff;
+            border: 2px solid #e9ecef;
+            color: #6c757d;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            font-size: 0.9rem;
+            min-width: 100px;
+            text-align: center;
+        }
+        
+        .filter-tab:hover {
+            border-color: var(--seafoam-green);
+            color: var(--seafoam-green);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+        }
+        
+        .filter-tab.active {
+            background: linear-gradient(135deg, var(--seafoam-green), #00cec9);
+            border-color: var(--seafoam-green);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+        }
+        
+        .date-range-section {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e9ecef;
+        }
+        
+        .date-range-header {
+            text-align: center;
+            margin-bottom: 1rem;
+            color: #495057;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        
+        .date-input-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .date-input-wrapper {
+            display: flex;
+            align-items: center;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 0.5rem;
+            border: 1px solid #dee2e6;
+            transition: all 0.3s ease;
+        }
+        
+        .date-input-wrapper:focus-within {
+            border-color: var(--seafoam-green);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+        
+        .date-input-wrapper label {
+            margin: 0 0.5rem 0 0;
+            color: #495057;
+            font-weight: 500;
+            font-size: 0.9rem;
+            min-width: 30px;
+        }
+        
+        .date-input-wrapper input {
+            border: none;
+            background: transparent;
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: #495057;
+            min-width: 140px;
+        }
+        
+        .date-input-wrapper input:focus {
+            outline: none;
+            background: #ffffff;
+        }
+        
+        .filter-actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .btn-clear-filters {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+        }
+        
+        .btn-clear-filters:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
+            color: white;
+        }
+        
+        .btn-change-rate {
+            background: linear-gradient(135deg, #ffc107, #e0a800);
+            border: none;
+            color: #212529;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+        }
+        
+        .btn-change-rate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
+            color: #212529;
+        }
+        
         @media (max-width: 768px) {
-            .dashboard-title { font-size: 1.3rem; }
-        }
-        #change-rate-btn {
-            box-shadow: 0 2px 8px #ff980020;
-            transition: background 0.15s, color 0.15s;
-        }
-        #change-rate-btn:hover {
-            background: #ffc107;
-            color: #003b73;
-        }
-        @media (max-width: 768px) {
-            #change-rate-btn {
-                width: 100%;
-                margin-top: 1rem;
-                margin-left: 0;
+            .filter-section {
+                padding: 1.5rem;
+                margin: 1rem 0;
             }
-            .dashboard-title {
+            
+            .filter-tabs {
+                gap: 0.25rem;
+            }
+            
+            .filter-tab {
+                padding: 0.5rem 1rem;
+                font-size: 0.8rem;
+                min-width: 80px;
+            }
+            
+            .date-input-group {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+            
+            .date-input-wrapper {
                 width: 100%;
-                text-align: center;
-                margin-bottom: 0.7rem;
+                max-width: 300px;
+            }
+            
+            .filter-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn-clear-filters,
+            .btn-change-rate {
+                width: 100%;
+                max-width: 250px;
+            }
+            
+            .dashboard-title {
+                font-size: 1.5rem;
+                margin-bottom: 1rem;
             }
         }
     </style>
 </head>
 <body>
 <div class="container-fluid">
-    <div class="row mb-3">
-        <div class="col-12 d-flex justify-content-between align-items-center flex-wrap">
-            <div class="dashboard-title mb-0">ڕاپۆرتی دارایی</div>
-            <button class="btn btn-warning btn-sm ms-2 mt-2 mt-lg-0" id="change-rate-btn" data-bs-toggle="modal" data-bs-target="#exchangeRateModal" style="font-weight:bold;">
-                <i class="fa fa-dollar-sign me-1"></i> گۆڕینی نرخ
+    <!-- Professional Filter Section -->
+    <div class="filter-section">
+        <div class="filter-header">
+            <i class="fa fa-filter me-2"></i>فلتەری ڕاپۆرت
+        </div>
+        
+        <!-- Quick Filter Tabs -->
+        <div class="filter-tabs" id="report-date-filter">
+            <button type="button" class="filter-tab active" data-filter="year">
+                <i class="fa fa-calendar-year me-1"></i>ئەم ساڵ
+            </button>
+            <button type="button" class="filter-tab" data-filter="month">
+                <i class="fa fa-calendar-alt me-1"></i>ئەم مانگ
+            </button>
+            <button type="button" class="filter-tab" data-filter="week">
+                <i class="fa fa-calendar-week me-1"></i>ئەم هەفتە
+            </button>
+            <button type="button" class="filter-tab" data-filter="today">
+                <i class="fa fa-calendar-day me-1"></i>ئەمڕۆ
+            </button>
+        </div>
+        
+        <!-- Date Range Section -->
+        <div class="date-range-section">
+            <div class="date-range-header">
+                <i class="fa fa-calendar-range me-2"></i>بڕی بەرواری تایبەت
+            </div>
+            <div class="date-input-group">
+                <div class="date-input-wrapper">
+                    <label>لە:</label>
+                    <input type="date" id="from-date" name="from-date">
+                </div>
+                <div class="date-input-wrapper">
+                    <label>بۆ:</label>
+                    <input type="date" id="to-date" name="to-date">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Filter Actions -->
+        <div class="filter-actions">
+            <button class="btn-clear-filters" id="clear-filters-btn" type="button">
+                <i class="fa fa-times me-1"></i>پاککردنەوەی فلتەرەکان
+            </button>
+            <button class="btn-change-rate" id="change-rate-btn" data-bs-toggle="modal" data-bs-target="#exchangeRateModal">
+                <i class="fa fa-dollar-sign me-1"></i>گۆڕینی نرخی دۆلار
             </button>
         </div>
     </div>
-    <div class="row mb-3">
-        <div class="col-12 d-flex justify-content-center align-items-center">
-            <div class="btn-group" id="report-date-filter" role="group" aria-label="Report Date Filter">
-                <button type="button" class="btn btn-outline-primary active" data-filter="year">ئەم ساڵ</button>
-                <button type="button" class="btn btn-outline-primary" data-filter="month">ئەم مانگ</button>
-                <button type="button" class="btn btn-outline-primary" data-filter="week">ئەم هەفتە</button>
-                <button type="button" class="btn btn-outline-primary" data-filter="today">ئەمڕۆ</button>
-            </div>
-        </div>
-    </div>
-    <!-- Date Range Filter -->
-    <div class="row mb-3">
-        <div class="col-12 d-flex justify-content-center align-items-center">
-            <div class="input-group" style="max-width: 400px;">
-                <span class="input-group-text">لە</span>
-                <input type="date" class="form-control" id="from-date" name="from-date">
-                <span class="input-group-text">بۆ</span>
-                <input type="date" class="form-control" id="to-date" name="to-date">
-            </div>
-            <button class="btn btn-outline-danger ms-2" id="clear-filters-btn" type="button">
-                <i class="fa fa-times"></i> پاککردنەوە
-            </button>
-        </div>
-    </div>
+    
     <!-- Exchange Rate Modal -->
     <div class="modal fade" id="exchangeRateModal" tabindex="-1" aria-labelledby="exchangeRateModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
