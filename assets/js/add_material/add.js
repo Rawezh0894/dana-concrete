@@ -15,7 +15,7 @@ $(function() {
         var jsonResponse = JSON.parse(res);
         console.log('Parsed JSON response:', jsonResponse);
         
-        if (jsonResponse.status === 'success') {
+        if (jsonResponse.success === true) {
           Swal.fire({
             icon: 'success',
             title: 'سەرکەوتوو',
@@ -38,7 +38,7 @@ $(function() {
         // If not JSON, treat as plain text
         console.log('Response is not JSON, treating as plain text');
         
-        if (res.trim() === 'success') {
+        if (typeof res === 'string' && res.trim() === 'success') {
           Swal.fire({
             icon: 'success',
             title: 'سەرکەوتوو',
