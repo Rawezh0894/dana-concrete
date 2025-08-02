@@ -14,9 +14,13 @@ $(document).on('click', '.delete-btn', function() {
         if (result.isConfirmed) {
             $btn.prop('disabled', true);
             $.post('../process/add_material/delete.php', {id: id}, function(res) {
+                console.log('Delete response:', res);
+                console.log('Response type:', typeof res);
+                
                 try {
                     // Try to parse as JSON first
                     var jsonResponse = JSON.parse(res);
+                    console.log('Parsed JSON response:', jsonResponse);
                     
                     if (jsonResponse.status === 'success') {
                         Swal.fire({
@@ -36,6 +40,9 @@ $(document).on('click', '.delete-btn', function() {
                         });
                     }
                 } catch (e) {
+                    console.log('JSON parsing failed:', e);
+                    console.log('Raw response:', res);
+                    
                     // If not JSON, treat as plain text
                     var responseText = '';
                     if (typeof res === 'string') {

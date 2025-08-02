@@ -8,7 +8,8 @@ $(function() {
     console.log('Submitting form data:', formData);
     
     $.post('../process/add_material/add.php', formData, function(res) {
-      console.log('Server response:', res);
+      console.log('Add response:', res);
+      console.log('Response type:', typeof res);
       
       try {
         // Try to parse as JSON first
@@ -35,10 +36,10 @@ $(function() {
           });
         }
       } catch (e) {
-        // If not JSON, treat as plain text
-        console.log('Response is not JSON, treating as plain text');
+        console.log('JSON parsing failed:', e);
+        console.log('Raw response:', res);
         
-        // Ensure res is a string before calling trim()
+        // If not JSON, treat as plain text
         var responseText = '';
         if (typeof res === 'string') {
           responseText = res;
