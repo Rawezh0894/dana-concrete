@@ -343,8 +343,8 @@ document.getElementById('clearFilterBtn')?.addEventListener('click', function() 
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    // Set default filter to show unread notes
-    document.getElementById('filter_read').value = '0';
+    // Set default filter to show all notes (empty value)
+    document.getElementById('filter_read').value = '';
     
     // Initialize Select2 for filters if not already done
     if ($('#filter_customer').length > 0 && !$('#filter_customer').hasClass('select2-hidden-accessible')) {
@@ -355,7 +355,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Trigger change event to update Select2 display
-    $('#filter_read').val('0').trigger('change');
+    $('#filter_read').val('').trigger('change');
     
     loadNotes();
     
