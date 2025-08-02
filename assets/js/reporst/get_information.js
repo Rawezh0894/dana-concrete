@@ -27,32 +27,40 @@ function fetchAndRenderReportData() {
                     label: 'کۆی قەرزی کڕیارەکان',
                     icon: 'fa-users',
                     gradient: 'card-gradient-success',
-                    value: formatCurrency(Number(data.customer.usd) || 0, 'USD'),
-                    subtitle: 'قەرزی کڕیارەکان'
+                    value: formatCurrency(data.customer.usd, 'USD'),
+                    subtitle: 'قەرزی کڕیارەکان',
+                    showBreakdown: false
                 },
                 {
                     key: 'company',
                     label: 'قەرزی ئێمە لەگەڵ کۆمپانیاکان',
                     icon: 'fa-building',
                     gradient: 'card-gradient-warning',
-                    value: formatCurrency(Number(company_debt_usd) || 0, 'USD'),
-                    subtitle: 'قەرزی کۆمپانیاکان'
+                    value: formatCurrency(company_debt_usd, 'USD'),
+                    subtitle: 'قەرزی کۆمپانیاکان',
+                    showBreakdown: false
                 },
                 {
                     key: 'person',
                     label: 'قەرزی ئێمە لەگەڵ کەسانی خەرجی تر',
                     icon: 'fa-user-tie',
                     gradient: 'card-gradient-purple',
-                    value: formatCurrency(Number(person_debt_usd) || 0, 'USD'),
-                    subtitle: 'قەرزی کەسانی تر'
+                    value: formatCurrency(person_debt_usd, 'USD'),
+                    subtitle: 'قەرزی کەسانی تر',
+                    showBreakdown: false
                 },
                 {
                     key: 'purchases',
                     label: 'کۆی نرخی کڕین',
                     icon: 'fa-cart-plus',
                     gradient: 'card-gradient-teal',
-                    value: formatCurrency(Number(purchases_usd) || 0, 'USD'),
-                    subtitle: 'کۆی کڕینەکان'
+                    value: formatCurrency(purchases_usd, 'USD'),
+                    subtitle: 'کۆی کڕینەکان',
+                    showBreakdown: true,
+                    breakdown: {
+                        cash: formatCurrency(purchases_cash_usd, 'USD'),
+                        credit: formatCurrency(purchases_credit_usd, 'USD')
+                    }
                 },
                 {
                     key: 'sales',
@@ -60,7 +68,12 @@ function fetchAndRenderReportData() {
                     icon: 'fa-cash-register',
                     gradient: 'card-gradient-orange',
                     value: formatCurrency((Number(data.sales.cash.usd) || 0) + (Number(data.sales.credit.usd) || 0), 'USD'),
-                    subtitle: 'کۆی فرۆشتنەکان'
+                    subtitle: 'کۆی فرۆشتنەکان',
+                    showBreakdown: true,
+                    breakdown: {
+                        cash: formatCurrency(Number(data.sales.cash.usd) || 0, 'USD'),
+                        credit: formatCurrency(Number(data.sales.credit.usd) || 0, 'USD')
+                    }
                 },
                 {
                     key: 'remaining_purchases',
@@ -68,7 +81,8 @@ function fetchAndRenderReportData() {
                     icon: 'fa-wallet',
                     gradient: 'card-gradient-info',
                     value: formatCurrency(Number(data.remaining_purchases.usd) || 0, 'USD'),
-                    subtitle: 'پارەی ماوە'
+                    subtitle: 'پارەی ماوە',
+                    showBreakdown: false
                 },
                 {
                     key: 'discounts',
@@ -76,7 +90,8 @@ function fetchAndRenderReportData() {
                     icon: 'fa-percent',
                     gradient: 'card-gradient-dark',
                     value: formatCurrency(Number(data.discounts.usd) || 0, 'USD'),
-                    subtitle: 'داشکاندنەکان'
+                    subtitle: 'داشکاندنەکان',
+                    showBreakdown: false
                 },
                 {
                     key: 'net_profit',
@@ -84,7 +99,8 @@ function fetchAndRenderReportData() {
                     icon: 'fa-coins',
                     gradient: 'card-gradient-success',
                     value: formatCurrency(Number(data.net_profit.usd) || 0, 'USD'),
-                    subtitle: 'قازانجی پوخت'
+                    subtitle: 'قازانجی پوخت',
+                    showBreakdown: false
                 },
                 {
                     key: 'total_expenses',
@@ -92,7 +108,14 @@ function fetchAndRenderReportData() {
                     icon: 'fa-money-bill-wave',
                     gradient: 'card-gradient-danger',
                     value: formatCurrency(Number(data.total_expenses.usd) || 0, 'USD'),
-                    subtitle: 'کۆی هەموو خەرجییەکان'
+                    subtitle: 'کۆی هەموو خەرجییەکان',
+                    showBreakdown: true,
+                    breakdown: {
+                        employee_payments: formatCurrency(Number(data.total_expenses.breakdown?.employee_payments) || 0, 'USD'),
+                        other_expenses: formatCurrency(Number(data.total_expenses.breakdown?.other_expenses) || 0, 'USD'),
+                        purchases: formatCurrency(Number(data.total_expenses.breakdown?.purchases) || 0, 'USD'),
+                        purchase_materials: formatCurrency(Number(data.total_expenses.breakdown?.purchase_materials) || 0, 'USD')
+                    }
                 },
                 {
                     key: 'dollar_rate',
@@ -100,12 +123,56 @@ function fetchAndRenderReportData() {
                     icon: 'fa-dollar-sign',
                     gradient: 'card-gradient-light',
                     value: formatNumber(Number(data.usd_iqd_rate) || 0) + ' د.ع',
-                    subtitle: 'نرخی ئێستا'
+                    subtitle: 'نرخی ئێستا',
+                    showBreakdown: false
                 }
             ];
 
             let html = '';
             cards.forEach(card => {
+                let breakdownHtml = '';
+                if (card.showBreakdown && card.breakdown) {
+                    if (card.key === 'total_expenses') {
+                        // Special layout for total expenses with 4 breakdown items
+                        breakdownHtml = `
+                            <div class="row mt-2">
+                                <div class="col-6">
+                                    <small class="text-white-50">پارەدان بە کارمەند</small>
+                                    <div class="text-white small">${card.breakdown.employee_payments}</div>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-white-50">خەرجی تر</small>
+                                    <div class="text-white small">${card.breakdown.other_expenses}</div>
+                                </div>
+                            </div>
+                            <div class="row mt-1">
+                                <div class="col-6">
+                                    <small class="text-white-50">کڕین مەواد</small>
+                                    <div class="text-white small">${card.breakdown.purchases}</div>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-white-50">کڕینی کاڵا</small>
+                                    <div class="text-white small">${card.breakdown.purchase_materials}</div>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        // Standard layout for cash/credit breakdown
+                        breakdownHtml = `
+                            <div class="row mt-2">
+                                <div class="col-6">
+                                    <small class="text-white-50">نەقد</small>
+                                    <div class="text-white small">${card.breakdown.cash}</div>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-white-50">قەرز</small>
+                                    <div class="text-white small">${card.breakdown.credit}</div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+                
                 html += `<div class="col-md-3 col-sm-6 mb-3">
                     <div class="card text-center shadow ${card.gradient} card-animate-hover">
                         <div class="card-body">
@@ -113,6 +180,7 @@ function fetchAndRenderReportData() {
                             <h6 class="card-title text-white">${card.label}</h6>
                             <div class="fs-4 fw-bold text-white">${card.value}</div>
                             <small class="text-white">${card.subtitle}</small>
+                            ${breakdownHtml}
                         </div>
                     </div>
                 </div>`;
