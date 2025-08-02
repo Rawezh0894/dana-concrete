@@ -313,8 +313,7 @@ function refreshEditMaterialDropdowns() {
                 data-liters-per-barrel="${material.liters_per_barrel || ''}"
                 data-price-per-piece="${material.price_per_piece || ''}"
                 data-price-per-liter="${material.price_per_liter || ''}"
-                data-price-per-bag="${material.price_per_bag || ''}"
-                data-purchase-unit="${material.unit_type || ''}">${material.name}</option>`;
+                data-price-per-bag="${material.price_per_bag || ''}">${material.name}</option>`;
         });
     } else {
         options = '<option value="">کاڵاکان بار نەکراون...</option>';
@@ -323,8 +322,6 @@ function refreshEditMaterialDropdowns() {
     // Update all material select dropdowns in edit form
     $('.edit-material-select').each(function() {
         const currentValue = $(this).val();
-        const currentPurchaseUnit = $(this).find('option:selected').data('purchase-unit');
-        
         $(this).html(options);
         $(this).val(currentValue);
         
@@ -335,12 +332,5 @@ function refreshEditMaterialDropdowns() {
             placeholder: "هەڵبژێرە",
             dir: "rtl"
         });
-        
-        // Restore the purchase unit if it was set
-        if (currentValue && currentPurchaseUnit) {
-            const row = $(this).closest('tr');
-            const purchaseUnitSelect = row.find('.edit-purchase-unit-select');
-            purchaseUnitSelect.val(currentPurchaseUnit);
-        }
     });
 }
