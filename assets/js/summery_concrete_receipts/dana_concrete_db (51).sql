@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 27, 2025 at 02:06 PM
+-- Generation Time: Aug 02, 2025 at 03:33 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -41,6 +41,18 @@ END$$
 --
 -- Functions
 --
+CREATE DEFINER=`root`@`localhost` FUNCTION `create_detailed_notification` (`p_user_id` INT, `p_action` VARCHAR(50), `p_table_name` VARCHAR(50), `p_record_id` INT, `p_description` TEXT, `p_old_values` TEXT, `p_new_values` TEXT, `p_additional_info` TEXT, `p_ip_address` VARCHAR(45)) RETURNS INT(11) DETERMINISTIC READS SQL DATA BEGIN
+    INSERT INTO notifications (
+        user_id, action, table_name, record_id, description, 
+        old_values, new_values, additional_info, ip_address
+    ) VALUES (
+        p_user_id, p_action, p_table_name, p_record_id, p_description,
+        p_old_values, p_new_values, p_additional_info, p_ip_address
+    );
+    
+    RETURN LAST_INSERT_ID();
+END$$
+
 CREATE DEFINER=`root`@`localhost` FUNCTION `log_user_activity` (`p_user_id` INT, `p_username` VARCHAR(100), `p_activity_type` ENUM('login','logout','create','update','delete','view','export','import','print'), `p_module` VARCHAR(50), `p_action_description` TEXT, `p_record_id` INT, `p_table_name` VARCHAR(50), `p_old_values` TEXT, `p_new_values` TEXT, `p_ip_address` VARCHAR(45)) RETURNS INT(11) DETERMINISTIC READS SQL DATA BEGIN
     INSERT INTO user_activity_log (
         user_id, username, activity_type, module, action_description, 
@@ -68,7 +80,7 @@ CREATE TABLE `bins_silos` (
   `material_type` varchar(50) DEFAULT NULL,
   `amount` decimal(10,2) DEFAULT 0.00,
   `total_value` decimal(12,2) DEFAULT 0.00,
-  `average_price` decimal(15,6) DEFAULT NULL
+  `average_price` decimal(15,10) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -76,15 +88,15 @@ CREATE TABLE `bins_silos` (
 --
 
 INSERT INTO `bins_silos` (`id`, `name`, `type`, `material_type`, `amount`, `total_value`, `average_price`) VALUES
-(1, 'چاوی ١', 'چاو', 'لمی ڕەش', 41220.00, 417352.50, 10.125000),
-(2, 'چاوی ٢', 'چاو', 'لمی کەسارە', 20000000.00, 0.00, 0.000000),
-(3, 'چاوی ٣', 'چاو', 'چەو', 1988390.00, 0.00, 0.000000),
-(4, 'چاوی ٤', 'چاو', 'چەو', 99988389.99, 0.00, 0.000000),
-(5, 'سایلۆی ١', 'سایلۆ', 'چیمەنتۆ', 20000000.00, 0.00, 0.000000),
-(6, 'سایلۆی ٢', 'سایلۆ', 'چیمەنتۆ', 19992710.00, 0.00, 0.000000),
-(7, 'تەنکی دەرمان ١', 'تەنکی', 'دەرمان', 19999946.00, 0.00, 0.000000),
-(8, 'تەکی گاز ١', 'تەنکی', 'گاز', 20000000.00, 0.00, 0.000000),
-(11, 'تەنکی گازی 2', 'تەنکی', 'گاز', 0.00, 0.00, 0.000000);
+(1, 'چاوی ١', 'چاو', 'لمی ڕەش', 100220.00, 1018767.87, 10.1653150000),
+(2, 'چاوی ٢', 'چاو', 'لمی کەسارە', 20006460.00, 0.00, 0.0000000000),
+(3, 'چاوی ٣', 'چاو', 'چەو', 1998760.00, 0.00, 0.0000000000),
+(4, 'چاوی ٤', 'چاو', 'چەو', 99995699.99, 0.00, 0.0000000000),
+(5, 'سایلۆی ١', 'سایلۆ', 'چیمەنتۆ', 20001130.00, 0.00, 0.0000000000),
+(6, 'سایلۆی ٢', 'سایلۆ', 'چیمەنتۆ', 19997840.00, 0.00, 0.0000000000),
+(7, 'تەنکی دەرمان ١', 'تەنکی', 'دەرمان', 19999994.00, 0.00, 0.0000000000),
+(8, 'تەکی گاز ١', 'تەنکی', 'گاز', 7000.00, 80000.00, 8.0000000000),
+(11, 'تەنکی گازی 2', 'تەنکی', 'گاز', 0.00, 0.00, 0.0000000000);
 
 --
 -- Triggers `bins_silos`
@@ -161,9 +173,9 @@ CREATE TABLE `cash_box` (
 --
 
 INSERT INTO `cash_box` (`id`, `date`, `type`, `amount_iqd`, `amount_usd`, `currency`, `note`, `created_by`, `created_at`) VALUES
-(18, '2025-07-16', 'deposit', 0.00, 40.00, 'دۆلار', 'فرۆشتن: invoice 88', NULL, '2025-07-17 07:22:32'),
-(19, '2025-07-26', 'deposit', 0.00, 1200.00, 'دۆلار', 'فرۆشتن: invoice A-0140', NULL, '2025-07-27 06:41:18'),
-(20, '2025-07-26', 'deposit', 40000.00, 0.00, 'دینار', 'فرۆشتن: invoice A-0140', NULL, '2025-07-27 06:41:18');
+(34, '2025-07-17', 'deposit', 150000.00, 0.00, 'دینار', '', 1, '2025-07-29 09:46:49'),
+(37, '2025-07-28', 'deposit', 0.00, 50.00, 'دۆلار', 'گەڕاندنەوەی قەرزی کڕیار', NULL, '2025-07-30 06:29:20'),
+(38, '2025-07-28', 'deposit', 50000.00, 0.00, 'دینار', 'گەڕاندنەوەی قەرزی کڕیار', NULL, '2025-07-30 06:29:20');
 
 --
 -- Triggers `cash_box`
@@ -303,8 +315,6 @@ DELIMITER ;
 CREATE TABLE `company` (
   `id` int(11) NOT NULL,
   `name` varchar(100) NOT NULL,
-  `debt_usd` decimal(14,2) DEFAULT 0.00,
-  `debt_iqd` decimal(20,2) DEFAULT 0.00,
   `opening_debt_usd` decimal(14,2) DEFAULT 0.00,
   `opening_debt_iqd` decimal(20,2) DEFAULT 0.00,
   `currency_type` enum('دینار','دۆلار') DEFAULT 'دینار'
@@ -314,9 +324,10 @@ CREATE TABLE `company` (
 -- Dumping data for table `company`
 --
 
-INSERT INTO `company` (`id`, `name`, `debt_usd`, `debt_iqd`, `opening_debt_usd`, `opening_debt_iqd`, `currency_type`) VALUES
-(27, 'Rawezh', 0.00, 360000.00, 0.00, 0.00, 'دینار'),
-(28, 'محمد', 375.00, 0.00, 0.00, 0.00, 'دۆلار');
+INSERT INTO `company` (`id`, `name`, `opening_debt_usd`, `opening_debt_iqd`, `currency_type`) VALUES
+(27, 'Rawezh', 0.00, 150000.00, 'دینار'),
+(28, 'محمد', 0.00, 0.00, 'دۆلار'),
+(29, 'test', 0.00, 50000.00, 'دینار');
 
 -- --------------------------------------------------------
 
@@ -390,48 +401,18 @@ CREATE TABLE `concrete_receipts` (
   `mixer_driver_id` int(11) DEFAULT NULL,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime DEFAULT NULL,
-  `receiver_name` text DEFAULT NULL
+  `receiver_name` text DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  `payment_status` enum('paid','unpaid') NOT NULL DEFAULT 'unpaid'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `concrete_receipts`
 --
 
-INSERT INTO `concrete_receipts` (`id`, `receipt_number`, `customer_id`, `location`, `meter_amount`, `price_per_meter`, `formulas_id`, `pump_car_id`, `pump_driver_id`, `mixer_car_id`, `mixer_driver_id`, `created_at`, `updated_at`, `receiver_name`) VALUES
-(2, 'A-0002', 21, 'سلێمانی', 20.00, 0.00, 30, 8, 38, 9, 38, '2025-07-17 13:05:21', NULL, NULL),
-(3, 'A-0003', 21, 'سلێمانی', 20.00, 0.00, 30, 8, 37, 9, 38, '2025-07-17 13:25:29', NULL, NULL),
-(4, 'A-0004', NULL, 'سلێمانی', 20.00, 0.00, 27, 11, 38, 10, 37, '2025-07-17 13:30:39', NULL, NULL),
-(5, 'A-0005', 21, 'سلێمانی', 20.00, 0.00, 27, 11, 34, 9, 35, '2025-07-17 13:35:25', NULL, NULL),
-(6, 'A-0006', 21, 'سلێمانی', 20.00, 0.00, 26, 11, 36, 10, 34, '2025-07-17 13:36:42', NULL, NULL),
-(7, 'A-0007', 21, 'سلێمانی', 20.00, 0.00, 30, 8, 37, 9, 38, '2025-07-17 14:09:54', NULL, NULL),
-(8, 'A-0008', 21, 'سلێمانی', 20.00, 0.00, 31, 8, 38, 9, 38, '2025-07-18 20:20:03', NULL, NULL),
-(9, 'A-0009', 21, 'سلێمانی', 20.00, 0.00, 27, 8, 37, 10, 38, '2025-07-18 21:03:21', NULL, NULL),
-(10, 'A-0010', NULL, 'سلێمانی', 20.00, 0.00, 30, 11, 38, 9, 38, '2025-07-18 21:03:42', NULL, NULL),
-(11, 'A-0011', 21, 'سلێمانی', 20.00, 0.00, 30, 8, 38, 9, 37, '2025-07-19 17:50:36', NULL, NULL),
-(12, 'A-0012', 21, 'سلێمانی', 20.00, 0.00, 30, 8, 38, 9, 38, '2025-07-19 17:58:10', NULL, NULL),
-(13, 'A-0013', 21, 'سلێمانی', 20.00, 0.00, 30, 11, 38, 9, 36, '2025-07-19 18:01:04', NULL, NULL),
-(14, 'A-0014', 21, 'سلێمانی', 12.00, 0.00, 27, 11, 27, 19, 34, '2025-07-20 08:43:28', NULL, NULL),
-(15, 'A-0015', 21, 'سلێمانی', 12.00, 0.00, 26, 11, 26, 20, 37, '2025-07-20 08:44:48', NULL, NULL),
-(16, 'A-0016', 21, 'سلێمانی', 12.00, 0.00, 27, 8, 27, 20, 37, '2025-07-20 08:51:17', NULL, NULL),
-(17, 'A-0017', 21, 'سلێمانی', 12.00, 0.00, 26, 11, 25, 21, 34, '2025-07-20 08:59:18', NULL, NULL),
-(18, 'A-0018', 21, 'سلێمانی', 12.00, 0.00, 30, 8, 27, 21, 38, '2025-07-20 09:00:59', NULL, NULL),
-(19, 'A-0019', 21, 'سلێمانی', 12.00, 0.00, 30, 11, 27, 21, 32, '2025-07-20 09:02:33', NULL, NULL),
-(20, 'A-0020', 21, 'سلێمانی', 12.00, 0.00, 27, 8, 27, 22, 34, '2025-07-20 09:04:58', NULL, NULL),
-(21, 'A-0021', 21, 'سلێمانی', 12.00, 0.00, 30, 8, 27, 22, 34, '2025-07-20 09:08:09', NULL, NULL),
-(23, 'A-0022', 21, 'سلێمانی', 12.00, 0.00, 30, 8, 26, 20, 37, '2025-07-20 09:13:54', NULL, NULL),
-(24, 'A-0023', 22, 'سلێمانی', 12.00, 0.00, 31, 11, 27, 22, 38, '2025-07-20 11:47:07', NULL, NULL),
-(25, 'A-0024', 21, 'سلێمانی', 12.00, 0.00, 31, 8, 26, 22, 33, '2025-07-20 11:48:00', NULL, NULL),
-(26, 'A-0025', 22, 'سلێمانی', 12.00, 0.00, 27, 8, 26, 22, 34, '2025-07-20 11:49:13', NULL, NULL),
-(27, 'A-0026', 22, 'سلێمانی', 12.00, 0.00, 30, 8, 27, 22, 37, '2025-07-20 11:58:19', NULL, NULL),
-(28, 'A-0027', 22, 'سلێمانی', 12.00, 0.00, 27, 8, 27, 22, 38, '2025-07-20 11:59:18', NULL, NULL),
-(29, 'A-0028', 22, 'Iraq-Kurdistan, Sulaymaniyah ', 12.00, 0.00, 27, 8, 26, 20, 37, '2025-07-21 09:36:31', NULL, NULL),
-(30, 'A-0029', 21, 'سلێمانی', 12.00, 0.00, 31, 8, 26, 22, 37, '2025-07-21 09:38:51', NULL, NULL),
-(31, 'A-0030', 22, 'سلێمانی', 12.00, 0.00, 30, 11, 26, 22, 37, '2025-07-21 09:39:13', NULL, NULL),
-(32, 'A-0031', 21, 'سلێمانی', 12.00, 0.00, 30, 8, 26, 22, 37, '2025-07-21 09:41:56', NULL, NULL),
-(33, 'A-0032', 21, 'سلێمانی', 12.00, 0.00, 30, 8, 26, 21, 38, '2025-07-21 09:52:25', NULL, NULL),
-(34, 'A-0033', 21, 'سلێمانی', 2.00, 12.00, 26, 8, 25, 20, 33, '2025-07-21 09:53:42', '2025-07-25 21:02:26', NULL),
-(35, 'A-0034', 21, 'Iraq-Kurdistan, Sulaymaniyah ', 2.00, 12.00, 27, 8, 26, 21, 38, '2025-07-21 09:54:37', '2025-07-25 21:02:26', NULL),
-(36, 'A-0035', 21, 'سلێمانی', 12.00, 13.00, 18, 8, 27, 22, 37, '2025-07-22 10:18:12', '2025-07-25 21:13:00', 'هەڵگورد');
+INSERT INTO `concrete_receipts` (`id`, `receipt_number`, `customer_id`, `location`, `meter_amount`, `price_per_meter`, `formulas_id`, `pump_car_id`, `pump_driver_id`, `mixer_car_id`, `mixer_driver_id`, `created_at`, `updated_at`, `receiver_name`, `notes`, `payment_status`) VALUES
+(38, 'A-0001', 32, 'سلێمانی ', 10.00, 0.00, 17, 8, 27, 19, 35, '2025-07-30 09:28:28', NULL, 'محمد', NULL, 'unpaid'),
+(39, 'A-0002', 32, 'سلێمانی ', 10.00, 0.00, 17, 8, 27, 22, 36, '2025-07-30 09:54:44', NULL, 'محمد', NULL, 'unpaid');
 
 -- --------------------------------------------------------
 
@@ -444,8 +425,6 @@ CREATE TABLE `customers` (
   `name` varchar(255) NOT NULL,
   `mobile1` varchar(20) NOT NULL,
   `mobile2` varchar(20) DEFAULT NULL,
-  `debt_iqd` decimal(20,2) DEFAULT 0.00,
-  `debt_usd` decimal(14,2) DEFAULT 0.00,
   `opening_debt_usd` decimal(14,2) DEFAULT 0.00,
   `opening_debt_iqd` decimal(20,2) DEFAULT 0.00
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -454,16 +433,8 @@ CREATE TABLE `customers` (
 -- Dumping data for table `customers`
 --
 
-INSERT INTO `customers` (`id`, `name`, `mobile1`, `mobile2`, `debt_iqd`, `debt_usd`, `opening_debt_usd`, `opening_debt_iqd`) VALUES
-(21, 'test2', '07709240894', '', 0.00, 80.00, 0.00, 0.00),
-(22, 'test5', '07701211541', '', 0.00, 0.00, 0.00, 0.00),
-(23, 'test8', '07701211566', '', 0.00, 40.00, 0.00, 0.00),
-(24, 'test10', '07701211577', '', 0.00, 0.00, 0.00, 0.00),
-(25, 'test11', '07701211588', '', 0.00, 0.00, 0.00, 0.00),
-(26, 'test15', '07701211554', '', 0.00, 0.00, 0.00, 0.00),
-(27, 'test16', '07701211523', '', 0.00, 0.00, 0.00, 0.00),
-(28, 'test115', '07709245656', '', 0.00, 0.00, 0.00, 0.00),
-(29, 'test557', '07709245611', '', 0.00, 0.00, 0.00, 0.00);
+INSERT INTO `customers` (`id`, `name`, `mobile1`, `mobile2`, `opening_debt_usd`, `opening_debt_iqd`) VALUES
+(32, 'test', '07709245644', '', 14.03, 0.00);
 
 -- --------------------------------------------------------
 
@@ -483,6 +454,13 @@ CREATE TABLE `customer_debt_payments` (
   `from_opening_debt_usd` decimal(14,2) DEFAULT 0.00,
   `from_sales_usd` decimal(14,2) DEFAULT 0.00
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `customer_debt_payments`
+--
+
+INSERT INTO `customer_debt_payments` (`id`, `customer_id`, `date`, `dolar_rate`, `paid_usd`, `paid_iqd`, `discount`, `note`, `from_opening_debt_usd`, `from_sales_usd`) VALUES
+(4, 32, '2025-07-28', 139000.00, 50.00, 50000.00, 0.00, '', 85.97, 0.00);
 
 --
 -- Triggers `customer_debt_payments`
@@ -609,6 +587,28 @@ CREATE TRIGGER `trg_before_update_debt_payments` BEFORE UPDATE ON `debt_payments
 END
 $$
 DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `dollar_rates`
+--
+
+CREATE TABLE `dollar_rates` (
+  `id` int(11) NOT NULL,
+  `rate_value` decimal(10,2) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `dollar_rates`
+--
+
+INSERT INTO `dollar_rates` (`id`, `rate_value`, `created_at`) VALUES
+(1, 131073.00, '2025-07-30 05:03:29'),
+(2, 131073.00, '2025-07-30 05:03:33'),
+(3, 131073.00, '2025-07-30 05:05:27'),
+(4, 131073.00, '2025-07-30 05:06:55');
 
 -- --------------------------------------------------------
 
@@ -740,6 +740,13 @@ CREATE TABLE `list_materials` (
   `purchase_price_iqd` decimal(15,2) DEFAULT 0.00
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `list_materials`
+--
+
+INSERT INTO `list_materials` (`id`, `name`, `quantity`, `created_at`, `currency_type`, `purchase_price_usd`, `purchase_price_iqd`) VALUES
+(5, 'تایە ', 95.00, '2025-07-27 13:29:29', 'دۆلار', 100.00, 0.00);
+
 -- --------------------------------------------------------
 
 --
@@ -786,6 +793,39 @@ INSERT INTO `materials` (`id`, `name`, `type`, `unit`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `notes`
+--
+
+CREATE TABLE `notes` (
+  `id` int(11) NOT NULL,
+  `date` date NOT NULL,
+  `time` time NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `recipient` varchar(255) DEFAULT NULL,
+  `meter_amount` decimal(10,2) NOT NULL,
+  `formula_id` int(11) NOT NULL,
+  `mixer_car_id` int(11) DEFAULT NULL,
+  `mixer_driver_id` int(11) DEFAULT NULL,
+  `pump_car_id` int(11) DEFAULT NULL,
+  `pump_driver_id` int(11) DEFAULT NULL,
+  `is_read` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `notes`
+--
+
+INSERT INTO `notes` (`id`, `date`, `time`, `customer_id`, `location`, `recipient`, `meter_amount`, `formula_id`, `mixer_car_id`, `mixer_driver_id`, `pump_car_id`, `pump_driver_id`, `is_read`, `created_at`, `updated_at`) VALUES
+(1, '2025-07-29', '15:00:00', 32, 'سلێمانی', 'کاک ڕاوێژ ', 50.00, 21, 22, 37, 8, 34, 1, '2025-07-28 10:48:54', '2025-07-28 11:50:35'),
+(2, '2025-07-28', '15:15:00', 32, 'سلێمانی', 'کاک ڕاوێژ ', 50.00, 42, 10, 30, 8, 25, 1, '2025-07-28 11:15:41', '2025-07-28 11:53:27'),
+(3, '2025-07-28', '14:18:00', 32, 'سلێمانی', 'کاک ڕاوێژ ', 50.00, 39, 22, 36, 8, 36, 1, '2025-07-28 11:16:06', '2025-07-28 11:55:31');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `notifications`
 --
 
@@ -797,15 +837,21 @@ CREATE TABLE `notifications` (
   `record_id` int(11) DEFAULT NULL,
   `description` text DEFAULT NULL,
   `created_at` datetime DEFAULT current_timestamp(),
-  `seen` tinyint(1) DEFAULT 0
+  `seen` tinyint(1) DEFAULT 0,
+  `old_values` text DEFAULT NULL COMMENT 'JSON format of old values before change',
+  `new_values` text DEFAULT NULL COMMENT 'JSON format of new values after change',
+  `additional_info` text DEFAULT NULL COMMENT 'Additional context information',
+  `ip_address` varchar(45) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `notifications`
 --
 
-INSERT INTO `notifications` (`id`, `user_id`, `action`, `table_name`, `record_id`, `description`, `created_at`, `seen`) VALUES
-(164, 1, 'insert', 'sales', 8, 'فرۆشتنێکی نوێ زیادکرا (invoice: A-0140)', '2025-07-27 09:41:18', 0);
+INSERT INTO `notifications` (`id`, `user_id`, `action`, `table_name`, `record_id`, `description`, `created_at`, `seen`, `old_values`, `new_values`, `additional_info`, `ip_address`) VALUES
+(206, 1, 'insert', 'other_expenses', 12, 'خەرجی تر زیادکرا (invoice: , جۆر: بەکارهێنانی گاز, کەس: هیچ کەسێک نییە, کارمەند: احمد(ابو روەیدا), سەیارە: M10)', '2025-07-30 10:14:14', 0, NULL, '{\"person_id\":null,\"person_name\":\"هیچ کەسێک نییە\",\"employee_id\":\"32\",\"employee_name\":\"احمد(ابو روەیدا)\",\"car_id\":\"12\",\"car_name\":\"M10\",\"gas_liters\":1000,\"expense_type\":\"بەکارهێنانی گاز\",\"material_id\":null,\"material_name\":\"هیچ مادەیەک نییە\",\"material_quantity\":0,\"material_purchase_price_iqd\":0,\"material_purchase_price_usd\":0,\"material_total_cost\":0,\"gas_purchase_price_input\":8,\"gas_total_cost\":8000,\"payment_type\":\"نەقد\",\"currency_type\":\"\",\"invoice_number\":\"\",\"amount_iqd\":0,\"amount_usd\":0,\"paid_iqd\":0,\"paid_usd\":0,\"exchange_rate\":139000,\"remaining_iqd\":0,\"remaining_usd\":0,\"date\":\"2025-07-30\"}', '{\"action_type\":\"other_expense_creation\",\"payment_status\":\"paid\",\"currency_used\":\"none\",\"total_paid\":0,\"remaining_debt\":0,\"expense_category\":\"بەکارهێنانی گاز\"}', '::1'),
+(207, 1, 'insert', 'customer_debt_payments', 6, 'پارەدان بۆ قەرزی کڕیار زیادکرا (کڕیار: test, تەلەفۆن: 07709245644)', '2025-07-30 10:53:13', 0, NULL, '{\"customer_id\":\"32\",\"customer_name\":\"test\",\"customer_phone\":\"07709245644\",\"date\":\"2025-07-30\",\"dolar_rate\":139000,\"paid_usd\":14.03,\"paid_iqd\":0,\"discount\":0,\"note\":\"\",\"from_opening_debt_usd\":14.03,\"from_sales_usd\":0}', '{\"action_type\":\"customer_debt_payment\",\"payment_method\":\"USD\",\"total_paid_usd_equivalent\":14.03,\"debt_reduction_type\":\"opening_debt\"}', '::1'),
+(208, 1, 'delete', 'customer_debt_payments', 6, 'پارەدانی قەرزی کڕیار سڕایەوە (کڕیار: test, تەلەفۆن: 07709245644)', '2025-07-30 10:54:56', 0, '{\"customer_id\":32,\"customer_name\":\"test\",\"customer_phone\":\"07709245644\",\"date\":\"2025-07-30\",\"dolar_rate\":139000,\"paid_usd\":14.03,\"paid_iqd\":0,\"discount\":0,\"note\":\"\",\"from_opening_debt_usd\":14.03,\"from_sales_usd\":0}', NULL, '{\"action_type\":\"customer_debt_payment_deletion\",\"payment_method\":\"USD\",\"total_paid_usd_equivalent\":14.03,\"debt_reduction_type\":\"opening_debt\"}', '::1');
 
 -- --------------------------------------------------------
 
@@ -816,13 +862,12 @@ INSERT INTO `notifications` (`id`, `user_id`, `action`, `table_name`, `record_id
 CREATE TABLE `other_expenses` (
   `id` int(11) NOT NULL,
   `purpose` text NOT NULL,
-  `person_id` int(11) NOT NULL,
+  `person_id` int(11) DEFAULT NULL,
   `employee_id` int(11) DEFAULT NULL,
   `car_id` int(11) DEFAULT NULL,
   `gas_liters` decimal(10,2) DEFAULT NULL,
-  `expense_type` enum('بەکارهێنانی کاڵای کۆگا','بەکارهێنانی گاز','خەرجی تر','خواردنگە','ئۆفیس') DEFAULT 'خەرجی تر',
-  `payment_type` enum('نەقد','قەرز') NOT NULL,
-  `currency_type` enum('دینار','دۆلار') NOT NULL,
+  `payment_type` enum('نەقد','قەرز') DEFAULT NULL,
+  `currency_type` enum('دینار','دۆلار') DEFAULT NULL,
   `invoice_number` varchar(100) DEFAULT NULL,
   `amount_iqd` decimal(20,2) DEFAULT 0.00,
   `amount_usd` decimal(14,2) DEFAULT 0.00,
@@ -831,22 +876,33 @@ CREATE TABLE `other_expenses` (
   `exchange_rate` decimal(10,2) DEFAULT 150000.00,
   `remaining_iqd` decimal(20,2) DEFAULT 0.00,
   `remaining_usd` decimal(14,2) DEFAULT 0.00,
-  `date` date NOT NULL
+  `date` date NOT NULL,
+  `expense_type` enum('بەکارهێنانی کاڵای کۆگا','بەکارهێنانی گاز','خەرجی تر','خواردنگە','ئۆفیس') DEFAULT 'خەرجی تر',
+  `material_quantity` decimal(10,2) DEFAULT NULL COMMENT 'بڕی عەدەدی کاڵا',
+  `gas_purchase_price_input` decimal(15,2) DEFAULT NULL COMMENT 'ئینپوتی نرخی کڕینی گاز',
+  `material_purchase_price_iqd` decimal(15,2) DEFAULT NULL COMMENT 'نرخی کڕینی کاڵا بە دینار',
+  `material_purchase_price_usd` decimal(15,2) DEFAULT NULL COMMENT 'نرخی کڕینی کاڵا بە دۆلار',
+  `material_id` int(11) DEFAULT NULL COMMENT 'ناسنامەی کاڵا لە کۆگا',
+  `material_total_cost` decimal(15,2) DEFAULT NULL COMMENT 'کۆی نرخی کاڵای بەکارهاتوو',
+  `gas_total_cost` decimal(15,2) DEFAULT NULL COMMENT 'کۆی نرخی گازی بەکارهاتوو'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `other_expenses`
 --
 
-INSERT INTO `other_expenses` (`id`, `purpose`, `person_id`, `employee_id`, `car_id`, `gas_liters`, `expense_type`, `payment_type`, `currency_type`, `invoice_number`, `amount_iqd`, `amount_usd`, `paid_iqd`, `paid_usd`, `exchange_rate`, `remaining_iqd`, `remaining_usd`, `date`) VALUES
-(1, 'c', 13, 33, 9, NULL, 'خەرجی تر', 'نەقد', 'دینار', '', 500000.00, 0.00, 0.00, 0.00, 150000.00, 500000.00, 0.00, '2025-07-17'),
-(2, 'گاز تێکردن بۆ سەیارەی M1', 13, 23, 18, 12000.00, 'بەکارهێنانی گاز', 'قەرز', 'دۆلار', '123', 0.00, 0.00, 0.00, 0.00, 150000.00, 0.00, 0.00, '2025-07-23');
+INSERT INTO `other_expenses` (`id`, `purpose`, `person_id`, `employee_id`, `car_id`, `gas_liters`, `payment_type`, `currency_type`, `invoice_number`, `amount_iqd`, `amount_usd`, `paid_iqd`, `paid_usd`, `exchange_rate`, `remaining_iqd`, `remaining_usd`, `date`, `expense_type`, `material_quantity`, `gas_purchase_price_input`, `material_purchase_price_iqd`, `material_purchase_price_usd`, `material_id`, `material_total_cost`, `gas_total_cost`) VALUES
+(7, '', NULL, 33, 13, 2000.00, 'نەقد', '', '', 0.00, 0.00, 0.00, 0.00, 150000.00, 0.00, 0.00, '2025-07-27', 'بەکارهێنانی گاز', 0.00, 8.00, 0.00, 0.00, NULL, 0.00, 16000.00),
+(8, '', NULL, 22, 13, 0.00, 'نەقد', '', '', 0.00, 0.00, 0.00, 0.00, 150000.00, 0.00, 0.00, '2025-07-27', 'بەکارهێنانی کاڵای کۆگا', 2.00, 0.00, 0.00, 100.00, 5, 200.00, 0.00),
+(10, '', NULL, 33, 12, 0.00, 'نەقد', '', '', 0.00, 0.00, 0.00, 0.00, 150000.00, 0.00, 0.00, '2025-07-28', 'بەکارهێنانی کاڵای کۆگا', 3.00, 0.00, 0.00, 100.00, 5, 300.00, 0.00),
+(12, '', NULL, 32, 12, 1000.00, 'نەقد', '', '', 0.00, 0.00, 0.00, 0.00, 139000.00, 0.00, 0.00, '2025-07-30', 'بەکارهێنانی گاز', 0.00, 8.00, 0.00, 0.00, NULL, 0.00, 8000.00);
 
 --
 -- Triggers `other_expenses`
 --
 DELIMITER $$
 CREATE TRIGGER `trg_after_insert_other_expenses` AFTER INSERT ON `other_expenses` FOR EACH ROW BEGIN
+    -- Handle cash box operations for cash payments
     IF NEW.payment_type = 'نەقد' THEN
         IF NEW.currency_type = 'دۆلار' AND NEW.paid_usd > 0 THEN
             INSERT INTO cash_box (`date`, `type`, `amount_iqd`, `amount_usd`, `currency`, `note`, `created_by`)
@@ -856,12 +912,59 @@ CREATE TRIGGER `trg_after_insert_other_expenses` AFTER INSERT ON `other_expenses
             INSERT INTO cash_box (`date`, `type`, `amount_iqd`, `amount_usd`, `currency`, `note`, `created_by`)
             VALUES (NEW.date, 'withdraw', NEW.paid_iqd, 0, 'دینار', CONCAT('خەرجی تر: invoice ', NEW.invoice_number), NULL);
         END IF;
+    END IF;
+    
+    -- Handle gas consumption for gas usage expenses
+    IF NEW.expense_type = 'بەکارهێنانی گاز' AND NEW.gas_liters IS NOT NULL AND NEW.gas_liters > 0 THEN
+        UPDATE bins_silos
+        SET amount = amount - NEW.gas_liters
+        WHERE type = 'تەنکی' AND material_type = 'گاز'
+        LIMIT 1;
+    END IF;
+    
+    -- Handle material consumption for warehouse material usage
+    IF NEW.expense_type = 'بەکارهێنانی کاڵای کۆگا' AND NEW.material_id IS NOT NULL AND NEW.material_quantity IS NOT NULL AND NEW.material_quantity > 0 THEN
+        UPDATE list_materials
+        SET quantity = quantity - NEW.material_quantity
+        WHERE id = NEW.material_id;
+    END IF;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `trg_after_update_other_expenses` AFTER UPDATE ON `other_expenses` FOR EACH ROW BEGIN
+    -- Handle cash box operations for new record
+    IF NEW.payment_type = 'نەقد' THEN
+        IF NEW.currency_type = 'دۆلار' AND NEW.paid_usd > 0 THEN
+            INSERT INTO cash_box (`date`, `type`, `amount_iqd`, `amount_usd`, `currency`, `note`, `created_by`)
+            VALUES (NEW.date, 'withdraw', 0, NEW.paid_usd, 'دۆلار', CONCAT('خەرجی تر: invoice ', NEW.invoice_number), NULL);
+        END IF;
+        IF NEW.currency_type = 'دینار' AND NEW.paid_iqd > 0 THEN
+            INSERT INTO cash_box (`date`, `type`, `amount_iqd`, `amount_usd`, `currency`, `note`, `created_by`)
+            VALUES (NEW.date, 'withdraw', NEW.paid_iqd, 0, 'دینار', CONCAT('خەرجی تر: invoice ', NEW.invoice_number), NULL);
+        END IF;
+    END IF;
+    
+    -- Handle new gas consumption
+    IF NEW.expense_type = 'بەکارهێنانی گاز' AND NEW.gas_liters IS NOT NULL AND NEW.gas_liters > 0 THEN
+        UPDATE bins_silos
+        SET amount = amount - NEW.gas_liters
+        WHERE type = 'تەنکی' AND material_type = 'گاز'
+        LIMIT 1;
+    END IF;
+    
+    -- Handle new material consumption
+    IF NEW.expense_type = 'بەکارهێنانی کاڵای کۆگا' AND NEW.material_id IS NOT NULL AND NEW.material_quantity IS NOT NULL AND NEW.material_quantity > 0 THEN
+        UPDATE list_materials
+        SET quantity = quantity - NEW.material_quantity
+        WHERE id = NEW.material_id;
     END IF;
 END
 $$
 DELIMITER ;
 DELIMITER $$
 CREATE TRIGGER `trg_before_delete_other_expenses` BEFORE DELETE ON `other_expenses` FOR EACH ROW BEGIN
+    -- Handle cash box operations reversal
     IF OLD.payment_type = 'نەقد' THEN
         IF OLD.currency_type = 'دۆلار' AND OLD.paid_usd > 0 THEN
             DELETE FROM cash_box
@@ -871,12 +974,28 @@ CREATE TRIGGER `trg_before_delete_other_expenses` BEFORE DELETE ON `other_expens
             DELETE FROM cash_box
             WHERE `date` = OLD.date AND `type` = 'withdraw' AND amount_iqd = OLD.paid_iqd AND currency = 'دینار' AND note = CONCAT('خەرجی تر: invoice ', OLD.invoice_number);
         END IF;
+    END IF;
+    
+    -- Handle gas restoration
+    IF OLD.expense_type = 'بەکارهێنانی گاز' AND OLD.gas_liters IS NOT NULL AND OLD.gas_liters > 0 THEN
+        UPDATE bins_silos
+        SET amount = amount + OLD.gas_liters
+        WHERE type = 'تەنکی' AND material_type = 'گاز'
+        LIMIT 1;
+    END IF;
+    
+    -- Handle material restoration
+    IF OLD.expense_type = 'بەکارهێنانی کاڵای کۆگا' AND OLD.material_id IS NOT NULL AND OLD.material_quantity IS NOT NULL AND OLD.material_quantity > 0 THEN
+        UPDATE list_materials
+        SET quantity = quantity + OLD.material_quantity
+        WHERE id = OLD.material_id;
     END IF;
 END
 $$
 DELIMITER ;
 DELIMITER $$
 CREATE TRIGGER `trg_before_update_other_expenses` BEFORE UPDATE ON `other_expenses` FOR EACH ROW BEGIN
+    -- Handle cash box operations for old record
     IF OLD.payment_type = 'نەقد' THEN
         IF OLD.currency_type = 'دۆلار' AND OLD.paid_usd > 0 THEN
             DELETE FROM cash_box
@@ -887,26 +1006,22 @@ CREATE TRIGGER `trg_before_update_other_expenses` BEFORE UPDATE ON `other_expens
             WHERE `date` = OLD.date AND `type` = 'withdraw' AND amount_iqd = OLD.paid_iqd AND currency = 'دینار' AND note = CONCAT('خەرجی تر: invoice ', OLD.invoice_number);
         END IF;
     END IF;
-    IF NEW.payment_type = 'نەقد' THEN
-        IF NEW.currency_type = 'دۆلار' AND NEW.paid_usd > 0 THEN
-            INSERT INTO cash_box (`date`, `type`, `amount_iqd`, `amount_usd`, `currency`, `note`, `created_by`)
-            VALUES (NEW.date, 'withdraw', 0, NEW.paid_usd, 'دۆلار', CONCAT('خەرجی تر: invoice ', NEW.invoice_number), NULL);
-        END IF;
-        IF NEW.currency_type = 'دینار' AND NEW.paid_iqd > 0 THEN
-            INSERT INTO cash_box (`date`, `type`, `amount_iqd`, `amount_usd`, `currency`, `note`, `created_by`)
-            VALUES (NEW.date, 'withdraw', NEW.paid_iqd, 0, 'دینار', CONCAT('خەرجی تر: invoice ', NEW.invoice_number), NULL);
-        END IF;
-    END IF;
-END
-$$
-DELIMITER ;
-DELIMITER $$
-CREATE TRIGGER `trg_restore_gas_on_delete_other_expenses` AFTER DELETE ON `other_expenses` FOR EACH ROW BEGIN
-    IF OLD.gas_liters IS NOT NULL AND OLD.gas_liters > 0 THEN
+    
+    -- Handle gas changes
+    IF OLD.expense_type = 'بەکارهێنانی گاز' AND OLD.gas_liters IS NOT NULL AND OLD.gas_liters > 0 THEN
+        -- Restore old gas amount
         UPDATE bins_silos
         SET amount = amount + OLD.gas_liters
         WHERE type = 'تەنکی' AND material_type = 'گاز'
         LIMIT 1;
+    END IF;
+    
+    -- Handle material changes
+    IF OLD.expense_type = 'بەکارهێنانی کاڵای کۆگا' AND OLD.material_id IS NOT NULL AND OLD.material_quantity IS NOT NULL AND OLD.material_quantity > 0 THEN
+        -- Restore old material quantity
+        UPDATE list_materials
+        SET quantity = quantity + OLD.material_quantity
+        WHERE id = OLD.material_id;
     END IF;
 END
 $$
@@ -926,13 +1041,6 @@ CREATE TABLE `other_expense_persons` (
   `opening_debt_usd` decimal(15,2) DEFAULT 0.00,
   `opening_debt_iqd` decimal(15,2) DEFAULT 0.00
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `other_expense_persons`
---
-
-INSERT INTO `other_expense_persons` (`id`, `name`, `expense_usd`, `expense_iqd`, `opening_debt_usd`, `opening_debt_iqd`) VALUES
-(13, 'test', 0.00, 500000.00, 0.00, 0.00);
 
 -- --------------------------------------------------------
 
@@ -1017,7 +1125,15 @@ INSERT INTO `permissions` (`id`, `name`, `description`) VALUES
 (78, 'view_notifications', 'بینینی ئاگادارکردنەوەکان'),
 (79, 'view_summery_concrete_receipts', 'بینینی پوختەی پسووڵەکانی کۆنکرێت'),
 (80, 'view_bins_silos', 'بینینی بین/سایلۆکان'),
-(81, 'view_cash_box', 'بینینی قاسەکە');
+(81, 'view_cash_box', 'بینینی قاسەکە'),
+(82, 'view_notes', 'بینینی تێبینیەکان'),
+(83, 'add_notes', 'زیادکردنی تێبینیەکان'),
+(84, 'update_notes', 'نوێکردنەوەی تێبینیەکان'),
+(85, 'delete_notes', 'سڕینەوەی تێبینیەکان'),
+(86, 'mark_notes_read', 'خوێندنی تێبینیەکان'),
+(87, 'view_concrete_prices', 'بینینی نرخەکانی کۆنکرێت'),
+(88, 'set_concrete_prices', 'دانانی نرخی کۆنکرێت'),
+(89, 'edit_concrete_prices', 'دەستکاری نرخی کۆنکرێت');
 
 -- --------------------------------------------------------
 
@@ -1122,7 +1238,8 @@ CREATE TABLE `purchases` (
 --
 
 INSERT INTO `purchases` (`id`, `date`, `invoice_number`, `driver`, `location`, `material_id`, `kg`, `price`, `payment_type`, `exchange_rate`, `company_id`, `type`, `paid_usd`, `paid_iqd`, `remaining_usd`, `remaining_iqd`, `bin_id`, `amount_iqd`, `price_per_kg_iqd`, `price_per_kg_usd`) VALUES
-(57, '2025-07-24', '123654', 'test', 'سلێانی', 1, 36000.00, 0.00, 'قەرز', 150000, 27, 'دینار', 0, 0, 0.00, 360000, 1, 360000.00, 10000.00, 0.00);
+(57, '2025-07-24', '123654', 'test', 'سلێانی', 1, 36000.00, 0.00, 'قەرز', 150000, 27, 'دینار', 0, 0, 0.00, 360000, 1, 360000.00, 10000.00, 0.00),
+(58, '2025-07-27', 'A-0140', 'test', 'سلێانی', 1, 36000.00, 0.00, 'قەرز', 139050, 29, 'دینار', 0, 0, 0.00, 369000, 1, 369000.00, 10250.00, 0.00);
 
 --
 -- Triggers `purchases`
@@ -1465,7 +1582,8 @@ INSERT INTO `recycle_bin_purchases` (`id`, `original_id`, `date`, `invoice_numbe
 (58, 55, '2025-07-24', '12345', 'test', 'سلێانی', 3, 36000.00, 522.00, 'قەرز', 150000, 28, 'دۆلار', 0, 0, 522.00, 0, 5, 0.00, 0.00, 14.50, '2025-07-25 10:26:21'),
 (59, 56, '2025-07-24', '1234598', 'test', 'سلێانی', 3, 30000.00, 390.00, 'قەرز', 150000, 28, 'دۆلار', 0, 0, 390.00, 0, 5, 0.00, 0.00, 13.00, '2025-07-25 10:26:24'),
 (60, 54, '2025-07-24', '1234', 'test', 'سلێانی', 1, 30000.00, 0.00, 'قەرز', 150000, 28, 'دینار', 0, 0, 0.00, 300000, 1, 300000.00, 10000.00, 0.00, '2025-07-25 10:26:26'),
-(61, 53, '2025-07-24', '123', 'test', 'سلێانی', 1, 36000.00, 0.00, 'قەرز', 150000, 27, 'دینار', 0, 0, 0.00, 369000, 1, 369000.00, 10250.00, 0.00, '2025-07-25 10:26:28');
+(61, 53, '2025-07-24', '123', 'test', 'سلێانی', 1, 36000.00, 0.00, 'قەرز', 150000, 27, 'دینار', 0, 0, 0.00, 369000, 1, 369000.00, 10250.00, 0.00, '2025-07-25 10:26:28'),
+(62, 59, '2025-07-27', 'A-01404', 'test', 'سلێانی', 1, 40000.00, 0.00, 'قەرز', 150000, 28, 'دینار', 0, 0, 0.00, 240000, 1, 240000.00, 6000.00, 0.00, '2025-07-28 11:05:09');
 
 -- --------------------------------------------------------
 
@@ -1793,7 +1911,9 @@ INSERT INTO `role_permissions` (`id`, `role`, `permission_id`) VALUES
 (754, 'accountant', 80),
 (755, 'admin', 80),
 (756, 'admin', 81),
-(757, 'accountant', 81);
+(757, 'accountant', 81),
+(758, 'user', 86),
+(759, 'user', 82);
 
 -- --------------------------------------------------------
 
@@ -1826,11 +1946,7 @@ CREATE TABLE `sales` (
 --
 
 INSERT INTO `sales` (`id`, `customer_id`, `recipient`, `location`, `quantity`, `price_per_unit`, `total_price`, `payment_type`, `amount_paid_usd`, `amount_paid_iq`, `dolar_rate`, `remaining_amount`, `invoice_number`, `order_date`, `notes`, `formula_id`, `discount`) VALUES
-(3, 21, 'کاک.محمود ', 'پیرەمەگروون ', 2.00, 20.00, 40.00, 'قەرز', 0.00, 0.00, 150000.00, 40.00, '88', '2025-07-13', '', 24, 0.00),
-(4, 21, 'کاک.محمود ', 'پیرەمەگروون ', 2.00, 20.00, 40.00, 'نەقد', 40.00, 0.00, 150000.00, 0.00, '88', '2025-07-16', '', 21, 0.00),
-(5, 21, 'محمد', 'سلێمانی', 2.00, 20.00, 40.00, 'قەرز', 0.00, 0.00, 150000.00, 40.00, '123', '2025-07-16', '', 24, 0.00),
-(6, 23, 'محمد', 'سلێمانی', 2.00, 20.00, 40.00, 'قەرز', 0.00, 0.00, 150000.00, 40.00, '5', '2025-07-19', '', 17, 0.00),
-(8, 21, '', 'سلێمانی', 27.00, 45.52, 1228.91, 'نەقد', 1200.00, 40000.00, 139250.00, 0.00, 'A-0140', '2025-07-26', '', 17, 0.18);
+(12, 32, '', 'سلێمانی', 10.00, 45.00, 450.00, 'قەرز', 0.00, 0.00, 139050.00, 450.00, 'A-0140', '2025-07-27', '', 17, 0.00);
 
 --
 -- Triggers `sales`
@@ -2288,7 +2404,7 @@ CREATE TABLE `users` (
 INSERT INTO `users` (`id`, `username`, `password`, `role`) VALUES
 (1, 'Dana', '$2y$10$zu.c2smtRIzusVGN2tUpwuc/C50zJx.pWJuMz0VyER84Sw0j9XbRe', 'admin'),
 (2, 'rawezh', '$2y$10$.okWrqkFKbIoEN7LdwwApusaQV.SOJRYJx5Zfrn.OOk2ULmUFRor6', 'user'),
-(4, 'test', '$2y$10$JgVyrys3Rz7X9nVN9iHKiey3HKzY.w.TU0XEE7/4/6oBRuV6BkaSq', 'user');
+(4, 'test', '$2y$10$xWN316OpnqZt0Z02NePmruAFKm6cHO.c8TUJMPK6XhCLJEILmirma', 'user');
 
 --
 -- Indexes for dumped tables
@@ -2358,6 +2474,12 @@ ALTER TABLE `debt_payments`
   ADD KEY `created_by` (`created_by`);
 
 --
+-- Indexes for table `dollar_rates`
+--
+ALTER TABLE `dollar_rates`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `drivers`
 --
 ALTER TABLE `drivers`
@@ -2393,6 +2515,20 @@ ALTER TABLE `locations`
 --
 ALTER TABLE `materials`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `notes`
+--
+ALTER TABLE `notes`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `customer_id` (`customer_id`),
+  ADD KEY `formula_id` (`formula_id`),
+  ADD KEY `mixer_car_id` (`mixer_car_id`),
+  ADD KEY `mixer_driver_id` (`mixer_driver_id`),
+  ADD KEY `pump_car_id` (`pump_car_id`),
+  ADD KEY `pump_driver_id` (`pump_driver_id`),
+  ADD KEY `date` (`date`),
+  ADD KEY `is_read` (`is_read`);
 
 --
 -- Indexes for table `notifications`
@@ -2521,13 +2657,13 @@ ALTER TABLE `cars`
 -- AUTO_INCREMENT for table `cash_box`
 --
 ALTER TABLE `cash_box`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
 -- AUTO_INCREMENT for table `company`
 --
 ALTER TABLE `company`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- AUTO_INCREMENT for table `concrete_formulas`
@@ -2539,25 +2675,31 @@ ALTER TABLE `concrete_formulas`
 -- AUTO_INCREMENT for table `concrete_receipts`
 --
 ALTER TABLE `concrete_receipts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
 -- AUTO_INCREMENT for table `customers`
 --
 ALTER TABLE `customers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT for table `customer_debt_payments`
 --
 ALTER TABLE `customer_debt_payments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `debt_payments`
 --
 ALTER TABLE `debt_payments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT for table `dollar_rates`
+--
+ALTER TABLE `dollar_rates`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `drivers`
@@ -2575,13 +2717,13 @@ ALTER TABLE `employees`
 -- AUTO_INCREMENT for table `employee_payments`
 --
 ALTER TABLE `employee_payments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `list_materials`
 --
 ALTER TABLE `list_materials`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `locations`
@@ -2596,16 +2738,22 @@ ALTER TABLE `materials`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
+-- AUTO_INCREMENT for table `notes`
+--
+ALTER TABLE `notes`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=165;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=209;
 
 --
 -- AUTO_INCREMENT for table `other_expenses`
 --
 ALTER TABLE `other_expenses`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `other_expense_persons`
@@ -2617,7 +2765,7 @@ ALTER TABLE `other_expense_persons`
 -- AUTO_INCREMENT for table `permissions`
 --
 ALTER TABLE `permissions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=82;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=90;
 
 --
 -- AUTO_INCREMENT for table `person_other_expenses_debt_payments`
@@ -2629,7 +2777,7 @@ ALTER TABLE `person_other_expenses_debt_payments`
 -- AUTO_INCREMENT for table `purchases`
 --
 ALTER TABLE `purchases`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=60;
 
 --
 -- AUTO_INCREMENT for table `purchase_materials`
@@ -2641,13 +2789,13 @@ ALTER TABLE `purchase_materials`
 -- AUTO_INCREMENT for table `recycle_bin_purchases`
 --
 ALTER TABLE `recycle_bin_purchases`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=62;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=63;
 
 --
 -- AUTO_INCREMENT for table `recycle_bin_sales`
 --
 ALTER TABLE `recycle_bin_sales`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `roles`
@@ -2659,13 +2807,13 @@ ALTER TABLE `roles`
 -- AUTO_INCREMENT for table `role_permissions`
 --
 ALTER TABLE `role_permissions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=758;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=760;
 
 --
 -- AUTO_INCREMENT for table `sales`
 --
 ALTER TABLE `sales`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `settings`
@@ -2720,6 +2868,17 @@ ALTER TABLE `employee_payments`
   ADD CONSTRAINT `employee_payments_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`);
 
 --
+-- Constraints for table `notes`
+--
+ALTER TABLE `notes`
+  ADD CONSTRAINT `notes_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `notes_ibfk_2` FOREIGN KEY (`formula_id`) REFERENCES `concrete_formulas` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `notes_ibfk_3` FOREIGN KEY (`mixer_car_id`) REFERENCES `cars` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `notes_ibfk_4` FOREIGN KEY (`mixer_driver_id`) REFERENCES `employees` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `notes_ibfk_5` FOREIGN KEY (`pump_car_id`) REFERENCES `cars` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `notes_ibfk_6` FOREIGN KEY (`pump_driver_id`) REFERENCES `employees` (`id`) ON DELETE SET NULL;
+
+--
 -- Constraints for table `other_expenses`
 --
 ALTER TABLE `other_expenses`
@@ -2760,39 +2919,6 @@ ALTER TABLE `role_permissions`
 ALTER TABLE `sales`
   ADD CONSTRAINT `sales_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `sales_ibfk_2` FOREIGN KEY (`formula_id`) REFERENCES `concrete_formulas` (`id`) ON UPDATE CASCADE;
-
---
--- Adding new columns to other_expenses table
---
-
--- Add material quantity column
-ALTER TABLE `other_expenses` 
-ADD COLUMN `material_quantity` decimal(10,2) DEFAULT NULL COMMENT 'بڕی عەدەدی کاڵا';
-
--- Add material purchase price column (IQD)
-ALTER TABLE `other_expenses` 
-ADD COLUMN `material_purchase_price_iqd` decimal(15,2) DEFAULT NULL COMMENT 'نرخی کڕینی کاڵا بە دینار';
-
--- Add material purchase price column (USD)
-ALTER TABLE `other_expenses` 
-ADD COLUMN `material_purchase_price_usd` decimal(15,2) DEFAULT NULL COMMENT 'نرخی کڕینی کاڵا بە دۆلار';
-
--- Add material selection column
-ALTER TABLE `other_expenses` 
-ADD COLUMN `material_id` int(11) DEFAULT NULL COMMENT 'ناسنامەی کاڵا لە کۆگا';
-
--- Add material total cost column
-ALTER TABLE `other_expenses` 
-ADD COLUMN `material_total_cost` decimal(15,2) DEFAULT NULL COMMENT 'کۆی نرخی کاڵای بەکارهاتوو';
-
--- Add gas total cost column
-ALTER TABLE `other_expenses` 
-ADD COLUMN `gas_total_cost` decimal(15,2) DEFAULT NULL COMMENT 'کۆی نرخی گازی بەکارهاتوو';
-
--- Add gas purchase price input column
-ALTER TABLE `other_expenses` 
-ADD COLUMN `gas_purchase_price_input` decimal(15,2) DEFAULT NULL COMMENT 'ئینپوتی نرخی کڕینی گاز';
-
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

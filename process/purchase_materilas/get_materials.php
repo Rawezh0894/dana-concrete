@@ -18,10 +18,10 @@ if (!hasPermission('view_materials')) {
 }
 
 try {
-    // Get materials from list_materials table
+    // Get materials from inventory_materials table
     $stmt = $pdo->prepare("
-        SELECT id, name, quantity, currency_type, purchase_price_usd, purchase_price_iqd 
-        FROM list_materials 
+        SELECT id, name, current_quantity as quantity, currency_type, purchase_price_usd, purchase_price_iqd, unit_type, pieces_per_carton, bags_per_barrel, liters_per_bag, liters_per_barrel, price_per_piece, price_per_liter, price_per_bag
+        FROM inventory_materials 
         ORDER BY name ASC
     ");
     $stmt->execute();

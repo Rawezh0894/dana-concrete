@@ -44,7 +44,7 @@ try {
     }
 
     // Check if material exists
-    $checkStmt = $pdo->prepare('SELECT id, name FROM list_materials WHERE id = ?');
+    $checkStmt = $pdo->prepare('SELECT id, name FROM inventory_materials WHERE id = ?');
     $checkStmt->execute([$id]);
     $existingMaterial = $checkStmt->fetch(PDO::FETCH_ASSOC);
     
@@ -54,7 +54,7 @@ try {
         exit;
     }
 
-    $stmt = $pdo->prepare("DELETE FROM list_materials WHERE id=?");
+    $stmt = $pdo->prepare("DELETE FROM inventory_materials WHERE id=?");
     if ($stmt->execute([$id])) {
         error_log('Material successfully deleted: ID=' . $id . ', Name=' . $existingMaterial['name']);
         echo json_encode(['success' => true, 'message' => 'ماددە بەسەرکەوتوویی سڕایەوە!']);
