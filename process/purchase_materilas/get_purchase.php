@@ -64,20 +64,31 @@ try {
     $stmt = $pdo->prepare("
         SELECT 
             pm.material_id,
+            pm.unit_type,
             pm.quantity,
             pm.price_per_unit_usd,
             pm.price_per_unit_iqd,
+            pm.price_per_piece,
+            pm.price_per_liter,
+            pm.price_per_bag,
             pm.total_price_usd,
             pm.total_price_iqd,
-            lm.name as material_name
+            pm.pieces_per_carton,
+            pm.bags_per_barrel,
+            pm.liters_per_bag,
+            pm.liters_per_barrel,
+            im.name as material_name
         FROM purchase_materials pm
-        LEFT JOIN list_materials lm ON pm.material_id = lm.id
+        LEFT JOIN inventory_materials im ON pm.material_id = im.id
         WHERE pm.receipt_number = ?
         ORDER BY pm.id ASC
     ");
     
     $stmt->execute([$purchase['receipt_number']]);
     $materials = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Debug: Log the materials data
+    error_log("Materials data for receipt " . $purchase['receipt_number'] . ": " . json_encode($materials));
     
     $purchase['materials'] = $materials;
     

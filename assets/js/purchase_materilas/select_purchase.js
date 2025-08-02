@@ -350,8 +350,12 @@ function populateViewMaterialsTable(materials) {
     const tbody = $('#viewMaterialsTableBody');
     tbody.empty();
     
+    console.log('populateViewMaterialsTable called with materials:', materials);
+    
     if (materials && materials.length > 0) {
         materials.forEach(function(material, index) {
+            console.log('Processing material:', material);
+            
             // Create unit type display text
             let unitTypeText = '';
             if (material.unit_type) {
@@ -375,6 +379,10 @@ function populateViewMaterialsTable(materials) {
                         unitTypeText = material.unit_type || '-';
                 }
             }
+            
+            console.log('Unit type text:', unitTypeText);
+            console.log('Material name:', material.material_name);
+            console.log('Quantity:', material.quantity);
             
             tbody.append(`
                 <tr>
