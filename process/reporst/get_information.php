@@ -74,11 +74,34 @@ try {
     $company_debt_iqd_converted = ($usd_iqd_rate > 0) ? ($company_debt_iqd / ($usd_iqd_rate / 100)) : 0;
     $company_debt_total_usd = $company_debt_usd + $company_debt_iqd_converted;
 
-    // Other expense persons
-    $stmt = $pdo->query('SELECT SUM(expense_usd) as usd, SUM(expense_iqd) as iqd FROM other_expense_persons');
+    // Other expense persons - Calculate total debt (opening debt + expenses - payments)
+    $person_debt_query = "
+        SELECT 
+            SUM(p.opening_debt_usd) as opening_debt_usd,
+            SUM(p.opening_debt_iqd) as opening_debt_iqd,
+            COALESCE(SUM(oe.amount_usd), 0) as total_expenses_usd,
+            COALESCE(SUM(oe.amount_iqd), 0) as total_expenses_iqd,
+            COALESCE(SUM(oe.amount_iqd / NULLIF(oe.exchange_rate, 0)), 0) as total_expenses_iqd_converted,
+            COALESCE(SUM(pedp.amount_usd), 0) as total_payments_usd,
+            COALESCE(SUM(pedp.amount_iqd), 0) as total_payments_iqd
+        FROM person_other_expenses p
+        LEFT JOIN other_expenses oe ON p.id = oe.person_id
+        LEFT JOIN person_other_expenses_debt_payments pedp ON p.id = pedp.person_id
+    ";
+    $stmt = $pdo->query($person_debt_query);
     $row = $stmt->fetch();
-    $person_debt_usd = $row['usd'] ?? 0;
-    $person_debt_iqd = $row['iqd'] ?? 0;
+    
+    $opening_debt_usd = floatval($row['opening_debt_usd'] ?? 0);
+    $opening_debt_iqd = floatval($row['opening_debt_iqd'] ?? 0);
+    $total_expenses_usd = floatval($row['total_expenses_usd'] ?? 0);
+    $total_expenses_iqd = floatval($row['total_expenses_iqd'] ?? 0);
+    $total_expenses_iqd_converted = floatval($row['total_expenses_iqd_converted'] ?? 0);
+    $total_payments_usd = floatval($row['total_payments_usd'] ?? 0);
+    $total_payments_iqd = floatval($row['total_payments_iqd'] ?? 0);
+    
+    // Calculate total debt: opening debt + expenses - payments
+    $person_debt_usd = $opening_debt_usd + $total_expenses_usd + $total_expenses_iqd_converted - $total_payments_usd;
+    $person_debt_iqd = $opening_debt_iqd + $total_expenses_iqd - $total_payments_iqd;
     $person_debt_iqd_converted = ($usd_iqd_rate > 0) ? ($person_debt_iqd / ($usd_iqd_rate / 100)) : 0;
     $person_debt_total_usd = $person_debt_usd + $person_debt_iqd_converted;
 
@@ -406,19 +429,24 @@ try {
 
     // Other expense persons breakdown by payment_type
     // نەقد
-    $stmt = $pdo->query("SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd FROM other_expenses WHERE payment_type='نەقد'");
+    $stmt = $pdo->query("SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd, SUM(amount_iqd / NULLIF(exchange_rate, 0)) as iqd_converted FROM other_expenses WHERE payment_type='نەقد'");
     $row = $stmt->fetch();
     $person_cash_usd = $row['usd'] ?? 0;
     $person_cash_iqd = $row['iqd'] ?? 0;
-    $person_cash_total_usd = $person_cash_usd + (($usd_iqd_rate > 0) ? ($person_cash_iqd / ($usd_iqd_rate / 100)) : 0);
+    $person_cash_iqd_converted = $row['iqd_converted'] ?? 0;
+    $person_cash_total_usd = $person_cash_usd + $person_cash_iqd_converted;
+    
     // قەرز
-    $stmt = $pdo->query("SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd FROM other_expenses WHERE payment_type='قەرز'");
+    $stmt = $pdo->query("SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd, SUM(amount_iqd / NULLIF(exchange_rate, 0)) as iqd_converted FROM other_expenses WHERE payment_type='قەرز'");
     $row = $stmt->fetch();
     $person_credit_usd = $row['usd'] ?? 0;
     $person_credit_iqd = $row['iqd'] ?? 0;
-    $person_credit_total_usd = $person_credit_usd + (($usd_iqd_rate > 0) ? ($person_credit_iqd / ($usd_iqd_rate / 100)) : 0);
-    $person_debt_usd = $person_cash_total_usd + $person_credit_total_usd;
-    $person_debt_iqd = $person_cash_iqd + $person_credit_iqd;
+    $person_credit_iqd_converted = $row['iqd_converted'] ?? 0;
+    $person_credit_total_usd = $person_credit_usd + $person_credit_iqd_converted;
+    
+    // Use the calculated total debt from above
+    $person_debt_usd = $person_debt_total_usd; // This is already calculated correctly above
+    $person_debt_iqd = $person_debt_iqd; // This is already calculated correctly above
 
     echo json_encode([
         'success' => true,
