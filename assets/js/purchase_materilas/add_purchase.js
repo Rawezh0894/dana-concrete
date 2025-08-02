@@ -74,21 +74,18 @@ $(document).ready(function() {
             // Find the selected material from the materials array
             const material = window.materials.find(m => m.id == materialId);
             if (material) {
-                // Update unit type display
-                updateUnitTypeDisplay(row, material);
-                
-                // Auto-fill the price fields based on unit type
-                fillPricesBasedOnUnitType(row, material);
+                // Auto-fill the price fields
+                row.find('.price-usd-input').val(material.purchase_price_usd || 0);
+                row.find('.price-iqd-input').val(material.purchase_price_iqd || 0);
                 
                 // Calculate totals
                 calculateRowTotal(row);
                 calculateGrandTotal();
             }
         } else {
-            // Clear fields if no material is selected
+            // Clear price fields if no material is selected
             row.find('.price-usd-input').val(0);
             row.find('.price-iqd-input').val(0);
-            row.find('.unit-type-display').text('');
             calculateRowTotal(row);
             calculateGrandTotal();
         }
@@ -113,28 +110,7 @@ function addMaterialRow() {
     let materialsOptions = '<option value="">هەڵبژێرە</option>';
     if (materials.length > 0) {
         materials.forEach(function(material) {
-            // Create display text with unit type information
-            let displayText = material.name;
-            if (material.unit_type) {
-                switch(material.unit_type) {
-                    case 'carton':
-                        displayText += ` (کارتۆن - ${material.pieces_per_carton || 1} دانە)`;
-                        break;
-                    case 'piece':
-                        displayText += ' (دانە)';
-                        break;
-                    case 'barrel':
-                        displayText += ` (بەرمیل - ${material.bags_per_barrel || 1} دەبە × ${material.liters_per_bag || 1} لیتر)`;
-                        break;
-                    case 'bag':
-                        displayText += ` (دەبە - ${material.liters_per_bag || 1} لیتر)`;
-                        break;
-                    case 'liter':
-                        displayText += ' (لیتر)';
-                        break;
-                }
-            }
-            materialsOptions += `<option value="${material.id}" data-unit-type="${material.unit_type || 'piece'}" data-pieces-per-carton="${material.pieces_per_carton || ''}" data-bags-per-barrel="${material.bags_per_barrel || ''}" data-liters-per-bag="${material.liters_per_bag || ''}" data-price-per-piece="${material.price_per_piece || ''}" data-price-per-liter="${material.price_per_liter || ''}">${displayText}</option>`;
+            materialsOptions += `<option value="${material.id}">${material.name}</option>`;
         });
     } else {
         materialsOptions = '<option value="">کاڵاکان بار نەکراون...</option>';
@@ -148,7 +124,6 @@ function addMaterialRow() {
                 </select>
             </td>
             <td>
-                <div class="unit-type-display" style="font-size: 0.9em; color: #666; margin-bottom: 5px;"></div>
                 <input type="number" class="form-control quantity-input" name="materials[${rowId}][quantity]" 
                        min="0" step="0.01" placeholder="0.00" required>
             </td>
@@ -630,74 +605,4 @@ function loadUsdRate() {
             console.error('Error loading USD rate:', error);
         }
     });
-}
-
-// Helper functions for unit system
-function updateUnitTypeDisplay(row, material) {
-    const unitDisplay = row.find('.unit-type-display');
-    let displayText = '';
-    
-    if (material.unit_type) {
-        switch(material.unit_type) {
-            case 'carton':
-                displayText = `کارتۆن (${material.pieces_per_carton || 1} دانە)`;
-                break;
-            case 'piece':
-                displayText = 'دانە';
-                break;
-            case 'barrel':
-                displayText = `بەرمیل (${material.bags_per_barrel || 1} دەبە × ${material.liters_per_bag || 1} لیتر)`;
-                break;
-            case 'bag':
-                displayText = `دەبە (${material.liters_per_bag || 1} لیتر)`;
-                break;
-            case 'liter':
-                displayText = 'لیتر';
-                break;
-        }
-    }
-    
-    unitDisplay.text(displayText);
-}
-
-function fillPricesBasedOnUnitType(row, material) {
-    const currencyType = $('#currency_type').val();
-    
-    if (material.unit_type === 'carton') {
-        // For carton, show price per carton but calculate price per piece
-        if (currencyType === 'دۆلار') {
-            row.find('.price-usd-input').val(material.purchase_price_usd || 0);
-            row.find('.price-iqd-input').val(0);
-        } else {
-            row.find('.price-usd-input').val(0);
-            row.find('.price-iqd-input').val(material.purchase_price_iqd || 0);
-        }
-    } else if (material.unit_type === 'barrel') {
-        // For barrel, show price per barrel but calculate price per liter
-        if (currencyType === 'دۆلار') {
-            row.find('.price-usd-input').val(material.purchase_price_usd || 0);
-            row.find('.price-iqd-input').val(0);
-        } else {
-            row.find('.price-usd-input').val(0);
-            row.find('.price-iqd-input').val(material.purchase_price_iqd || 0);
-        }
-    } else if (material.unit_type === 'bag') {
-        // For bag, show price per bag but calculate price per liter
-        if (currencyType === 'دۆلار') {
-            row.find('.price-usd-input').val(material.purchase_price_usd || 0);
-            row.find('.price-iqd-input').val(0);
-        } else {
-            row.find('.price-usd-input').val(0);
-            row.find('.price-iqd-input').val(material.purchase_price_iqd || 0);
-        }
-    } else {
-        // For piece and liter, use the price as is
-        if (currencyType === 'دۆلار') {
-            row.find('.price-usd-input').val(material.purchase_price_usd || 0);
-            row.find('.price-iqd-input').val(0);
-        } else {
-            row.find('.price-usd-input').val(0);
-            row.find('.price-iqd-input').val(material.purchase_price_iqd || 0);
-        }
-    }
 }
