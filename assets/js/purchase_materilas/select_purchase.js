@@ -532,8 +532,11 @@ function populateEditMaterialsTable(materials) {
     const tbody = $('#editMaterialsTableBody');
     tbody.empty();
     
+    console.log('populateEditMaterialsTable called with materials:', materials);
+    
     if (materials && materials.length > 0) {
-        materials.forEach(function(material) {
+        materials.forEach(function(material, index) {
+            console.log(`Material ${index}:`, material);
             addEditMaterialRow(material);
         });
     } else {
@@ -548,13 +551,23 @@ function populateEditMaterialsTable(materials) {
             const purchaseUnitSelect = row.find('.edit-purchase-unit-select');
             const materialId = materialSelect.val();
             
+            console.log('Processing row with materialId:', materialId);
+            
             if (materialId) {
                 const materials = window.materials || [];
                 const material = materials.find(m => m.id == materialId);
+                console.log('Found material:', material);
+                
                 if (material) {
-                    // Set the purchase unit based on the material's unit type
-                    const unitType = material.unit_type || 'piece';
-                    purchaseUnitSelect.val(unitType);
+                    // Get the unit type from the purchase data (not the material definition)
+                    let purchaseUnitType = 'piece';
+                    if (material.unit_type) {
+                        purchaseUnitType = material.unit_type;
+                    }
+                    console.log('Setting purchase unit type to:', purchaseUnitType);
+                    
+                    // Set the purchase unit dropdown
+                    purchaseUnitSelect.val(purchaseUnitType);
                     
                     // Update the display and prices
                     updateEditUnitTypeDisplay(row, material);
@@ -682,6 +695,19 @@ function addEditMaterialRow(materialData = null) {
         const material = materials.find(m => m.id == materialData.material_id);
         if (material) {
             updateEditUnitTypeDisplay($(`#${rowId}`), material);
+            
+            // Set the purchase unit based on the existing data
+            // First try to get from purchase data, then from material definition, then default to 'piece'
+            let purchaseUnitType = 'piece';
+            if (materialData.unit_type) {
+                purchaseUnitType = materialData.unit_type;
+            } else if (material.unit_type) {
+                purchaseUnitType = material.unit_type;
+            }
+            
+            console.log('Setting purchase unit type to:', purchaseUnitType, 'for material:', materialData.material_id);
+            $(`#${rowId} .edit-purchase-unit-select`).val(purchaseUnitType);
+            
             fillEditPricesBasedOnUnitType($(`#${rowId}`), material);
         }
     }
