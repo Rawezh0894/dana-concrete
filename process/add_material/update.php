@@ -47,7 +47,6 @@ try {
     $liters_per_barrel = null;
     $price_per_piece = 0;
     $price_per_liter = 0;
-    $price_per_bag = 0;
 
     // Validate unit type
     if (!in_array($unit_type, ['carton', 'piece', 'barrel', 'bag', 'liter'])) {
@@ -80,12 +79,10 @@ try {
                 exit;
             }
             $liters_per_barrel = $bags_per_barrel * $liters_per_bag;
-            // Calculate price per bag and price per liter
+            // Calculate price per liter
             if ($currency_type === 'دۆلار' && $purchase_price_usd > 0) {
-                $price_per_bag = $purchase_price_usd / $bags_per_barrel;
                 $price_per_liter = $purchase_price_usd / $liters_per_barrel;
             } elseif ($currency_type === 'دینار' && $purchase_price_iqd > 0) {
-                $price_per_bag = $purchase_price_iqd / $bags_per_barrel;
                 $price_per_liter = $purchase_price_iqd / $liters_per_barrel;
             }
             break;
@@ -96,13 +93,11 @@ try {
                 echo json_encode(['success' => false, 'message' => 'ژمارەی لیتر لە دەبە دەبێت لە ٠ زیاتر بێت!']);
                 exit;
             }
-            // Calculate price per liter and price per bag
+            // Calculate price per liter
             if ($currency_type === 'دۆلار' && $purchase_price_usd > 0) {
                 $price_per_liter = $purchase_price_usd / $liters_per_bag;
-                $price_per_bag = $purchase_price_usd;
             } elseif ($currency_type === 'دینار' && $purchase_price_iqd > 0) {
                 $price_per_liter = $purchase_price_iqd / $liters_per_bag;
-                $price_per_bag = $purchase_price_iqd;
             }
             break;
             
@@ -142,7 +137,7 @@ try {
     }
 
     // Check if material exists
-    $checkStmt = $pdo->prepare('SELECT id, name FROM inventory_materials WHERE id = ?');
+    $checkStmt = $pdo->prepare('SELECT id, name FROM list_materials WHERE id = ?');
     $checkStmt->execute([$id]);
     $existingMaterial = $checkStmt->fetch(PDO::FETCH_ASSOC);
     
@@ -153,16 +148,16 @@ try {
     }
 
     // Update with new unit system fields
-    $stmt = $pdo->prepare("UPDATE inventory_materials SET 
-        name=?, unit_type=?, current_quantity=?, currency_type=?, purchase_price_usd=?, purchase_price_iqd=?,
+    $stmt = $pdo->prepare("UPDATE list_materials SET 
+        name=?, unit_type=?, quantity=?, currency_type=?, purchase_price_usd=?, purchase_price_iqd=?,
         pieces_per_carton=?, bags_per_barrel=?, liters_per_bag=?, liters_per_barrel=?,
-        price_per_piece=?, price_per_liter=?, price_per_bag=? 
+        price_per_piece=?, price_per_liter=? 
         WHERE id=?");
     
     if ($stmt->execute([
         $name, $unit_type, $quantity, $currency_type, $purchase_price_usd, $purchase_price_iqd,
         $pieces_per_carton, $bags_per_barrel, $liters_per_bag, $liters_per_barrel,
-        $price_per_piece, $price_per_liter, $price_per_bag, $id
+        $price_per_piece, $price_per_liter, $id
     ])) {
         error_log('Material successfully updated: ID=' . $id . ', Name=' . $name . ', UnitType=' . $unit_type);
         echo json_encode(['success' => true, 'message' => 'ماددە بەسەرکەوتوویی نوێکرایەوە!']);

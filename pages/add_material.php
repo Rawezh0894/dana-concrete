@@ -22,41 +22,7 @@ if (!hasPermission('view_materials')) {
 }
 // Note: add_material permission is checked in the UI, not here
 // Users with only view_materials permission can still access the page
-
-// Updated query to use the new unit-specific inventory system
-$materials = $pdo->query("
-    SELECT 
-        im.id, 
-        im.name, 
-        im.currency_type, 
-        im.purchase_price_usd, 
-        im.purchase_price_iqd, 
-        im.unit_type, 
-        im.pieces_per_carton, 
-        im.bags_per_barrel, 
-        im.liters_per_bag, 
-        im.liters_per_barrel, 
-        im.price_per_piece, 
-        im.price_per_liter, 
-        im.price_per_bag,
-        -- Get quantities by unit type
-        COALESCE(carton_qty.quantity, 0) as carton_quantity,
-        COALESCE(piece_qty.quantity, 0) as piece_quantity,
-        COALESCE(barrel_qty.quantity, 0) as barrel_quantity,
-        COALESCE(bag_qty.quantity, 0) as bag_quantity,
-        COALESCE(liter_qty.quantity, 0) as liter_quantity,
-        -- Get total quantity across all units
-        COALESCE(carton_qty.quantity, 0) + COALESCE(piece_qty.quantity, 0) + 
-        COALESCE(barrel_qty.quantity, 0) + COALESCE(bag_qty.quantity, 0) + 
-        COALESCE(liter_qty.quantity, 0) as total_quantity
-    FROM inventory_materials im
-    LEFT JOIN inventory_by_unit carton_qty ON im.id = carton_qty.material_id AND carton_qty.unit_type = 'carton'
-    LEFT JOIN inventory_by_unit piece_qty ON im.id = piece_qty.material_id AND piece_qty.unit_type = 'piece'
-    LEFT JOIN inventory_by_unit barrel_qty ON im.id = barrel_qty.material_id AND barrel_qty.unit_type = 'barrel'
-    LEFT JOIN inventory_by_unit bag_qty ON im.id = bag_qty.material_id AND bag_qty.unit_type = 'bag'
-    LEFT JOIN inventory_by_unit liter_qty ON im.id = liter_qty.material_id AND liter_qty.unit_type = 'liter'
-    ORDER BY im.name ASC
-")->fetchAll(PDO::FETCH_ASSOC);
+$materials = $pdo->query("SELECT id, name, quantity, currency_type, purchase_price_usd, purchase_price_iqd, unit_type, pieces_per_carton, bags_per_barrel, liters_per_bag, liters_per_barrel, price_per_piece, price_per_liter FROM list_materials")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="ku">
@@ -97,7 +63,6 @@ $materials = $pdo->query("
                     <th>نرخی کڕین بە دۆلار</th>
                     <th>نرخی کڕین بە دینار</th>
                     <th>نرخی یەکە</th>
-                    <th>نرخی دەبە</th>
                     <th>کردارەکان</th>
                 </tr>
             </thead>
@@ -134,35 +99,7 @@ $materials = $pdo->query("
                             echo htmlspecialchars($unitTypeText);
                             ?>
                         </td>
-                        <td>
-                            <?php
-                            $quantityDisplay = '';
-                            $quantities = [];
-                            
-                            if ($mat['carton_quantity'] > 0) {
-                                $quantities[] = $mat['carton_quantity'] . ' کارتۆن';
-                            }
-                            if ($mat['piece_quantity'] > 0) {
-                                $quantities[] = $mat['piece_quantity'] . ' دانە';
-                            }
-                            if ($mat['barrel_quantity'] > 0) {
-                                $quantities[] = $mat['barrel_quantity'] . ' بەرمیل';
-                            }
-                            if ($mat['bag_quantity'] > 0) {
-                                $quantities[] = $mat['bag_quantity'] . ' دەبە';
-                            }
-                            if ($mat['liter_quantity'] > 0) {
-                                $quantities[] = $mat['liter_quantity'] . ' لیتر';
-                            }
-                            
-                            if (empty($quantities)) {
-                                $quantityDisplay = '0';
-                            } else {
-                                $quantityDisplay = implode(' + ', $quantities);
-                            }
-                            echo htmlspecialchars($quantityDisplay);
-                            ?>
-                        </td>
+                        <td><?= htmlspecialchars($mat['quantity']) ?></td>
                         <td><?= htmlspecialchars($mat['currency_type']) ?></td>
                         <td><?= htmlspecialchars($mat['purchase_price_usd']) ?></td>
                         <td><?= htmlspecialchars($mat['purchase_price_iqd']) ?></td>
@@ -171,10 +108,8 @@ $materials = $pdo->query("
                             $unitPrice = '';
                             if ($mat['unit_type'] == 'carton' && $mat['price_per_piece']) {
                                 $unitPrice = $mat['price_per_piece'] . ' دۆلار/دانە';
-                            } elseif ($mat['unit_type'] == 'barrel') {
-                                if ($mat['price_per_liter']) {
-                                    $unitPrice = $mat['price_per_liter'] . ' دۆلار/لیتر';
-                                }
+                            } elseif ($mat['unit_type'] == 'barrel' && $mat['price_per_liter']) {
+                                $unitPrice = $mat['price_per_liter'] . ' دۆلار/لیتر';
                             } elseif ($mat['unit_type'] == 'bag' && $mat['price_per_liter']) {
                                 $unitPrice = $mat['price_per_liter'] . ' دۆلار/لیتر';
                             } elseif ($mat['unit_type'] == 'piece' || $mat['unit_type'] == 'liter') {
@@ -184,22 +119,11 @@ $materials = $pdo->query("
                             ?>
                         </td>
                         <td>
-                            <?php
-                            $bagPrice = '';
-                            if ($mat['unit_type'] == 'barrel' && $mat['price_per_bag']) {
-                                $bagPrice = $mat['price_per_bag'] . ' دۆلار/دەبە';
-                            } elseif ($mat['unit_type'] == 'bag' && $mat['price_per_bag']) {
-                                $bagPrice = $mat['price_per_bag'] . ' دۆلار/دەبە';
-                            }
-                            echo htmlspecialchars($bagPrice);
-                            ?>
-                        </td>
-                        <td>
                             <?php if (hasPermission('edit_material')): ?>
                             <button class="btn btn-sm btn-primary edit-btn" 
                                 data-id="<?= $mat['id'] ?>" 
                                 data-name="<?= htmlspecialchars($mat['name']) ?>" 
-                                data-quantity="<?= htmlspecialchars($mat['total_quantity']) ?>" 
+                                data-quantity="<?= htmlspecialchars($mat['quantity']) ?>" 
                                 data-currency_type="<?= htmlspecialchars($mat['currency_type']) ?>" 
                                 data-purchase_price_usd="<?= htmlspecialchars($mat['purchase_price_usd']) ?>" 
                                 data-purchase_price_iqd="<?= htmlspecialchars($mat['purchase_price_iqd']) ?>"
@@ -210,7 +134,6 @@ $materials = $pdo->query("
                                 data-liters_per_barrel="<?= htmlspecialchars($mat['liters_per_barrel']) ?>"
                                 data-price_per_piece="<?= htmlspecialchars($mat['price_per_piece']) ?>"
                                 data-price_per_liter="<?= htmlspecialchars($mat['price_per_liter']) ?>"
-                                data-price_per_bag="<?= htmlspecialchars($mat['price_per_bag']) ?>"
                                 aria-label="نوێکردنەوە"><i class="bi bi-pencil"></i></button>
                             <?php endif; ?>
                             <?php if (hasPermission('delete_material')): ?>
@@ -610,26 +533,6 @@ $(function() {
       calculateEditUnitPrice();
     }, 100);
   });
-
-  // Function to reload materials table
-  function loadMaterials() {
-    $.ajax({
-      url: '../process/add_material/select.php',
-      type: 'GET',
-      success: function(response) {
-        $('#materialTable tbody').html(response);
-      },
-      error: function(xhr, status, error) {
-        console.error('Error loading materials:', error);
-        Swal.fire({
-          icon: 'error',
-          title: 'هەڵە',
-          text: 'هەڵە لە بارکردنی کاڵاکان: ' + error,
-          confirmButtonText: 'باشە'
-        });
-      }
-    });
-  }
 
   // Initialize
   togglePriceFields();

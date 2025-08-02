@@ -344,102 +344,21 @@ function populateEditForm(data) {
     
     // Calculate totals
     calculateEditGrandTotal();
-    
-    // Set up event handlers for dynamic calculations
-    setupEditEventHandlers();
-}
-
-function setupEditEventHandlers() {
-    // Handle quantity and price changes for total calculations
-    $(document).on('input', '.edit-quantity-input, .edit-price-usd-input, .edit-price-iqd-input', function() {
-        calculateEditRowTotal($(this).closest('tr'));
-        calculateEditGrandTotal();
-    });
-    
-    // Handle material selection changes
-    $(document).on('change', '.edit-material-select', function() {
-        const row = $(this).closest('tr');
-        const materialId = $(this).val();
-        const materials = window.materials || [];
-        
-        if (materialId) {
-            const material = materials.find(m => m.id == materialId);
-            if (material) {
-                updateEditUnitTypeDisplay(row, material);
-                fillEditPricesBasedOnUnitType(row, material);
-                calculateEditRowTotal(row);
-                calculateEditGrandTotal();
-            }
-        } else {
-            updateEditUnitTypeDisplay(row, null);
-        }
-    });
-    
-    // Handle purchase unit changes
-    $(document).on('change', '.edit-purchase-unit-select', function() {
-        const row = $(this).closest('tr');
-        const materialSelect = row.find('.edit-material-select');
-        const materialId = materialSelect.val();
-        const materials = window.materials || [];
-        
-        if (materialId) {
-            const material = materials.find(m => m.id == materialId);
-            if (material) {
-                fillEditPricesBasedOnUnitType(row, material);
-                calculateEditRowTotal(row);
-                calculateEditGrandTotal();
-            }
-        }
-    });
 }
 
 function populateViewMaterialsTable(materials) {
     const tbody = $('#viewMaterialsTableBody');
     tbody.empty();
     
-    console.log('populateViewMaterialsTable called with materials:', materials);
-    
     if (materials && materials.length > 0) {
         materials.forEach(function(material, index) {
-            console.log('Processing material:', material);
-            
-            // Create unit type display text
-            let unitTypeText = '';
-            if (material.unit_type) {
-                switch(material.unit_type) {
-                    case 'carton':
-                        unitTypeText = `کارتۆن (${material.pieces_per_carton || 1} دانە)`;
-                        break;
-                    case 'piece':
-                        unitTypeText = 'دانە';
-                        break;
-                    case 'barrel':
-                        unitTypeText = `بەرمیل (${material.bags_per_barrel || 1} دەبە × ${material.liters_per_bag || 1} لیتر)`;
-                        break;
-                    case 'bag':
-                        unitTypeText = `دەبە (${material.liters_per_bag || 1} لیتر)`;
-                        break;
-                    case 'liter':
-                        unitTypeText = 'لیتر';
-                        break;
-                    default:
-                        unitTypeText = material.unit_type || '-';
-                }
-            }
-            
-            console.log('Unit type text:', unitTypeText);
-            console.log('Material name:', material.material_name);
-            console.log('Quantity:', material.quantity);
-            
             tbody.append(`
                 <tr>
                     <td>${index + 1}</td>
                     <td>${material.material_name || '-'}</td>
-                    <td>${unitTypeText}</td>
                     <td>${parseFloat(material.quantity || 0).toFixed(2)}</td>
                     <td>${parseFloat(material.price_per_unit_usd || 0).toFixed(2)}</td>
                     <td>${parseFloat(material.price_per_unit_iqd || 0).toFixed(2)}</td>
-                    <td>${parseFloat(material.price_per_bag || 0).toFixed(2)}</td>
                     <td>${parseFloat(material.total_price_usd || 0).toFixed(2)}</td>
                     <td>${parseFloat(material.total_price_iqd || 0).toFixed(2)}</td>
                 </tr>
@@ -448,7 +367,7 @@ function populateViewMaterialsTable(materials) {
     } else {
         tbody.append(`
             <tr>
-                <td colspan="9" class="text-center">هیچ کاڵایەک نییە</td>
+                <td colspan="7" class="text-center">هیچ کاڵایەک نییە</td>
             </tr>
         `);
     }
@@ -539,32 +458,6 @@ function populateEditMaterialsTable(materials) {
     } else {
         addEditMaterialRow();
     }
-    
-    // After adding all rows, set the purchase unit for existing materials
-    setTimeout(function() {
-        $('.edit-material-row').each(function() {
-            const row = $(this);
-            const materialSelect = row.find('.edit-material-select');
-            const purchaseUnitSelect = row.find('.edit-purchase-unit-select');
-            const materialId = materialSelect.val();
-            
-            if (materialId) {
-                const materials = window.materials || [];
-                const material = materials.find(m => m.id == materialId);
-                if (material) {
-                    // Set the purchase unit based on the material's unit type
-                    const unitType = material.unit_type || 'piece';
-                    purchaseUnitSelect.val(unitType);
-                    
-                    // Update the display and prices
-                    updateEditUnitTypeDisplay(row, material);
-                    fillEditPricesBasedOnUnitType(row, material);
-                    calculateEditRowTotal(row);
-                }
-            }
-        });
-        calculateEditGrandTotal();
-    }, 100);
 }
 
 function addEditMaterialRow(materialData = null) {
@@ -574,15 +467,7 @@ function addEditMaterialRow(materialData = null) {
     let materialsOptions = '<option value="">هەڵبژێرە</option>';
     materials.forEach(function(material) {
         const selected = materialData && materialData.material_id == material.id ? 'selected' : '';
-        materialsOptions += `<option value="${material.id}" ${selected} 
-            data-unit-type="${material.unit_type || ''}"
-            data-pieces-per-carton="${material.pieces_per_carton || ''}"
-            data-bags-per-barrel="${material.bags_per_barrel || ''}"
-            data-liters-per-bag="${material.liters_per_bag || ''}"
-            data-liters-per-barrel="${material.liters_per_barrel || ''}"
-            data-price-per-piece="${material.price_per_piece || ''}"
-            data-price-per-liter="${material.price_per_liter || ''}"
-            data-price-per-bag="${material.price_per_bag || ''}">${material.name}</option>`;
+        materialsOptions += `<option value="${material.id}" ${selected}>${material.name}</option>`;
     });
 
     const newRow = `
@@ -590,12 +475,6 @@ function addEditMaterialRow(materialData = null) {
             <td>
                 <select class="form-select edit-material-select" name="edit_materials[${rowId}][material_id]" required>
                     ${materialsOptions}
-                </select>
-            </td>
-            <td>
-                <div class="edit-unit-type-display" style="font-size: 0.9em; color: #666; margin-bottom: 5px;"></div>
-                <select class="form-select edit-purchase-unit-select" name="edit_materials[${rowId}][purchase_unit]" style="font-size: 0.8em;">
-                    <option value="">هەڵبژێرە</option>
                 </select>
             </td>
             <td>
@@ -612,11 +491,6 @@ function addEditMaterialRow(materialData = null) {
                 <input type="number" class="form-control edit-price-iqd-input" name="edit_materials[${rowId}][price_per_unit_iqd]" 
                        min="0" step="0.01" placeholder="0.00" 
                        value="${materialData ? materialData.price_per_unit_iqd : '0'}">
-            </td>
-            <td>
-                <input type="number" class="form-control edit-price-bag-input" name="edit_materials[${rowId}][price_per_bag]" 
-                       min="0" step="0.01" placeholder="0.00" 
-                       value="${materialData ? materialData.price_per_bag : '0'}">
             </td>
             <td>
                 <input type="number" class="form-control edit-total-usd-input" name="edit_materials[${rowId}][total_price_usd]" 
@@ -646,46 +520,6 @@ function addEditMaterialRow(materialData = null) {
         dir: "rtl"
     });
     
-    // Set up material change handler
-    $(`#${rowId} .edit-material-select`).on('change', function() {
-        const selectedOption = $(this).find('option:selected');
-        const materialId = $(this).val();
-        
-        if (materialId) {
-            const material = materials.find(m => m.id == materialId);
-            if (material) {
-                updateEditUnitTypeDisplay($(this).closest('tr'), material);
-                fillEditPricesBasedOnUnitType($(this).closest('tr'), material);
-            }
-        } else {
-            updateEditUnitTypeDisplay($(this).closest('tr'), null);
-        }
-    });
-    
-    // Set up purchase unit change handler
-    $(`#${rowId} .edit-purchase-unit-select`).on('change', function() {
-        const row = $(this).closest('tr');
-        const materialSelect = row.find('.edit-material-select');
-        const selectedOption = materialSelect.find('option:selected');
-        
-        if (selectedOption.length > 0) {
-            const material = materials.find(m => m.id == materialSelect.val());
-            if (material) {
-                fillEditPricesBasedOnUnitType(row, material);
-            }
-        }
-        calculateEditRowTotal(row);
-    });
-    
-    // If we have material data, populate the unit information
-    if (materialData && materialData.material_id) {
-        const material = materials.find(m => m.id == materialData.material_id);
-        if (material) {
-            updateEditUnitTypeDisplay($(`#${rowId}`), material);
-            fillEditPricesBasedOnUnitType($(`#${rowId}`), material);
-        }
-    }
-    
     // Calculate row total
     calculateEditRowTotal($(`#${rowId}`));
 }
@@ -694,7 +528,6 @@ function calculateEditRowTotal(row) {
     const quantity = parseFloat(row.find('.edit-quantity-input').val()) || 0;
     const priceUsd = parseFloat(row.find('.edit-price-usd-input').val()) || 0;
     const priceIqd = parseFloat(row.find('.edit-price-iqd-input').val()) || 0;
-    const priceBag = parseFloat(row.find('.edit-price-bag-input').val()) || 0;
     
     const totalUsd = quantity * priceUsd;
     const totalIqd = quantity * priceIqd;
@@ -891,102 +724,3 @@ $(document).ready(function() {
         }
     });
 });
-
-function updateEditUnitTypeDisplay(row, material) {
-    const unitTypeDisplay = row.find('.edit-unit-type-display');
-    const purchaseUnitSelect = row.find('.edit-purchase-unit-select');
-    
-    if (!material) {
-        unitTypeDisplay.text('');
-        purchaseUnitSelect.html('<option value="">هەڵبژێرە</option>');
-        return;
-    }
-    
-    // Display unit type information
-    let unitTypeText = '';
-    switch(material.unit_type) {
-        case 'carton':
-            unitTypeText = `کارتۆن (${material.pieces_per_carton || 1} دانە)`;
-            break;
-        case 'piece':
-            unitTypeText = 'دانە';
-            break;
-        case 'barrel':
-            unitTypeText = `بەرمیل (${material.bags_per_barrel || 1} دەبە × ${material.liters_per_bag || 1} لیتر)`;
-            break;
-        case 'bag':
-            unitTypeText = `دەبە (${material.liters_per_bag || 1} لیتر)`;
-            break;
-        case 'liter':
-            unitTypeText = 'لیتر';
-            break;
-        default:
-            unitTypeText = material.unit_type || '-';
-    }
-    unitTypeDisplay.text(unitTypeText);
-    
-    // Populate purchase unit options
-    let purchaseUnitOptions = '<option value="">هەڵبژێرە</option>';
-    switch(material.unit_type) {
-        case 'carton':
-            purchaseUnitOptions += '<option value="carton">کارتۆن</option>';
-            purchaseUnitOptions += '<option value="piece">دانە</option>';
-            break;
-        case 'piece':
-            purchaseUnitOptions += '<option value="piece">دانە</option>';
-            break;
-        case 'barrel':
-            purchaseUnitOptions += '<option value="barrel">بەرمیل</option>';
-            purchaseUnitOptions += '<option value="bag">دەبە</option>';
-            purchaseUnitOptions += '<option value="liter">لیتر</option>';
-            break;
-        case 'bag':
-            purchaseUnitOptions += '<option value="bag">دەبە</option>';
-            purchaseUnitOptions += '<option value="liter">لیتر</option>';
-            break;
-        case 'liter':
-            purchaseUnitOptions += '<option value="liter">لیتر</option>';
-            break;
-    }
-    purchaseUnitSelect.html(purchaseUnitOptions);
-}
-
-function fillEditPricesBasedOnUnitType(row, material) {
-    const currencyType = $('#edit_currency_type').val();
-    const purchaseUnit = row.find('.edit-purchase-unit-select').val();
-    
-    if (!purchaseUnit) return;
-    
-    let priceUsd = 0;
-    let priceIqd = 0;
-    let priceBag = 0;
-    
-    switch(purchaseUnit) {
-        case 'carton':
-            priceUsd = material.purchase_price_usd || 0;
-            priceIqd = material.purchase_price_iqd || 0;
-            break;
-        case 'piece':
-            priceUsd = material.price_per_piece || 0;
-            priceIqd = material.purchase_price_iqd || 0;
-            break;
-        case 'barrel':
-            priceUsd = material.purchase_price_usd || 0;
-            priceIqd = material.purchase_price_iqd || 0;
-            priceBag = material.price_per_bag || 0;
-            break;
-        case 'bag':
-            priceUsd = material.price_per_bag || 0;
-            priceIqd = material.purchase_price_iqd || 0;
-            priceBag = material.price_per_bag || 0;
-            break;
-        case 'liter':
-            priceUsd = material.price_per_liter || 0;
-            priceIqd = material.purchase_price_iqd || 0;
-            break;
-    }
-    
-    row.find('.edit-price-usd-input').val(priceUsd.toFixed(2));
-    row.find('.edit-price-iqd-input').val(priceIqd.toFixed(2));
-    row.find('.edit-price-bag-input').val(priceBag.toFixed(2));
-}

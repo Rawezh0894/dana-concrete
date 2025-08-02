@@ -46,7 +46,6 @@ try {
     $liters_per_barrel = null;
     $price_per_piece = 0;
     $price_per_liter = 0;
-    $price_per_bag = 0;
 
     // Validate unit type
     if (!in_array($unit_type, ['carton', 'piece', 'barrel', 'bag', 'liter'])) {
@@ -79,12 +78,10 @@ try {
                 exit;
             }
             $liters_per_barrel = $bags_per_barrel * $liters_per_bag;
-            // Calculate price per bag and price per liter
+            // Calculate price per liter
             if ($currency_type === 'دۆلار' && $purchase_price_usd > 0) {
-                $price_per_bag = $purchase_price_usd / $bags_per_barrel;
                 $price_per_liter = $purchase_price_usd / $liters_per_barrel;
             } elseif ($currency_type === 'دینار' && $purchase_price_iqd > 0) {
-                $price_per_bag = $purchase_price_iqd / $bags_per_barrel;
                 $price_per_liter = $purchase_price_iqd / $liters_per_barrel;
             }
             break;
@@ -95,13 +92,11 @@ try {
                 echo json_encode(['success' => false, 'message' => 'ژمارەی لیتر لە دەبە دەبێت لە ٠ زیاتر بێت!']);
                 exit;
             }
-            // Calculate price per liter and price per bag
+            // Calculate price per liter
             if ($currency_type === 'دۆلار' && $purchase_price_usd > 0) {
                 $price_per_liter = $purchase_price_usd / $liters_per_bag;
-                $price_per_bag = $purchase_price_usd;
             } elseif ($currency_type === 'دینار' && $purchase_price_iqd > 0) {
                 $price_per_liter = $purchase_price_iqd / $liters_per_bag;
-                $price_per_bag = $purchase_price_iqd;
             }
             break;
             
@@ -135,14 +130,14 @@ try {
     }
 
     // Check if table exists first
-    $checkTable = $pdo->query("SHOW TABLES LIKE 'inventory_materials'");
+    $checkTable = $pdo->query("SHOW TABLES LIKE 'list_materials'");
     if ($checkTable->rowCount() == 0) {
-        error_log('Table inventory_materials does not exist');
+        error_log('Table list_materials does not exist');
         throw new Exception("خشتەی ماددەکان بوونی نییە");
     }
 
     // Check for duplicate material name
-    $stmt = $pdo->prepare('SELECT id FROM inventory_materials WHERE name = ?');
+    $stmt = $pdo->prepare('SELECT id FROM list_materials WHERE name = ?');
     $stmt->execute([$name]);
     if ($stmt->fetch()) {
         error_log('Duplicate material name found: ' . $name);
@@ -151,16 +146,16 @@ try {
     }
 
     // Insert with new unit system fields
-    $stmt = $pdo->prepare("INSERT INTO inventory_materials (
-        name, unit_type, current_quantity, currency_type, purchase_price_usd, purchase_price_iqd,
+    $stmt = $pdo->prepare("INSERT INTO list_materials (
+        name, unit_type, quantity, currency_type, purchase_price_usd, purchase_price_iqd,
         pieces_per_carton, bags_per_barrel, liters_per_bag, liters_per_barrel,
-        price_per_piece, price_per_liter, price_per_bag
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        price_per_piece, price_per_liter
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     
     $result = $stmt->execute([
         $name, $unit_type, $quantity, $currency_type, $purchase_price_usd, $purchase_price_iqd,
         $pieces_per_carton, $bags_per_barrel, $liters_per_bag, $liters_per_barrel,
-        $price_per_piece, $price_per_liter, $price_per_bag
+        $price_per_piece, $price_per_liter
     ]);
     
     if ($result) {

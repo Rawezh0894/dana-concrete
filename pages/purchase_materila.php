@@ -20,7 +20,7 @@ if (!hasPermission('view_materials')) {
 // Users with only view_materials permission can still access the page
 
 // Load materials and persons data for initial dropdown population
-$materials = $pdo->query("SELECT id, name, unit_type, pieces_per_carton, bags_per_barrel, liters_per_bag, liters_per_barrel, price_per_piece, price_per_liter, price_per_bag, purchase_price_usd, purchase_price_iqd FROM inventory_materials ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
+$materials = $pdo->query("SELECT id, name, unit_type, pieces_per_carton, bags_per_barrel, liters_per_bag, liters_per_barrel, price_per_piece, price_per_liter, purchase_price_usd, purchase_price_iqd FROM list_materials ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
 $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
@@ -133,7 +133,7 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
 
     <!-- Add Purchase Materials Modal -->
     <div class="modal fade" id="addPurchaseModal" tabindex="-1" aria-labelledby="addPurchaseModalLabel" aria-hidden="true">
-        <div class="modal-dialog" style="max-width: 95%; width: 95%;">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <form id="addPurchaseForm">
                     <div class="modal-header">
@@ -207,7 +207,6 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
                                                 <th>بڕ</th>
                                                 <th>نرخی یەکە بە دۆلار</th>
                                                 <th>نرخی یەکە بە دینار</th>
-                                                <th>نرخی دەبە</th>
                                                 <th>کۆی نرخ بە دۆلار</th>
                                                 <th>کۆی نرخ بە دینار</th>
                                                 <th>کردار</th>
@@ -254,7 +253,7 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
 
     <!-- Edit Purchase Materials Modal -->
     <div class="modal fade" id="editPurchaseModal" tabindex="-1" aria-labelledby="editPurchaseModalLabel" aria-hidden="true">
-        <div class="modal-dialog" style="max-width: 95%; width: 95%;">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <form id="editPurchaseForm">
                     <input type="hidden" id="edit_purchase_id" name="edit_purchase_id">
@@ -329,7 +328,6 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
                                                 <th>بڕ</th>
                                                 <th>نرخی یەکە بە دۆلار</th>
                                                 <th>نرخی یەکە بە دینار</th>
-                                                <th>نرخی دەبە</th>
                                                 <th>کۆی نرخ بە دۆلار</th>
                                                 <th>کۆی نرخ بە دینار</th>
                                                 <th>کردار</th>
@@ -376,7 +374,7 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
 
     <!-- View Purchase Materials Modal -->
     <div class="modal fade" id="viewPurchaseModal" tabindex="-1" aria-labelledby="viewPurchaseModalLabel" aria-hidden="true">
-        <div class="modal-dialog" style="max-width: 95%; width: 95%;">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="viewPurchaseModalLabel">وردەکاری کڕینی کاڵاکان</h5>
@@ -441,7 +439,6 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
                                             <th>بڕ</th>
                                             <th>نرخی یەکە بە دۆلار</th>
                                             <th>نرخی یەکە بە دینار</th>
-                                            <th>نرخی دەبە</th>
                                             <th>کۆی نرخ بە دۆلار</th>
                                             <th>کۆی نرخ بە دینار</th>
                                         </tr>

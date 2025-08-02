@@ -112,66 +112,22 @@ try {
     // Insert all materials as new records
     $stmt = $pdo->prepare("
         INSERT INTO purchase_materials 
-        (receipt_number, material_id, unit_type, person_id, quantity, price_per_unit_usd, price_per_unit_iqd, 
-         price_per_piece, price_per_liter, price_per_bag, total_price_usd, total_price_iqd, currency_type, 
-         purchase_date, notes, transfer_loss, other_loss, usd_to_iqd_rate, pieces_per_carton, bags_per_barrel, 
-         liters_per_bag, liters_per_barrel, created_by) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (receipt_number, material_id, person_id, quantity, price_per_unit_usd, price_per_unit_iqd, 
+         total_price_usd, total_price_iqd, currency_type, purchase_date, notes, transfer_loss, other_loss, usd_to_iqd_rate, created_by) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
     
     foreach ($materials as $material) {
-        // Get material details for unit calculations
-        $materialStmt = $pdo->prepare("
-            SELECT unit_type, pieces_per_carton, bags_per_barrel, liters_per_bag, liters_per_barrel,
-                   price_per_piece, price_per_liter, price_per_bag
-            FROM inventory_materials 
-            WHERE id = ?
-        ");
-        $materialStmt->execute([$material['material_id']]);
-        $materialDetails = $materialStmt->fetch(PDO::FETCH_ASSOC);
-        
-        // Get purchase unit from material data or default to material's unit type
-        $purchase_unit = $material['purchase_unit'] ?? $materialDetails['unit_type'] ?? 'piece';
-        
-        // Calculate unit prices based on purchase unit
-        $price_per_piece = 0;
-        $price_per_liter = 0;
-        $price_per_bag = 0;
-        
-        switch ($purchase_unit) {
-            case 'carton':
-                $price_per_piece = $material['price_per_unit_usd'] / ($materialDetails['pieces_per_carton'] ?? 1);
-                break;
-            case 'piece':
-                $price_per_piece = $material['price_per_unit_usd'];
-                break;
-            case 'barrel':
-                $price_per_liter = $material['price_per_unit_usd'] / ($materialDetails['liters_per_barrel'] ?? 1);
-                $price_per_bag = $material['price_per_unit_usd'] / ($materialDetails['bags_per_barrel'] ?? 1);
-                break;
-            case 'bag':
-                $price_per_liter = $material['price_per_unit_usd'] / ($materialDetails['liters_per_bag'] ?? 1);
-                $price_per_bag = $material['price_per_unit_usd'];
-                break;
-            case 'liter':
-                $price_per_liter = $material['price_per_unit_usd'];
-                break;
-        }
-        
         $total_price_usd = $material['quantity'] * $material['price_per_unit_usd'];
         $total_price_iqd = $material['quantity'] * $material['price_per_unit_iqd'];
         
         $stmt->execute([
             $_POST['receipt_number'],
             $material['material_id'],
-            $purchase_unit,
             $_POST['person_id'],
             $material['quantity'],
             $material['price_per_unit_usd'],
             $material['price_per_unit_iqd'],
-            $price_per_piece,
-            $price_per_liter,
-            $price_per_bag,
             $total_price_usd,
             $total_price_iqd,
             $_POST['currency_type'],
@@ -180,10 +136,6 @@ try {
             $transfer_loss,
             $other_loss,
             $usd_to_iqd_rate,
-            $materialDetails['pieces_per_carton'] ?? null,
-            $materialDetails['bags_per_barrel'] ?? null,
-            $materialDetails['liters_per_bag'] ?? null,
-            $materialDetails['liters_per_barrel'] ?? null,
             $_SESSION['user_id']
         ]);
     }

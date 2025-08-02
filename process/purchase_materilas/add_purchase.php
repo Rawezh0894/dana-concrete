@@ -75,8 +75,8 @@ try {
         INSERT INTO purchase_materials 
         (receipt_number, material_id, unit_type, person_id, quantity, price_per_unit_usd, price_per_unit_iqd, 
          total_price_usd, total_price_iqd, currency_type, purchase_date, notes, transfer_loss, other_loss, usd_to_iqd_rate, 
-         pieces_per_carton, bags_per_barrel, liters_per_bag, liters_per_barrel, price_per_piece, price_per_liter, price_per_bag, created_by) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         pieces_per_carton, bags_per_barrel, liters_per_bag, liters_per_barrel, price_per_piece, price_per_liter, created_by) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
     
     $total_usd = 0;
@@ -84,43 +84,38 @@ try {
     
     foreach ($materials as $material) {
         // Get material details to calculate unit-specific prices
-        $materialStmt = $pdo->prepare("SELECT unit_type, pieces_per_carton, bags_per_barrel, liters_per_bag, liters_per_barrel, price_per_piece, price_per_liter, price_per_bag FROM inventory_materials WHERE id = ?");
+        $materialStmt = $pdo->prepare("SELECT unit_type, pieces_per_carton, bags_per_barrel, liters_per_bag, liters_per_barrel, price_per_piece, price_per_liter FROM list_materials WHERE id = ?");
         $materialStmt->execute([$material['material_id']]);
         $materialDetails = $materialStmt->fetch(PDO::FETCH_ASSOC);
-        
-        // Get the purchase unit (what unit the user wants to buy in)
-        $purchase_unit = $material['purchase_unit'] ?? $materialDetails['unit_type'] ?? 'piece';
         
         $total_price_usd = $material['quantity'] * $material['price_per_unit_usd'];
         $total_price_iqd = $material['quantity'] * $material['price_per_unit_iqd'];
         
-        // Calculate unit-specific prices based on purchase unit
+        // Calculate unit-specific prices based on material type
         $price_per_piece = 0;
         $price_per_liter = 0;
-        $price_per_bag = 0;
         
         if ($materialDetails) {
-            switch ($purchase_unit) {
+            switch ($materialDetails['unit_type']) {
                 case 'carton':
-                    // User is buying by carton
-                    $price_per_piece = $material['price_per_unit_usd'] / ($materialDetails['pieces_per_carton'] ?? 1);
-                    break;
-                case 'piece':
-                    // User is buying by piece
-                    $price_per_piece = $material['price_per_unit_usd'];
+                    if ($materialDetails['pieces_per_carton'] > 0) {
+                        $price_per_piece = $material['price_per_unit_usd'] / $materialDetails['pieces_per_carton'];
+                    }
                     break;
                 case 'barrel':
-                    // User is buying by barrel
-                    $price_per_bag = $material['price_per_unit_usd'] / ($materialDetails['bags_per_barrel'] ?? 1);
-                    $price_per_liter = $material['price_per_unit_usd'] / (($materialDetails['bags_per_barrel'] ?? 1) * ($materialDetails['liters_per_bag'] ?? 1));
+                    if ($materialDetails['bags_per_barrel'] > 0 && $materialDetails['liters_per_bag'] > 0) {
+                        $price_per_liter = $material['price_per_unit_usd'] / ($materialDetails['bags_per_barrel'] * $materialDetails['liters_per_bag']);
+                    }
                     break;
                 case 'bag':
-                    // User is buying by bag
-                    $price_per_bag = $material['price_per_unit_usd'];
-                    $price_per_liter = $material['price_per_unit_usd'] / ($materialDetails['liters_per_bag'] ?? 1);
+                    if ($materialDetails['liters_per_bag'] > 0) {
+                        $price_per_liter = $material['price_per_unit_usd'] / $materialDetails['liters_per_bag'];
+                    }
+                    break;
+                case 'piece':
+                    $price_per_piece = $material['price_per_unit_usd'];
                     break;
                 case 'liter':
-                    // User is buying by liter
                     $price_per_liter = $material['price_per_unit_usd'];
                     break;
             }
@@ -129,7 +124,7 @@ try {
         $stmt->execute([
             $_POST['receipt_number'],
             $material['material_id'],
-            $purchase_unit, // Use the purchase unit instead of material's base unit
+            $materialDetails['unit_type'] ?? 'piece',
             $_POST['person_id'],
             $material['quantity'],
             $material['price_per_unit_usd'],
@@ -148,7 +143,6 @@ try {
             $materialDetails['liters_per_barrel'] ?? null,
             $price_per_piece,
             $price_per_liter,
-            $price_per_bag,
             $_SESSION['user_id']
         ]);
         
