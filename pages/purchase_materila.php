@@ -133,7 +133,7 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
 
     <!-- Add Purchase Materials Modal -->
     <div class="modal fade" id="addPurchaseModal" tabindex="-1" aria-labelledby="addPurchaseModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
+        <div class="modal-dialog" style="max-width: 95%; width: 95%;">
             <div class="modal-content">
                 <form id="addPurchaseForm">
                     <div class="modal-header">
@@ -254,7 +254,7 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
 
     <!-- Edit Purchase Materials Modal -->
     <div class="modal fade" id="editPurchaseModal" tabindex="-1" aria-labelledby="editPurchaseModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
+        <div class="modal-dialog" style="max-width: 95%; width: 95%;">
             <div class="modal-content">
                 <form id="editPurchaseForm">
                     <input type="hidden" id="edit_purchase_id" name="edit_purchase_id">
@@ -376,7 +376,7 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
 
     <!-- View Purchase Materials Modal -->
     <div class="modal fade" id="viewPurchaseModal" tabindex="-1" aria-labelledby="viewPurchaseModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
+        <div class="modal-dialog" style="max-width: 95%; width: 95%;">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="viewPurchaseModalLabel">وردەکاری کڕینی کاڵاکان</h5>
@@ -441,6 +441,7 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
                                             <th>بڕ</th>
                                             <th>نرخی یەکە بە دۆلار</th>
                                             <th>نرخی یەکە بە دینار</th>
+                                            <th>نرخی دەبە</th>
                                             <th>کۆی نرخ بە دۆلار</th>
                                             <th>کۆی نرخ بە دینار</th>
                                         </tr>

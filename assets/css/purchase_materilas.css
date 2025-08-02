@@ -9,9 +9,18 @@
     margin-bottom: 20px;
 }
 
+/* Modal width for purchase modals */
+#addPurchaseModal .modal-dialog,
+#editPurchaseModal .modal-dialog,
+#viewPurchaseModal .modal-dialog {
+    max-width: 95% !important;
+    width: 95% !important;
+}
+
 /* Fix table column widths for materials table */
 #materialsTable,
-#editMaterialsTable {
+#editMaterialsTable,
+#viewMaterialsTable {
     table-layout: fixed;
     width: 100%;
 }
@@ -19,7 +28,9 @@
 #materialsTable th,
 #materialsTable td,
 #editMaterialsTable th,
-#editMaterialsTable td {
+#editMaterialsTable td,
+#viewMaterialsTable th,
+#viewMaterialsTable td {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -27,19 +38,23 @@
     vertical-align: middle;
 }
 
-/* Specific column widths */
+/* Specific column widths for 9-column tables */
 #materialsTable th:nth-child(1), /* کاڵا */
 #materialsTable td:nth-child(1),
 #editMaterialsTable th:nth-child(1),
-#editMaterialsTable td:nth-child(1) {
-    width: 20%;
-    min-width: 150px;
+#editMaterialsTable td:nth-child(1),
+#viewMaterialsTable th:nth-child(1),
+#viewMaterialsTable td:nth-child(1) {
+    width: 18%;
+    min-width: 140px;
 }
 
 #materialsTable th:nth-child(2), /* جۆری یەکە */
 #materialsTable td:nth-child(2),
 #editMaterialsTable th:nth-child(2),
-#editMaterialsTable td:nth-child(2) {
+#editMaterialsTable td:nth-child(2),
+#viewMaterialsTable th:nth-child(2),
+#viewMaterialsTable td:nth-child(2) {
     width: 12%;
     min-width: 100px;
 }
@@ -47,15 +62,19 @@
 #materialsTable th:nth-child(3), /* بڕ */
 #materialsTable td:nth-child(3),
 #editMaterialsTable th:nth-child(3),
-#editMaterialsTable td:nth-child(3) {
+#editMaterialsTable td:nth-child(3),
+#viewMaterialsTable th:nth-child(3),
+#viewMaterialsTable td:nth-child(3) {
     width: 8%;
-    min-width: 80px;
+    min-width: 70px;
 }
 
 #materialsTable th:nth-child(4), /* نرخی یەکە بە دۆلار */
 #materialsTable td:nth-child(4),
 #editMaterialsTable th:nth-child(4),
-#editMaterialsTable td:nth-child(4) {
+#editMaterialsTable td:nth-child(4),
+#viewMaterialsTable th:nth-child(4),
+#viewMaterialsTable td:nth-child(4) {
     width: 12%;
     min-width: 100px;
 }
@@ -63,7 +82,9 @@
 #materialsTable th:nth-child(5), /* نرخی یەکە بە دینار */
 #materialsTable td:nth-child(5),
 #editMaterialsTable th:nth-child(5),
-#editMaterialsTable td:nth-child(5) {
+#editMaterialsTable td:nth-child(5),
+#viewMaterialsTable th:nth-child(5),
+#viewMaterialsTable td:nth-child(5) {
     width: 12%;
     min-width: 100px;
 }
@@ -71,7 +92,9 @@
 #materialsTable th:nth-child(6), /* نرخی دەبە */
 #materialsTable td:nth-child(6),
 #editMaterialsTable th:nth-child(6),
-#editMaterialsTable td:nth-child(6) {
+#editMaterialsTable td:nth-child(6),
+#viewMaterialsTable th:nth-child(6),
+#viewMaterialsTable td:nth-child(6) {
     width: 10%;
     min-width: 80px;
 }
@@ -79,7 +102,9 @@
 #materialsTable th:nth-child(7), /* کۆی نرخ بە دۆلار */
 #materialsTable td:nth-child(7),
 #editMaterialsTable th:nth-child(7),
-#editMaterialsTable td:nth-child(7) {
+#editMaterialsTable td:nth-child(7),
+#viewMaterialsTable th:nth-child(7),
+#viewMaterialsTable td:nth-child(7) {
     width: 12%;
     min-width: 100px;
 }
@@ -87,7 +112,9 @@
 #materialsTable th:nth-child(8), /* کۆی نرخ بە دینار */
 #materialsTable td:nth-child(8),
 #editMaterialsTable th:nth-child(8),
-#editMaterialsTable td:nth-child(8) {
+#editMaterialsTable td:nth-child(8),
+#viewMaterialsTable th:nth-child(8),
+#viewMaterialsTable td:nth-child(8) {
     width: 12%;
     min-width: 100px;
 }
@@ -96,7 +123,7 @@
 #materialsTable td:nth-child(9),
 #editMaterialsTable th:nth-child(9),
 #editMaterialsTable td:nth-child(9) {
-    width: 2%;
+    width: 4%;
     min-width: 60px;
 }
 
@@ -282,8 +309,9 @@
     }
     
     #materialsTable,
-    #editMaterialsTable {
-        min-width: 800px;
+    #editMaterialsTable,
+    #viewMaterialsTable {
+        min-width: 900px;
     }
 }
 

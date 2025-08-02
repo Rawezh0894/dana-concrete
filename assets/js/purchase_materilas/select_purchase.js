@@ -352,13 +352,39 @@ function populateViewMaterialsTable(materials) {
     
     if (materials && materials.length > 0) {
         materials.forEach(function(material, index) {
+            // Create unit type display text
+            let unitTypeText = '';
+            if (material.unit_type) {
+                switch(material.unit_type) {
+                    case 'carton':
+                        unitTypeText = `کارتۆن (${material.pieces_per_carton || 1} دانە)`;
+                        break;
+                    case 'piece':
+                        unitTypeText = 'دانە';
+                        break;
+                    case 'barrel':
+                        unitTypeText = `بەرمیل (${material.bags_per_barrel || 1} دەبە × ${material.liters_per_bag || 1} لیتر)`;
+                        break;
+                    case 'bag':
+                        unitTypeText = `دەبە (${material.liters_per_bag || 1} لیتر)`;
+                        break;
+                    case 'liter':
+                        unitTypeText = 'لیتر';
+                        break;
+                    default:
+                        unitTypeText = material.unit_type || '-';
+                }
+            }
+            
             tbody.append(`
                 <tr>
                     <td>${index + 1}</td>
                     <td>${material.material_name || '-'}</td>
+                    <td>${unitTypeText}</td>
                     <td>${parseFloat(material.quantity || 0).toFixed(2)}</td>
                     <td>${parseFloat(material.price_per_unit_usd || 0).toFixed(2)}</td>
                     <td>${parseFloat(material.price_per_unit_iqd || 0).toFixed(2)}</td>
+                    <td>${parseFloat(material.price_per_bag || 0).toFixed(2)}</td>
                     <td>${parseFloat(material.total_price_usd || 0).toFixed(2)}</td>
                     <td>${parseFloat(material.total_price_iqd || 0).toFixed(2)}</td>
                 </tr>
@@ -367,7 +393,7 @@ function populateViewMaterialsTable(materials) {
     } else {
         tbody.append(`
             <tr>
-                <td colspan="7" class="text-center">هیچ کاڵایەک نییە</td>
+                <td colspan="9" class="text-center">هیچ کاڵایەک نییە</td>
             </tr>
         `);
     }
