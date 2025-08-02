@@ -13,41 +13,56 @@ function populateFormFromURL() {
         // Populate form fields
         if (urlParams.has('customer_id')) {
             const customerId = urlParams.get('customer_id');
+            console.log('Setting customer_id:', customerId);
             if (customerId && customerId !== 'null' && customerId !== '') {
                 $('#customer_id').val(customerId).trigger('change');
             }
         }
         
         if (urlParams.has('recipient')) {
-            $('#recipient').val(urlParams.get('recipient'));
+            const recipient = urlParams.get('recipient');
+            console.log('Setting recipient:', recipient);
+            $('#recipient').val(recipient);
         }
         
         if (urlParams.has('location')) {
-            $('#location').val(urlParams.get('location'));
+            const location = urlParams.get('location');
+            console.log('Setting location:', location);
+            $('#location').val(location);
         }
         
         if (urlParams.has('formula_id')) {
             const formulaId = urlParams.get('formula_id');
+            console.log('Setting formula_id:', formulaId);
             if (formulaId && formulaId !== 'null' && formulaId !== '') {
                 $('#formula_id').val(formulaId).trigger('change');
             }
         }
         
         if (urlParams.has('quantity')) {
-            $('#quantity').val(urlParams.get('quantity'));
+            const quantity = urlParams.get('quantity');
+            console.log('Setting quantity:', quantity);
+            $('#quantity').val(quantity);
         }
         
         if (urlParams.has('price_per_unit')) {
-            $('#price_per_unit').val(urlParams.get('price_per_unit'));
+            const pricePerUnit = urlParams.get('price_per_unit');
+            console.log('Setting price_per_unit:', pricePerUnit);
+            $('#price_per_unit').val(pricePerUnit);
         }
         
         if (urlParams.has('total_price')) {
-            $('#total_price').val(urlParams.get('total_price'));
+            const totalPrice = urlParams.get('total_price');
+            console.log('Setting total_price:', totalPrice);
+            $('#total_price').val(totalPrice);
         }
         
         if (urlParams.has('receipt_numbers')) {
             const receiptNumbers = urlParams.get('receipt_numbers');
             const totalMeterAmount = urlParams.get('total_meter_amount');
+            
+            console.log('Setting receipt_numbers:', receiptNumbers);
+            console.log('Setting total_meter_amount:', totalMeterAmount);
             
             // Add receipt information to notes
             let notes = `پسووڵەکان: ${receiptNumbers}`;

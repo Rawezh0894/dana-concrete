@@ -623,6 +623,12 @@ function createSaleFromReceipts() {
         params.append('recipient', firstReceipt.receiver_name || '');
         params.append('location', firstReceipt.location || '');
         params.append('formula_id', firstReceipt.formulas_id || '');
+        
+        // Debug: Log the data being sent
+        console.log('First receipt data:', firstReceipt);
+        console.log('Total meter amount:', totalMeterAmount);
+        console.log('Price per meter:', pricePerMeter);
+        console.log('Total price:', totalPrice);
     }
     
     // Add receipt information
@@ -635,6 +641,9 @@ function createSaleFromReceipts() {
         params.append('price_per_unit', pricePerMeter.toFixed(2));
         params.append('total_price', totalPrice.toFixed(2));
     }
+    
+    // Debug: Log the final URL parameters
+    console.log('Final URL parameters:', params.toString());
     
     // Redirect to add_sale.php with the data
     window.location.href = `add_sale.php?${params.toString()}`;
