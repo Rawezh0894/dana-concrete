@@ -37,6 +37,14 @@ function populateFormFromURL() {
             $('#quantity').val(urlParams.get('quantity'));
         }
         
+        if (urlParams.has('price_per_unit')) {
+            $('#price_per_unit').val(urlParams.get('price_per_unit'));
+        }
+        
+        if (urlParams.has('total_price')) {
+            $('#total_price').val(urlParams.get('total_price'));
+        }
+        
         if (urlParams.has('receipt_numbers')) {
             const receiptNumbers = urlParams.get('receipt_numbers');
             const totalMeterAmount = urlParams.get('total_meter_amount');
