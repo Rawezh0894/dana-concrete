@@ -124,6 +124,8 @@ try {
             SELECT 
                 cr.id,
                 cr.receipt_number,
+                cr.customer_id,
+                cr.formulas_id,
                 cr.location,
                 cr.receiver_name,
                 cr.meter_amount,
@@ -180,6 +182,8 @@ try {
             return [
                 'id' => (int)$receipt['id'],
                 'receipt_number' => $receipt['receipt_number'],
+                'customer_id' => (int)$receipt['customer_id'],
+                'formulas_id' => (int)$receipt['formulas_id'],
                 'location' => $receipt['location'],
                 'receiver_name' => $receipt['receiver_name'],
                 'meter_amount' => round((float)$receipt['meter_amount'], 2),

@@ -1,6 +1,85 @@
 // Multiple submission prevention flag
 let submitting = false;
 
+// Function to populate form from URL parameters
+function populateFormFromURL() {
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    // Check if we have parameters from receipt selection
+    if (urlParams.has('customer_id') || urlParams.has('receipt_numbers')) {
+        // Auto-open the modal
+        $('#addSaleModal').modal('show');
+        
+        // Populate form fields
+        if (urlParams.has('customer_id')) {
+            const customerId = urlParams.get('customer_id');
+            if (customerId && customerId !== 'null' && customerId !== '') {
+                $('#customer_id').val(customerId).trigger('change');
+            }
+        }
+        
+        if (urlParams.has('recipient')) {
+            $('#recipient').val(urlParams.get('recipient'));
+        }
+        
+        if (urlParams.has('location')) {
+            $('#location').val(urlParams.get('location'));
+        }
+        
+        if (urlParams.has('formula_id')) {
+            const formulaId = urlParams.get('formula_id');
+            if (formulaId && formulaId !== 'null' && formulaId !== '') {
+                $('#formula_id').val(formulaId).trigger('change');
+            }
+        }
+        
+        if (urlParams.has('quantity')) {
+            $('#quantity').val(urlParams.get('quantity'));
+        }
+        
+        if (urlParams.has('receipt_numbers')) {
+            const receiptNumbers = urlParams.get('receipt_numbers');
+            const totalMeterAmount = urlParams.get('total_meter_amount');
+            
+            // Add receipt information to notes
+            let notes = `پسووڵەکان: ${receiptNumbers}`;
+            if (totalMeterAmount) {
+                notes += `\nکۆی مەتر سێجا: ${totalMeterAmount} م³`;
+            }
+            $('#notes').val(notes);
+        }
+        
+        // Set today's date
+        const today = new Date().toISOString().split('T')[0];
+        $('#order_date').val(today);
+        
+        // Generate invoice number based on receipt numbers
+        if (urlParams.has('receipt_numbers')) {
+            const receiptNumbers = urlParams.get('receipt_numbers').split(',');
+            if (receiptNumbers.length > 0) {
+                // Use the first receipt number as base for invoice
+                const baseReceipt = receiptNumbers[0];
+                const invoiceNumber = `SALE-${baseReceipt}`;
+                $('#invoice_number').val(invoiceNumber);
+            }
+        }
+        
+        // Show success message
+        Swal.fire({
+            icon: 'info',
+            title: 'داتا زیادکرا',
+            text: 'داتای پسووڵەکان بە سەرکەوتوویی زیادکرا بۆ فۆڕمەکە',
+            timer: 2000,
+            showConfirmButton: false,
+            toast: true,
+            position: 'top-end'
+        });
+        
+        // Clear URL parameters to prevent re-population on refresh
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+}
+
 // Function to fetch dollar rate from API
 function fetchDollarRate() {
     const apiUrl = 'https://dinarapi.hediworks.site/api/get-price';
@@ -60,6 +139,9 @@ function fetchDollarRate() {
 }
 
 $(document).ready(function() {
+    // Check for URL parameters and populate form if they exist
+    populateFormFromURL();
+    
     // Fetch dollar rate when add sale modal is shown
     $('#addSaleModal').on('show.bs.modal', function() {
         fetchDollarRate();

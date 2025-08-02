@@ -195,6 +195,11 @@ function displayCustomerDetails(customerName, receipts) {
                     <i class="fas fa-dollar-sign me-1"></i>دانانی نرخ
                 </button>
                 ` : ''}
+                ${window.userPermissions.canAdd ? `
+                <button class="btn btn-info btn-sm ms-2" onclick="createSaleFromReceipts()">
+                    <i class="fas fa-plus me-1"></i>زیادکردنی فرۆشتن
+                </button>
+                ` : ''}
             </div>
             <div class="table-responsive">
                 <table class="table table-bordered table-hover">
@@ -232,7 +237,7 @@ function displayCustomerDetails(customerName, receipts) {
             html += `
                 <tr>
                     <td class="text-center">
-                        <input type="checkbox" class="receipt-checkbox" value="${receipt.id}" data-receipt-number="${receipt.receipt_number}">
+                        <input type="checkbox" class="receipt-checkbox" value="${receipt.id}" data-receipt-number="${receipt.receipt_number}" data-receipt-data='${JSON.stringify(receipt)}'>
                     </td>
                     <td><strong>${receipt.receipt_number}</strong></td>
                     <td>${receipt.location || '-'}</td>
@@ -548,4 +553,70 @@ function showError(message) {
         text: message,
         confirmButtonText: 'باشە'
     });
+}
+
+// Function to create sale from selected receipts
+function createSaleFromReceipts() {
+    // Check permission
+    if (!window.userPermissions.canAdd) {
+        Swal.fire({
+            icon: 'error',
+            title: 'هەڵە',
+            text: 'توانای دەست گەیشتنت نییە بۆ زیادکردنی فرۆشتن',
+            confirmButtonText: 'باشە'
+        });
+        return;
+    }
+    
+    const selectedReceipts = $('.receipt-checkbox:checked');
+    
+    if (selectedReceipts.length === 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'ئاگاداری',
+            text: 'تکایە پسووڵەیەک هەڵبژێرە بۆ زیادکردنی فرۆشتن',
+            confirmButtonText: 'باشە'
+        });
+        return;
+    }
+    
+    // Collect data from selected receipts
+    const receiptsData = [];
+    let totalMeterAmount = 0;
+    let receiptNumbers = [];
+    
+    selectedReceipts.each(function() {
+        try {
+            const receiptData = JSON.parse($(this).data('receipt-data'));
+            receiptsData.push(receiptData);
+            totalMeterAmount += parseFloat(receiptData.meter_amount) || 0;
+            receiptNumbers.push(receiptData.receipt_number);
+        } catch (error) {
+            console.error('Error parsing receipt data:', error);
+            // Fallback to basic data if JSON parsing fails
+            const receiptId = $(this).val();
+            const receiptNumber = $(this).data('receipt-number');
+            receiptNumbers.push(receiptNumber);
+        }
+    });
+    
+    // Create URL parameters for add_sale.php
+    const params = new URLSearchParams();
+    
+    // Add customer information
+    if (receiptsData.length > 0) {
+        const firstReceipt = receiptsData[0];
+        params.append('customer_id', firstReceipt.customer_id || '');
+        params.append('recipient', firstReceipt.receiver_name || '');
+        params.append('location', firstReceipt.location || '');
+        params.append('formula_id', firstReceipt.formulas_id || '');
+    }
+    
+    // Add receipt information
+    params.append('receipt_numbers', receiptNumbers.join(','));
+    params.append('total_meter_amount', totalMeterAmount.toFixed(2));
+    params.append('quantity', totalMeterAmount.toFixed(2));
+    
+    // Redirect to add_sale.php with the data
+    window.location.href = `add_sale.php?${params.toString()}`;
 }
