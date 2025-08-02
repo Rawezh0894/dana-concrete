@@ -195,11 +195,6 @@ function displayCustomerDetails(customerName, receipts) {
                     <i class="fas fa-dollar-sign me-1"></i>دانانی نرخ
                 </button>
                 ` : ''}
-                ${window.userPermissions.canAdd ? `
-                <button class="btn btn-info btn-sm ms-2" onclick="createSaleFromReceipts()">
-                    <i class="fas fa-plus me-1"></i>زیادکردنی فرۆشتن
-                </button>
-                ` : ''}
             </div>
             <div class="table-responsive">
                 <table class="table table-bordered table-hover">
@@ -555,96 +550,3 @@ function showError(message) {
     });
 }
 
-// Function to create sale from selected receipts
-function createSaleFromReceipts() {
-    // Check permission
-    if (!window.userPermissions.canAdd) {
-        Swal.fire({
-            icon: 'error',
-            title: 'هەڵە',
-            text: 'توانای دەست گەیشتنت نییە بۆ زیادکردنی فرۆشتن',
-            confirmButtonText: 'باشە'
-        });
-        return;
-    }
-    
-    const selectedReceipts = $('.receipt-checkbox:checked');
-    
-    if (selectedReceipts.length === 0) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'ئاگاداری',
-            text: 'تکایە پسووڵەیەک هەڵبژێرە بۆ زیادکردنی فرۆشتن',
-            confirmButtonText: 'باشە'
-        });
-        return;
-    }
-    
-    // Collect data from selected receipts
-    const receiptsData = [];
-    let totalMeterAmount = 0;
-    let receiptNumbers = [];
-    let totalPrice = 0;
-    let pricePerMeter = 0;
-    
-    selectedReceipts.each(function() {
-        try {
-            const receiptData = JSON.parse($(this).data('receipt-data'));
-            receiptsData.push(receiptData);
-            totalMeterAmount += parseFloat(receiptData.meter_amount) || 0;
-            receiptNumbers.push(receiptData.receipt_number);
-            
-            // Calculate total price if price_per_meter exists
-            if (receiptData.price_per_meter && receiptData.meter_amount) {
-                const receiptPrice = parseFloat(receiptData.price_per_meter) * parseFloat(receiptData.meter_amount);
-                totalPrice += receiptPrice;
-            }
-        } catch (error) {
-            console.error('Error parsing receipt data:', error);
-            // Fallback to basic data if JSON parsing fails
-            const receiptId = $(this).val();
-            const receiptNumber = $(this).data('receipt-number');
-            receiptNumbers.push(receiptNumber);
-        }
-    });
-    
-    // Calculate average price per meter if we have total price and meter amount
-    if (totalPrice > 0 && totalMeterAmount > 0) {
-        pricePerMeter = totalPrice / totalMeterAmount;
-    }
-    
-    // Create URL parameters for add_sale.php
-    const params = new URLSearchParams();
-    
-    // Add customer information
-    if (receiptsData.length > 0) {
-        const firstReceipt = receiptsData[0];
-        params.append('customer_id', firstReceipt.customer_id || '');
-        params.append('recipient', firstReceipt.receiver_name || '');
-        params.append('location', firstReceipt.location || '');
-        params.append('formula_id', firstReceipt.formulas_id || '');
-        
-        // Debug: Log the data being sent
-        console.log('First receipt data:', firstReceipt);
-        console.log('Total meter amount:', totalMeterAmount);
-        console.log('Price per meter:', pricePerMeter);
-        console.log('Total price:', totalPrice);
-    }
-    
-    // Add receipt information
-    params.append('receipt_numbers', receiptNumbers.join(','));
-    params.append('total_meter_amount', totalMeterAmount.toFixed(2));
-    params.append('quantity', totalMeterAmount.toFixed(2));
-    
-    // Add price information if available
-    if (pricePerMeter > 0) {
-        params.append('price_per_unit', pricePerMeter.toFixed(2));
-        params.append('total_price', totalPrice.toFixed(2));
-    }
-    
-    // Debug: Log the final URL parameters
-    console.log('Final URL parameters:', params.toString());
-    
-    // Redirect to add_sale.php with the data
-    window.location.href = `add_sale.php?${params.toString()}`;
-}

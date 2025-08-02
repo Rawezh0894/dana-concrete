@@ -294,8 +294,7 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
     window.userPermissions = {
       canViewPrices: <?php echo hasPermission('view_concrete_prices') ? 'true' : 'false'; ?>,
       canSetPrices: <?php echo hasPermission('set_concrete_prices') ? 'true' : 'false'; ?>,
-      canEditPrices: <?php echo hasPermission('edit_concrete_prices') ? 'true' : 'false'; ?>,
-      canAdd: <?php echo hasPermission('add_sale') ? 'true' : 'false'; ?>
+      canEditPrices: <?php echo hasPermission('edit_concrete_prices') ? 'true' : 'false'; ?>
     };
     function printReport() {
       // Update print section with current data
