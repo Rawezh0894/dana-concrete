@@ -329,6 +329,7 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
                                                 <th>بڕ</th>
                                                 <th>نرخی یەکە بە دۆلار</th>
                                                 <th>نرخی یەکە بە دینار</th>
+                                                <th>نرخی دەبە</th>
                                                 <th>کۆی نرخ بە دۆلار</th>
                                                 <th>کۆی نرخ بە دینار</th>
                                                 <th>کردار</th>

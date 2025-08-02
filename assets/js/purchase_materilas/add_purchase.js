@@ -149,6 +149,8 @@ function addMaterialRow() {
             </td>
             <td>
                 <div class="unit-type-display" style="font-size: 0.9em; color: #666; margin-bottom: 5px;"></div>
+            </td>
+            <td>
                 <input type="number" class="form-control quantity-input" name="materials[${rowId}][quantity]" 
                        min="0" step="0.01" placeholder="0.00" required>
             </td>
@@ -158,6 +160,10 @@ function addMaterialRow() {
             </td>
             <td>
                 <input type="number" class="form-control price-iqd-input" name="materials[${rowId}][price_per_unit_iqd]" 
+                       min="0" step="0.01" placeholder="0.00" value="0">
+            </td>
+            <td>
+                <input type="number" class="form-control price-bag-input" name="materials[${rowId}][price_per_bag]" 
                        min="0" step="0.01" placeholder="0.00" value="0">
             </td>
             <td>
@@ -693,23 +699,33 @@ function fillPricesBasedOnUnitType(row, material) {
             row.find('.price-usd-input').val(0);
             row.find('.price-iqd-input').val(material.purchase_price_iqd || 0);
         }
+        // No bag price for carton
+        row.find('.price-bag-input').val(0);
     } else if (material.unit_type === 'barrel') {
         // For barrel, show price per barrel but calculate price per bag and liter
         if (currencyType === 'دۆلار') {
             row.find('.price-usd-input').val(material.purchase_price_usd || 0);
             row.find('.price-iqd-input').val(0);
+            // Set bag price for barrel
+            row.find('.price-bag-input').val(material.price_per_bag || 0);
         } else {
             row.find('.price-usd-input').val(0);
             row.find('.price-iqd-input').val(material.purchase_price_iqd || 0);
+            // Set bag price for barrel
+            row.find('.price-bag-input').val(material.price_per_bag || 0);
         }
     } else if (material.unit_type === 'bag') {
         // For bag, show price per bag but calculate price per liter
         if (currencyType === 'دۆلار') {
             row.find('.price-usd-input').val(material.purchase_price_usd || 0);
             row.find('.price-iqd-input').val(0);
+            // Set bag price for bag
+            row.find('.price-bag-input').val(material.purchase_price_usd || 0);
         } else {
             row.find('.price-usd-input').val(0);
             row.find('.price-iqd-input').val(material.purchase_price_iqd || 0);
+            // Set bag price for bag
+            row.find('.price-bag-input').val(material.purchase_price_iqd || 0);
         }
     } else {
         // For piece and liter, use the price as is
@@ -720,5 +736,7 @@ function fillPricesBasedOnUnitType(row, material) {
             row.find('.price-usd-input').val(0);
             row.find('.price-iqd-input').val(material.purchase_price_iqd || 0);
         }
+        // No bag price for piece and liter
+        row.find('.price-bag-input').val(0);
     }
 }
