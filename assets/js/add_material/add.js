@@ -7,13 +7,13 @@ $(function() {
     
     console.log('Submitting form data:', formData);
     
-    $.post('../process/add_material/add.php', formData, function(res) {
-      console.log('Server response:', res);
-      
-      try {
-        // Try to parse as JSON first
-        var jsonResponse = JSON.parse(res);
-        console.log('Parsed JSON response:', jsonResponse);
+    $.ajax({
+      url: '../process/add_material/add.php',
+      type: 'POST',
+      data: formData,
+      dataType: 'json',
+      success: function(jsonResponse) {
+        console.log('Server response:', jsonResponse);
         
         if (jsonResponse.success === true) {
           Swal.fire({
@@ -34,48 +34,40 @@ $(function() {
             confirmButtonText: 'باشە'
           });
         }
-      } catch (e) {
-        // If not JSON, treat as plain text
-        console.log('Response is not JSON, treating as plain text');
         
-        if (typeof res === 'string' && res.trim() === 'success') {
-          Swal.fire({
-            icon: 'success',
-            title: 'سەرکەوتوو',
-            text: 'کاڵا بە سەرکەوتوویی زیادکرا!',
-            confirmButtonText: 'باشە'
-          }).then(() => {
-            $('#addMaterialModal').modal('hide');
-            if (typeof loadMaterials === 'function') loadMaterials();
-            $('#addMaterialForm')[0].reset();
-          });
-        } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'هەڵە',
-            text: 'زیادکردن سەرکەوتوو نەبوو! Response: ' + res,
-            confirmButtonText: 'باشە'
-          });
+        $btn.prop('disabled', false);
+      },
+      error: function(xhr, status, error) {
+        console.error('AJAX Error:', {
+          status: status,
+          error: error,
+          responseText: xhr.responseText,
+          statusCode: xhr.status
+        });
+        
+        // Try to parse error response as JSON
+        var errorMessage = 'هەڵە لە پەیوەندی بە سێرڤەر: ' + error + ' (Status: ' + xhr.status + ')';
+        try {
+          var errorResponse = JSON.parse(xhr.responseText);
+          if (errorResponse.message) {
+            errorMessage = errorResponse.message;
+          }
+        } catch (e) {
+          // If not JSON, use the raw response text
+          if (xhr.responseText) {
+            errorMessage = xhr.responseText;
+          }
         }
+        
+        Swal.fire({
+          icon: 'error',
+          title: 'هەڵە',
+          text: errorMessage,
+          confirmButtonText: 'باشە'
+        });
+        
+        $btn.prop('disabled', false);
       }
-      
-      $btn.prop('disabled', false);
-    }).fail(function(xhr, status, error) {
-      console.error('AJAX Error:', {
-        status: status,
-        error: error,
-        responseText: xhr.responseText,
-        statusCode: xhr.status
-      });
-      
-      Swal.fire({
-        icon: 'error',
-        title: 'هەڵەی AJAX',
-        text: 'هەڵە لە پەیوەندی بە سێرڤەر: ' + error + ' (Status: ' + xhr.status + ')',
-        confirmButtonText: 'باشە'
-      });
-      
-      $btn.prop('disabled', false);
     });
   });
 });
