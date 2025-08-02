@@ -272,6 +272,8 @@ if (!isset($_SESSION['user_id'])) {
             box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             border: 1px solid rgba(0,0,0,0.05);
             transition: all 0.3s ease;
+            height: 400px;
+            position: relative;
         }
         
         .chart-section:hover {
@@ -284,10 +286,18 @@ if (!isset($_SESSION['user_id'])) {
             font-weight: bold;
             font-size: 1.1rem;
             margin-bottom: 1.5rem;
+            text-align: center;
         }
         
         .chart-section canvas {
             border-radius: 8px;
+            max-height: 300px !important;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
         }
         
         /* Chart Grid Layout */
@@ -354,6 +364,18 @@ if (!isset($_SESSION['user_id'])) {
             
             .stat-item .h4 {
                 font-size: 1.25rem;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-section {
+                height: 350px;
+            }
+            
+            .chart-container {
+                height: 250px;
             }
         }
     </style>
@@ -651,14 +673,18 @@ if (!isset($_SESSION['user_id'])) {
     <div class="row g-4 mb-4">
         <div class="col-lg-6 col-md-12">
             <div class="card p-3 shadow-sm chart-section">
-                <h5 class="mb-3 text-center">ستۆک بە جۆری ماتریاڵ</h5>
-                <canvas id="chart-stock-material" height="180"></canvas>
+                <h5 class="mb-3">ستۆک بە جۆری ماتریاڵ</h5>
+                <div class="chart-container">
+                    <canvas id="chart-stock-material"></canvas>
+                </div>
             </div>
         </div>
         <div class="col-lg-6 col-md-12">
             <div class="card p-3 shadow-sm chart-section">
-                <h5 class="mb-3 text-center">گۆڕانکاری داهات و خەرجی بە مانگ</h5>
-                <canvas id="chart-income-by-month-year" height="180"></canvas>
+                <h5 class="mb-3">گۆڕانکاری داهات و خەرجی بە مانگ</h5>
+                <div class="chart-container">
+                    <canvas id="chart-income-by-month-year"></canvas>
+                </div>
             </div>
         </div>
     </div>
@@ -667,14 +693,18 @@ if (!isset($_SESSION['user_id'])) {
     <div class="row g-4 mb-4">
         <div class="col-lg-6 col-md-12">
             <div class="card p-3 shadow-sm chart-section">
-                <h5 class="mb-3 text-center">فرۆشتن vs خەرجی vs قازانج</h5>
-                <canvas id="chart-sales-vs-expenses" height="180"></canvas>
+                <h5 class="mb-3">فرۆشتن vs خەرجی vs قازانج</h5>
+                <div class="chart-container">
+                    <canvas id="chart-sales-vs-expenses"></canvas>
+                </div>
             </div>
         </div>
         <div class="col-lg-6 col-md-12">
             <div class="card p-3 shadow-sm chart-section">
-                <h5 class="mb-3 text-center">شیکردنەوەی قەرزەکان</h5>
-                <canvas id="chart-debt-analysis" height="180"></canvas>
+                <h5 class="mb-3">شیکردنەوەی قەرزەکان</h5>
+                <div class="chart-container">
+                    <canvas id="chart-debt-analysis"></canvas>
+                </div>
             </div>
         </div>
     </div>
@@ -683,14 +713,18 @@ if (!isset($_SESSION['user_id'])) {
     <div class="row g-4 mb-4">
         <div class="col-lg-6 col-md-12">
             <div class="card p-3 shadow-sm chart-section">
-                <h5 class="mb-3 text-center">کارایی کارمەندان</h5>
-                <canvas id="chart-employee-performance" height="180"></canvas>
+                <h5 class="mb-3">کارایی کارمەندان</h5>
+                <div class="chart-container">
+                    <canvas id="chart-employee-performance"></canvas>
+                </div>
             </div>
         </div>
         <div class="col-lg-6 col-md-12">
             <div class="card p-3 shadow-sm chart-section">
-                <h5 class="mb-3 text-center">خەرجی سەیارەکان</h5>
-                <canvas id="chart-car-expenses" height="180"></canvas>
+                <h5 class="mb-3">خەرجی سەیارەکان</h5>
+                <div class="chart-container">
+                    <canvas id="chart-car-expenses"></canvas>
+                </div>
             </div>
         </div>
     </div>

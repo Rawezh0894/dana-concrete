@@ -71,7 +71,8 @@ function renderStockByMaterial(data) {
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false,
+                maintainAspectRatio: true,
+                aspectRatio: 2,
                 plugins: {
                     legend: {
                         position: 'bottom',
@@ -128,7 +129,8 @@ function renderIncomeByMonthYear(data) {
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false,
+                maintainAspectRatio: true,
+                aspectRatio: 2,
                 plugins: {
                     legend: { 
                         display: true, 
@@ -189,7 +191,8 @@ function renderSalesVsExpenses(data) {
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false,
+                maintainAspectRatio: true,
+                aspectRatio: 2,
                 plugins: {
                     legend: { display: false },
                     title: {
@@ -240,7 +243,8 @@ function renderDebtAnalysis(data) {
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false,
+                maintainAspectRatio: true,
+                aspectRatio: 2,
                 plugins: {
                     legend: {
                         position: 'bottom',
@@ -288,7 +292,8 @@ function renderEmployeePerformance(data) {
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false,
+                maintainAspectRatio: true,
+                aspectRatio: 1.5,
                 plugins: {
                     title: {
                         display: true,
@@ -343,7 +348,8 @@ function renderCarExpenses(data) {
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false,
+                maintainAspectRatio: true,
+                aspectRatio: 2,
                 plugins: {
                     title: {
                         display: true,
