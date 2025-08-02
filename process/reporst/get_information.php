@@ -239,7 +239,7 @@ try {
     $customer_debt_payments_total_usd = $customer_debt_payments_usd + $customer_debt_payments_iqd_converted;
 
     // Person other expenses debt payments
-    $person_debt_payments_query = "SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd FROM other_expense_persons_debt_payments WHERE 1=1 $date_condition_date";
+    $person_debt_payments_query = "SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd FROM person_other_expenses_debt_payments WHERE 1=1 $date_condition_date";
     $stmt = $pdo->query($person_debt_payments_query);
     $row = $stmt->fetch();
     $person_debt_payments_usd = $row['usd'] ?? 0;
