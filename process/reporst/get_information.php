@@ -341,6 +341,63 @@ try {
     $total_sales_amount = ($sales['cash']['usd'] ?? 0) + ($sales['credit']['usd'] ?? 0);
     $net_profit = $total_sales_amount - $total_expenses_usd - $total_discounts;
 
+    // Additional Professional Reports Data
+    
+    // Employee Reports
+    $employee_stats = [];
+    $stmt = $pdo->query("SELECT COUNT(*) as total FROM employees");
+    $employee_stats['total'] = $stmt->fetchColumn();
+    
+    $stmt = $pdo->query("SELECT SUM(salary) as total_salary FROM employees");
+    $employee_stats['total_salary'] = $stmt->fetchColumn() ?: 0;
+    
+    $stmt = $pdo->query("SELECT COUNT(*) as drivers FROM employees WHERE role = 'شۆفێر'");
+    $employee_stats['drivers'] = $stmt->fetchColumn();
+    
+    $stmt = $pdo->query("SELECT COUNT(*) as accountants FROM employees WHERE role = 'موحاسیب'");
+    $employee_stats['accountants'] = $stmt->fetchColumn();
+    
+    // Car Reports
+    $car_stats = [];
+    $stmt = $pdo->query("SELECT COUNT(*) as total FROM cars");
+    $car_stats['total'] = $stmt->fetchColumn();
+    
+    $stmt = $pdo->query("SELECT SUM(gas_liters) as total_gas_used FROM other_expenses WHERE expense_type = 'بەکارهێنانی گاز'");
+    $car_stats['total_gas_used'] = $stmt->fetchColumn() ?: 0;
+    
+    $stmt = $pdo->query("SELECT SUM(gas_total_cost) as total_gas_expense FROM other_expenses WHERE expense_type = 'بەکارهێنانی گاز'");
+    $car_stats['total_gas_expense'] = $stmt->fetchColumn() ?: 0;
+    
+    $car_stats['avg_expense'] = $car_stats['total'] > 0 ? ($car_stats['total_gas_expense'] / $car_stats['total']) : 0;
+    
+    // Stock Reports
+    $stock_stats = [];
+    $stmt = $pdo->query("SELECT COUNT(*) as total_bins FROM bins_silos");
+    $stock_stats['total_bins'] = $stmt->fetchColumn();
+    
+    $stmt = $pdo->query("SELECT COUNT(*) as total_materials FROM materials");
+    $stock_stats['total_materials'] = $stmt->fetchColumn();
+    
+    $stmt = $pdo->query("SELECT COUNT(*) as low_stock_items FROM bins_silos WHERE amount < 1000");
+    $stock_stats['low_stock_items'] = $stmt->fetchColumn();
+    
+    $stmt = $pdo->query("SELECT SUM(total_value) as total_value FROM bins_silos");
+    $stock_stats['total_value'] = $stmt->fetchColumn() ?: 0;
+    
+    // Activity Reports
+    $activity_stats = [];
+    $stmt = $pdo->query("SELECT COUNT(*) as concrete_receipts FROM concrete_receipts");
+    $activity_stats['concrete_receipts'] = $stmt->fetchColumn();
+    
+    $stmt = $pdo->query("SELECT COUNT(*) as notes FROM notes");
+    $activity_stats['notes'] = $stmt->fetchColumn();
+    
+    $stmt = $pdo->query("SELECT COUNT(*) as notifications FROM notifications WHERE seen = 0");
+    $activity_stats['notifications'] = $stmt->fetchColumn();
+    
+    $stmt = $pdo->query("SELECT COUNT(*) as stock_adjustments FROM stock_adjustments");
+    $activity_stats['stock_adjustments'] = $stmt->fetchColumn();
+
     // Chart Data - Real Database Queries
     
     // 1. Stock by Material Type
@@ -368,7 +425,7 @@ try {
         // Monthly sales - using order_date instead of date
         $stmt = $pdo->prepare("
             SELECT SUM(total_price) as total_sales 
-            FROM sales 
+        FROM sales
             WHERE DATE_FORMAT(order_date, '%Y-%m') = ?
         ");
         $stmt->execute([$date]);
@@ -396,6 +453,52 @@ try {
             'sales' => $monthly_sales,
             'expenses' => $monthly_expenses + ($employee_payments / ($usd_iqd_rate / 100)),
             'income' => $monthly_sales - ($monthly_expenses + ($employee_payments / ($usd_iqd_rate / 100)))
+        ];
+    }
+    
+    // 3. Employee Performance Data
+    $employee_performance = [];
+    $stmt = $pdo->query("
+        SELECT 
+            e.name,
+            COUNT(DISTINCT ep.id) as payment_count,
+            AVG(ep.total) as avg_salary,
+            COUNT(DISTINCT oe.id) as expense_count
+        FROM employees e
+        LEFT JOIN employee_payments ep ON e.id = ep.employee_id
+        LEFT JOIN other_expenses oe ON e.id = oe.employee_id
+        GROUP BY e.id, e.name
+        ORDER BY avg_salary DESC
+        LIMIT 10
+    ");
+    while ($row = $stmt->fetch()) {
+        $performance_score = 0;
+        if ($row['payment_count'] > 0) $performance_score += 30;
+        if ($row['avg_salary'] > 500000) $performance_score += 40;
+        if ($row['expense_count'] > 0) $performance_score += 30;
+        
+        $employee_performance[$row['name']] = min(100, $performance_score);
+    }
+    
+    // 4. Car Expenses Data
+    $car_expenses = [];
+    $stmt = $pdo->query("
+        SELECT 
+            c.name as car_name,
+            SUM(oe.gas_liters) as total_gas_used,
+            SUM(oe.gas_total_cost) as total_gas_cost,
+            COUNT(oe.id) as expense_count
+        FROM cars c
+        LEFT JOIN other_expenses oe ON c.id = oe.car_id AND oe.expense_type = 'بەکارهێنانی گاز'
+        GROUP BY c.id, c.name
+        ORDER BY total_gas_cost DESC
+        LIMIT 10
+    ");
+    while ($row = $stmt->fetch()) {
+        $car_expenses[$row['car_name']] = [
+            'gas_used' => $row['total_gas_used'] ?: 0,
+            'gas_cost' => $row['total_gas_cost'] ?: 0,
+            'expense_count' => $row['expense_count'] ?: 0
         ];
     }
     
@@ -428,10 +531,17 @@ try {
                 'usd' => $total_expenses_usd,
                 'breakdown' => $total_expenses_breakdown
             ],
+            // Additional professional reports data
+            'employees' => $employee_stats,
+            'cars' => $car_stats,
+            'stock' => $stock_stats,
+            'activity' => $activity_stats,
             // Chart data
             'charts' => [
                 'stock_by_material' => $stock_by_material,
                 'monthly_data' => $monthly_data,
+                'employee_performance' => $employee_performance,
+                'car_expenses' => $car_expenses,
                 'sales_vs_expenses' => [
                     'sales' => $current_period_sales,
                     'expenses' => $current_period_expenses,
@@ -441,7 +551,7 @@ try {
             ]
         ]
     ];
-
+    
     // 2. Debts by type - Updated to use new calculation method
     $debts_by_type = [
         'customers' => 0,

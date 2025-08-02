@@ -208,6 +208,63 @@ if (!isset($_SESSION['user_id'])) {
             background: linear-gradient(135deg, #dc3545, #c82333) !important;
         }
         
+        .report-stat-card {
+            transition: all 0.3s ease;
+            border: none;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .report-stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .report-stat-card .card-header {
+            border: none;
+            padding: 1.5rem;
+        }
+        
+        .report-stat-card .card-body {
+            padding: 1.5rem;
+        }
+        
+        .stat-item {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 10px;
+            padding: 1.25rem;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .stat-item:hover {
+            background: linear-gradient(135deg, #ffffff, #f8f9fa);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .stat-item i {
+            opacity: 0.8;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-item:hover i {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        
+        .stat-item h6 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-item .h4 {
+            font-weight: bold;
+            margin-bottom: 0;
+        }
+        
         /* Chart Section Styles */
         .chart-section {
             background: #ffffff;
@@ -356,11 +413,11 @@ if (!isset($_SESSION['user_id'])) {
                 <div class="date-input-wrapper">
                     <label>لە:</label>
                     <input type="date" id="from-date" name="from-date">
-                </div>
+        </div>
                 <div class="date-input-wrapper">
                     <label>بۆ:</label>
                     <input type="date" id="to-date" name="to-date">
-                </div>
+    </div>
             </div>
         </div>
         
@@ -403,7 +460,214 @@ if (!isset($_SESSION['user_id'])) {
         <!-- Cards will be rendered here by JS -->
     </div>
     
-
+    <!-- Additional Professional Reports Sections -->
+    <div class="row g-4 mb-4">
+        <!-- Employee Reports Section -->
+        <div class="col-lg-6 col-md-12">
+            <div class="card shadow-sm report-stat-card">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fa fa-users me-2"></i>ڕاپۆرتی کارمەندان
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center stat-item">
+                                <i class="fa fa-user-tie fa-2x text-primary me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">کۆی کارمەندان</h6>
+                                    <span class="h4 mb-0 text-primary" id="total-employees">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center stat-item">
+                                <i class="fa fa-money-bill-wave fa-2x text-success me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">کۆی مووچەی مانگانە</h6>
+                                    <span class="h4 mb-0 text-success" id="total-salary">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center stat-item">
+                                <i class="fa fa-truck fa-2x text-warning me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">شۆفێرەکان</h6>
+                                    <span class="h4 mb-0 text-warning" id="total-drivers">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center stat-item">
+                                <i class="fa fa-calculator fa-2x text-info me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">موحاسیبەکان</h6>
+                                    <span class="h4 mb-0 text-info" id="total-accountants">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Car Reports Section -->
+        <div class="col-lg-6 col-md-12">
+            <div class="card shadow-sm report-stat-card">
+                <div class="card-header bg-gradient-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fa fa-truck me-2"></i>ڕاپۆرتی سەیارەکان
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center stat-item">
+                                <i class="fa fa-car fa-2x text-success me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">کۆی سەیارەکان</h6>
+                                    <span class="h4 mb-0 text-success" id="total-cars">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center stat-item">
+                                <i class="fa fa-gas-pump fa-2x text-warning me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">کۆی گازی بەکارهاتوو</h6>
+                                    <span class="h4 mb-0 text-warning" id="total-gas-used">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center stat-item">
+                                <i class="fa fa-money-bill fa-2x text-danger me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">خەرجی گاز</h6>
+                                    <span class="h4 mb-0 text-danger" id="total-gas-expense">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center stat-item">
+                                <i class="fa fa-chart-line fa-2x text-info me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">تێکڕای خەرجی بۆ سەیارە</h6>
+                                    <span class="h4 mb-0 text-info" id="avg-car-expense">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Stock and Inventory Reports -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6 col-md-12">
+            <div class="card shadow-sm report-stat-card">
+                <div class="card-header bg-gradient-warning text-white">
+                    <h5 class="mb-0">
+                        <i class="fa fa-boxes me-2"></i>ڕاپۆرتی ستۆک و کۆگا
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center stat-item">
+                                <i class="fa fa-warehouse fa-2x text-warning me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">کۆی چاو و سایلۆ</h6>
+                                    <span class="h4 mb-0 text-warning" id="total-bins">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center stat-item">
+                                <i class="fa fa-cubes fa-2x text-info me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">جۆرەکانی مەواد</h6>
+                                    <span class="h4 mb-0 text-info" id="total-materials">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center stat-item">
+                                <i class="fa fa-exclamation-triangle fa-2x text-danger me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">مەوادی کەم</h6>
+                                    <span class="h4 mb-0 text-danger" id="low-stock-items">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center stat-item">
+                                <i class="fa fa-chart-bar fa-2x text-success me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">کۆی نرخی ستۆک</h6>
+                                    <span class="h4 mb-0 text-success" id="total-stock-value">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Activity and Performance Reports -->
+        <div class="col-lg-6 col-md-12">
+            <div class="card shadow-sm report-stat-card">
+                <div class="card-header bg-gradient-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fa fa-chart-line me-2"></i>ڕاپۆرتی چالاکی و کارایی
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center stat-item">
+                                <i class="fa fa-file-invoice fa-2x text-info me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">پسوڵەکانی کۆنکرێت</h6>
+                                    <span class="h4 mb-0 text-info" id="total-concrete-receipts">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center stat-item">
+                                <i class="fa fa-sticky-note fa-2x text-warning me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">نووسراوەکان</h6>
+                                    <span class="h4 mb-0 text-warning" id="total-notes">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center stat-item">
+                                <i class="fa fa-bell fa-2x text-danger me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">ئاگادارکردنەوەکان</h6>
+                                    <span class="h4 mb-0 text-danger" id="total-notifications">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center stat-item">
+                                <i class="fa fa-exchange-alt fa-2x text-success me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">گۆڕانکارییەکانی ستۆک</h6>
+                                    <span class="h4 mb-0 text-success" id="total-stock-adjustments">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <!-- Charts Section -->
     <div class="row g-4 mb-4">
@@ -425,7 +689,45 @@ if (!isset($_SESSION['user_id'])) {
         </div>
     </div>
     
-
+    <!-- Additional Charts Section -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6 col-md-12">
+            <div class="card p-3 shadow-sm chart-section">
+                <h5 class="mb-3">فرۆشتن vs خەرجی vs قازانج</h5>
+                <div class="chart-container">
+                    <canvas id="chart-sales-vs-expenses"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-12">
+            <div class="card p-3 shadow-sm chart-section">
+                <h5 class="mb-3">شیکردنەوەی قەرزەکان</h5>
+                <div class="chart-container">
+                    <canvas id="chart-debt-analysis"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Performance Charts Section -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6 col-md-12">
+            <div class="card p-3 shadow-sm chart-section">
+                <h5 class="mb-3">کارایی کارمەندان</h5>
+                <div class="chart-container">
+                    <canvas id="chart-employee-performance"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-12">
+            <div class="card p-3 shadow-sm chart-section">
+                <h5 class="mb-3">خەرجی سەیارەکان</h5>
+                <div class="chart-container">
+                    <canvas id="chart-car-expenses"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
