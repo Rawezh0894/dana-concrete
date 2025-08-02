@@ -1,21 +1,7 @@
 -- Database Migration for New Unit System
 -- This migration creates a new inventory system with different unit types: Carton, Piece, Barrel, Bag, Liter
 
--- Add unit system columns to purchase_materials table
-ALTER TABLE `purchase_materials` 
-ADD COLUMN `unit_type` ENUM('carton', 'piece', 'barrel', 'bag', 'liter') NOT NULL DEFAULT 'piece' AFTER `material_id`,
-ADD COLUMN `pieces_per_carton` INT NULL DEFAULT NULL COMMENT 'Number of pieces in one carton' AFTER `quantity`,
-ADD COLUMN `bags_per_barrel` INT NULL DEFAULT NULL COMMENT 'Number of bags in one barrel' AFTER `pieces_per_carton`,
-ADD COLUMN `liters_per_bag` DECIMAL(10,2) NULL DEFAULT NULL COMMENT 'Number of liters in one bag' AFTER `bags_per_barrel`,
-ADD COLUMN `liters_per_barrel` DECIMAL(10,2) NULL DEFAULT NULL COMMENT 'Total liters in one barrel' AFTER `liters_per_bag`,
-ADD COLUMN `price_per_piece` DECIMAL(15,2) DEFAULT 0.00 COMMENT 'Price per individual piece' AFTER `price_per_unit_iqd`,
-ADD COLUMN `price_per_liter` DECIMAL(15,2) DEFAULT 0.00 COMMENT 'Price per liter' AFTER `price_per_piece`,
-ADD COLUMN `price_per_bag` DECIMAL(15,2) DEFAULT 0.00 COMMENT 'Price per bag' AFTER `price_per_liter`;
-
--- Update existing purchase_materials records to have default unit_type
-UPDATE `purchase_materials` SET `unit_type` = 'piece' WHERE `unit_type` IS NULL OR `unit_type` = '';
-
--- Create the new inventory_materials table
+-- Create new inventory_materials table
 CREATE TABLE `inventory_materials` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
@@ -37,78 +23,18 @@ CREATE TABLE `inventory_materials` (
   UNIQUE KEY `name_unique` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Create SQL functions for unit price calculations
-DELIMITER $$
+-- Add new columns to purchase_materials table
+ALTER TABLE `purchase_materials` 
+ADD COLUMN `unit_type` ENUM('carton', 'piece', 'barrel', 'bag', 'liter') NOT NULL DEFAULT 'piece' AFTER `material_id`,
+ADD COLUMN `pieces_per_carton` INT NULL DEFAULT NULL COMMENT 'Number of pieces in one carton',
+ADD COLUMN `bags_per_barrel` INT NULL DEFAULT NULL COMMENT 'Number of bags in one barrel',
+ADD COLUMN `liters_per_bag` DECIMAL(10,2) NULL DEFAULT NULL COMMENT 'Number of liters in one bag',
+ADD COLUMN `liters_per_barrel` DECIMAL(10,2) NULL DEFAULT NULL COMMENT 'Total liters in one barrel',
+ADD COLUMN `price_per_piece` DECIMAL(15,2) DEFAULT 0.00 COMMENT 'Price per individual piece',
+ADD COLUMN `price_per_liter` DECIMAL(15,2) DEFAULT 0.00 COMMENT 'Price per liter',
+ADD COLUMN `price_per_bag` DECIMAL(15,2) DEFAULT 0.00 COMMENT 'Price per bag';
 
-CREATE FUNCTION `calculate_piece_price_from_carton`(
-    carton_price DECIMAL(15,2),
-    pieces_per_carton INT
-) RETURNS DECIMAL(15,2)
-READS SQL DATA
-DETERMINISTIC
-BEGIN
-    IF pieces_per_carton IS NULL OR pieces_per_carton <= 0 THEN
-        RETURN carton_price;
-    END IF;
-    RETURN carton_price / pieces_per_carton;
-END$$
-
-CREATE FUNCTION `calculate_liter_price_from_barrel`(
-    barrel_price DECIMAL(15,2),
-    bags_per_barrel INT,
-    liters_per_bag DECIMAL(10,2)
-) RETURNS DECIMAL(15,2)
-READS SQL DATA
-DETERMINISTIC
-BEGIN
-    IF bags_per_barrel IS NULL OR bags_per_barrel <= 0 OR liters_per_bag IS NULL OR liters_per_bag <= 0 THEN
-        RETURN barrel_price;
-    END IF;
-    RETURN barrel_price / (bags_per_barrel * liters_per_bag);
-END$$
-
-CREATE FUNCTION `calculate_liter_price_from_bag`(
-    bag_price DECIMAL(15,2),
-    liters_per_bag DECIMAL(10,2)
-) RETURNS DECIMAL(15,2)
-READS SQL DATA
-DETERMINISTIC
-BEGIN
-    IF liters_per_bag IS NULL OR liters_per_bag <= 0 THEN
-        RETURN bag_price;
-    END IF;
-    RETURN bag_price / liters_per_bag;
-END$$
-
-CREATE FUNCTION `calculate_bag_price_from_barrel`(
-    barrel_price DECIMAL(15,2),
-    bags_per_barrel INT
-) RETURNS DECIMAL(15,2)
-READS SQL DATA
-DETERMINISTIC
-BEGIN
-    IF bags_per_barrel IS NULL OR bags_per_barrel <= 0 THEN
-        RETURN barrel_price;
-    END IF;
-    RETURN barrel_price / bags_per_barrel;
-END$$
-
-CREATE FUNCTION `calculate_bag_price_from_liter`(
-    liter_price DECIMAL(15,2),
-    liters_per_bag DECIMAL(10,2)
-) RETURNS DECIMAL(15,2)
-READS SQL DATA
-DETERMINISTIC
-BEGIN
-    IF liters_per_bag IS NULL OR liters_per_bag <= 0 THEN
-        RETURN liter_price;
-    END IF;
-    RETURN liter_price * liters_per_bag;
-END$$
-
-DELIMITER ;
-
--- Create view for unit calculations
+-- Create a view for material unit calculations
 CREATE VIEW `inventory_unit_calculations` AS
 SELECT 
     id,
@@ -119,26 +45,113 @@ SELECT
     liters_per_bag,
     liters_per_barrel,
     current_quantity,
-    currency_type,
     purchase_price_usd,
     purchase_price_iqd,
     price_per_piece,
     price_per_liter,
     price_per_bag,
     CASE 
-        WHEN unit_type = 'carton' AND pieces_per_carton > 0 THEN purchase_price_usd / pieces_per_carton
-        WHEN unit_type = 'piece' THEN purchase_price_usd
-        ELSE price_per_piece
-    END as calculated_price_per_piece,
+        WHEN unit_type = 'carton' THEN current_quantity * pieces_per_carton
+        WHEN unit_type = 'barrel' THEN current_quantity * bags_per_barrel * liters_per_bag
+        WHEN unit_type = 'bag' THEN current_quantity * liters_per_bag
+        ELSE current_quantity
+    END as total_pieces_or_liters,
     CASE 
-        WHEN unit_type = 'barrel' AND bags_per_barrel > 0 AND liters_per_bag > 0 THEN purchase_price_usd / (bags_per_barrel * liters_per_bag)
-        WHEN unit_type = 'bag' AND liters_per_bag > 0 THEN purchase_price_usd / liters_per_bag
-        WHEN unit_type = 'liter' THEN purchase_price_usd
-        ELSE price_per_liter
-    END as calculated_price_per_liter,
-    CASE 
-        WHEN unit_type = 'barrel' AND bags_per_barrel > 0 THEN purchase_price_usd / bags_per_barrel
-        WHEN unit_type = 'bag' THEN purchase_price_usd
-        ELSE price_per_bag
-    END as calculated_price_per_bag
-FROM inventory_materials; 
+        WHEN unit_type = 'carton' THEN current_quantity * bags_per_barrel
+        WHEN unit_type = 'barrel' THEN current_quantity * bags_per_barrel
+        WHEN unit_type = 'bag' THEN current_quantity
+        ELSE 0
+    END as total_bags
+FROM inventory_materials;
+
+-- Create a function to calculate piece price from carton
+DELIMITER $$
+CREATE FUNCTION `calculate_piece_price_from_carton`(
+    p_carton_price DECIMAL(15,2),
+    p_pieces_per_carton INT
+) RETURNS DECIMAL(15,2)
+DETERMINISTIC
+READS SQL DATA
+BEGIN
+    IF p_pieces_per_carton > 0 THEN
+        RETURN p_carton_price / p_pieces_per_carton;
+    ELSE
+        RETURN 0;
+    END IF;
+END$$
+DELIMITER ;
+
+-- Create a function to calculate bag price from barrel
+DELIMITER $$
+CREATE FUNCTION `calculate_bag_price_from_barrel`(
+    p_barrel_price DECIMAL(15,2),
+    p_bags_per_barrel INT
+) RETURNS DECIMAL(15,2)
+DETERMINISTIC
+READS SQL DATA
+BEGIN
+    IF p_bags_per_barrel > 0 THEN
+        RETURN p_barrel_price / p_bags_per_barrel;
+    ELSE
+        RETURN 0;
+    END IF;
+END$$
+DELIMITER ;
+
+-- Create a function to calculate liter price from barrel
+DELIMITER $$
+CREATE FUNCTION `calculate_liter_price_from_barrel`(
+    p_barrel_price DECIMAL(15,2),
+    p_bags_per_barrel INT,
+    p_liters_per_bag DECIMAL(10,2)
+) RETURNS DECIMAL(15,2)
+DETERMINISTIC
+READS SQL DATA
+BEGIN
+    DECLARE total_liters DECIMAL(15,2);
+    SET total_liters = p_bags_per_barrel * p_liters_per_bag;
+    
+    IF total_liters > 0 THEN
+        RETURN p_barrel_price / total_liters;
+    ELSE
+        RETURN 0;
+    END IF;
+END$$
+DELIMITER ;
+
+-- Create a function to calculate liter price from bag
+DELIMITER $$
+CREATE FUNCTION `calculate_liter_price_from_bag`(
+    p_bag_price DECIMAL(15,2),
+    p_liters_per_bag DECIMAL(10,2)
+) RETURNS DECIMAL(15,2)
+DETERMINISTIC
+READS SQL DATA
+BEGIN
+    IF p_liters_per_bag > 0 THEN
+        RETURN p_bag_price / p_liters_per_bag;
+    ELSE
+        RETURN 0;
+    END IF;
+END$$
+DELIMITER ;
+
+-- Create a function to calculate bag price from liter
+DELIMITER $$
+CREATE FUNCTION `calculate_bag_price_from_liter`(
+    p_liter_price DECIMAL(15,2),
+    p_liters_per_bag DECIMAL(10,2)
+) RETURNS DECIMAL(15,2)
+DETERMINISTIC
+READS SQL DATA
+BEGIN
+    IF p_liters_per_bag > 0 THEN
+        RETURN p_liter_price * p_liters_per_bag;
+    ELSE
+        RETURN 0;
+    END IF;
+END$$
+DELIMITER ;
+
+-- Update existing purchase_materials to have default unit type
+UPDATE purchase_materials SET unit_type = 'piece' WHERE unit_type IS NULL; 

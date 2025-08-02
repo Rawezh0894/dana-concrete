@@ -149,16 +149,20 @@ function collectEditFormData() {
     const materials = [];
     $('.edit-material-row').each(function() {
         const materialId = $(this).find('.edit-material-select').val();
+        const purchaseUnit = $(this).find('.edit-purchase-unit-select').val();
         const quantity = parseFloat($(this).find('.edit-quantity-input').val()) || 0;
         const priceUsd = parseFloat($(this).find('.edit-price-usd-input').val()) || 0;
         const priceIqd = parseFloat($(this).find('.edit-price-iqd-input').val()) || 0;
+        const priceBag = parseFloat($(this).find('.edit-price-bag-input').val()) || 0;
         
         if (materialId && quantity > 0) {
             materials.push({
                 material_id: materialId,
+                purchase_unit: purchaseUnit,
                 quantity: quantity,
                 price_per_unit_usd: priceUsd,
                 price_per_unit_iqd: priceIqd,
+                price_per_bag: priceBag,
                 total_price_usd: quantity * priceUsd,
                 total_price_iqd: quantity * priceIqd
             });
@@ -301,7 +305,15 @@ function refreshEditMaterialDropdowns() {
     
     if (materials.length > 0) {
         materials.forEach(function(material) {
-            options += `<option value="${material.id}">${material.name}</option>`;
+            options += `<option value="${material.id}" 
+                data-unit-type="${material.unit_type || ''}"
+                data-pieces-per-carton="${material.pieces_per_carton || ''}"
+                data-bags-per-barrel="${material.bags_per_barrel || ''}"
+                data-liters-per-bag="${material.liters_per_bag || ''}"
+                data-liters-per-barrel="${material.liters_per_barrel || ''}"
+                data-price-per-piece="${material.price_per_piece || ''}"
+                data-price-per-liter="${material.price_per_liter || ''}"
+                data-price-per-bag="${material.price_per_bag || ''}">${material.name}</option>`;
         });
     } else {
         options = '<option value="">کاڵاکان بار نەکراون...</option>';
