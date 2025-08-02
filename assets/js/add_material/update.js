@@ -30,7 +30,21 @@ $(function() {
         }
       } catch (e) {
         // If not JSON, treat as plain text
-        var responseText = typeof res === 'string' ? res : String(res);
+        var responseText = '';
+        if (typeof res === 'string') {
+          responseText = res;
+        } else if (typeof res === 'object' && res !== null) {
+          // If it's an object, try to get a meaningful message
+          if (res.message) {
+            responseText = res.message;
+          } else if (res.error) {
+            responseText = res.error;
+          } else {
+            responseText = 'هەڵەی نەناسراو';
+          }
+        } else {
+          responseText = String(res);
+        }
         
         if (responseText.trim() === 'success') {
           Swal.fire({
@@ -46,7 +60,7 @@ $(function() {
           Swal.fire({
             icon: 'error',
             title: 'هەڵە',
-            text: 'نوێکردنەوە سەرکەوتوو نەبوو! Response: ' + responseText,
+            text: 'نوێکردنەوە سەرکەوتوو نەبوو! ' + responseText,
             confirmButtonText: 'باشە'
           });
         }
@@ -61,10 +75,22 @@ $(function() {
         statusCode: xhr.status
       });
       
+      var errorMessage = 'هەڵە لە پەیوەندی بە سێرڤەر';
+      if (xhr.responseText) {
+        try {
+          var errorResponse = JSON.parse(xhr.responseText);
+          if (errorResponse.message) {
+            errorMessage = errorResponse.message;
+          }
+        } catch (e) {
+          errorMessage = xhr.responseText;
+        }
+      }
+      
       Swal.fire({
         icon: 'error',
         title: 'هەڵەی AJAX',
-        text: 'هەڵە لە پەیوەندی بە سێرڤەر: ' + error + ' (Status: ' + xhr.status + ')',
+        text: errorMessage,
         confirmButtonText: 'باشە'
       });
       
