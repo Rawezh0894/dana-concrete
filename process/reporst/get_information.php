@@ -115,33 +115,34 @@ try {
     $from_date = $_GET['from_date'] ?? '';
     $to_date = $_GET['to_date'] ?? '';
     $use_range = ($from_date || $to_date);
-    // Build date range condition for each table
-    $date_condition_date = '';
-    $date_condition_sales = '';
-    $date_condition_employee_payments = '';
+    // Date conditions for different tables
+    $date_condition_sales = "";
+    $date_condition_employee_payments = "";
+    $date_condition_date = "";
+    
     if ($use_range) {
         $from = $from_date ? $from_date : '1000-01-01';
         $to = $to_date ? $to_date : '9999-12-31';
-        $date_condition_date = " AND date >= '$from' AND date <= '$to'";
         $date_condition_sales = " AND order_date >= '$from' AND order_date <= '$to'";
         $date_condition_employee_payments = " AND DATE(created_at) >= '$from' AND DATE(created_at) <= '$to'";
+        $date_condition_date = " AND date >= '$from' AND date <= '$to'";
     } else {
         if ($filter === 'today') {
-            $date_condition_date = " AND date = CURDATE()";
             $date_condition_sales = " AND order_date = CURDATE()";
             $date_condition_employee_payments = " AND DATE(created_at) = CURDATE()";
+            $date_condition_date = " AND date = CURDATE()";
         } elseif ($filter === 'week') {
-            $date_condition_date = " AND YEARWEEK(date, 1) = YEARWEEK(CURDATE(), 1)";
             $date_condition_sales = " AND YEARWEEK(order_date, 1) = YEARWEEK(CURDATE(), 1)";
             $date_condition_employee_payments = " AND YEARWEEK(DATE(created_at), 1) = YEARWEEK(CURDATE(), 1)";
+            $date_condition_date = " AND YEARWEEK(date, 1) = YEARWEEK(CURDATE(), 1)";
         } elseif ($filter === 'month') {
-            $date_condition_date = " AND YEAR(date) = YEAR(CURDATE()) AND MONTH(date) = MONTH(CURDATE())";
             $date_condition_sales = " AND YEAR(order_date) = YEAR(CURDATE()) AND MONTH(order_date) = MONTH(CURDATE())";
             $date_condition_employee_payments = " AND YEAR(DATE(created_at)) = YEAR(CURDATE()) AND MONTH(DATE(created_at)) = MONTH(CURDATE())";
+            $date_condition_date = " AND YEAR(date) = YEAR(CURDATE()) AND MONTH(date) = MONTH(CURDATE())";
         } elseif ($filter === 'year') {
-            $date_condition_date = " AND YEAR(date) = YEAR(CURDATE())";
             $date_condition_sales = " AND YEAR(order_date) = YEAR(CURDATE())";
             $date_condition_employee_payments = " AND YEAR(DATE(created_at)) = YEAR(CURDATE())";
+            $date_condition_date = " AND YEAR(date) = YEAR(CURDATE())";
         }
     }
     $purchases_query = "SELECT payment_type, SUM(price) as iqd, SUM(amount_iqd) as amount_iqd, SUM(amount_iqd / NULLIF(exchange_rate, 0)) as iqd_converted FROM purchases WHERE type='دینار' $date_condition_date GROUP BY payment_type";
@@ -421,16 +422,16 @@ try {
         $year = date('Y', strtotime("-$i months"));
         $month = date('m', strtotime("-$i months"));
         
-        // Monthly sales
+        // Monthly sales - using order_date instead of date
         $stmt = $pdo->prepare("
             SELECT SUM(total_price) as total_sales 
             FROM sales 
-            WHERE DATE_FORMAT(date, '%Y-%m') = ?
+            WHERE DATE_FORMAT(order_date, '%Y-%m') = ?
         ");
         $stmt->execute([$date]);
         $monthly_sales = $stmt->fetchColumn() ?: 0;
         
-        // Monthly expenses
+        // Monthly expenses - using date column
         $stmt = $pdo->prepare("
             SELECT SUM(amount_usd) as total_expenses 
             FROM other_expenses 
@@ -439,7 +440,7 @@ try {
         $stmt->execute([$date]);
         $monthly_expenses = $stmt->fetchColumn() ?: 0;
         
-        // Employee payments
+        // Employee payments - using created_at instead of date
         $stmt = $pdo->prepare("
             SELECT SUM(total) as total_employee_payments 
             FROM employee_payments 
