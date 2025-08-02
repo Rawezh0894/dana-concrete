@@ -17,14 +17,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             const data = result.data;
             
-            // Render charts with error handling
+            // Render charts
             try {
                 renderStockByMaterial(data);
                 renderIncomeByMonthYear(data);
                 renderSalesVsExpenses(data);
                 renderDebtAnalysis(data);
-                renderEmployeePerformance(data);
-                renderCarExpenses(data);
             } catch (error) {
                 console.error('Chart rendering error:', error);
             }
@@ -305,129 +303,5 @@ function renderDebtAnalysis(data) {
         });
     } catch (error) {
         console.error('Error rendering debt analysis chart:', error);
-    }
-}
-
-function renderEmployeePerformance(data) {
-    const ctx = document.getElementById('chart-employee-performance');
-    if (!ctx) {
-        console.warn('chart-employee-performance canvas not found');
-        return;
-    }
-    
-    // Use real data from database
-    const employeePerformance = data.charts?.employee_performance || {};
-    
-    const employees = Object.keys(employeePerformance);
-    const performance = Object.values(employeePerformance);
-    
-    // If no data, use sample data
-    if (employees.length === 0) {
-        employees.push('شاخەوان', 'بازیان', 'دانا', 'بەرزان');
-        performance.push(85, 92, 78, 88);
-    }
-    
-    try {
-        new Chart(ctx, {
-            type: 'radar',
-            data: {
-                labels: employees,
-                datasets: [{
-                    label: 'کارایی (%)',
-                    data: performance,
-                    backgroundColor: 'rgba(0,151,167,0.2)',
-                    borderColor: 'rgba(0,151,167,1)',
-                    borderWidth: 2,
-                    pointBackgroundColor: 'rgba(0,151,167,1)',
-                    pointBorderColor: '#ffffff',
-                    pointBorderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                aspectRatio: 1.5,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'کارایی کارمەندان',
-                        font: { size: 16, weight: 'bold' }
-                    }
-                },
-                scales: {
-                    r: {
-                        beginAtZero: true,
-                        max: 100,
-                        ticks: { stepSize: 20 }
-                    }
-                }
-            }
-        });
-    } catch (error) {
-        console.error('Error rendering employee performance chart:', error);
-    }
-}
-
-function renderCarExpenses(data) {
-    const ctx = document.getElementById('chart-car-expenses');
-    if (!ctx) {
-        console.warn('chart-car-expenses canvas not found');
-        return;
-    }
-    
-    // Use real data from database
-    const carExpenses = data.charts?.car_expenses || {};
-    
-    const cars = Object.keys(carExpenses);
-    const gasExpenses = cars.map(car => carExpenses[car]?.gas_cost || 0);
-    const maintenanceExpenses = cars.map(car => carExpenses[car]?.expense_count * 100 || 0); // Sample maintenance cost
-    
-    // If no data, use sample data
-    if (cars.length === 0) {
-        cars.push('M10', 'M11', 'M12', 'M13', 'M14');
-        gasExpenses.push(1200, 1500, 900, 1800, 1100);
-        maintenanceExpenses.push(500, 800, 300, 1200, 600);
-    }
-    
-    try {
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: cars,
-                datasets: [{
-                    label: 'خەرجی گاز (USD)',
-                    data: gasExpenses,
-                    backgroundColor: 'rgba(255,193,7,0.8)',
-                    borderColor: 'rgba(255,193,7,1)',
-                    borderWidth: 1
-                }, {
-                    label: 'خەرجی چاککردنەوە (USD)',
-                    data: maintenanceExpenses,
-                    backgroundColor: 'rgba(220,53,69,0.8)',
-                    borderColor: 'rgba(220,53,69,1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                aspectRatio: 2,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'خەرجی سەیارەکان',
-                        font: { size: 16, weight: 'bold' }
-                    }
-                },
-                scales: {
-                    y: { 
-                        beginAtZero: true,
-                        title: { display: true, text: 'بڕ (USD)' }
-                    }
-                }
-            }
-        });
-    } catch (error) {
-        console.error('Error rendering car expenses chart:', error);
     }
 }
