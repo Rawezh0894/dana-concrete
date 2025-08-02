@@ -1,60 +1,38 @@
-// Summary Cards Update Script
-// This script updates the summary cards with real-time data
-
-function updateSummaryCards() {
-    // Update total purchases
-    $.ajax({
-        url: '../process/purchase_materilas/get_summary_stats.php',
-        method: 'GET',
-        dataType: 'json',
-        success: function(response) {
-            if (response.success) {
-                $('#total-purchases').text(response.data.total_purchases || 0);
-                $('#total-purchase-value').text('$' + (response.data.total_value || 0).toLocaleString());
-                $('#total-suppliers').text(response.data.total_suppliers || 0);
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error('Error fetching summary stats:', error);
-        }
-    });
-    
-    // Update total materials count from inventory data
-    if (typeof window.initialMaterials !== 'undefined') {
-        const totalMaterials = window.initialMaterials.length;
-        $('#total-materials').text(totalMaterials);
-    } else {
-        // If materials data is not available, fetch it
-        $.ajax({
-            url: '../process/purchase_materilas/get_materials_with_inventory.php',
-            method: 'GET',
-            dataType: 'json',
-            success: function(response) {
-                if (response.success) {
-                    const totalMaterials = response.data.length;
-                    $('#total-materials').text(totalMaterials);
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error('Error fetching materials count:', error);
-                $('#total-materials').text('0');
-            }
-        });
-    }
-}
-
-// Update summary cards on page load
+// Summary Cards Data Loading for Purchase Materials Page
 $(document).ready(function() {
-    updateSummaryCards();
+    loadSummaryCardsData();
     
-    // Update summary cards every 5 minutes
-    setInterval(updateSummaryCards, 5 * 60 * 1000);
-    
-    // Update summary cards when inventory is refreshed
-    $(document).on('inventoryRefreshed', function() {
-        updateSummaryCards();
+    // Refresh summary cards when purchases are updated
+    $(document).on('purchaseAdded purchaseUpdated purchaseDeleted', function() {
+        loadSummaryCardsData();
     });
 });
 
-// Export function for manual updates
-window.updateSummaryCards = updateSummaryCards; 
+function loadSummaryCardsData() {
+    $.ajax({
+        url: '../process/purchase_materilas/get_summary_stats.php',
+        type: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                // Update summary cards
+                $('#total-purchases').text(response.data.total_purchases);
+                $('#total-purchase-value').text('$' + response.data.total_purchase_value.toLocaleString());
+                $('#total-suppliers').text(response.data.total_suppliers);
+            } else {
+                console.error('Error loading summary data:', response.message);
+                // Set default values
+                $('#total-purchases').text('0');
+                $('#total-purchase-value').text('$0');
+                $('#total-suppliers').text('0');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('AJAX Error:', error);
+            // Set default values on error
+            $('#total-purchases').text('0');
+            $('#total-purchase-value').text('$0');
+            $('#total-suppliers').text('0');
+        }
+    });
+} 
