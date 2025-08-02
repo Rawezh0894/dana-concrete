@@ -271,12 +271,30 @@ if (!isset($_SESSION['user_id'])) {
             border-radius: 15px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             border: 1px solid rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .chart-section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
         }
         
         .chart-section h5 {
             color: var(--seafoam-green);
             font-weight: bold;
             font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .chart-section canvas {
+            border-radius: 8px;
+        }
+        
+        /* Chart Grid Layout */
+        .charts-grid {
+            display: grid;
+            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
         }
         
         @media (max-width: 768px) {
@@ -639,8 +657,40 @@ if (!isset($_SESSION['user_id'])) {
         </div>
         <div class="col-lg-6 col-md-12">
             <div class="card p-3 shadow-sm chart-section">
-                <h5 class="mb-3 text-center">گۆڕانکاری داهات بە مانگ و ساڵ</h5>
+                <h5 class="mb-3 text-center">گۆڕانکاری داهات و خەرجی بە مانگ</h5>
                 <canvas id="chart-income-by-month-year" height="180"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Additional Charts Section -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6 col-md-12">
+            <div class="card p-3 shadow-sm chart-section">
+                <h5 class="mb-3 text-center">فرۆشتن vs خەرجی vs قازانج</h5>
+                <canvas id="chart-sales-vs-expenses" height="180"></canvas>
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-12">
+            <div class="card p-3 shadow-sm chart-section">
+                <h5 class="mb-3 text-center">شیکردنەوەی قەرزەکان</h5>
+                <canvas id="chart-debt-analysis" height="180"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Performance Charts Section -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6 col-md-12">
+            <div class="card p-3 shadow-sm chart-section">
+                <h5 class="mb-3 text-center">کارایی کارمەندان</h5>
+                <canvas id="chart-employee-performance" height="180"></canvas>
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-12">
+            <div class="card p-3 shadow-sm chart-section">
+                <h5 class="mb-3 text-center">خەرجی سەیارەکان</h5>
+                <canvas id="chart-car-expenses" height="180"></canvas>
             </div>
         </div>
     </div>
