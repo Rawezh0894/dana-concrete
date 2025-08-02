@@ -549,6 +549,26 @@ $(function() {
     }, 100);
   });
 
+  // Function to reload materials table
+  function loadMaterials() {
+    $.ajax({
+      url: '../process/add_material/select.php',
+      type: 'GET',
+      success: function(response) {
+        $('#materialTable tbody').html(response);
+      },
+      error: function(xhr, status, error) {
+        console.error('Error loading materials:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'هەڵە',
+          text: 'هەڵە لە بارکردنی کاڵاکان: ' + error,
+          confirmButtonText: 'باشە'
+        });
+      }
+    });
+  }
+
   // Initialize
   togglePriceFields();
   toggleEditPriceFields();
