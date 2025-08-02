@@ -340,6 +340,88 @@ try {
     $total_sales_amount = ($sales['cash']['usd'] ?? 0) + ($sales['credit']['usd'] ?? 0);
     $net_profit = $total_sales_amount - $total_expenses_usd - $total_discounts;
 
+    // Additional Professional Reports Data
+    
+    // Employee Reports
+    $employee_stats = [];
+    $stmt = $pdo->query("SELECT COUNT(*) as total FROM employees");
+    $employee_stats['total'] = $stmt->fetchColumn();
+    
+    $stmt = $pdo->query("SELECT SUM(salary) as total_salary FROM employees");
+    $employee_stats['total_salary'] = $stmt->fetchColumn() ?: 0;
+    
+    $stmt = $pdo->query("SELECT COUNT(*) as drivers FROM employees WHERE role = 'شۆفێر'");
+    $employee_stats['drivers'] = $stmt->fetchColumn();
+    
+    $stmt = $pdo->query("SELECT COUNT(*) as accountants FROM employees WHERE role = 'موحاسیب'");
+    $employee_stats['accountants'] = $stmt->fetchColumn();
+    
+    // Car Reports
+    $car_stats = [];
+    $stmt = $pdo->query("SELECT COUNT(*) as total FROM cars");
+    $car_stats['total'] = $stmt->fetchColumn();
+    
+    $stmt = $pdo->query("SELECT SUM(gas_liters) as total_gas_used FROM other_expenses WHERE expense_type = 'بەکارهێنانی گاز'");
+    $car_stats['total_gas_used'] = $stmt->fetchColumn() ?: 0;
+    
+    $stmt = $pdo->query("SELECT SUM(gas_total_cost) as total_gas_expense FROM other_expenses WHERE expense_type = 'بەکارهێنانی گاز'");
+    $car_stats['total_gas_expense'] = $stmt->fetchColumn() ?: 0;
+    
+    $car_stats['avg_expense'] = $car_stats['total'] > 0 ? ($car_stats['total_gas_expense'] / $car_stats['total']) : 0;
+    
+    // Stock Reports
+    $stock_stats = [];
+    $stmt = $pdo->query("SELECT COUNT(*) as total_bins FROM bins_silos");
+    $stock_stats['total_bins'] = $stmt->fetchColumn();
+    
+    $stmt = $pdo->query("SELECT COUNT(*) as total_materials FROM materials");
+    $stock_stats['total_materials'] = $stmt->fetchColumn();
+    
+    $stmt = $pdo->query("SELECT COUNT(*) as low_stock_items FROM bins_silos WHERE amount < 1000");
+    $stock_stats['low_stock_items'] = $stmt->fetchColumn();
+    
+    $stmt = $pdo->query("SELECT SUM(total_value) as total_value FROM bins_silos");
+    $stock_stats['total_value'] = $stmt->fetchColumn() ?: 0;
+    
+    // Activity Reports
+    $activity_stats = [];
+    $stmt = $pdo->query("SELECT COUNT(*) as concrete_receipts FROM concrete_receipts");
+    $activity_stats['concrete_receipts'] = $stmt->fetchColumn();
+    
+    $stmt = $pdo->query("SELECT COUNT(*) as notes FROM notes");
+    $activity_stats['notes'] = $stmt->fetchColumn();
+    
+    $stmt = $pdo->query("SELECT COUNT(*) as notifications FROM notifications WHERE seen = 0");
+    $activity_stats['notifications'] = $stmt->fetchColumn();
+    
+    $stmt = $pdo->query("SELECT COUNT(*) as stock_adjustments FROM stock_adjustments");
+    $activity_stats['stock_adjustments'] = $stmt->fetchColumn();
+
+    // Prepare response data
+    $response_data = [
+        'success' => true,
+        'data' => [
+            'usd_iqd_rate' => $usd_iqd_rate,
+            'customer' => ['usd' => $customer_debt_total_usd, 'iqd' => $customer_debt_iqd],
+            'company' => ['usd' => $company_debt_total_usd, 'iqd' => $company_debt_iqd],
+            'person' => ['usd' => $person_debt_usd, 'iqd' => $person_debt_iqd],
+            'purchases' => $purchases,
+            'sales' => $sales,
+            'remaining_purchases' => ['usd' => $remaining_purchases_total_usd, 'iqd' => $remaining_purchases_iqd],
+            'discounts' => ['usd' => $total_discount],
+            'net_profit' => ['usd' => $net_profit],
+            'total_expenses' => [
+                'usd' => $total_expenses_usd,
+                'breakdown' => $total_expenses_breakdown
+            ],
+            // Additional professional reports data
+            'employees' => $employee_stats,
+            'cars' => $car_stats,
+            'stock' => $stock_stats,
+            'activity' => $activity_stats
+        ]
+    ];
+
     // 1. Monthly Income/Expenses (last 6 months)
     $monthly_income_expenses = [];
     $stmt = $pdo->query("
@@ -448,45 +530,7 @@ try {
     $person_debt_usd = $person_debt_total_usd; // This is already calculated correctly above
     // $person_debt_iqd is already calculated correctly above, no need to reassign
 
-    echo json_encode([
-        'success' => true,
-        'data' => [
-            'customer' => ['usd' => $customer_debt_total_usd, 'iqd' => $customer_debt_iqd],
-            'company' => ['usd' => $company_debt_total_usd, 'iqd' => $company_debt_iqd],
-            'person' => [
-                'cash' => ['usd' => $person_cash_total_usd, 'iqd' => $person_cash_iqd],
-                'credit' => ['usd' => $person_credit_total_usd, 'iqd' => $person_credit_iqd],
-                'usd' => $person_debt_usd,
-                'iqd' => $person_debt_iqd
-            ],
-            'purchases' => array_merge($purchases, [
-                'usd' => $total_usd + $total_iqd_converted,
-                'iqd' => ($purchases['cash']['iqd'] ?? 0) + ($purchases['credit']['iqd'] ?? 0)
-            ]),
-            'sales' => $sales,
-            'other_expenses' => ['usd' => $other_expenses_total_usd, 'iqd' => $other_expenses_iqd],
-            'discounts' => ['usd' => $total_discount],
-            'employee_expenses' => ['usd' => $employee_expenses_usd, 'iqd' => $employee_expenses],
-            'total_expenses' => [
-                'usd' => $total_expenses_usd,
-                'breakdown' => $total_expenses_breakdown
-            ],
-            'net_profit' => ['usd' => $net_profit],
-            'charts' => [
-                'monthly_income_expenses' => $monthly_income_expenses,
-                'debts_by_type' => $debts_by_type,
-                'stock_by_material' => $stock_by_material,
-                'sales_by_payment_type' => $sales_by_payment_type,
-                'income_by_month_year' => $income_by_month_year
-            ],
-            'usd_iqd_rate' => $usd_iqd_rate,
-            'remaining_purchases' => ['usd' => $remaining_purchases_total_usd, 'iqd' => $remaining_purchases_iqd],
-            'remaining_sales' => ['usd' => $remaining_sales_total_usd, 'iqd' => $remaining_sales_iqd],
-            'debt_payments' => ['usd' => $debt_payments_usd, 'iqd' => $debt_payments_iqd],
-            'customer_debt_payments' => ['usd' => $customer_debt_payments_usd, 'iqd' => $customer_debt_payments_iqd],
-            'person_debt_payments' => ['usd' => $person_debt_payments_usd, 'iqd' => $person_debt_payments_iqd]
-        ]
-    ]);
+    echo json_encode($response_data);
 } catch (Exception $e) {
     echo json_encode([
         'success' => false,
