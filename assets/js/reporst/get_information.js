@@ -137,19 +137,6 @@ function fetchAndRenderReportData() {
                     }
                 },
                 {
-                    key: 'other_expenses',
-                    label: 'خەرجی تر',
-                    icon: 'fa-wallet',
-                    color: 'var(--purchases-accent)',
-                    cardClass: 'purchases-card',
-                    html: function() {
-                        return `
-
-                            <div class=\"card-value\">${formatCurrency(data.other_expenses.usd, 'USD')}</div>
-                        `;
-                    }
-                },
-                {
                     key: 'discounts',
                     label: 'کۆی داشکاندن',
                     icon: 'fa-percent',
@@ -158,18 +145,6 @@ function fetchAndRenderReportData() {
                     html: function() {
                         return `
                             <div class=\"card-value\">${formatCurrency(data.discounts.usd, 'USD')}</div>
-                        `;
-                    }
-                },
-                {
-                    key: 'employee_expenses',
-                    label: 'خەرجی کارمەندەکان',
-                    icon: 'fa-user-friends',
-                    color: 'var(--company-accent)',
-                    cardClass: 'company-card',
-                    html: function() {
-                        return `
-                            <div class=\"card-value\">${formatCurrency(data.employee_expenses.usd, 'USD')}</div>
                         `;
                     }
                 },
