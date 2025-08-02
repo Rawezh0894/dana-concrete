@@ -192,11 +192,11 @@ try {
     }
 
     // Remaining Sales
-    $stmt = $pdo->query("SELECT SUM(remaining_amount) as usd, SUM(amount_paid_iq) as iqd FROM sales");
+    $stmt = $pdo->query("SELECT SUM(remaining_amount) as usd, SUM(amount_paid_iq) as iqd, SUM(amount_paid_iq / NULLIF(dolar_rate, 0)) as iqd_converted FROM sales");
     $row = $stmt->fetch();
     $remaining_sales_usd = $row['usd'] ?? 0;
     $remaining_sales_iqd = $row['iqd'] ?? 0;
-    $remaining_sales_iqd_converted = ($usd_iqd_rate > 0) ? ($remaining_sales_iqd / ($usd_iqd_rate / 100)) : 0;
+    $remaining_sales_iqd_converted = $row['iqd_converted'] ?? 0;
     $remaining_sales_total_usd = $remaining_sales_usd + $remaining_sales_iqd_converted;
 
     // Other Expenses (خەرجی تر)
