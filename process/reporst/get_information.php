@@ -86,7 +86,7 @@ try {
             COALESCE(SUM(pedp.amount_iqd), 0) as total_payments_iqd
         FROM other_expense_persons p
         LEFT JOIN other_expenses oe ON p.id = oe.person_id
-        LEFT JOIN other_expense_persons_debt_payments pedp ON p.id = pedp.person_id
+        LEFT JOIN person_other_expenses_debt_payments pedp ON p.id = pedp.person_id
     ";
     $stmt = $pdo->query($person_debt_query);
     $row = $stmt->fetch();
