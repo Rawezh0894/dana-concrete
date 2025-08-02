@@ -144,15 +144,15 @@ try {
             $date_condition_employee_payments = " AND YEAR(DATE(created_at)) = YEAR(CURDATE())";
         }
     }
-    $purchases_query = "SELECT payment_type, SUM(price) as iqd, SUM(amount_iqd) as amount_iqd FROM purchases WHERE type='دینار' $date_condition_date GROUP BY payment_type";
+    $purchases_query = "SELECT payment_type, SUM(price) as iqd, SUM(amount_iqd) as amount_iqd, SUM(amount_iqd / NULLIF(exchange_rate, 0)) as iqd_converted FROM purchases WHERE type='دینار' $date_condition_date GROUP BY payment_type";
     $stmt = $pdo->query($purchases_query);
     while ($row = $stmt->fetch()) {
         if ($row['payment_type'] === 'نەقد') {
             $purchases['cash']['iqd'] = $row['iqd'] ?? 0;
-            $purchases['cash']['iqd_converted'] = ($usd_iqd_rate > 0) ? (($row['amount_iqd'] ?? 0) / ($usd_iqd_rate / 100)) : 0;
+            $purchases['cash']['iqd_converted'] = $row['iqd_converted'] ?? 0;
         } elseif ($row['payment_type'] === 'قەرز') {
             $purchases['credit']['iqd'] = $row['iqd'] ?? 0;
-            $purchases['credit']['iqd_converted'] = ($usd_iqd_rate > 0) ? (($row['amount_iqd'] ?? 0) / ($usd_iqd_rate / 100)) : 0;
+            $purchases['credit']['iqd_converted'] = $row['iqd_converted'] ?? 0;
         }
     }
     // دۆلار
@@ -169,11 +169,11 @@ try {
     $total_iqd_converted = ($purchases['cash']['iqd_converted'] ?? 0) + ($purchases['credit']['iqd_converted'] ?? 0);
 
     // Remaining Purchases
-    $stmt = $pdo->query("SELECT SUM(remaining_usd) as usd, SUM(remaining_iqd) as iqd FROM purchases");
+    $stmt = $pdo->query("SELECT SUM(remaining_usd) as usd, SUM(remaining_iqd) as iqd, SUM(remaining_iqd / NULLIF(exchange_rate, 0)) as iqd_converted FROM purchases");
     $row = $stmt->fetch();
     $remaining_purchases_usd = $row['usd'] ?? 0;
     $remaining_purchases_iqd = $row['iqd'] ?? 0;
-    $remaining_purchases_iqd_converted = ($usd_iqd_rate > 0) ? ($remaining_purchases_iqd / ($usd_iqd_rate / 100)) : 0;
+    $remaining_purchases_iqd_converted = $row['iqd_converted'] ?? 0;
     $remaining_purchases_total_usd = $remaining_purchases_usd + $remaining_purchases_iqd_converted;
 
     // Sales (فرۆشتن) - Only USD
@@ -297,11 +297,11 @@ try {
     $total_expenses_breakdown['other_expenses'] = $other_expenses_total_usd;
 
     // Purchases (کڕین) - only cash payments with date filter
-    $purchases_query = "SELECT SUM(amount_iqd) as iqd FROM purchases WHERE payment_type = 'نەقد' AND type = 'دینار' $date_condition_date";
+    $purchases_query = "SELECT SUM(amount_iqd) as iqd, SUM(amount_iqd / NULLIF(exchange_rate, 0)) as iqd_converted FROM purchases WHERE payment_type = 'نەقد' AND type = 'دینار' $date_condition_date";
     $stmt = $pdo->query($purchases_query);
     $row = $stmt->fetch();
     $purchases_cash_iqd = $row['iqd'] ?? 0;
-    $purchases_cash_usd = ($usd_iqd_rate > 0) ? ($purchases_cash_iqd / ($usd_iqd_rate / 100)) : 0;
+    $purchases_cash_usd = $row['iqd_converted'] ?? 0;
     $total_expenses_breakdown['purchases'] = $purchases_cash_usd;
 
     // Purchase materials (کڕینی مەواد) with date filter
