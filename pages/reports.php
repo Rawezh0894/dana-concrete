@@ -20,6 +20,7 @@ if (!isset($_SESSION['user_id'])) {
     <link href="../assets/css/nav.css" rel="stylesheet">
     <link href="../assets/css/comon/table.css" rel="stylesheet">
     <link href="../assets/css/comon/style.css" rel="stylesheet">
+    <link href="../assets/css/comon/cards.css" rel="stylesheet">
     <link href="../assets/css/reports.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
