@@ -41,13 +41,13 @@ function renderStockByMaterial(data) {
         return;
     }
     
-    // Create sample data if not available
-    const stockData = {
-        'چیمەنتۆ': data.stock?.total_value * 0.4 || 1000,
-        'لمی ڕەش': data.stock?.total_value * 0.3 || 800,
-        'چەو': data.stock?.total_value * 0.2 || 600,
-        'دەرمان': data.stock?.total_value * 0.1 || 400
-    };
+    // Use real data from database
+    const stockData = data.charts?.stock_by_material || {};
+    
+    // If no data, show message
+    if (Object.keys(stockData).length === 0) {
+        stockData['هیچ داتایەک نییە'] = 1;
+    }
     
     const labels = Object.keys(stockData);
     const values = Object.values(stockData);
@@ -63,7 +63,9 @@ function renderStockByMaterial(data) {
                         'rgba(0,151,167,0.8)',
                         'rgba(255,193,7,0.8)',
                         'rgba(220,53,69,0.8)',
-                        'rgba(40,167,69,0.8)'
+                        'rgba(40,167,69,0.8)',
+                        'rgba(108,117,125,0.8)',
+                        'rgba(23,162,184,0.8)'
                     ],
                     borderWidth: 2,
                     borderColor: '#ffffff'
@@ -101,10 +103,49 @@ function renderIncomeByMonthYear(data) {
         return;
     }
     
-    // Create sample data for the last 6 months
-    const months = ['کانوونی دووەم', 'شوبات', 'ئازار', 'نیسان', 'ئایار', 'حوزەیران'];
-    const incomeData = [12000, 15000, 18000, 14000, 16000, 20000];
-    const expenseData = [8000, 10000, 12000, 9000, 11000, 14000];
+    // Use real data from database
+    const monthlyData = data.charts?.monthly_data || {};
+    
+    // Prepare data for chart
+    const months = [];
+    const incomeData = [];
+    const expenseData = [];
+    
+    // Kurdish month names
+    const kurdishMonths = {
+        '01': 'کانوونی دووەم',
+        '02': 'شوبات',
+        '03': 'ئازار',
+        '04': 'نیسان',
+        '05': 'ئایار',
+        '06': 'حوزەیران',
+        '07': 'تەمموز',
+        '08': 'ئاب',
+        '09': 'ئەیلوول',
+        '10': 'تشرینی یەکەم',
+        '11': 'تشرینی دووەم',
+        '12': 'کانوونی یەکەم'
+    };
+    
+    Object.keys(monthlyData).forEach(year => {
+        Object.keys(monthlyData[year]).forEach(month => {
+            const monthData = monthlyData[year][month];
+            months.push(`${kurdishMonths[month] || month} ${year}`);
+            incomeData.push(monthData.income || 0);
+            expenseData.push(monthData.expenses || 0);
+        });
+    });
+    
+    // If no data, use sample data
+    if (months.length === 0) {
+        const sampleMonths = ['کانوونی دووەم', 'شوبات', 'ئازار', 'نیسان', 'ئایار', 'حوزەیران'];
+        const sampleIncome = [12000, 15000, 18000, 14000, 16000, 20000];
+        const sampleExpenses = [8000, 10000, 12000, 9000, 11000, 14000];
+        
+        months.push(...sampleMonths);
+        incomeData.push(...sampleIncome);
+        expenseData.push(...sampleExpenses);
+    }
     
     try {
         new Chart(ctx, {
@@ -168,9 +209,11 @@ function renderSalesVsExpenses(data) {
         return;
     }
     
-    const salesAmount = (data.sales?.cash?.usd || 0) + (data.sales?.credit?.usd || 0);
-    const expensesAmount = data.total_expenses?.usd || 0;
-    const profit = salesAmount - expensesAmount;
+    // Use real data from database
+    const salesVsExpenses = data.charts?.sales_vs_expenses || {};
+    const salesAmount = salesVsExpenses.sales || 0;
+    const expensesAmount = salesVsExpenses.expenses || 0;
+    const profit = salesVsExpenses.profit || 0;
     
     try {
         new Chart(ctx, {
@@ -221,9 +264,11 @@ function renderDebtAnalysis(data) {
         return;
     }
     
-    const customerDebt = data.customer?.usd || 0;
-    const companyDebt = data.company?.usd || 0;
-    const personDebt = data.person?.usd || 0;
+    // Use real data from database
+    const debtAnalysis = data.charts?.debt_analysis || {};
+    const customerDebt = debtAnalysis.customer_debt || 0;
+    const companyDebt = debtAnalysis.company_debt || 0;
+    const personDebt = debtAnalysis.person_debt || 0;
     
     try {
         new Chart(ctx, {
@@ -270,9 +315,17 @@ function renderEmployeePerformance(data) {
         return;
     }
     
-    // Sample employee performance data
-    const employees = ['شاخەوان', 'بازیان', 'دانا', 'بەرزان'];
-    const performance = [85, 92, 78, 88];
+    // Use real data from database
+    const employeePerformance = data.charts?.employee_performance || {};
+    
+    const employees = Object.keys(employeePerformance);
+    const performance = Object.values(employeePerformance);
+    
+    // If no data, use sample data
+    if (employees.length === 0) {
+        employees.push('شاخەوان', 'بازیان', 'دانا', 'بەرزان');
+        performance.push(85, 92, 78, 88);
+    }
     
     try {
         new Chart(ctx, {
@@ -322,10 +375,19 @@ function renderCarExpenses(data) {
         return;
     }
     
-    // Sample car expense data
-    const cars = ['M10', 'M11', 'M12', 'M13', 'M14'];
-    const gasExpenses = [1200, 1500, 900, 1800, 1100];
-    const maintenanceExpenses = [500, 800, 300, 1200, 600];
+    // Use real data from database
+    const carExpenses = data.charts?.car_expenses || {};
+    
+    const cars = Object.keys(carExpenses);
+    const gasExpenses = cars.map(car => carExpenses[car]?.gas_cost || 0);
+    const maintenanceExpenses = cars.map(car => carExpenses[car]?.expense_count * 100 || 0); // Sample maintenance cost
+    
+    // If no data, use sample data
+    if (cars.length === 0) {
+        cars.push('M10', 'M11', 'M12', 'M13', 'M14');
+        gasExpenses.push(1200, 1500, 900, 1800, 1100);
+        maintenanceExpenses.push(500, 800, 300, 1200, 600);
+    }
     
     try {
         new Chart(ctx, {

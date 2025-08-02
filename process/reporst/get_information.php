@@ -397,6 +397,122 @@ try {
     $stmt = $pdo->query("SELECT COUNT(*) as stock_adjustments FROM stock_adjustments");
     $activity_stats['stock_adjustments'] = $stmt->fetchColumn();
 
+    // Chart Data - Real Database Queries
+    
+    // 1. Stock by Material Type
+    $stock_by_material = [];
+    $stmt = $pdo->query("
+        SELECT 
+            material_type,
+            SUM(amount) as total_amount,
+            SUM(total_value) as total_value
+        FROM bins_silos 
+        GROUP BY material_type
+    ");
+    while ($row = $stmt->fetch()) {
+        $stock_by_material[$row['material_type']] = $row['total_value'] ?: 0;
+    }
+    
+    // 2. Monthly Income/Expenses (last 6 months)
+    $monthly_data = [];
+    $current_month = date('Y-m');
+    for ($i = 5; $i >= 0; $i--) {
+        $date = date('Y-m', strtotime("-$i months"));
+        $year = date('Y', strtotime("-$i months"));
+        $month = date('m', strtotime("-$i months"));
+        
+        // Monthly sales
+        $stmt = $pdo->prepare("
+            SELECT SUM(total_price) as total_sales 
+            FROM sales 
+            WHERE DATE_FORMAT(date, '%Y-%m') = ?
+        ");
+        $stmt->execute([$date]);
+        $monthly_sales = $stmt->fetchColumn() ?: 0;
+        
+        // Monthly expenses
+        $stmt = $pdo->prepare("
+            SELECT SUM(amount_usd) as total_expenses 
+            FROM other_expenses 
+            WHERE DATE_FORMAT(date, '%Y-%m') = ?
+        ");
+        $stmt->execute([$date]);
+        $monthly_expenses = $stmt->fetchColumn() ?: 0;
+        
+        // Employee payments
+        $stmt = $pdo->prepare("
+            SELECT SUM(total) as total_employee_payments 
+            FROM employee_payments 
+            WHERE DATE_FORMAT(created_at, '%Y-%m') = ?
+        ");
+        $stmt->execute([$date]);
+        $employee_payments = $stmt->fetchColumn() ?: 0;
+        
+        $monthly_data[$year][$month] = [
+            'sales' => $monthly_sales,
+            'expenses' => $monthly_expenses + ($employee_payments / ($usd_iqd_rate / 100)),
+            'income' => $monthly_sales - ($monthly_expenses + ($employee_payments / ($usd_iqd_rate / 100)))
+        ];
+    }
+    
+    // 3. Employee Performance Data
+    $employee_performance = [];
+    $stmt = $pdo->query("
+        SELECT 
+            e.name,
+            COUNT(DISTINCT ep.id) as payment_count,
+            AVG(ep.total) as avg_salary,
+            COUNT(DISTINCT oe.id) as expense_count
+        FROM employees e
+        LEFT JOIN employee_payments ep ON e.id = ep.employee_id
+        LEFT JOIN other_expenses oe ON e.id = oe.employee_id
+        GROUP BY e.id, e.name
+        ORDER BY avg_salary DESC
+        LIMIT 10
+    ");
+    while ($row = $stmt->fetch()) {
+        $performance_score = 0;
+        if ($row['payment_count'] > 0) $performance_score += 30;
+        if ($row['avg_salary'] > 500000) $performance_score += 40;
+        if ($row['expense_count'] > 0) $performance_score += 30;
+        
+        $employee_performance[$row['name']] = min(100, $performance_score);
+    }
+    
+    // 4. Car Expenses Data
+    $car_expenses = [];
+    $stmt = $pdo->query("
+        SELECT 
+            c.name as car_name,
+            SUM(oe.gas_liters) as total_gas_used,
+            SUM(oe.gas_total_cost) as total_gas_cost,
+            COUNT(oe.id) as expense_count
+        FROM cars c
+        LEFT JOIN other_expenses oe ON c.id = oe.car_id AND oe.expense_type = 'بەکارهێنانی گاز'
+        GROUP BY c.id, c.name
+        ORDER BY total_gas_cost DESC
+        LIMIT 10
+    ");
+    while ($row = $stmt->fetch()) {
+        $car_expenses[$row['car_name']] = [
+            'gas_used' => $row['total_gas_used'] ?: 0,
+            'gas_cost' => $row['total_gas_cost'] ?: 0,
+            'expense_count' => $row['expense_count'] ?: 0
+        ];
+    }
+    
+    // 5. Sales vs Expenses vs Profit (Current Period)
+    $current_period_sales = ($sales['cash']['usd'] ?? 0) + ($sales['credit']['usd'] ?? 0);
+    $current_period_expenses = $total_expenses_usd;
+    $current_period_profit = $current_period_sales - $current_period_expenses;
+    
+    // 6. Debt Analysis
+    $debt_analysis = [
+        'customer_debt' => $customer_debt_total_usd,
+        'company_debt' => $company_debt_total_usd,
+        'person_debt' => $person_debt_usd
+    ];
+
     // Prepare response data
     $response_data = [
         'success' => true,
@@ -418,33 +534,23 @@ try {
             'employees' => $employee_stats,
             'cars' => $car_stats,
             'stock' => $stock_stats,
-            'activity' => $activity_stats
+            'activity' => $activity_stats,
+            // Chart data
+            'charts' => [
+                'stock_by_material' => $stock_by_material,
+                'monthly_data' => $monthly_data,
+                'employee_performance' => $employee_performance,
+                'car_expenses' => $car_expenses,
+                'sales_vs_expenses' => [
+                    'sales' => $current_period_sales,
+                    'expenses' => $current_period_expenses,
+                    'profit' => $current_period_profit
+                ],
+                'debt_analysis' => $debt_analysis
+            ]
         ]
     ];
 
-    // 1. Monthly Income/Expenses (last 6 months)
-    $monthly_income_expenses = [];
-    $stmt = $pdo->query("
-        SELECT DATE_FORMAT(order_date, '%Y-%m') as month, SUM(total_price) as income
-        FROM sales
-        GROUP BY month
-        ORDER BY month DESC
-        LIMIT 6
-    ");
-    while ($row = $stmt->fetch()) {
-        $monthly_income_expenses[$row['month']]['income'] = (float)$row['income'];
-    }
-    $stmt = $pdo->query("
-        SELECT DATE_FORMAT(date, '%Y-%m') as month, SUM(amount_usd) as expenses
-        FROM other_expenses
-        GROUP BY month
-        ORDER BY month DESC
-        LIMIT 6
-    ");
-    while ($row = $stmt->fetch()) {
-        $monthly_income_expenses[$row['month']]['expenses'] = (float)$row['expenses'];
-    }
-    
     // 2. Debts by type - Updated to use new calculation method
     $debts_by_type = [
         'customers' => 0,
