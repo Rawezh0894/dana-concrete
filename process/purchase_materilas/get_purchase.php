@@ -90,11 +90,6 @@ try {
     // Debug: Log the materials data
     error_log("Materials data for receipt " . $purchase['receipt_number'] . ": " . json_encode($materials));
     
-    // Debug: Log each material individually
-    foreach ($materials as $index => $material) {
-        error_log("Material $index: " . json_encode($material));
-    }
-    
     $purchase['materials'] = $materials;
     
     echo json_encode([

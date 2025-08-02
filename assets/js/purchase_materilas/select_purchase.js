@@ -328,9 +328,6 @@ function populateViewForm(data) {
 }
 
 function populateEditForm(data) {
-    // Store the original materials data for later use
-    window.editMaterialsData = data.materials || [];
-    
     // Populate receipt details
     $('#edit_purchase_id').val(data.id);
     $('#edit_receipt_number').val(data.receipt_number).prop('readonly', true);
@@ -535,11 +532,8 @@ function populateEditMaterialsTable(materials) {
     const tbody = $('#editMaterialsTableBody');
     tbody.empty();
     
-    console.log('populateEditMaterialsTable called with materials:', materials);
-    
     if (materials && materials.length > 0) {
-        materials.forEach(function(material, index) {
-            console.log(`Material ${index}:`, material);
+        materials.forEach(function(material) {
             addEditMaterialRow(material);
         });
     } else {
@@ -554,34 +548,17 @@ function populateEditMaterialsTable(materials) {
             const purchaseUnitSelect = row.find('.edit-purchase-unit-select');
             const materialId = materialSelect.val();
             
-            console.log('Processing row with materialId:', materialId);
-            
             if (materialId) {
-                // Get the materials data from the original materials array passed to this function
-                const originalMaterials = window.editMaterialsData || [];
-                const material = originalMaterials.find(m => m.material_id == materialId);
-                console.log('Found material from original data:', material);
-                
+                const materials = window.materials || [];
+                const material = materials.find(m => m.id == materialId);
                 if (material) {
-                    // Get the unit type from the purchase data
-                    let purchaseUnitType = 'piece';
-                    if (material.unit_type) {
-                        purchaseUnitType = material.unit_type;
-                    }
-                    console.log('Setting purchase unit type to:', purchaseUnitType);
-                    
-                    // Set the purchase unit dropdown
-                    purchaseUnitSelect.val(purchaseUnitType);
-                    
-                    // Get the material definition for display purposes
-                    const materials = window.materials || [];
-                    const materialDef = materials.find(m => m.id == materialId);
+                    // Set the purchase unit based on the material's unit type
+                    const unitType = material.unit_type || 'piece';
+                    purchaseUnitSelect.val(unitType);
                     
                     // Update the display and prices
-                    if (materialDef) {
-                        updateEditUnitTypeDisplay(row, materialDef);
-                        fillEditPricesBasedOnUnitType(row, materialDef);
-                    }
+                    updateEditUnitTypeDisplay(row, material);
+                    fillEditPricesBasedOnUnitType(row, material);
                     calculateEditRowTotal(row);
                 }
             }
@@ -593,8 +570,6 @@ function populateEditMaterialsTable(materials) {
 function addEditMaterialRow(materialData = null) {
     const rowId = 'edit_row_' + Date.now();
     const materials = window.materials || [];
-    
-    console.log('addEditMaterialRow called with materialData:', materialData);
     
     let materialsOptions = '<option value="">هەڵبژێرە</option>';
     materials.forEach(function(material) {
@@ -704,45 +679,11 @@ function addEditMaterialRow(materialData = null) {
     
     // If we have material data, populate the unit information
     if (materialData && materialData.material_id) {
-        console.log('Processing materialData:', materialData);
-        
-        // Use the purchase data directly for unit information since it has all the details
-        const purchaseMaterial = materialData;
-        console.log('Using purchase material data for unit info:', purchaseMaterial);
-        
-        // Create a material object with the unit information from the purchase data
-        const materialWithUnitInfo = {
-            id: purchaseMaterial.material_id,
-            name: purchaseMaterial.material_name,
-            unit_type: purchaseMaterial.unit_type,
-            pieces_per_carton: purchaseMaterial.pieces_per_carton,
-            bags_per_barrel: purchaseMaterial.bags_per_barrel,
-            liters_per_bag: purchaseMaterial.liters_per_bag,
-            liters_per_barrel: purchaseMaterial.liters_per_barrel,
-            price_per_piece: purchaseMaterial.price_per_piece,
-            price_per_liter: purchaseMaterial.price_per_liter,
-            price_per_bag: purchaseMaterial.price_per_bag,
-            purchase_price_usd: purchaseMaterial.price_per_unit_usd,
-            purchase_price_iqd: purchaseMaterial.price_per_unit_iqd
-        };
-        
-        console.log('Created material object with unit info:', materialWithUnitInfo);
-        
-        updateEditUnitTypeDisplay($(`#${rowId}`), materialWithUnitInfo);
-        
-        // Set the purchase unit based on the existing data
-        let purchaseUnitType = 'piece';
-        if (purchaseMaterial.unit_type) {
-            purchaseUnitType = purchaseMaterial.unit_type;
+        const material = materials.find(m => m.id == materialData.material_id);
+        if (material) {
+            updateEditUnitTypeDisplay($(`#${rowId}`), material);
+            fillEditPricesBasedOnUnitType($(`#${rowId}`), material);
         }
-        
-        console.log('Setting purchase unit type to:', purchaseUnitType, 'for material:', purchaseMaterial.material_id);
-        const purchaseUnitSelect = $(`#${rowId} .edit-purchase-unit-select`);
-        console.log('Purchase unit select element:', purchaseUnitSelect.length > 0 ? 'found' : 'not found');
-        purchaseUnitSelect.val(purchaseUnitType);
-        console.log('Purchase unit select value after setting:', purchaseUnitSelect.val());
-        
-        fillEditPricesBasedOnUnitType($(`#${rowId}`), materialWithUnitInfo);
     }
     
     // Calculate row total
@@ -952,20 +893,14 @@ $(document).ready(function() {
 });
 
 function updateEditUnitTypeDisplay(row, material) {
-    console.log('updateEditUnitTypeDisplay called with material:', material);
-    
     const unitTypeDisplay = row.find('.edit-unit-type-display');
     const purchaseUnitSelect = row.find('.edit-purchase-unit-select');
     
     if (!material) {
-        console.log('No material provided, clearing display');
         unitTypeDisplay.text('');
         purchaseUnitSelect.html('<option value="">هەڵبژێرە</option>');
         return;
     }
-    
-    console.log('Material unit_type:', material.unit_type);
-    console.log('Material pieces_per_carton:', material.pieces_per_carton);
     
     // Display unit type information
     let unitTypeText = '';
@@ -988,7 +923,6 @@ function updateEditUnitTypeDisplay(row, material) {
         default:
             unitTypeText = material.unit_type || '-';
     }
-    console.log('Unit type text:', unitTypeText);
     unitTypeDisplay.text(unitTypeText);
     
     // Populate purchase unit options
@@ -1014,7 +948,6 @@ function updateEditUnitTypeDisplay(row, material) {
             purchaseUnitOptions += '<option value="liter">لیتر</option>';
             break;
     }
-    console.log('Purchase unit options:', purchaseUnitOptions);
     purchaseUnitSelect.html(purchaseUnitOptions);
 }
 
