@@ -19,8 +19,40 @@ if (!hasPermission('view_materials')) {
 // Note: add_material permission is checked in the UI, not here
 // Users with only view_materials permission can still access the page
 
-// Load materials and persons data for initial dropdown population
-$materials = $pdo->query("SELECT id, name, unit_type, pieces_per_carton, bags_per_barrel, liters_per_bag, liters_per_barrel, price_per_piece, price_per_liter, price_per_bag, purchase_price_usd, purchase_price_iqd FROM inventory_materials ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
+// Load materials with inventory quantities
+$materials = $pdo->query("
+    SELECT 
+        im.id, 
+        im.name, 
+        im.unit_type, 
+        im.pieces_per_carton, 
+        im.bags_per_barrel, 
+        im.liters_per_bag, 
+        im.liters_per_barrel, 
+        im.price_per_piece, 
+        im.price_per_liter, 
+        im.price_per_bag, 
+        im.purchase_price_usd, 
+        im.purchase_price_iqd,
+        -- Get quantities by unit type
+        COALESCE(carton_qty.quantity, 0) as carton_quantity,
+        COALESCE(piece_qty.quantity, 0) as piece_quantity,
+        COALESCE(barrel_qty.quantity, 0) as barrel_quantity,
+        COALESCE(bag_qty.quantity, 0) as bag_quantity,
+        COALESCE(liter_qty.quantity, 0) as liter_quantity,
+        -- Get total quantity across all units
+        COALESCE(carton_qty.quantity, 0) + COALESCE(piece_qty.quantity, 0) + 
+        COALESCE(barrel_qty.quantity, 0) + COALESCE(bag_qty.quantity, 0) + 
+        COALESCE(liter_qty.quantity, 0) as total_quantity
+    FROM inventory_materials im
+    LEFT JOIN inventory_by_unit carton_qty ON im.id = carton_qty.material_id AND carton_qty.unit_type = 'carton'
+    LEFT JOIN inventory_by_unit piece_qty ON im.id = piece_qty.material_id AND piece_qty.unit_type = 'piece'
+    LEFT JOIN inventory_by_unit barrel_qty ON im.id = barrel_qty.material_id AND barrel_qty.unit_type = 'barrel'
+    LEFT JOIN inventory_by_unit bag_qty ON im.id = bag_qty.material_id AND bag_qty.unit_type = 'bag'
+    LEFT JOIN inventory_by_unit liter_qty ON im.id = liter_qty.material_id AND liter_qty.unit_type = 'liter'
+    ORDER BY im.name ASC
+")->fetchAll(PDO::FETCH_ASSOC);
+
 $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
@@ -44,6 +76,43 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        .inventory-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            margin: 0.125rem;
+            display: inline-block;
+        }
+        .inventory-carton { background-color: #e3f2fd; color: #1976d2; }
+        .inventory-piece { background-color: #f3e5f5; color: #7b1fa2; }
+        .inventory-barrel { background-color: #e8f5e8; color: #388e3c; }
+        .inventory-bag { background-color: #fff3e0; color: #f57c00; }
+        .inventory-liter { background-color: #fce4ec; color: #c2185b; }
+        .inventory-zero { background-color: #ffebee; color: #d32f2f; }
+        .material-select-option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        .material-name {
+            font-weight: 500;
+        }
+        .material-inventory {
+            font-size: 0.8rem;
+            color: #666;
+        }
+        .inventory-display {
+            min-width: 150px;
+        }
+        .card-gradient-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+    </style>
+
 </head>
 <body dir="rtl">
     <?php include '../includes/navbar.php'; ?>
@@ -59,7 +128,7 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
 
         <!-- Summary Cards -->
         <div class="row mb-4" id="summary-cards">
-            <div class="col-md-4 mb-3">
+            <div class="col-md-3 mb-3">
                 <div class="card text-center shadow  card-gradient-info card-animate-hover">
                     <div class="card-body">
                         <i class="fas fa-shopping-bag card-icon"></i>
@@ -69,7 +138,7 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
                     </div>
                 </div>
             </div>
-            <div class="col-md-4 mb-3">
+            <div class="col-md-3 mb-3">
                 <div class="card text-center shadow  card-gradient-success card-animate-hover">
                     <div class="card-body">
                         <i class="fas fa-dollar-sign card-icon"></i>
@@ -79,13 +148,23 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
                     </div>
                 </div>
             </div>
-            <div class="col-md-4 mb-3">
+            <div class="col-md-3 mb-3">
                 <div class="card text-center shadow  card-gradient-warning card-animate-hover">
                     <div class="card-body">
                         <i class="fas fa-users card-icon"></i>
                         <h6 class="card-title">درووشیارەکان</h6>
                         <div class="fs-4 fw-bold" id="total-suppliers">0</div>
                         <small class="text-light">ژمارەی دروشیارەکان</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-center shadow  card-gradient-primary card-animate-hover">
+                    <div class="card-body">
+                        <i class="fas fa-boxes card-icon"></i>
+                        <h6 class="card-title">کۆی کاڵاکان</h6>
+                        <div class="fs-4 fw-bold" id="total-materials">0</div>
+                        <small class="text-light">ژمارەی کاڵاکان لە کۆگا</small>
                     </div>
                 </div>
             </div>
@@ -203,6 +282,7 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
                                         <thead style="background: var(--light-gray);">
                                             <tr>
                                                 <th>کاڵا</th>
+                                                <th>بڕی بەردەست</th>
                                                 <th>جۆری یەکە</th>
                                                 <th>بڕ</th>
                                                 <th>نرخی یەکە بە دۆلار</th>
@@ -325,6 +405,7 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
                                         <thead style="background: var(--light-gray);">
                                             <tr>
                                                 <th>کاڵا</th>
+                                                <th>بڕی بەردەست</th>
                                                 <th>جۆری یەکە</th>
                                                 <th>بڕ</th>
                                                 <th>نرخی یەکە بە دۆلار</th>
@@ -437,6 +518,7 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
                                         <tr>
                                             <th>#</th>
                                             <th>کاڵا</th>
+                                            <th>بڕی بەردەست</th>
                                             <th>جۆری یەکە</th>
                                             <th>بڕ</th>
                                             <th>نرخی یەکە بە دۆلار</th>
@@ -499,6 +581,7 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
         window.initialPersons = <?php echo json_encode($persons); ?>;
     </script>
     
+    <script src="../assets/js/purchase_materilas/inventory_display.js"></script>
     <script src="../assets/js/purchase_materilas/add_purchase.js"></script>
     <script src="../assets/js/purchase_materilas/select_purchase.js"></script>
     <script src="../assets/js/purchase_materilas/update_purchase.js"></script>
