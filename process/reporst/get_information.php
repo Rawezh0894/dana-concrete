@@ -84,9 +84,9 @@ try {
             COALESCE(SUM(oe.amount_iqd / NULLIF(oe.exchange_rate, 0)), 0) as total_expenses_iqd_converted,
             COALESCE(SUM(pedp.amount_usd), 0) as total_payments_usd,
             COALESCE(SUM(pedp.amount_iqd), 0) as total_payments_iqd
-        FROM person_other_expenses p
+        FROM other_expense_persons p
         LEFT JOIN other_expenses oe ON p.id = oe.person_id
-        LEFT JOIN person_other_expenses_debt_payments pedp ON p.id = pedp.person_id
+        LEFT JOIN other_expense_persons_debt_payments pedp ON p.id = pedp.person_id
     ";
     $stmt = $pdo->query($person_debt_query);
     $row = $stmt->fetch();
@@ -239,7 +239,7 @@ try {
     $customer_debt_payments_total_usd = $customer_debt_payments_usd + $customer_debt_payments_iqd_converted;
 
     // Person other expenses debt payments
-    $person_debt_payments_query = "SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd FROM person_other_expenses_debt_payments WHERE 1=1 $date_condition_date";
+    $person_debt_payments_query = "SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd FROM other_expense_persons_debt_payments WHERE 1=1 $date_condition_date";
     $stmt = $pdo->query($person_debt_payments_query);
     $row = $stmt->fetch();
     $person_debt_payments_usd = $row['usd'] ?? 0;
@@ -446,7 +446,7 @@ try {
     
     // Use the calculated total debt from above
     $person_debt_usd = $person_debt_total_usd; // This is already calculated correctly above
-    $person_debt_iqd = $person_debt_iqd; // This is already calculated correctly above
+    // $person_debt_iqd is already calculated correctly above, no need to reassign
 
     echo json_encode([
         'success' => true,
