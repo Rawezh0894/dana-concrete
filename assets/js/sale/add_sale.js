@@ -5,8 +5,18 @@ let submitting = false;
 function formatReceiptNumbers(numbers) {
     if (!numbers || numbers.length === 0) return '';
     
-    // Convert to numbers and sort
-    const sortedNumbers = numbers.map(num => parseInt(num)).sort((a, b) => a - b);
+    // Filter out invalid numbers and convert to integers
+    const validNumbers = numbers
+        .map(num => {
+            const parsed = parseInt(num);
+            return isNaN(parsed) ? null : parsed;
+        })
+        .filter(num => num !== null);
+    
+    if (validNumbers.length === 0) return '';
+    
+    // Sort the valid numbers
+    const sortedNumbers = validNumbers.sort((a, b) => a - b);
     
     const ranges = [];
     let start = sortedNumbers[0];
