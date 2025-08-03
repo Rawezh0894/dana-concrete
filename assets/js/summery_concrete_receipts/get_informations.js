@@ -553,19 +553,13 @@ function showError(message) {
     });
 }
 
-// Function to format invoice numbers in a compact way
+// Function to format invoice numbers in ranges
 function formatInvoiceNumbers(numbers) {
-    if (!numbers || numbers.length === 0) return '';
+    if (numbers.length === 0) return '';
+    if (numbers.length === 1) return numbers[0].toString();
     
-    // Filter out invalid numbers and convert to integers
-    const validNumbers = numbers
-        .filter(num => num && num.toString().trim() !== '' && !isNaN(parseInt(num)))
-        .map(num => parseInt(num));
-    
-    if (validNumbers.length === 0) return '';
-    
-    // Sort numbers
-    const sortedNumbers = validNumbers.sort((a, b) => a - b);
+    // Convert to numbers and sort
+    const sortedNumbers = numbers.map(num => parseInt(num)).sort((a, b) => a - b);
     
     const ranges = [];
     let start = sortedNumbers[0];
@@ -625,12 +619,8 @@ function createSaleFromReceipts() {
         const receiptData = $(this).data('receipt-data');
         receiptsData.push(receiptData);
         
-        // Debug: Log receipt data
-        console.log('Receipt Data:', receiptData);
-        console.log('Receipt Number:', receiptData.receipt_number, 'Type:', typeof receiptData.receipt_number);
-        
         // Collect unique values
-        if (receiptData.receipt_number && receiptData.receipt_number.toString().trim() !== '' && !invoiceNumbers.includes(receiptData.receipt_number)) {
+        if (receiptData.receipt_number && !invoiceNumbers.includes(receiptData.receipt_number)) {
             invoiceNumbers.push(receiptData.receipt_number);
         }
         if (receiptData.location && !locations.includes(receiptData.location)) {
@@ -656,23 +646,8 @@ function createSaleFromReceipts() {
         totalMeterAmount += parseFloat(receiptData.meter_amount || 0);
     });
     
-    // Debug: Log collected invoice numbers
-    console.log('Collected Invoice Numbers:', invoiceNumbers);
-    console.log('Formatted Invoice Numbers:', formatInvoiceNumbers(invoiceNumbers));
-    
     // Format invoice numbers using the new function
     const formattedInvoiceNumbers = formatInvoiceNumbers(invoiceNumbers);
-    
-    // Debug: Show alert with invoice numbers
-    console.log('Original Invoice Numbers:', invoiceNumbers);
-    console.log('Formatted Invoice Numbers:', formattedInvoiceNumbers);
-    
-    // If no formatted numbers, use receipt IDs as fallback
-    let finalInvoiceNumbers = formattedInvoiceNumbers;
-    if (!finalInvoiceNumbers || finalInvoiceNumbers.trim() === '') {
-        const receiptIds = receiptsData.map(receipt => receipt.id).sort((a, b) => a - b);
-        finalInvoiceNumbers = 'Receipt IDs: ' + receiptIds.join(', ');
-    }
     
     // Prepare data for sale form
     const saleData = {
@@ -680,7 +655,7 @@ function createSaleFromReceipts() {
         customer_name: currentCustomerName,
         recipient: receivers.join(', '),
         location: locations.join(', '),
-        invoice_number: finalInvoiceNumbers,
+        invoice_number: formattedInvoiceNumbers,
         formula_name: formulas.join(', '),
         order_date: dates.length > 0 ? dates[0].split(' ')[0] : new Date().toISOString().split('T')[0],
         quantity: totalMeterAmount,
