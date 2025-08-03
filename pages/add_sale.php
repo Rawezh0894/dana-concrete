@@ -49,7 +49,7 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
             <a href="summery_concrete_receipts.php" class="btn btn-warning me-2" style="color: white; font-weight: bold;">
                 <i class="fas fa-chart-bar me-1"></i>پوختەی پسووڵەکان
             </a>
-            <?php if (hasPermission('add_sale')): ?>
+            <?php if (hasPermission('show_add_sale_button')): ?>
             <button class="btn" data-bs-toggle="modal" data-bs-target="#addSaleModal" style="background: var(--seafoam-green); color:white; font-weight: bold;">+ زیادکردنی فرۆشتن</button>
             <?php endif; ?>
         </div>
@@ -365,6 +365,7 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
 <script>
     // Pass permissions to JavaScript
     window.userPermissions = {
+      canShowAddButton: <?php echo hasPermission('show_add_sale_button') ? 'true' : 'false'; ?>,
       canAdd: <?php echo hasPermission('add_sale') ? 'true' : 'false'; ?>,
       canEdit: <?php echo hasPermission('update_sale') ? 'true' : 'false'; ?>,
       canDelete: <?php echo hasPermission('delete_sale') ? 'true' : 'false'; ?>
