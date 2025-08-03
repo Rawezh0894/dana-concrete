@@ -553,7 +553,7 @@ function refreshMaterialDropdowns() {
 }
 
 // Load materials data on page load
-loadMaterials();
+loadMaterialsData();
 
 // Load next receipt number
 function loadNextReceiptNumber() {
@@ -583,19 +583,26 @@ function loadUsdRate() {
     $.ajax({
         url: '../process/purchase_materilas/get_usd_rate.php',
         type: 'GET',
-        dataType: 'json',
-        success: function(result) {
-            if (result.success) {
-                $('#usd_to_iqd_rate').val(result.rate);
-                // Recalculate totals if there are any existing values
-                calculateGrandTotal();
-            } else {
-                // Use default rate if API fails
-                if (result.default_rate) {
-                    $('#usd_to_iqd_rate').val(result.default_rate);
+        success: function(response) {
+            try {
+                const result = JSON.parse(response);
+                if (result.success) {
+                    $('#usd_to_iqd_rate').val(result.rate);
+                    // Recalculate totals if there are any existing values
                     calculateGrandTotal();
+                } else {
+                    // Use default rate if API fails
+                    if (result.default_rate) {
+                        $('#usd_to_iqd_rate').val(result.default_rate);
+                        calculateGrandTotal();
+                    }
+                    console.log('Error loading USD rate: ' + result.error);
                 }
-                console.log('Error loading USD rate: ' + result.error);
+            } catch (e) {
+                console.error('Error parsing USD rate response:', e);
+                // Use default rate if parsing fails
+                $('#usd_to_iqd_rate').val(139250);
+                calculateGrandTotal();
             }
         },
         error: function(xhr, status, error) {

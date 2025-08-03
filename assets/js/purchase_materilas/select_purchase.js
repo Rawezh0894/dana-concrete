@@ -76,19 +76,26 @@ function loadEditUsdRate() {
     $.ajax({
         url: '../process/purchase_materilas/get_usd_rate.php',
         type: 'GET',
-        dataType: 'json',
-        success: function(result) {
-            if (result.success) {
-                $('#edit_usd_to_iqd_rate').val(result.rate);
-                // Recalculate totals if there are any existing values
-                calculateEditGrandTotal();
-            } else {
-                // Use default rate if API fails
-                if (result.default_rate) {
-                    $('#edit_usd_to_iqd_rate').val(result.default_rate);
+        success: function(response) {
+            try {
+                const result = JSON.parse(response);
+                if (result.success) {
+                    $('#edit_usd_to_iqd_rate').val(result.rate);
+                    // Recalculate totals if there are any existing values
                     calculateEditGrandTotal();
+                } else {
+                    // Use default rate if API fails
+                    if (result.default_rate) {
+                        $('#edit_usd_to_iqd_rate').val(result.default_rate);
+                        calculateEditGrandTotal();
+                    }
+                    console.log('Error loading USD rate: ' + result.error);
                 }
-                console.log('Error loading USD rate: ' + result.error);
+            } catch (e) {
+                console.error('Error parsing USD rate response:', e);
+                // Use default rate if parsing fails
+                $('#edit_usd_to_iqd_rate').val(139250);
+                calculateEditGrandTotal();
             }
         },
         error: function(xhr, status, error) {
@@ -113,21 +120,32 @@ function loadPurchaseMaterialsTable() {
     $.ajax({
         url: '../process/purchase_materilas/select_purchase.php',
         type: 'GET',
-        dataType: 'json',
         data: {
             filter_from: filterFrom,
             filter_to: filterTo
         },
-        success: function(result) {
-            if (result.success) {
-                renderPurchaseMaterialsTable(result.data);
-            } else {
+        success: function(response) {
+            try {
+                const result = JSON.parse(response);
+                
+                if (result.success) {
+                    renderPurchaseMaterialsTable(result.data);
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'هەڵە',
+                        text: result.error || 'هەڵەیەک ڕوویدا',
+                        confirmButtonText: 'باشە'
+                    });
+                }
+            } catch (e) {
                 Swal.fire({
                     icon: 'error',
                     title: 'هەڵە',
-                    text: result.error || 'هەڵەیەک ڕوویدا',
+                    text: 'هەڵەیەک لە وەڵامەکەدا هەیە',
                     confirmButtonText: 'باشە'
                 });
+                console.error('Response:', response);
             }
         },
         error: function(xhr, status, error) {
@@ -205,36 +223,17 @@ function attachActionHandlers() {
 }
 
 function loadPurchaseForView(purchaseId) {
-    console.log('Loading purchase for view:', purchaseId);
-    
     $.ajax({
         url: '../process/purchase_materilas/get_purchase.php',
         type: 'GET',
         data: { id: purchaseId },
         success: function(response) {
-            console.log('View response:', response);
-            
             try {
                 const result = JSON.parse(response);
-                console.log('Parsed result:', result);
                 
                 if (result.success) {
-                    console.log('Populating view form with data:', result.data);
                     populateViewForm(result.data);
-                    
-                    // Check if modal exists
-                    if ($('#viewPurchaseModal').length > 0) {
-                        console.log('Modal found, showing...');
-                        $('#viewPurchaseModal').modal('show');
-                    } else {
-                        console.error('Modal not found: #viewPurchaseModal');
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'هەڵە',
-                            text: 'مۆداڵەکە نەدۆزرایەوە',
-                            confirmButtonText: 'باشە'
-                        });
-                    }
+                    $('#viewPurchaseModal').modal('show');
                 } else {
                     Swal.fire({
                         icon: 'error',
@@ -244,7 +243,6 @@ function loadPurchaseForView(purchaseId) {
                     });
                 }
             } catch (e) {
-                console.error('Error parsing response:', e);
                 Swal.fire({
                     icon: 'error',
                     title: 'هەڵە',
@@ -255,7 +253,6 @@ function loadPurchaseForView(purchaseId) {
             }
         },
         error: function(xhr, status, error) {
-            console.error('AJAX Error:', {xhr, status, error});
             Swal.fire({
                 icon: 'error',
                 title: 'هەڵە',
@@ -374,23 +371,16 @@ function populateViewMaterialsTable(materials) {
 }
 
 function calculateViewTotals(materials, transferLoss, otherLoss, currencyType, usdToIqdRate) {
-    console.log('calculateViewTotals called with:', {materials, transferLoss, otherLoss, currencyType, usdToIqdRate});
-    
     let totalUsd = 0;
     let totalIqd = 0;
     
     // Calculate materials totals
     if (materials && materials.length > 0) {
         materials.forEach(function(material) {
-            const materialUsd = parseFloat(material.total_price_usd || 0) || 0;
-            const materialIqd = parseFloat(material.total_price_iqd || 0) || 0;
-            totalUsd += materialUsd;
-            totalIqd += materialIqd;
-            console.log('Material:', material.name, 'USD:', materialUsd, 'IQD:', materialIqd);
+            totalUsd += parseFloat(material.total_price_usd || 0);
+            totalIqd += parseFloat(material.total_price_iqd || 0);
         });
     }
-    
-    console.log('After materials calculation - Total USD:', totalUsd, 'Total IQD:', totalIqd);
     
     // Convert losses to appropriate currency based on currency type
     let transferLossUsd = 0;
@@ -398,41 +388,28 @@ function calculateViewTotals(materials, transferLoss, otherLoss, currencyType, u
     let otherLossUsd = 0;
     let otherLossIqd = 0;
     
-    // Ensure losses are numbers
-    const transferLossNum = parseFloat(transferLoss || 0) || 0;
-    const otherLossNum = parseFloat(otherLoss || 0) || 0;
-    const usdToIqdRateNum = parseFloat(usdToIqdRate || 0) || 0;
-    
-    console.log('Losses:', {transferLossNum, otherLossNum, usdToIqdRateNum});
-    
     if (currencyType === 'دۆلار') {
         // If currency is USD, convert IQD losses to USD
-        if (usdToIqdRateNum > 0) {
-            transferLossUsd = transferLossNum / (usdToIqdRateNum / 100);
-            otherLossUsd = otherLossNum / (usdToIqdRateNum / 100);
+        if (usdToIqdRate > 0) {
+            transferLossUsd = transferLoss / (usdToIqdRate / 100);
+            otherLossUsd = otherLoss / (usdToIqdRate / 100);
         }
-        transferLossIqd = transferLossNum;
-        otherLossIqd = otherLossNum;
+        transferLossIqd = transferLoss;
+        otherLossIqd = otherLoss;
     } else {
         // If currency is IQD, losses are already in IQD
-        transferLossIqd = transferLossNum;
-        otherLossIqd = otherLossNum;
+        transferLossIqd = transferLoss;
+        otherLossIqd = otherLoss;
         // Convert to USD if rate is available
-        if (usdToIqdRateNum > 0) {
-            transferLossUsd = transferLossNum / (usdToIqdRateNum / 100);
-            otherLossUsd = otherLossNum / (usdToIqdRateNum / 100);
+        if (usdToIqdRate > 0) {
+            transferLossUsd = transferLoss / (usdToIqdRate / 100);
+            otherLossUsd = otherLoss / (usdToIqdRate / 100);
         }
     }
     
     // Add losses to totals
     totalUsd += transferLossUsd + otherLossUsd;
     totalIqd += transferLossIqd + otherLossIqd;
-    
-    console.log('Final totals - USD:', totalUsd, 'IQD:', totalIqd);
-    
-    // Ensure totals are numbers before using toFixed
-    totalUsd = parseFloat(totalUsd) || 0;
-    totalIqd = parseFloat(totalIqd) || 0;
     
     // Display totals based on currency type
     if (currencyType === 'دۆلار') {

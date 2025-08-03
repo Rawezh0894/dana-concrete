@@ -1,19 +1,10 @@
 <?php
 session_start();
-// Only log errors, don't display them in JSON response
-ini_set('log_errors', 1);
-ini_set('error_log', __DIR__ . '/../../php-error.log');
-
 require_once '../../config/db_conected.php';
 require_once '../../config/permissions.php';
 
-// Log session and POST data for debugging
-error_log('SESSION: ' . print_r($_SESSION, true));
-error_log('purchase_materilas/update_purchase.php POST: ' . print_r($_POST, true));
-
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
-    error_log('User not logged in for purchase materials update');
     http_response_code(401);
     echo json_encode(['success' => false, 'error' => 'Not authenticated']);
     exit;
@@ -21,7 +12,6 @@ if (!isset($_SESSION['user_id'])) {
 
 // Check permission
 if (!hasPermission('edit_material')) {
-    error_log('Permission denied for user: ' . $_SESSION['user_id'] . ' to edit material');
     http_response_code(403);
     echo json_encode(['success' => false, 'error' => 'Permission denied']);
     exit;
@@ -29,7 +19,6 @@ if (!hasPermission('edit_material')) {
 
 // Check if it's a POST request
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    error_log('Invalid request method: ' . $_SERVER['REQUEST_METHOD']);
     http_response_code(405);
     echo json_encode(['success' => false, 'error' => 'Method not allowed']);
     exit;
@@ -40,19 +29,14 @@ try {
     $required_fields = ['id', 'receipt_number', 'person_id', 'purchase_date', 'currency_type'];
     foreach ($required_fields as $field) {
         if (!isset($_POST[$field]) || empty($_POST[$field])) {
-            error_log('Missing required field: ' . $field);
             throw new Exception("Field '$field' is required");
         }
     }
-    
-    // Log parsed variables for debugging
-    error_log("Parsed vars: id='" . $_POST['id'] . "', receipt_number='" . $_POST['receipt_number'] . "', person_id='" . $_POST['person_id'] . "', purchase_date='" . $_POST['purchase_date'] . "', currency_type='" . $_POST['currency_type'] . "'");
     
     // Check if receipt number already exists for different purchase
     $stmt = $pdo->prepare("SELECT id FROM purchase_materials WHERE receipt_number = ? AND id != ? LIMIT 1");
     $stmt->execute([$_POST['receipt_number'], $_POST['id']]);
     if ($stmt->fetch()) {
-        error_log('Duplicate receipt number: ' . $_POST['receipt_number']);
         throw new Exception("ژمارەی پسووڵە دووبارەیە، تکایە ژمارەیەکی تر هەڵبژێرە");
     }
     
@@ -63,26 +47,22 @@ try {
     
     // Validate materials data
     if (!isset($_POST['materials']) || empty($_POST['materials'])) {
-        error_log('No materials provided');
         throw new Exception('At least one material is required');
     }
     
     $materials = json_decode($_POST['materials'], true);
     if (!is_array($materials) || empty($materials)) {
-        error_log('Invalid materials data: ' . $_POST['materials']);
         throw new Exception('Invalid materials data');
     }
     
     // Validate each material
-    foreach ($materials as $index => $material) {
+    foreach ($materials as $material) {
         if (!isset($material['material_id']) || !isset($material['quantity']) || 
             !isset($material['price_per_unit_usd']) || !isset($material['price_per_unit_iqd'])) {
-            error_log('Invalid material data at index ' . $index . ': ' . print_r($material, true));
             throw new Exception('Invalid material data structure');
         }
         
         if (empty($material['material_id']) || $material['quantity'] <= 0) {
-            error_log('Invalid material quantity or ID at index ' . $index);
             throw new Exception('Invalid material quantity or ID');
         }
     }
@@ -95,12 +75,10 @@ try {
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
     
     if (!$result) {
-        error_log('Purchase not found: ID=' . $purchase_id);
         throw new Exception('Purchase not found');
     }
     
     $old_receipt_number = $result['receipt_number'];
-    error_log('Found purchase for update: ' . print_r($result, true));
     
     // Start transaction
     $pdo->beginTransaction();
@@ -154,8 +132,6 @@ try {
     // Commit transaction
     $pdo->commit();
     
-    error_log('Purchase materials successfully updated: ID=' . $purchase_id . ', Receipt Number=' . $_POST['receipt_number']);
-    
     echo json_encode([
         'success' => true,
         'message' => 'کڕینەکە بە سەرکەوتووی نوێ کراوەتەوە',
@@ -171,7 +147,7 @@ try {
         $pdo->rollBack();
     }
     
-    error_log("Error in purchase_materilas/update_purchase.php: " . $e->getMessage());
+    error_log("Error in update_purchase.php: " . $e->getMessage());
     echo json_encode([
         'success' => false,
         'error' => $e->getMessage()
