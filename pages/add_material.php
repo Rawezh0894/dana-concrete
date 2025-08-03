@@ -121,11 +121,11 @@ $materials = $pdo->query("SELECT id, name, quantity, currency_type, purchase_pri
           </div>
           <div class="mb-3" id="price_usd_group" style="display:none;">
             <label for="purchase_price_usd" class="form-label">نرخی کڕین بە دۆلار</label>
-            <input type="number" class="form-control" id="purchase_price_usd" name="purchase_price_usd" min="0" step="0.01">
+            <input type="number" class="form-control" id="purchase_price_usd" name="purchase_price_usd" min="0" step="0.01" value="0">
           </div>
           <div class="mb-3" id="price_iqd_group" style="display:none;">
             <label for="purchase_price_iqd" class="form-label">نرخی کڕین بە دینار</label>
-            <input type="number" class="form-control" id="purchase_price_iqd" name="purchase_price_iqd" min="0" step="0.01">
+            <input type="number" class="form-control" id="purchase_price_iqd" name="purchase_price_iqd" min="0" step="0.01" value="0">
           </div>
         </div>
         <div class="modal-footer">
@@ -165,11 +165,11 @@ $materials = $pdo->query("SELECT id, name, quantity, currency_type, purchase_pri
           </div>
           <div class="mb-3" id="edit_price_usd_group" style="display:none;">
             <label for="edit_purchase_price_usd" class="form-label">نرخی کڕین بە دۆلار</label>
-            <input type="number" class="form-control" id="edit_purchase_price_usd" name="purchase_price_usd" min="0" step="0.01">
+            <input type="number" class="form-control" id="edit_purchase_price_usd" name="purchase_price_usd" min="0" step="0.01" value="0">
           </div>
           <div class="mb-3" id="edit_price_iqd_group" style="display:none;">
             <label for="edit_purchase_price_iqd" class="form-label">نرخی کڕین بە دینار</label>
-            <input type="number" class="form-control" id="edit_purchase_price_iqd" name="purchase_price_iqd" min="0" step="0.01">
+            <input type="number" class="form-control" id="edit_purchase_price_iqd" name="purchase_price_iqd" min="0" step="0.01" value="0">
           </div>
         </div>
         <div class="modal-footer">
