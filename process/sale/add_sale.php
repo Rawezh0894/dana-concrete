@@ -27,9 +27,11 @@ try {
     // Get form data
     $customer_id = $_POST['customer_id'] ?? null;
     $formula_id = $_POST['formula_id'] ?? null;
+    $recipient = $_POST['recipient'] ?? '';
+    $location = $_POST['location'] ?? '';
     $quantity = $_POST['quantity'] ?? 0;
-    $price_per_cubic = $_POST['price_per_cubic'] ?? 0;
-    $total_amount = $_POST['total_amount'] ?? 0;
+    $price_per_unit = $_POST['price_per_unit'] ?? 0;
+    $total_price = $_POST['total_price'] ?? 0;
     $payment_type = $_POST['payment_type'] ?? 'قەرز';
     $amount_paid_usd = $_POST['amount_paid_usd'] ?? 0;
     $amount_paid_iq = $_POST['amount_paid_iq'] ?? 0;
@@ -54,11 +56,11 @@ try {
     $formula = $stmt->fetch();
 
     // Insert sale
-    $sql = "INSERT INTO sales (customer_id, formula_id, quantity, price_per_cubic, total_amount, payment_type, amount_paid_usd, amount_paid_iq, order_date, invoice_number, notes) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO sales (customer_id, formula_id, recipient, location, quantity, price_per_unit, total_price, payment_type, amount_paid_usd, amount_paid_iq, order_date, invoice_number, notes) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([
-        $customer_id, $formula_id, $quantity, $price_per_cubic, $total_amount,
+        $customer_id, $formula_id, $recipient, $location, $quantity, $price_per_unit, $total_price,
         $payment_type, $amount_paid_usd, $amount_paid_iq, $order_date, $invoice_number, $notes
     ]);
 
@@ -70,9 +72,11 @@ try {
         'customer_name' => $customer['name'] ?? 'Unknown',
         'formula_id' => $formula_id,
         'formula_name' => $formula['name'] ?? 'Unknown',
+        'recipient' => $recipient,
+        'location' => $location,
         'quantity' => $quantity,
-        'price_per_cubic' => $price_per_cubic,
-        'total_amount' => $total_amount,
+        'price_per_unit' => $price_per_unit,
+        'total_price' => $total_price,
         'payment_type' => $payment_type,
         'amount_paid_usd' => $amount_paid_usd,
         'amount_paid_iq' => $amount_paid_iq,
