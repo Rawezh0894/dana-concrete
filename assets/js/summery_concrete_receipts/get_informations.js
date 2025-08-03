@@ -553,6 +553,42 @@ function showError(message) {
     });
 }
 
+function formatReceiptNumbers(numbers) {
+    if (!numbers || numbers.length === 0) return '';
+    
+    // Convert to numbers and sort
+    const sortedNumbers = numbers.map(num => parseInt(num)).sort((a, b) => a - b);
+    
+    const ranges = [];
+    let start = sortedNumbers[0];
+    let end = sortedNumbers[0];
+    
+    for (let i = 1; i < sortedNumbers.length; i++) {
+        if (sortedNumbers[i] === end + 1) {
+            // Continue the range
+            end = sortedNumbers[i];
+        } else {
+            // End current range and start new one
+            if (start === end) {
+                ranges.push(start.toString());
+            } else {
+                ranges.push(`${start}-${end}`);
+            }
+            start = sortedNumbers[i];
+            end = sortedNumbers[i];
+        }
+    }
+    
+    // Add the last range
+    if (start === end) {
+        ranges.push(start.toString());
+    } else {
+        ranges.push(`${start}-${end}`);
+    }
+    
+    return ranges.join(', ');
+}
+
 function createSaleFromReceipts() {
     const selectedReceipts = $('.receipt-checkbox:checked');
     
@@ -608,13 +644,16 @@ function createSaleFromReceipts() {
         totalMeterAmount += parseFloat(receiptData.meter_amount || 0);
     });
     
+    // Format receipt numbers in compact way
+    const formattedReceiptNumbers = formatReceiptNumbers(invoiceNumbers);
+    
     // Prepare data for sale form
     const saleData = {
         customer_id: currentCustomerId,
         customer_name: currentCustomerName,
         recipient: receivers.join(', '),
         location: locations.join(', '),
-        invoice_number: invoiceNumbers.join(', '),
+        invoice_number: formattedReceiptNumbers,
         formula_name: formulas.join(', '),
         order_date: dates.length > 0 ? dates[0].split(' ')[0] : new Date().toISOString().split('T')[0],
         quantity: totalMeterAmount,
@@ -626,7 +665,18 @@ function createSaleFromReceipts() {
     // Store data in localStorage for the sale page
     localStorage.setItem('saleFromReceipts', JSON.stringify(saleData));
     
-    // Redirect to sale page
-    window.location.href = 'add_sale.php';
+    // Redirect to sale page with formatted receipt numbers as URL parameter
+    const urlParams = new URLSearchParams();
+    urlParams.set('invoice_number', formattedReceiptNumbers);
+    urlParams.set('customer_id', currentCustomerId);
+    urlParams.set('recipient', receivers.join(', '));
+    urlParams.set('location', locations.join(', '));
+    urlParams.set('formula_name', formulas.join(', '));
+    urlParams.set('quantity', totalMeterAmount);
+    urlParams.set('price_per_unit', pricePerMeter || 0);
+    urlParams.set('total_price', totalMeterAmount * (pricePerMeter || 0));
+    urlParams.set('order_date', dates.length > 0 ? dates[0].split(' ')[0] : new Date().toISOString().split('T')[0]);
+    
+    window.location.href = `add_sale.php?${urlParams.toString()}`;
 }
 
