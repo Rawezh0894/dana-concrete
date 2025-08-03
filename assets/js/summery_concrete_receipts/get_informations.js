@@ -195,6 +195,9 @@ function displayCustomerDetails(customerName, receipts) {
                      <i class="fas fa-dollar-sign me-1"></i>دانانی نرخ
                  </button>
                  ` : ''}
+                <button class="btn btn-info btn-sm ms-2" onclick="createSaleFromReceipts()">
+                    <i class="fas fa-plus me-1"></i>زیادکردنی فرۆشتن
+                </button>
             </div>
             <div class="table-responsive">
                 <table class="table table-bordered table-hover">
@@ -548,5 +551,76 @@ function showError(message) {
         text: message,
         confirmButtonText: 'باشە'
     });
+}
+
+function createSaleFromReceipts() {
+    const selectedReceipts = $('.receipt-checkbox:checked');
+    
+    if (selectedReceipts.length === 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'ئاگاداری',
+            text: 'تکایە پسووڵەیەک هەڵبژێرە',
+            confirmButtonText: 'باشە'
+        });
+        return;
+    }
+    
+    // Collect data from selected receipts
+    const receiptsData = [];
+    let totalMeterAmount = 0;
+    let invoiceNumbers = [];
+    let locations = [];
+    let receivers = [];
+    let formulas = [];
+    let dates = [];
+    let pricePerMeter = null;
+    
+    selectedReceipts.each(function() {
+        const receiptData = $(this).data('receipt-data');
+        receiptsData.push(receiptData);
+        
+        // Collect unique values
+        if (receiptData.receipt_number && !invoiceNumbers.includes(receiptData.receipt_number)) {
+            invoiceNumbers.push(receiptData.receipt_number);
+        }
+        if (receiptData.location && !locations.includes(receiptData.location)) {
+            locations.push(receiptData.location);
+        }
+        if (receiptData.receiver_name && !receivers.includes(receiptData.receiver_name)) {
+            receivers.push(receiptData.receiver_name);
+        }
+        if (receiptData.formula_name && !formulas.includes(receiptData.formula_name)) {
+            formulas.push(receiptData.formula_name);
+        }
+        if (receiptData.created_at) {
+            dates.push(receiptData.created_at);
+        }
+        if (receiptData.price_per_meter && !pricePerMeter) {
+            pricePerMeter = receiptData.price_per_meter;
+        }
+        
+        totalMeterAmount += parseFloat(receiptData.meter_amount || 0);
+    });
+    
+    // Prepare data for sale form
+    const saleData = {
+        customer_id: currentCustomerId,
+        customer_name: currentCustomerName,
+        recipient: receivers.join(', '),
+        location: locations.join(', '),
+        invoice_number: invoiceNumbers.join(', '),
+        formula_name: formulas.join(', '),
+        order_date: dates.length > 0 ? dates[0].split(' ')[0] : new Date().toISOString().split('T')[0],
+        quantity: totalMeterAmount,
+        price_per_unit: pricePerMeter || 0,
+        total_price: totalMeterAmount * (pricePerMeter || 0)
+    };
+    
+    // Store data in localStorage for the sale page
+    localStorage.setItem('saleFromReceipts', JSON.stringify(saleData));
+    
+    // Redirect to sale page
+    window.location.href = 'add_sale.php';
 }
 

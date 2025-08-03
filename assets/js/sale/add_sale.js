@@ -1,6 +1,135 @@
 // Multiple submission prevention flag
 let submitting = false;
 
+// Function to populate form from localStorage (from receipt selection)
+function populateFormFromLocalStorage() {
+    const saleData = localStorage.getItem('saleFromReceipts');
+    if (saleData) {
+        try {
+            const data = JSON.parse(saleData);
+            
+            // Auto-open the modal
+            $('#addSaleModal').modal('show');
+            
+            // Populate form fields
+            if (data.customer_id) {
+                $('#customer_id').val(data.customer_id).trigger('change');
+            } else if (data.customer_name) {
+                // Try to find customer by name if ID is not provided
+                const customerSelect = $('#customer_id');
+                const options = customerSelect.find('option');
+                let foundCustomerId = null;
+                
+                options.each(function() {
+                    if ($(this).text().trim() === data.customer_name.trim()) {
+                        foundCustomerId = $(this).val();
+                        return false; // break the loop
+                    }
+                });
+                
+                if (foundCustomerId) {
+                    $('#customer_id').val(foundCustomerId).trigger('change');
+                }
+            }
+            
+            if (data.recipient) {
+                $('#recipient').val(data.recipient);
+            }
+            
+            if (data.location) {
+                $('#location').val(data.location);
+            }
+            
+            if (data.invoice_number) {
+                $('#invoice_number').val(data.invoice_number);
+            }
+            
+            if (data.formula_name) {
+                // Try to find formula by name
+                const formulaSelect = $('#formula_id');
+                const options = formulaSelect.find('option');
+                let foundFormulaId = null;
+                
+                // Split formula names if multiple formulas are provided
+                const formulaNames = data.formula_name.split(',').map(name => name.trim());
+                
+                // Try to find the first matching formula
+                for (let formulaName of formulaNames) {
+                    options.each(function() {
+                        if ($(this).text().trim() === formulaName) {
+                            foundFormulaId = $(this).val();
+                            return false; // break the loop
+                        }
+                    });
+                    if (foundFormulaId) break; // break outer loop if found
+                }
+                
+                if (foundFormulaId) {
+                    $('#formula_id').val(foundFormulaId).trigger('change');
+                }
+            }
+            
+            if (data.order_date) {
+                $('#order_date').val(data.order_date);
+            } else {
+                // Set today's date if no order_date provided
+                const today = new Date().toISOString().split('T')[0];
+                $('#order_date').val(today);
+            }
+            
+            if (data.quantity) {
+                $('#quantity').val(data.quantity);
+            }
+            
+            if (data.price_per_unit) {
+                $('#price_per_unit').val(data.price_per_unit);
+            }
+            
+            // Calculate total price if quantity and price are available
+            if (data.quantity && data.price_per_unit) {
+                const totalPrice = parseFloat(data.quantity) * parseFloat(data.price_per_unit);
+                $('#total_price').val(totalPrice.toFixed(2));
+            }
+            
+            if (data.total_price && !data.quantity) {
+                // Only set total_price if quantity is not provided (to avoid overriding calculated value)
+                $('#total_price').val(data.total_price);
+            }
+            
+            // Add receipt information to notes
+            let notes = `پسووڵەکان: ${data.invoice_number}`;
+            if (data.quantity) {
+                notes += `\nکۆی مەتر سێجا: ${data.quantity} م³`;
+            }
+            if (data.formula_name) {
+                notes += `\nفۆرمۆلا: ${data.formula_name}`;
+            }
+            if (data.location) {
+                notes += `\nشوێن: ${data.location}`;
+            }
+            if (data.recipient) {
+                notes += `\nوەرگر: ${data.recipient}`;
+            }
+            $('#notes').val(notes);
+            
+            // Clear localStorage after using the data
+            localStorage.removeItem('saleFromReceipts');
+            
+            // Show success message
+            Swal.fire({
+                icon: 'info',
+                title: 'داتا زیادکرا',
+                text: 'داتای پسووڵەکان بە سەرکەوتوویی زیادکرا بۆ فۆڕمەکە',
+                confirmButtonText: 'باشە'
+            });
+            
+        } catch (error) {
+            console.error('Error parsing sale data from localStorage:', error);
+            localStorage.removeItem('saleFromReceipts');
+        }
+    }
+}
+
 // Function to populate form from URL parameters
 function populateFormFromURL() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -168,6 +297,9 @@ function fetchDollarRate() {
 }
 
 $(document).ready(function() {
+    // Check for localStorage data and populate form if it exists
+    populateFormFromLocalStorage();
+    
     // Check for URL parameters and populate form if they exist
     populateFormFromURL();
     
