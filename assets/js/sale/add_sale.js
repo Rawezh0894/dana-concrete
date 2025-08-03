@@ -96,19 +96,10 @@ function populateFormFromLocalStorage() {
                 $('#total_price').val(data.total_price);
             }
             
-            // Add receipt information to notes
-            let notes = `پسووڵەکان: ${data.invoice_number}`;
-            if (data.quantity) {
-                notes += `\nکۆی مەتر سێجا: ${data.quantity} م³`;
-            }
-            if (data.formula_name) {
-                notes += `\nفۆرمۆلا: ${data.formula_name}`;
-            }
-            if (data.location) {
-                notes += `\nشوێن: ${data.location}`;
-            }
-            if (data.recipient) {
-                notes += `\nوەرگر: ${data.recipient}`;
+            // Add receipt information to notes only if there are notes from receipts
+            let notes = '';
+            if (data.notes && data.notes.trim() !== '') {
+                notes = data.notes;
             }
             $('#notes').val(notes);
             

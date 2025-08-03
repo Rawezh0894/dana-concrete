@@ -575,6 +575,7 @@ function createSaleFromReceipts() {
     let formulas = [];
     let dates = [];
     let pricePerMeter = null;
+    let notes = [];
     
     selectedReceipts.each(function() {
         const receiptData = $(this).data('receipt-data');
@@ -600,6 +601,10 @@ function createSaleFromReceipts() {
             pricePerMeter = receiptData.price_per_meter;
         }
         
+        if (receiptData.notes && receiptData.notes.trim() !== '' && !notes.includes(receiptData.notes.trim())) {
+            notes.push(receiptData.notes.trim());
+        }
+        
         totalMeterAmount += parseFloat(receiptData.meter_amount || 0);
     });
     
@@ -614,7 +619,8 @@ function createSaleFromReceipts() {
         order_date: dates.length > 0 ? dates[0].split(' ')[0] : new Date().toISOString().split('T')[0],
         quantity: totalMeterAmount,
         price_per_unit: pricePerMeter || 0,
-        total_price: totalMeterAmount * (pricePerMeter || 0)
+        total_price: totalMeterAmount * (pricePerMeter || 0),
+        notes: notes.join('\n')
     };
     
     // Store data in localStorage for the sale page
