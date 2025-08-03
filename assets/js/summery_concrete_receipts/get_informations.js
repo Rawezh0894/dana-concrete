@@ -554,46 +554,40 @@ function showError(message) {
 }
 
 // Function to format invoice numbers in a compact way
-function formatInvoiceNumbers(invoiceNumbers) {
-    if (!invoiceNumbers || invoiceNumbers.length === 0) return '';
+function formatInvoiceNumbers(numbers) {
+    if (!numbers || numbers.length === 0) return '';
     
-    // Sort the numbers
-    const sortedNumbers = [...invoiceNumbers].sort();
+    // Convert to numbers and sort
+    const sortedNumbers = numbers.map(num => parseInt(num)).sort((a, b) => a - b);
     
-    // Extract prefix and numbers
-    const prefix = sortedNumbers[0].split('-')[0] + '-';
-    const numbers = sortedNumbers.map(num => {
-        const parts = num.split('-');
-        return parts.length > 1 ? parseInt(parts[1]) : parseInt(num);
-    }).sort((a, b) => a - b);
-    
-    // Find consecutive ranges
     const ranges = [];
-    let start = numbers[0];
-    let end = numbers[0];
+    let start = sortedNumbers[0];
+    let end = sortedNumbers[0];
     
-    for (let i = 1; i < numbers.length; i++) {
-        if (numbers[i] === end + 1) {
-            end = numbers[i];
+    for (let i = 1; i < sortedNumbers.length; i++) {
+        if (sortedNumbers[i] === end + 1) {
+            // Continue the range
+            end = sortedNumbers[i];
         } else {
-            // Add the current range
+            // End current range and start new one
             if (start === end) {
-                ranges.push(`${prefix}${start.toString().padStart(4, '0')}`);
+                ranges.push(start.toString());
             } else {
-                ranges.push(`${prefix}${start.toString().padStart(4, '0')}بۆ${prefix}${end.toString().padStart(4, '0')}`);
+                ranges.push(`${start}-${end}`);
             }
-            start = end = numbers[i];
+            start = sortedNumbers[i];
+            end = sortedNumbers[i];
         }
     }
     
     // Add the last range
     if (start === end) {
-        ranges.push(`${prefix}${start.toString().padStart(4, '0')}`);
+        ranges.push(start.toString());
     } else {
-        ranges.push(`${prefix}${start.toString().padStart(4, '0')}بۆ${prefix}${end.toString().padStart(4, '0')}`);
+        ranges.push(`${start}-${end}`);
     }
     
-    return ranges.join('/');
+    return ranges.join(', ');
 }
 
 function createSaleFromReceipts() {
@@ -651,7 +645,7 @@ function createSaleFromReceipts() {
         totalMeterAmount += parseFloat(receiptData.meter_amount || 0);
     });
     
-    // Format invoice numbers
+    // Format invoice numbers using the new function
     const formattedInvoiceNumbers = formatInvoiceNumbers(invoiceNumbers);
     
     // Prepare data for sale form
