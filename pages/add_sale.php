@@ -45,9 +45,14 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
 <div class="container-fluid py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">فرۆشتن</h2>
-        <?php if (hasPermission('add_sale')): ?>
-        <button class="btn" data-bs-toggle="modal" data-bs-target="#addSaleModal" style="background: var(--seafoam-green); color:white; font-weight: bold;">+ زیادکردنی فرۆشتن</button>
-        <?php endif; ?>
+        <div>
+            <a href="notes.php" class="btn btn-info me-2" style="color: white; font-weight: bold;">
+                <i class="fas fa-sticky-note me-1"></i>تێبینیەکان
+            </a>
+            <?php if (hasPermission('add_sale')): ?>
+            <button class="btn" data-bs-toggle="modal" data-bs-target="#addSaleModal" style="background: var(--seafoam-green); color:white; font-weight: bold;">+ زیادکردنی فرۆشتن</button>
+            <?php endif; ?>
+        </div>
     </div>
 
     <!-- Summary Cards -->
@@ -234,6 +239,9 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
           </div>
         </div>
         <div class="modal-footer">
+          <a href="notes.php" class="btn btn-info me-auto" style="color: white; font-weight: bold;">
+            <i class="fas fa-sticky-note me-1"></i>تێبینیەکان
+          </a>
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
           <button type="submit" class="btn" style="background: var(--seafoam-green); color: white; font-weight: bold;">زیادکردن</button>
         </div>
@@ -339,6 +347,9 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
           </div>
         </div>
         <div class="modal-footer">
+          <a href="notes.php" class="btn btn-info me-auto" style="color: white; font-weight: bold;">
+            <i class="fas fa-sticky-note me-1"></i>تێبینیەکان
+          </a>
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
           <button type="submit" class="btn" style="background: var(--seafoam-green); color: white; font-weight: bold;">نوێکردنەوە</button>
         </div>
