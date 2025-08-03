@@ -557,8 +557,15 @@ function showError(message) {
 function formatInvoiceNumbers(numbers) {
     if (!numbers || numbers.length === 0) return '';
     
-    // Convert to numbers and sort
-    const sortedNumbers = numbers.map(num => parseInt(num)).sort((a, b) => a - b);
+    // Filter out invalid numbers and convert to integers
+    const validNumbers = numbers
+        .filter(num => num && num.toString().trim() !== '' && !isNaN(parseInt(num)))
+        .map(num => parseInt(num));
+    
+    if (validNumbers.length === 0) return '';
+    
+    // Sort numbers
+    const sortedNumbers = validNumbers.sort((a, b) => a - b);
     
     const ranges = [];
     let start = sortedNumbers[0];
@@ -618,6 +625,10 @@ function createSaleFromReceipts() {
         const receiptData = $(this).data('receipt-data');
         receiptsData.push(receiptData);
         
+        // Debug: Log receipt data
+        console.log('Receipt Data:', receiptData);
+        console.log('Receipt Number:', receiptData.receipt_number, 'Type:', typeof receiptData.receipt_number);
+        
         // Collect unique values
         if (receiptData.receipt_number && !invoiceNumbers.includes(receiptData.receipt_number)) {
             invoiceNumbers.push(receiptData.receipt_number);
@@ -644,6 +655,10 @@ function createSaleFromReceipts() {
         
         totalMeterAmount += parseFloat(receiptData.meter_amount || 0);
     });
+    
+    // Debug: Log collected invoice numbers
+    console.log('Collected Invoice Numbers:', invoiceNumbers);
+    console.log('Formatted Invoice Numbers:', formatInvoiceNumbers(invoiceNumbers));
     
     // Format invoice numbers using the new function
     const formattedInvoiceNumbers = formatInvoiceNumbers(invoiceNumbers);
