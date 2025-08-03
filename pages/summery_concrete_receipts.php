@@ -66,6 +66,11 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
     <div class="d-flex justify-content-between align-items-center mb-4">
   
       <div class="d-flex gap-2">
+        <?php if (hasPermission('show_add_sale_button')): ?>
+          <a href="add_sale.php" class="btn btn-success" style="font-weight: bold;">
+            <i class="fas fa-plus me-1"></i>زیادکردنی فرۆشتن
+          </a>
+        <?php endif; ?>
         <?php if (hasPermission('view_notes')): ?>
           <a href="notes.php" class="btn" style="background: var(--kelly-green); color:white; font-weight: bold;">
             <i class="fas fa-sticky-note me-1"></i>تێبینیەکان
