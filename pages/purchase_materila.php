@@ -20,7 +20,7 @@ if (!hasPermission('view_materials')) {
 // Users with only view_materials permission can still access the page
 
 // Load materials and persons data for initial dropdown population
-$materials = $pdo->query("SELECT id, name, purchase_price_usd, purchase_price_iqd FROM list_materials ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
+$materials = $pdo->query("SELECT id, name, unit_type, purchase_price_usd, purchase_price_iqd, pieces_per_carton, buckets_per_barrel, liters_per_bucket, liters_per_barrel, price_per_piece_usd, price_per_piece_iqd, price_per_bucket_usd, price_per_bucket_iqd, price_per_liter_usd, price_per_liter_iqd FROM list_materials ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
 $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
@@ -203,6 +203,7 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
                                         <thead style="background: var(--light-gray);">
                                             <tr>
                                                 <th>کاڵا</th>
+                                                <th>جۆری یەکە</th>
                                                 <th>بڕ</th>
                                                 <th>نرخی یەکە بە دۆلار</th>
                                                 <th>نرخی یەکە بە دینار</th>
@@ -323,6 +324,7 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
                                         <thead style="background: var(--light-gray);">
                                             <tr>
                                                 <th>کاڵا</th>
+                                                <th>جۆری یەکە</th>
                                                 <th>بڕ</th>
                                                 <th>نرخی یەکە بە دۆلار</th>
                                                 <th>نرخی یەکە بە دینار</th>
@@ -433,6 +435,7 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
                                         <tr>
                                             <th>#</th>
                                             <th>کاڵا</th>
+                                            <th>جۆری یەکە</th>
                                             <th>بڕ</th>
                                             <th>نرخی یەکە بە دۆلار</th>
                                             <th>نرخی یەکە بە دینار</th>

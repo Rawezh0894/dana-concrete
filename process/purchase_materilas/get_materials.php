@@ -17,10 +17,32 @@ if (!hasPermission('view_materials')) {
     exit;
 }
 
+// Check if it's a GET request
+if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+    http_response_code(405);
+    echo json_encode(['success' => false, 'error' => 'Method not allowed']);
+    exit;
+}
+
 try {
-    // Get materials from list_materials table
+    // Get all materials with unit system support
     $stmt = $pdo->prepare("
-        SELECT id, name, quantity, currency_type, purchase_price_usd, purchase_price_iqd 
+        SELECT 
+            id, 
+            name, 
+            unit_type,
+            purchase_price_usd, 
+            purchase_price_iqd,
+            pieces_per_carton,
+            buckets_per_barrel,
+            liters_per_bucket,
+            liters_per_barrel,
+            price_per_piece_usd,
+            price_per_piece_iqd,
+            price_per_bucket_usd,
+            price_per_bucket_iqd,
+            price_per_liter_usd,
+            price_per_liter_iqd
         FROM list_materials 
         ORDER BY name ASC
     ");
@@ -32,9 +54,11 @@ try {
         'data' => $materials
     ]);
     
-} catch (PDOException $e) {
-    error_log("Database error in get_materials.php: " . $e->getMessage());
-    http_response_code(500);
-    echo json_encode(['success' => false, 'error' => 'Database error']);
+} catch (Exception $e) {
+    error_log("Error in get_materials.php: " . $e->getMessage());
+    echo json_encode([
+        'success' => false,
+        'error' => $e->getMessage()
+    ]);
 }
 ?> 

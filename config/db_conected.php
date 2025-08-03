@@ -26,6 +26,12 @@ $user = env('DB_USER', 'dana_user');
 $pass = env('DB_PASS', 'Rawezh.Jaza@0894');
 $charset = env('DB_CHARSET', 'utf8mb4');
 
+// $host = env('DB_HOST', 'localhost');
+// $db   = env('DB_NAME', 'dana_concrete_db');
+// $user = env('DB_USER', 'root');
+// $pass = env('DB_PASS', '');
+// $charset = env('DB_CHARSET', 'utf8mb4');
+
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
 $options = [
     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,

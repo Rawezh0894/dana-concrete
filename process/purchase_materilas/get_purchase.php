@@ -33,7 +33,7 @@ if (!isset($_GET['id']) || empty($_GET['id'])) {
 try {
     $purchase_id = $_GET['id'];
     
-    // Get purchase details (first record for this receipt)
+    // Get purchase details (first record for this receipt) with unit system support
     $stmt = $pdo->prepare("
         SELECT 
             pm.id,
@@ -41,6 +41,7 @@ try {
             pm.person_id,
             pm.purchase_date,
             pm.currency_type,
+            pm.unit_type,
             pm.notes,
             pm.transfer_loss,
             pm.other_loss,
@@ -60,16 +61,31 @@ try {
         exit;
     }
     
-    // Get ALL materials for this receipt number (not just one ID)
+    // Get ALL materials for this receipt number with complete unit system support
     $stmt = $pdo->prepare("
         SELECT 
             pm.material_id,
+            pm.unit_type,
             pm.quantity,
             pm.price_per_unit_usd,
             pm.price_per_unit_iqd,
             pm.total_price_usd,
             pm.total_price_iqd,
-            lm.name as material_name
+            pm.base_quantity,
+            pm.base_price_per_unit_usd,
+            pm.base_price_per_unit_iqd,
+            lm.name as material_name,
+            lm.unit_type as material_unit_type,
+            lm.pieces_per_carton,
+            lm.buckets_per_barrel,
+            lm.liters_per_bucket,
+            lm.liters_per_barrel,
+            lm.price_per_piece_usd,
+            lm.price_per_piece_iqd,
+            lm.price_per_bucket_usd,
+            lm.price_per_bucket_iqd,
+            lm.price_per_liter_usd,
+            lm.price_per_liter_iqd
         FROM purchase_materials pm
         LEFT JOIN list_materials lm ON pm.material_id = lm.id
         WHERE pm.receipt_number = ?

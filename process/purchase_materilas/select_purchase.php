@@ -45,21 +45,23 @@ try {
         $where_clause = 'WHERE ' . implode(' AND ', $where_conditions);
     }
     
-    // Main query to get purchase summaries
+    // Main query to get purchase summaries with unit system support (compatible with older MySQL versions)
     $query = "
         SELECT 
-            ANY_VALUE(pm.id) as id,
+            MIN(pm.id) as id,
             pm.receipt_number,
-            ANY_VALUE(pm.purchase_date) as purchase_date,
-            ANY_VALUE(pm.currency_type) as currency_type,
-            ANY_VALUE(pm.notes) as notes,
-            ANY_VALUE(pm.transfer_loss) as transfer_loss,
-            ANY_VALUE(pm.other_loss) as other_loss,
-            ANY_VALUE(pm.usd_to_iqd_rate) as usd_to_iqd_rate,
-            ANY_VALUE(oep.name) as person_name,
+            MIN(pm.purchase_date) as purchase_date,
+            MIN(pm.currency_type) as currency_type,
+            MIN(pm.unit_type) as unit_type,
+            MIN(pm.notes) as notes,
+            MIN(pm.transfer_loss) as transfer_loss,
+            MIN(pm.other_loss) as other_loss,
+            MIN(pm.usd_to_iqd_rate) as usd_to_iqd_rate,
+            MIN(oep.name) as person_name,
             COUNT(pm.material_id) as materials_count,
             SUM(pm.total_price_usd) as total_usd,
-            SUM(pm.total_price_iqd) as total_iqd
+            SUM(pm.total_price_iqd) as total_iqd,
+            SUM(pm.base_quantity) as total_base_quantity
         FROM purchase_materials pm
         LEFT JOIN other_expense_persons oep ON pm.person_id = oep.id
         $where_clause

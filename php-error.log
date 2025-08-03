@@ -5417,3 +5417,49 @@
 )
 
 [02-Aug-2025 21:45:26 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[03-Aug-2025 08:12:15 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754201535
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 08:12:15 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[03-Aug-2025 08:44:00 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754203440
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 08:44:00 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[03-Aug-2025 10:05:46 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754208346
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 10:05:46 Europe/Berlin] add_sale.php POST: Array
+(
+    [customer_id] => 32
+    [recipient] => 
+    [location] => پیرەمەگرون
+    [invoice_number] => 12
+    [formula_id] => 17
+    [order_date] => 2025-08-02
+    [quantity] => 10
+    [price_per_unit] => 45
+    [total_price] => 450.0000
+    [payment_type] => قەرز
+    [amount_paid_iq] => 0
+    [amount_paid_usd] => 0
+    [remaining_amount] => 450.0000
+    [dolar_rate] => 139450
+    [discount] => 0
+    [notes] => 
+)
+

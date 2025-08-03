@@ -24,7 +24,7 @@ $(document).ready(function() {
         loadPurchaseMaterialsTable();
     });
 
-    // Auto-fill prices when material is selected in edit form
+    // Auto-fill prices and unit type when material is selected in edit form
     $(document).on('change', '.edit-material-select', function() {
         const materialId = $(this).val();
         const row = $(this).closest('tr');
@@ -33,20 +33,56 @@ $(document).ready(function() {
             // Find the selected material from the materials array
             const material = window.materials.find(m => m.id == materialId);
             if (material) {
-                // Auto-fill the price fields
-                row.find('.edit-price-usd-input').val(material.purchase_price_usd || 0);
-                row.find('.edit-price-iqd-input').val(material.purchase_price_iqd || 0);
+                // Auto-fill the unit type
+                row.find('.edit-unit-type-display').text(material.unit_type || 'دانە');
+                row.find('.edit-unit-type-input').val(material.unit_type || 'دانە');
+                
+                // Populate unit type dropdown with available options
+                populateEditUnitTypeDropdown(row, material);
+                
+                // Auto-fill the price fields based on currency type
+                const currencyType = $('#edit_currency_type').val();
+                if (currencyType === 'دۆلار') {
+                    row.find('.edit-price-usd-input').val(material.purchase_price_usd || 0);
+                    row.find('.edit-price-iqd-input').val(0);
+                } else if (currencyType === 'دینار') {
+                    row.find('.edit-price-usd-input').val(0);
+                    row.find('.edit-price-iqd-input').val(material.purchase_price_iqd || 0);
+                } else {
+                    row.find('.edit-price-usd-input').val(material.purchase_price_usd || 0);
+                    row.find('.edit-price-iqd-input').val(material.purchase_price_iqd || 0);
+                }
                 
                 // Calculate totals
                 calculateEditRowTotal(row);
                 calculateEditGrandTotal();
             }
         } else {
-            // Clear price fields if no material is selected
+            // Clear fields if no material is selected
+            row.find('.edit-unit-type-display').text('دانە');
+            row.find('.edit-unit-type-input').val('دانە');
+            row.find('.edit-unit-type-select').empty().append('<option value="دانە">دانە</option>');
             row.find('.edit-price-usd-input').val(0);
             row.find('.edit-price-iqd-input').val(0);
             calculateEditRowTotal(row);
             calculateEditGrandTotal();
+        }
+    });
+
+    // Handle unit type change in edit modal
+    $(document).on('change', '.edit-unit-type-select', function() {
+        const row = $(this).closest('tr');
+        const selectedUnitType = $(this).val();
+        const materialId = row.find('.edit-material-select').val();
+        
+        if (materialId && selectedUnitType) {
+            const material = window.materials.find(m => m.id == materialId);
+            if (material) {
+                // Calculate price based on selected unit type
+                calculateEditPriceForUnitType(row, material, selectedUnitType);
+                calculateEditRowTotal(row);
+                calculateEditGrandTotal();
+            }
         }
     });
 
@@ -76,32 +112,17 @@ function loadEditUsdRate() {
     $.ajax({
         url: '../process/purchase_materilas/get_usd_rate.php',
         type: 'GET',
+        dataType: 'json',
         success: function(response) {
-            try {
-                const result = JSON.parse(response);
-                if (result.success) {
-                    $('#edit_usd_to_iqd_rate').val(result.rate);
-                    // Recalculate totals if there are any existing values
-                    calculateEditGrandTotal();
-                } else {
-                    // Use default rate if API fails
-                    if (result.default_rate) {
-                        $('#edit_usd_to_iqd_rate').val(result.default_rate);
-                        calculateEditGrandTotal();
-                    }
-                    console.log('Error loading USD rate: ' + result.error);
-                }
-            } catch (e) {
-                console.error('Error parsing USD rate response:', e);
-                // Use default rate if parsing fails
-                $('#edit_usd_to_iqd_rate').val(139250);
+            if (response.success) {
+                $('#edit_usd_to_iqd_rate').val(response.rate);
+                // Recalculate totals if there are any existing values
                 calculateEditGrandTotal();
+            } else {
+                console.log('Error loading USD rate: ' + response.error);
             }
         },
         error: function(xhr, status, error) {
-            // Use default rate if request fails
-            $('#edit_usd_to_iqd_rate').val(139250);
-            calculateEditGrandTotal();
             console.error('Error loading USD rate:', error);
         }
     });
@@ -124,28 +145,17 @@ function loadPurchaseMaterialsTable() {
             filter_from: filterFrom,
             filter_to: filterTo
         },
+        dataType: 'json',
         success: function(response) {
-            try {
-                const result = JSON.parse(response);
-                
-                if (result.success) {
-                    renderPurchaseMaterialsTable(result.data);
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'هەڵە',
-                        text: result.error || 'هەڵەیەک ڕوویدا',
-                        confirmButtonText: 'باشە'
-                    });
-                }
-            } catch (e) {
+            if (response.success) {
+                renderPurchaseMaterialsTable(response.data);
+            } else {
                 Swal.fire({
                     icon: 'error',
                     title: 'هەڵە',
-                    text: 'هەڵەیەک لە وەڵامەکەدا هەیە',
+                    text: response.error || 'هەڵەیەک ڕوویدا',
                     confirmButtonText: 'باشە'
                 });
-                console.error('Response:', response);
             }
         },
         error: function(xhr, status, error) {
@@ -227,29 +237,18 @@ function loadPurchaseForView(purchaseId) {
         url: '../process/purchase_materilas/get_purchase.php',
         type: 'GET',
         data: { id: purchaseId },
+        dataType: 'json',
         success: function(response) {
-            try {
-                const result = JSON.parse(response);
-                
-                if (result.success) {
-                    populateViewForm(result.data);
-                    $('#viewPurchaseModal').modal('show');
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'هەڵە',
-                        text: result.error || 'هەڵەیەک ڕوویدا',
-                        confirmButtonText: 'باشە'
-                    });
-                }
-            } catch (e) {
+            if (response.success) {
+                populateViewForm(response.data);
+                $('#viewPurchaseModal').modal('show');
+            } else {
                 Swal.fire({
                     icon: 'error',
                     title: 'هەڵە',
-                    text: 'هەڵەیەک لە وەڵامەکەدا هەیە',
+                    text: response.error || 'هەڵەیەک ڕوویدا',
                     confirmButtonText: 'باشە'
                 });
-                console.error('Response:', response);
             }
         },
         error: function(xhr, status, error) {
@@ -269,29 +268,18 @@ function loadPurchaseForEdit(purchaseId) {
         url: '../process/purchase_materilas/get_purchase.php',
         type: 'GET',
         data: { id: purchaseId },
+        dataType: 'json',
         success: function(response) {
-            try {
-                const result = JSON.parse(response);
-                
-                if (result.success) {
-                    populateEditForm(result.data);
-                    $('#editPurchaseModal').modal('show');
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'هەڵە',
-                        text: result.error || 'هەڵەیەک ڕوویدا',
-                        confirmButtonText: 'باشە'
-                    });
-                }
-            } catch (e) {
+            if (response.success) {
+                populateEditForm(response.data);
+                $('#editPurchaseModal').modal('show');
+            } else {
                 Swal.fire({
                     icon: 'error',
                     title: 'هەڵە',
-                    text: 'هەڵەیەک لە وەڵامەکەدا هەیە',
+                    text: response.error || 'هەڵەیەک ڕوویدا',
                     confirmButtonText: 'باشە'
                 });
-                console.error('Response:', response);
             }
         },
         error: function(xhr, status, error) {
@@ -353,6 +341,7 @@ function populateViewMaterialsTable(materials) {
                 <tr>
                     <td>${index + 1}</td>
                     <td>${material.material_name || '-'}</td>
+                    <td>${material.unit_type || 'دانە'}</td>
                     <td>${parseFloat(material.quantity || 0).toFixed(2)}</td>
                     <td>${parseFloat(material.price_per_unit_usd || 0).toFixed(2)}</td>
                     <td>${parseFloat(material.price_per_unit_iqd || 0).toFixed(2)}</td>
@@ -364,7 +353,7 @@ function populateViewMaterialsTable(materials) {
     } else {
         tbody.append(`
             <tr>
-                <td colspan="7" class="text-center">هیچ کاڵایەک نییە</td>
+                <td colspan="8" class="text-center">هیچ کاڵایەک نییە</td>
             </tr>
         `);
     }
@@ -444,7 +433,7 @@ function addEditMaterialRow(materialData = null) {
     let materialsOptions = '<option value="">هەڵبژێرە</option>';
     materials.forEach(function(material) {
         const selected = materialData && materialData.material_id == material.id ? 'selected' : '';
-        materialsOptions += `<option value="${material.id}" ${selected}>${material.name}</option>`;
+        materialsOptions += `<option value="${material.id}" ${selected}>${material.name} (${material.unit_type || 'دانە'})</option>`;
     });
 
     const newRow = `
@@ -453,6 +442,12 @@ function addEditMaterialRow(materialData = null) {
                 <select class="form-select edit-material-select" name="edit_materials[${rowId}][material_id]" required>
                     ${materialsOptions}
                 </select>
+            </td>
+            <td>
+                <select class="form-select edit-unit-type-select" name="edit_materials[${rowId}][unit_type]" required>
+                    <option value="دانە">دانە</option>
+                </select>
+                <input type="hidden" class="edit-unit-type-input" name="edit_materials[${rowId}][original_unit_type]" value="دانە">
             </td>
             <td>
                 <input type="number" class="form-control edit-quantity-input" name="edit_materials[${rowId}][quantity]" 
@@ -497,8 +492,94 @@ function addEditMaterialRow(materialData = null) {
         dir: "rtl"
     });
     
+    // If material data exists, populate unit type dropdown
+    if (materialData) {
+        const material = window.materials.find(m => m.id == materialData.material_id);
+        if (material) {
+            populateEditUnitTypeDropdown($(`#${rowId}`), material);
+            $(`#${rowId} .edit-unit-type-select`).val(materialData.unit_type || material.unit_type || 'دانە');
+        }
+    }
+    
     // Calculate row total
     calculateEditRowTotal($(`#${rowId}`));
+}
+
+function populateEditUnitTypeDropdown(row, material) {
+    const $unitSelect = row.find('.edit-unit-type-select');
+    $unitSelect.empty();
+    
+    // Always include the material's original unit type
+    const originalUnitType = material.unit_type || 'دانە';
+    $unitSelect.append(`<option value="${originalUnitType}">${originalUnitType}</option>`);
+    
+    // Add other available unit types based on material's conversion data
+    if (material.unit_type === 'کارتۆن' && material.pieces_per_carton) {
+        $unitSelect.append('<option value="دانە">دانە</option>');
+    } else if (material.unit_type === 'بەرمیل') {
+        if (material.buckets_per_barrel) {
+            $unitSelect.append('<option value="دەبە">دەبە</option>');
+        }
+        if (material.liters_per_barrel) {
+            $unitSelect.append('<option value="لیتر">لیتر</option>');
+        }
+    } else if (material.unit_type === 'دەبە' && material.liters_per_bucket) {
+        $unitSelect.append('<option value="لیتر">لیتر</option>');
+    } else if (material.unit_type === 'لیتر') {
+        // Can be purchased as liters
+        $unitSelect.append('<option value="لیتر">لیتر</option>');
+    } else if (material.unit_type === 'دانە') {
+        // Can be purchased as pieces
+        $unitSelect.append('<option value="دانە">دانە</option>');
+    }
+    
+    // Set the original unit type as default
+    $unitSelect.val(originalUnitType);
+    row.find('.edit-unit-type-input').val(originalUnitType);
+}
+
+function calculateEditPriceForUnitType(row, material, selectedUnitType) {
+    const originalUnitType = material.unit_type || 'دانە';
+    let priceUsd = 0;
+    let priceIqd = 0;
+    
+    if (selectedUnitType === originalUnitType) {
+        // Same unit type, use original prices
+        priceUsd = material.purchase_price_usd || 0;
+        priceIqd = material.purchase_price_iqd || 0;
+    } else {
+        // Convert prices based on unit type
+        if (originalUnitType === 'کارتۆن' && selectedUnitType === 'دانە' && material.pieces_per_carton) {
+            priceUsd = (material.purchase_price_usd || 0) / material.pieces_per_carton;
+            priceIqd = (material.purchase_price_iqd || 0) / material.pieces_per_carton;
+        } else if (originalUnitType === 'بەرمیل' && selectedUnitType === 'دەبە' && material.buckets_per_barrel) {
+            priceUsd = (material.purchase_price_usd || 0) / material.buckets_per_barrel;
+            priceIqd = (material.purchase_price_iqd || 0) / material.buckets_per_barrel;
+        } else if (originalUnitType === 'بەرمیل' && selectedUnitType === 'لیتر' && material.liters_per_barrel) {
+            priceUsd = (material.purchase_price_usd || 0) / material.liters_per_barrel;
+            priceIqd = (material.purchase_price_iqd || 0) / material.liters_per_barrel;
+        } else if (originalUnitType === 'دەبە' && selectedUnitType === 'لیتر' && material.liters_per_bucket) {
+            priceUsd = (material.purchase_price_usd || 0) / material.liters_per_bucket;
+            priceIqd = (material.purchase_price_iqd || 0) / material.liters_per_bucket;
+        } else {
+            // Fallback to original prices
+            priceUsd = material.purchase_price_usd || 0;
+            priceIqd = material.purchase_price_iqd || 0;
+        }
+    }
+    
+    // Update price fields based on currency type
+    const currencyType = $('#edit_currency_type').val();
+    if (currencyType === 'دۆلار') {
+        row.find('.edit-price-usd-input').val(priceUsd.toFixed(2));
+        row.find('.edit-price-iqd-input').val(0);
+    } else if (currencyType === 'دینار') {
+        row.find('.edit-price-usd-input').val(0);
+        row.find('.edit-price-iqd-input').val(priceIqd.toFixed(2));
+    } else {
+        row.find('.edit-price-usd-input').val(priceUsd.toFixed(2));
+        row.find('.edit-price-iqd-input').val(priceIqd.toFixed(2));
+    }
 }
 
 function calculateEditRowTotal(row) {
@@ -588,35 +669,24 @@ function deletePurchase(purchaseId) {
                 url: '../process/purchase_materilas/delete_purchase.php',
                 type: 'POST',
                 data: { id: purchaseId },
+                dataType: 'json',
                 success: function(response) {
-                    try {
-                        const result = JSON.parse(response);
-                        
-                        if (result.success) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'سەرکەوتوو',
-                                text: result.message || 'کڕینەکە بە سەرکەوتووی سڕایەوە',
-                                confirmButtonText: 'باشە'
-                            }).then(() => {
-                                loadPurchaseMaterialsTable();
-                            });
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'هەڵە',
-                                text: result.error || 'هەڵەیەک ڕوویدا',
-                                confirmButtonText: 'باشە'
-                            });
-                        }
-                    } catch (e) {
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'سەرکەوتوو',
+                            text: response.message || 'کڕینەکە بە سەرکەوتووی سڕایەوە',
+                            confirmButtonText: 'باشە'
+                        }).then(() => {
+                            loadPurchaseMaterialsTable();
+                        });
+                    } else {
                         Swal.fire({
                             icon: 'error',
                             title: 'هەڵە',
-                            text: 'هەڵەیەک لە وەڵامەکەدا هەیە',
+                            text: response.error || 'هەڵەیەک ڕوویدا',
                             confirmButtonText: 'باشە'
                         });
-                        console.error('Response:', response);
                     }
                 },
                 error: function(xhr, status, error) {
@@ -637,16 +707,12 @@ function loadMaterials() {
     $.ajax({
         url: '../process/purchase_materilas/get_materials.php',
         type: 'GET',
+        dataType: 'json',
         success: function(response) {
-            try {
-                const result = JSON.parse(response);
-                if (result.success) {
-                    window.materials = result.data;
-                } else {
-                    console.error('Error loading materials:', result.error);
-                }
-            } catch (e) {
-                console.error('Error parsing materials response:', e);
+            if (response.success) {
+                window.materials = response.data;
+            } else {
+                console.error('Error loading materials:', response.error);
             }
         },
         error: function(xhr, status, error) {
@@ -659,16 +725,12 @@ function loadPersons() {
     $.ajax({
         url: '../process/purchase_materilas/get_persons.php',
         type: 'GET',
+        dataType: 'json',
         success: function(response) {
-            try {
-                const result = JSON.parse(response);
-                if (result.success) {
-                    window.persons = result.data;
-                } else {
-                    console.error('Error loading persons:', result.error);
-                }
-            } catch (e) {
-                console.error('Error parsing persons response:', e);
+            if (response.success) {
+                window.persons = response.data;
+            } else {
+                console.error('Error loading persons:', response.error);
             }
         },
         error: function(xhr, status, error) {

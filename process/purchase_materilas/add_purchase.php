@@ -58,7 +58,8 @@ try {
     // Validate each material
     foreach ($materials as $material) {
         if (!isset($material['material_id']) || !isset($material['quantity']) || 
-            !isset($material['price_per_unit_usd']) || !isset($material['price_per_unit_iqd'])) {
+            !isset($material['price_per_unit_usd']) || !isset($material['price_per_unit_iqd']) ||
+            !isset($material['unit_type'])) {
             throw new Exception('Invalid material data structure');
         }
         
@@ -70,18 +71,97 @@ try {
     // Start transaction
     $pdo->beginTransaction();
     
-    // Insert main purchase record
+    // Insert main purchase record with unit system support
     $stmt = $pdo->prepare("
         INSERT INTO purchase_materials 
-        (receipt_number, material_id, person_id, quantity, price_per_unit_usd, price_per_unit_iqd, 
-         total_price_usd, total_price_iqd, currency_type, purchase_date, notes, transfer_loss, other_loss, usd_to_iqd_rate, created_by) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (receipt_number, material_id, person_id, unit_type, quantity, price_per_unit_usd, price_per_unit_iqd, 
+         total_price_usd, total_price_iqd, currency_type, purchase_date, notes, transfer_loss, other_loss, 
+         usd_to_iqd_rate, base_quantity, base_price_per_unit_usd, base_price_per_unit_iqd, created_by) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
     
     $total_usd = 0;
     $total_iqd = 0;
     
     foreach ($materials as $material) {
+        // Get material info for unit conversion
+        $materialStmt = $pdo->prepare("
+            SELECT unit_type, pieces_per_carton, buckets_per_barrel, liters_per_bucket, liters_per_barrel,
+                   price_per_piece_usd, price_per_piece_iqd, price_per_bucket_usd, price_per_bucket_iqd,
+                   price_per_liter_usd, price_per_liter_iqd
+            FROM list_materials WHERE id = ?
+        ");
+        $materialStmt->execute([$material['material_id']]);
+        $materialInfo = $materialStmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$materialInfo) {
+            throw new Exception('Material not found');
+        }
+        
+        // Calculate base quantity and base prices based on unit type
+        $base_quantity = $material['quantity'];
+        $base_price_per_unit_usd = $material['price_per_unit_usd'];
+        $base_price_per_unit_iqd = $material['price_per_unit_iqd'];
+        
+        // Convert to base units for inventory tracking
+        $purchase_unit_type = $material['unit_type'];
+        $material_unit_type = $materialInfo['unit_type'] ?? 'دانە';
+        
+        // Handle different unit type conversions
+        if ($purchase_unit_type === 'کارتۆن' && $material_unit_type === 'کارتۆن' && $materialInfo['pieces_per_carton']) {
+            // Purchasing cartons, convert to pieces for base tracking
+            $base_quantity = $material['quantity'] * $materialInfo['pieces_per_carton'];
+            $base_price_per_unit_usd = $material['price_per_unit_usd'] / $materialInfo['pieces_per_carton'];
+            $base_price_per_unit_iqd = $material['price_per_unit_iqd'] / $materialInfo['pieces_per_carton'];
+        } elseif ($purchase_unit_type === 'دانە' && $material_unit_type === 'کارتۆن' && $materialInfo['pieces_per_carton']) {
+            // Purchasing pieces from carton-based material
+            $base_quantity = $material['quantity'];
+            $base_price_per_unit_usd = $material['price_per_unit_usd'];
+            $base_price_per_unit_iqd = $material['price_per_unit_iqd'];
+        } elseif ($purchase_unit_type === 'بەرمیل' && $material_unit_type === 'بەرمیل') {
+            // Purchasing barrels, convert to liters for base tracking
+            if ($materialInfo['liters_per_barrel']) {
+                $base_quantity = $material['quantity'] * $materialInfo['liters_per_barrel'];
+                $base_price_per_unit_usd = $material['price_per_unit_usd'] / $materialInfo['liters_per_barrel'];
+                $base_price_per_unit_iqd = $material['price_per_unit_iqd'] / $materialInfo['liters_per_barrel'];
+            }
+        } elseif ($purchase_unit_type === 'دەبە' && $material_unit_type === 'بەرمیل' && $materialInfo['buckets_per_barrel']) {
+            // Purchasing buckets from barrel-based material
+            $base_quantity = $material['quantity'] * $materialInfo['liters_per_bucket'];
+            $base_price_per_unit_usd = $material['price_per_unit_usd'] / $materialInfo['liters_per_bucket'];
+            $base_price_per_unit_iqd = $material['price_per_unit_iqd'] / $materialInfo['liters_per_bucket'];
+        } elseif ($purchase_unit_type === 'لیتر' && $material_unit_type === 'بەرمیل' && $materialInfo['liters_per_barrel']) {
+            // Purchasing liters from barrel-based material
+            $base_quantity = $material['quantity'];
+            $base_price_per_unit_usd = $material['price_per_unit_usd'];
+            $base_price_per_unit_iqd = $material['price_per_unit_iqd'];
+        } elseif ($purchase_unit_type === 'دەبە' && $material_unit_type === 'دەبە' && $materialInfo['liters_per_bucket']) {
+            // Purchasing buckets, convert to liters for base tracking
+            $base_quantity = $material['quantity'] * $materialInfo['liters_per_bucket'];
+            $base_price_per_unit_usd = $material['price_per_unit_usd'] / $materialInfo['liters_per_bucket'];
+            $base_price_per_unit_iqd = $material['price_per_unit_iqd'] / $materialInfo['liters_per_bucket'];
+        } elseif ($purchase_unit_type === 'لیتر' && $material_unit_type === 'دەبە' && $materialInfo['liters_per_bucket']) {
+            // Purchasing liters from bucket-based material
+            $base_quantity = $material['quantity'];
+            $base_price_per_unit_usd = $material['price_per_unit_usd'];
+            $base_price_per_unit_iqd = $material['price_per_unit_iqd'];
+        } elseif ($purchase_unit_type === 'لیتر' && $material_unit_type === 'لیتر') {
+            // Purchasing liters from liter-based material
+            $base_quantity = $material['quantity'];
+            $base_price_per_unit_usd = $material['price_per_unit_usd'];
+            $base_price_per_unit_iqd = $material['price_per_unit_iqd'];
+        } elseif ($purchase_unit_type === 'دانە' && $material_unit_type === 'دانە') {
+            // Purchasing pieces from piece-based material
+            $base_quantity = $material['quantity'];
+            $base_price_per_unit_usd = $material['price_per_unit_usd'];
+            $base_price_per_unit_iqd = $material['price_per_unit_iqd'];
+        } else {
+            // Fallback: use the purchase values as base values
+            $base_quantity = $material['quantity'];
+            $base_price_per_unit_usd = $material['price_per_unit_usd'];
+            $base_price_per_unit_iqd = $material['price_per_unit_iqd'];
+        }
+        
         $total_price_usd = $material['quantity'] * $material['price_per_unit_usd'];
         $total_price_iqd = $material['quantity'] * $material['price_per_unit_iqd'];
         
@@ -89,6 +169,7 @@ try {
             $_POST['receipt_number'],
             $material['material_id'],
             $_POST['person_id'],
+            $material['unit_type'],
             $material['quantity'],
             $material['price_per_unit_usd'],
             $material['price_per_unit_iqd'],
@@ -100,6 +181,9 @@ try {
             $transfer_loss,
             $other_loss,
             $usd_to_iqd_rate,
+            $base_quantity,
+            $base_price_per_unit_usd,
+            $base_price_per_unit_iqd,
             $_SESSION['user_id']
         ]);
         

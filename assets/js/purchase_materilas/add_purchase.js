@@ -65,7 +65,7 @@ $(document).ready(function() {
         calculateGrandTotal();
     });
 
-    // Auto-fill prices when material is selected
+    // Auto-fill prices and unit type when material is selected
     $(document).on('change', '.material-select', function() {
         const materialId = $(this).val();
         const row = $(this).closest('tr');
@@ -74,20 +74,56 @@ $(document).ready(function() {
             // Find the selected material from the materials array
             const material = window.materials.find(m => m.id == materialId);
             if (material) {
-                // Auto-fill the price fields
-                row.find('.price-usd-input').val(material.purchase_price_usd || 0);
-                row.find('.price-iqd-input').val(material.purchase_price_iqd || 0);
+                // Auto-fill the unit type
+                row.find('.unit-type-display').text(material.unit_type || 'دانە');
+                row.find('.unit-type-input').val(material.unit_type || 'دانە');
+                
+                // Populate unit type dropdown with available options
+                populateUnitTypeDropdown(row, material);
+                
+                // Auto-fill the price fields based on currency type
+                const currencyType = $('#currency_type').val();
+                if (currencyType === 'دۆلار') {
+                    row.find('.price-usd-input').val(material.purchase_price_usd || 0);
+                    row.find('.price-iqd-input').val(0);
+                } else if (currencyType === 'دینار') {
+                    row.find('.price-usd-input').val(0);
+                    row.find('.price-iqd-input').val(material.purchase_price_iqd || 0);
+                } else {
+                    row.find('.price-usd-input').val(material.purchase_price_usd || 0);
+                    row.find('.price-iqd-input').val(material.purchase_price_iqd || 0);
+                }
                 
                 // Calculate totals
                 calculateRowTotal(row);
                 calculateGrandTotal();
             }
         } else {
-            // Clear price fields if no material is selected
+            // Clear fields if no material is selected
+            row.find('.unit-type-display').text('دانە');
+            row.find('.unit-type-input').val('دانە');
+            row.find('.unit-type-select').empty().append('<option value="دانە">دانە</option>');
             row.find('.price-usd-input').val(0);
             row.find('.price-iqd-input').val(0);
             calculateRowTotal(row);
             calculateGrandTotal();
+        }
+    });
+
+    // Handle unit type change
+    $(document).on('change', '.unit-type-select', function() {
+        const row = $(this).closest('tr');
+        const selectedUnitType = $(this).val();
+        const materialId = row.find('.material-select').val();
+        
+        if (materialId && selectedUnitType) {
+            const material = window.materials.find(m => m.id == materialId);
+            if (material) {
+                // Calculate price based on selected unit type
+                calculatePriceForUnitType(row, material, selectedUnitType);
+                calculateRowTotal(row);
+                calculateGrandTotal();
+            }
         }
     });
 
@@ -110,7 +146,7 @@ function addMaterialRow() {
     let materialsOptions = '<option value="">هەڵبژێرە</option>';
     if (materials.length > 0) {
         materials.forEach(function(material) {
-            materialsOptions += `<option value="${material.id}">${material.name}</option>`;
+            materialsOptions += `<option value="${material.id}">${material.name} (${material.unit_type || 'دانە'})</option>`;
         });
     } else {
         materialsOptions = '<option value="">کاڵاکان بار نەکراون...</option>';
@@ -122,6 +158,12 @@ function addMaterialRow() {
                 <select class="form-select material-select" name="materials[${rowId}][material_id]" required>
                     ${materialsOptions}
                 </select>
+            </td>
+            <td>
+                <select class="form-select unit-type-select" name="materials[${rowId}][unit_type]" required>
+                    <option value="دانە">دانە</option>
+                </select>
+                <input type="hidden" class="unit-type-input" name="materials[${rowId}][original_unit_type]" value="دانە">
             </td>
             <td>
                 <input type="number" class="form-control quantity-input" name="materials[${rowId}][quantity]" 
@@ -167,6 +209,83 @@ function addMaterialRow() {
     }
 }
 
+function populateUnitTypeDropdown(row, material) {
+    const $unitSelect = row.find('.unit-type-select');
+    $unitSelect.empty();
+    
+    // Always include the material's original unit type
+    const originalUnitType = material.unit_type || 'دانە';
+    $unitSelect.append(`<option value="${originalUnitType}">${originalUnitType}</option>`);
+    
+    // Add other available unit types based on material's conversion data
+    if (material.unit_type === 'کارتۆن' && material.pieces_per_carton) {
+        $unitSelect.append('<option value="دانە">دانە</option>');
+    } else if (material.unit_type === 'بەرمیل') {
+        if (material.buckets_per_barrel) {
+            $unitSelect.append('<option value="دەبە">دەبە</option>');
+        }
+        if (material.liters_per_barrel) {
+            $unitSelect.append('<option value="لیتر">لیتر</option>');
+        }
+    } else if (material.unit_type === 'دەبە' && material.liters_per_bucket) {
+        $unitSelect.append('<option value="لیتر">لیتر</option>');
+    } else if (material.unit_type === 'لیتر') {
+        // Can be purchased as liters
+        $unitSelect.append('<option value="لیتر">لیتر</option>');
+    } else if (material.unit_type === 'دانە') {
+        // Can be purchased as pieces
+        $unitSelect.append('<option value="دانە">دانە</option>');
+    }
+    
+    // Set the original unit type as default
+    $unitSelect.val(originalUnitType);
+    row.find('.unit-type-input').val(originalUnitType);
+}
+
+function calculatePriceForUnitType(row, material, selectedUnitType) {
+    const originalUnitType = material.unit_type || 'دانە';
+    let priceUsd = 0;
+    let priceIqd = 0;
+    
+    if (selectedUnitType === originalUnitType) {
+        // Same unit type, use original prices
+        priceUsd = material.purchase_price_usd || 0;
+        priceIqd = material.purchase_price_iqd || 0;
+    } else {
+        // Convert prices based on unit type
+        if (originalUnitType === 'کارتۆن' && selectedUnitType === 'دانە' && material.pieces_per_carton) {
+            priceUsd = (material.purchase_price_usd || 0) / material.pieces_per_carton;
+            priceIqd = (material.purchase_price_iqd || 0) / material.pieces_per_carton;
+        } else if (originalUnitType === 'بەرمیل' && selectedUnitType === 'دەبە' && material.buckets_per_barrel) {
+            priceUsd = (material.purchase_price_usd || 0) / material.buckets_per_barrel;
+            priceIqd = (material.purchase_price_iqd || 0) / material.buckets_per_barrel;
+        } else if (originalUnitType === 'بەرمیل' && selectedUnitType === 'لیتر' && material.liters_per_barrel) {
+            priceUsd = (material.purchase_price_usd || 0) / material.liters_per_barrel;
+            priceIqd = (material.purchase_price_iqd || 0) / material.liters_per_barrel;
+        } else if (originalUnitType === 'دەبە' && selectedUnitType === 'لیتر' && material.liters_per_bucket) {
+            priceUsd = (material.purchase_price_usd || 0) / material.liters_per_bucket;
+            priceIqd = (material.purchase_price_iqd || 0) / material.liters_per_bucket;
+        } else {
+            // Fallback to original prices
+            priceUsd = material.purchase_price_usd || 0;
+            priceIqd = material.purchase_price_iqd || 0;
+        }
+    }
+    
+    // Update price fields based on currency type
+    const currencyType = $('#currency_type').val();
+    if (currencyType === 'دۆلار') {
+        row.find('.price-usd-input').val(priceUsd.toFixed(2));
+        row.find('.price-iqd-input').val(0);
+    } else if (currencyType === 'دینار') {
+        row.find('.price-usd-input').val(0);
+        row.find('.price-iqd-input').val(priceIqd.toFixed(2));
+    } else {
+        row.find('.price-usd-input').val(priceUsd.toFixed(2));
+        row.find('.price-iqd-input').val(priceIqd.toFixed(2));
+    }
+}
+
 function calculateRowTotal(row) {
     const quantity = parseFloat(row.find('.quantity-input').val()) || 0;
     const priceUsd = parseFloat(row.find('.price-usd-input').val()) || 0;
@@ -202,115 +321,31 @@ function calculateGrandTotal() {
     let otherLossIqd = 0;
     
     if (currencyType === 'دۆلار') {
-        // If currency is USD, convert IQD losses to USD
-        if (usdToIqdRate > 0) {
-            transferLossUsd = transferLoss / (usdToIqdRate / 100);
-            otherLossUsd = otherLoss / (usdToIqdRate / 100);
-        }
+        transferLossUsd = transferLoss;
+        otherLossUsd = otherLoss;
+        transferLossIqd = transferLoss * usdToIqdRate;
+        otherLossIqd = otherLoss * usdToIqdRate;
+    } else if (currencyType === 'دینار') {
         transferLossIqd = transferLoss;
         otherLossIqd = otherLoss;
-    } else {
-        // If currency is IQD, losses are already in IQD
-        transferLossIqd = transferLoss;
-        otherLossIqd = otherLoss;
-        // Convert to USD if rate is available
-        if (usdToIqdRate > 0) {
-            transferLossUsd = transferLoss / (usdToIqdRate / 100);
-            otherLossUsd = otherLoss / (usdToIqdRate / 100);
-        }
+        transferLossUsd = usdToIqdRate > 0 ? transferLoss / usdToIqdRate : 0;
+        otherLossUsd = usdToIqdRate > 0 ? otherLoss / usdToIqdRate : 0;
     }
     
     // Add losses to totals
     totalUsd += transferLossUsd + otherLossUsd;
     totalIqd += transferLossIqd + otherLossIqd;
     
-    // Set totals based on currency type
-    if (currencyType === 'دۆلار') {
-        $('#total_usd').val(totalUsd.toFixed(2));
-        $('#total_iqd').val(''); // Clear IQD total when currency is USD
-    } else if (currencyType === 'دینار') {
-        $('#total_usd').val(''); // Clear USD total when currency is IQD
-        $('#total_iqd').val(totalIqd.toFixed(2));
-    } else {
-        // If no currency selected, show both
-        $('#total_usd').val(totalUsd.toFixed(2));
-        $('#total_iqd').val(totalIqd.toFixed(2));
-    }
+    // Update total fields
+    $('#total_usd').val(totalUsd.toFixed(2));
+    $('#total_iqd').val(totalIqd.toFixed(2));
 }
 
 function validateForm() {
-    // Check if receipt number is provided
-    if (!$('#receipt_number').val().trim()) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'هەڵە',
-            text: 'تکایە ژمارەی پسووڵە بنووسە',
-            confirmButtonText: 'باشە'
-        });
-        return false;
-    }
-    
-    // Check receipt number format (KR-XXXX)
-    const receiptNumber = $('#receipt_number').val().trim();
-    const receiptPattern = /^KR-\d{4}$/;
-    if (!receiptPattern.test(receiptNumber)) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'هەڵە',
-            text: 'فۆرماتی ژمارەی پسووڵە هەڵەیە، دەبێت بە شێوەی KR-XXXX بێت',
-            confirmButtonText: 'باشە'
-        });
-        return false;
-    }
-    
-    // Check if person is selected
-    if (!$('#person_id').val()) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'هەڵە',
-            text: 'تکایە درووشیار هەڵبژێرە',
-            confirmButtonText: 'باشە'
-        });
-        return false;
-    }
-    
-    // Check if purchase date is provided
-    if (!$('#purchase_date').val()) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'هەڵە',
-            text: 'تکایە بەروار هەڵبژێرە',
-            confirmButtonText: 'باشە'
-        });
-        return false;
-    }
-    
-    // Check if currency type is selected
-    if (!$('#currency_type').val()) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'هەڵە',
-            text: 'تکایە جۆری دراو هەڵبژێرە',
-            confirmButtonText: 'باشە'
-        });
-        return false;
-    }
-    
-    // Check if USD to IQD rate is provided
-    if (!$('#usd_to_iqd_rate').val() || parseFloat($('#usd_to_iqd_rate').val()) <= 0) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'هەڵە',
-            text: 'تکایە نرخی 100 دۆلار بە دینار بنووسە',
-            confirmButtonText: 'باشە'
-        });
-        return false;
-    }
-    
     // Check if at least one material is added
     if ($('#materialsTableBody tr').length === 0) {
         Swal.fire({
-            icon: 'warning',
+            icon: 'error',
             title: 'هەڵە',
             text: 'تکایە لانیکەم یەک کاڵا زیاد بکە',
             confirmButtonText: 'باشە'
@@ -322,18 +357,68 @@ function validateForm() {
     let hasValidMaterial = false;
     $('.material-row').each(function() {
         const materialId = $(this).find('.material-select').val();
-        const quantity = parseFloat($(this).find('.quantity-input').val());
+        const quantity = parseFloat($(this).find('.quantity-input').val()) || 0;
+        const priceUsd = parseFloat($(this).find('.price-usd-input').val()) || 0;
+        const priceIqd = parseFloat($(this).find('.price-iqd-input').val()) || 0;
         
-        if (materialId && quantity > 0) {
+        if (materialId && quantity > 0 && (priceUsd > 0 || priceIqd > 0)) {
             hasValidMaterial = true;
         }
     });
     
     if (!hasValidMaterial) {
         Swal.fire({
-            icon: 'warning',
+            icon: 'error',
             title: 'هەڵە',
-            text: 'تکایە لانیکەم یەک کاڵای بەردەست هەڵبژێرە و بڕی بەردەست بنووسە',
+            text: 'تکایە لانیکەم یەک کاڵای بەردەست هەڵبژێرە و بڕ و نرخی بنووسە',
+            confirmButtonText: 'باشە'
+        });
+        return false;
+    }
+    
+    // Validate receipt number
+    const receiptNumber = $('#receipt_number').val().trim();
+    if (!receiptNumber) {
+        Swal.fire({
+            icon: 'error',
+            title: 'هەڵە',
+            text: 'تکایە ژمارەی پسووڵە بنووسە',
+            confirmButtonText: 'باشە'
+        });
+        return false;
+    }
+    
+    // Validate person
+    const personId = $('#person_id').val();
+    if (!personId) {
+        Swal.fire({
+            icon: 'error',
+            title: 'هەڵە',
+            text: 'تکایە دروشیار هەڵبژێرە',
+            confirmButtonText: 'باشە'
+        });
+        return false;
+    }
+    
+    // Validate date
+    const purchaseDate = $('#purchase_date').val();
+    if (!purchaseDate) {
+        Swal.fire({
+            icon: 'error',
+            title: 'هەڵە',
+            text: 'تکایە بەروار هەڵبژێرە',
+            confirmButtonText: 'باشە'
+        });
+        return false;
+    }
+    
+    // Validate currency type
+    const currencyType = $('#currency_type').val();
+    if (!currencyType) {
+        Swal.fire({
+            icon: 'error',
+            title: 'هەڵە',
+            text: 'تکایە جۆری دراو هەڵبژێرە',
             confirmButtonText: 'باشە'
         });
         return false;
@@ -345,20 +430,21 @@ function validateForm() {
 function collectFormData() {
     const formData = new FormData();
     
-    // Receipt details
+    // Add basic form fields
     formData.append('receipt_number', $('#receipt_number').val());
     formData.append('person_id', $('#person_id').val());
     formData.append('purchase_date', $('#purchase_date').val());
     formData.append('currency_type', $('#currency_type').val());
-    formData.append('notes', $('#notes').val());
     formData.append('transfer_loss', $('#transfer_loss').val() || 0);
     formData.append('other_loss', $('#other_loss').val() || 0);
     formData.append('usd_to_iqd_rate', $('#usd_to_iqd_rate').val() || 0);
+    formData.append('notes', $('#notes').val() || '');
     
-    // Materials data
+    // Collect materials data
     const materials = [];
     $('.material-row').each(function() {
         const materialId = $(this).find('.material-select').val();
+        const unitType = $(this).find('.unit-type-select').val();
         const quantity = parseFloat($(this).find('.quantity-input').val()) || 0;
         const priceUsd = parseFloat($(this).find('.price-usd-input').val()) || 0;
         const priceIqd = parseFloat($(this).find('.price-iqd-input').val()) || 0;
@@ -366,11 +452,10 @@ function collectFormData() {
         if (materialId && quantity > 0) {
             materials.push({
                 material_id: materialId,
+                unit_type: unitType,
                 quantity: quantity,
                 price_per_unit_usd: priceUsd,
-                price_per_unit_iqd: priceIqd,
-                total_price_usd: quantity * priceUsd,
-                total_price_iqd: quantity * priceIqd
+                price_per_unit_iqd: priceIqd
             });
         }
     });
@@ -381,6 +466,11 @@ function collectFormData() {
 }
 
 function submitForm(formData) {
+    const submitBtn = $('#addPurchaseForm button[type="submit"]');
+    const originalText = submitBtn.text();
+    
+    submitBtn.prop('disabled', true).text('چاوەڕوان بە...');
+    
     $.ajax({
         url: '../process/purchase_materilas/add_purchase.php',
         type: 'POST',
@@ -388,9 +478,10 @@ function submitForm(formData) {
         processData: false,
         contentType: false,
         success: function(response) {
+            console.log('Server response:', response);
+            
             try {
                 const result = JSON.parse(response);
-                
                 if (result.success) {
                     Swal.fire({
                         icon: 'success',
@@ -398,43 +489,75 @@ function submitForm(formData) {
                         text: result.message || 'کڕینەکە بە سەرکەوتووی زیاد کراوە',
                         confirmButtonText: 'باشە'
                     }).then(() => {
-                        // Reset form
-                        resetForm();
-                        
-                        // Reload table
-                        if (typeof loadPurchaseMaterialsTable === 'function') {
-                            loadPurchaseMaterialsTable();
-                        }
-                        
-                        // Close modal
                         $('#addPurchaseModal').modal('hide');
+                        resetForm();
+                        // Refresh the purchase list if the function exists
+                        if (typeof loadPurchases === 'function') {
+                            loadPurchases();
+                        }
+                        // Refresh summary cards if the function exists
+                        if (typeof loadSummaryCards === 'function') {
+                            loadSummaryCards();
+                        }
                     });
                 } else {
                     Swal.fire({
                         icon: 'error',
                         title: 'هەڵە',
-                        text: result.error || 'هەڵەیەک ڕوویدا',
+                        text: result.error || 'زیادکردن سەرکەوتوو نەبوو',
                         confirmButtonText: 'باشە'
                     });
                 }
             } catch (e) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'هەڵە',
-                    text: 'هەڵەیەک لە وەڵامەکەدا هەیە',
-                    confirmButtonText: 'باشە'
-                });
-                console.error('Response:', response);
+                // If not JSON, treat as plain text
+                console.log('Response is not JSON, treating as plain text');
+                
+                if (response.trim() === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'سەرکەوتوو',
+                        text: 'کڕینەکە بە سەرکەوتووی زیاد کراوە',
+                        confirmButtonText: 'باشە'
+                    }).then(() => {
+                        $('#addPurchaseModal').modal('hide');
+                        resetForm();
+                        // Refresh the purchase list if the function exists
+                        if (typeof loadPurchases === 'function') {
+                            loadPurchases();
+                        }
+                        // Refresh summary cards if the function exists
+                        if (typeof loadSummaryCards === 'function') {
+                            loadSummaryCards();
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'هەڵە',
+                        text: 'زیادکردن سەرکەوتوو نەبوو! Response: ' + response,
+                        confirmButtonText: 'باشە'
+                    });
+                }
             }
+            
+            submitBtn.prop('disabled', false).text(originalText);
         },
         error: function(xhr, status, error) {
+            console.error('AJAX Error:', {
+                status: status,
+                error: error,
+                responseText: xhr.responseText,
+                statusCode: xhr.status
+            });
+            
             Swal.fire({
                 icon: 'error',
-                title: 'هەڵە',
-                text: 'هەڵەی پەیوەندی بە سێرڤەرەوە: ' + error,
+                title: 'هەڵەی AJAX',
+                text: 'هەڵە لە پەیوەندی بە سێرڤەر: ' + error + ' (Status: ' + xhr.status + ')',
                 confirmButtonText: 'باشە'
             });
-            console.error('AJAX Error:', xhr.responseText);
+            
+            submitBtn.prop('disabled', false).text(originalText);
         }
     });
 }
@@ -444,37 +567,22 @@ function resetForm() {
     $('#materialsTableBody').empty();
     $('#total_usd').val('0.00');
     $('#total_iqd').val('0.00');
-    $('#transfer_loss').val('0');
-    $('#other_loss').val('0');
-    $('#usd_to_iqd_rate').val('140000');
     $('#purchase_date').val(new Date().toISOString().split('T')[0]);
-    
-    // Reset Select2 dropdowns
-    $('#person_id').val('').trigger('change');
-    $('#currency_type').val('').trigger('change');
-    
     loadNextReceiptNumber();
-    loadUsdRate(); // Load current USD rate
     addMaterialRow();
 }
 
-// Load materials data for dropdowns
 function loadMaterials() {
     return $.ajax({
         url: '../process/purchase_materilas/get_materials.php',
         type: 'GET',
+        dataType: 'json',
         success: function(response) {
-            try {
-                const result = JSON.parse(response);
-                if (result.success) {
-                    window.materials = result.data;
-                    // Refresh material dropdowns
-                    refreshMaterialDropdowns();
-                } else {
-                    console.error('Error loading materials:', result.error);
-                }
-            } catch (e) {
-                console.error('Error parsing materials response:', e);
+            if (response.success) {
+                window.materials = response.data;
+                populatePersonDropdown();
+            } else {
+                console.error('Failed to load materials:', response.error);
             }
         },
         error: function(xhr, status, error) {
@@ -487,18 +595,13 @@ function loadPersons() {
     return $.ajax({
         url: '../process/purchase_materilas/get_persons.php',
         type: 'GET',
+        dataType: 'json',
         success: function(response) {
-            try {
-                const result = JSON.parse(response);
-                if (result.success) {
-                    window.persons = result.data;
-                    // Populate person dropdown
-                    populatePersonDropdown();
-                } else {
-                    console.error('Error loading persons:', result.error);
-                }
-            } catch (e) {
-                console.error('Error parsing persons response:', e);
+            if (response.success) {
+                window.persons = response.data;
+                populatePersonDropdown();
+            } else {
+                console.error('Failed to load persons:', response.error);
             }
         },
         error: function(xhr, status, error) {
@@ -509,106 +612,64 @@ function loadPersons() {
 
 function populatePersonDropdown() {
     const persons = window.persons || [];
-    let options = '<option value="">هەڵبژێرە</option>';
-    persons.forEach(function(person) {
-        options += `<option value="${person.id}">${person.name}</option>`;
-    });
-    $('#person_id').html(options);
+    const $personSelect = $('#person_id');
     
-    // Re-initialize Select2 for person dropdown
-    $('#person_id').select2({
-        dropdownParent: $('#addPurchaseModal'),
-        width: '100%',
-        placeholder: "هەڵبژێرە",
-        dir: "rtl"
+    $personSelect.empty();
+    $personSelect.append('<option value="">هەڵبژێرە</option>');
+    
+    persons.forEach(function(person) {
+        $personSelect.append(`<option value="${person.id}">${person.name}</option>`);
     });
 }
 
 function refreshMaterialDropdowns() {
     const materials = window.materials || [];
-    let options = '<option value="">هەڵبژێرە</option>';
     
-    if (materials.length > 0) {
-        materials.forEach(function(material) {
-            options += `<option value="${material.id}">${material.name}</option>`;
-        });
-    } else {
-        options = '<option value="">کاڵاکان بار نەکراون...</option>';
-    }
-    
-    // Update all material select dropdowns
     $('.material-select').each(function() {
-        const currentValue = $(this).val();
-        $(this).html(options);
-        $(this).val(currentValue);
+        const $select = $(this);
+        const currentValue = $select.val();
         
-        // Re-initialize Select2 for this dropdown
-        $(this).select2({
-            dropdownParent: $('#addPurchaseModal'),
-            width: '100%',
-            placeholder: "هەڵبژێرە",
-            dir: "rtl"
+        $select.empty();
+        $select.append('<option value="">هەڵبژێرە</option>');
+        
+        materials.forEach(function(material) {
+            const selected = material.id == currentValue ? 'selected' : '';
+            $select.append(`<option value="${material.id}" ${selected}>${material.name} (${material.unit_type || 'دانە'})</option>`);
         });
     });
 }
 
-// Load materials data on page load
-loadMaterialsData();
-
-// Load next receipt number
 function loadNextReceiptNumber() {
     $.ajax({
         url: '../process/purchase_materilas/get_next_receipt_number.php',
         type: 'GET',
+        dataType: 'json',
         success: function(response) {
-            try {
-                const result = JSON.parse(response);
-                if (result.success) {
-                    $('#receipt_number').val(result.receipt_number);
-                } else {
-                    console.error('Error loading receipt number:', result.error);
-                }
-            } catch (e) {
-                console.error('Error parsing receipt number response:', e);
+            if (response.success) {
+                $('#receipt_number').val(response.next_number);
+            } else {
+                console.error('Failed to load next receipt number:', response.error);
             }
         },
         error: function(xhr, status, error) {
-            console.error('Error loading receipt number:', error);
+            console.error('Error loading next receipt number:', error);
         }
     });
 }
 
-// Load USD to IQD exchange rate from API
 function loadUsdRate() {
     $.ajax({
         url: '../process/purchase_materilas/get_usd_rate.php',
         type: 'GET',
+        dataType: 'json',
         success: function(response) {
-            try {
-                const result = JSON.parse(response);
-                if (result.success) {
-                    $('#usd_to_iqd_rate').val(result.rate);
-                    // Recalculate totals if there are any existing values
-                    calculateGrandTotal();
-                } else {
-                    // Use default rate if API fails
-                    if (result.default_rate) {
-                        $('#usd_to_iqd_rate').val(result.default_rate);
-                        calculateGrandTotal();
-                    }
-                    console.log('Error loading USD rate: ' + result.error);
-                }
-            } catch (e) {
-                console.error('Error parsing USD rate response:', e);
-                // Use default rate if parsing fails
-                $('#usd_to_iqd_rate').val(139250);
-                calculateGrandTotal();
+            if (response.success) {
+                $('#usd_to_iqd_rate').val(response.rate);
+            } else {
+                console.error('Failed to load USD rate:', response.error);
             }
         },
         error: function(xhr, status, error) {
-            // Use default rate if request fails
-            $('#usd_to_iqd_rate').val(139250);
-            calculateGrandTotal();
             console.error('Error loading USD rate:', error);
         }
     });

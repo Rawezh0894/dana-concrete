@@ -17,10 +17,17 @@ if (!hasPermission('view_materials')) {
     exit;
 }
 
+// Check if it's a GET request
+if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+    http_response_code(405);
+    echo json_encode(['success' => false, 'error' => 'Method not allowed']);
+    exit;
+}
+
 try {
-    // Get persons from other_expense_persons table
+    // Get all persons/suppliers
     $stmt = $pdo->prepare("
-        SELECT id, name, phone, address 
+        SELECT id, name 
         FROM other_expense_persons 
         ORDER BY name ASC
     ");
@@ -32,9 +39,11 @@ try {
         'data' => $persons
     ]);
     
-} catch (PDOException $e) {
-    error_log("Database error in get_persons.php: " . $e->getMessage());
-    http_response_code(500);
-    echo json_encode(['success' => false, 'error' => 'Database error']);
+} catch (Exception $e) {
+    error_log("Error in get_persons.php: " . $e->getMessage());
+    echo json_encode([
+        'success' => false,
+        'error' => $e->getMessage()
+    ]);
 }
 ?> 

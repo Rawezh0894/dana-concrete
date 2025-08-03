@@ -76,7 +76,7 @@ try {
     
     echo json_encode([
         'success' => true,
-        'receipt_number' => $next_receipt_number
+        'next_number' => $next_receipt_number
     ]);
     
 } catch (Exception $e) {

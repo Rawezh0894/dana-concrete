@@ -35,6 +35,9 @@ try {
     $payment_type = $_POST['payment_type'] ?? 'قەرز';
     $amount_paid_usd = $_POST['amount_paid_usd'] ?? 0;
     $amount_paid_iq = $_POST['amount_paid_iq'] ?? 0;
+    $remaining_amount = $_POST['remaining_amount'] ?? 0;
+    $dolar_rate = $_POST['dolar_rate'] ?? 150000;
+    $discount = $_POST['discount'] ?? 0;
     $order_date = $_POST['order_date'] ?? date('Y-m-d');
     $invoice_number = $_POST['invoice_number'] ?? '';
     $notes = $_POST['notes'] ?? '';
@@ -55,13 +58,14 @@ try {
     $stmt->execute([$formula_id]);
     $formula = $stmt->fetch();
 
-    // Insert sale
-    $sql = "INSERT INTO sales (customer_id, formula_id, recipient, location, quantity, price_per_unit, total_price, payment_type, amount_paid_usd, amount_paid_iq, order_date, invoice_number, notes) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    // Insert sale with all fields
+    $sql = "INSERT INTO sales (customer_id, formula_id, recipient, location, quantity, price_per_unit, total_price, payment_type, amount_paid_usd, amount_paid_iq, remaining_amount, dolar_rate, discount, order_date, invoice_number, notes) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([
         $customer_id, $formula_id, $recipient, $location, $quantity, $price_per_unit, $total_price,
-        $payment_type, $amount_paid_usd, $amount_paid_iq, $order_date, $invoice_number, $notes
+        $payment_type, $amount_paid_usd, $amount_paid_iq, $remaining_amount, $dolar_rate, $discount,
+        $order_date, $invoice_number, $notes
     ]);
 
     $sale_id = $pdo->lastInsertId();
@@ -80,6 +84,9 @@ try {
         'payment_type' => $payment_type,
         'amount_paid_usd' => $amount_paid_usd,
         'amount_paid_iq' => $amount_paid_iq,
+        'remaining_amount' => $remaining_amount,
+        'dolar_rate' => $dolar_rate,
+        'discount' => $discount,
         'order_date' => $order_date,
         'invoice_number' => $invoice_number,
         'notes' => $notes

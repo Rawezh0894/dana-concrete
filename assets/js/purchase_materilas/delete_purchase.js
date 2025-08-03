@@ -1,6 +1,4 @@
-// Delete functionality is already implemented in select_purchase.js
-// This file is kept for consistency with the project structure
-
+// Delete Purchase Functionality
 function deletePurchase(purchaseId) {
     Swal.fire({
         title: 'دڵنیای لە سڕینەوە؟',
@@ -9,7 +7,7 @@ function deletePurchase(purchaseId) {
         showCancelButton: true,
         confirmButtonColor: '#d33',
         cancelButtonColor: '#3085d6',
-        confirmButtonText: 'بەڵێ، سڕەوە!',
+        confirmButtonText: 'بەڵێ، سڕەوە',
         cancelButtonText: 'پاشگەزبوونەوە'
     }).then((result) => {
         if (result.isConfirmed) {
@@ -17,45 +15,48 @@ function deletePurchase(purchaseId) {
                 url: '../process/purchase_materilas/delete_purchase.php',
                 type: 'POST',
                 data: { id: purchaseId },
+                dataType: 'json',
                 success: function(response) {
-                    try {
-                        const result = JSON.parse(response);
-                        
-                        if (result.success) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'سەرکەوتوو',
-                                text: result.message || 'کڕینەکە بە سەرکەوتووی سڕایەوە',
-                                confirmButtonText: 'باشە'
-                            }).then(() => {
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'سەرکەوتوو',
+                            text: response.message || 'کڕینەکە بە سەرکەوتووی سڕایەوە',
+                            confirmButtonText: 'باشە'
+                        }).then(() => {
+                            // Refresh the purchase list
+                            if (typeof loadPurchaseMaterialsTable === 'function') {
                                 loadPurchaseMaterialsTable();
-                            });
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'هەڵە',
-                                text: result.error || 'هەڵەیەک ڕوویدا',
-                                confirmButtonText: 'باشە'
-                            });
-                        }
-                    } catch (e) {
+                            }
+                            
+                            // Refresh summary cards if the function exists
+                            if (typeof loadSummaryCards === 'function') {
+                                loadSummaryCards();
+                            }
+                        });
+                    } else {
                         Swal.fire({
                             icon: 'error',
                             title: 'هەڵە',
-                            text: 'هەڵەیەک لە وەڵامەکەدا هەیە',
+                            text: response.error || 'هەڵەیەک ڕوویدا',
                             confirmButtonText: 'باشە'
                         });
-                        console.error('Response:', response);
                     }
                 },
                 error: function(xhr, status, error) {
+                    console.error('AJAX Error:', {
+                        status: status,
+                        error: error,
+                        responseText: xhr.responseText,
+                        statusCode: xhr.status
+                    });
+                    
                     Swal.fire({
                         icon: 'error',
-                        title: 'هەڵە',
-                        text: 'هەڵەی پەیوەندی بە سێرڤەرەوە: ' + error,
+                        title: 'هەڵەی AJAX',
+                        text: 'هەڵە لە پەیوەندی بە سێرڤەر: ' + error + ' (Status: ' + xhr.status + ')',
                         confirmButtonText: 'باشە'
                     });
-                    console.error('AJAX Error:', xhr.responseText);
                 }
             });
         }
