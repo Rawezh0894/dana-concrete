@@ -46,6 +46,9 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">فرۆشتن</h2>
         <div>
+            <a href="summery_concrete_receipts.php" class="btn btn-warning me-2" style="color: white; font-weight: bold;">
+                <i class="fas fa-chart-bar me-1"></i>پوختەی پسووڵەکان
+            </a>
             <a href="notes.php" class="btn btn-info me-2" style="color: white; font-weight: bold;">
                 <i class="fas fa-sticky-note me-1"></i>تێبینیەکان
             </a>
@@ -239,7 +242,10 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
           </div>
         </div>
         <div class="modal-footer">
-          <a href="notes.php" class="btn btn-info me-auto" style="color: white; font-weight: bold;">
+          <a href="summery_concrete_receipts.php" class="btn btn-warning me-auto" style="color: white; font-weight: bold;">
+            <i class="fas fa-chart-bar me-1"></i>پوختەی پسووڵەکان
+          </a>
+          <a href="notes.php" class="btn btn-info me-2" style="color: white; font-weight: bold;">
             <i class="fas fa-sticky-note me-1"></i>تێبینیەکان
           </a>
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
@@ -347,7 +353,10 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
           </div>
         </div>
         <div class="modal-footer">
-          <a href="notes.php" class="btn btn-info me-auto" style="color: white; font-weight: bold;">
+          <a href="summery_concrete_receipts.php" class="btn btn-warning me-auto" style="color: white; font-weight: bold;">
+            <i class="fas fa-chart-bar me-1"></i>پوختەی پسووڵەکان
+          </a>
+          <a href="notes.php" class="btn btn-info me-2" style="color: white; font-weight: bold;">
             <i class="fas fa-sticky-note me-1"></i>تێبینیەکان
           </a>
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
