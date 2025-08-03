@@ -553,44 +553,6 @@ function showError(message) {
     });
 }
 
-// Function to format invoice numbers in ranges
-function formatInvoiceNumbers(numbers) {
-    if (numbers.length === 0) return '';
-    if (numbers.length === 1) return numbers[0].toString();
-    
-    // Convert to numbers and sort
-    const sortedNumbers = numbers.map(num => parseInt(num)).sort((a, b) => a - b);
-    
-    const ranges = [];
-    let start = sortedNumbers[0];
-    let end = sortedNumbers[0];
-    
-    for (let i = 1; i < sortedNumbers.length; i++) {
-        if (sortedNumbers[i] === end + 1) {
-            // Continue the range
-            end = sortedNumbers[i];
-        } else {
-            // End current range and start new one
-            if (start === end) {
-                ranges.push(start.toString());
-            } else {
-                ranges.push(`${start}-${end}`);
-            }
-            start = sortedNumbers[i];
-            end = sortedNumbers[i];
-        }
-    }
-    
-    // Add the last range
-    if (start === end) {
-        ranges.push(start.toString());
-    } else {
-        ranges.push(`${start}-${end}`);
-    }
-    
-    return ranges.join(', ');
-}
-
 function createSaleFromReceipts() {
     const selectedReceipts = $('.receipt-checkbox:checked');
     
@@ -646,16 +608,13 @@ function createSaleFromReceipts() {
         totalMeterAmount += parseFloat(receiptData.meter_amount || 0);
     });
     
-    // Format invoice numbers using the new function
-    const formattedInvoiceNumbers = formatInvoiceNumbers(invoiceNumbers);
-    
     // Prepare data for sale form
     const saleData = {
         customer_id: currentCustomerId,
         customer_name: currentCustomerName,
         recipient: receivers.join(', '),
         location: locations.join(', '),
-        invoice_number: formattedInvoiceNumbers,
+        invoice_number: invoiceNumbers.join(', '),
         formula_name: formulas.join(', '),
         order_date: dates.length > 0 ? dates[0].split(' ')[0] : new Date().toISOString().split('T')[0],
         quantity: totalMeterAmount,
