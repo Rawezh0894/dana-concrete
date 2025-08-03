@@ -1,53 +1,6 @@
 // Multiple submission prevention flag
 let submitting = false;
 
-// Function to format receipt numbers in compact way
-function formatReceiptNumbers(numbers) {
-    if (!numbers || numbers.length === 0) return '';
-    
-    // Filter out invalid numbers and convert to integers
-    const validNumbers = numbers
-        .map(num => {
-            const parsed = parseInt(num);
-            return isNaN(parsed) ? null : parsed;
-        })
-        .filter(num => num !== null);
-    
-    if (validNumbers.length === 0) return '';
-    
-    // Sort the valid numbers
-    const sortedNumbers = validNumbers.sort((a, b) => a - b);
-    
-    const ranges = [];
-    let start = sortedNumbers[0];
-    let end = sortedNumbers[0];
-    
-    for (let i = 1; i < sortedNumbers.length; i++) {
-        if (sortedNumbers[i] === end + 1) {
-            // Continue the range
-            end = sortedNumbers[i];
-        } else {
-            // End current range and start new one
-            if (start === end) {
-                ranges.push(start.toString());
-            } else {
-                ranges.push(`${start}-${end}`);
-            }
-            start = sortedNumbers[i];
-            end = sortedNumbers[i];
-        }
-    }
-    
-    // Add the last range
-    if (start === end) {
-        ranges.push(start.toString());
-    } else {
-        ranges.push(`${start}-${end}`);
-    }
-    
-    return ranges.join(', ');
-}
-
 // Function to populate form from localStorage (from receipt selection)
 function populateFormFromLocalStorage() {
     const saleData = localStorage.getItem('saleFromReceipts');
@@ -237,12 +190,6 @@ function populateFormFromURL() {
                 notes += `\nکۆی مەتر سێجا: ${totalMeterAmount} م³`;
             }
             $('#notes').val(notes);
-        }
-        
-        if (urlParams.has('invoice_number')) {
-            const invoiceNumber = urlParams.get('invoice_number');
-            console.log('Setting invoice_number:', invoiceNumber);
-            $('#invoice_number').val(invoiceNumber);
         }
         
         if (urlParams.has('order_date')) {

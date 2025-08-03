@@ -553,76 +553,6 @@ function showError(message) {
     });
 }
 
-function formatReceiptNumbers(numbers) {
-    console.log('formatReceiptNumbers called with:', numbers);
-    
-    if (!numbers || numbers.length === 0) {
-        console.log('Empty or null numbers array, returning empty string');
-        return '';
-    }
-    
-    // Filter out invalid numbers and convert to integers
-    const validNumbers = numbers
-        .map(num => {
-            console.log('Processing number:', num, 'Type:', typeof num);
-            const parsed = parseInt(num);
-            console.log('Parsed result:', parsed, 'IsNaN:', isNaN(parsed));
-            return isNaN(parsed) ? null : parsed;
-        })
-        .filter(num => num !== null);
-    
-    console.log('Valid numbers after filtering:', validNumbers);
-    
-    if (validNumbers.length === 0) {
-        console.log('No valid numbers found, returning empty string');
-        return '';
-    }
-    
-    // Sort the valid numbers
-    const sortedNumbers = validNumbers.sort((a, b) => a - b);
-    console.log('Sorted numbers:', sortedNumbers);
-    
-    const ranges = [];
-    let start = sortedNumbers[0];
-    let end = sortedNumbers[0];
-    
-    console.log('Starting range processing. Initial start:', start, 'end:', end);
-    
-    for (let i = 1; i < sortedNumbers.length; i++) {
-        console.log('Processing index', i, 'value:', sortedNumbers[i], 'current end:', end);
-        if (sortedNumbers[i] === end + 1) {
-            // Continue the range
-            end = sortedNumbers[i];
-            console.log('Extended range. New end:', end);
-        } else {
-            // End current range and start new one
-            if (start === end) {
-                ranges.push(start.toString());
-                console.log('Added single number range:', start.toString());
-            } else {
-                ranges.push(`${start}-${end}`);
-                console.log('Added range:', `${start}-${end}`);
-            }
-            start = sortedNumbers[i];
-            end = sortedNumbers[i];
-            console.log('Started new range. start:', start, 'end:', end);
-        }
-    }
-    
-    // Add the last range
-    if (start === end) {
-        ranges.push(start.toString());
-        console.log('Added final single number range:', start.toString());
-    } else {
-        ranges.push(`${start}-${end}`);
-        console.log('Added final range:', `${start}-${end}`);
-    }
-    
-    const result = ranges.join(', ');
-    console.log('Final result:', result);
-    return result;
-}
-
 function createSaleFromReceipts() {
     const selectedReceipts = $('.receipt-checkbox:checked');
     
@@ -678,22 +608,13 @@ function createSaleFromReceipts() {
         totalMeterAmount += parseFloat(receiptData.meter_amount || 0);
     });
     
-    // Debug: Log the receipt numbers before formatting
-    console.log('Original receipt numbers:', invoiceNumbers);
-    console.log('Receipt numbers type:', typeof invoiceNumbers);
-    console.log('Receipt numbers length:', invoiceNumbers.length);
-    
-    // Format receipt numbers in compact way
-    const formattedReceiptNumbers = formatReceiptNumbers(invoiceNumbers);
-    console.log('Formatted receipt numbers:', formattedReceiptNumbers);
-    
     // Prepare data for sale form
     const saleData = {
         customer_id: currentCustomerId,
         customer_name: currentCustomerName,
         recipient: receivers.join(', '),
         location: locations.join(', '),
-        invoice_number: formattedReceiptNumbers,
+        invoice_number: invoiceNumbers.join(', '),
         formula_name: formulas.join(', '),
         order_date: dates.length > 0 ? dates[0].split(' ')[0] : new Date().toISOString().split('T')[0],
         quantity: totalMeterAmount,
@@ -705,18 +626,7 @@ function createSaleFromReceipts() {
     // Store data in localStorage for the sale page
     localStorage.setItem('saleFromReceipts', JSON.stringify(saleData));
     
-    // Redirect to sale page with formatted receipt numbers as URL parameter
-    const urlParams = new URLSearchParams();
-    urlParams.set('invoice_number', formattedReceiptNumbers);
-    urlParams.set('customer_id', currentCustomerId);
-    urlParams.set('recipient', receivers.join(', '));
-    urlParams.set('location', locations.join(', '));
-    urlParams.set('formula_name', formulas.join(', '));
-    urlParams.set('quantity', totalMeterAmount);
-    urlParams.set('price_per_unit', pricePerMeter || 0);
-    urlParams.set('total_price', totalMeterAmount * (pricePerMeter || 0));
-    urlParams.set('order_date', dates.length > 0 ? dates[0].split(' ')[0] : new Date().toISOString().split('T')[0]);
-    
-    window.location.href = `add_sale.php?${urlParams.toString()}`;
+    // Redirect to sale page
+    window.location.href = 'add_sale.php';
 }
 
