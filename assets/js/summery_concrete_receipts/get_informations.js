@@ -630,7 +630,7 @@ function createSaleFromReceipts() {
         console.log('Receipt Number:', receiptData.receipt_number, 'Type:', typeof receiptData.receipt_number);
         
         // Collect unique values
-        if (receiptData.receipt_number && !invoiceNumbers.includes(receiptData.receipt_number)) {
+        if (receiptData.receipt_number && receiptData.receipt_number.toString().trim() !== '' && !invoiceNumbers.includes(receiptData.receipt_number)) {
             invoiceNumbers.push(receiptData.receipt_number);
         }
         if (receiptData.location && !locations.includes(receiptData.location)) {
@@ -663,13 +663,24 @@ function createSaleFromReceipts() {
     // Format invoice numbers using the new function
     const formattedInvoiceNumbers = formatInvoiceNumbers(invoiceNumbers);
     
+    // Debug: Show alert with invoice numbers
+    console.log('Original Invoice Numbers:', invoiceNumbers);
+    console.log('Formatted Invoice Numbers:', formattedInvoiceNumbers);
+    
+    // If no formatted numbers, use receipt IDs as fallback
+    let finalInvoiceNumbers = formattedInvoiceNumbers;
+    if (!finalInvoiceNumbers || finalInvoiceNumbers.trim() === '') {
+        const receiptIds = receiptsData.map(receipt => receipt.id).sort((a, b) => a - b);
+        finalInvoiceNumbers = 'Receipt IDs: ' + receiptIds.join(', ');
+    }
+    
     // Prepare data for sale form
     const saleData = {
         customer_id: currentCustomerId,
         customer_name: currentCustomerName,
         recipient: receivers.join(', '),
         location: locations.join(', '),
-        invoice_number: formattedInvoiceNumbers,
+        invoice_number: finalInvoiceNumbers,
         formula_name: formulas.join(', '),
         order_date: dates.length > 0 ? dates[0].split(' ')[0] : new Date().toISOString().split('T')[0],
         quantity: totalMeterAmount,
