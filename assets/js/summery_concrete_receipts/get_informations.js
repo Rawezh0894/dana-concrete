@@ -553,6 +553,49 @@ function showError(message) {
     });
 }
 
+// Function to format invoice numbers in a compact way
+function formatInvoiceNumbers(invoiceNumbers) {
+    if (!invoiceNumbers || invoiceNumbers.length === 0) return '';
+    
+    // Sort the numbers
+    const sortedNumbers = [...invoiceNumbers].sort();
+    
+    // Extract prefix and numbers
+    const prefix = sortedNumbers[0].split('-')[0] + '-';
+    const numbers = sortedNumbers.map(num => {
+        const parts = num.split('-');
+        return parts.length > 1 ? parseInt(parts[1]) : parseInt(num);
+    }).sort((a, b) => a - b);
+    
+    // Find consecutive ranges
+    const ranges = [];
+    let start = numbers[0];
+    let end = numbers[0];
+    
+    for (let i = 1; i < numbers.length; i++) {
+        if (numbers[i] === end + 1) {
+            end = numbers[i];
+        } else {
+            // Add the current range
+            if (start === end) {
+                ranges.push(`${prefix}${start.toString().padStart(4, '0')}`);
+            } else {
+                ranges.push(`${prefix}${start.toString().padStart(4, '0')}بۆ${prefix}${end.toString().padStart(4, '0')}`);
+            }
+            start = end = numbers[i];
+        }
+    }
+    
+    // Add the last range
+    if (start === end) {
+        ranges.push(`${prefix}${start.toString().padStart(4, '0')}`);
+    } else {
+        ranges.push(`${prefix}${start.toString().padStart(4, '0')}بۆ${prefix}${end.toString().padStart(4, '0')}`);
+    }
+    
+    return ranges.join('/');
+}
+
 function createSaleFromReceipts() {
     const selectedReceipts = $('.receipt-checkbox:checked');
     
@@ -608,13 +651,16 @@ function createSaleFromReceipts() {
         totalMeterAmount += parseFloat(receiptData.meter_amount || 0);
     });
     
+    // Format invoice numbers
+    const formattedInvoiceNumbers = formatInvoiceNumbers(invoiceNumbers);
+    
     // Prepare data for sale form
     const saleData = {
         customer_id: currentCustomerId,
         customer_name: currentCustomerName,
         recipient: receivers.join(', '),
         location: locations.join(', '),
-        invoice_number: invoiceNumbers.join(', '),
+        invoice_number: formattedInvoiceNumbers,
         formula_name: formulas.join(', '),
         order_date: dates.length > 0 ? dates[0].split(' ')[0] : new Date().toISOString().split('T')[0],
         quantity: totalMeterAmount,
