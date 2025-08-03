@@ -8,8 +8,7 @@ $(function() {
     console.log('Submitting form data:', formData);
     
     $.post('../process/add_material/add.php', formData, function(res) {
-      console.log('Add response:', res);
-      console.log('Response type:', typeof res);
+      console.log('Server response:', res);
       
       try {
         // Try to parse as JSON first
@@ -36,27 +35,10 @@ $(function() {
           });
         }
       } catch (e) {
-        console.log('JSON parsing failed:', e);
-        console.log('Raw response:', res);
-        
         // If not JSON, treat as plain text
-        var responseText = '';
-        if (typeof res === 'string') {
-          responseText = res;
-        } else if (typeof res === 'object' && res !== null) {
-          // If it's an object, try to get a meaningful message
-          if (res.message) {
-            responseText = res.message;
-          } else if (res.error) {
-            responseText = res.error;
-          } else {
-            responseText = 'هەڵەی نەناسراو';
-          }
-        } else {
-          responseText = String(res);
-        }
+        console.log('Response is not JSON, treating as plain text');
         
-        if (responseText.trim() === 'success') {
+        if (res.trim() === 'success') {
           Swal.fire({
             icon: 'success',
             title: 'سەرکەوتوو',
@@ -71,7 +53,7 @@ $(function() {
           Swal.fire({
             icon: 'error',
             title: 'هەڵە',
-            text: 'زیادکردن سەرکەوتوو نەبوو! ' + responseText,
+            text: 'زیادکردن سەرکەوتوو نەبوو! Response: ' + res,
             confirmButtonText: 'باشە'
           });
         }
@@ -86,22 +68,10 @@ $(function() {
         statusCode: xhr.status
       });
       
-      var errorMessage = 'هەڵە لە پەیوەندی بە سێرڤەر';
-      if (xhr.responseText) {
-        try {
-          var errorResponse = JSON.parse(xhr.responseText);
-          if (errorResponse.message) {
-            errorMessage = errorResponse.message;
-          }
-        } catch (e) {
-          errorMessage = xhr.responseText;
-        }
-      }
-      
       Swal.fire({
         icon: 'error',
         title: 'هەڵەی AJAX',
-        text: errorMessage,
+        text: 'هەڵە لە پەیوەندی بە سێرڤەر: ' + error + ' (Status: ' + xhr.status + ')',
         confirmButtonText: 'باشە'
       });
       
