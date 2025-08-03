@@ -106,13 +106,7 @@ function populateFormFromLocalStorage() {
             // Clear localStorage after using the data
             localStorage.removeItem('saleFromReceipts');
             
-            // Show success message
-            Swal.fire({
-                icon: 'info',
-                title: 'داتا زیادکرا',
-                text: 'داتای پسووڵەکان بە سەرکەوتوویی زیادکرا بۆ فۆڕمەکە',
-                confirmButtonText: 'باشە'
-            });
+            // Data added successfully - no message needed
             
         } catch (error) {
             console.error('Error parsing sale data from localStorage:', error);

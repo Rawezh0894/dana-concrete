@@ -13,7 +13,7 @@ async function loadCashSales() {
         data = JSON.parse(text);
     } catch (e) {
         console.error('Raw response from select_cash_sale.php:', text);
-        alert('هەڵەیەک لە وەڵامەکەی سێرڤەر هەیە. زانیاری زیاتر لە console.');
+        console.error('Server response error. Check console for details.');
         return;
     }
     const columns = [

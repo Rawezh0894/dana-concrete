@@ -6,7 +6,7 @@ async function loadSalesTable() {
         data = JSON.parse(text);
     } catch (e) {
         console.error('Raw response from select_sale.php:', text);
-        alert('هەڵەیەک لە وەڵامەکەی سێرڤەر هەیە. زانیاری زیاتر لە console.');
+        console.error('Server response error. Check console for details.');
         return;
     }
     if (!data.success) {
@@ -72,7 +72,7 @@ async function loadSalesFiltered() {
         data = JSON.parse(text);
     } catch (e) {
         console.error('Raw response from select_sale.php:', text);
-        alert('هەڵەیەک لە وەڵامەکەی سێرڤەر هەیە. زانیاری زیاتر لە console.');
+        console.error('Server response error. Check console for details.');
         return;
     }
     if (!data.success) {

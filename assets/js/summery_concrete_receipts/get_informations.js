@@ -545,12 +545,8 @@ function formatDate(dateString) {
 }
 
 function showError(message) {
-    Swal.fire({
-        icon: 'error',
-        title: 'هەڵە',
-        text: message,
-        confirmButtonText: 'باشە'
-    });
+    // Error occurred - no message display needed
+    console.error('Error:', message);
 }
 
 function createSaleFromReceipts() {
