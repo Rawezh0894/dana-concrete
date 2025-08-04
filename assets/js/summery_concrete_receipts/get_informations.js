@@ -95,7 +95,7 @@ function updateCustomerSummaryTable(customerSummary) {
     // Format the data for TableController
     const formattedData = customerSummary.map(customer => {
         const formulasHtml = customer.formulas_used.map(formula => 
-            `<span class="formula-badge me-1">${formula}</span>`
+            `<span class="formula-badge">${formula}</span>`
         ).join('');
         
         const totalPrice = customer.total_price ? 
@@ -123,15 +123,17 @@ function updateCustomerSummaryTable(customerSummary) {
         
         return {
             customer_name: `
-                <strong>${customer.customer_name}</strong>
-                ${customer.mobile1 ? `<br><small class="text-muted">${customer.mobile1}</small>` : ''}
+                <div class="text-end">
+                    <strong>${customer.customer_name}</strong>
+                    ${customer.mobile1 ? `<br><small class="text-muted">${customer.mobile1}</small>` : ''}
+                </div>
             `,
             receipt_count: `<span class="badge bg-primary">${customer.receipt_count}</span>`,
             total_meter: `<strong>${customer.total_meter}</strong> م³`,
             total_price: window.userPermissions.canViewPrices ? totalPrice : '-',
-            notes: window.userPermissions.canViewPrices ? notesDisplay : '-',
+            notes: window.userPermissions.canViewPrices ? `<div class="notes-cell">${notesDisplay}</div>` : '-',
             payment_status: paymentStatus,
-            formulas: formulasHtml,
+            formulas: `<div class="text-center">${formulasHtml}</div>`,
             actions: `
                 <button class="btn btn-sm btn-info" onclick="showCustomerDetails(${customer.customer_id}, '${customer.customer_name}')">
                     <i class="fas fa-eye me-1"></i>وردەکاری

@@ -51,6 +51,58 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
         padding: 20px;
       }
     }
+    
+    /* Table styling for better layout */
+    #customerSummaryTable {
+      table-layout: fixed;
+    }
+    
+    #customerSummaryTable th,
+    #customerSummaryTable td {
+      vertical-align: middle;
+      text-align: center;
+    }
+    
+    #customerSummaryTable th:first-child,
+    #customerSummaryTable td:first-child {
+      text-align: center;
+    }
+    
+    #customerSummaryTable th:nth-child(2),
+    #customerSummaryTable td:nth-child(2) {
+      text-align: right;
+    }
+    
+    #customerSummaryTable th:last-child,
+    #customerSummaryTable td:last-child {
+      text-align: center;
+    }
+    
+    /* Formula badges styling */
+    .formula-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      margin: 1px;
+      background-color: #1976d2;
+      color: white;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    
+    /* Notes cell styling */
+    .notes-cell {
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    
+    /* Table search inputs styling */
+    .table-search-input {
+      font-size: 0.8rem;
+      padding: 2px 6px;
+    }
   </style>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
@@ -162,17 +214,17 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
           <table class="table table-bordered table-hover" id="customerSummaryTable">
             <thead style="background: var(--kelly-green); color: white;">
               <tr>
-                <th>#</th>
-                <th>ناوی کڕیار</th>
-                <th>ژمارەی پسووڵەکان</th>
-                <th>کۆی مەتر سێجا</th>
+                <th style="width: 5%;">#</th>
+                <th style="width: 20%;">ناوی کڕیار</th>
+                <th style="width: 10%;">ژمارەی پسووڵەکان</th>
+                <th style="width: 12%;">کۆی مەتر سێجا</th>
                 <?php if (hasPermission('view_concrete_prices')): ?>
-                <th>کۆی نرخ</th>
-                <th>تێبینی</th>
+                <th style="width: 12%;">کۆی نرخ</th>
+                <th style="width: 15%;">تێبینی</th>
                 <?php endif; ?>
-                <th>دۆخی پارەدان</th>
-                <th>فۆرمۆلاکان</th>
-                <th>کردارەکان</th>
+                <th style="width: 12%;">دۆخی پارەدان</th>
+                <th style="width: 14%;">فۆرمۆلاکان</th>
+                <th style="width: 10%;">کردارەکان</th>
               </tr>
             </thead>
             <tbody>
