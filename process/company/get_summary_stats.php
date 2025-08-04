@@ -23,7 +23,7 @@ try {
         SELECT 
             SUM(remaining_usd) as usd, 
             SUM(remaining_iqd) as iqd,
-            SUM(remaining_iqd / NULLIF(exchange_rate, 0)) as iqd_converted
+            SUM(remaining_iqd / NULLIF(exchange_rate / 100, 0)) as iqd_converted
         FROM purchases 
         WHERE payment_type = 'قەرز'
     ")->fetch();

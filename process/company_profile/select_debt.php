@@ -23,7 +23,7 @@ if (isset($_GET['stats'])) {
         SELECT 
             COALESCE(SUM(remaining_usd), 0) as remaining_usd,
             COALESCE(SUM(remaining_iqd), 0) as remaining_iqd,
-            COALESCE(SUM(remaining_iqd / NULLIF(exchange_rate, 0)), 0) as remaining_iqd_converted
+            COALESCE(SUM(remaining_iqd / NULLIF(exchange_rate / 100, 0)), 0) as remaining_iqd_converted
         FROM purchases 
         WHERE company_id = ? AND payment_type = 'قەرز'
     ");
@@ -60,7 +60,7 @@ if (isset($_GET['total_remaining'])) {
         SELECT 
             COALESCE(SUM(remaining_usd), 0) as remaining_usd,
             COALESCE(SUM(remaining_iqd), 0) as remaining_iqd,
-            COALESCE(SUM(remaining_iqd / NULLIF(exchange_rate, 0)), 0) as remaining_iqd_converted
+            COALESCE(SUM(remaining_iqd / NULLIF(exchange_rate / 100, 0)), 0) as remaining_iqd_converted
         FROM purchases 
         WHERE company_id = ? AND payment_type = 'قەرز'
     ");

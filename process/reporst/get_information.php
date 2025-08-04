@@ -65,7 +65,7 @@ try {
             SUM(c.opening_debt_iqd) as opening_debt_iqd,
             COALESCE(SUM(p.remaining_usd), 0) as remaining_usd_from_purchases,
             COALESCE(SUM(p.remaining_iqd), 0) as remaining_iqd_from_purchases,
-            COALESCE(SUM(p.remaining_iqd / NULLIF(p.exchange_rate, 0)), 0) as remaining_iqd_converted
+            COALESCE(SUM(p.remaining_iqd / NULLIF(p.exchange_rate / 100, 0)), 0) as remaining_iqd_converted
         FROM company c
         LEFT JOIN purchases p ON c.id = p.company_id AND p.payment_type = 'قەرز'
     ";
@@ -85,7 +85,7 @@ try {
             SUM(p.opening_debt_iqd) as opening_debt_iqd,
             COALESCE(SUM(oe.amount_usd), 0) as total_expenses_usd,
             COALESCE(SUM(oe.amount_iqd), 0) as total_expenses_iqd,
-            COALESCE(SUM(oe.amount_iqd / NULLIF(oe.exchange_rate, 0)), 0) as total_expenses_iqd_converted,
+            COALESCE(SUM(oe.amount_iqd / NULLIF(oe.exchange_rate / 100, 0)), 0) as total_expenses_iqd_converted,
             COALESCE(SUM(pedp.amount_usd), 0) as total_payments_usd,
             COALESCE(SUM(pedp.amount_iqd), 0) as total_payments_iqd
         FROM other_expense_persons p
@@ -149,7 +149,7 @@ try {
             $date_condition_date = " AND YEAR(date) = YEAR(CURDATE())";
         }
     }
-    $purchases_query = "SELECT payment_type, SUM(price) as iqd, SUM(amount_iqd) as amount_iqd, SUM(amount_iqd / NULLIF(exchange_rate, 0)) as iqd_converted FROM purchases WHERE type='دینار' $date_condition_date GROUP BY payment_type";
+    $purchases_query = "SELECT payment_type, SUM(price) as iqd, SUM(amount_iqd) as amount_iqd, SUM(amount_iqd / NULLIF(exchange_rate / 100, 0)) as iqd_converted FROM purchases WHERE type='دینار' $date_condition_date GROUP BY payment_type";
     $stmt = $pdo->query($purchases_query);
     while ($row = $stmt->fetch()) {
         if ($row['payment_type'] === 'نەقد') {
@@ -174,7 +174,7 @@ try {
     $total_iqd_converted = ($purchases['cash']['iqd_converted'] ?? 0) + ($purchases['credit']['iqd_converted'] ?? 0);
 
     // Remaining Purchases
-    $stmt = $pdo->query("SELECT SUM(remaining_usd) as usd, SUM(remaining_iqd) as iqd, SUM(remaining_iqd / NULLIF(exchange_rate, 0)) as iqd_converted FROM purchases");
+    $stmt = $pdo->query("SELECT SUM(remaining_usd) as usd, SUM(remaining_iqd) as iqd, SUM(remaining_iqd / NULLIF(exchange_rate / 100, 0)) as iqd_converted FROM purchases");
     $row = $stmt->fetch();
     $remaining_purchases_usd = $row['usd'] ?? 0;
     $remaining_purchases_iqd = $row['iqd'] ?? 0;
@@ -302,7 +302,7 @@ try {
     $total_expenses_breakdown['other_expenses'] = $other_expenses_total_usd;
 
     // Purchases (کڕین) - only cash payments with date filter
-    $purchases_query = "SELECT SUM(amount_iqd) as iqd, SUM(amount_iqd / NULLIF(exchange_rate, 0)) as iqd_converted FROM purchases WHERE payment_type = 'نەقد' AND type = 'دینار' $date_condition_date";
+    $purchases_query = "SELECT SUM(amount_iqd) as iqd, SUM(amount_iqd / NULLIF(exchange_rate / 100, 0)) as iqd_converted FROM purchases WHERE payment_type = 'نەقد' AND type = 'دینار' $date_condition_date";
     $stmt = $pdo->query($purchases_query);
     $row = $stmt->fetch();
     $purchases_cash_iqd = $row['iqd'] ?? 0;
@@ -585,7 +585,7 @@ try {
             SUM(c.opening_debt_iqd) as opening_debt_iqd,
             COALESCE(SUM(p.remaining_usd), 0) as remaining_usd_from_purchases,
             COALESCE(SUM(p.remaining_iqd), 0) as remaining_iqd_from_purchases,
-            COALESCE(SUM(p.remaining_iqd / NULLIF(p.exchange_rate, 0)), 0) as remaining_iqd_converted
+            COALESCE(SUM(p.remaining_iqd / NULLIF(p.exchange_rate / 100, 0)), 0) as remaining_iqd_converted
         FROM company c
         LEFT JOIN purchases p ON c.id = p.company_id AND p.payment_type = 'قەرز'
     ");
@@ -627,7 +627,7 @@ try {
 
     // Other expense persons breakdown by payment_type
     // نەقد
-    $stmt = $pdo->query("SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd, SUM(amount_iqd / NULLIF(exchange_rate, 0)) as iqd_converted FROM other_expenses WHERE payment_type='نەقد'");
+    $stmt = $pdo->query("SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd, SUM(amount_iqd / NULLIF(exchange_rate / 100, 0)) as iqd_converted FROM other_expenses WHERE payment_type='نەقد'");
     $row = $stmt->fetch();
     $person_cash_usd = $row['usd'] ?? 0;
     $person_cash_iqd = $row['iqd'] ?? 0;
@@ -635,7 +635,7 @@ try {
     $person_cash_total_usd = $person_cash_usd + $person_cash_iqd_converted;
     
     // قەرز
-    $stmt = $pdo->query("SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd, SUM(amount_iqd / NULLIF(exchange_rate, 0)) as iqd_converted FROM other_expenses WHERE payment_type='قەرز'");
+    $stmt = $pdo->query("SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd, SUM(amount_iqd / NULLIF(exchange_rate / 100, 0)) as iqd_converted FROM other_expenses WHERE payment_type='قەرز'");
     $row = $stmt->fetch();
     $person_credit_usd = $row['usd'] ?? 0;
     $person_credit_iqd = $row['iqd'] ?? 0;
