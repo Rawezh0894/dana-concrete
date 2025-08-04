@@ -21,7 +21,7 @@ if (!$material_id) {
     exit;
 }
 
-$sql = "SELECT id, name, currency_type, purchase_price_usd, purchase_price_iqd FROM list_materials WHERE id = ?";
+$sql = "SELECT id, name, currency_type, purchase_price_usd, purchase_price_iqd, unit_type, pieces_per_carton, buckets_per_barrel, liters_per_bucket, liters_per_barrel, quantity FROM list_materials WHERE id = ?";
 $stmt = $pdo->prepare($sql);
 $stmt->execute([$material_id]);
 $material = $stmt->fetch(PDO::FETCH_ASSOC);

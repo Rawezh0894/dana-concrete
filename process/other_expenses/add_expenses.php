@@ -43,6 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $material_id = null;
     }
     $material_quantity = isset($_POST['material_quantity']) ? floatval($_POST['material_quantity']) : null;
+    $usage_unit_type = $_POST['usage_unit_type'] ?? null;
     $material_purchase_price_iqd = !empty($_POST['material_purchase_price_iqd']) ? floatval($_POST['material_purchase_price_iqd']) : 0;
     $material_purchase_price_usd = !empty($_POST['material_purchase_price_usd']) ? floatval($_POST['material_purchase_price_usd']) : 0;
     $material_total_cost = !empty($_POST['material_total_cost']) ? floatval($_POST['material_total_cost']) : 0;
@@ -55,10 +56,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $amount_usd = isset($_POST['amount_usd']) ? floatval($_POST['amount_usd']) : 0;
     $paid_iqd = isset($_POST['paid_iqd']) ? floatval($_POST['paid_iqd']) : 0;
     $paid_usd = isset($_POST['paid_usd']) ? floatval($_POST['paid_usd']) : 0;
-    $exchange_rate = isset($_POST['exchange_rate']) ? floatval($_POST['exchange_rate']) : 150000;
+    $exchange_rate = isset($_POST['exchange_rate']) ? floatval($_POST['exchange_rate']) : 139250;
     $remaining_iqd = isset($_POST['remaining_iqd']) ? floatval($_POST['remaining_iqd']) : 0;
     $remaining_usd = isset($_POST['remaining_usd']) ? floatval($_POST['remaining_usd']) : 0;
     $date = $_POST['date'] ?? '';
+
+    $base_material_quantity = null;
 
     // Only expense_type is required
     if ($expense_type === '') {
@@ -67,9 +70,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Check material availability for warehouse material usage
-    if ($expense_type === 'بەکارهێنانی کاڵای کۆگا' && $material_id && $material_quantity) {
-        // Get current stock quantity for the material
-        $stock_sql = "SELECT quantity, name FROM list_materials WHERE id = ?";
+    if ($expense_type === 'بەکارهێنانی کاڵای کۆگا' && $material_id && $material_quantity && $usage_unit_type) {
+        // Get current stock quantity and unit info for the material
+        $stock_sql = "SELECT quantity, name, unit_type, pieces_per_carton, buckets_per_barrel, liters_per_bucket, liters_per_barrel FROM list_materials WHERE id = ?";
         $stock_stmt = $pdo->prepare($stock_sql);
         $stock_stmt->execute([$material_id]);
         $material_stock = $stock_stmt->fetch(PDO::FETCH_ASSOC);
@@ -81,11 +84,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         $available_quantity = floatval($material_stock['quantity']);
         $required_quantity = floatval($material_quantity);
+        $material_unit_type = $material_stock['unit_type'];
+        $pieces_per_carton = floatval($material_stock['pieces_per_carton'] ?? 0);
+        $buckets_per_barrel = floatval($material_stock['buckets_per_barrel'] ?? 0);
+        $liters_per_bucket = floatval($material_stock['liters_per_bucket'] ?? 0);
+        $liters_per_barrel = floatval($material_stock['liters_per_barrel'] ?? 0);
         
-        if ($available_quantity < $required_quantity) {
+        // Calculate base_material_quantity based on usage_unit_type
+        $base_material_quantity = $required_quantity;
+        
+        // Convert usage unit to base unit (دانە/لیتر)
+        if ($usage_unit_type === 'کارتۆن' && $material_unit_type === 'کارتۆن' && $pieces_per_carton > 0) {
+            $base_material_quantity = $required_quantity * $pieces_per_carton;
+        } elseif ($usage_unit_type === 'دانە' && $material_unit_type === 'کارتۆن') {
+            $base_material_quantity = $required_quantity;
+        } elseif ($usage_unit_type === 'بەرمیل' && $material_unit_type === 'بەرمیل' && $liters_per_barrel > 0) {
+            $base_material_quantity = $required_quantity * $liters_per_barrel;
+        } elseif ($usage_unit_type === 'لیتر' && $material_unit_type === 'بەرمیل') {
+            $base_material_quantity = $required_quantity;
+        } elseif ($usage_unit_type === 'دەبە' && $material_unit_type === 'بەرمیل' && $liters_per_bucket > 0) {
+            $base_material_quantity = $required_quantity * $liters_per_bucket;
+        } elseif ($usage_unit_type === 'دەبە' && $material_unit_type === 'دەبە' && $liters_per_bucket > 0) {
+            $base_material_quantity = $required_quantity * $liters_per_bucket;
+        } elseif ($usage_unit_type === 'لیتر' && $material_unit_type === 'دەبە') {
+            $base_material_quantity = $required_quantity;
+        } elseif ($usage_unit_type === 'لیتر' && $material_unit_type === 'لیتر') {
+            $base_material_quantity = $required_quantity;
+        } elseif ($usage_unit_type === 'دانە' && $material_unit_type === 'دانە') {
+            $base_material_quantity = $required_quantity;
+        } else {
+            // Fallback: use the usage quantity as base quantity
+            $base_material_quantity = $required_quantity;
+        }
+        
+        // Check stock using base_material_quantity
+        if ($available_quantity < $base_material_quantity) {
             echo json_encode([
                 'success' => false, 
-                'msg' => "بڕی پێویست لە کۆگا نەماوە. بڕی بەردەست: {$available_quantity}، بڕی پێویست: {$required_quantity}"
+                'msg' => "بڕی پێویست لە کۆگا نەماوە. بڕی بەردەست: {$available_quantity}، بڕی پێویست: {$base_material_quantity} (بنەڕەتی)"
             ]);
             exit;
         }
@@ -128,8 +164,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $sql = "INSERT INTO other_expenses (
         purpose, person_id, employee_id, car_id, gas_liters, expense_type, material_id, material_quantity, material_purchase_price_iqd, material_purchase_price_usd, material_total_cost, gas_purchase_price_input, gas_total_cost, payment_type, currency_type, invoice_number,
-        amount_iqd, amount_usd, paid_iqd, paid_usd, exchange_rate, remaining_iqd, remaining_usd, date
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        amount_iqd, amount_usd, paid_iqd, paid_usd, exchange_rate, remaining_iqd, remaining_usd, date, base_material_quantity, usage_unit_type
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     $stmt = $pdo->prepare($sql);
     $ok = $stmt->execute([
         $purpose,
@@ -155,7 +191,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $exchange_rate,
         $remaining_iqd,
         $remaining_usd,
-        $date
+        $date,
+        $base_material_quantity,
+        $usage_unit_type
     ]);
     if ($ok) {
                             // Update person expense if person_id is set

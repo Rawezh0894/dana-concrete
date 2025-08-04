@@ -4,7 +4,7 @@ header('Content-Type: application/json');
 
 try {
     // Get exchange rate from API
-    $usd_iqd_rate = 150000; // Default fallback value
+    $usd_iqd_rate = 139250; // Default fallback value
     
     // Function to fetch dollar rate from API
     function fetchDollarRateFromAPI() {

@@ -9,7 +9,7 @@ $(document).ready(function() {
         loadPersons();
     }
     
-    // Load purchase materials table on page load
+    // Load purchase materials table on page load without page refresh
     loadPurchaseMaterialsTable();
     
     // Filter functionality
@@ -97,7 +97,59 @@ $(document).ready(function() {
         calculateEditGrandTotal();
     });
 
+    // Calculate remaining amounts when paid amounts change in edit form
+    $(document).on('input', '#edit_paid_amount_usd, #edit_paid_amount_iqd', function() {
+        calculateEditRemainingAmounts();
+    });
+
+    // Handle payment type change in edit form
+    $(document).on('change', '#edit_payment_type', function() {
+        const paymentType = $(this).val();
+        
+        if (paymentType === 'نەقد') {
+            // For cash payment, clear remaining amounts
+            $('#edit_remaining_amount_usd').val('');
+            $('#edit_remaining_amount_iqd').val('');
+        } else if (paymentType === 'قەرز') {
+            // For credit payment, calculate remaining amounts
+            calculateEditRemainingAmounts();
+        }
+    });
+
+    // Calculate totals and remaining amounts when USD rate changes in edit form
+    $(document).on('input', '#edit_usd_to_iqd_rate', function() {
+        calculateEditGrandTotal();
+        calculateEditRemainingAmounts();
+    });
+
     $(document).on('change', '#edit_currency_type', function() {
+        // Store current values as IQD before converting
+        const currentTransferLoss = parseFloat($('#edit_transfer_loss').val()) || 0;
+        const currentOtherLoss = parseFloat($('#edit_other_loss').val()) || 0;
+        const usdToIqdRate = parseFloat($('#edit_usd_to_iqd_rate').val()) || 0;
+        const oldCurrencyType = $('#edit_currency_type').attr('data-previous-value');
+        
+        // Convert current values to IQD if they were in USD
+        let transferLossIqd = currentTransferLoss;
+        let otherLossIqd = currentOtherLoss;
+        
+        if (oldCurrencyType === 'دۆلار') {
+            transferLossIqd = currentTransferLoss * (usdToIqdRate / 100);
+            otherLossIqd = currentOtherLoss * (usdToIqdRate / 100);
+        }
+        
+        // Store IQD values
+        $('#edit_transfer_loss').attr('data-iqd-value', transferLossIqd);
+        $('#edit_other_loss').attr('data-iqd-value', otherLossIqd);
+        
+        // Update display based on new currency type
+        if (typeof updateEditAdditionalCostsFields === 'function') {
+            updateEditAdditionalCostsFields();
+        }
+        
+        // Store new currency type
+        $('#edit_currency_type').attr('data-previous-value', $(this).val());
+        
         calculateEditGrandTotal();
     });
 
@@ -109,6 +161,52 @@ $(document).ready(function() {
 
 // Load USD to IQD exchange rate for edit form
 function loadEditUsdRate() {
+    // API configuration
+    const apiUrl = 'https://dinarapi.hediworks.site/api/get-price';
+    const apiToken = 'S3gl9SVEkZ1Vvc93cCjsbLLmwDvgzk';
+    const id = '8'; // 100 dollar ID
+    
+    $.ajax({
+        url: `${apiUrl}?id=${id}&api_token=${apiToken}`,
+        type: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            console.log('API Response:', response);
+            
+            // Check different possible response formats
+            let rate = null;
+            
+            if (response.success && response.data && response.data.price) {
+                rate = response.data.price;
+            } else if (response.value) {
+                rate = response.value;
+            } else if (response.price) {
+                rate = response.price;
+            } else if (response.rate) {
+                rate = response.rate;
+            }
+            
+            if (rate) {
+                $('#edit_usd_to_iqd_rate').val(rate);
+                // Recalculate totals if there are any existing values
+                calculateEditGrandTotal();
+                calculateEditRemainingAmounts();
+                console.log('USD rate loaded successfully:', rate);
+            } else {
+                console.error('Failed to load USD rate from API:', response);
+                // Fallback to local rate
+                loadEditLocalUsdRate();
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error loading USD rate from API:', error);
+            // Fallback to local rate
+            loadEditLocalUsdRate();
+        }
+    });
+}
+
+function loadEditLocalUsdRate() {
     $.ajax({
         url: '../process/purchase_materilas/get_usd_rate.php',
         type: 'GET',
@@ -119,11 +217,11 @@ function loadEditUsdRate() {
                 // Recalculate totals if there are any existing values
                 calculateEditGrandTotal();
             } else {
-                console.log('Error loading USD rate: ' + response.error);
+                console.log('Error loading local USD rate: ' + response.error);
             }
         },
         error: function(xhr, status, error) {
-            console.error('Error loading USD rate:', error);
+            console.error('Error loading local USD rate:', error);
         }
     });
 }
@@ -171,44 +269,43 @@ function loadPurchaseMaterialsTable() {
 }
 
 function renderPurchaseMaterialsTable(data) {
+    // Helper to format numbers with commas
+    function formatNumber(num) {
+        return Number(num).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    }
     // Prepare data for TableController
     const tableData = data.map(function(item) {
         const actions = [];
-        
-        // View details button (always available)
         actions.push(`<button class='btn btn-info btn-sm view-purchase' data-id='${item.id}' title='وردەکاری'><i class='fa fa-eye'></i></button>`);
-        
         if (window.userPermissions && window.userPermissions.canEdit) {
             actions.push(`<button class='btn btn-warning btn-sm edit-purchase' data-id='${item.id}' title='نوێکردنەوە'><i class='fa fa-edit'></i></button>`);
         }
-        
         if (window.userPermissions && window.userPermissions.canDelete) {
             actions.push(`<button class='btn btn-danger btn-sm delete-purchase' data-id='${item.id}' title='سڕینەوە'><i class='fa fa-trash'></i></button>`);
         }
-        
+        // Format prices
+        const usd = formatNumber(item.total_usd || 0);
+        const iqd = formatNumber(item.total_iqd || 0);
         return {
             '#': '',
             'receipt_number': item.receipt_number || '-',
             'person_name': item.person_name || '-',
             'purchase_date': item.purchase_date || '-',
             'materials_count': item.materials_count || 0,
-            'total_prices': `<div>USD: ${parseFloat(item.total_usd || 0).toFixed(2)}</div><div>IQD: ${parseFloat(item.total_iqd || 0).toFixed(2)}</div>`,
+            'total_usd': `$${usd}`,
+            'total_iqd': `${iqd} د.ع`,
             'currency_type': item.currency_type || '-',
             'notes': item.notes || '-',
             'actions': actions.join(' ')
         };
     });
-    
     // Define columns
-    const columns = ['#', 'receipt_number', 'person_name', 'purchase_date', 'materials_count', 'total_prices', 'currency_type', 'notes', 'actions'];
-    
+    const columns = ['#', 'receipt_number', 'person_name', 'purchase_date', 'materials_count', 'total_usd', 'total_iqd', 'currency_type', 'notes', 'actions'];
     // Use TableController with pagination
     TableController.renderWithPagination('#purchaseMaterialsTable', tableData, columns, {
         pageSize: 10,
         currentPage: 1
     });
-    
-    // Attach event handlers for action buttons
     attachActionHandlers();
 }
 
@@ -264,33 +361,42 @@ function loadPurchaseForView(purchaseId) {
 }
 
 function loadPurchaseForEdit(purchaseId) {
-    $.ajax({
-        url: '../process/purchase_materilas/get_purchase.php',
-        type: 'GET',
-        data: { id: purchaseId },
-        dataType: 'json',
-        success: function(response) {
-            if (response.success) {
-                populateEditForm(response.data);
-                $('#editPurchaseModal').modal('show');
-            } else {
+    // First ensure materials are loaded
+    let materialsPromise = Promise.resolve();
+    if (!window.materials || window.materials.length === 0) {
+        materialsPromise = loadMaterials();
+    }
+    
+    // Then load purchase data
+    materialsPromise.then(function() {
+        $.ajax({
+            url: '../process/purchase_materilas/get_purchase.php',
+            type: 'GET',
+            data: { id: purchaseId },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    populateEditForm(response.data);
+                    $('#editPurchaseModal').modal('show');
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'هەڵە',
+                        text: response.error || 'هەڵەیەک ڕوویدا',
+                        confirmButtonText: 'باشە'
+                    });
+                }
+            },
+            error: function(xhr, status, error) {
                 Swal.fire({
                     icon: 'error',
                     title: 'هەڵە',
-                    text: response.error || 'هەڵەیەک ڕوویدا',
+                    text: 'هەڵەی پەیوەندی بە سێرڤەرەوە: ' + error,
                     confirmButtonText: 'باشە'
                 });
+                console.error('AJAX Error:', xhr.responseText);
             }
-        },
-        error: function(xhr, status, error) {
-            Swal.fire({
-                icon: 'error',
-                title: 'هەڵە',
-                text: 'هەڵەی پەیوەندی بە سێرڤەرەوە: ' + error,
-                confirmButtonText: 'باشە'
-            });
-            console.error('AJAX Error:', xhr.responseText);
-        }
+        });
     });
 }
 
@@ -300,10 +406,15 @@ function populateViewForm(data) {
     $('#view_person_name').text(data.person_name);
     $('#view_purchase_date').text(data.purchase_date);
     $('#view_currency_type').text(data.currency_type);
+    $('#view_payment_type').text(data.payment_type || 'نەقد');
     $('#view_notes').text(data.notes || '-');
     $('#view_transfer_loss').text(parseFloat(data.transfer_loss || 0).toFixed(2));
     $('#view_other_loss').text(parseFloat(data.other_loss || 0).toFixed(2));
     $('#view_usd_to_iqd_rate').text(parseFloat(data.usd_to_iqd_rate || 0).toFixed(2));
+    $('#view_paid_amount_usd').text('$' + parseFloat(data.paid_amount_usd || 0).toFixed(2));
+    $('#view_paid_amount_iqd').text(parseFloat(data.paid_amount_iqd || 0).toFixed(2) + ' د.ع');
+    $('#view_remaining_amount_usd').text('$' + parseFloat(data.remaining_amount_usd || 0).toFixed(2));
+    $('#view_remaining_amount_iqd').text(parseFloat(data.remaining_amount_iqd || 0).toFixed(2) + ' د.ع');
     
     // Populate materials table
     populateViewMaterialsTable(data.materials);
@@ -319,34 +430,64 @@ function populateEditForm(data) {
     $('#edit_person_id').val(data.person_id).trigger('change');
     $('#edit_purchase_date').val(data.purchase_date);
     $('#edit_currency_type').val(data.currency_type).trigger('change');
+    $('#edit_payment_type').val(data.payment_type || 'نەقد').trigger('change');
     $('#edit_notes').val(data.notes);
     $('#edit_transfer_loss').val(data.transfer_loss || 0);
     $('#edit_other_loss').val(data.other_loss || 0);
     $('#edit_usd_to_iqd_rate').val(data.usd_to_iqd_rate || 0);
+    $('#edit_paid_amount_usd').val(data.paid_amount_usd || 0);
+    $('#edit_paid_amount_iqd').val(data.paid_amount_iqd || 0);
+    
+    // Format remaining amounts for display
+    const currencyType = data.currency_type || '';
+    const remainingUsd = parseFloat(data.remaining_amount_usd || 0);
+    const remainingIqd = parseFloat(data.remaining_amount_iqd || 0);
+    
+    if (currencyType === 'دۆلار') {
+        $('#edit_remaining_amount_usd').val(`$${remainingUsd.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`);
+        $('#edit_remaining_amount_iqd').val('');
+    } else if (currencyType === 'دینار') {
+        $('#edit_remaining_amount_usd').val('');
+        $('#edit_remaining_amount_iqd').val(`${remainingIqd.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} د.ع`);
+    } else {
+        $('#edit_remaining_amount_usd').val(`$${remainingUsd.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`);
+        $('#edit_remaining_amount_iqd').val(`${remainingIqd.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} د.ع`);
+    }
     
     // Populate materials
     populateEditMaterialsTable(data.materials);
     
-    // Calculate totals
+    // Calculate totals and remaining amounts
     calculateEditGrandTotal();
+    calculateEditRemainingAmounts();
 }
 
 function populateViewMaterialsTable(materials) {
+    // Helper to format numbers with commas
+    function formatNumber(num) {
+        return Number(num).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    }
+    
     const tbody = $('#viewMaterialsTableBody');
     tbody.empty();
     
     if (materials && materials.length > 0) {
         materials.forEach(function(material, index) {
+            const priceUsd = formatNumber(material.price_per_unit_usd || 0);
+            const priceIqd = formatNumber(material.price_per_unit_iqd || 0);
+            const totalUsd = formatNumber(material.total_price_usd || 0);
+            const totalIqd = formatNumber(material.total_price_iqd || 0);
+            
             tbody.append(`
                 <tr>
                     <td>${index + 1}</td>
                     <td>${material.material_name || '-'}</td>
                     <td>${material.unit_type || 'دانە'}</td>
                     <td>${parseFloat(material.quantity || 0).toFixed(2)}</td>
-                    <td>${parseFloat(material.price_per_unit_usd || 0).toFixed(2)}</td>
-                    <td>${parseFloat(material.price_per_unit_iqd || 0).toFixed(2)}</td>
-                    <td>${parseFloat(material.total_price_usd || 0).toFixed(2)}</td>
-                    <td>${parseFloat(material.total_price_iqd || 0).toFixed(2)}</td>
+                    <td>$${priceUsd}</td>
+                    <td>${priceIqd} د.ع</td>
+                    <td>$${totalUsd}</td>
+                    <td>${totalIqd} د.ع</td>
                 </tr>
             `);
         });
@@ -371,46 +512,45 @@ function calculateViewTotals(materials, transferLoss, otherLoss, currencyType, u
         });
     }
     
-    // Convert losses to appropriate currency based on currency type
-    let transferLossUsd = 0;
-    let transferLossIqd = 0;
-    let otherLossUsd = 0;
-    let otherLossIqd = 0;
+    // Get transfer loss and other loss values (these are always in IQD)
+    const transferLossIqd = parseFloat(transferLoss || 0);
+    const otherLossIqd = parseFloat(otherLoss || 0);
     
+    // Convert additional costs based on currency type
     if (currencyType === 'دۆلار') {
-        // If currency is USD, convert IQD losses to USD
-        if (usdToIqdRate > 0) {
-            transferLossUsd = transferLoss / (usdToIqdRate / 100);
-            otherLossUsd = otherLoss / (usdToIqdRate / 100);
-        }
-        transferLossIqd = transferLoss;
-        otherLossIqd = otherLoss;
-    } else {
-        // If currency is IQD, losses are already in IQD
-        transferLossIqd = transferLoss;
-        otherLossIqd = otherLoss;
-        // Convert to USD if rate is available
-        if (usdToIqdRate > 0) {
-            transferLossUsd = transferLoss / (usdToIqdRate / 100);
-            otherLossUsd = otherLoss / (usdToIqdRate / 100);
-        }
+        // If currency is USD, convert IQD costs to USD and add to USD total only
+        const transferLossUsd = usdToIqdRate > 0 ? transferLossIqd / (usdToIqdRate / 100) : 0;
+        const otherLossUsd = usdToIqdRate > 0 ? otherLossIqd / (usdToIqdRate / 100) : 0;
+        totalUsd += transferLossUsd + otherLossUsd;
+        // Don't calculate IQD total when currency is USD
+        totalIqd = 0;
+    } else if (currencyType === 'دینار') {
+        // If currency is IQD, add costs directly to IQD total only
+        totalIqd += transferLossIqd + otherLossIqd;
+        // Don't calculate USD total when currency is IQD
+        totalUsd = 0;
     }
     
-    // Add losses to totals
-    totalUsd += transferLossUsd + otherLossUsd;
-    totalIqd += transferLossIqd + otherLossIqd;
+    // Helper to format numbers with commas
+    function formatNumber(num) {
+        return Number(num).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    }
     
     // Display totals based on currency type
     if (currencyType === 'دۆلار') {
-        $('#view_total_usd').text(totalUsd.toFixed(2));
+        $('#view_total_usd').text(`$${formatNumber(totalUsd)}`);
         $('#view_total_iqd').text('');
     } else if (currencyType === 'دینار') {
         $('#view_total_usd').text('');
-        $('#view_total_iqd').text(totalIqd.toFixed(2));
+        $('#view_total_iqd').text(`${formatNumber(totalIqd)} د.ع`);
     } else {
-        $('#view_total_usd').text(totalUsd.toFixed(2));
-        $('#view_total_iqd').text(totalIqd.toFixed(2));
+        $('#view_total_usd').text(`$${formatNumber(totalUsd)}`);
+        $('#view_total_iqd').text(`${formatNumber(totalIqd)} د.ع`);
     }
+    
+    // Store raw values for calculations
+    $('#view_total_usd').attr('data-raw-value', totalUsd);
+    $('#view_total_iqd').attr('data-raw-value', totalIqd);
 }
 
 function populateEditMaterialsTable(materials) {
@@ -604,52 +744,109 @@ function calculateEditGrandTotal() {
         totalIqd += parseFloat($(this).find('.edit-total-iqd-input').val()) || 0;
     });
     
-    // Get transfer loss and other loss values
-    const transferLoss = parseFloat($('#edit_transfer_loss').val()) || 0;
-    const otherLoss = parseFloat($('#edit_other_loss').val()) || 0;
+    // Get transfer loss and other loss values (these are always in IQD)
+    const transferLossIqd = parseFloat($('#edit_transfer_loss').val()) || 0;
+    const otherLossIqd = parseFloat($('#edit_other_loss').val()) || 0;
     const usdToIqdRate = parseFloat($('#edit_usd_to_iqd_rate').val()) || 0;
     const currencyType = $('#edit_currency_type').val();
     
-    // Convert losses to appropriate currency based on currency type
-    let transferLossUsd = 0;
-    let transferLossIqd = 0;
-    let otherLossUsd = 0;
-    let otherLossIqd = 0;
-    
+    // Convert additional costs based on currency type
     if (currencyType === 'دۆلار') {
-        // If currency is USD, convert IQD losses to USD
-        if (usdToIqdRate > 0) {
-            transferLossUsd = transferLoss / (usdToIqdRate / 100);
-            otherLossUsd = otherLoss / (usdToIqdRate / 100);
-        }
-        transferLossIqd = transferLoss;
-        otherLossIqd = otherLoss;
-    } else {
-        // If currency is IQD, losses are already in IQD
-        transferLossIqd = transferLoss;
-        otherLossIqd = otherLoss;
-        // Convert to USD if rate is available
-        if (usdToIqdRate > 0) {
-            transferLossUsd = transferLoss / (usdToIqdRate / 100);
-            otherLossUsd = otherLoss / (usdToIqdRate / 100);
-        }
+        // If currency is USD, convert IQD costs to USD and add to USD total only
+        const transferLossUsd = usdToIqdRate > 0 ? transferLossIqd / (usdToIqdRate / 100) : 0;
+        const otherLossUsd = usdToIqdRate > 0 ? otherLossIqd / (usdToIqdRate / 100) : 0;
+        totalUsd += transferLossUsd + otherLossUsd;
+        // Don't calculate IQD total when currency is USD
+        totalIqd = 0;
+    } else if (currencyType === 'دینار') {
+        // If currency is IQD, add costs directly to IQD total only
+        totalIqd += transferLossIqd + otherLossIqd;
+        // Don't calculate USD total when currency is IQD
+        totalUsd = 0;
     }
     
-    // Add losses to totals
-    totalUsd += transferLossUsd + otherLossUsd;
-    totalIqd += transferLossIqd + otherLossIqd;
+    // Helper to format numbers with commas
+    function formatNumber(num) {
+        return Number(num).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    }
     
     // Set totals based on currency type
     if (currencyType === 'دۆلار') {
-        $('#edit_total_usd').val(totalUsd.toFixed(2));
+        $('#edit_total_usd').val(`$${formatNumber(totalUsd)}`);
         $('#edit_total_iqd').val(''); // Clear IQD total when currency is USD
     } else if (currencyType === 'دینار') {
         $('#edit_total_usd').val(''); // Clear USD total when currency is IQD
-        $('#edit_total_iqd').val(totalIqd.toFixed(2));
+        $('#edit_total_iqd').val(`${formatNumber(totalIqd)} د.ع`);
     } else {
         // If no currency selected, show both
-        $('#edit_total_usd').val(totalUsd.toFixed(2));
-        $('#edit_total_iqd').val(totalIqd.toFixed(2));
+        $('#edit_total_usd').val(`$${formatNumber(totalUsd)}`);
+        $('#edit_total_iqd').val(`${formatNumber(totalIqd)} د.ع`);
+    }
+    
+    // Store raw values for calculations
+    $('#edit_total_usd').attr('data-raw-value', totalUsd);
+    $('#edit_total_iqd').attr('data-raw-value', totalIqd);
+    
+    // Calculate remaining amounts
+    calculateEditRemainingAmounts();
+}
+
+function calculateEditRemainingAmounts() {
+    // Check payment type first
+    const paymentType = $('#edit_payment_type').val();
+    
+    if (paymentType === 'نەقد') {
+        // For cash payment, clear remaining amounts
+        $('#edit_remaining_amount_usd').val('');
+        $('#edit_remaining_amount_iqd').val('');
+        return;
+    }
+    
+    // Get raw values from data attributes for calculations
+    const totalUsd = parseFloat($('#edit_total_usd').attr('data-raw-value')) || 0;
+    const totalIqd = parseFloat($('#edit_total_iqd').attr('data-raw-value')) || 0;
+    const paidUsd = parseFloat($('#edit_paid_amount_usd').val()) || 0;
+    const paidIqd = parseFloat($('#edit_paid_amount_iqd').val()) || 0;
+    const usdToIqdRate = parseFloat($('#edit_usd_to_iqd_rate').val()) || 0;
+    const currencyType = $('#edit_currency_type').val();
+    
+    let remainingUsd = 0;
+    let remainingIqd = 0;
+    
+    if (currencyType === 'دۆلار') {
+        // If currency is USD, convert paid IQD to USD and calculate remaining in USD only
+        const paidIqdInUsd = usdToIqdRate > 0 ? paidIqd / (usdToIqdRate / 100) : 0;
+        remainingUsd = totalUsd - paidUsd - paidIqdInUsd;
+        // Don't calculate IQD remaining when currency is USD
+        remainingIqd = 0;
+    } else if (currencyType === 'دینار') {
+        // If currency is IQD, convert paid USD to IQD and calculate remaining in IQD only
+        const paidUsdInIqd = paidUsd * (usdToIqdRate / 100);
+        remainingIqd = totalIqd - paidIqd - paidUsdInIqd;
+        // Don't calculate USD remaining when currency is IQD
+        remainingUsd = 0;
+    } else {
+        // If no currency type selected, calculate separately
+        remainingUsd = totalUsd - paidUsd;
+        remainingIqd = totalIqd - paidIqd;
+    }
+    
+    // Helper to format numbers with commas
+    function formatNumber(num) {
+        return Number(num).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    }
+    
+    // Update remaining fields based on currency type
+    if (currencyType === 'دۆلار') {
+        $('#edit_remaining_amount_usd').val(`$${formatNumber(remainingUsd)}`);
+        $('#edit_remaining_amount_iqd').val(''); // Clear IQD remaining when currency is USD
+    } else if (currencyType === 'دینار') {
+        $('#edit_remaining_amount_usd').val(''); // Clear USD remaining when currency is IQD
+        $('#edit_remaining_amount_iqd').val(`${formatNumber(remainingIqd)} د.ع`);
+    } else {
+        // If no currency selected, show both
+        $('#edit_remaining_amount_usd').val(`$${formatNumber(remainingUsd)}`);
+        $('#edit_remaining_amount_iqd').val(`${formatNumber(remainingIqd)} د.ع`);
     }
 }
 
@@ -704,7 +901,7 @@ function deletePurchase(purchaseId) {
 }
 
 function loadMaterials() {
-    $.ajax({
+    return $.ajax({
         url: '../process/purchase_materilas/get_materials.php',
         type: 'GET',
         dataType: 'json',
@@ -737,6 +934,36 @@ function loadPersons() {
             console.error('Error loading persons:', error);
         }
     });
+}
+
+function updateEditAdditionalCostsFields() {
+    const currencyType = $('#edit_currency_type').val();
+    const usdToIqdRate = parseFloat($('#edit_usd_to_iqd_rate').val()) || 0;
+    
+    // Get current values (always stored in IQD)
+    const transferLossIqd = parseFloat($('#edit_transfer_loss').attr('data-iqd-value')) || parseFloat($('#edit_transfer_loss').val()) || 0;
+    const otherLossIqd = parseFloat($('#edit_other_loss').attr('data-iqd-value')) || parseFloat($('#edit_other_loss').val()) || 0;
+    
+    if (currencyType === 'دۆلار') {
+        // Convert to USD for display
+        const transferLossUsd = usdToIqdRate > 0 ? transferLossIqd / (usdToIqdRate / 100) : 0;
+        const otherLossUsd = usdToIqdRate > 0 ? otherLossIqd / (usdToIqdRate / 100) : 0;
+        
+        $('#edit_transfer_loss').val(transferLossUsd.toFixed(2));
+        $('#edit_other_loss').val(otherLossUsd.toFixed(2));
+        
+        // Store original IQD values
+        $('#edit_transfer_loss').attr('data-iqd-value', transferLossIqd);
+        $('#edit_other_loss').attr('data-iqd-value', otherLossIqd);
+    } else if (currencyType === 'دینار') {
+        // Show in IQD
+        $('#edit_transfer_loss').val(transferLossIqd.toFixed(2));
+        $('#edit_other_loss').val(otherLossIqd.toFixed(2));
+        
+        // Store original IQD values
+        $('#edit_transfer_loss').attr('data-iqd-value', transferLossIqd);
+        $('#edit_other_loss').attr('data-iqd-value', otherLossIqd);
+    }
 }
 
 // Edit modal event handlers

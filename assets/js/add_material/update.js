@@ -67,6 +67,8 @@ $(function() {
             if (typeof loadMaterials === 'function') loadMaterials();
             // Reset calculated prices display
             $('#edit_calculated_prices').hide();
+            // Trigger custom event for summary cards update
+            $(document).trigger('materialUpdated');
           });
         } else {
           Swal.fire({

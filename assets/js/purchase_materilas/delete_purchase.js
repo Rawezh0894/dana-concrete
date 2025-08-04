@@ -24,12 +24,12 @@ function deletePurchase(purchaseId) {
                             text: response.message || 'کڕینەکە بە سەرکەوتووی سڕایەوە',
                             confirmButtonText: 'باشە'
                         }).then(() => {
-                            // Refresh the purchase list
+                            // Refresh the purchase list without page reload
                             if (typeof loadPurchaseMaterialsTable === 'function') {
                                 loadPurchaseMaterialsTable();
                             }
                             
-                            // Refresh summary cards if the function exists
+                            // Refresh summary cards without page reload
                             if (typeof loadSummaryCards === 'function') {
                                 loadSummaryCards();
                             }

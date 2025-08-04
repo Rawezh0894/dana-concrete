@@ -81,8 +81,69 @@ try {
     
     $old_receipt_number = $result['receipt_number'];
     
+    // Get old purchase data to revert quantities
+    $stmt = $pdo->prepare("
+        SELECT material_id, unit_type, quantity, base_quantity 
+        FROM purchase_materials 
+        WHERE receipt_number = ?
+    ");
+    $stmt->execute([$old_receipt_number]);
+    $old_purchases = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
     // Start transaction
     $pdo->beginTransaction();
+    
+    // Revert old quantities from materials
+    foreach ($old_purchases as $old_purchase) {
+        // Get material info for unit conversion
+        $materialStmt = $pdo->prepare("
+            SELECT unit_type, pieces_per_carton, buckets_per_barrel, liters_per_bucket, liters_per_barrel,
+                   price_per_piece_usd, price_per_piece_iqd, price_per_bucket_usd, price_per_bucket_iqd,
+                   price_per_liter_usd, price_per_liter_iqd, quantity
+            FROM list_materials WHERE id = ?
+        ");
+        $materialStmt->execute([$old_purchase['material_id']]);
+        $materialInfo = $materialStmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($materialInfo) {
+            // Calculate quantity to subtract based on old purchase
+            $quantity_to_subtract = 0;
+            $old_purchase_unit_type = $old_purchase['unit_type'];
+            $material_unit_type = $materialInfo['unit_type'] ?? 'دانە';
+            
+            // Handle different unit type conversions for reverting
+            if ($old_purchase_unit_type === 'کارتۆن' && $material_unit_type === 'کارتۆن' && $materialInfo['pieces_per_carton']) {
+                $quantity_to_subtract = $old_purchase['quantity'] * $materialInfo['pieces_per_carton'];
+            } elseif ($old_purchase_unit_type === 'دانە' && $material_unit_type === 'کارتۆن' && $materialInfo['pieces_per_carton']) {
+                $quantity_to_subtract = $old_purchase['quantity'];
+            } elseif ($old_purchase_unit_type === 'بەرمیل' && $material_unit_type === 'بەرمیل' && $materialInfo['liters_per_barrel']) {
+                $quantity_to_subtract = $old_purchase['quantity'] * $materialInfo['liters_per_barrel'];
+            } elseif ($old_purchase_unit_type === 'دەبە' && $material_unit_type === 'بەرمیل' && $materialInfo['buckets_per_barrel']) {
+                $quantity_to_subtract = $old_purchase['quantity'] * $materialInfo['liters_per_bucket'];
+            } elseif ($old_purchase_unit_type === 'لیتر' && $material_unit_type === 'بەرمیل' && $materialInfo['liters_per_barrel']) {
+                $quantity_to_subtract = $old_purchase['quantity'];
+            } elseif ($old_purchase_unit_type === 'دەبە' && $material_unit_type === 'دەبە' && $materialInfo['liters_per_bucket']) {
+                $quantity_to_subtract = $old_purchase['quantity'] * $materialInfo['liters_per_bucket'];
+            } elseif ($old_purchase_unit_type === 'لیتر' && $material_unit_type === 'دەبە' && $materialInfo['liters_per_bucket']) {
+                $quantity_to_subtract = $old_purchase['quantity'];
+            } elseif ($old_purchase_unit_type === 'لیتر' && $material_unit_type === 'لیتر') {
+                $quantity_to_subtract = $old_purchase['quantity'];
+            } elseif ($old_purchase_unit_type === 'دانە' && $material_unit_type === 'دانە') {
+                $quantity_to_subtract = $old_purchase['quantity'];
+            } else {
+                $quantity_to_subtract = $old_purchase['quantity'];
+            }
+            
+            // Subtract the old quantity
+            $new_quantity = max(0, $materialInfo['quantity'] - $quantity_to_subtract);
+            $updateMaterialStmt = $pdo->prepare("
+                UPDATE list_materials 
+                SET quantity = ? 
+                WHERE id = ?
+            ");
+            $updateMaterialStmt->execute([$new_quantity, $old_purchase['material_id']]);
+        }
+    }
     
     // Delete all existing materials for this receipt number
     $stmt = $pdo->prepare("DELETE FROM purchase_materials WHERE receipt_number = ?");
@@ -97,12 +158,15 @@ try {
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
     
+    $total_usd = 0;
+    $total_iqd = 0;
+    
     foreach ($materials as $material) {
         // Get material info for unit conversion
         $materialStmt = $pdo->prepare("
             SELECT unit_type, pieces_per_carton, buckets_per_barrel, liters_per_bucket, liters_per_barrel,
                    price_per_piece_usd, price_per_piece_iqd, price_per_bucket_usd, price_per_bucket_iqd,
-                   price_per_liter_usd, price_per_liter_iqd
+                   price_per_liter_usd, price_per_liter_iqd, quantity
             FROM list_materials WHERE id = ?
         ");
         $materialStmt->execute([$material['material_id']]);
@@ -121,59 +185,72 @@ try {
         $purchase_unit_type = $material['unit_type'];
         $material_unit_type = $materialInfo['unit_type'] ?? 'دانە';
         
+        // Calculate quantity to add to inventory based on unit type
+        $quantity_to_add = 0;
+        
         // Handle different unit type conversions
         if ($purchase_unit_type === 'کارتۆن' && $material_unit_type === 'کارتۆن' && $materialInfo['pieces_per_carton']) {
             // Purchasing cartons, convert to pieces for base tracking
             $base_quantity = $material['quantity'] * $materialInfo['pieces_per_carton'];
             $base_price_per_unit_usd = $material['price_per_unit_usd'] / $materialInfo['pieces_per_carton'];
             $base_price_per_unit_iqd = $material['price_per_unit_iqd'] / $materialInfo['pieces_per_carton'];
+            $quantity_to_add = $material['quantity'] * $materialInfo['pieces_per_carton']; // Add pieces to inventory
         } elseif ($purchase_unit_type === 'دانە' && $material_unit_type === 'کارتۆن' && $materialInfo['pieces_per_carton']) {
             // Purchasing pieces from carton-based material
             $base_quantity = $material['quantity'];
             $base_price_per_unit_usd = $material['price_per_unit_usd'];
             $base_price_per_unit_iqd = $material['price_per_unit_iqd'];
+            $quantity_to_add = $material['quantity']; // Add pieces to inventory
         } elseif ($purchase_unit_type === 'بەرمیل' && $material_unit_type === 'بەرمیل') {
             // Purchasing barrels, convert to liters for base tracking
             if ($materialInfo['liters_per_barrel']) {
                 $base_quantity = $material['quantity'] * $materialInfo['liters_per_barrel'];
                 $base_price_per_unit_usd = $material['price_per_unit_usd'] / $materialInfo['liters_per_barrel'];
                 $base_price_per_unit_iqd = $material['price_per_unit_iqd'] / $materialInfo['liters_per_barrel'];
+                $quantity_to_add = $material['quantity'] * $materialInfo['liters_per_barrel']; // Add liters to inventory
             }
         } elseif ($purchase_unit_type === 'دەبە' && $material_unit_type === 'بەرمیل' && $materialInfo['buckets_per_barrel']) {
             // Purchasing buckets from barrel-based material
             $base_quantity = $material['quantity'] * $materialInfo['liters_per_bucket'];
             $base_price_per_unit_usd = $material['price_per_unit_usd'] / $materialInfo['liters_per_bucket'];
             $base_price_per_unit_iqd = $material['price_per_unit_iqd'] / $materialInfo['liters_per_bucket'];
+            $quantity_to_add = $material['quantity'] * $materialInfo['liters_per_bucket']; // Add liters to inventory
         } elseif ($purchase_unit_type === 'لیتر' && $material_unit_type === 'بەرمیل' && $materialInfo['liters_per_barrel']) {
             // Purchasing liters from barrel-based material
             $base_quantity = $material['quantity'];
             $base_price_per_unit_usd = $material['price_per_unit_usd'];
             $base_price_per_unit_iqd = $material['price_per_unit_iqd'];
+            $quantity_to_add = $material['quantity']; // Add liters to inventory
         } elseif ($purchase_unit_type === 'دەبە' && $material_unit_type === 'دەبە' && $materialInfo['liters_per_bucket']) {
             // Purchasing buckets, convert to liters for base tracking
             $base_quantity = $material['quantity'] * $materialInfo['liters_per_bucket'];
             $base_price_per_unit_usd = $material['price_per_unit_usd'] / $materialInfo['liters_per_bucket'];
             $base_price_per_unit_iqd = $material['price_per_unit_iqd'] / $materialInfo['liters_per_bucket'];
+            $quantity_to_add = $material['quantity'] * $materialInfo['liters_per_bucket']; // Add liters to inventory
         } elseif ($purchase_unit_type === 'لیتر' && $material_unit_type === 'دەبە' && $materialInfo['liters_per_bucket']) {
             // Purchasing liters from bucket-based material
             $base_quantity = $material['quantity'];
             $base_price_per_unit_usd = $material['price_per_unit_usd'];
             $base_price_per_unit_iqd = $material['price_per_unit_iqd'];
+            $quantity_to_add = $material['quantity']; // Add liters to inventory
         } elseif ($purchase_unit_type === 'لیتر' && $material_unit_type === 'لیتر') {
             // Purchasing liters from liter-based material
             $base_quantity = $material['quantity'];
             $base_price_per_unit_usd = $material['price_per_unit_usd'];
             $base_price_per_unit_iqd = $material['price_per_unit_iqd'];
+            $quantity_to_add = $material['quantity']; // Add liters to inventory
         } elseif ($purchase_unit_type === 'دانە' && $material_unit_type === 'دانە') {
             // Purchasing pieces from piece-based material
             $base_quantity = $material['quantity'];
             $base_price_per_unit_usd = $material['price_per_unit_usd'];
             $base_price_per_unit_iqd = $material['price_per_unit_iqd'];
+            $quantity_to_add = $material['quantity']; // Add pieces to inventory
         } else {
             // Fallback: use the purchase values as base values
             $base_quantity = $material['quantity'];
             $base_price_per_unit_usd = $material['price_per_unit_usd'];
             $base_price_per_unit_iqd = $material['price_per_unit_iqd'];
+            $quantity_to_add = $material['quantity']; // Add the quantity as is
         }
         
         $total_price_usd = $material['quantity'] * $material['price_per_unit_usd'];
@@ -200,15 +277,16 @@ try {
             $base_price_per_unit_iqd,
             $_SESSION['user_id']
         ]);
-    }
-    
-    // Calculate totals for all materials
-    $total_usd = 0;
-    $total_iqd = 0;
-    
-    foreach ($materials as $material) {
-        $total_price_usd = $material['quantity'] * $material['price_per_unit_usd'];
-        $total_price_iqd = $material['quantity'] * $material['price_per_unit_iqd'];
+        
+        // Update material quantity in list_materials table
+        $new_quantity = $materialInfo['quantity'] + $quantity_to_add;
+        $updateMaterialStmt = $pdo->prepare("
+            UPDATE list_materials 
+            SET quantity = ? 
+            WHERE id = ?
+        ");
+        $updateMaterialStmt->execute([$new_quantity, $material['material_id']]);
+        
         $total_usd += $total_price_usd;
         $total_iqd += $total_price_iqd;
     }

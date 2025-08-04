@@ -22,11 +22,24 @@ if (!hasPermission('view_materials')) {
 }
 // Note: add_material permission is checked in the UI, not here
 // Users with only view_materials permission can still access the page
-$materials = $pdo->query("SELECT id, name, unit_type, quantity, currency_type, purchase_price_usd, purchase_price_iqd, 
-                         pieces_per_carton, buckets_per_barrel, liters_per_bucket, liters_per_barrel,
-                         price_per_piece_usd, price_per_piece_iqd, price_per_bucket_usd, price_per_bucket_iqd,
-                         price_per_liter_usd, price_per_liter_iqd 
-                         FROM list_materials")->fetchAll(PDO::FETCH_ASSOC);
+
+// Get summary statistics
+$totalMaterials = $pdo->query("SELECT COUNT(*) as count FROM list_materials")->fetch(PDO::FETCH_ASSOC)['count'];
+
+$lowStockMaterials = $pdo->query("SELECT COUNT(*) as count FROM list_materials WHERE quantity <= 10")->fetch(PDO::FETCH_ASSOC)['count'];
+
+// Get most used materials (from other expenses)
+$mostUsedMaterials = $pdo->query("
+    SELECT m.name, COUNT(*) as usage_count 
+    FROM other_expenses oe 
+    JOIN list_materials m ON oe.material_id = m.id 
+    WHERE oe.expense_type = 'بەکارهێنانی کاڵای کۆگا'
+    GROUP BY oe.material_id, m.name 
+    ORDER BY usage_count DESC 
+    LIMIT 1
+")->fetch(PDO::FETCH_ASSOC);
+
+
 ?>
 <!DOCTYPE html>
 <html lang="ku">
@@ -41,9 +54,11 @@ $materials = $pdo->query("SELECT id, name, unit_type, quantity, currency_type, p
     <link href="../assets/css/comon/table.css" rel="stylesheet">
     <link href="../assets/css/comon/style.css" rel="stylesheet">
     <link href="../assets/css/comon/select2_design.css" rel="stylesheet">
+    <link href="../assets/css/comon/cards.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.rtl.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 </head>
 <body dir="rtl">
 <?php include '../includes/navbar.php'; ?>
@@ -55,6 +70,51 @@ $materials = $pdo->query("SELECT id, name, unit_type, quantity, currency_type, p
         <button class="btn" data-bs-toggle="modal" data-bs-target="#addMaterialModal" style="background: var(--seafoam-green); color:white; font-weight: bold;">+ زیادکردنی کاڵا</button>
         <?php endif; ?>
     </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card card-gradient-success card-animate-hover card-rounded card-shadow-medium text-center">
+                <div class="card-body card-padding-lg">
+                    <div class="card-icon">
+                        <i class="fas fa-boxes"></i>
+                    </div>
+                    <div class="card-value-lg" id="totalMaterialsCount"><?= $totalMaterials ?></div>
+                    <div class="card-title-md">کۆی بەرهەمەکان</div>
+                    <div class="card-desc-md">هەموو کاڵاکان</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card card-gradient-warning card-animate-hover card-rounded card-shadow-medium text-center">
+                <div class="card-body card-padding-lg">
+                    <div class="card-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="card-value-lg" id="lowStockCount"><?= $lowStockMaterials ?></div>
+                    <div class="card-title-md">کاڵا کەم بووەکان</div>
+                    <div class="card-desc-md">کەمتر لە ١٠</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card card-gradient-info card-animate-hover card-rounded card-shadow-medium text-center">
+                <div class="card-body card-padding-lg">
+                    <div class="card-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="card-value-lg" id="mostUsedMaterial">
+                        <?= $mostUsedMaterials ? $mostUsedMaterials['usage_count'] : '0' ?>
+                    </div>
+                    <div class="card-title-md">زۆرترین بەکارهاتوو</div>
+                    <div class="card-desc-md" id="mostUsedMaterialName">
+                        <?= $mostUsedMaterials ? $mostUsedMaterials['name'] : 'هیچ' ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="table-responsive">
         <table class="table table-bordered table-hover align-middle text-center" id="materialTable">
             <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
@@ -70,43 +130,7 @@ $materials = $pdo->query("SELECT id, name, unit_type, quantity, currency_type, p
                 </tr>
             </thead>
             <tbody>
-                <?php if (count($materials) === 0): ?>
-                <tr>
-                    <td colspan="8">هیچ داتایەک نییە</td>
-                </tr>
-                <?php else: ?>
-                    <?php foreach ($materials as $i => $mat): ?>
-                    <tr>
-                        <td><?= $i+1 ?></td>
-                        <td><?= htmlspecialchars($mat['name']) ?></td>
-                        <td><?= htmlspecialchars($mat['unit_type']) ?></td>
-                        <td><?= htmlspecialchars($mat['quantity']) ?></td>
-                        <td><?= htmlspecialchars($mat['currency_type']) ?></td>
-                        <td><?= htmlspecialchars($mat['purchase_price_usd']) ?></td>
-                        <td><?= htmlspecialchars($mat['purchase_price_iqd']) ?></td>
-                        <td>
-                            <?php if (hasPermission('edit_material')): ?>
-                            <button class="btn btn-sm btn-primary edit-btn" 
-                                    data-id="<?= $mat['id'] ?>" 
-                                    data-name="<?= htmlspecialchars($mat['name']) ?>" 
-                                    data-unit_type="<?= htmlspecialchars($mat['unit_type']) ?>"
-                                    data-quantity="<?= htmlspecialchars($mat['quantity']) ?>" 
-                                    data-currency_type="<?= htmlspecialchars($mat['currency_type']) ?>" 
-                                    data-purchase_price_usd="<?= htmlspecialchars($mat['purchase_price_usd']) ?>" 
-                                    data-purchase_price_iqd="<?= htmlspecialchars($mat['purchase_price_iqd']) ?>"
-                                    data-pieces_per_carton="<?= htmlspecialchars($mat['pieces_per_carton']) ?>"
-                                    data-buckets_per_barrel="<?= htmlspecialchars($mat['buckets_per_barrel']) ?>"
-                                    data-liters_per_bucket="<?= htmlspecialchars($mat['liters_per_bucket']) ?>"
-                                    data-liters_per_barrel="<?= htmlspecialchars($mat['liters_per_barrel']) ?>"
-                                    aria-label="نوێکردنەوە"><i class="bi bi-pencil"></i></button>
-                            <?php endif; ?>
-                            <?php if (hasPermission('delete_material')): ?>
-                            <button class="btn btn-sm btn-danger delete-btn" data-id="<?= $mat['id'] ?>" aria-label="سڕینەوە"><i class="bi bi-trash"></i></button>
-                            <?php endif; ?>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
-                <?php endif; ?>
+                <!-- Data will be loaded by JavaScript -->
             </tbody>
         </table>
     </div>
@@ -326,10 +350,16 @@ $materials = $pdo->query("SELECT id, name, unit_type, quantity, currency_type, p
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="../assets/js/swalAlert.js"></script>
 <script src="../assets/js/comon/table-controler.js"></script>
+<script>
+// Set permissions for JavaScript
+window.hasEditPermission = <?= hasPermission('edit_material') ? 'true' : 'false' ?>;
+window.hasDeletePermission = <?= hasPermission('delete_material') ? 'true' : 'false' ?>;
+</script>
 <script src="../assets/js/add_material/add.js"></script>
-<script src="../assets/js/add_material/select.js"></script>
 <script src="../assets/js/add_material/delete.js"></script>
 <script src="../assets/js/add_material/update.js"></script>
+<script src="../assets/js/add_material/summary_cards.js"></script>
+<script src="../assets/js/add_material/table_loader.js"></script>
 <script>
 $(function() {
   function togglePriceFields() {
@@ -366,6 +396,8 @@ $(function() {
       $('#buckets_per_barrel_group').show();
       $('#liters_per_bucket_group').show();
       $('#liters_per_barrel_group').show();
+      // Calculate total liters when barrel is selected
+      calculateTotalLitersForBarrel();
     } else if (unitType === 'دەبە') {
       $('#conversion_fields').show();
       $('#liters_per_bucket_group').show();
@@ -410,10 +442,21 @@ $(function() {
     }
   }
 
+  // Function to calculate total liters for barrel
+  function calculateTotalLitersForBarrel() {
+    var bucketsPerBarrel = parseInt($('#buckets_per_barrel').val()) || 1;
+    var litersPerBucket = parseFloat($('#liters_per_bucket').val()) || 1;
+    var totalLiters = bucketsPerBarrel * litersPerBucket;
+    $('#liters_per_barrel').val(totalLiters.toFixed(2));
+    calculatePrices();
+  }
+
   // Event listeners for add modal
   $('#currency_type').on('change', togglePriceFields);
   $('#unit_type').on('change', toggleUnitFields);
-  $('#purchase_price_usd, #purchase_price_iqd, #pieces_per_carton, #buckets_per_barrel, #liters_per_bucket, #liters_per_barrel').on('input', calculatePrices);
+  $('#purchase_price_usd, #purchase_price_iqd, #pieces_per_carton').on('input', calculatePrices);
+  $('#buckets_per_barrel, #liters_per_bucket').on('input', calculateTotalLitersForBarrel);
+  $('#liters_per_barrel').on('input', calculatePrices);
   togglePriceFields();
   toggleUnitFields();
 
@@ -452,6 +495,8 @@ $(function() {
       $('#edit_buckets_per_barrel_group').show();
       $('#edit_liters_per_bucket_group').show();
       $('#edit_liters_per_barrel_group').show();
+      // Calculate total liters when barrel is selected
+      calculateEditTotalLitersForBarrel();
     } else if (unitType === 'دەبە') {
       $('#edit_conversion_fields').show();
       $('#edit_liters_per_bucket_group').show();
@@ -496,10 +541,21 @@ $(function() {
     }
   }
 
+  // Function to calculate total liters for barrel in edit modal
+  function calculateEditTotalLitersForBarrel() {
+    var bucketsPerBarrel = parseInt($('#edit_buckets_per_barrel').val()) || 1;
+    var litersPerBucket = parseFloat($('#edit_liters_per_bucket').val()) || 1;
+    var totalLiters = bucketsPerBarrel * litersPerBucket;
+    $('#edit_liters_per_barrel').val(totalLiters.toFixed(2));
+    calculateEditPrices();
+  }
+
   // Event listeners for edit modal
   $('#edit_currency_type').on('change', toggleEditPriceFields);
   $('#edit_unit_type').on('change', toggleEditUnitFields);
-  $('#edit_purchase_price_usd, #edit_purchase_price_iqd, #edit_pieces_per_carton, #edit_buckets_per_barrel, #edit_liters_per_bucket, #edit_liters_per_barrel').on('input', calculateEditPrices);
+  $('#edit_purchase_price_usd, #edit_purchase_price_iqd, #edit_pieces_per_carton').on('input', calculateEditPrices);
+  $('#edit_buckets_per_barrel, #edit_liters_per_bucket').on('input', calculateEditTotalLitersForBarrel);
+  $('#edit_liters_per_barrel').on('input', calculateEditPrices);
 
   // When opening edit modal, update fields visibility
   $(document).on('click', '.edit-btn', function() {

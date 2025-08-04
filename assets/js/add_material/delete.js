@@ -22,6 +22,8 @@ $(document).on('click', '.delete-btn', function() {
                         confirmButtonText: 'باشە'
                     }).then(() => {
                         if (typeof loadMaterials === 'function') loadMaterials();
+                        // Trigger custom event for summary cards update
+                        $(document).trigger('materialDeleted');
                     });
                 } else {
                     Swal.fire({

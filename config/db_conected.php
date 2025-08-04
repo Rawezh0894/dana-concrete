@@ -20,7 +20,7 @@ if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > 
 $_SESSION['LAST_ACTIVITY'] = time();
 
 // Database connection settings
-$host = env('DB_HOST', 'localhost');
+// $host = env('DB_HOST', 'localhost');
 $db   = env('DB_NAME', 'dana_concrete_db');
 $user = env('DB_USER', 'dana_user');
 $pass = env('DB_PASS', 'Rawezh.Jaza@0894');

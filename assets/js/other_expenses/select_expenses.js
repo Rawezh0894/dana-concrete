@@ -2,18 +2,25 @@ async function loadOtherExpenses() {
     try {
         console.log('Loading other expenses...');
         
-        // Fetch latest USD rate
+        // Get USD rate from the exchange rate input field in the add modal
         let usdRate = 139250; // fallback default
-        try {
-            const rateRes = await fetch('../process/purchase_materilas/get_usd_rate.php');
-            const rateData = await rateRes.json();
-            if (rateData.success && rateData.rate) {
-                usdRate = parseFloat(rateData.rate);
-            } else if (rateData.default_rate) {
-                usdRate = parseFloat(rateData.default_rate);
+        const exchangeRateInput = document.getElementById('exchange_rate');
+        if (exchangeRateInput && exchangeRateInput.value) {
+            usdRate = parseFloat(exchangeRateInput.value);
+            console.log('Using exchange rate from input field:', usdRate);
+        } else {
+            // Fallback to API if input field is empty
+            try {
+                const rateRes = await fetch('../process/purchase_materilas/get_usd_rate.php');
+                const rateData = await rateRes.json();
+                if (rateData.success && rateData.rate) {
+                    usdRate = parseFloat(rateData.rate);
+                } else if (rateData.default_rate) {
+                    usdRate = parseFloat(rateData.default_rate);
+                }
+            } catch (e) {
+                // fallback to default
             }
-        } catch (e) {
-            // fallback to default
         }
 
         const monthFilter = document.getElementById('monthFilter');
@@ -54,7 +61,7 @@ async function loadOtherExpenses() {
         return num ? `${formatNumber(num)} د.ع` : '0 د.ع';
     }
     function iqdToUsd(iqd) {
-        return usdRate && iqd ? (parseFloat(iqd) / usdRate * 100) : 0;
+        return usdRate && iqd ? (parseFloat(iqd) / (usdRate / 100)) : 0;
     }
     // Filter by month
     let filtered = data;
@@ -99,9 +106,9 @@ async function loadOtherExpenses() {
     
     // Convert IQD to USD for display
     // Formula: USD = IQD / (rate/100) where rate is for 100 USD
-    const totalCarMaterialCostUSDConverted = totalCarMaterialCostIQD / usdRate * 100 + totalCarMaterialCostUSD;
-    const totalCarGasCostUSD = totalCarGasCost / usdRate * 100;
-    const totalOtherExpensesUSDConverted = totalOtherExpensesIQD / usdRate * 100 + totalOtherExpensesUSD;
+    const totalCarMaterialCostUSDConverted = totalCarMaterialCostIQD / (usdRate / 100) + totalCarMaterialCostUSD;
+    const totalCarGasCostUSD = totalCarGasCost / (usdRate / 100);
+    const totalOtherExpensesUSDConverted = totalOtherExpensesIQD / (usdRate / 100) + totalOtherExpensesUSD;
     const totalCarExpensesUSD = totalCarMaterialCostUSDConverted + totalCarGasCostUSD;
     const totalAllExpensesUSD = totalOtherExpensesUSDConverted + totalCarExpensesUSD;
     
@@ -211,6 +218,9 @@ async function loadOtherExpenses() {
                 }
                 if (document.getElementById('edit_material_quantity')) {
                     document.getElementById('edit_material_quantity').value = row.material_quantity || '';
+                }
+                if (document.getElementById('edit_usage_unit_type')) {
+                    document.getElementById('edit_usage_unit_type').value = row.usage_unit_type || '';
                 }
                 if (document.getElementById('edit_material_purchase_price_iqd')) {
                     document.getElementById('edit_material_purchase_price_iqd').value = row.material_purchase_price_iqd || '';

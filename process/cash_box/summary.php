@@ -47,7 +47,7 @@ function fetchDollarRateFromAPI() {
 
 try {
     // Get exchange rate from API
-    $usd_iqd_rate = 150000; // Default fallback value
+    $usd_iqd_rate = 139250; // Default fallback value
     
     // Try to get rate from API
     $api_rate = fetchDollarRateFromAPI();

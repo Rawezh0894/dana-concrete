@@ -36,7 +36,7 @@ try {
     $stmt->execute();
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
     
-    $rate = $result ? floatval($result['rate']) : 1500.00; // Default rate if not found
+    $rate = $result ? floatval($result['rate']) : 139250.00; // Default rate if not found
     
     echo json_encode([
         'success' => true,
@@ -48,7 +48,7 @@ try {
     // Return default rate on error
     echo json_encode([
         'success' => true,
-        'rate' => 1500.00
+        'rate' => 139250.00
     ]);
 }
 ?> 

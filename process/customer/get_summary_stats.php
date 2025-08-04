@@ -36,7 +36,7 @@ try {
     $pdo->query('SELECT 1');
     
     // Get USD exchange rate from settings table first, fallback to API
-    $usdRate = 150000; // Default rate
+    $usdRate = 139250; // Default rate
     
     try {
         $stmt = $pdo->query("SELECT value FROM settings WHERE name = 'usd_iqd_rate'");

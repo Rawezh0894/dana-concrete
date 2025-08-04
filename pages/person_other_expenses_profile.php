@@ -69,8 +69,8 @@ if ($person_id) {
             </a>
         </div>
         <div class="row mb-3" id="person-summary-cards">
-          <div class="col-md-4 mb-2">
-            <div class="card text-center shadow  card-gradient-success card-animate-hover">
+          <div class="col mb-2">
+            <div class="card text-center shadow card-gradient-success card-animate-hover">
               <div class="card-body">
                 <i class="fas fa-dollar-sign card-icon"></i>
                 <h6 class="card-title">کۆی گشتی خەرجی بە دۆلار</h6>
@@ -79,8 +79,8 @@ if ($person_id) {
               </div>
             </div>
           </div>
-          <div class="col-md-4 mb-2">
-            <div class="card text-center shadow  card-gradient-warning card-animate-hover">
+          <div class="col mb-2">
+            <div class="card text-center shadow card-gradient-warning card-animate-hover">
               <div class="card-body">
                 <i class="fas fa-coins card-icon"></i>
                 <h6 class="card-title">کۆی گشتی خەرجی بە دینار</h6>
@@ -89,8 +89,28 @@ if ($person_id) {
               </div>
             </div>
           </div>
-          <div class="col-md-4 mb-2">
-            <div class="card text-center shadow  card-gradient-info card-animate-hover">
+          <div class="col mb-2">
+            <div class="card text-center shadow card-gradient-danger card-animate-hover">
+              <div class="card-body">
+                <i class="fas fa-credit-card card-icon"></i>
+                <h6 class="card-title">کۆی قەرزی ئێمە بە دۆلار</h6>
+                <div class="fs-4 fw-bold" id="summary_our_debt_usd">0</div>
+                <small class="text-light">کۆی قەرزی ئێمە بە دۆلار</small>
+              </div>
+            </div>
+          </div>
+          <div class="col mb-2">
+            <div class="card text-center shadow card-gradient-primary card-animate-hover">
+              <div class="card-body">
+                <i class="fas fa-credit-card card-icon"></i>
+                <h6 class="card-title">کۆی قەرزی ئێمە بە دینار</h6>
+                <div class="fs-4 fw-bold" id="summary_our_debt_iqd">0</div>
+                <small class="text-light">کۆی قەرزی ئێمە بە دینار</small>
+              </div>
+            </div>
+          </div>
+          <div class="col mb-2">
+            <div class="card text-center shadow card-gradient-info card-animate-hover">
               <div class="card-body">
                 <i class="fas fa-list-alt card-icon"></i>
                 <h6 class="card-title">ژمارەی خەرجیەکان</h6>
@@ -107,6 +127,10 @@ if ($person_id) {
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="expenses-tab" data-bs-toggle="tab" data-bs-target="#expenses"
                     type="button" role="tab" aria-controls="expenses" aria-selected="true">مێژووی خەرجیەکان</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="purchases-tab" data-bs-toggle="tab" data-bs-target="#purchases" type="button"
+                    role="tab" aria-controls="purchases" aria-selected="false">مێژووی کڕینی کاڵاکان</button>
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="debt-tab" data-bs-toggle="tab" data-bs-target="#debt" type="button"
@@ -138,6 +162,32 @@ if ($person_id) {
                         </thead>
                         <tbody>
                             <!-- Expenses will be loaded here by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="purchases" role="tabpanel" aria-labelledby="purchases-tab">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle text-center" id="purchasesTable">
+                        <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
+                            <tr>
+                                <th>#</th>
+                                <th>ژمارەی پسووڵە</th>
+                                <th>بەروار</th>
+                                <th>کۆی کاڵاکان</th>
+                                <th>کۆی نرخ بە دۆلار</th>
+                                <th>کۆی نرخ بە دینار</th>
+                                <th>جۆری دراو</th>
+                                <th>جۆری مامەڵە</th>
+                                <th>پارەی دراو بە دۆلار</th>
+                                <th>پارەی دراو بە دینار</th>
+                                <th>پارەی ماوە بە دۆلار</th>
+                                <th>پارەی ماوە بە دینار</th>
+                                <th>تێبینی</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Purchase materials will be loaded here by JS -->
                         </tbody>
                     </table>
                 </div>
@@ -250,22 +300,13 @@ if ($person_id) {
     </div>
     <script>
         const PERSON_ID = <?php echo $person_id; ?>;
-        function loadPersonSummaryCards() {
-            $.get('../process/person_other_expenses_profile/select_other_expenses.php', { person_id: PERSON_ID, stats: 1 }, function(data) {
-                if (!data || !data.stats) return;
-                const s = data.stats;
-                $('#summary_total_usd').text(Number(s.total_usd).toLocaleString('en-US') + ' $');
-                $('#summary_total_iqd').text(Number(s.total_iqd).toLocaleString('en-US') + ' د.ع');
-                $('#summary_count').text(s.count);
-            }, 'json');
-        }
-        $(function() { loadPersonSummaryCards(); });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="../assets/js/swalAlert.js"></script>
     <script src="../assets/js/comon/table-controler.js"></script>
     <script src="../assets/js/person_other_expenses_profile/select_other_expenses.js"></script>
+    <script src="../assets/js/person_other_expenses_profile/select_purchases.js"></script>
     <script src="../assets/js/person_other_expenses_profile/select_debt.js"></script>
     <script src="../assets/js/person_other_expenses_profile/add_debt.js"></script>
     <script src="../assets/js/person_other_expenses_profile/update_debt.js"></script>

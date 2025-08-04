@@ -40,8 +40,20 @@ try {
     if ($deduct_opening_usd > 0) {
         $pdo->prepare("UPDATE other_expense_persons SET opening_debt_usd = opening_debt_usd + ? WHERE id=?")->execute([$deduct_opening_usd, $person_id]);
     }
-    // 2. Restore to other_expenses (LIFO) ONLY the amount originally deducted from expenses
+    // 2. Restore to purchase_materials (LIFO) ONLY the amount originally deducted from purchases
     $remain_usd = $deduct_expenses_usd;
+    if ($remain_usd > 0) {
+        $stmt = $pdo->prepare("SELECT id FROM purchase_materials WHERE person_id=? AND payment_type='قەرز' ORDER BY purchase_date DESC, id DESC FOR UPDATE");
+        $stmt->execute([$person_id]);
+        foreach ($stmt as $row) {
+            if ($remain_usd <= 0) break;
+            $to_add = $remain_usd; // All remaining amount goes to the next purchase (since we don't track per-purchase deduction)
+            $pdo->prepare("UPDATE purchase_materials SET remaining_amount_usd = remaining_amount_usd + ? WHERE id=?")->execute([$to_add, $row['id']]);
+            $remain_usd -= $to_add;
+        }
+    }
+    
+    // 3. Restore to other_expenses (LIFO) ONLY the amount originally deducted from expenses
     if ($remain_usd > 0) {
         $stmt = $pdo->prepare("SELECT id FROM other_expenses WHERE person_id=? AND payment_type='قەرز' ORDER BY date DESC, id DESC FOR UPDATE");
         $stmt->execute([$person_id]);
@@ -57,7 +69,20 @@ try {
     if ($deduct_opening_iqd > 0) {
         $pdo->prepare("UPDATE other_expense_persons SET opening_debt_iqd = opening_debt_iqd + ? WHERE id=?")->execute([$deduct_opening_iqd, $person_id]);
     }
+    // 2. Restore to purchase_materials (LIFO) ONLY the amount originally deducted from purchases
     $remain_iqd = $deduct_expenses_iqd;
+    if ($remain_iqd > 0) {
+        $stmt = $pdo->prepare("SELECT id FROM purchase_materials WHERE person_id=? AND payment_type='قەرز' ORDER BY purchase_date DESC, id DESC FOR UPDATE");
+        $stmt->execute([$person_id]);
+        foreach ($stmt as $row) {
+            if ($remain_iqd <= 0) break;
+            $to_add = $remain_iqd; // All remaining amount goes to the next purchase (since we don't track per-purchase deduction)
+            $pdo->prepare("UPDATE purchase_materials SET remaining_amount_iqd = remaining_amount_iqd + ? WHERE id=?")->execute([$to_add, $row['id']]);
+            $remain_iqd -= $to_add;
+        }
+    }
+    
+    // 3. Restore to other_expenses (LIFO) ONLY the amount originally deducted from expenses
     if ($remain_iqd > 0) {
         $stmt = $pdo->prepare("SELECT id FROM other_expenses WHERE person_id=? AND payment_type='قەرز' ORDER BY date DESC, id DESC FOR UPDATE");
         $stmt->execute([$person_id]);
@@ -79,12 +104,17 @@ try {
     $stmt->execute([$person_id]);
     $person = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // Check not exceeding current debt (opening + remaining in other_expenses)
+    // Check not exceeding current debt (opening + remaining in other_expenses + remaining in purchase_materials)
     $stmt = $pdo->prepare("SELECT SUM(remaining_usd) as rem_usd, SUM(remaining_iqd) as rem_iqd FROM other_expenses WHERE person_id=? AND payment_type='قەرز'");
     $stmt->execute([$person_id]);
-    $rem = $stmt->fetch(PDO::FETCH_ASSOC);
-    $total_usd = floatval($person['opening_debt_usd']) + floatval($rem['rem_usd']);
-    $total_iqd = floatval($person['opening_debt_iqd']) + floatval($rem['rem_iqd']);
+    $rem_expenses = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    $stmt = $pdo->prepare("SELECT SUM(remaining_amount_usd) as rem_usd, SUM(remaining_amount_iqd) as rem_iqd FROM purchase_materials WHERE person_id=? AND payment_type='قەرز'");
+    $stmt->execute([$person_id]);
+    $rem_purchases = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    $total_usd = floatval($person['opening_debt_usd']) + floatval($rem_expenses['rem_usd']) + floatval($rem_purchases['rem_usd']);
+    $total_iqd = floatval($person['opening_debt_iqd']) + floatval($rem_expenses['rem_iqd']) + floatval($rem_purchases['rem_iqd']);
     if (($amount_usd > 0 && $amount_usd > $total_usd) || ($amount_iqd > 0 && $amount_iqd > $total_iqd)) {
         throw new Exception('نابێت بڕی پارەی گەرەوا زیاتر بێت لە بڕی قەرز!');
     }
@@ -110,6 +140,18 @@ try {
             $remain_usd -= $to_deduct;
         }
     }
+    
+    // 3. FIFO لە purchase_materials.remaining_amount_usd
+    if ($remain_usd > 0) {
+        $stmt = $pdo->prepare("SELECT id, remaining_amount_usd FROM purchase_materials WHERE person_id=? AND payment_type='قەرز' AND remaining_amount_usd > 0 ORDER BY purchase_date ASC, id ASC FOR UPDATE");
+        $stmt->execute([$person_id]);
+        foreach ($stmt as $row) {
+            if ($remain_usd <= 0) break;
+            $to_deduct = min($row['remaining_amount_usd'], $remain_usd);
+            $pdo->prepare("UPDATE purchase_materials SET remaining_amount_usd = remaining_amount_usd - ? WHERE id=?")->execute([$to_deduct, $row['id']]);
+            $remain_usd -= $to_deduct;
+        }
+    }
 
     // IQD
     $opening_iqd = floatval($person['opening_debt_iqd']);
@@ -125,6 +167,18 @@ try {
             if ($remain_iqd <= 0) break;
             $to_deduct = min($row['remaining_iqd'], $remain_iqd);
             $pdo->prepare("UPDATE other_expenses SET remaining_iqd = remaining_iqd - ? WHERE id=?")->execute([$to_deduct, $row['id']]);
+            $remain_iqd -= $to_deduct;
+        }
+    }
+    
+    // 3. FIFO لە purchase_materials.remaining_amount_iqd
+    if ($remain_iqd > 0) {
+        $stmt = $pdo->prepare("SELECT id, remaining_amount_iqd FROM purchase_materials WHERE person_id=? AND payment_type='قەرز' AND remaining_amount_iqd > 0 ORDER BY purchase_date ASC, id ASC FOR UPDATE");
+        $stmt->execute([$person_id]);
+        foreach ($stmt as $row) {
+            if ($remain_iqd <= 0) break;
+            $to_deduct = min($row['remaining_amount_iqd'], $remain_iqd);
+            $pdo->prepare("UPDATE purchase_materials SET remaining_amount_iqd = remaining_amount_iqd - ? WHERE id=?")->execute([$to_deduct, $row['id']]);
             $remain_iqd -= $to_deduct;
         }
     }

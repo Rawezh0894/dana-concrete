@@ -41,11 +41,15 @@ try {
             pm.person_id,
             pm.purchase_date,
             pm.currency_type,
-            pm.unit_type,
+            pm.payment_type,
             pm.notes,
             pm.transfer_loss,
             pm.other_loss,
             pm.usd_to_iqd_rate,
+            pm.paid_amount_usd,
+            pm.paid_amount_iqd,
+            pm.remaining_amount_usd,
+            pm.remaining_amount_iqd,
             oep.name as person_name
         FROM purchase_materials pm
         LEFT JOIN other_expense_persons oep ON pm.person_id = oep.id

@@ -70,6 +70,9 @@ if (addExpenseForm) {
         if (document.getElementById('material_quantity')) {
             formData.append('material_quantity', document.getElementById('material_quantity').value);
         }
+        if (document.getElementById('usage_unit_type')) {
+            formData.append('usage_unit_type', document.getElementById('usage_unit_type').value);
+        }
         if (document.getElementById('material_purchase_price_iqd')) {
             formData.append('material_purchase_price_iqd', document.getElementById('material_purchase_price_iqd').value);
         }

@@ -23,7 +23,22 @@ try {
     $remain_usd = $amount_usd;
     $remain_iqd = $amount_iqd;
 
-    // 1. LIFO بۆ other_expenses.remaining_usd
+    // 1. LIFO بۆ purchase_materials.remaining_amount_usd
+    if ($remain_usd > 0) {
+        $stmt = $pdo->prepare("SELECT id, total_price_usd, remaining_amount_usd FROM purchase_materials WHERE person_id=? AND payment_type='قەرز' ORDER BY purchase_date DESC, id DESC FOR UPDATE");
+        $stmt->execute([$person_id]);
+        foreach ($stmt as $row) {
+            if ($remain_usd <= 0) break;
+            $used = $row['total_price_usd'] - $row['remaining_amount_usd'];
+            $to_add = min($used, $remain_usd);
+            if ($to_add > 0) {
+                $pdo->prepare("UPDATE purchase_materials SET remaining_amount_usd = remaining_amount_usd + ? WHERE id=?")->execute([$to_add, $row['id']]);
+                $remain_usd -= $to_add;
+            }
+        }
+    }
+    
+    // 2. LIFO بۆ other_expenses.remaining_usd
     if ($remain_usd > 0) {
         $stmt = $pdo->prepare("SELECT id, amount_usd, remaining_usd FROM other_expenses WHERE person_id=? AND payment_type='قەرز' ORDER BY date DESC, id DESC FOR UPDATE");
         $stmt->execute([$person_id]);
@@ -37,12 +52,29 @@ try {
             }
         }
     }
-    // 2. بڕی ماوە بگەڕێندرێتەوە بۆ opening_debt_usd
+    
+    // 3. بڕی ماوە بگەڕێندرێتەوە بۆ opening_debt_usd
     if ($remain_usd > 0) {
         $pdo->prepare("UPDATE other_expense_persons SET opening_debt_usd = opening_debt_usd + ? WHERE id=?")->execute([$remain_usd, $person_id]);
     }
 
     // IQD
+    // 1. LIFO بۆ purchase_materials.remaining_amount_iqd
+    if ($remain_iqd > 0) {
+        $stmt = $pdo->prepare("SELECT id, total_price_iqd, remaining_amount_iqd FROM purchase_materials WHERE person_id=? AND payment_type='قەرز' ORDER BY purchase_date DESC, id DESC FOR UPDATE");
+        $stmt->execute([$person_id]);
+        foreach ($stmt as $row) {
+            if ($remain_iqd <= 0) break;
+            $used = $row['total_price_iqd'] - $row['remaining_amount_iqd'];
+            $to_add = min($used, $remain_iqd);
+            if ($to_add > 0) {
+                $pdo->prepare("UPDATE purchase_materials SET remaining_amount_iqd = remaining_amount_iqd + ? WHERE id=?")->execute([$to_add, $row['id']]);
+                $remain_iqd -= $to_add;
+            }
+        }
+    }
+    
+    // 2. LIFO بۆ other_expenses.remaining_iqd
     if ($remain_iqd > 0) {
         $stmt = $pdo->prepare("SELECT id, amount_iqd, remaining_iqd FROM other_expenses WHERE person_id=? AND payment_type='قەرز' ORDER BY date DESC, id DESC FOR UPDATE");
         $stmt->execute([$person_id]);
@@ -56,6 +88,8 @@ try {
             }
         }
     }
+    
+    // 3. بڕی ماوە بگەڕێندرێتەوە بۆ opening_debt_iqd
     if ($remain_iqd > 0) {
         $pdo->prepare("UPDATE other_expense_persons SET opening_debt_iqd = opening_debt_iqd + ? WHERE id=?")->execute([$remain_iqd, $person_id]);
     }

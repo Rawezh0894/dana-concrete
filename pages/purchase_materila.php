@@ -117,7 +117,8 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
                             <th>درووشیار</th>
                             <th>بەروار</th>
                             <th>کۆی کاڵاکان</th>
-                            <th>کۆی نرخ</th>
+                            <th>کۆی نرخ بە دۆلار</th>
+                            <th>کۆی نرخ بە دینار</th>
                             <th>جۆری دراو</th>
                             <th>تێبینی</th>
                             <th>کردارەکان</th>
@@ -133,7 +134,7 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
 
     <!-- Add Purchase Materials Modal -->
     <div class="modal fade" id="addPurchaseModal" tabindex="-1" aria-labelledby="addPurchaseModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
+        <div class="modal-dialog" style="width: 95%; max-width: 95%;">
             <div class="modal-content">
                 <form id="addPurchaseForm">
                     <div class="modal-header">
@@ -173,7 +174,46 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
                             </div>
                             <div class="col-md-2 mb-3">
                                 <label for="usd_to_iqd_rate" class="form-label">نرخی 100 دۆلار بە دینار</label>
-                                <input type="number" class="form-control" id="usd_to_iqd_rate" name="usd_to_iqd_rate" min="0" step="0.01" placeholder="139250" value="139250">
+                                <input type="number" class="form-control" id="usd_to_iqd_rate" name="usd_to_iqd_rate" min="0" step="0.01" placeholder="139250" value="139250" required>
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <label for="payment_type" class="form-label">جۆری مامەڵە</label>
+                                <select class="form-select" id="payment_type" name="payment_type" required>
+                                    <option value="">هەڵبژێرە</option>
+                                    <option value="نەقد">نەقد</option>
+                                    <option value="قەرز">قەرز</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Materials Section -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="border-bottom pb-2" style="color: var(--seafoam-green);">کاڵاکان</h6>
+                            </div>
+                            <div class="col-12">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered" id="materialsTable">
+                                        <thead style="background: var(--light-gray);">
+                                            <tr>
+                                                <th style="width: 25%;">کاڵا</th>
+                                                <th style="width: 10%;">جۆری یەکە</th>
+                                                <th style="width: 8%;">بڕ</th>
+                                                <th style="width: 12%;">نرخی یەکە بە دۆلار</th>
+                                                <th style="width: 12%;">نرخی یەکە بە دینار</th>
+                                                <th style="width: 12%;">کۆی نرخ بە دۆلار</th>
+                                                <th style="width: 12%;">کۆی نرخ بە دینار</th>
+                                                <th style="width: 9%;">کردار</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="materialsTableBody">
+                                            <!-- Materials will be added here dynamically -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-primary" id="addMaterialRow">
+                                    <i class="fas fa-plus"></i> زیادکردنی کاڵا
+                                </button>
                             </div>
                         </div>
 
@@ -192,37 +232,6 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
                             </div>
                         </div>
 
-                        <!-- Materials Section -->
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <h6 class="border-bottom pb-2" style="color: var(--seafoam-green);">کاڵاکان</h6>
-                            </div>
-                            <div class="col-12">
-                                <div class="table-responsive">
-                                    <table class="table table-bordered" id="materialsTable">
-                                        <thead style="background: var(--light-gray);">
-                                            <tr>
-                                                <th>کاڵا</th>
-                                                <th>جۆری یەکە</th>
-                                                <th>بڕ</th>
-                                                <th>نرخی یەکە بە دۆلار</th>
-                                                <th>نرخی یەکە بە دینار</th>
-                                                <th>کۆی نرخ بە دۆلار</th>
-                                                <th>کۆی نرخ بە دینار</th>
-                                                <th>کردار</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="materialsTableBody">
-                                            <!-- Materials will be added here dynamically -->
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <button type="button" class="btn btn-sm btn-outline-primary" id="addMaterialRow">
-                                    <i class="fas fa-plus"></i> زیادکردنی کاڵا
-                                </button>
-                            </div>
-                        </div>
-
                         <!-- Summary Section -->
                         <div class="row">
                             <div class="col-12">
@@ -230,15 +239,40 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">کۆی نرخ بە دۆلار</label>
-                                <input type="number" class="form-control" id="total_usd" name="total_usd" readonly>
+                                <input type="text" class="form-control" id="total_usd" name="total_usd" readonly>
+                                <input type="hidden" id="total_usd_raw" name="total_usd_raw">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">کۆی نرخ بە دینار</label>
-                                <input type="number" class="form-control" id="total_iqd" name="total_iqd" readonly>
+                                <input type="text" class="form-control" id="total_iqd" name="total_iqd" readonly>
+                                <input type="hidden" id="total_iqd_raw" name="total_iqd_raw">
                             </div>
                             <div class="col-md-12 mb-3">
                                 <label for="notes" class="form-label">تێبینی</label>
                                 <textarea class="form-control" id="notes" name="notes" rows="1"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Payment Details Section -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="border-bottom pb-2" style="color: var(--seafoam-green);">وردەکاری پارەدان</h6>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="paid_amount_usd" class="form-label">پارەی دراو بە دۆلار</label>
+                                <input type="number" class="form-control" id="paid_amount_usd" name="paid_amount_usd" min="0" step="0.01" placeholder="0.00" value="0">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="paid_amount_iqd" class="form-label">پارەی دراو بە دینار</label>
+                                <input type="number" class="form-control" id="paid_amount_iqd" name="paid_amount_iqd" min="0" step="0.01" placeholder="0.00" value="0">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="remaining_amount_usd" class="form-label">پارەی ماوە بە دۆلار</label>
+                                <input type="text" class="form-control" id="remaining_amount_usd" name="remaining_amount_usd" placeholder="0.00" value="0" readonly>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="remaining_amount_iqd" class="form-label">پارەی ماوە بە دینار</label>
+                                <input type="text" class="form-control" id="remaining_amount_iqd" name="remaining_amount_iqd" placeholder="0.00" value="0" readonly>
                             </div>
                         </div>
                     </div>
@@ -294,7 +328,46 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
                             </div>
                             <div class="col-md-2 mb-3">
                                 <label for="edit_usd_to_iqd_rate" class="form-label">نرخی 100 دۆلار بە دینار</label>
-                                <input type="number" class="form-control" id="edit_usd_to_iqd_rate" name="edit_usd_to_iqd_rate" min="0" step="0.01" placeholder="139250" value="139250">
+                                <input type="number" class="form-control" id="edit_usd_to_iqd_rate" name="edit_usd_to_iqd_rate" min="0" step="0.01" placeholder="139250" value="139250" required>
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <label for="edit_payment_type" class="form-label">جۆری مامەڵە</label>
+                                <select class="form-select" id="edit_payment_type" name="edit_payment_type" required>
+                                    <option value="">هەڵبژێرە</option>
+                                    <option value="نەقد">نەقد</option>
+                                    <option value="قەرز">قەرز</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Materials Section -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="border-bottom pb-2" style="color: var(--seafoam-green);">کاڵاکان</h6>
+                            </div>
+                            <div class="col-12">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered" id="editMaterialsTable">
+                                        <thead style="background: var(--light-gray);">
+                                            <tr>
+                                                <th style="width: 25%;">کاڵا</th>
+                                                <th style="width: 10%;">جۆری یەکە</th>
+                                                <th style="width: 8%;">بڕ</th>
+                                                <th style="width: 12%;">نرخی یەکە بە دۆلار</th>
+                                                <th style="width: 12%;">نرخی یەکە بە دینار</th>
+                                                <th style="width: 12%;">کۆی نرخ بە دۆلار</th>
+                                                <th style="width: 12%;">کۆی نرخ بە دینار</th>
+                                                <th style="width: 9%;">کردار</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="editMaterialsTableBody">
+                                            <!-- Materials will be loaded here for editing -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-primary" id="editAddMaterialRow">
+                                    <i class="fas fa-plus"></i> زیادکردنی کاڵا
+                                </button>
                             </div>
                         </div>
 
@@ -313,37 +386,6 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
                             </div>
                         </div>
 
-                        <!-- Materials Section -->
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <h6 class="border-bottom pb-2" style="color: var(--seafoam-green);">کاڵاکان</h6>
-                            </div>
-                            <div class="col-12">
-                                <div class="table-responsive">
-                                    <table class="table table-bordered" id="editMaterialsTable">
-                                        <thead style="background: var(--light-gray);">
-                                            <tr>
-                                                <th>کاڵا</th>
-                                                <th>جۆری یەکە</th>
-                                                <th>بڕ</th>
-                                                <th>نرخی یەکە بە دۆلار</th>
-                                                <th>نرخی یەکە بە دینار</th>
-                                                <th>کۆی نرخ بە دۆلار</th>
-                                                <th>کۆی نرخ بە دینار</th>
-                                                <th>کردار</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="editMaterialsTableBody">
-                                            <!-- Materials will be loaded here for editing -->
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <button type="button" class="btn btn-sm btn-outline-primary" id="editAddMaterialRow">
-                                    <i class="fas fa-plus"></i> زیادکردنی کاڵا
-                                </button>
-                            </div>
-                        </div>
-
                         <!-- Summary Section -->
                         <div class="row">
                             <div class="col-12">
@@ -351,15 +393,40 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">کۆی نرخ بە دۆلار</label>
-                                <input type="number" class="form-control" id="edit_total_usd" name="edit_total_usd" readonly>
+                                <input type="text" class="form-control" id="edit_total_usd" name="edit_total_usd" readonly>
+                                <input type="hidden" id="edit_total_usd_raw" name="edit_total_usd_raw">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">کۆی نرخ بە دینار</label>
-                                <input type="number" class="form-control" id="edit_total_iqd" name="edit_total_iqd" readonly>
+                                <input type="text" class="form-control" id="edit_total_iqd" name="edit_total_iqd" readonly>
+                                <input type="hidden" id="edit_total_iqd_raw" name="edit_total_iqd_raw">
                             </div>
                             <div class="col-md-12 mb-3">
                                 <label for="edit_notes" class="form-label">تێبینی</label>
                                 <textarea class="form-control" id="edit_notes" name="edit_notes" rows="1"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Payment Details Section -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="border-bottom pb-2" style="color: var(--seafoam-green);">وردەکاری پارەدان</h6>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="edit_paid_amount_usd" class="form-label">پارەی دراو بە دۆلار</label>
+                                <input type="number" class="form-control" id="edit_paid_amount_usd" name="edit_paid_amount_usd" min="0" step="0.01" placeholder="0.00" value="0">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="edit_paid_amount_iqd" class="form-label">پارەی دراو بە دینار</label>
+                                <input type="number" class="form-control" id="edit_paid_amount_iqd" name="edit_paid_amount_iqd" min="0" step="0.01" placeholder="0.00" value="0">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="edit_remaining_amount_usd" class="form-label">پارەی ماوە بە دۆلار</label>
+                                <input type="text" class="form-control" id="edit_remaining_amount_usd" name="edit_remaining_amount_usd" placeholder="0.00" value="0" readonly>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="edit_remaining_amount_iqd" class="form-label">پارەی ماوە بە دینار</label>
+                                <input type="text" class="form-control" id="edit_remaining_amount_iqd" name="edit_remaining_amount_iqd" placeholder="0.00" value="0" readonly>
                             </div>
                         </div>
                     </div>
@@ -405,6 +472,33 @@ $persons = $pdo->query("SELECT id, name FROM other_expense_persons ORDER BY name
                         <div class="col-md-2 mb-3">
                             <label class="form-label fw-bold">نرخی 100 دۆلار بە دینار:</label>
                             <div class="form-control-plaintext" id="view_usd_to_iqd_rate"></div>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <label class="form-label fw-bold">جۆری مامەڵە:</label>
+                            <div class="form-control-plaintext" id="view_payment_type"></div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Details Section -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="border-bottom pb-2" style="color: var(--seafoam-green);">وردەکاری پارەدان</h6>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label fw-bold">پارەی دراو بە دۆلار:</label>
+                            <div class="form-control-plaintext" id="view_paid_amount_usd"></div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label fw-bold">پارەی دراو بە دینار:</label>
+                            <div class="form-control-plaintext" id="view_paid_amount_iqd"></div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label fw-bold">پارەی ماوە بە دۆلار:</label>
+                            <div class="form-control-plaintext" id="view_remaining_amount_usd"></div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label fw-bold">پارەی ماوە بە دینار:</label>
+                            <div class="form-control-plaintext" id="view_remaining_amount_iqd"></div>
                         </div>
                     </div>
 

@@ -5463,3 +5463,545 @@
     [notes] => 
 )
 
+[03-Aug-2025 11:47:46 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754214466
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 11:47:46 Europe/Berlin] add_sale.php POST: Array
+(
+    [customer_id] => 32
+    [recipient] => وستا ازاد
+    [location] => پیرەمەگرون
+    [invoice_number] => 12
+    [formula_id] => 18
+    [order_date] => 2025-08-02
+    [quantity] => 10
+    [price_per_unit] => 45
+    [total_price] => 450.0000
+    [payment_type] => قەرز
+    [amount_paid_iq] => 0
+    [amount_paid_usd] => 0
+    [remaining_amount] => 450.0000
+    [dolar_rate] => 139450
+    [discount] => 0
+    [notes] => 
+)
+
+[03-Aug-2025 11:48:26 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754214506
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 11:48:26 Europe/Berlin] add_sale.php POST: Array
+(
+    [customer_id] => 32
+    [recipient] => وستا ازاد
+    [location] => پیرەمەگرون
+    [invoice_number] => 125
+    [formula_id] => 22
+    [order_date] => 2025-08-02
+    [quantity] => 10
+    [price_per_unit] => 45
+    [total_price] => 450.0000
+    [payment_type] => قەرز
+    [amount_paid_iq] => 0
+    [amount_paid_usd] => 0
+    [remaining_amount] => 450.0000
+    [dolar_rate] => 139450
+    [discount] => 0
+    [notes] => 
+)
+
+[03-Aug-2025 11:57:12 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754215032
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 11:57:12 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[03-Aug-2025 12:43:21 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754217801
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 12:43:21 Europe/Berlin] Cars retrieved successfully: Count=15
+[03-Aug-2025 12:43:21 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754217801
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 12:43:21 Europe/Berlin] Employees retrieved successfully: Count=18
+[03-Aug-2025 15:53:52 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754229232
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 15:53:52 Europe/Berlin] Cars retrieved successfully: Count=15
+[03-Aug-2025 15:53:52 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754229232
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 15:53:52 Europe/Berlin] Employees retrieved successfully: Count=18
+[03-Aug-2025 16:07:58 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754230078
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 16:07:58 Europe/Berlin] Cars retrieved successfully: Count=15
+[03-Aug-2025 16:07:58 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754230078
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 16:07:58 Europe/Berlin] Employees retrieved successfully: Count=18
+[03-Aug-2025 16:08:01 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754230081
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 16:08:01 Europe/Berlin] Cars retrieved successfully: Count=15
+[03-Aug-2025 16:08:01 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754230081
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 16:08:01 Europe/Berlin] Employees retrieved successfully: Count=18
+[03-Aug-2025 16:08:55 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754230135
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 16:08:55 Europe/Berlin] Cars retrieved successfully: Count=15
+[03-Aug-2025 16:08:55 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754230135
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 16:08:55 Europe/Berlin] Employees retrieved successfully: Count=18
+[03-Aug-2025 16:12:09 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754230329
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 16:12:09 Europe/Berlin] Cars retrieved successfully: Count=15
+[03-Aug-2025 16:12:09 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754230329
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 16:12:09 Europe/Berlin] Employees retrieved successfully: Count=18
+[03-Aug-2025 16:14:30 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754230470
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 16:14:30 Europe/Berlin] Cars retrieved successfully: Count=15
+[03-Aug-2025 16:14:30 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754230470
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 16:14:30 Europe/Berlin] Employees retrieved successfully: Count=18
+[03-Aug-2025 16:21:32 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754230892
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 16:21:32 Europe/Berlin] Cars retrieved successfully: Count=15
+[03-Aug-2025 16:21:32 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754230892
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 16:21:32 Europe/Berlin] Employees retrieved successfully: Count=18
+[03-Aug-2025 16:22:38 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754230958
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 16:22:38 Europe/Berlin] Cars retrieved successfully: Count=15
+[03-Aug-2025 16:22:38 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754230958
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 16:22:38 Europe/Berlin] Employees retrieved successfully: Count=18
+[03-Aug-2025 16:23:57 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754231037
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 16:23:57 Europe/Berlin] Cars retrieved successfully: Count=15
+[03-Aug-2025 16:23:57 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754231037
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 16:23:57 Europe/Berlin] Employees retrieved successfully: Count=18
+[03-Aug-2025 16:25:53 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754231153
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 16:25:53 Europe/Berlin] Cars retrieved successfully: Count=15
+[03-Aug-2025 16:25:53 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754231153
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 16:25:53 Europe/Berlin] Employees retrieved successfully: Count=18
+[03-Aug-2025 16:33:36 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754231616
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 16:33:36 Europe/Berlin] Cars retrieved successfully: Count=15
+[03-Aug-2025 16:33:36 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754231616
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 16:33:36 Europe/Berlin] Employees retrieved successfully: Count=18
+[03-Aug-2025 16:33:46 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754231626
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 16:33:46 Europe/Berlin] Cars retrieved successfully: Count=15
+[03-Aug-2025 16:33:46 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754231626
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 16:33:46 Europe/Berlin] Employees retrieved successfully: Count=18
+[03-Aug-2025 16:37:04 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754231824
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 16:37:04 Europe/Berlin] Cars retrieved successfully: Count=15
+[03-Aug-2025 16:37:04 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754231824
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 16:37:04 Europe/Berlin] Employees retrieved successfully: Count=18
+[03-Aug-2025 16:38:13 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754231893
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 16:38:13 Europe/Berlin] Cars retrieved successfully: Count=15
+[03-Aug-2025 16:38:13 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754231893
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 16:38:13 Europe/Berlin] Employees retrieved successfully: Count=18
+[03-Aug-2025 16:39:57 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754231997
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 16:39:57 Europe/Berlin] Cars retrieved successfully: Count=15
+[03-Aug-2025 16:39:57 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754231997
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 16:39:57 Europe/Berlin] Employees retrieved successfully: Count=18
+[03-Aug-2025 16:43:22 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754232202
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 16:43:22 Europe/Berlin] Cars retrieved successfully: Count=15
+[03-Aug-2025 16:43:22 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754232202
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 16:43:22 Europe/Berlin] Employees retrieved successfully: Count=18
+[03-Aug-2025 16:44:00 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754232240
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 16:44:00 Europe/Berlin] Cars retrieved successfully: Count=15
+[03-Aug-2025 16:44:00 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754232240
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 16:44:00 Europe/Berlin] Employees retrieved successfully: Count=18
+[03-Aug-2025 16:45:34 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754232334
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 16:45:34 Europe/Berlin] Cars retrieved successfully: Count=15
+[03-Aug-2025 16:45:34 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754232334
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 16:45:34 Europe/Berlin] Employees retrieved successfully: Count=18
+[03-Aug-2025 16:45:40 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754232340
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 16:45:40 Europe/Berlin] Cars retrieved successfully: Count=15
+[03-Aug-2025 16:45:41 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754232341
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 16:45:41 Europe/Berlin] Employees retrieved successfully: Count=18
+[03-Aug-2025 16:47:34 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754232454
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 16:47:34 Europe/Berlin] Cars retrieved successfully: Count=15
+[03-Aug-2025 16:47:34 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754232454
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[03-Aug-2025 16:47:34 Europe/Berlin] Employees retrieved successfully: Count=18
+[04-Aug-2025 07:05:51 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754283951
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[04-Aug-2025 07:05:51 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[04-Aug-2025 07:06:12 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754283972
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[04-Aug-2025 07:06:12 Europe/Berlin] Cars retrieved successfully: Count=15
+[04-Aug-2025 07:06:12 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754283972
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[04-Aug-2025 07:06:12 Europe/Berlin] Employees retrieved successfully: Count=18
+[04-Aug-2025 07:10:10 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754284210
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[04-Aug-2025 07:10:10 Europe/Berlin] Cars retrieved successfully: Count=15
+[04-Aug-2025 07:10:10 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754284210
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[04-Aug-2025 07:10:10 Europe/Berlin] Employees retrieved successfully: Count=18
+[04-Aug-2025 07:10:11 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754284211
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[04-Aug-2025 07:10:11 Europe/Berlin] Cars retrieved successfully: Count=15
+[04-Aug-2025 07:10:11 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754284211
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[04-Aug-2025 07:10:11 Europe/Berlin] Employees retrieved successfully: Count=18
+[04-Aug-2025 07:33:50 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754285630
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[04-Aug-2025 07:33:50 Europe/Berlin] Cars retrieved successfully: Count=15
+[04-Aug-2025 07:33:50 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754285630
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[04-Aug-2025 07:33:50 Europe/Berlin] Employees retrieved successfully: Count=18
+[04-Aug-2025 07:42:44 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754286164
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[04-Aug-2025 07:42:44 Europe/Berlin] Cars retrieved successfully: Count=15
+[04-Aug-2025 07:42:44 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754286164
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[04-Aug-2025 07:42:44 Europe/Berlin] Employees retrieved successfully: Count=18

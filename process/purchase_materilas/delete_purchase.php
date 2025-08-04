@@ -44,8 +44,69 @@ try {
     
     $receipt_number = $result['receipt_number'];
     
+    // Get purchase data to revert quantities
+    $stmt = $pdo->prepare("
+        SELECT material_id, unit_type, quantity, base_quantity 
+        FROM purchase_materials 
+        WHERE receipt_number = ?
+    ");
+    $stmt->execute([$receipt_number]);
+    $purchases = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
     // Start transaction
     $pdo->beginTransaction();
+    
+    // Revert quantities from materials
+    foreach ($purchases as $purchase) {
+        // Get material info for unit conversion
+        $materialStmt = $pdo->prepare("
+            SELECT unit_type, pieces_per_carton, buckets_per_barrel, liters_per_bucket, liters_per_barrel,
+                   price_per_piece_usd, price_per_piece_iqd, price_per_bucket_usd, price_per_bucket_iqd,
+                   price_per_liter_usd, price_per_liter_iqd, quantity
+            FROM list_materials WHERE id = ?
+        ");
+        $materialStmt->execute([$purchase['material_id']]);
+        $materialInfo = $materialStmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($materialInfo) {
+            // Calculate quantity to subtract based on purchase
+            $quantity_to_subtract = 0;
+            $purchase_unit_type = $purchase['unit_type'];
+            $material_unit_type = $materialInfo['unit_type'] ?? 'دانە';
+            
+            // Handle different unit type conversions for reverting
+            if ($purchase_unit_type === 'کارتۆن' && $material_unit_type === 'کارتۆن' && $materialInfo['pieces_per_carton']) {
+                $quantity_to_subtract = $purchase['quantity'] * $materialInfo['pieces_per_carton'];
+            } elseif ($purchase_unit_type === 'دانە' && $material_unit_type === 'کارتۆن' && $materialInfo['pieces_per_carton']) {
+                $quantity_to_subtract = $purchase['quantity'];
+            } elseif ($purchase_unit_type === 'بەرمیل' && $material_unit_type === 'بەرمیل' && $materialInfo['liters_per_barrel']) {
+                $quantity_to_subtract = $purchase['quantity'] * $materialInfo['liters_per_barrel'];
+            } elseif ($purchase_unit_type === 'دەبە' && $material_unit_type === 'بەرمیل' && $materialInfo['buckets_per_barrel']) {
+                $quantity_to_subtract = $purchase['quantity'] * $materialInfo['liters_per_bucket'];
+            } elseif ($purchase_unit_type === 'لیتر' && $material_unit_type === 'بەرمیل' && $materialInfo['liters_per_barrel']) {
+                $quantity_to_subtract = $purchase['quantity'];
+            } elseif ($purchase_unit_type === 'دەبە' && $material_unit_type === 'دەبە' && $materialInfo['liters_per_bucket']) {
+                $quantity_to_subtract = $purchase['quantity'] * $materialInfo['liters_per_bucket'];
+            } elseif ($purchase_unit_type === 'لیتر' && $material_unit_type === 'دەبە' && $materialInfo['liters_per_bucket']) {
+                $quantity_to_subtract = $purchase['quantity'];
+            } elseif ($purchase_unit_type === 'لیتر' && $material_unit_type === 'لیتر') {
+                $quantity_to_subtract = $purchase['quantity'];
+            } elseif ($purchase_unit_type === 'دانە' && $material_unit_type === 'دانە') {
+                $quantity_to_subtract = $purchase['quantity'];
+            } else {
+                $quantity_to_subtract = $purchase['quantity'];
+            }
+            
+            // Subtract the quantity
+            $new_quantity = max(0, $materialInfo['quantity'] - $quantity_to_subtract);
+            $updateMaterialStmt = $pdo->prepare("
+                UPDATE list_materials 
+                SET quantity = ? 
+                WHERE id = ?
+            ");
+            $updateMaterialStmt->execute([$new_quantity, $purchase['material_id']]);
+        }
+    }
     
     // Delete all materials for this receipt number
     $stmt = $pdo->prepare("DELETE FROM purchase_materials WHERE receipt_number = ?");

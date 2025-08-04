@@ -77,6 +77,8 @@ $(function() {
               $('#addMaterialForm')[0].reset();
               // Reset calculated prices display
               $('#calculated_prices').hide();
+              // Trigger custom event for summary cards update
+              $(document).trigger('materialAdded');
             });
           } else {
             Swal.fire({
@@ -102,6 +104,8 @@ $(function() {
               $('#addMaterialForm')[0].reset();
               // Reset calculated prices display
               $('#calculated_prices').hide();
+              // Trigger custom event for summary cards update
+              $(document).trigger('materialAdded');
             });
           } else {
             Swal.fire({

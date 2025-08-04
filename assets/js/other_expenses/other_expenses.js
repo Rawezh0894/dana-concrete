@@ -224,6 +224,15 @@ document.addEventListener('DOMContentLoaded', function() {
             let paidIqdVal = parseFloat(paidIqd.value) || 0;
             let paidUsdVal = parseFloat(paidUsd.value) || 0;
             let exRate = parseFloat(exchangeRate.value) || 0;
+            
+            // Use the exchange rate from the input field
+            if (exRate === 0) {
+                // If exchange rate is not set, try to get it from the field
+                const exchangeRateField = document.getElementById('exchange_rate');
+                if (exchangeRateField && exchangeRateField.value) {
+                    exRate = parseFloat(exchangeRateField.value);
+                }
+            }
             if (currencyType.value === 'دینار') {
                 // If paid_usd entered, convert to IQD and add to paid_iqd
                 if (paidUsdVal > 0) {
@@ -264,19 +273,105 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Handle material selection for add form
+    // Add event listeners for material selection
     const addMaterialSelect = document.getElementById('material_id');
+    const editMaterialSelect = document.getElementById('edit_material_id');
+    
     if (addMaterialSelect) {
         addMaterialSelect.addEventListener('change', function() {
-            populateMaterialPrices(this.value, 'add');
+            const materialId = this.value;
+            if (materialId) {
+                populateMaterialPrices(materialId, 'add');
+                // Clear any existing quantity and recalculate
+                const quantityField = document.getElementById('material_quantity');
+                if (quantityField) {
+                    quantityField.value = '';
+                    clearMaterialAvailabilityMessage('add');
+                    clearMaterialUnitInfo('add');
+                    clearBaseQuantityDisplay('add');
+                }
+                // Clear usage unit selection when material changes
+                const usageUnitField = document.getElementById('usage_unit_type');
+                if (usageUnitField) {
+                    usageUnitField.value = '';
+                }
+                // Clear material unit info
+                clearMaterialUnitInfo('add');
+            } else {
+                clearMaterialAvailabilityMessage('add');
+                clearMaterialUnitInfo('add');
+                clearBaseQuantityDisplay('add');
+                // Clear usage unit and reset prices when material is cleared
+                const usageUnitField = document.getElementById('usage_unit_type');
+                if (usageUnitField) {
+                    usageUnitField.value = '';
+                    usageUnitField.innerHTML = '<option value="">یەکەی بەکارهێنان هەڵبژێرە</option>';
+                }
+                // Clear material unit info
+                clearMaterialUnitInfo('add');
+                // Clear price fields
+                const iqdPriceField = document.getElementById('material_purchase_price_iqd');
+                const usdPriceField = document.getElementById('material_purchase_price_usd');
+                const totalCostField = document.getElementById('material_total_cost');
+                if (iqdPriceField) iqdPriceField.value = '';
+                if (usdPriceField) usdPriceField.value = '';
+                if (totalCostField) {
+                    totalCostField.value = '';
+                    // Reset placeholder
+                    if (totalCostField.hasAttribute('data-original-placeholder')) {
+                        totalCostField.placeholder = totalCostField.getAttribute('data-original-placeholder');
+                    }
+                }
+            }
         });
     }
-
-    // Handle material selection for edit form
-    const editMaterialSelect = document.getElementById('edit_material_id');
+    
     if (editMaterialSelect) {
         editMaterialSelect.addEventListener('change', function() {
-            populateMaterialPrices(this.value, 'edit');
+            const materialId = this.value;
+            if (materialId) {
+                populateMaterialPrices(materialId, 'edit');
+                // Clear any existing quantity and recalculate
+                const quantityField = document.getElementById('edit_material_quantity');
+                if (quantityField) {
+                    quantityField.value = '';
+                    clearMaterialAvailabilityMessage('edit');
+                    clearMaterialUnitInfo('edit');
+                    clearBaseQuantityDisplay('edit');
+                }
+                // Clear usage unit selection when material changes
+                const usageUnitField = document.getElementById('edit_usage_unit_type');
+                if (usageUnitField) {
+                    usageUnitField.value = '';
+                }
+                // Clear material unit info
+                clearMaterialUnitInfo('edit');
+            } else {
+                clearMaterialAvailabilityMessage('edit');
+                clearMaterialUnitInfo('edit');
+                clearBaseQuantityDisplay('edit');
+                // Clear usage unit and reset prices when material is cleared
+                const usageUnitField = document.getElementById('edit_usage_unit_type');
+                if (usageUnitField) {
+                    usageUnitField.value = '';
+                    usageUnitField.innerHTML = '<option value="">یەکەی بەکارهێنان هەڵبژێرە</option>';
+                }
+                // Clear material unit info
+                clearMaterialUnitInfo('edit');
+                // Clear price fields
+                const iqdPriceField = document.getElementById('edit_material_purchase_price_iqd');
+                const usdPriceField = document.getElementById('edit_material_purchase_price_usd');
+                const totalCostField = document.getElementById('edit_material_total_cost');
+                if (iqdPriceField) iqdPriceField.value = '';
+                if (usdPriceField) usdPriceField.value = '';
+                if (totalCostField) {
+                    totalCostField.value = '';
+                    // Reset placeholder
+                    if (totalCostField.hasAttribute('data-original-placeholder')) {
+                        totalCostField.placeholder = totalCostField.getAttribute('data-original-placeholder');
+                    }
+                }
+            }
         });
     }
 
@@ -290,6 +385,8 @@ document.addEventListener('DOMContentLoaded', function() {
             calculateMaterialTotalCost('add');
             // Check material availability when quantity changes
             checkMaterialAvailability('add');
+            // Calculate and display base quantity
+            calculateAndDisplayBaseQuantity('add');
         });
     }
     if (addIqdPriceField) {
@@ -328,6 +425,8 @@ document.addEventListener('DOMContentLoaded', function() {
             calculateMaterialTotalCost('edit');
             // Check material availability when quantity changes
             checkMaterialAvailability('edit');
+            // Calculate and display base quantity
+            calculateAndDisplayBaseQuantity('edit');
         });
     }
     if (editIqdPriceField) {
@@ -383,6 +482,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         const material = data.data;
                         console.log('Processing material:', material);
                         
+                        // Display material unit information
+                        displayMaterialUnitInfo(material, formType);
+                        
+                        // Populate usage unit type options
+                        populateUsageUnitOptions(material, formType);
+                        
                         // Populate price fields based on currency type
                         if (material.currency_type === 'دۆلار') {
                             // If material currency is USD, populate USD field
@@ -419,6 +524,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         // Calculate total cost after populating prices
                         console.log('Calling calculateMaterialTotalCost');
                         calculateMaterialTotalCost(formType);
+                        
+                        // Update prices based on current usage unit if selected
+                        const usageUnitField = document.getElementById(prefix + 'usage_unit_type');
+                        if (usageUnitField && usageUnitField.value) {
+                            console.log('Usage unit already selected, updating prices');
+                            updateMaterialPricesByUsageUnit(formType);
+                        }
                     } else {
                         console.error('Error fetching material details:', data.msg);
                     }
@@ -443,6 +555,248 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Function to populate usage unit type options
+    window.populateUsageUnitOptions = function(material, formType) {
+        try {
+            const prefix = formType === 'edit' ? 'edit_' : '';
+            const usageUnitSelect = document.getElementById(prefix + 'usage_unit_type');
+            
+            if (!usageUnitSelect) {
+                console.warn('Usage unit type select not found:', prefix + 'usage_unit_type');
+                return;
+            }
+            
+            // Clear existing options and reset prices
+            usageUnitSelect.innerHTML = '<option value="">یەکەی بەکارهێنان هەڵبژێرە</option>';
+            
+            // Reset material prices to base prices when usage unit is cleared
+            const materialIdField = document.getElementById(prefix + 'material_id');
+            if (materialIdField && materialIdField.value) {
+                // Reset prices to base material prices
+                const iqdPriceField = document.getElementById(prefix + 'material_purchase_price_iqd');
+                const usdPriceField = document.getElementById(prefix + 'material_purchase_price_usd');
+                const totalCostField = document.getElementById(prefix + 'material_total_cost');
+                
+                if (material.currency_type === 'دۆلار') {
+                    if (usdPriceField) usdPriceField.value = material.purchase_price_usd || '';
+                    if (iqdPriceField) iqdPriceField.value = '';
+                } else {
+                    if (iqdPriceField) iqdPriceField.value = material.purchase_price_iqd || '';
+                    if (usdPriceField) usdPriceField.value = '';
+                }
+                
+                // Reset total cost field placeholder
+                if (totalCostField && totalCostField.hasAttribute('data-original-placeholder')) {
+                    totalCostField.placeholder = totalCostField.getAttribute('data-original-placeholder');
+                }
+                
+                // Recalculate total cost
+                calculateMaterialTotalCost(formType);
+            }
+            
+            const materialUnitType = material.unit_type;
+            const piecesPerCarton = material.pieces_per_carton;
+            const litersPerBarrel = material.liters_per_barrel;
+            const litersPerBucket = material.liters_per_bucket;
+            
+            // Add options based on material unit type
+            if (materialUnitType === 'کارتۆن') {
+                usageUnitSelect.innerHTML += '<option value="کارتۆن">کارتۆن</option>';
+                if (piecesPerCarton && piecesPerCarton > 0) {
+                    usageUnitSelect.innerHTML += '<option value="دانە">دانە</option>';
+                }
+            } else if (materialUnitType === 'بەرمیل') {
+                usageUnitSelect.innerHTML += '<option value="بەرمیل">بەرمیل</option>';
+                if (litersPerBarrel && litersPerBarrel > 0) {
+                    usageUnitSelect.innerHTML += '<option value="لیتر">لیتر</option>';
+                }
+                if (litersPerBucket && litersPerBucket > 0) {
+                    usageUnitSelect.innerHTML += '<option value="دەبە">دەبە</option>';
+                }
+            } else if (materialUnitType === 'دەبە') {
+                usageUnitSelect.innerHTML += '<option value="دەبە">دەبە</option>';
+                if (litersPerBucket && litersPerBucket > 0) {
+                    usageUnitSelect.innerHTML += '<option value="لیتر">لیتر</option>';
+                }
+            } else if (materialUnitType === 'لیتر') {
+                usageUnitSelect.innerHTML += '<option value="لیتر">لیتر</option>';
+            } else if (materialUnitType === 'دانە') {
+                usageUnitSelect.innerHTML += '<option value="دانە">دانە</option>';
+            }
+            
+            console.log('Populated usage unit options for material unit type:', materialUnitType);
+            
+        } catch (error) {
+            console.error('Error in populateUsageUnitOptions:', error);
+        }
+    }
+
+    // Function to display material unit information
+    window.displayMaterialUnitInfo = function(material, formType) {
+        try {
+            const prefix = formType === 'edit' ? 'edit_' : '';
+            const quantityField = document.getElementById(prefix + 'material_quantity');
+            
+            if (!quantityField) return;
+            
+            // Remove any existing unit info
+            clearMaterialUnitInfo(formType);
+            
+            // Create unit info element
+            const unitInfoDiv = document.createElement('div');
+            unitInfoDiv.className = 'material-unit-info';
+            unitInfoDiv.style.fontSize = '12px';
+            unitInfoDiv.style.marginTop = '5px';
+            unitInfoDiv.style.color = '#6c757d';
+            
+            let unitInfoText = `یەکە: ${material.unit_type}`;
+            
+            // Add conversion information based on unit type
+            if (material.unit_type === 'کارتۆن' && material.pieces_per_carton) {
+                unitInfoText += ` (${material.pieces_per_carton} دانە لە کارتۆن)`;
+            } else if (material.unit_type === 'بەرمیل' && material.liters_per_barrel) {
+                unitInfoText += ` (${material.liters_per_barrel} لیتر لە بەرمیل)`;
+            } else if (material.unit_type === 'دەبە' && material.liters_per_bucket) {
+                unitInfoText += ` (${material.liters_per_bucket} لیتر لە دەبە)`;
+            }
+            
+            unitInfoText += ' - بڕی بنەڕەتی بە دانە/لیتر هەژمار دەکرێت';
+            
+            unitInfoDiv.textContent = unitInfoText;
+            
+            // Add unit info after quantity field
+            quantityField.parentNode.appendChild(unitInfoDiv);
+            
+        } catch (error) {
+            console.error('Error in displayMaterialUnitInfo:', error);
+        }
+    }
+
+    // Function to clear material unit info
+    window.clearMaterialUnitInfo = function(formType) {
+        const prefix = formType === 'edit' ? 'edit_' : '';
+        const quantityField = document.getElementById(prefix + 'material_quantity');
+        
+        if (!quantityField) return;
+        
+        // Remove existing unit info
+        const existingUnitInfo = quantityField.parentNode.querySelector('.material-unit-info');
+        if (existingUnitInfo) {
+            existingUnitInfo.remove();
+        }
+        
+        // Reset total cost field placeholder
+        const totalCostField = document.getElementById(prefix + 'material_total_cost');
+        if (totalCostField && totalCostField.hasAttribute('data-original-placeholder')) {
+            totalCostField.placeholder = totalCostField.getAttribute('data-original-placeholder');
+        }
+    }
+
+    // Function to calculate and display base quantity
+    window.calculateAndDisplayBaseQuantity = function(formType) {
+        try {
+            const prefix = formType === 'edit' ? 'edit_' : '';
+            const quantityField = document.getElementById(prefix + 'material_quantity');
+            const materialSelect = document.getElementById(prefix + 'material_id');
+            const usageUnitSelect = document.getElementById(prefix + 'usage_unit_type');
+            
+            if (!quantityField || !materialSelect || !usageUnitSelect) return;
+            
+            const quantity = parseFloat(quantityField.value) || 0;
+            const materialId = materialSelect.value;
+            const usageUnitType = usageUnitSelect.value;
+            
+            if (quantity <= 0 || !materialId || !usageUnitType) {
+                clearBaseQuantityDisplay(formType);
+                return;
+            }
+            
+            // Get material details to calculate base quantity
+            fetch(`../process/other_expenses/get_material_details.php?material_id=${materialId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const material = data.data;
+                        let baseQuantity = quantity;
+                        
+                        // Calculate base quantity based on usage unit type and material unit type
+                        if (usageUnitType === 'کارتۆن' && material.unit_type === 'کارتۆن' && material.pieces_per_carton) {
+                            baseQuantity = quantity * material.pieces_per_carton;
+                        } else if (usageUnitType === 'دانە' && material.unit_type === 'کارتۆن') {
+                            baseQuantity = quantity;
+                        } else if (usageUnitType === 'بەرمیل' && material.unit_type === 'بەرمیل' && material.liters_per_barrel) {
+                            baseQuantity = quantity * material.liters_per_barrel;
+                        } else if (usageUnitType === 'لیتر' && material.unit_type === 'بەرمیل') {
+                            baseQuantity = quantity;
+                        } else if (usageUnitType === 'دەبە' && material.unit_type === 'بەرمیل' && material.liters_per_bucket) {
+                            baseQuantity = quantity * material.liters_per_bucket;
+                        } else if (usageUnitType === 'دەبە' && material.unit_type === 'دەبە' && material.liters_per_bucket) {
+                            baseQuantity = quantity * material.liters_per_bucket;
+                        } else if (usageUnitType === 'لیتر' && material.unit_type === 'دەبە') {
+                            baseQuantity = quantity;
+                        } else if (usageUnitType === 'لیتر' && material.unit_type === 'لیتر') {
+                            baseQuantity = quantity;
+                        } else if (usageUnitType === 'دانە' && material.unit_type === 'دانە') {
+                            baseQuantity = quantity;
+                        } else {
+                            baseQuantity = quantity;
+                        }
+                        
+                        displayBaseQuantity(baseQuantity, usageUnitType, formType);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error calculating base quantity:', error);
+                });
+                
+        } catch (error) {
+            console.error('Error in calculateAndDisplayBaseQuantity:', error);
+        }
+    }
+
+    // Function to display base quantity
+    window.displayBaseQuantity = function(baseQuantity, unitType, formType) {
+        const prefix = formType === 'edit' ? 'edit_' : '';
+        const quantityField = document.getElementById(prefix + 'material_quantity');
+        
+        if (!quantityField) return;
+        
+        // Remove any existing base quantity display
+        clearBaseQuantityDisplay(formType);
+        
+        // Create base quantity display element
+        const baseQuantityDiv = document.createElement('div');
+        baseQuantityDiv.className = 'base-quantity-display';
+        baseQuantityDiv.style.fontSize = '11px';
+        baseQuantityDiv.style.marginTop = '3px';
+        baseQuantityDiv.style.color = '#0d6efd';
+        baseQuantityDiv.style.fontWeight = 'bold';
+        
+        let baseUnit = 'دانە';
+        if (unitType === 'بەرمیل' || unitType === 'دەبە') {
+            baseUnit = 'لیتر';
+        }
+        
+        baseQuantityDiv.textContent = `بڕی بنەڕەتی: ${baseQuantity.toFixed(2)} ${baseUnit}`;
+        
+        // Add base quantity display after quantity field
+        quantityField.parentNode.appendChild(baseQuantityDiv);
+    }
+
+    // Function to clear base quantity display
+    window.clearBaseQuantityDisplay = function(formType) {
+        const prefix = formType === 'edit' ? 'edit_' : '';
+        const quantityField = document.getElementById(prefix + 'material_quantity');
+        
+        if (!quantityField) return;
+        
+        // Remove existing base quantity display
+        const existingBaseQuantity = quantityField.parentNode.querySelector('.base-quantity-display');
+        if (existingBaseQuantity) {
+            existingBaseQuantity.remove();
+        }
+    }
+
     // Function to calculate material total cost
     window.calculateMaterialTotalCost = function(formType) {
         try {
@@ -454,12 +808,14 @@ document.addEventListener('DOMContentLoaded', function() {
             const iqdPriceField = document.getElementById(prefix + 'material_purchase_price_iqd');
             const usdPriceField = document.getElementById(prefix + 'material_purchase_price_usd');
             const totalCostField = document.getElementById(prefix + 'material_total_cost');
+            const usageUnitField = document.getElementById(prefix + 'usage_unit_type');
             
             console.log('Fields found:', {
                 quantityField: !!quantityField,
                 iqdPriceField: !!iqdPriceField,
                 usdPriceField: !!usdPriceField,
-                totalCostField: !!totalCostField
+                totalCostField: !!totalCostField,
+                usageUnitField: !!usageUnitField
             });
             
             if (!quantityField || !totalCostField) {
@@ -470,8 +826,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const quantity = parseFloat(quantityField.value) || 0;
             const iqdPrice = parseFloat(iqdPriceField?.value) || 0;
             const usdPrice = parseFloat(usdPriceField?.value) || 0;
+            const usageUnit = usageUnitField?.value || '';
             
-            console.log('Values:', { quantity, iqdPrice, usdPrice });
+            console.log('Values:', { quantity, iqdPrice, usdPrice, usageUnit });
             
             // Use whichever price is available (IQD or USD)
             const price = iqdPrice > 0 ? iqdPrice : usdPrice;
@@ -479,11 +836,20 @@ document.addEventListener('DOMContentLoaded', function() {
             // Calculate total cost: quantity × price
             const totalCost = quantity * price;
             
-            console.log('Calculation:', { quantity, price, totalCost });
+            console.log('Calculation:', { quantity, price, totalCost, usageUnit });
             
             // Update the total cost field
             totalCostField.value = totalCost.toFixed(2);
             console.log('Updated material total cost field with:', totalCost.toFixed(2));
+            
+            // Display usage unit info in total cost field
+            if (usageUnit && totalCostField) {
+                const unitInfo = ` (${usageUnit})`;
+                if (!totalCostField.hasAttribute('data-original-placeholder')) {
+                    totalCostField.setAttribute('data-original-placeholder', totalCostField.placeholder || '');
+                }
+                totalCostField.placeholder = totalCostField.getAttribute('data-original-placeholder') + unitInfo;
+            }
         } catch (error) {
             console.error('Error in calculateMaterialTotalCost:', error);
             console.error('Error details:', {
@@ -539,60 +905,153 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Function to check material availability
-    window.checkMaterialAvailability = function(formType) {
+    // Function to update material prices based on usage unit
+    window.updateMaterialPricesByUsageUnit = function(formType) {
         try {
-            console.log('checkMaterialAvailability called with:', { formType });
+            console.log('updateMaterialPricesByUsageUnit called with:', { formType });
             
             const prefix = formType === 'edit' ? 'edit_' : '';
             
-            const materialSelect = document.getElementById(prefix + 'material_id');
+            const materialIdField = document.getElementById(prefix + 'material_id');
+            const usageUnitField = document.getElementById(prefix + 'usage_unit_type');
             const quantityField = document.getElementById(prefix + 'material_quantity');
             
-            console.log('Fields found:', {
-                materialSelect: !!materialSelect,
-                quantityField: !!quantityField
-            });
-            
-            if (!materialSelect || !quantityField) {
-                console.warn('Required fields not found for material availability check');
+            if (!materialIdField || !usageUnitField || !quantityField) {
+                console.warn('Required fields not found for price update');
                 return;
             }
             
-            const materialId = materialSelect.value;
+            const materialId = materialIdField.value;
+            const usageUnit = usageUnitField.value;
             const quantity = parseFloat(quantityField.value) || 0;
             
-            console.log('Values:', { materialId, quantity });
+            if (!materialId || !usageUnit) {
+                console.log('Material ID or usage unit not selected');
+                return;
+            }
             
-            // Only check if both material and quantity are provided
-            if (!materialId || quantity <= 0) {
-                console.log('Material ID or quantity not provided, clearing messages');
-                // Clear any previous error messages
+            console.log('Updating prices for:', { materialId, usageUnit, quantity });
+            
+            // Fetch material details to get conversion rates
+            fetch(`../process/other_expenses/get_material_details.php?material_id=${materialId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const material = data.data;
+                        console.log('Material details:', material);
+                        
+                        // Calculate price based on usage unit
+                        let newPrice = 0;
+                        let priceField = null;
+                        
+                        if (material.currency_type === 'دۆلار') {
+                            priceField = document.getElementById(prefix + 'material_purchase_price_usd');
+                            newPrice = calculatePriceByUsageUnit(material, usageUnit, 'usd');
+                        } else {
+                            priceField = document.getElementById(prefix + 'material_purchase_price_iqd');
+                            newPrice = calculatePriceByUsageUnit(material, usageUnit, 'iqd');
+                        }
+                        
+                        if (priceField) {
+                            priceField.value = newPrice.toFixed(2);
+                            console.log('Updated price field with:', newPrice.toFixed(2));
+                            
+                            // Recalculate total cost
+                            calculateMaterialTotalCost(formType);
+                        }
+                    } else {
+                        console.error('Error fetching material details:', data.msg);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating material prices:', error);
+                });
+                
+        } catch (error) {
+            console.error('Error in updateMaterialPricesByUsageUnit:', error);
+        }
+    }
+
+    // Helper function to calculate price based on usage unit
+    function calculatePriceByUsageUnit(material, usageUnit, currencyType) {
+        const basePrice = currencyType === 'usd' ? material.purchase_price_usd : material.purchase_price_iqd;
+        const materialUnitType = material.unit_type;
+        
+        console.log('Calculating price for:', { usageUnit, materialUnitType, basePrice });
+        
+        // If usage unit is same as material unit type, return base price
+        if (usageUnit === materialUnitType) {
+            return basePrice;
+        }
+        
+        // Calculate conversion based on unit types
+        if (materialUnitType === 'کارتۆن' && usageUnit === 'دانە') {
+            // Convert from carton to pieces
+            const piecesPerCarton = material.pieces_per_carton || 1;
+            return basePrice / piecesPerCarton;
+        } else if (materialUnitType === 'بەرمیل' && usageUnit === 'لیتر') {
+            // Convert from barrel to liters
+            const litersPerBarrel = material.liters_per_barrel || 1;
+            return basePrice / litersPerBarrel;
+        } else if (materialUnitType === 'بەرمیل' && usageUnit === 'دەبە') {
+            // Convert from barrel to bucket
+            const litersPerBucket = material.liters_per_bucket || 1;
+            const litersPerBarrel = material.liters_per_barrel || 1;
+            return (basePrice / litersPerBarrel) * litersPerBucket;
+        } else if (materialUnitType === 'دەبە' && usageUnit === 'لیتر') {
+            // Convert from bucket to liters
+            const litersPerBucket = material.liters_per_bucket || 1;
+            return basePrice / litersPerBucket;
+        }
+        
+        // If no conversion found, return base price
+        console.warn('No conversion found for:', { usageUnit, materialUnitType });
+        return basePrice;
+    }
+
+    // Function to check material availability
+    window.checkMaterialAvailability = function(formType) {
+        try {
+            const prefix = formType === 'edit' ? 'edit_' : '';
+            const materialSelect = document.getElementById(prefix + 'material_id');
+            const quantityField = document.getElementById(prefix + 'material_quantity');
+            const usageUnitSelect = document.getElementById(prefix + 'usage_unit_type');
+            
+            if (!materialSelect || !quantityField || !usageUnitSelect) return;
+            
+            const materialId = materialSelect.value;
+            const quantity = parseFloat(quantityField.value) || 0;
+            const usageUnitType = usageUnitSelect.value;
+            
+            if (!materialId || quantity <= 0 || !usageUnitType) {
                 clearMaterialAvailabilityMessage(formType);
                 return;
             }
             
-            console.log('Checking material availability for:', { materialId, quantity });
-            
-            // Check availability via AJAX
-            fetch(`../process/other_expenses/check_material_availability.php?material_id=${materialId}&required_quantity=${quantity}`)
-                .then(response => {
-                    console.log('Material availability response status:', response.status);
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
+            // Check material availability using the new endpoint with usage unit type
+            fetch(`../process/other_expenses/check_material_availability.php?material_id=${materialId}&quantity=${quantity}&usage_unit_type=${usageUnitType}`)
+                .then(response => response.json())
                 .then(data => {
-                    console.log('Material availability data received:', data);
                     if (data.success) {
-                        // Material is available
-                        console.log('Material is available:', data.msg);
-                        showMaterialAvailabilityMessage(formType, 'success', data.msg);
+                        if (data.available) {
+                            let baseUnit = 'دانە';
+                            if (data.unit_type === 'بەرمیل' || data.unit_type === 'دەبە') {
+                                baseUnit = 'لیتر';
+                            }
+                            
+                            const message = `بڕی پێویست لە کۆگا هەیە. بڕی بەردەست: ${data.available_quantity} ${baseUnit}، بڕی پێویست: ${data.base_required_quantity} ${baseUnit}`;
+                            showMaterialAvailabilityMessage(formType, 'success', message);
+                        } else {
+                            let baseUnit = 'دانە';
+                            if (data.unit_type === 'بەرمیل' || data.unit_type === 'دەبە') {
+                                baseUnit = 'لیتر';
+                            }
+                            
+                            const message = `بڕی پێویست لە کۆگا نەماوە. بڕی بەردەست: ${data.available_quantity} ${baseUnit}، بڕی پێویست: ${data.base_required_quantity} ${baseUnit}`;
+                            showMaterialAvailabilityMessage(formType, 'error', message);
+                        }
                     } else {
-                        // Material is not available
-                        console.log('Material is not available:', data.msg);
-                        showMaterialAvailabilityMessage(formType, 'error', data.msg);
+                        showMaterialAvailabilityMessage(formType, 'error', data.msg || 'هەڵە لە پشکنینی بەردەستبوونی کاڵا');
                     }
                 })
                 .catch(error => {
@@ -602,6 +1061,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         stack: error.stack,
                         materialId,
                         quantity,
+                        usageUnitType,
                         formType
                     });
                     showMaterialAvailabilityMessage(formType, 'error', 'هەڵە لە پشکنینی بەردەستبوونی کاڵا');
@@ -806,7 +1266,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Show only material fields for "Warehouse material usage"
             gasMaterialFields.forEach(field => {
                 const fieldId = field.querySelector('input, select')?.id || '';
-                if (fieldId.includes('material_')) {
+                if (fieldId.includes('material_') || fieldId.includes('usage_unit_type')) {
                     field.style.display = 'block';
                     field.classList.add('show');
                 } else {
@@ -831,7 +1291,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (fieldId.includes('gas_') || fieldId.includes('gas_liters')) {
                     field.style.display = 'block';
                     field.classList.add('show');
-                } else if (fieldId.includes('material_')) {
+                } else if (fieldId.includes('material_') || fieldId.includes('usage_unit_type')) {
                     field.style.display = 'none';
                     field.classList.remove('show');
                 }
@@ -909,6 +1369,79 @@ document.addEventListener('DOMContentLoaded', function() {
         toggleCarField(expenseType, formType);
     }
 
+    // Function to handle expense type changes
+    window.handleExpenseTypeChange = function(formType) {
+        const prefix = formType === 'edit' ? 'edit_' : '';
+        const expenseTypeSelect = document.getElementById(prefix + 'expense_type');
+        
+        if (!expenseTypeSelect) return;
+        
+        const expenseType = expenseTypeSelect.value;
+        
+        // Clear all material-related information when expense type changes
+        clearMaterialAvailabilityMessage(formType);
+        clearMaterialUnitInfo(formType);
+        clearBaseQuantityDisplay(formType);
+        
+        // Show/hide relevant fields based on expense type
+        const materialFields = document.querySelectorAll(`[id^="${prefix}material_"]`);
+        const gasFields = document.querySelectorAll(`[id^="${prefix}gas_"]`);
+        
+        if (expenseType === 'بەکارهێنانی کاڵای کۆگا') {
+            // Show material fields, hide gas fields
+            materialFields.forEach(field => {
+                if (field.parentElement) {
+                    field.parentElement.style.display = 'block';
+                }
+            });
+            gasFields.forEach(field => {
+                if (field.parentElement) {
+                    field.parentElement.style.display = 'none';
+                }
+            });
+        } else if (expenseType === 'بەکارهێنانی گاز') {
+            // Show gas fields, hide material fields
+            materialFields.forEach(field => {
+                if (field.parentElement) {
+                    field.parentElement.style.display = 'none';
+                }
+            });
+            gasFields.forEach(field => {
+                if (field.parentElement) {
+                    field.parentElement.style.display = 'block';
+                }
+            });
+        } else {
+            // Hide both material and gas fields for other expense types
+            materialFields.forEach(field => {
+                if (field.parentElement) {
+                    field.parentElement.style.display = 'none';
+                }
+            });
+            gasFields.forEach(field => {
+                if (field.parentElement) {
+                    field.parentElement.style.display = 'none';
+                }
+            });
+        }
+    }
+
+    // Add event listeners for expense type changes
+    const addExpenseTypeSelect = document.getElementById('expense_type');
+    const editExpenseTypeSelect = document.getElementById('edit_expense_type');
+    
+    if (addExpenseTypeSelect) {
+        addExpenseTypeSelect.addEventListener('change', function() {
+            handleExpenseTypeChange('add');
+        });
+    }
+    
+    if (editExpenseTypeSelect) {
+        editExpenseTypeSelect.addEventListener('change', function() {
+            handleExpenseTypeChange('edit');
+        });
+    }
+
     // Initialize field visibility when modals are shown
     if (addExpenseModal) {
         addExpenseModal.addEventListener('show.bs.modal', function() {
@@ -931,4 +1464,107 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Update USD rate display every 5 minutes
     setInterval(updateUsdRateDisplay, 5 * 60 * 1000);
+
+    // Add event listeners for usage unit type changes
+    const addUsageUnitSelect = document.getElementById('usage_unit_type');
+    const editUsageUnitSelect = document.getElementById('edit_usage_unit_type');
+    
+    if (addUsageUnitSelect) {
+        addUsageUnitSelect.addEventListener('change', function() {
+            // Recalculate base quantity when usage unit changes
+            calculateAndDisplayBaseQuantity('add');
+            // Check material availability with new unit
+            checkMaterialAvailability('add');
+            // Update material prices based on usage unit
+            updateMaterialPricesByUsageUnit('add');
+        });
+    }
+    
+    if (editUsageUnitSelect) {
+        editUsageUnitSelect.addEventListener('change', function() {
+            // Recalculate base quantity when usage unit changes
+            calculateAndDisplayBaseQuantity('edit');
+            // Check material availability with new unit
+            checkMaterialAvailability('edit');
+            // Update material prices based on usage unit
+            updateMaterialPricesByUsageUnit('edit');
+        });
+    }
+    
+    // Add event listeners for usage unit type clearing
+    if (addUsageUnitSelect) {
+        addUsageUnitSelect.addEventListener('input', function() {
+            if (!this.value) {
+                // Reset prices to base material prices when usage unit is cleared
+                const materialIdField = document.getElementById('material_id');
+                if (materialIdField && materialIdField.value) {
+                    // Fetch material details and reset prices
+                    fetch(`../process/other_expenses/get_material_details.php?material_id=${materialIdField.value}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                const material = data.data;
+                                const iqdPriceField = document.getElementById('material_purchase_price_iqd');
+                                const usdPriceField = document.getElementById('material_purchase_price_usd');
+                                const totalCostField = document.getElementById('material_total_cost');
+                                
+                                if (material.currency_type === 'دۆلار') {
+                                    if (usdPriceField) usdPriceField.value = material.purchase_price_usd || '';
+                                    if (iqdPriceField) iqdPriceField.value = '';
+                                } else {
+                                    if (iqdPriceField) iqdPriceField.value = material.purchase_price_iqd || '';
+                                    if (usdPriceField) usdPriceField.value = '';
+                                }
+                                
+                                // Reset total cost field placeholder
+                                if (totalCostField && totalCostField.hasAttribute('data-original-placeholder')) {
+                                    totalCostField.placeholder = totalCostField.getAttribute('data-original-placeholder');
+                                }
+                                
+                                // Recalculate total cost
+                                calculateMaterialTotalCost('add');
+                            }
+                        });
+                }
+            }
+        });
+    }
+    
+    if (editUsageUnitSelect) {
+        editUsageUnitSelect.addEventListener('input', function() {
+            if (!this.value) {
+                // Reset prices to base material prices when usage unit is cleared
+                const materialIdField = document.getElementById('edit_material_id');
+                if (materialIdField && materialIdField.value) {
+                    // Fetch material details and reset prices
+                    fetch(`../process/other_expenses/get_material_details.php?material_id=${materialIdField.value}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                const material = data.data;
+                                const iqdPriceField = document.getElementById('edit_material_purchase_price_iqd');
+                                const usdPriceField = document.getElementById('edit_material_purchase_price_usd');
+                                const totalCostField = document.getElementById('edit_material_total_cost');
+                                
+                                if (material.currency_type === 'دۆلار') {
+                                    if (usdPriceField) usdPriceField.value = material.purchase_price_usd || '';
+                                    if (iqdPriceField) iqdPriceField.value = '';
+                                } else {
+                                    if (iqdPriceField) iqdPriceField.value = material.purchase_price_iqd || '';
+                                    if (usdPriceField) usdPriceField.value = '';
+                                }
+                                
+                                // Reset total cost field placeholder
+                                if (totalCostField && totalCostField.hasAttribute('data-original-placeholder')) {
+                                    totalCostField.placeholder = totalCostField.getAttribute('data-original-placeholder');
+                                }
+                                
+                                // Recalculate total cost
+                                calculateMaterialTotalCost('edit');
+                            }
+                        });
+                }
+            }
+        });
+    }
 });

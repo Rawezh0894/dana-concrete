@@ -44,6 +44,22 @@ if (!isset($_SESSION['user_id'])) {
         <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addExpenseModal" style="background: var(--seafoam-green); font-weight: bold;">+ زیادکردنی خەرجی تر</button>
         <?php endif; ?>
     </div>
+    
+    <!-- Help Section for Warehouse Material Usage -->
+    <div class="alert alert-info mb-4" role="alert">
+        <div class="d-flex align-items-start">
+            <i class="fas fa-info-circle me-2 mt-1"></i>
+            <div>
+                <h6 class="alert-heading mb-2">ڕوونکردنەوە بۆ بەکارهێنانی کاڵای کۆگا</h6>
+                <p class="mb-2">کاتێک جۆری خەرجی "بەکارهێنانی کاڵای کۆگا" هەڵبژێردرا:</p>
+                <ul class="mb-0">
+                    <li><strong>یەکەی کاڵا:</strong> یەکەی بنەڕەتی کاڵا (کارتۆن، بەرمیل، دەبە، دانە، لیتر)</li>
+                    <li><strong>یەکەی بەکارهێنان:</strong> دەتوانیت یەکەی بەکارهێنان هەڵبژێریت (مثلاً کارتۆن یان دانە)</li>
+                    <li><strong>بڕی بنەڕەتی:</strong> بە دانە/لیتر هەژمار دەکرێت بۆ ستۆک</li>
+                </ul>
+            </div>
+        </div>
+    </div>
     <div class="mb-4">
       <!-- Advanced Filter Section -->
       <div class="card shadow-sm">
@@ -310,6 +326,12 @@ if (!isset($_SESSION['user_id'])) {
               </select>
             </div>
             <div class="col-md-4 gas-material-field">
+              <label for="usage_unit_type" class="form-label">یەکەی بەکارهێنان</label>
+              <select class="form-control" id="usage_unit_type" name="usage_unit_type">
+                <option value="">یەکەی بەکارهێنان هەڵبژێرە</option>
+              </select>
+            </div>
+            <div class="col-md-4 gas-material-field">
               <label for="material_quantity" class="form-label">بڕی عەدەدی کاڵا</label>
               <input type="number" step="0.01" class="form-control" id="material_quantity" name="material_quantity" placeholder="0">
             </div>
@@ -387,7 +409,7 @@ if (!isset($_SESSION['user_id'])) {
             </div>
             <div class="col-md-4 warehouse-hidden-field">
               <label for="exchange_rate" class="form-label">نرخی 100 دۆلار بە دینار</label>
-              <input type="number" step="0.01" class="form-control" id="exchange_rate" name="exchange_rate" value="150000">
+              <input type="number" step="0.01" class="form-control" id="exchange_rate" name="exchange_rate" value="139250">
             </div>
           </div>
           <div class="mb-3 row">
@@ -496,6 +518,12 @@ if (!isset($_SESSION['user_id'])) {
               </select>
             </div>
             <div class="col-md-4 gas-material-field">
+              <label for="edit_usage_unit_type" class="form-label">یەکەی بەکارهێنان</label>
+              <select class="form-control" id="edit_usage_unit_type" name="usage_unit_type">
+                <option value="">یەکەی بەکارهێنان هەڵبژێرە</option>
+              </select>
+            </div>
+            <div class="col-md-4 gas-material-field">
               <label for="edit_material_quantity" class="form-label">بڕی عەدەدی کاڵا</label>
               <input type="number" step="0.01" class="form-control" id="edit_material_quantity" name="material_quantity" placeholder="0">
             </div>
@@ -569,7 +597,7 @@ if (!isset($_SESSION['user_id'])) {
             </div>
             <div class="col-md-4 warehouse-hidden-field">
               <label for="edit_exchange_rate" class="form-label">نرخی 100 دۆلار بە دینار</label>
-              <input type="number" step="0.01" class="form-control" id="edit_exchange_rate" name="exchange_rate" value="150000">
+              <input type="number" step="0.01" class="form-control" id="edit_exchange_rate" name="exchange_rate" value="139250">
             </div>
           </div>
           <div class="mb-3 row">

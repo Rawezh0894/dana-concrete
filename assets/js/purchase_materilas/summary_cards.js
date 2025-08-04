@@ -2,7 +2,7 @@
 $(document).ready(function() {
     loadSummaryCardsData();
     
-    // Refresh summary cards when purchases are updated
+    // Refresh summary cards when purchases are updated without page refresh
     $(document).on('purchaseAdded purchaseUpdated purchaseDeleted', function() {
         loadSummaryCardsData();
     });

@@ -29,6 +29,9 @@ async function editExpense(id, data) {
     if (document.getElementById('edit_material_quantity')) {
         formData.append('material_quantity', document.getElementById('edit_material_quantity').value);
     }
+    if (document.getElementById('edit_usage_unit_type')) {
+        formData.append('usage_unit_type', document.getElementById('edit_usage_unit_type').value);
+    }
     if (document.getElementById('edit_material_purchase_price_iqd')) {
         formData.append('material_purchase_price_iqd', document.getElementById('edit_material_purchase_price_iqd').value);
     }
@@ -120,6 +123,15 @@ function setupEditExpenseModal() {
             let paidIqdVal = parseFloat(paidIqd.value) || 0;
             let paidUsdVal = parseFloat(paidUsd.value) || 0;
             let exRate = parseFloat(exchangeRate.value) || 0;
+            
+            // Use the exchange rate from the input field
+            if (exRate === 0) {
+                // If exchange rate is not set, try to get it from the field
+                const exchangeRateField = document.getElementById('edit_exchange_rate');
+                if (exchangeRateField && exchangeRateField.value) {
+                    exRate = parseFloat(exchangeRateField.value);
+                }
+            }
             if (currencyType.value === 'دینار') {
                 if (paidUsdVal > 0) {
                     paidIqdVal += paidUsdVal * (exRate / 100);

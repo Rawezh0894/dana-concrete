@@ -326,18 +326,25 @@ class AdvancedFilters {
 
     async updateSummaryCards(summary) {
         if (summary) {
-            // Fetch latest USD rate
+            // Get USD rate from the exchange rate input field in the add modal
             let usdRate = 139250; // fallback default
-            try {
-                const rateRes = await fetch('../process/purchase_materilas/get_usd_rate.php');
-                const rateData = await rateRes.json();
-                if (rateData.success && rateData.rate) {
-                    usdRate = parseFloat(rateData.rate);
-                } else if (rateData.default_rate) {
-                    usdRate = parseFloat(rateData.default_rate);
+            const exchangeRateInput = document.getElementById('exchange_rate');
+            if (exchangeRateInput && exchangeRateInput.value) {
+                usdRate = parseFloat(exchangeRateInput.value);
+                console.log('Using exchange rate from input field:', usdRate);
+            } else {
+                // Fallback to API if input field is empty
+                try {
+                    const rateRes = await fetch('../process/purchase_materilas/get_usd_rate.php');
+                    const rateData = await rateRes.json();
+                    if (rateData.success && rateData.rate) {
+                        usdRate = parseFloat(rateData.rate);
+                    } else if (rateData.default_rate) {
+                        usdRate = parseFloat(rateData.default_rate);
+                    }
+                } catch (e) {
+                    // fallback to default
                 }
-            } catch (e) {
-                // fallback to default
             }
 
             function formatUSD(num) {
@@ -345,7 +352,7 @@ class AdvancedFilters {
             }
 
             function iqdToUsd(iqd) {
-                return usdRate && iqd ? (parseFloat(iqd) / usdRate * 100) : 0;
+                return usdRate && iqd ? (parseFloat(iqd) / (usdRate / 100)) : 0;
             }
             
             // Calculate totals using the same logic as select_expenses.js
