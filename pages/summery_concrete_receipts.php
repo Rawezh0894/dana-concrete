@@ -287,6 +287,7 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="../assets/js/swalAlert.js"></script>
   <script src="../assets/js/comon/select2_script.js"></script>
+  <script src="../assets/js/comon/table-controler.js"></script>
   <script src="../assets/js/summery_concrete_receipts/filter.js"></script>
   <script src="../assets/js/summery_concrete_receipts/get_informations.js"></script>
   <script>

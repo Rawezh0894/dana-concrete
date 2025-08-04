@@ -11,14 +11,20 @@ function loadSummaryData() {
     
     // Show loading state
     $('#summary-cards').addClass('opacity-50');
-    $('#customerSummaryTable tbody').html(`
-        <tr>
-            <td colspan="7" class="text-center">
-                <div class="spinner-border spinner-border-sm" role="status"></div>
-                <span class="ms-2">چاوەڕوان...</span>
-            </td>
-        </tr>
-    `);
+    
+    // Show loading state using TableController
+    const columns = [
+        '#', 
+        'customer_name', 
+        'receipt_count', 
+        'total_meter', 
+        'total_price', 
+        'notes', 
+        'payment_status', 
+        'formulas', 
+        'actions'
+    ];
+    TableController.showLoading('#customerSummaryTable', columns);
     
     $.ajax({
         url: '../process/summery_concrete_receipts/get_informations.php',
@@ -73,28 +79,21 @@ function updateSummaryCards(summary) {
 }
 
 function updateCustomerSummaryTable(customerSummary) {
-    const tbody = $('#customerSummaryTable tbody');
-    tbody.empty();
+    // Define columns for the table
+    const columns = [
+        '#', 
+        'customer_name', 
+        'receipt_count', 
+        'total_meter', 
+        'total_price', 
+        'notes', 
+        'payment_status', 
+        'formulas', 
+        'actions'
+    ];
     
-    // Calculate colspan based on permissions
-    const baseCols = 5; // #, customer name, receipt count, total meter, formulas
-    const priceCols = window.userPermissions.canViewPrices ? 2 : 0; // total price, notes
-    const paymentCols = 1; // payment status
-    const actionCols = 1; // actions
-    const totalCols = baseCols + priceCols + paymentCols + actionCols;
-    
-    if (customerSummary.length === 0) {
-        tbody.append(`
-            <tr>
-                <td colspan="${totalCols}" class="text-center text-muted">
-                    هیچ داتایەک نەدۆزرایەوە
-                </td>
-            </tr>
-        `);
-        return;
-    }
-    
-    customerSummary.forEach((customer, index) => {
+    // Format the data for TableController
+    const formattedData = customerSummary.map(customer => {
         const formulasHtml = customer.formulas_used.map(formula => 
             `<span class="formula-badge me-1">${formula}</span>`
         ).join('');
@@ -122,48 +121,29 @@ function updateCustomerSummaryTable(customerSummary) {
                 break;
         }
         
-        let row = `
-            <tr>
-                <td>${index + 1}</td>
-                <td>
-                    <strong>${customer.customer_name}</strong>
-                    ${customer.mobile1 ? `<br><small class="text-muted">${customer.mobile1}</small>` : ''}
-                </td>
-                <td class="text-center">
-                    <span class="badge bg-primary">${customer.receipt_count}</span>
-                </td>
-                <td class="text-center">
-                    <strong>${customer.total_meter}</strong> م³
-                </td>
-        `;
-        
-        // Add price-related columns only if user has permission
-        if (window.userPermissions.canViewPrices) {
-            row += `
-                <td class="text-center">
-                    ${totalPrice}
-                </td>
-                <td class="notes-cell">
-                    ${notesDisplay}
-                </td>
-            `;
-        }
-        
-        row += `
-                <td class="text-center">
-                    ${paymentStatus}
-                </td>
-                <td>
-                    ${formulasHtml}
-                </td>
-                <td class="text-center">
-                    <button class="btn btn-sm btn-info" onclick="showCustomerDetails(${customer.customer_id}, '${customer.customer_name}')">
-                        <i class="fas fa-eye me-1"></i>وردەکاری
-                    </button>
-                </td>
-            </tr>
-        `;
-        tbody.append(row);
+        return {
+            customer_name: `
+                <strong>${customer.customer_name}</strong>
+                ${customer.mobile1 ? `<br><small class="text-muted">${customer.mobile1}</small>` : ''}
+            `,
+            receipt_count: `<span class="badge bg-primary">${customer.receipt_count}</span>`,
+            total_meter: `<strong>${customer.total_meter}</strong> م³`,
+            total_price: window.userPermissions.canViewPrices ? totalPrice : '-',
+            notes: window.userPermissions.canViewPrices ? notesDisplay : '-',
+            payment_status: paymentStatus,
+            formulas: formulasHtml,
+            actions: `
+                <button class="btn btn-sm btn-info" onclick="showCustomerDetails(${customer.customer_id}, '${customer.customer_name}')">
+                    <i class="fas fa-eye me-1"></i>وردەکاری
+                </button>
+            `
+        };
+    });
+    
+    // Use TableController to render with pagination and search
+    TableController.renderWithPagination('#customerSummaryTable', formattedData, columns, {
+        pageSize: 10,
+        currentPage: 1
     });
 }
 
@@ -200,7 +180,7 @@ function displayCustomerDetails(customerName, receipts) {
                 </button>
             </div>
             <div class="table-responsive">
-                <table class="table table-bordered table-hover">
+                <table class="table table-bordered table-hover" id="customerReceiptsTable">
                     <thead style="background: var(--kelly-green); color: white;">
                         <tr>
                             <th>
@@ -220,56 +200,7 @@ function displayCustomerDetails(customerName, receipts) {
                         </tr>
                     </thead>
                     <tbody>
-        `;
-        
-        receipts.forEach((receipt, index) => {
-            const priceDisplay = receipt.price_per_meter ? 
-                `<span class="badge bg-success">$${receipt.price_per_meter.toLocaleString()}</span>` : 
-                `<span class="badge bg-secondary">نەدەراوە</span>`;
-            
-            // Payment status display for individual receipts
-            const receiptPaymentStatus = receipt.payment_status === 'paid' ? 
-                '<span class="badge bg-success">پارەی داوە</span>' : 
-                '<span class="badge bg-warning">پارەی نەداوە</span>';
-            
-            html += `
-                <tr>
-                    <td class="text-center">
-                        <input type="checkbox" class="receipt-checkbox" value="${receipt.id}" data-receipt-number="${receipt.receipt_number}" data-receipt-data='${JSON.stringify(receipt)}'>
-                    </td>
-                    <td><strong>${receipt.receipt_number}</strong></td>
-                    <td>${receipt.location || '-'}</td>
-                    <td>${receipt.receiver_name || '-'}</td>
-                    <td class="text-center">
-                        <span class="badge bg-info">${receipt.meter_amount} م³</span>
-                    </td>
-            `;
-            
-            // Add price-related columns only if user has permission
-            if (window.userPermissions.canViewPrices) {
-                html += `
-                    <td class="text-center">
-                        ${priceDisplay}
-                    </td>
-                    <td class="notes-cell">${receipt.notes || ''}</td>
-                `;
-            }
-            
-            html += `
-                    <td class="text-center">
-                        ${receiptPaymentStatus}
-                    </td>
-                    <td>
-                        <span class="formula-badge">${receipt.formula_name || '-'}</span>
-                    </td>
-                    <td>${receipt.mixer_info || '-'}</td>
-                    <td>${receipt.pump_info || '-'}</td>
-                    <td>${formatDate(receipt.created_at)}</td>
-                </tr>
-            `;
-        });
-        
-        html += `
+                        <!-- Data will be loaded by TableController -->
                     </tbody>
                 </table>
             </div>
@@ -277,6 +208,70 @@ function displayCustomerDetails(customerName, receipts) {
     }
     
     $('#customerDetailsContent').html(html);
+    
+    // If there are receipts, render them using TableController
+    if (receipts.length > 0) {
+        renderCustomerReceiptsTable(receipts);
+    }
+}
+
+function renderCustomerReceiptsTable(receipts) {
+    // Sort receipts by receipt number (A-001, A-002, etc.)
+    receipts.sort((a, b) => {
+        // Extract numbers from receipt numbers (A-001 -> 1, A-002 -> 2)
+        const aNum = parseInt(a.receipt_number.replace(/[^0-9]/g, '')) || 0;
+        const bNum = parseInt(b.receipt_number.replace(/[^0-9]/g, '')) || 0;
+        return aNum - bNum;
+    });
+    
+    // Define columns for the table
+    const columns = [
+        'select', 
+        'receipt_number', 
+        'location', 
+        'receiver_name', 
+        'meter_amount', 
+        'price_per_meter', 
+        'notes', 
+        'payment_status', 
+        'formula_name', 
+        'mixer_info', 
+        'pump_info', 
+        'created_at'
+    ];
+    
+    // Format the data for TableController
+    const formattedData = receipts.map(receipt => {
+        const priceDisplay = receipt.price_per_meter ? 
+            `<span class="badge bg-success">$${receipt.price_per_meter.toLocaleString()}</span>` : 
+            `<span class="badge bg-secondary">نەدەراوە</span>`;
+        
+        // Payment status display for individual receipts
+        const receiptPaymentStatus = receipt.payment_status === 'paid' ? 
+            '<span class="badge bg-success">پارەی داوە</span>' : 
+            '<span class="badge bg-warning">پارەی نەداوە</span>';
+        
+        return {
+            select: `<input type="checkbox" class="receipt-checkbox" value="${receipt.id}" data-receipt-number="${receipt.receipt_number}" data-receipt-data='${JSON.stringify(receipt)}'>`,
+            receipt_number: `<strong>${receipt.receipt_number}</strong>`,
+            location: receipt.location || '-',
+            receiver_name: receipt.receiver_name || '-',
+            meter_amount: `<span class="badge bg-info">${receipt.meter_amount} م³</span>`,
+            price_per_meter: window.userPermissions.canViewPrices ? priceDisplay : '-',
+            notes: window.userPermissions.canViewPrices ? (receipt.notes || '') : '-',
+            payment_status: receiptPaymentStatus,
+            formula_name: `<span class="formula-badge">${receipt.formula_name || '-'}</span>`,
+            mixer_info: receipt.mixer_info || '-',
+            pump_info: receipt.pump_info || '-',
+            created_at: formatDate(receipt.created_at)
+        };
+    });
+    
+    // Use TableController to render with pagination and search
+    TableController.renderWithPagination('#customerReceiptsTable', formattedData, columns, {
+        pageSize: 10,
+        currentPage: 1
+    });
 }
 
 // Global variables for price setting
