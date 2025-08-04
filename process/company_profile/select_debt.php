@@ -18,16 +18,25 @@ if (isset($_GET['stats'])) {
     $row = $pdo->prepare('SELECT opening_debt_usd, opening_debt_iqd FROM company WHERE id = ?');
     $row->execute([$company_id]);
     $debt = $row->fetch(PDO::FETCH_ASSOC);
-    // Sum of remaining amounts from purchases
-    $purchases_usd = $pdo->prepare("SELECT COALESCE(SUM(remaining_usd), 0) FROM purchases WHERE company_id = ? AND payment_type = 'قەرز'");
-    $purchases_usd->execute([$company_id]);
-    $total_remaining_usd = $purchases_usd->fetchColumn();
-    $purchases_iqd = $pdo->prepare("SELECT COALESCE(SUM(remaining_iqd), 0) FROM purchases WHERE company_id = ? AND payment_type = 'قەرز'");
-    $purchases_iqd->execute([$company_id]);
-    $total_remaining_iqd = $purchases_iqd->fetchColumn();
+    // Sum of remaining amounts from purchases with individual exchange rates
+    $purchases_data = $pdo->prepare("
+        SELECT 
+            COALESCE(SUM(remaining_usd), 0) as remaining_usd,
+            COALESCE(SUM(remaining_iqd), 0) as remaining_iqd,
+            COALESCE(SUM(remaining_iqd / NULLIF(exchange_rate, 0)), 0) as remaining_iqd_converted
+        FROM purchases 
+        WHERE company_id = ? AND payment_type = 'قەرز'
+    ");
+    $purchases_data->execute([$company_id]);
+    $purchases_result = $purchases_data->fetch(PDO::FETCH_ASSOC);
+    
+    $total_remaining_usd = floatval($purchases_result['remaining_usd']);
+    $total_remaining_iqd = floatval($purchases_result['remaining_iqd']);
+    $total_remaining_iqd_converted = floatval($purchases_result['remaining_iqd_converted']);
+    
     // Add opening debt
-    $total_debt_usd = floatval($total_remaining_usd) + floatval($debt['opening_debt_usd'] ?? 0);
-    $total_debt_iqd = floatval($total_remaining_iqd) + floatval($debt['opening_debt_iqd'] ?? 0);
+    $total_debt_usd = $total_remaining_usd + floatval($debt['opening_debt_usd'] ?? 0) + $total_remaining_iqd_converted;
+    $total_debt_iqd = $total_remaining_iqd + floatval($debt['opening_debt_iqd'] ?? 0);
     $count = $pdo->prepare("SELECT COUNT(*) FROM purchases WHERE company_id = ? AND payment_type = 'قەرز'");
     $count->execute([$company_id]);
     $credit_count = $count->fetchColumn();
@@ -46,17 +55,24 @@ if (isset($_GET['total_remaining'])) {
     $company->execute([$company_id]);
     $company_data = $company->fetch(PDO::FETCH_ASSOC);
     
-    // Sum of remaining amounts from purchases
-    $purchases_usd = $pdo->prepare("SELECT COALESCE(SUM(remaining_usd), 0) FROM purchases WHERE company_id = ? AND payment_type = 'قەرز'");
-    $purchases_usd->execute([$company_id]);
-    $total_remaining_usd = $purchases_usd->fetchColumn();
+    // Sum of remaining amounts from purchases with individual exchange rates
+    $purchases_data = $pdo->prepare("
+        SELECT 
+            COALESCE(SUM(remaining_usd), 0) as remaining_usd,
+            COALESCE(SUM(remaining_iqd), 0) as remaining_iqd,
+            COALESCE(SUM(remaining_iqd / NULLIF(exchange_rate, 0)), 0) as remaining_iqd_converted
+        FROM purchases 
+        WHERE company_id = ? AND payment_type = 'قەرز'
+    ");
+    $purchases_data->execute([$company_id]);
+    $purchases_result = $purchases_data->fetch(PDO::FETCH_ASSOC);
     
-    $purchases_iqd = $pdo->prepare("SELECT COALESCE(SUM(remaining_iqd), 0) FROM purchases WHERE company_id = ? AND payment_type = 'قەرز'");
-    $purchases_iqd->execute([$company_id]);
-    $total_remaining_iqd = $purchases_iqd->fetchColumn();
+    $total_remaining_usd = floatval($purchases_result['remaining_usd']);
+    $total_remaining_iqd = floatval($purchases_result['remaining_iqd']);
+    $total_remaining_iqd_converted = floatval($purchases_result['remaining_iqd_converted']);
     
     // Add opening debt
-    $total_remaining_usd += floatval($company_data['opening_debt_usd'] ?? 0);
+    $total_remaining_usd += floatval($company_data['opening_debt_usd'] ?? 0) + $total_remaining_iqd_converted;
     $total_remaining_iqd += floatval($company_data['opening_debt_iqd'] ?? 0);
     
     echo json_encode([

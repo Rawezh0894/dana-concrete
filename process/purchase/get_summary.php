@@ -41,11 +41,17 @@ try {
     $total_debt_usd = 0;
     $total_debt_iqd = 0;
     
-    // Get debt from purchases (remaining amounts)
-    $stmt = $pdo->query("SELECT SUM(remaining_usd) as usd, SUM(remaining_iqd) as iqd FROM purchases");
+    // Get debt from purchases (remaining amounts) with individual exchange rates
+    $stmt = $pdo->query("
+        SELECT 
+            SUM(remaining_usd) as usd, 
+            SUM(remaining_iqd) as iqd,
+            SUM(remaining_iqd / NULLIF(exchange_rate, 0)) as iqd_converted
+        FROM purchases
+    ");
     $row = $stmt->fetch();
     $total_debt_usd += floatval($row['usd'] ?? 0);
-    $total_debt_iqd += floatval($row['iqd'] ?? 0);
+    $total_debt_usd += floatval($row['iqd_converted'] ?? 0); // Add converted IQD amount
     
     // Get debt from company opening debts
     $stmt = $pdo->query("SELECT SUM(opening_debt_usd) as usd, SUM(opening_debt_iqd) as iqd FROM company");

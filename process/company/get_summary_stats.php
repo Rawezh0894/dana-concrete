@@ -18,16 +18,31 @@ try {
     // Get opening debt from companies
     $openingDebt = $pdo->query("SELECT SUM(opening_debt_usd) as usd, SUM(opening_debt_iqd) as iqd FROM company")->fetch();
     
-    // Get remaining debt from purchases
-    $remainingDebt = $pdo->query("SELECT SUM(remaining_usd) as usd, SUM(remaining_iqd) as iqd FROM purchases WHERE payment_type = 'قەرز'")->fetch();
+    // Get remaining debt from purchases with their individual exchange rates
+    $remainingDebt = $pdo->query("
+        SELECT 
+            SUM(remaining_usd) as usd, 
+            SUM(remaining_iqd) as iqd,
+            SUM(remaining_iqd / NULLIF(exchange_rate, 0)) as iqd_converted
+        FROM purchases 
+        WHERE payment_type = 'قەرز'
+    ")->fetch();
     
     // Calculate total debt
     $totalDebtUSD = floatval($openingDebt['usd'] ?? 0) + floatval($remainingDebt['usd'] ?? 0);
-    $totalDebtIQD = floatval($openingDebt['iqd'] ?? 0) + floatval($remainingDebt['iqd'] ?? 0);
+    $totalDebtUSD += floatval($remainingDebt['iqd_converted'] ?? 0); // Add converted IQD amount
     
-    // Convert IQD to USD (using fixed rate)
-    $usdRate = 139250;
-    $totalDebtUSD += ($totalDebtIQD / ($usdRate / 100));
+    // For opening debt IQD, use the latest exchange rate from purchases
+    $latestRate = $pdo->query("
+        SELECT exchange_rate 
+        FROM purchases 
+        WHERE exchange_rate > 0 
+        ORDER BY date DESC, id DESC 
+        LIMIT 1
+    ")->fetchColumn();
+    
+    $usdRate = $latestRate ?: 139250; // Fallback to default if no purchases exist
+    $totalDebtUSD += (floatval($openingDebt['iqd'] ?? 0) / ($usdRate / 100));
     
     // Count companies with debt
     $companiesWithDebt = $pdo->query("
