@@ -89,7 +89,7 @@ try {
         $where_clause
         GROUP BY c.id, c.name, c.mobile1
         HAVING receipt_count > 0
-        ORDER BY receipt_count ASC
+        ORDER BY MIN(cr.created_at) ASC
     ";
 
     $customer_summary_stmt = $pdo->prepare($customer_summary_query);
