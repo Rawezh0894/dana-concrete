@@ -178,7 +178,6 @@ if (!isset($_SESSION['user_id'])) {
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="../assets/js/swalAlert.js"></script>
 <script src="../assets/js/comon/table-controler.js"></script>
-<script src="../assets/js/company/summary_stats.js"></script>
 <script src="../assets/js/company/add_company.js"></script>
 <script src="../assets/js/company/select_company.js"></script>
 <script src="../assets/js/company/update_company.js"></script>
