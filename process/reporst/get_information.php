@@ -58,24 +58,35 @@ try {
     $customer_debt_iqd_converted = ($usd_iqd_rate > 0) ? ($customer_debt_iqd / ($usd_iqd_rate / 100)) : 0;
     $customer_debt_total_usd = $customer_debt_usd + $customer_debt_iqd_converted;
 
-    // Companies - Calculate debt using new method (opening_debt + remaining from purchases)
-    $company_debt_query = "
-        SELECT 
-            SUM(c.opening_debt_usd) as opening_debt_usd,
-            SUM(c.opening_debt_iqd) as opening_debt_iqd,
-            COALESCE(SUM(p.remaining_usd), 0) as remaining_usd_from_purchases,
-            COALESCE(SUM(p.remaining_iqd), 0) as remaining_iqd_from_purchases,
-            COALESCE(SUM(p.remaining_iqd / NULLIF(p.exchange_rate / 100, 0)), 0) as remaining_iqd_converted
-        FROM company c
-        LEFT JOIN purchases p ON c.id = p.company_id AND p.payment_type = 'قەرز'
-    ";
-    $stmt = $pdo->query($company_debt_query);
-    $row = $stmt->fetch();
-    $company_debt_usd = floatval($row['opening_debt_usd'] ?? 0) + floatval($row['remaining_usd_from_purchases'] ?? 0);
+    // Companies - Calculate debt using same method as get_summary_stats.php
+    // Get opening debt from companies
+    $openingDebt = $pdo->query("SELECT SUM(opening_debt_usd) as usd, SUM(opening_debt_iqd) as iqd FROM company")->fetch();
     
-    // Use converted amount from purchases + convert opening debt IQD
-    $company_debt_total_usd = $company_debt_usd + floatval($row['remaining_iqd_converted'] ?? 0);
-    $company_debt_total_usd += ($usd_iqd_rate > 0) ? (floatval($row['opening_debt_iqd'] ?? 0) / ($usd_iqd_rate / 100)) : 0;
+    // Get remaining debt from purchases with their individual exchange rates
+    $remainingDebt = $pdo->query("
+        SELECT 
+            SUM(remaining_usd) as usd, 
+            SUM(remaining_iqd) as iqd,
+            SUM(remaining_iqd / NULLIF(exchange_rate / 100, 0)) as iqd_converted
+        FROM purchases 
+        WHERE payment_type = 'قەرز'
+    ")->fetch();
+    
+    // Calculate total debt
+    $company_debt_total_usd = floatval($openingDebt['usd'] ?? 0) + floatval($remainingDebt['usd'] ?? 0);
+    $company_debt_total_usd += floatval($remainingDebt['iqd_converted'] ?? 0); // Add converted IQD amount
+    
+    // For opening debt IQD, use the latest exchange rate from purchases
+    $latestRate = $pdo->query("
+        SELECT exchange_rate 
+        FROM purchases 
+        WHERE exchange_rate > 0 
+        ORDER BY date DESC, id DESC 
+        LIMIT 1
+    ")->fetchColumn();
+    
+    $usdRate = $latestRate ?: 139250; // Fallback to default if no purchases exist
+    $company_debt_total_usd += (floatval($openingDebt['iqd'] ?? 0) / ($usdRate / 100));
 
     // Other expense persons - Calculate total debt (opening debt + expenses - payments)
     $person_debt_query = "
@@ -577,24 +588,8 @@ try {
     $customer_iqd_converted = ($usd_iqd_rate > 0) ? ($customer_iqd_debt / ($usd_iqd_rate / 100)) : 0;
     $debts_by_type['customers'] = $customer_total_debt + $customer_iqd_converted;
     
-    // Companies debt (opening_debt + remaining from purchases)
-    $stmt = $pdo->query("
-        SELECT 
-            SUM(c.opening_debt_usd) as opening_debt_usd,
-            SUM(c.opening_debt_iqd) as opening_debt_iqd,
-            COALESCE(SUM(p.remaining_usd), 0) as remaining_usd_from_purchases,
-            COALESCE(SUM(p.remaining_iqd), 0) as remaining_iqd_from_purchases,
-            COALESCE(SUM(p.remaining_iqd / NULLIF(p.exchange_rate / 100, 0)), 0) as remaining_iqd_converted
-        FROM company c
-        LEFT JOIN purchases p ON c.id = p.company_id AND p.payment_type = 'قەرز'
-    ");
-    $row = $stmt->fetch();
-    $company_total_debt = floatval($row['opening_debt_usd'] ?? 0) + floatval($row['remaining_usd_from_purchases'] ?? 0);
-    
-    // Use converted amount from purchases + convert opening debt IQD
-    $company_total_debt += floatval($row['remaining_iqd_converted'] ?? 0);
-    $company_total_debt += ($usd_iqd_rate > 0) ? (floatval($row['opening_debt_iqd'] ?? 0) / ($usd_iqd_rate / 100)) : 0;
-    $debts_by_type['companies'] = $company_total_debt;
+    // Companies debt (opening_debt + remaining from purchases) - using same method as above
+    $debts_by_type['companies'] = $company_debt_total_usd;
     
     // Persons debt
     $stmt = $pdo->query('SELECT SUM(expense_usd) as usd FROM other_expense_persons');
