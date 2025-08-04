@@ -63,14 +63,15 @@ try {
         SELECT 
             SUM(c.opening_debt_usd) as opening_debt_usd,
             SUM(c.opening_debt_iqd) as opening_debt_iqd,
-            COALESCE(SUM(p.remaining_usd), 0) as remaining_from_purchases
+            COALESCE(SUM(p.remaining_usd), 0) as remaining_usd_from_purchases,
+            COALESCE(SUM(p.remaining_iqd), 0) as remaining_iqd_from_purchases
         FROM company c
         LEFT JOIN purchases p ON c.id = p.company_id AND p.payment_type = 'قەرز'
     ";
     $stmt = $pdo->query($company_debt_query);
     $row = $stmt->fetch();
-    $company_debt_usd = floatval($row['opening_debt_usd'] ?? 0) + floatval($row['remaining_from_purchases'] ?? 0);
-    $company_debt_iqd = floatval($row['opening_debt_iqd'] ?? 0);
+    $company_debt_usd = floatval($row['opening_debt_usd'] ?? 0) + floatval($row['remaining_usd_from_purchases'] ?? 0);
+    $company_debt_iqd = floatval($row['opening_debt_iqd'] ?? 0) + floatval($row['remaining_iqd_from_purchases'] ?? 0);
     $company_debt_iqd_converted = ($usd_iqd_rate > 0) ? ($company_debt_iqd / ($usd_iqd_rate / 100)) : 0;
     $company_debt_total_usd = $company_debt_usd + $company_debt_iqd_converted;
 
@@ -579,13 +580,14 @@ try {
         SELECT 
             SUM(c.opening_debt_usd) as opening_debt_usd,
             SUM(c.opening_debt_iqd) as opening_debt_iqd,
-            COALESCE(SUM(p.remaining_usd), 0) as remaining_from_purchases
+            COALESCE(SUM(p.remaining_usd), 0) as remaining_usd_from_purchases,
+            COALESCE(SUM(p.remaining_iqd), 0) as remaining_iqd_from_purchases
         FROM company c
         LEFT JOIN purchases p ON c.id = p.company_id AND p.payment_type = 'قەرز'
     ");
     $row = $stmt->fetch();
-    $company_total_debt = floatval($row['opening_debt_usd'] ?? 0) + floatval($row['remaining_from_purchases'] ?? 0);
-    $company_iqd_debt = floatval($row['opening_debt_iqd'] ?? 0);
+    $company_total_debt = floatval($row['opening_debt_usd'] ?? 0) + floatval($row['remaining_usd_from_purchases'] ?? 0);
+    $company_iqd_debt = floatval($row['opening_debt_iqd'] ?? 0) + floatval($row['remaining_iqd_from_purchases'] ?? 0);
     $company_iqd_converted = ($usd_iqd_rate > 0) ? ($company_iqd_debt / ($usd_iqd_rate / 100)) : 0;
     $debts_by_type['companies'] = $company_total_debt + $company_iqd_converted;
     
