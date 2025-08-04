@@ -72,7 +72,6 @@ try {
     $stmt = $pdo->query($company_debt_query);
     $row = $stmt->fetch();
     $company_debt_usd = floatval($row['opening_debt_usd'] ?? 0) + floatval($row['remaining_usd_from_purchases'] ?? 0);
-    $company_debt_iqd = floatval($row['opening_debt_iqd'] ?? 0) + floatval($row['remaining_iqd_from_purchases'] ?? 0);
     
     // Use converted amount from purchases + convert opening debt IQD
     $company_debt_total_usd = $company_debt_usd + floatval($row['remaining_iqd_converted'] ?? 0);
@@ -523,9 +522,9 @@ try {
         'success' => true,
         'data' => [
             'usd_iqd_rate' => $usd_iqd_rate,
-            'customer' => ['usd' => $customer_debt_total_usd, 'iqd' => $customer_debt_iqd],
-            'company' => ['usd' => $company_debt_total_usd, 'iqd' => $company_debt_iqd],
-            'person' => ['usd' => $person_debt_usd, 'iqd' => $person_debt_iqd],
+            'customer' => ['usd' => $customer_debt_total_usd, 'iqd' => 0],
+            'company' => ['usd' => $company_debt_total_usd, 'iqd' => 0],
+            'person' => ['usd' => $person_debt_usd, 'iqd' => 0],
             'purchases' => $purchases,
             'sales' => $sales,
             'remaining_purchases' => ['usd' => $remaining_purchases_total_usd, 'iqd' => $remaining_purchases_iqd],
@@ -591,7 +590,6 @@ try {
     ");
     $row = $stmt->fetch();
     $company_total_debt = floatval($row['opening_debt_usd'] ?? 0) + floatval($row['remaining_usd_from_purchases'] ?? 0);
-    $company_iqd_debt = floatval($row['opening_debt_iqd'] ?? 0) + floatval($row['remaining_iqd_from_purchases'] ?? 0);
     
     // Use converted amount from purchases + convert opening debt IQD
     $company_total_debt += floatval($row['remaining_iqd_converted'] ?? 0);

@@ -15,7 +15,7 @@ function fetchAndRenderReportData() {
             }
             const data = result.data;
             const usd_iqd_rate = data.usd_iqd_rate || 0;
-            const company_debt_usd = Number(data.company.usd) + (Number(data.company.iqd) / (usd_iqd_rate / 100));
+            const company_debt_usd = Number(data.company.usd) || 0;
             const person_debt_usd = Number(data.person.usd) || 0;
             const purchases_cash_usd = Number(data.purchases.cash.usd) || 0;
             const purchases_credit_usd = Number(data.purchases.credit.usd) || 0;
