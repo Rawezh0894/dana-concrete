@@ -26,6 +26,7 @@ if (!isset($_SESSION['user_id'])) {
     <link href="../assets/css/nav.css" rel="stylesheet">
     <link href="../assets/css/comon/table.css" rel="stylesheet">
     <link href="../assets/css/comon/style.css" rel="stylesheet">
+    <link href="../assets/css/comon/cards.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 <body dir="rtl">
@@ -36,6 +37,43 @@ if (!isset($_SESSION['user_id'])) {
         <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">کەسانی خەرجی تر</h2>
         <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addPersonModal" style="background: var(--seafoam-green); font-weight: bold;">+ زیادکردنی کەس</button>
     </div>
+    
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card summary-card" style="background: linear-gradient(135deg, #28a745, #20c997);">
+                <div class="card-body text-center">
+                    <div class="card-icon">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <h5 class="card-title">کۆی قەرزی ئێمە بە دۆلار</h5>
+                    <h3 class="card-value" id="totalDebtUSD">$0.00</h3>
+                    <div class="card-details">
+                        <small>خەرجی تر: <span id="otherExpensesUSD">$0.00</span></small><br>
+                        <small>کڕینی کاڵا: <span id="purchaseMaterialsUSD">$0.00</span></small><br>
+                        <small>قەرزی سەرەتایی: <span id="personsOpeningUSD">$0.00</span></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card summary-card" style="background: linear-gradient(135deg, #fd7e14, #ffc107);">
+                <div class="card-body text-center">
+                    <div class="card-icon">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <h5 class="card-title">کۆی قەرزی ئێمە بە دینار</h5>
+                    <h3 class="card-value" id="totalDebtIQD">0 دینار</h3>
+                    <div class="card-details">
+                        <small>خەرجی تر: <span id="otherExpensesIQD">0 دینار</span></small><br>
+                        <small>کڕینی کاڵا: <span id="purchaseMaterialsIQD">0 دینار</span></small><br>
+                        <small>قەرزی سەرەتایی: <span id="personsOpeningIQD">0 دینار</span></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <div class="table-responsive">
         <table class="table table-bordered table-hover align-middle text-center" id="personTable">
             <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
