@@ -42,7 +42,16 @@ async function loadPersons() {
 function updateSummaryCards(summary) {
     // Format numbers
     const formatUSD = (amount) => `$${parseFloat(amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-    const formatIQD = (amount) => `${parseFloat(amount || 0).toLocaleString('ar-EG')} دینار`;
+    const formatIQD = (amount) => {
+        const num = parseFloat(amount || 0);
+        if (num >= 1000000) {
+            return `${(num / 1000000).toFixed(2)}M دینار`;
+        } else if (num >= 1000) {
+            return `${(num / 1000).toFixed(2)}K دینار`;
+        } else {
+            return `${num.toLocaleString('ar-EG')} دینار`;
+        }
+    };
     
     // Update USD card
     document.getElementById('totalDebtUSD').textContent = formatUSD(summary.total_debt_usd);

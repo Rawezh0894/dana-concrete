@@ -41,7 +41,7 @@ if (!isset($_SESSION['user_id'])) {
     <!-- Summary Cards -->
     <div class="row mb-4">
         <div class="col-md-6">
-            <div class="card summary-card" style="background: linear-gradient(135deg, #28a745, #20c997);">
+            <div class="card summary-card card-gradient-success card-animate-hover card-shadow-medium card-rounded">
                 <div class="card-body text-center">
                     <div class="card-icon">
                         <i class="fas fa-dollar-sign"></i>
@@ -57,7 +57,7 @@ if (!isset($_SESSION['user_id'])) {
             </div>
         </div>
         <div class="col-md-6">
-            <div class="card summary-card" style="background: linear-gradient(135deg, #fd7e14, #ffc107);">
+            <div class="card summary-card card-gradient-warning card-animate-hover card-shadow-medium card-rounded">
                 <div class="card-body text-center">
                     <div class="card-icon">
                         <i class="fas fa-coins"></i>
