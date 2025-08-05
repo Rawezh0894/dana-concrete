@@ -44,6 +44,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     $material_quantity = isset($_POST['material_quantity']) ? floatval($_POST['material_quantity']) : null;
     $usage_unit_type = $_POST['usage_unit_type'] ?? null;
+    // Validate usage_unit_type against enum values
+    if ($usage_unit_type && !in_array($usage_unit_type, ['کارتۆن', 'دانە', 'بەرمیل', 'دەبە', 'لیتر'])) {
+        $usage_unit_type = null;
+    }
     $material_purchase_price_iqd = !empty($_POST['material_purchase_price_iqd']) ? floatval($_POST['material_purchase_price_iqd']) : 0;
     $material_purchase_price_usd = !empty($_POST['material_purchase_price_usd']) ? floatval($_POST['material_purchase_price_usd']) : 0;
     $material_total_cost = !empty($_POST['material_total_cost']) ? floatval($_POST['material_total_cost']) : 0;
