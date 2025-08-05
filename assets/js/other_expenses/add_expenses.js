@@ -72,10 +72,9 @@ if (addExpenseForm) {
         }
         if (document.getElementById('usage_unit_type')) {
             const usageUnitType = document.getElementById('usage_unit_type').value;
-            // Only append if not empty and valid
-            if (usageUnitType && usageUnitType.trim() !== '') {
-                formData.append('usage_unit_type', usageUnitType);
-            }
+            // Always append usage_unit_type - empty string will be converted to null on server
+            formData.append('usage_unit_type', usageUnitType || '');
+            console.log('Usage unit type being sent:', usageUnitType || '');
         }
         if (document.getElementById('material_purchase_price_iqd')) {
             formData.append('material_purchase_price_iqd', document.getElementById('material_purchase_price_iqd').value);

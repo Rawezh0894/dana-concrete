@@ -29,13 +29,11 @@ async function editExpense(id, data) {
     if (document.getElementById('edit_material_quantity')) {
         formData.append('material_quantity', document.getElementById('edit_material_quantity').value);
     }
-    if (document.getElementById('edit_usage_unit_type')) {
-        const usageUnitType = document.getElementById('edit_usage_unit_type').value;
-        // Only append if not empty and valid
-        if (usageUnitType && usageUnitType.trim() !== '') {
-            formData.append('usage_unit_type', usageUnitType);
+            if (document.getElementById('edit_usage_unit_type')) {
+            const usageUnitType = document.getElementById('edit_usage_unit_type').value;
+            // Always append usage_unit_type - empty string will be converted to null on server
+            formData.append('usage_unit_type', usageUnitType || '');
         }
-    }
     if (document.getElementById('edit_material_purchase_price_iqd')) {
         formData.append('material_purchase_price_iqd', document.getElementById('edit_material_purchase_price_iqd').value);
     }
