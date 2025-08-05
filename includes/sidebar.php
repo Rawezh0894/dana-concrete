@@ -22,23 +22,24 @@ $logout_pages = ['logout.php'];
     <span class="sidebar-title">بەشە سەرەکییەکان</span>
   </div>
   <ul class="sidebar-menu list-unstyled">
-    <!-- Single links first -->
-    <?php if (hasPermission('view_dashboard')): ?>
-      <li><a href="../pages/dashboard.php" class="sidebar-link<?php if($current_page == 'dashboard.php') echo ' active'; ?>"><i class="bi bi-speedometer2 me-2"></i> داشبۆرد</a></li>
-    <?php endif; ?>
-    <?php if (hasPermission('view_reports')): ?>
-      <li><a href="../pages/reports.php" class="sidebar-link<?php if($current_page == 'reports.php') echo ' active'; ?>"><i class="bi bi-graph-up me-2"></i> ڕاپۆرت</a></li>
-    <?php endif; ?>
-    <?php if (hasPermission('view_cash_box')): ?>
-      <li><a href="../pages/cash_box.php" class="sidebar-link<?php if($current_page == 'cash_box.php') echo ' active'; ?>"><i class="bi bi-cash-stack me-2"></i> قاسەکە</a></li>
-    <?php endif; ?>
-    <?php if (hasPermission('view_users')): ?>
-      <li><a href="../pages/users.php" class="sidebar-link<?php if($current_page == 'users.php') echo ' active'; ?>"><i class="bi bi-people me-2"></i> بەکارهێنەران</a></li>
-    <?php endif; ?>
-    <?php if (hasPermission('view_notifications')): ?>
-      <li><a href="../pages/notifications.php" class="sidebar-link<?php if($current_page == 'notifications.php') echo ' active'; ?>"><i class="bi bi-bell me-2"></i> ئاگادارکردنەوەکان</a></li>
-    <?php endif; ?>
-    <!-- All dropdowns at the end -->
+    <!-- Main Dashboard Dropdown -->
+    <li class="sidebar-group">
+      <button class="sidebar-group-toggle d-flex align-items-center w-100" data-bs-toggle="collapse" data-bs-target="#mainMenu" aria-expanded="false">
+        <i class="bi bi-speedometer2 me-2"></i> سەرەکی
+      </button>
+      <ul class="collapse sidebar-submenu" id="mainMenu">
+        <?php if (hasPermission('view_dashboard')): ?>
+          <li><a href="../pages/dashboard.php" class="sidebar-link<?php if($current_page == 'dashboard.php') echo ' active'; ?>"><i class="bi bi-speedometer2 me-2"></i> داشبۆرد</a></li>
+        <?php endif; ?>
+        <?php if (hasPermission('view_reports')): ?>
+          <li><a href="../pages/reports.php" class="sidebar-link<?php if($current_page == 'reports.php') echo ' active'; ?>"><i class="bi bi-graph-up me-2"></i> ڕاپۆرت</a></li>
+        <?php endif; ?>
+        <?php if (hasPermission('view_cash_box')): ?>
+          <li><a href="../pages/cash_box.php" class="sidebar-link<?php if($current_page == 'cash_box.php') echo ' active'; ?>"><i class="bi bi-cash-stack me-2"></i> قاسەکە</a></li>
+        <?php endif; ?>
+      </ul>
+    </li>
+    <!-- All other dropdowns -->
     <li class="sidebar-group">
       <button class="sidebar-group-toggle d-flex align-items-center w-100" data-bs-toggle="collapse" data-bs-target="#concreteMenu" aria-expanded="false">
         <i class="bi bi-building me-2"></i> کۆنکرێت
@@ -132,5 +133,12 @@ $logout_pages = ['logout.php'];
         <?php endif; ?>
       </ul>
     </li>
+    <!-- System Management at the end -->
+    <?php if (hasPermission('view_users')): ?>
+      <li><a href="../pages/users.php" class="sidebar-link<?php if($current_page == 'users.php') echo ' active'; ?>"><i class="bi bi-people me-2"></i> بەکارهێنەران</a></li>
+    <?php endif; ?>
+    <?php if (hasPermission('view_notifications')): ?>
+      <li><a href="../pages/notifications.php" class="sidebar-link<?php if($current_page == 'notifications.php') echo ' active'; ?>"><i class="bi bi-bell me-2"></i> ئاگادارکردنەوەکان</a></li>
+    <?php endif; ?>
   </ul>
 </aside>
