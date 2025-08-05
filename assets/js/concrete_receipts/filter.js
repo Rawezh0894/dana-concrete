@@ -1,27 +1,16 @@
 $(document).ready(function() {
-  // Global pagination state
-  let currentPage = 1;
-  let pageSize = 10;
-  
   function getFilters() {
     return {
       customer_id: $('#filter_customer_id').val(),
       location: $('#filter_location').val(),
       formulas_id: $('#filter_formulas_id').val(),
       date_from: $('#filter_date_from').val(),
-      date_to: $('#filter_date_to').val(),
-      page: currentPage,
-      pageSize: pageSize
+      date_to: $('#filter_date_to').val()
     };
   }
 
-  function loadFilteredReceipts(page = 1) {
-    currentPage = page;
+  function loadFilteredReceipts() {
     const filters = getFilters();
-    
-    // Show loading
-    $('#concreteReceiptsTable tbody').html('<tr><td colspan="13" class="text-center"><span class="spinner-border spinner-border-sm"></span> چاوەڕوان بە...</td></tr>');
-    
     $.ajax({
       url: '../process/concrete_receipts/select_concrete_receipts.php',
       method: 'GET',
@@ -31,11 +20,9 @@ $(document).ready(function() {
         if (response.success) {
           updateSummaryCards(response.summary);
           if (response.data.length === 0) {
-            $('#concreteReceiptsTable tbody').html('<tr><td colspan="13">هیچ پسوڵەیەک نیە</td></tr>');
-            renderPagination(response.pagination);
+            $('#concreteReceiptsTable tbody').html('<tr><td colspan="11">هیچ پسوڵەیەک نیە</td></tr>');
             return;
           }
-          
           let rows = '';
           response.data.forEach(function(receipt, idx) {
             function formatNumber(n) {
@@ -48,11 +35,8 @@ $(document).ready(function() {
               if (isNaN(d)) return dt;
               return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0') + ' ' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
             }
-            
-            const rowNumber = ((response.pagination.currentPage - 1) * response.pagination.pageSize) + idx + 1;
-            
             rows += `<tr>
-                <td>${rowNumber}</td>
+                <td>${idx + 1}</td>
                 <td>${receipt.receipt_number || '-'}</td>
                 <td>${receipt.customer_name || '-'}</td>
                 <td>${receipt.location || '-'}</td>
@@ -72,101 +56,30 @@ $(document).ready(function() {
             </tr>`;
           });
           $('#concreteReceiptsTable tbody').html(rows);
-          
-          // Render pagination
-          renderPagination(response.pagination);
-          
           // Re-attach event handlers for the new buttons
           attachEventHandlers();
         } else {
           updateSummaryCards({total_receipts: 0, total_meter: 0, total_customers: 0});
-          $('#concreteReceiptsTable tbody').html('<tr><td colspan="13">هەڵەیەک روویدا</td></tr>');
+          $('#concreteReceiptsTable tbody').html('<tr><td colspan="11">هەڵەیەک روویدا</td></tr>');
         }
       },
       error: function() {
         updateSummaryCards({total_receipts: 0, total_meter: 0, total_customers: 0});
-        $('#concreteReceiptsTable tbody').html('<tr><td colspan="13">هەڵەیەک روویدا</td></tr>');
+        $('#concreteReceiptsTable tbody').html('<tr><td colspan="11">هەڵەیەک روویدا</td></tr>');
       }
     });
   }
-  
-  function renderPagination(pagination) {
-    let paginationContainer = $('.concrete-receipts-pagination');
-    if (paginationContainer.length === 0) {
-      paginationContainer = $('<div class="concrete-receipts-pagination d-flex justify-content-between align-items-center mt-3"></div>');
-      $('#concreteReceiptsTable').after(paginationContainer);
-    }
-    
-    if (pagination.totalPages <= 1) {
-      paginationContainer.hide();
-      return;
-    }
-    
-    paginationContainer.show();
-    
-    const startRecord = ((pagination.currentPage - 1) * pagination.pageSize) + 1;
-    const endRecord = Math.min(pagination.currentPage * pagination.pageSize, pagination.totalRecords);
-    
-    let paginationHtml = `
-      <div class="pagination-info">
-        <small class="text-muted">
-          نیشاندەر ${startRecord} بۆ ${endRecord} لە ${pagination.totalRecords} ڕیکۆرد
-        </small>
-      </div>
-      <div class="pagination-controls">
-    `;
-    
-    // Previous button
-    paginationHtml += `
-      <button class="btn btn-sm btn-outline-secondary mx-1" ${pagination.currentPage === 1 ? 'disabled' : ''} 
-              onclick="loadFilteredReceipts(${pagination.currentPage - 1})">
-        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M13 15L8 10L13 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
-    `;
-    
-    // Page numbers
-    for (let i = 1; i <= pagination.totalPages; i++) {
-      if (i === 1 || i === pagination.totalPages || Math.abs(i - pagination.currentPage) <= 2) {
-        paginationHtml += `
-          <button class="btn btn-sm ${i === pagination.currentPage ? 'btn-success active' : 'btn-outline-secondary'} mx-1" 
-                  onclick="loadFilteredReceipts(${i})">${i}</button>
-        `;
-      } else if (i === pagination.currentPage - 3 || i === pagination.currentPage + 3) {
-        paginationHtml += '<span class="mx-1">...</span>';
-      }
-    }
-    
-    // Next button
-    paginationHtml += `
-      <button class="btn btn-sm btn-outline-secondary mx-1" ${pagination.currentPage === pagination.totalPages ? 'disabled' : ''} 
-              onclick="loadFilteredReceipts(${pagination.currentPage + 1})">
-        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M7 5L12 10L7 15" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
-    </div>`;
-    
-    paginationContainer.html(paginationHtml);
-  }
 
-  // Bind filter events - reset to page 1 when filters change
-  $('#filter_customer_id, #filter_formulas_id').on('change', function() {
-    loadFilteredReceipts(1);
-  });
-  $('#filter_location').on('input', function() {
-    loadFilteredReceipts(1);
-  });
-  $('#filter_date_from, #filter_date_to').on('change', function() {
-    loadFilteredReceipts(1);
-  });
+  // Bind filter events
+  $('#filter_customer_id, #filter_formulas_id').on('change', loadFilteredReceipts);
+  $('#filter_location').on('input', loadFilteredReceipts);
+  $('#filter_date_from, #filter_date_to').on('change', loadFilteredReceipts);
 
   // Today/Yesterday filter buttons
   function setDateFilter(from, to) {
     $('#filter_date_from').val(from);
     $('#filter_date_to').val(to);
-    loadFilteredReceipts(1);
+    loadFilteredReceipts();
   }
   function formatDateInput(d) {
     // Format JS Date to yyyy-mm-dd
@@ -206,8 +119,16 @@ $(document).ready(function() {
     // Remove highlights
     $('#filter_today').removeClass('active btn-primary').addClass('btn-outline-primary');
     $('#filter_yesterday').removeClass('active btn-secondary').addClass('btn-outline-secondary');
-    // Reload table with pagination
-    loadFilteredReceipts(1);
+    // Reload table
+    if (typeof window.reloadConcreteReceipts === 'function') {
+      window.reloadConcreteReceipts();
+    } else {
+      loadFilteredReceipts();
+    }
+    // Reload summary cards as well
+    if (typeof window.reloadConcreteReceiptsSummary === 'function') {
+      window.reloadConcreteReceiptsSummary();
+    }
   });
 
   function updateSummaryCards(summary) {
@@ -225,7 +146,7 @@ $(document).ready(function() {
   }
 
   // On page load, fetch and show the real summary values
-  loadFilteredReceipts(1); // Load data immediately on page load with pagination
+  loadFilteredReceipts(); // Load data immediately on page load
 
   // Function to attach event handlers to buttons
   function attachEventHandlers() {
@@ -282,7 +203,4 @@ $(document).ready(function() {
       }
     });
   };
-  
-  // Make loadFilteredReceipts globally available
-  window.loadFilteredReceipts = loadFilteredReceipts;
 });
