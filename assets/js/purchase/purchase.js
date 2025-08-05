@@ -2,33 +2,9 @@
 $(document).on('change', '#material_id', function() {
     const material = $('#material_id option:selected').text().trim();
     const $bin = $('#bin_id');
-    const $kgLabel = $('label[for="kg"]');
-    const $editKgLabel = $('label[for="edit_kg"]');
-    
     $bin.val('');
     $bin.find('option').hide();
     $bin.find('option[value=""]').show(); // always show default
-    
-    // Update kg field label for gas materials
-    if (material === 'گاز') {
-        if ($kgLabel.length) $kgLabel.text('چەند کیلۆ (دەکرێت بە طەن)');
-        if ($editKgLabel.length) $editKgLabel.text('چەند کیلۆ (دەکرێت بە طەن)');
-        
-        // Add helper text for gas conversion
-        if (!$('#kg').next('.gas-conversion-help').length) {
-            $('#kg').after('<small class="form-text text-info gas-conversion-help">نوێتە: بۆ گاز، کیلۆ دەکرێت بە طەن (دابەشی 1000)</small>');
-        }
-        if (!$('#edit_kg').next('.gas-conversion-help').length) {
-            $('#edit_kg').after('<small class="form-text text-info gas-conversion-help">نوێتە: بۆ گاز، کیلۆ دەکرێت بە طەن (دابەشی 1000)</small>');
-        }
-    } else {
-        if ($kgLabel.length) $kgLabel.text('چەند کیلۆ');
-        if ($editKgLabel.length) $editKgLabel.text('چەند کیلۆ');
-        
-        // Remove helper text for non-gas materials
-        $('.gas-conversion-help').remove();
-    }
-    
     if (material === 'لمی ڕەش' || material === 'لمی کەسارە') {
         $bin.find('option:contains("چاوی ١")').show();
         $bin.find('option:contains("چاوی ٢")').show();
@@ -65,8 +41,6 @@ function togglePricePerKgInputsFor(typeSelector, iqdGroupSelector, usdGroupSelec
 function updateAmountsFor(prefix) {
     const kg = parseFloat($('#' + prefix + 'kg').val()) || 0;
     const type = $('#' + prefix + 'type').val();
-    const material = $('#' + prefix + 'material_id option:selected').text().trim();
-    
     let pricePerKg = 0;
     if (type === 'دینار') {
         pricePerKg = parseFloat($('#' + prefix + 'price_per_kg_iqd').val()) || 0;
@@ -78,16 +52,7 @@ function updateAmountsFor(prefix) {
     const paid_usd = parseFloat($('#' + prefix + 'paid_usd').val()) || 0;
     const paid_iqd = parseFloat($('#' + prefix + 'paid_iqd').val()) || 0;
     const exchange_rate = parseFloat($('#' + prefix + 'exchange_rate').val()) || 1;
-    
-    // For gas materials, convert kg to tons (divide by 1000)
-    let amount;
-    if (material === 'گاز') {
-        amount = (kg / 1000) * pricePerKg;
-        console.log(`Gas material detected: ${kg} kg converted to ${kg/1000} tons, price per kg: ${pricePerKg}, total amount: ${amount}`);
-    } else {
-        amount = kg * pricePerKg;
-        console.log(`Regular material: ${kg} kg, price per kg: ${pricePerKg}, total amount: ${amount}`);
-    }
+    const amount = (kg / 1000) * pricePerKg;
     const remainingUsdFocused = document.activeElement === document.getElementById(prefix + 'remaining_usd');
     const remainingIqdFocused = document.activeElement === document.getElementById(prefix + 'remaining_iqd');
     if (type === 'دینار') {
@@ -133,27 +98,6 @@ $(document).ready(function() {
     const priceIqd = document.getElementById('price_per_kg_iqd');
     if (priceIqd) priceIqd.value = 0;
     const priceUsd = document.getElementById('price_per_kg_usd');
-    
-    // Handle edit modal material change
-    $(document).on('change', '#edit_material_id', function() {
-        const material = $('#edit_material_id option:selected').text().trim();
-        const $editKgLabel = $('label[for="edit_kg"]');
-        
-        // Update kg field label for gas materials
-        if (material === 'گاز') {
-            if ($editKgLabel.length) $editKgLabel.text('چەند کیلۆ (دەکرێت بە طەن)');
-            
-            // Add helper text for gas conversion
-            if (!$('#edit_kg').next('.gas-conversion-help').length) {
-                $('#edit_kg').after('<small class="form-text text-info gas-conversion-help">نوێتە: بۆ گاز، کیلۆ دەکرێت بە طەن (دابەشی 1000)</small>');
-            }
-        } else {
-            if ($editKgLabel.length) $editKgLabel.text('چەند کیلۆ');
-            
-            // Remove helper text for non-gas materials
-            $('#edit_kg').next('.gas-conversion-help').remove();
-        }
-    });
     if (priceUsd) priceUsd.value = 0;
     updateAmountsFor('purchase');
 });
