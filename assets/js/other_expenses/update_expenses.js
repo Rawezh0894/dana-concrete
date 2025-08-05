@@ -51,9 +51,28 @@ async function editExpense(id, data) {
     if (document.getElementById('edit_gas_total_cost')) {
         formData.append('gas_total_cost', document.getElementById('edit_gas_total_cost').value);
     }
+    // Add payment_type
+    if (document.getElementById('edit_payment_type')) {
+        const paymentType = document.getElementById('edit_payment_type').value;
+        if (paymentType && paymentType.trim() !== '') {
+            formData.append('payment_type', paymentType);
+        } else {
+            formData.append('payment_type', 'نەقد'); // Default value
+        }
+    } else {
+        formData.append('payment_type', 'نەقد'); // Default value
+    }
+    
     // Add currency_type
     if (document.getElementById('edit_currency_type')) {
-        formData.append('currency_type', document.getElementById('edit_currency_type').value);
+        const currencyType = document.getElementById('edit_currency_type').value;
+        if (currencyType && currencyType.trim() !== '') {
+            formData.append('currency_type', currencyType);
+        } else {
+            formData.append('currency_type', 'دینار'); // Default value
+        }
+    } else {
+        formData.append('currency_type', 'دینار'); // Default value
     }
     formData.append('id', id);
     

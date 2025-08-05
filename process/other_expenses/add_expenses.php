@@ -36,7 +36,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $car_id = null;
     }
      $gas_liters = isset($_POST['gas_liters']) ? floatval($_POST['gas_liters']) : null;
-    $expense_type = $_POST['expense_type'] ?? '';
+    $expense_type = $_POST['expense_type'] ?? 'خەرجی تر'; // Default to خەرجی تر if empty
+    // Ensure expense_type is valid
+    if (!in_array($expense_type, ['بەکارهێنانی کاڵای کۆگا', 'بەکارهێنانی گاز', 'خەرجی تر', 'خواردنگە', 'ئۆفیس'])) {
+        $expense_type = 'خەرجی تر';
+    }
     $material_id = $_POST['material_id'] ?? null;
     // Convert empty string to null for foreign key constraint
     if ($material_id === '') {
@@ -53,8 +57,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $material_total_cost = !empty($_POST['material_total_cost']) ? floatval($_POST['material_total_cost']) : 0;
     $gas_purchase_price_input = !empty($_POST['gas_purchase_price_input']) ? floatval($_POST['gas_purchase_price_input']) : 0;
     $gas_total_cost = !empty($_POST['gas_total_cost']) ? floatval($_POST['gas_total_cost']) : 0;
-    $payment_type = $_POST['payment_type'] ?? '';
+    $payment_type = $_POST['payment_type'] ?? 'نەقد'; // Default to نەقد if empty
+    // Ensure payment_type is valid
+    if (!in_array($payment_type, ['نەقد', 'قەرز'])) {
+        $payment_type = 'نەقد';
+    }
     $currency_type = $_POST['currency_type'] ?? 'دینار'; // Default to دینار if empty
+    // Ensure currency_type is valid
+    if (!in_array($currency_type, ['دینار', 'دۆلار'])) {
+        $currency_type = 'دینار';
+    }
     $invoice_number = $_POST['invoice_number'] ?? '';
     $amount_iqd = isset($_POST['amount_iqd']) ? floatval($_POST['amount_iqd']) : 0;
     $amount_usd = isset($_POST['amount_usd']) ? floatval($_POST['amount_usd']) : 0;

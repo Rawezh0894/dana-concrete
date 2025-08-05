@@ -92,9 +92,28 @@ if (addExpenseForm) {
         if (document.getElementById('gas_total_cost')) {
             formData.append('gas_total_cost', document.getElementById('gas_total_cost').value);
         }
+        // Add payment_type
+        if (document.getElementById('payment_type')) {
+            const paymentType = document.getElementById('payment_type').value;
+            if (paymentType && paymentType.trim() !== '') {
+                formData.append('payment_type', paymentType);
+            } else {
+                formData.append('payment_type', 'نەقد'); // Default value
+            }
+        } else {
+            formData.append('payment_type', 'نەقد'); // Default value
+        }
+        
         // Add currency_type
         if (document.getElementById('currency_type')) {
-            formData.append('currency_type', document.getElementById('currency_type').value);
+            const currencyType = document.getElementById('currency_type').value;
+            if (currencyType && currencyType.trim() !== '') {
+                formData.append('currency_type', currencyType);
+            } else {
+                formData.append('currency_type', 'دینار'); // Default value
+            }
+        } else {
+            formData.append('currency_type', 'دینار'); // Default value
         }
         try {
             console.log('Submitting expense form...');
