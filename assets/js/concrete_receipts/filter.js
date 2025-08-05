@@ -10,64 +10,8 @@ $(document).ready(function() {
   }
 
   function loadFilteredReceipts() {
-    const filters = getFilters();
-    $.ajax({
-      url: '../process/concrete_receipts/select_concrete_receipts.php',
-      method: 'GET',
-      data: filters,
-      dataType: 'json',
-      success: function(response) {
-        if (response.success) {
-          updateSummaryCards(response.summary);
-          if (response.data.length === 0) {
-            $('#concreteReceiptsTable tbody').html('<tr><td colspan="11">هیچ پسوڵەیەک نیە</td></tr>');
-            return;
-          }
-          let rows = '';
-          response.data.forEach(function(receipt, idx) {
-            function formatNumber(n) {
-              if (n === null || n === undefined || n === '') return '';
-              return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-            }
-            function formatDate(dt) {
-              if (!dt) return '-';
-              const d = new Date(dt);
-              if (isNaN(d)) return dt;
-              return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0') + ' ' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
-            }
-            rows += `<tr>
-                <td>${idx + 1}</td>
-                <td>${receipt.receipt_number || '-'}</td>
-                <td>${receipt.customer_name || '-'}</td>
-                <td>${receipt.location || '-'}</td>
-                <td>${receipt.receiver_name || '-'}</td>
-                <td>${formatDate(receipt.created_at)}</td>
-                <td>${receipt.meter_amount !== null && receipt.meter_amount !== undefined && receipt.meter_amount !== '' ? formatNumber(receipt.meter_amount) + ' m³' : '-'}</td>
-                <td>${receipt.formula_name || '-'}</td>
-                <td>${receipt.pump_car_name || '-'}</td>
-                <td>${receipt.pump_driver_name || '-'}</td>
-                <td>${receipt.mixer_car_name || '-'}</td>
-                <td>${receipt.mixer_driver_name || '-'}</td>
-                <td>
-                    ${window.userPermissions && window.userPermissions.canEdit ? `<button class='btn btn-sm btn-warning edit-receipt' data-id='${receipt.id}' title='نوێکردنەوە'><i class='fa fa-edit'></i></button>` : ''}
-                    ${window.userPermissions && window.userPermissions.canDelete ? `<button class='btn btn-sm btn-danger delete-receipt' data-id='${receipt.id}' title='سڕینەوە'><i class='fa fa-trash'></i></button>` : ''}
-                    ${window.userPermissions && window.userPermissions.canPrint ? `<button class='btn btn-sm btn-info print-receipt' data-id='${receipt.id}' title='پرێنت'><i class='fa fa-print'></i></button>` : ''}
-                </td>
-            </tr>`;
-          });
-          $('#concreteReceiptsTable tbody').html(rows);
-          // Re-attach event handlers for the new buttons
-          attachEventHandlers();
-        } else {
-          updateSummaryCards({total_receipts: 0, total_meter: 0, total_customers: 0});
-          $('#concreteReceiptsTable tbody').html('<tr><td colspan="11">هەڵەیەک روویدا</td></tr>');
-        }
-      },
-      error: function() {
-        updateSummaryCards({total_receipts: 0, total_meter: 0, total_customers: 0});
-        $('#concreteReceiptsTable tbody').html('<tr><td colspan="11">هەڵەیەک روویدا</td></tr>');
-      }
-    });
+    // Reset to first page when filtering
+    loadConcreteReceiptsTable(1, 10);
   }
 
   // Bind filter events
@@ -119,26 +63,23 @@ $(document).ready(function() {
     // Remove highlights
     $('#filter_today').removeClass('active btn-primary').addClass('btn-outline-primary');
     $('#filter_yesterday').removeClass('active btn-secondary').addClass('btn-outline-secondary');
-    // Reload table
-    if (typeof window.reloadConcreteReceipts === 'function') {
-      window.reloadConcreteReceipts();
-    } else {
-      loadFilteredReceipts();
-    }
-    // Reload summary cards as well
-    if (typeof window.reloadConcreteReceiptsSummary === 'function') {
-      window.reloadConcreteReceiptsSummary();
-    }
+    // Reload table with reset filters
+    loadConcreteReceiptsTable(1, 10);
   });
 
   function updateSummaryCards(summary) {
+    function formatNumber(n) {
+      if (n === null || n === undefined || n === '') return '0';
+      return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+    
     // Update total receipts
     const totalReceipts = summary && summary.total_receipts !== undefined ? summary.total_receipts : 0;
     $('#summary_total_receipts').text(totalReceipts);
     
     // Update total meter
     const totalMeter = summary && summary.total_meter !== undefined ? summary.total_meter : 0;
-    $('#summary_total_meter').text(totalMeter + ' m³');
+    $('#summary_total_meter').text(formatNumber(totalMeter) + ' m³');
     
     // Update total customers
     const totalCustomers = summary && summary.total_customers !== undefined ? summary.total_customers : 0;
@@ -146,7 +87,7 @@ $(document).ready(function() {
   }
 
   // On page load, fetch and show the real summary values
-  loadFilteredReceipts(); // Load data immediately on page load
+  // loadFilteredReceipts(); // This is now handled by select_concrete_receipts.js
 
   // Function to attach event handlers to buttons
   function attachEventHandlers() {
@@ -190,17 +131,11 @@ $(document).ready(function() {
     });
   }
 
+  // Global function to attach event handlers (called from select_concrete_receipts.js)
+  window.attachConcreteReceiptsEventHandlers = attachEventHandlers;
+
   // Function to reload only the summary cards (no filters)
   window.reloadConcreteReceiptsSummary = function() {
-    $.ajax({
-      url: '../process/concrete_receipts/select_concrete_receipts.php',
-      method: 'GET',
-      dataType: 'json',
-      success: function(response) {
-        if (response.success && response.summary) {
-          updateSummaryCards(response.summary);
-        }
-      }
-    });
+    loadConcreteReceiptsTable(1, 10);
   };
 });

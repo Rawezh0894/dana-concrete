@@ -42,6 +42,29 @@ try {
         $params[':date_to'] = $_GET['date_to'];
     }
     $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
+    
+    // Pagination parameters
+    $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+    $pageSize = isset($_GET['pageSize']) ? (int)$_GET['pageSize'] : 10;
+    $offset = ($page - 1) * $pageSize;
+    
+    // Get total count for pagination
+    $count_sql = '
+        SELECT COUNT(*) as total
+        FROM concrete_receipts cr
+        LEFT JOIN customers c ON cr.customer_id = c.id
+        LEFT JOIN concrete_formulas f ON cr.formulas_id = f.id
+        LEFT JOIN cars pump_car ON cr.pump_car_id = pump_car.id
+        LEFT JOIN employees pump_driver ON cr.pump_driver_id = pump_driver.id
+        LEFT JOIN cars mixer_car ON cr.mixer_car_id = mixer_car.id
+        LEFT JOIN employees mixer_driver ON cr.mixer_driver_id = mixer_driver.id
+        ' . $whereSql . '
+    ';
+    $count_stmt = $pdo->prepare($count_sql);
+    $count_stmt->execute($params);
+    $total_count = $count_stmt->fetch(PDO::FETCH_ASSOC)['total'];
+    
+    // Main query with pagination
     $sql = '
         SELECT cr.*, c.name AS customer_name, f.name AS formula_name,
        pump_car.name AS pump_car_name, pump_driver.name AS pump_driver_name,
@@ -56,9 +79,15 @@ try {
         LEFT JOIN employees mixer_driver ON cr.mixer_driver_id = mixer_driver.id
         ' . $whereSql . '
         ORDER BY cr.id DESC
+        LIMIT :limit OFFSET :offset
     ';
     $stmt = $pdo->prepare($sql);
-    $stmt->execute($params);
+    $stmt->bindValue(':limit', $pageSize, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    foreach ($params as $key => $value) {
+        $stmt->bindValue($key, $value);
+    }
+    $stmt->execute();
     $receipts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     // Summary queries
@@ -77,7 +106,17 @@ try {
     $summary["total_meter"] = (float) ($summary["total_meter"] ?? 0);
     $summary["total_customers"] = (int) ($summary["total_customers"] ?? 0);
 
-    echo json_encode(['success' => true, 'data' => $receipts, 'summary' => $summary]);
+    echo json_encode([
+        'success' => true, 
+        'data' => $receipts, 
+        'summary' => $summary,
+        'pagination' => [
+            'total' => (int)$total_count,
+            'page' => $page,
+            'pageSize' => $pageSize,
+            'totalPages' => ceil($total_count / $pageSize)
+        ]
+    ]);
 } catch (Exception $e) {
     echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 }
