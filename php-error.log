@@ -6005,3 +6005,12 @@
 )
 
 [04-Aug-2025 07:42:44 Europe/Berlin] Employees retrieved successfully: Count=18
+[05-Aug-2025 09:26:52 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754378812
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[05-Aug-2025 09:26:52 Europe/Berlin] Dashboard data loaded successfully for user: 1

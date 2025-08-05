@@ -51,9 +51,14 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
 <div class="container-fluid py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">کڕین</h2>
-        <?php if (hasPermission('add_purchase')): ?>
-        <button class="btn" data-bs-toggle="modal" data-bs-target="#addPurchaseModal" style="background: var(--seafoam-green); color:white; font-weight: bold;">+ زیادکردنی کڕین</button>
-        <?php endif; ?>
+        <div class="d-flex gap-2">
+            <button class="btn" data-bs-toggle="modal" data-bs-target="#driversManagementModal" style="background: var(--kelly-green); color:white; font-weight: bold;">
+                <i class="fas fa-users me-1"></i>وردەکاری شۆفێرەکان
+            </button>
+            <?php if (hasPermission('add_purchase')): ?>
+            <button class="btn" data-bs-toggle="modal" data-bs-target="#addPurchaseModal" style="background: var(--seafoam-green); color:white; font-weight: bold;">+ زیادکردنی کڕین</button>
+            <?php endif; ?>
+        </div>
     </div>
     
     <!-- Summary Cards -->
@@ -312,6 +317,98 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
     </div>
   </div>
 </div>
+<!-- Drivers Management Modal -->
+<div class="modal fade" id="driversManagementModal" tabindex="-1" aria-labelledby="driversManagementModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="driversManagementModalLabel">وردەکاری شۆفێرەکان</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Add Driver Form -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h6 class="mb-0">زیادکردنی شۆفێری نوێ</h6>
+          </div>
+          <div class="card-body">
+            <form id="addDriverForm">
+              <div class="row">
+                <div class="col-md-6">
+                  <label for="driver_name" class="form-label">ناوی شۆفێر</label>
+                  <input type="text" class="form-control" id="driver_name" name="name" placeholder="ناوی شۆفێر" required>
+                </div>
+                <div class="col-md-6">
+                  <label for="driver_load_capacity" class="form-label">بەتاڵەی بارهەڵگر (کگم)</label>
+                  <input type="number" class="form-control" id="driver_load_capacity" name="load_capacity" placeholder="بەتاڵەی بارهەڵگر" min="0" step="0.01">
+                </div>
+              </div>
+              <div class="mt-3">
+                <button type="submit" class="btn" style="background: var(--seafoam-green); color: white; font-weight: bold;">
+                  <i class="fas fa-plus me-1"></i>زیادکردن
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Drivers List -->
+        <div class="card">
+          <div class="card-header">
+            <h6 class="mb-0">لیستی شۆفێرەکان</h6>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-bordered table-hover" id="driversTable">
+                <thead style="background: var(--kelly-green); color: white;">
+                  <tr>
+                    <th>#</th>
+                    <th>ناوی شۆفێر</th>
+                    <th>بەتاڵەی بارهەڵگر</th>
+                    <th>کردارەکان</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- Drivers will be loaded here -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Driver Modal -->
+<div class="modal fade" id="editDriverModal" tabindex="-1" aria-labelledby="editDriverModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="editDriverForm">
+        <input type="hidden" id="edit_driver_id" name="id">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editDriverModalLabel">نوێکردنەوەی شۆفێر</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="edit_driver_name" class="form-label">ناوی شۆفێر</label>
+            <input type="text" class="form-control" id="edit_driver_name" name="name" required>
+          </div>
+          <div class="mb-3">
+            <label for="edit_driver_load_capacity" class="form-label">بەتاڵەی بارهەڵگر (کگم)</label>
+            <input type="number" class="form-control" id="edit_driver_load_capacity" name="load_capacity" min="0" step="0.01">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
+          <button type="submit" class="btn" style="background: var(--seafoam-green); color: white; font-weight: bold;">نوێکردنەوە</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <!-- Add Driver Modal (هەمان شێوە) -->
 <div class="modal fade" id="addDriverModal" tabindex="-1">
   <div class="modal-dialog">
@@ -498,6 +595,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
 <script src="../assets/js/purchase/delete_purchase.js"></script>
 <script src="../assets/js/purchase/purchase.js"></script>
 <script src="../assets/js/purchase/update_purchase.js"></script>
+<script src="../assets/js/drivers/drivers_management.js"></script>
 <script>
 // Add modal: dynamic price per kg fields
 $(function() {
