@@ -1,4 +1,19 @@
 async function loadSalesTable() {
+    // Get current month and year
+    const now = new Date();
+    const currentMonth = now.getMonth() + 1; // JavaScript months are 0-indexed
+    const currentYear = now.getFullYear();
+    
+    // Set default filter to current month
+    const fromDate = `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`;
+    const toDate = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${new Date(currentYear, currentMonth, 0).getDate()}`;
+    
+    // Update filter inputs if they exist
+    const fromInput = document.getElementById('filter_from');
+    const toInput = document.getElementById('filter_to');
+    if (fromInput && !fromInput.value) fromInput.value = fromDate;
+    if (toInput && !toInput.value) toInput.value = toDate;
+    
     let res = await fetch('../process/sale/select_sale.php');
     let text = await res.text();
     let data;
@@ -130,7 +145,7 @@ if (clearBtn) {
     clearBtn.addEventListener('click', function() {
         if (fromInput) fromInput.value = '';
         if (toInput) toInput.value = '';
-        loadSalesTable();
+        loadSalesFiltered();
     });
 }
 

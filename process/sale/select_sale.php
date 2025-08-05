@@ -23,7 +23,7 @@ $sql = "SELECT s.*, c.name AS customer_name, f.name AS formula_name FROM sales s
 if ($where) {
     $sql .= " WHERE " . implode(" AND ", $where);
 }
-$sql .= " ORDER BY s.order_date DESC";
+$sql .= " ORDER BY s.order_date ASC";
 
 try {
     $stmt = $pdo->prepare($sql);

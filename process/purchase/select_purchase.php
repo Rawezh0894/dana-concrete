@@ -53,7 +53,7 @@ LEFT JOIN bins_silos b ON p.bin_id = b.id";
 if ($where) {
     $sql .= " WHERE " . implode(" AND ", $where);
 }
-$sql .= " ORDER BY p.date DESC";
+$sql .= " ORDER BY p.date ASC";
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
