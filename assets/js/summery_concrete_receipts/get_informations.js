@@ -267,11 +267,8 @@ function renderCustomerReceiptsTable(receipts) {
         };
     });
     
-    // Use TableController to render with pagination and search
-    TableController.renderWithPagination('#customerReceiptsTable', formattedData, columns, {
-        pageSize: 10,
-        currentPage: 1
-    });
+    // Use TableController to render without pagination (show all data)
+    TableController.render('#customerReceiptsTable', formattedData, columns);
 }
 
 // Global variables for price setting
