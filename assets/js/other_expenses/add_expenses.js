@@ -88,6 +88,10 @@ if (addExpenseForm) {
         if (document.getElementById('gas_total_cost')) {
             formData.append('gas_total_cost', document.getElementById('gas_total_cost').value);
         }
+        // Add currency_type
+        if (document.getElementById('currency_type')) {
+            formData.append('currency_type', document.getElementById('currency_type').value);
+        }
         try {
             console.log('Submitting expense form...');
             console.log('Form data entries:');

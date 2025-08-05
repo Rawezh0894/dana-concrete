@@ -47,6 +47,10 @@ async function editExpense(id, data) {
     if (document.getElementById('edit_gas_total_cost')) {
         formData.append('gas_total_cost', document.getElementById('edit_gas_total_cost').value);
     }
+    // Add currency_type
+    if (document.getElementById('edit_currency_type')) {
+        formData.append('currency_type', document.getElementById('edit_currency_type').value);
+    }
     formData.append('id', id);
     
     try {
