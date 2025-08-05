@@ -232,9 +232,6 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
             <div class="col-md-6 mb-3">
               <label for="kg" class="form-label">چەند کیلۆ</label>
               <input type="number" class="form-control" id="kg" name="kg" min="0" step="0.01" required>
-              <small class="text-muted" id="kg-helper-text" style="display: none;">
-                <i class="fas fa-info-circle"></i> بۆ مەوادی گاز، بڕی دەرچوو دابەشی 1000 دەکرێت
-              </small>
             </div>
             <div class="col-md-6 mb-3">
                 <div id="pricePerKgIqdGroup">
@@ -512,9 +509,6 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
             <div class="col-md-6 mb-3">
               <label for="edit_kg" class="form-label">چەند کیلۆ</label>
               <input type="number" class="form-control" id="edit_kg" name="kg" min="0" step="0.01" required>
-              <small class="text-muted" id="edit-kg-helper-text" style="display: none;">
-                <i class="fas fa-info-circle"></i> بۆ مەوادی گاز، بڕی دەرچوو دابەشی 1000 دەکرێت
-              </small>
             </div>
             <div class="col-md-6 mb-3">
                 <div id="edit_pricePerKgIqdGroup">
