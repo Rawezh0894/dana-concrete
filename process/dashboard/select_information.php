@@ -77,7 +77,8 @@ try {
             'material_type' => $row['material_type'],
             'average_price_per_kg' => round($avg_price_per_kg, 2),
             'price_currency' => $price_currency,
-            'total_value' => $row['total_value']
+            'total_value' => $row['total_value'],
+            'total_value_formatted' => number_format($row['total_value'], 0, '.', ',')
         ];
     }
 

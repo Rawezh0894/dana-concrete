@@ -127,8 +127,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         `${amountInTons.toFixed(1)}` : 
                         `${amountInTons.toFixed(2)}`;
                     
-                    // Calculate total value (average_price * amount)
-                    const totalValue = item.average_price_per_kg * item.amount;
+                    // Use total_value from database directly
+                    const totalValue = item.total_value || 0;
                     
                     const stockGradient = stockGradients[index % stockGradients.length];
                     stockHtml += `<div class="col-md-3 col-sm-6 mb-3">
@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     `<div class="mt-2">
                                         <small class="text-white">${formatPrice(item.average_price_per_kg, item.price_currency)}/کگم</small>
                                         <br>
-                                        <small class="text-white" style="font-weight: bold;">کۆی نرخ: ${formatPrice(totalValue, item.price_currency)}</small>
+                                        <small class="text-white" style="font-weight: bold;">کۆی نرخ: ${item.total_value_formatted} ${item.price_currency === 'دۆلار' ? '$' : 'د.ع'}</small>
                                     </div>` : 
                                     ''
                                 }
