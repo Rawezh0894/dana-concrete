@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $gas_purchase_price_input = !empty($_POST['gas_purchase_price_input']) ? floatval($_POST['gas_purchase_price_input']) : 0;
     $gas_total_cost = isset($_POST['gas_total_cost']) ? floatval($_POST['gas_total_cost']) : null;
     $payment_type = $_POST['payment_type'] ?? '';
-    $currency_type = $_POST['currency_type'] ?? '';
+    $currency_type = $_POST['currency_type'] ?? 'دینار'; // Default to دینار if empty
     $invoice_number = $_POST['invoice_number'] ?? '';
     $amount_iqd = isset($_POST['amount_iqd']) ? floatval($_POST['amount_iqd']) : 0;
     $amount_usd = isset($_POST['amount_usd']) ? floatval($_POST['amount_usd']) : 0;
