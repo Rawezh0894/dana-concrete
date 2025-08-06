@@ -1,44 +1,22 @@
-// Global variable to track data loading state
-window.SALES_DATA_LOADED = false;
-
 // Professional Receipt Management System
 class ReceiptManager {
     constructor() {
-        try {
-            this.tooltip = null;
-            this.isLoading = false;
-            this.init();
-        } catch (error) {
-            console.error('Error creating ReceiptManager:', error);
-            // Fallback initialization
-            this.tooltip = null;
-            this.isLoading = false;
-            this.showError('هەڵە لە دروستکردنی سیستەمەکە');
-        }
+        this.tooltip = null;
+        this.isLoading = false;
+        this.init();
     }
 
     init() {
-        try {
-            this.createTooltip();
-            this.bindEvents();
-            this.loadSalesData();
-        } catch (error) {
-            console.error('Error initializing ReceiptManager:', error);
-            // Show error state
-            this.showError('هەڵە لە دەستپێکردنی سیستەمەکە');
-        }
+        this.createTooltip();
+        this.bindEvents();
+        this.loadSalesData();
     }
 
     createTooltip() {
-        try {
-            // Create professional tooltip element
-            this.tooltip = document.createElement('div');
-            this.tooltip.className = 'receipt-tooltip';
-            document.body.appendChild(this.tooltip);
-        } catch (error) {
-            console.warn('Error creating tooltip:', error);
-            this.tooltip = null;
-        }
+        // Create professional tooltip element
+        this.tooltip = document.createElement('div');
+        this.tooltip.className = 'receipt-tooltip';
+        document.body.appendChild(this.tooltip);
     }
 
     bindEvents() {
@@ -51,21 +29,16 @@ class ReceiptManager {
             }
         });
 
-        // Bind tooltip events with better handling
+        // Bind tooltip events
         document.addEventListener('mouseover', (e) => this.handleTooltipShow(e));
         document.addEventListener('mouseout', (e) => this.handleTooltipHide(e));
-        
-        // Prevent tooltip from showing on mobile
-        document.addEventListener('touchstart', () => this.hideTooltip());
     }
 
     handleTooltipShow(e) {
         const cell = e.target.closest('.receipt-number-cell');
         if (cell && cell.classList.contains('truncated')) {
-            const text = cell.textContent.trim();
-            if (text && text.length > 10) {
-                this.showTooltip(text, e.clientX, e.clientY);
-            }
+            const text = cell.textContent;
+            this.showTooltip(text, e.clientX, e.clientY);
         }
     }
 
@@ -77,41 +50,14 @@ class ReceiptManager {
     }
 
     showTooltip(text, x, y) {
-        if (!this.tooltip || !text) return;
-        
         this.tooltip.textContent = text;
-        
-        // Calculate position to keep tooltip within viewport
-        const tooltipWidth = 300; // max-width from CSS
-        const tooltipHeight = 60; // approximate height
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-        
-        let left = x + 10;
-        let top = y - 40;
-        
-        // Adjust horizontal position if tooltip would go off screen
-        if (left + tooltipWidth > viewportWidth) {
-            left = x - tooltipWidth - 10;
-        }
-        
-        // Adjust vertical position if tooltip would go off screen
-        if (top < 0) {
-            top = y + 20;
-        }
-        if (top + tooltipHeight > viewportHeight) {
-            top = viewportHeight - tooltipHeight - 10;
-        }
-        
-        this.tooltip.style.left = left + 'px';
-        this.tooltip.style.top = top + 'px';
+        this.tooltip.style.left = x + 10 + 'px';
+        this.tooltip.style.top = y - 40 + 'px';
         this.tooltip.classList.add('show');
     }
 
     hideTooltip() {
-        if (this.tooltip) {
-            this.tooltip.classList.remove('show');
-        }
+        this.tooltip.classList.remove('show');
     }
 
     showLoading() {
@@ -122,9 +68,8 @@ class ReceiptManager {
                 <tr>
                     <td colspan="9" class="table-loading">
                         <div style="text-align: center; padding: 2rem;">
-                            <i class="fa fa-spinner fa-spin" style="font-size: 2rem; color: var(--seafoam-green); margin-bottom: 1rem;"></i>
-                            <p style="margin: 0; color: #666; font-size: 1rem;">لە بارکردنی داتاکان...</p>
-                            <small style="display: block; margin-top: 0.5rem; color: #adb5bd;">تکایە چاوەڕوان بە</small>
+                            <i class="fa fa-spinner fa-spin" style="font-size: 2rem; color: var(--seafoam-green);"></i>
+                            <p style="margin-top: 1rem; color: #666;">لە بارکردنی داتاکان...</p>
                         </div>
                     </td>
                 </tr>
@@ -138,70 +83,51 @@ class ReceiptManager {
             tbody.innerHTML = `
                 <tr>
                     <td colspan="9" class="table-empty">
-                        <i class="fa fa-inbox" style="font-size: 3rem; color: #dee2e6; margin-bottom: 1rem; display: block;"></i>
-                        <p style="margin: 0.5rem 0; font-size: 1.1rem; color: #6c757d;">هیچ داتایەک نەدۆزرایەوە</p>
-                        <small style="display: block; color: #adb5bd; font-size: 0.9rem;">تکایە فلتەرەکان بگۆڕە یان داتای نوێ زیاد بکە</small>
+                        <i class="fa fa-inbox"></i>
+                        <p>هیچ داتایەک نەدۆزرایەوە</p>
+                        <small>تکایە فلتەرەکان بگۆڕە یان داتای نوێ زیاد بکە</small>
                     </td>
                 </tr>
             `;
         }
-        
-        // Mark sales data as not loaded
-        window.SALES_DATA_LOADED = false;
     }
 
     showError(message) {
         const tbody = document.getElementById('receipt-table-body');
         if (tbody) {
-            const errorMessage = message || 'هەڵەی نەناسراو';
             tbody.innerHTML = `
                 <tr>
                     <td colspan="9" style="text-align: center; padding: 2rem; color: #dc3545;">
                         <i class="fa fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
                         <p>هەڵە لە بارکردنی داتاکان</p>
-                        <small style="display: block; margin: 0.5rem 0; font-size: 0.9rem;">${errorMessage}</small>
-                        <button onclick="receiptManager.loadSalesData()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: var(--seafoam-green); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
+                        <small>${message}</small>
+                        <button onclick="receiptManager.loadSalesData()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: var(--seafoam-green); color: white; border: none; border-radius: 4px; cursor: pointer;">
                             <i class="fa fa-refresh"></i> هەوڵ بدەوە
                         </button>
                     </td>
                 </tr>
             `;
         }
-        
-        // Mark sales data as not loaded
-        window.SALES_DATA_LOADED = false;
     }
 
     formatReceiptNumber(number) {
-        if (!number && number !== 0) return '';
+        if (!number) return '';
         
-        try {
-            const receiptNumber = String(number);
-            const isLong = receiptNumber.length > 10;
-            
-            return `
-                <div class="receipt-number-cell ${isLong ? 'truncated' : ''}" 
-                     title="${isLong ? receiptNumber : ''}"
-                     data-full-number="${receiptNumber}">
-                    ${receiptNumber}
-                </div>
-            `;
-        } catch (error) {
-            console.warn('Error formatting receipt number:', number, error);
-            return `
-                <div class="receipt-number-cell">
-                    ${String(number || '')}
-                </div>
-            `;
-        }
+        const receiptNumber = String(number);
+        const isLong = receiptNumber.length > 10;
+        
+        return `
+            <div class="receipt-number-cell ${isLong ? 'truncated' : ''}" 
+                 title="${isLong ? receiptNumber : ''}"
+                 data-full-number="${receiptNumber}">
+                ${receiptNumber}
+            </div>
+        `;
     }
 
     formatCurrency(amount) {
-        if (!amount && amount !== 0) return '';
-        
-        // Convert to string if it's not already
-        const amountStr = String(amount);
-        const num = parseFloat(amountStr.replace(/[$,]/g, '')) || 0;
+        if (!amount) return '';
+        const num = parseFloat(amount.replace(/[$,]/g, '')) || 0;
         return '$' + num.toLocaleString('en-US', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
@@ -210,28 +136,11 @@ class ReceiptManager {
 
     formatDate(dateString) {
         if (!dateString) return '';
-        
         try {
-            // Handle different date formats
-            let date;
-            if (typeof dateString === 'string') {
-                // Try to parse the date string
-                date = new Date(dateString);
-            } else if (dateString instanceof Date) {
-                date = dateString;
-            } else {
-                return String(dateString);
-            }
-            
-            // Check if date is valid
-            if (isNaN(date.getTime())) {
-                return String(dateString);
-            }
-            
+            const date = new Date(dateString);
             return date.toLocaleDateString('ku-IQ');
         } catch (e) {
-            console.warn('Error formatting date:', dateString, e);
-            return String(dateString);
+            return dateString;
         }
     }
 
@@ -246,13 +155,13 @@ class ReceiptManager {
             const date_from = this.getDateFrom();
             const date_to = this.getDateTo();
             
-            const params = new URLSearchParams({
-                customer_id: CUSTOMER_ID,
-                type,
-                month,
-                date_from,
-                date_to
-            });
+    const params = new URLSearchParams({
+        customer_id: CUSTOMER_ID,
+        type,
+        month,
+        date_from,
+        date_to
+    });
 
             const response = await fetch(`../process/receipts/select_sale.php?${params.toString()}`);
             
@@ -260,16 +169,7 @@ class ReceiptManager {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            let data;
-            try {
-                data = await response.json();
-            } catch (jsonError) {
-                console.error('JSON parsing error:', jsonError);
-                const textResponse = await response.text();
-                console.error('Raw response:', textResponse);
-                throw new Error('داتای نەدراوە بە شێوەیەکی دروست (JSON)');
-            }
-
+            const data = await response.json();
             this.renderSalesData(data);
             
         } catch (error) {
@@ -281,106 +181,67 @@ class ReceiptManager {
     }
 
     renderSalesData(response) {
-        // Validate response structure
-        if (!response || typeof response !== 'object') {
-            console.error('Invalid response format:', response);
-            this.showError('داتای نەدراوە بە شێوەیەکی دروست');
-            return;
-        }
+            const data = response.sales_data;
+            const openingDebt = response.opening_debt;
+            
+            const tbody = document.getElementById('receipt-table-body');
+        if (!tbody) return;
 
-        const data = response.sales_data;
-        const openingDebt = response.opening_debt;
-        
-        const tbody = document.getElementById('receipt-table-body');
-        if (!tbody) {
-            console.error('Table body element not found');
-            return;
-        }
-
-        if (!data || !Array.isArray(data) || data.length === 0) {
+        if (!data || data.length === 0) {
             this.showEmpty();
-            return;
-        }
-
-        let total = 0;
-        let remainingTotal = 0;
-        
-        const rows = data.map(row => {
-            try {
-                // Calculate totals with safe parsing
-                const cleanTotal = this.safeParseFloat(row.total_price) || 0;
-                const cleanRemaining = this.safeParseFloat(row.remaining_amount) || 0;
-                total += cleanTotal;
-                remainingTotal += cleanRemaining;
-
-                return `
-                    <tr class="receipt-row" data-receipt-id="${row.invoice_number || ''}">
-                        <td>${row.quantity || ''}</td>
-                        <td>${row.rezh || ''}</td>
-                        <td>${this.formatCurrency(row.price_per_unit)}</td>
-                        <td>${this.formatCurrency(row.total_price)}</td>
-                        <td>${this.formatCurrency(row.amount_paid_usd)}</td>
-                        <td>${row.amount_paid_iqd || ''}</td>
-                        <td>${this.formatCurrency(row.remaining_amount)}</td>
-                        <td>${this.formatReceiptNumber(row.invoice_number)}</td>
-                        <td>${this.formatDate(row.order_date)}</td>
-                    </tr>
-                `;
-            } catch (error) {
-                console.error('Error processing row:', row, error);
-                return `
-                    <tr class="receipt-row error-row">
-                        <td colspan="9" style="color: #dc3545; text-align: center;">
-                            <i class="fa fa-exclamation-triangle"></i>
-                            هەڵە لە پرۆسێسکردنی ئەم ڕیزە
-                        </td>
-                    </tr>
-                `;
+                return;
             }
+            
+            let total = 0;
+            let remainingTotal = 0;
+            
+        const rows = data.map(row => {
+            // Calculate totals
+            const cleanTotal = parseFloat((row.total_price || '').replace(/[$,]/g, '')) || 0;
+            const cleanRemaining = parseFloat((row.remaining_amount || '').replace(/[$,]/g, '')) || 0;
+            total += cleanTotal;
+            remainingTotal += cleanRemaining;
+
+            return `
+                <tr class="receipt-row" data-receipt-id="${row.invoice_number || ''}">
+                    <td>${row.quantity || ''}</td>
+                    <td>${row.rezh || ''}</td>
+                    <td>${this.formatCurrency(row.price_per_unit)}</td>
+                    <td>${this.formatCurrency(row.total_price)}</td>
+                    <td>${this.formatCurrency(row.amount_paid_usd)}</td>
+                    <td>${row.amount_paid_iqd || ''}</td>
+                    <td>${this.formatCurrency(row.remaining_amount)}</td>
+                    <td>${this.formatReceiptNumber(row.invoice_number)}</td>
+                    <td>${this.formatDate(row.order_date)}</td>
+                    </tr>
+                `;
         }).join('');
 
         tbody.innerHTML = rows;
-        this.updateSummary(total, remainingTotal);
+        this.updateSummary(total, remainingTotal, openingDebt);
         this.updateDebtSummary(openingDebt, remainingTotal);
-        
-        // Mark sales data as loaded
-        window.SALES_DATA_LOADED = true;
-        
-        // Load return debt data after sales data is loaded
-        if (typeof loadReturnDebt === 'function') {
-            setTimeout(() => loadReturnDebt(), 100);
-        }
-    }
-
-    // Helper function for safe float parsing
-    safeParseFloat(value) {
-        if (!value && value !== 0) return 0;
-        
-        try {
-            const strValue = String(value);
-            return parseFloat(strValue.replace(/[$,]/g, '')) || 0;
-        } catch (error) {
-            console.warn('Error parsing float value:', value, error);
-            return 0;
+            
+            // Mark sales data as loaded
+            window.SALES_DATA_LOADED = true;
+            
+            // Load return debt data after sales data is loaded
+            if (typeof loadReturnDebt === 'function') {
+                setTimeout(() => loadReturnDebt(), 100);
         }
     }
 
     updateSummary(total, remainingTotal) {
         const tfoot = document.getElementById('receipt-table-footer');
         if (tfoot) {
-            // Ensure values are numbers
-            const totalValue = typeof total === 'number' ? total : 0;
-            const remainingValue = typeof remainingTotal === 'number' ? remainingTotal : 0;
-            
             tfoot.innerHTML = `
                 <tr class="summary-row">
                     <td colspan="4">
                         <i class="fa fa-calculator"></i>
-                        کۆی نرخ: ${this.formatCurrency(totalValue)}
+                        کۆی نرخ: ${this.formatCurrency(total)}
                     </td>
                     <td colspan="5">
                         <i class="fa fa-money-bill-wave"></i>
-                        کۆی پارەی ماوە: ${this.formatCurrency(remainingValue)}
+                        کۆی پارەی ماوە: ${this.formatCurrency(remainingTotal)}
                     </td>
                 </tr>
             `;
@@ -388,29 +249,18 @@ class ReceiptManager {
     }
 
     updateDebtSummary(openingDebt, remainingTotal) {
-        // Handle opening debt - could be string or number
-        let openingDebtValue = 0;
-        if (openingDebt) {
-            if (typeof openingDebt === 'string') {
-                openingDebtValue = parseFloat(openingDebt.replace(/[$,]/g, '')) || 0;
-            } else if (typeof openingDebt === 'number') {
-                openingDebtValue = openingDebt;
-            }
-        }
-        
-        // Ensure remainingTotal is a number
-        const remainingValue = typeof remainingTotal === 'number' ? remainingTotal : 0;
-        const totalRemaining = openingDebtValue + remainingValue;
+        const openingDebtValue = parseFloat(openingDebt.replace(/[$,]/g, '')) || 0;
+        const totalRemaining = openingDebtValue + remainingTotal;
         
         // Store global values
         window.RECEIPT_TOTAL = totalRemaining;
-        window.REMAINING_TOTAL = remainingValue;
+        window.REMAINING_TOTAL = remainingTotal;
         window.OPENING_DEBT = openingDebtValue;
         
         // Update UI elements
         const elements = {
             'opening-debt': this.formatCurrency(openingDebtValue),
-            'remaining-amount': this.formatCurrency(remainingValue),
+            'remaining-amount': this.formatCurrency(remainingTotal),
             'total-debt': this.formatCurrency(totalRemaining)
         };
 
@@ -443,84 +293,31 @@ class ReceiptManager {
 
 // Initialize the receipt manager when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    try {
-        if (typeof CUSTOMER_ID === 'undefined' || !CUSTOMER_ID) {
-            console.error('CUSTOMER_ID is not defined');
-            return;
-        }
-        
-        // Initialize the professional receipt manager
-        window.receiptManager = new ReceiptManager();
-        
-        // Legacy function for backward compatibility
-        window.loadSalesData = loadSalesData;
-    } catch (error) {
-        console.error('Error in DOM ready handler:', error);
-        // Show fallback error message
-        const tbody = document.getElementById('receipt-table-body');
-        if (tbody) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="9" style="text-align: center; padding: 2rem; color: #dc3545;">
-                        <i class="fa fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
-                        <p>هەڵە لە دەستپێکردنی سیستەمەکە</p>
-                        <small style="display: block; margin: 0.5rem 0; font-size: 0.9rem;">تکایە پەڕەکە ڕیفرێش بکە</small>
-                        <button onclick="location.reload()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: var(--seafoam-green); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
-                            <i class="fa fa-refresh"></i> ڕیفرێش
-                        </button>
-                    </td>
-                </tr>
-            `;
-        }
+    if (typeof CUSTOMER_ID === 'undefined' || !CUSTOMER_ID) {
+        console.error('CUSTOMER_ID is not defined');
+        return;
     }
+    
+    // Initialize the professional receipt manager
+    window.receiptManager = new ReceiptManager();
+    
+    // Legacy function for backward compatibility
+    window.loadSalesData = () => window.receiptManager.loadSalesData();
 });
 
 // Legacy functions for backward compatibility
 function getSelectedTransactionType() {
-    try {
-        return window.receiptManager ? window.receiptManager.getSelectedTransactionType() : 'all';
-    } catch (error) {
-        console.warn('Error in getSelectedTransactionType:', error);
-        return 'all';
-    }
+    return window.receiptManager ? window.receiptManager.getSelectedTransactionType() : 'all';
 }
 
 function getSelectedMonth() {
-    try {
-        return window.receiptManager ? window.receiptManager.getSelectedMonth() : 'all';
-    } catch (error) {
-        console.warn('Error in getSelectedMonth:', error);
-        return 'all';
-    }
+    return window.receiptManager ? window.receiptManager.getSelectedMonth() : 'all';
 }
 
 function getDateFrom() {
-    try {
-        return window.receiptManager ? window.receiptManager.getDateFrom() : '';
-    } catch (error) {
-        console.warn('Error in getDateFrom:', error);
-        return '';
-    }
+    return window.receiptManager ? window.receiptManager.getDateFrom() : '';
 }
 
 function getDateTo() {
-    try {
-        return window.receiptManager ? window.receiptManager.getDateTo() : '';
-    } catch (error) {
-        console.warn('Error in getDateTo:', error);
-        return '';
-    }
-}
-
-// Global loadSalesData function for backward compatibility
-function loadSalesData() {
-    try {
-        if (window.receiptManager) {
-            window.receiptManager.loadSalesData();
-        } else {
-            console.warn('ReceiptManager not initialized');
-        }
-    } catch (error) {
-        console.error('Error in global loadSalesData:', error);
-    }
+    return window.receiptManager ? window.receiptManager.getDateTo() : '';
 }
