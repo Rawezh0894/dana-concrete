@@ -21,37 +21,6 @@ $(document).on('change', '#material_id', function() {
     } else {
         $bin.find('option').show(); // fallback: show all
     }
-    
-    // Update amounts when material changes
-    updateAmountsFor('');
-});
-
-// Dynamic bin select for edit modal
-$(document).on('change', '#edit_material_id', function() {
-    const material = $('#edit_material_id option:selected').text().trim();
-    const $bin = $('#edit_bin_id');
-    $bin.val('');
-    $bin.find('option').hide();
-    $bin.find('option[value=""]').show(); // always show default
-    if (material === 'لمی ڕەش' || material === 'لمی کەسارە') {
-        $bin.find('option:contains("چاوی ١")').show();
-        $bin.find('option:contains("چاوی ٢")').show();
-    } else if (material === 'چەو') {
-        $bin.find('option:contains("چاوی ٣")').show();
-        $bin.find('option:contains("چاوی ٤")').show();
-    } else if (material === 'چیمەنتۆ') {
-        $bin.find('option:contains("سایلۆی ١")').show();
-        $bin.find('option:contains("سایلۆی ٢")').show();
-    } else if (material === 'دەرمان') {
-        $bin.find('option:contains("تەنکی دەرمان ١")').show();
-    } else if (material === 'گاز') {
-        $bin.find('option:contains("تەکی گاز ١")').show();
-    } else {
-        $bin.find('option').show(); // fallback: show all
-    }
-    
-    // Update amounts when material changes in edit modal
-    updateAmountsFor('edit_');
 });
 
 // Shared logic for add and edit purchase modals
@@ -83,14 +52,7 @@ function updateAmountsFor(prefix) {
     const paid_usd = parseFloat($('#' + prefix + 'paid_usd').val()) || 0;
     const paid_iqd = parseFloat($('#' + prefix + 'paid_iqd').val()) || 0;
     const exchange_rate = parseFloat($('#' + prefix + 'exchange_rate').val()) || 1;
-    // Check if material is gas - for gas, don't divide by 1000
-    const material = $('#' + prefix + 'material_id option:selected').text().trim();
-    let amount;
-    if (material === 'گاز') {
-        amount = kg * pricePerKg; // For gas, use kg directly
-    } else {
-        amount = (kg / 1000) * pricePerKg; // For other materials, divide by 1000
-    }
+    const amount = (kg / 1000) * pricePerKg;
     const remainingUsdFocused = document.activeElement === document.getElementById(prefix + 'remaining_usd');
     const remainingIqdFocused = document.activeElement === document.getElementById(prefix + 'remaining_iqd');
     if (type === 'دینار') {
