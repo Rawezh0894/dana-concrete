@@ -308,8 +308,37 @@ body {
     }
 }
 .receipt-table-custom {
-    table-layout: auto !important;
+    table-layout: fixed !important;
     width: 100%;
+    min-width: 900px; /* بۆ ئەوەی horizontal scroll بێت ئەگەر پێویست بوو */
+}
+
+/* Container بۆ horizontal scroll */
+.receipt-table-container {
+    overflow-x: auto;
+    margin: 1rem 0;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Scrollbar styling */
+.receipt-table-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.receipt-table-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.receipt-table-container::-webkit-scrollbar-thumb {
+    background: var(--seafoam-green);
+    border-radius: 4px;
+}
+
+.receipt-table-container::-webkit-scrollbar-thumb:hover {
+    background: #0056b3;
 }
 .receipt-table-custom th, .receipt-table-custom td {
     word-break: break-word;
@@ -317,20 +346,188 @@ body {
     text-align: center;
     vertical-align: middle;
     padding: 0.5rem 0.7rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border: 1px solid #ddd;
 }
-.receipt-table-custom th {
-    /* بۆ سووتنە درێژەکان */
-    max-width: 110px;
+
+/* ستوونی ژمارەی پسووڵە - بۆ نیشاندانی بە شێوەیەکی باش */
+.receipt-table-custom th:nth-child(8),
+.receipt-table-custom td:nth-child(8) {
+    width: 120px;
+    min-width: 120px;
+    max-width: 120px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    font-weight: bold;
+    background: #f8f9fa;
+    border-left: 2px solid var(--seafoam-green);
+    border-right: 2px solid var(--seafoam-green);
+    position: relative;
+    cursor: help;
+    text-align: center;
+    letter-spacing: 0.5px;
+}
+
+/* Tooltip بۆ ژمارەی پسووڵە */
+.receipt-table-custom td:nth-child(8):hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: white;
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    pointer-events: none;
+    max-width: 300px;
+    word-wrap: break-word;
+    font-family: 'Courier New', monospace;
+    margin-bottom: 5px;
+}
+
+.receipt-table-custom td:nth-child(8):hover::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: #333;
+    z-index: 1000;
+    pointer-events: none;
+    margin-bottom: -5px;
+}
+
+/* Responsive design بۆ تەیبڵەکە */
+@media (max-width: 768px) {
+    .receipt-table-container {
+        margin: 0.5rem 0;
+        border-radius: 4px;
+    }
+    
+    .receipt-table-custom {
+        font-size: 0.75rem;
+        min-width: 800px;
+    }
+    
+    .receipt-table-custom th,
+    .receipt-table-custom td {
+        padding: 0.3rem 0.4rem;
+        font-size: 0.7rem;
+    }
+    
+    /* ستوونی ژمارەی پسووڵە لە mobile */
+    .receipt-table-custom th:nth-child(8),
+    .receipt-table-custom td:nth-child(8) {
+        width: 80px;
+        min-width: 80px;
+        max-width: 80px;
+        font-size: 0.7rem;
+    }
+    
+    /* ستوونی بەروار لە mobile */
+    .receipt-table-custom th:nth-child(9),
+    .receipt-table-custom td:nth-child(9) {
+        width: 70px;
+        min-width: 70px;
+        max-width: 70px;
+        font-size: 0.7rem;
+    }
+    
+    /* Hide tooltip on mobile */
+    .receipt-table-custom td:nth-child(8):hover::after,
+    .receipt-table-custom td:nth-child(8):hover::before {
+        display: none;
+    }
+}
+
+/* ستوونی بەروار - بۆ نیشاندانی بە شێوەیەکی باش */
+.receipt-table-custom th:nth-child(9),
+.receipt-table-custom td:nth-child(9) {
+    width: 100px;
+    min-width: 100px;
+    max-width: 100px;
+    font-size: 0.85rem;
+    text-align: center;
+    font-family: 'Rabar', sans-serif;
+}
+
+/* ستوونەکانی تر */
+.receipt-table-custom th:nth-child(1),
+.receipt-table-custom td:nth-child(1) {
+    width: 80px;
+    min-width: 80px;
+    max-width: 80px;
+    text-align: center;
+}
+
+.receipt-table-custom th:nth-child(2),
+.receipt-table-custom td:nth-child(2) {
+    width: 100px;
+    min-width: 100px;
+    max-width: 100px;
+    text-align: center;
+}
+
+.receipt-table-custom th:nth-child(3),
+.receipt-table-custom td:nth-child(3) {
+    width: 100px;
+    min-width: 100px;
+    max-width: 100px;
+    text-align: center;
+}
+
+.receipt-table-custom th:nth-child(4),
+.receipt-table-custom td:nth-child(4) {
+    width: 100px;
+    min-width: 100px;
+    max-width: 100px;
+    text-align: center;
+}
+
+.receipt-table-custom th:nth-child(5),
+.receipt-table-custom td:nth-child(5) {
+    width: 120px;
+    min-width: 120px;
+    max-width: 120px;
+    text-align: center;
+}
+
+.receipt-table-custom th:nth-child(6),
+.receipt-table-custom td:nth-child(6) {
+    width: 120px;
+    min-width: 120px;
+    max-width: 120px;
+    text-align: center;
+}
+
+.receipt-table-custom th:nth-child(7),
+.receipt-table-custom td:nth-child(7) {
+    width: 120px;
+    min-width: 120px;
+    max-width: 120px;
+    text-align: center;
 }
 .receipt-table-custom tbody tr:nth-child(even) td {
     background: #f4f8fc;
+}
+
+.receipt-table-custom tbody tr:hover td {
+    background: #e8f2ff;
+    transition: background-color 0.2s ease;
 }
 .receipt-table-custom .summary-row td {
     font-weight: bold;
     background: #f4f8fc;
     color: var(--seafoam-green);
     border-top: 2px solid var(--seafoam-green);
-    text-align: right;
+    text-align: center;
     font-size: 1.08rem;
 }
 .receipt-notes {
@@ -442,9 +639,15 @@ body {
 }
 
 @media print {
+    .receipt-table-container {
+        overflow-x: visible !important;
+        border: none !important;
+    }
+    
     .receipt-table-custom {
-        table-layout: auto !important;
+        table-layout: fixed !important;
         width: 100% !important;
+        min-width: auto !important;
     }
     .receipt-table-custom th,
     .receipt-table-custom td {
@@ -454,9 +657,40 @@ body {
         vertical-align: middle !important;
         padding: 0.3rem 0.5rem !important;
         font-size: 0.85rem !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
     }
+    
+    /* ستوونی ژمارەی پسووڵە لە print */
+    .receipt-table-custom th:nth-child(8),
+    .receipt-table-custom td:nth-child(8) {
+        width: 100px !important;
+        min-width: 100px !important;
+        max-width: 100px !important;
+        font-family: 'Courier New', monospace !important;
+        font-size: 0.75rem !important;
+        font-weight: bold !important;
+        background: #f8f9fa !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    /* ستوونی بەروار لە print */
+    .receipt-table-custom th:nth-child(9),
+    .receipt-table-custom td:nth-child(9) {
+        width: 80px !important;
+        min-width: 80px !important;
+        max-width: 80px !important;
+        font-size: 0.75rem !important;
+    }
+    
     .receipt-table-custom th {
         max-width: 90px !important;
+        background: var(--seafoam-green) !important;
+        color: white !important;
+        font-weight: bold !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
     }
 }
 
@@ -479,4 +713,5 @@ body {
     background: var(--seafoam-green);
     color: #fff;
     font-weight: bold;
+    border: 1px solid #0056b3;
 }
