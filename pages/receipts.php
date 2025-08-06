@@ -109,38 +109,27 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         <input type="date" id="date-to-filter" style="padding: 0.3rem; font-size: 1rem;">
     </div>
 
-    <!-- Professional Table Wrapper -->
-    <div class="receipt-table-wrapper">
-        <table class="receipt-table receipt-table-custom">
-            <thead>
-                <tr>
-                    <th>پێوانە</th>
-                    <th>ڕێژە</th>
-                    <th>نرخی 1 م 3</th>
-                    <th>کۆی نرخ</th>
-                    <th>پارەی دراو (USD)</th>
-                    <th>پارەی دراو (د.ع)</th>
-                    <th>پارەی ماوە</th>
-                    <th>ژمارەی پسووڵە</th>
-                    <th>بەروار</th>
-                </tr>
-            </thead>
-            <tbody id="receipt-table-body">
-                <!-- Loading state -->
-                <tr>
-                    <td colspan="9" class="table-loading">
-                        <div style="text-align: center; padding: 2rem;">
-                            <i class="fa fa-spinner fa-spin" style="font-size: 2rem; color: var(--seafoam-green);"></i>
-                            <p style="margin-top: 1rem; color: #666;">لە بارکردنی داتاکان...</p>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-            <tfoot id="receipt-table-footer">
-                <!-- Summary will be loaded by JS -->
-            </tfoot>
-        </table>
-    </div>
+    <table class="receipt-table receipt-table-custom">
+        <thead>
+            <tr>
+                <th>پێوانە</th>
+                <th>ڕێژە</th>
+                <th>نرخی 1 م 3</th>
+                <th>کۆی نرخ</th>
+                <th>پارەی دراو (USD)</th>
+                <th>پارەی دراو (د.ع)</th>
+                <th>پارەی ماوە</th>
+                <th>ژمارەی پسووڵە</th>
+                <th>بەروار</th>
+            </tr>
+        </thead>
+        <tbody id="receipt-table-body">
+            <!-- Rows will be loaded by JS -->
+        </tbody>
+        <tfoot id="receipt-table-footer">
+            <!-- Summary will be loaded by JS -->
+        </tfoot>
+    </table>
     
     <!-- تابلەی vertical پارەی واسڵ کراو و بەرواری پارەدان -->
     <table class="receipt-table receipt-table-custom" id="paid-table" style="margin-top: 1.5rem; width: 85%; margin-right: auto; margin-left: auto;">
