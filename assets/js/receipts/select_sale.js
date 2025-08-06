@@ -91,7 +91,7 @@ function loadSalesData() {
                         <td>${row.amount_paid_usd ?? ''}</td>
                         <td>${row.amount_paid_iqd ?? ''}</td>
                         <td>${row.remaining_amount ?? ''}</td>
-                        <td title="${row.invoice_number ?? ''}">${row.invoice_number ?? ''}</td>
+                        <td>${row.invoice_number ?? ''}</td>
                         <td>${row.order_date ?? ''}</td>
                     </tr>`;
                 });
