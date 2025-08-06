@@ -683,3 +683,333 @@ body {
         font-size: 0.7rem;
     }
 }
+
+/* Professional Table Solution */
+.receipt-table-wrapper {
+    position: relative;
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 59, 115, 0.15);
+    background: #fff;
+}
+
+.receipt-table-wrapper::-webkit-scrollbar {
+    height: 8px;
+}
+
+.receipt-table-wrapper::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.receipt-table-wrapper::-webkit-scrollbar-thumb {
+    background: var(--seafoam-green);
+    border-radius: 4px;
+}
+
+.receipt-table-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #0056b3;
+}
+
+.receipt-table-custom {
+    min-width: 1200px;
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    font-size: 0.95rem;
+}
+
+.receipt-table-custom th {
+    background: linear-gradient(135deg, var(--seafoam-green), #0056b3);
+    color: #fff;
+    font-weight: 600;
+    padding: 1rem 0.8rem;
+    text-align: center;
+    border: 1px solid #fff;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    white-space: nowrap;
+    font-size: 0.9rem;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.receipt-table-custom td {
+    padding: 0.8rem 0.6rem;
+    border: 1px solid #e0e6ed;
+    text-align: center;
+    vertical-align: middle;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.receipt-table-custom tbody tr {
+    transition: all 0.2s ease;
+}
+
+.receipt-table-custom tbody tr:hover {
+    background: linear-gradient(90deg, #f8faff, #f0f7ff);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 59, 115, 0.1);
+}
+
+.receipt-table-custom tbody tr:nth-child(even) {
+    background: #fafbfc;
+}
+
+.receipt-table-custom tbody tr:nth-child(even):hover {
+    background: linear-gradient(90deg, #f8faff, #f0f7ff);
+}
+
+/* Professional Column Widths */
+.receipt-table-custom th:nth-child(1),
+.receipt-table-custom td:nth-child(1) {
+    width: 8%;
+    min-width: 80px;
+}
+
+.receipt-table-custom th:nth-child(2),
+.receipt-table-custom td:nth-child(2) {
+    width: 8%;
+    min-width: 80px;
+}
+
+.receipt-table-custom th:nth-child(3),
+.receipt-table-custom td:nth-child(3) {
+    width: 10%;
+    min-width: 100px;
+}
+
+.receipt-table-custom th:nth-child(4),
+.receipt-table-custom td:nth-child(4) {
+    width: 12%;
+    min-width: 120px;
+}
+
+.receipt-table-custom th:nth-child(5),
+.receipt-table-custom td:nth-child(5) {
+    width: 12%;
+    min-width: 120px;
+}
+
+.receipt-table-custom th:nth-child(6),
+.receipt-table-custom td:nth-child(6) {
+    width: 12%;
+    min-width: 120px;
+}
+
+.receipt-table-custom th:nth-child(7),
+.receipt-table-custom td:nth-child(7) {
+    width: 12%;
+    min-width: 120px;
+}
+
+.receipt-table-custom th:nth-child(8),
+.receipt-table-custom td:nth-child(8) {
+    width: 10%;
+    min-width: 100px;
+    max-width: 120px;
+}
+
+.receipt-table-custom th:nth-child(9),
+.receipt-table-custom td:nth-child(9) {
+    width: 16%;
+    min-width: 120px;
+}
+
+/* Professional Receipt Number Handling */
+.receipt-number-cell {
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    background: linear-gradient(90deg, #f8f9fa, #e9ecef);
+    border-radius: 4px;
+    padding: 0.4rem 0.6rem;
+    margin: 0.2rem;
+    transition: all 0.3s ease;
+}
+
+.receipt-number-cell:hover {
+    background: linear-gradient(90deg, #e3f2fd, #bbdefb);
+    transform: scale(1.02);
+    box-shadow: 0 2px 8px rgba(0, 59, 115, 0.2);
+}
+
+.receipt-number-cell.truncated::after {
+    content: "...";
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--seafoam-green);
+    font-weight: bold;
+    background: inherit;
+    padding-left: 5px;
+}
+
+/* Professional Tooltip */
+.receipt-tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.9);
+    color: #fff;
+    padding: 0.8rem 1rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    z-index: 1000;
+    max-width: 300px;
+    word-wrap: break-word;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
+
+.receipt-tooltip.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.receipt-tooltip::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 5px solid rgba(0, 0, 0, 0.9);
+}
+
+/* Professional Summary Row */
+.receipt-table-custom .summary-row td {
+    background: linear-gradient(135deg, var(--seafoam-green), #0056b3);
+    color: #fff;
+    font-weight: 600;
+    text-align: center;
+    border: 1px solid #fff;
+    padding: 1rem 0.8rem;
+    font-size: 1rem;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+/* Professional Loading State */
+.table-loading {
+    position: relative;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.table-loading::after {
+    content: '';
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e9ecef;
+    border-top: 4px solid var(--seafoam-green);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Professional Empty State */
+.table-empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+    font-size: 1.1rem;
+}
+
+.table-empty i {
+    font-size: 3rem;
+    color: #dee2e6;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+/* Professional Responsive Design */
+@media (max-width: 1200px) {
+    .receipt-table-custom {
+        min-width: 1000px;
+    }
+}
+
+@media (max-width: 768px) {
+    .receipt-table-wrapper {
+        border-radius: 4px;
+        box-shadow: 0 2px 6px rgba(0, 59, 115, 0.1);
+    }
+    
+    .receipt-table-custom {
+        min-width: 800px;
+        font-size: 0.85rem;
+    }
+    
+    .receipt-table-custom th,
+    .receipt-table-custom td {
+        padding: 0.6rem 0.4rem;
+    }
+    
+    .receipt-number-cell {
+        font-size: 0.8rem;
+        padding: 0.3rem 0.4rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .receipt-table-custom {
+        min-width: 600px;
+        font-size: 0.75rem;
+    }
+    
+    .receipt-table-custom th,
+    .receipt-table-custom td {
+        padding: 0.4rem 0.3rem;
+    }
+    
+    .receipt-number-cell {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.3rem;
+    }
+}
+
+/* Professional Print Styles */
+@media print {
+    .receipt-table-wrapper {
+        overflow: visible;
+        box-shadow: none;
+        border: 1px solid #000;
+    }
+    
+    .receipt-table-custom {
+        min-width: auto;
+        width: 100%;
+        font-size: 0.8rem;
+    }
+    
+    .receipt-table-custom th,
+    .receipt-table-custom td {
+        padding: 0.3rem 0.4rem;
+        border: 1px solid #000;
+    }
+    
+    .receipt-number-cell {
+        background: none;
+        border: 1px solid #000;
+        padding: 0.2rem 0.3rem;
+    }
+    
+    .receipt-tooltip {
+        display: none;
+    }
+}
