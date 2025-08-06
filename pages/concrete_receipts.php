@@ -471,26 +471,42 @@ $mixer_drivers = array_filter($employees, function ($emp) {
     document.addEventListener('DOMContentLoaded', function() {
       const params = new URLSearchParams(window.location.search);
       if (params.get('open_add') === '1') {
-        // Only clear meter_amount, mixer_car_id, mixer_driver_id from localStorage
-        const storageKey = 'addConcreteReceiptFormData';
-        const saved = localStorage.getItem(storageKey);
-        if (saved) {
-          try {
-            const data = JSON.parse(saved);
-            delete data['meter_amount'];
-            delete data['mixer_car_id'];
-            delete data['mixer_driver_id'];
-            localStorage.setItem(storageKey, JSON.stringify(data));
-          } catch(e) {}
-        }
-
         const modalEl = document.getElementById('addConcreteReceiptModal');
         const modal = new bootstrap.Modal(modalEl);
+        
+        // Clear form first before opening modal
+        const form = document.getElementById('addConcreteReceiptForm');
+        if (form) {
+          form.reset();
+        }
+        
+        // Clear localStorage data for this form
+        const storageKey = 'addConcreteReceiptFormData';
+        localStorage.removeItem(storageKey);
+        
         modal.show();
         
         // Wait for modal to be fully shown before filling data
         modalEl.addEventListener('shown.bs.modal', function() {
-          // Fill form with data from URL parameters
+          // Reset all form fields first
+          const formFields = [
+            'customer_id', 'location', 'receiver_name', 'meter_amount', 
+            'formulas_id', 'mixer_car_id', 'mixer_driver_id', 
+            'pump_car_id', 'pump_driver_id'
+          ];
+          
+          formFields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field) {
+              if (field.tagName === 'SELECT') {
+                $(field).val('').trigger('change');
+              } else {
+                field.value = '';
+              }
+            }
+          });
+          
+          // Now fill form with data from URL parameters
           if (params.get('customer_id')) {
             $('#customer_id').val(params.get('customer_id')).trigger('change');
           }
