@@ -78,7 +78,7 @@ $debt_id = isset($_GET['id']) ? $_GET['id'] : null;
             <div class="concrete-type" style="font-size:16px;">
                 پسوڵەی دانەوەی قەرز
             </div>
-            <div class="receipt-title" style="font-size:16px;">پسوڵەی ناردنی دانەوەی قەرز</div>
+            <div class="receipt-title" style="font-size:16px;">پسوڵەی پارەپێدان و پارە وەرگرتن</div>
             
             <div class="receipt-number" style="background: var(--light-green); font-size:16px; color: var(--primary-green); font-weight: bold; border-radius: var(--border-radius); padding: 4px 10px; font-size: 16px; display: inline-block;">
                 ژ.پسووڵە: <span id="receipt_number">QW-0001</span>
@@ -93,9 +93,7 @@ $debt_id = isset($_GET['id']) ? $_GET['id'] : null;
             <div>
                 <strong>ژ.م:</strong> <span id="customer_phone">-</span>
             </div>
-            <div>
-                <strong>ناونیشان:</strong> <span id="customer_address">-</span>
-            </div>
+        
             <div>
                 <strong>بەروار:</strong> <span id="payment_date">-</span>
             </div>
