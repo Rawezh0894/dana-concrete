@@ -21,6 +21,37 @@ $(document).on('change', '#material_id', function() {
     } else {
         $bin.find('option').show(); // fallback: show all
     }
+    
+    // Update amounts when material changes
+    updateAmountsFor('');
+});
+
+// Dynamic bin select for edit modal
+$(document).on('change', '#edit_material_id', function() {
+    const material = $('#edit_material_id option:selected').text().trim();
+    const $bin = $('#edit_bin_id');
+    $bin.val('');
+    $bin.find('option').hide();
+    $bin.find('option[value=""]').show(); // always show default
+    if (material === 'لمی ڕەش' || material === 'لمی کەسارە') {
+        $bin.find('option:contains("چاوی ١")').show();
+        $bin.find('option:contains("چاوی ٢")').show();
+    } else if (material === 'چەو') {
+        $bin.find('option:contains("چاوی ٣")').show();
+        $bin.find('option:contains("چاوی ٤")').show();
+    } else if (material === 'چیمەنتۆ') {
+        $bin.find('option:contains("سایلۆی ١")').show();
+        $bin.find('option:contains("سایلۆی ٢")').show();
+    } else if (material === 'دەرمان') {
+        $bin.find('option:contains("تەنکی دەرمان ١")').show();
+    } else if (material === 'گاز') {
+        $bin.find('option:contains("تەکی گاز ١")').show();
+    } else {
+        $bin.find('option').show(); // fallback: show all
+    }
+    
+    // Update amounts when material changes in edit modal
+    updateAmountsFor('edit_');
 });
 
 // Shared logic for add and edit purchase modals
@@ -41,7 +72,6 @@ function togglePricePerKgInputsFor(typeSelector, iqdGroupSelector, usdGroupSelec
 function updateAmountsFor(prefix) {
     const kg = parseFloat($('#' + prefix + 'kg').val()) || 0;
     const type = $('#' + prefix + 'type').val();
-    const material_id = $('#' + prefix + 'material_id').val();
     let pricePerKg = 0;
     if (type === 'دینار') {
         pricePerKg = parseFloat($('#' + prefix + 'price_per_kg_iqd').val()) || 0;
@@ -53,21 +83,13 @@ function updateAmountsFor(prefix) {
     const paid_usd = parseFloat($('#' + prefix + 'paid_usd').val()) || 0;
     const paid_iqd = parseFloat($('#' + prefix + 'paid_iqd').val()) || 0;
     const exchange_rate = parseFloat($('#' + prefix + 'exchange_rate').val()) || 1;
-    
-    // Get material name to check if it's gas
-    const materialSelect = $('#' + prefix + 'material_id');
-    const selectedOption = materialSelect.find('option:selected');
-    const materialName = selectedOption.text().trim();
-    
-    let amount = 0;
-    if (materialName === 'گاز') {
-        // For gas: کۆی نرخ = (چەند کیلۆ/1000) * (نرخی یەک طەن *1000)
-        // ئەمە بۆ گاز بەکاردێت کە نرخی یەک طەن دەدات بەڵام بە کیلۆگرام دەکڕین
-        amount = (kg / 1000) * (pricePerKg * 1000);
+    // Check if material is gas - for gas, don't divide by 1000
+    const material = $('#' + prefix + 'material_id option:selected').text().trim();
+    let amount;
+    if (material === 'گاز') {
+        amount = kg * pricePerKg; // For gas, use kg directly
     } else {
-        // For other materials: کۆی نرخ = (چەند کیلۆ/1000) * نرخی یەک کیلۆ
-        // ئەمە بۆ مەوادەکانی تر بەکاردێت
-        amount = (kg / 1000) * pricePerKg;
+        amount = (kg / 1000) * pricePerKg; // For other materials, divide by 1000
     }
     const remainingUsdFocused = document.activeElement === document.getElementById(prefix + 'remaining_usd');
     const remainingIqdFocused = document.activeElement === document.getElementById(prefix + 'remaining_iqd');

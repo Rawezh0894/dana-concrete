@@ -103,47 +103,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $location_stmt = $pdo->prepare("SELECT name FROM locations WHERE id = ?");
     $location_stmt->execute([$location_id]);
     $location = $location_stmt->fetchColumn();
-    
-    // Get material name to check if it's gas
-    $material_stmt = $pdo->prepare("SELECT name FROM materials WHERE id = ?");
-    $material_stmt->execute([$material_id]);
-    $material_name = $material_stmt->fetchColumn();
-    
-    // Validate calculated amounts based on material type
-    $calculated_price = 0;
-    $calculated_amount_iqd = 0;
-    
-    if ($material_name === 'گاز') {
-        // For gas: کۆی نرخ = (چەند کیلۆ/1000) * (نرخی یەک طەن *1000)
-        if ($type === 'دینار') {
-            $calculated_amount_iqd = ($kg / 1000) * ($price_per_kg_iqd * 1000);
-            if (abs($calculated_amount_iqd - $amount_iqd) > 0.01) {
-                echo json_encode(['success' => false, 'msg' => 'هەژمارکردنی کۆی نرخ بۆ گاز هەڵەیە!']);
-                exit;
-            }
-        } else if ($type === 'دۆلار') {
-            $calculated_price = ($kg / 1000) * ($price_per_kg_usd * 1000);
-            if (abs($calculated_price - $price) > 0.01) {
-                echo json_encode(['success' => false, 'msg' => 'هەژمارکردنی کۆی نرخ بۆ گاز هەڵەیە!']);
-                exit;
-            }
-        }
-    } else {
-        // For other materials: کۆی نرخ = (چەند کیلۆ/1000) * نرخی یەک کیلۆ
-        if ($type === 'دینار') {
-            $calculated_amount_iqd = ($kg / 1000) * $price_per_kg_iqd;
-            if (abs($calculated_amount_iqd - $amount_iqd) > 0.01) {
-                echo json_encode(['success' => false, 'msg' => 'هەژمارکردنی کۆی نرخ هەڵەیە!']);
-                exit;
-            }
-        } else if ($type === 'دۆلار') {
-            $calculated_price = ($kg / 1000) * $price_per_kg_usd;
-            if (abs($calculated_price - $price) > 0.01) {
-                echo json_encode(['success' => false, 'msg' => 'هەژمارکردنی کۆی نرخ هەڵەیە!']);
-                exit;
-            }
-        }
-    }
     try {
         $stmt = $pdo->prepare("INSERT INTO purchases (date, invoice_number, driver, location, material_id, amount_iqd, kg, price, payment_type, exchange_rate, company_id, type, paid_usd, paid_iqd, remaining_usd, remaining_iqd, bin_id, price_per_kg_iqd, price_per_kg_usd) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         $ok = $stmt->execute([
