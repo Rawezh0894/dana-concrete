@@ -426,6 +426,83 @@ body {
 .debt-summary-box.total-box .debt-value {
     color: #fff;
 }
+
+/* Specific styling for receipt number column */
+.receipt-table-custom th:nth-child(8),
+.receipt-table-custom td:nth-child(8) {
+    max-width: 120px;
+    min-width: 100px;
+    width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    position: relative;
+}
+
+/* Tooltip for truncated receipt numbers */
+.receipt-table-custom td:nth-child(8):hover {
+    white-space: normal;
+    word-break: break-all;
+    overflow: visible;
+    z-index: 1000;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    border-radius: 4px;
+    position: relative;
+}
+
+/* Ensure table layout is fixed for better control */
+.receipt-table-custom {
+    table-layout: fixed !important;
+    width: 100%;
+}
+
+/* Column width distribution */
+.receipt-table-custom th:nth-child(1),
+.receipt-table-custom td:nth-child(1) {
+    width: 10%; /* پێوانە */
+}
+
+.receipt-table-custom th:nth-child(2),
+.receipt-table-custom td:nth-child(2) {
+    width: 10%; /* ڕێژە */
+}
+
+.receipt-table-custom th:nth-child(3),
+.receipt-table-custom td:nth-child(3) {
+    width: 12%; /* نرخی 1 م 3 */
+}
+
+.receipt-table-custom th:nth-child(4),
+.receipt-table-custom td:nth-child(4) {
+    width: 12%; /* کۆی نرخ */
+}
+
+.receipt-table-custom th:nth-child(5),
+.receipt-table-custom td:nth-child(5) {
+    width: 12%; /* پارەی دراو (USD) */
+}
+
+.receipt-table-custom th:nth-child(6),
+.receipt-table-custom td:nth-child(6) {
+    width: 12%; /* پارەی دراو (د.ع) */
+}
+
+.receipt-table-custom th:nth-child(7),
+.receipt-table-custom td:nth-child(7) {
+    width: 12%; /* پارەی ماوە */
+}
+
+.receipt-table-custom th:nth-child(8),
+.receipt-table-custom td:nth-child(8) {
+    width: 10%; /* ژمارەی پسووڵە */
+}
+
+.receipt-table-custom th:nth-child(9),
+.receipt-table-custom td:nth-child(9) {
+    width: 10%; /* بەروار */
+}
+
 .table td,
 .table th {
     white-space: normal;
@@ -443,7 +520,7 @@ body {
 
 @media print {
     .receipt-table-custom {
-        table-layout: auto !important;
+        table-layout: fixed !important;
         width: 100% !important;
     }
     .receipt-table-custom th,
@@ -455,8 +532,12 @@ body {
         padding: 0.3rem 0.5rem !important;
         font-size: 0.85rem !important;
     }
-    .receipt-table-custom th {
-        max-width: 90px !important;
+    .receipt-table-custom th:nth-child(8),
+    .receipt-table-custom td:nth-child(8) {
+        max-width: 100px !important;
+        min-width: 80px !important;
+        width: 100px !important;
+        font-size: 0.8rem !important;
     }
 }
 
@@ -479,4 +560,126 @@ body {
     background: var(--seafoam-green);
     color: #fff;
     font-weight: bold;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+    .receipt-container {
+        margin: 1rem;
+        padding: 0.5rem;
+        max-width: none;
+    }
+    
+    .receipt-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    
+    .receipt-title {
+        font-size: 1.5rem;
+        padding: 0.8rem 1rem;
+    }
+    
+    .company-info-row {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .company-info-box {
+        min-width: auto;
+        width: 100%;
+    }
+    
+    .receipt-table-custom {
+        font-size: 0.9rem;
+    }
+    
+    .receipt-table-custom th,
+    .receipt-table-custom td {
+        padding: 0.3rem 0.4rem;
+        font-size: 0.85rem;
+    }
+    
+    /* Adjust column widths for mobile */
+    .receipt-table-custom th:nth-child(1),
+    .receipt-table-custom td:nth-child(1) {
+        width: 8%; /* پێوانە */
+    }
+    
+    .receipt-table-custom th:nth-child(2),
+    .receipt-table-custom td:nth-child(2) {
+        width: 8%; /* ڕێژە */
+    }
+    
+    .receipt-table-custom th:nth-child(3),
+    .receipt-table-custom td:nth-child(3) {
+        width: 10%; /* نرخی 1 م 3 */
+    }
+    
+    .receipt-table-custom th:nth-child(4),
+    .receipt-table-custom td:nth-child(4) {
+        width: 10%; /* کۆی نرخ */
+    }
+    
+    .receipt-table-custom th:nth-child(5),
+    .receipt-table-custom td:nth-child(5) {
+        width: 10%; /* پارەی دراو (USD) */
+    }
+    
+    .receipt-table-custom th:nth-child(6),
+    .receipt-table-custom td:nth-child(6) {
+        width: 10%; /* پارەی دراو (د.ع) */
+    }
+    
+    .receipt-table-custom th:nth-child(7),
+    .receipt-table-custom td:nth-child(7) {
+        width: 10%; /* پارەی ماوە */
+    }
+    
+    .receipt-table-custom th:nth-child(8),
+    .receipt-table-custom td:nth-child(8) {
+        width: 12%; /* ژمارەی پسووڵە */
+        max-width: 80px;
+        min-width: 60px;
+    }
+    
+    .receipt-table-custom th:nth-child(9),
+    .receipt-table-custom td:nth-child(9) {
+        width: 12%; /* بەروار */
+    }
+    
+    .debt-summary-row {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .debt-summary-box {
+        min-width: auto;
+        width: 100%;
+    }
+    
+    #paid-table {
+        width: 100%;
+    }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+    .receipt-table-custom {
+        font-size: 0.8rem;
+    }
+    
+    .receipt-table-custom th,
+    .receipt-table-custom td {
+        padding: 0.2rem 0.3rem;
+        font-size: 0.75rem;
+    }
+    
+    .receipt-table-custom th:nth-child(8),
+    .receipt-table-custom td:nth-child(8) {
+        max-width: 60px;
+        min-width: 50px;
+        font-size: 0.7rem;
+    }
 }

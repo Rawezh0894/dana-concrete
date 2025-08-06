@@ -83,6 +83,13 @@ function loadSalesData() {
                     let cleanRemaining = (row.remaining_amount || '').replace(/[$,]/g, '');
                     total += parseFloat(cleanTotal) || 0;
                     remainingTotal += parseFloat(cleanRemaining) || 0;
+                    
+                    // Format receipt number with tooltip if it's long
+                    const receiptNumber = row.invoice_number || '';
+                    const receiptNumberCell = receiptNumber.length > 10 ? 
+                        `<td title="${receiptNumber}">${receiptNumber}</td>` : 
+                        `<td>${receiptNumber}</td>`;
+                    
                     tbody.innerHTML += `<tr>
                         <td>${row.quantity ?? ''}</td>
                         <td>${row.rezh ?? ''}</td>
@@ -91,7 +98,7 @@ function loadSalesData() {
                         <td>${row.amount_paid_usd ?? ''}</td>
                         <td>${row.amount_paid_iqd ?? ''}</td>
                         <td>${row.remaining_amount ?? ''}</td>
-                        <td>${row.invoice_number ?? ''}</td>
+                        ${receiptNumberCell}
                         <td>${row.order_date ?? ''}</td>
                     </tr>`;
                 });
