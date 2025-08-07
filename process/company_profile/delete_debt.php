@@ -88,8 +88,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
         if ($remaining > 0) {
             $pdo->prepare('UPDATE company SET opening_debt_usd = opening_debt_usd + ? WHERE id = ?')->execute([$remaining, $company_id]);
         }
-        // Note: debt_usd column doesn't exist in company table
-        // The debt is calculated from opening_debt + remaining amounts in purchases
+        // Note: debt_usd column doesn't exist in company table, so we don't update it
+        // The debt is calculated from purchases table and opening_debt columns
     }
     if ($amount_iqd > 0) {
         $remaining = $amount_iqd;
@@ -108,8 +108,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
         if ($remaining > 0) {
             $pdo->prepare('UPDATE company SET opening_debt_iqd = opening_debt_iqd + ? WHERE id = ?')->execute([$remaining, $company_id]);
         }
-        // Note: debt_iqd column doesn't exist in company table
-        // The debt is calculated from opening_debt + remaining amounts in purchases
+        // Note: debt_iqd column doesn't exist in company table, so we don't update it
+        // The debt is calculated from purchases table and opening_debt columns
     }
     echo json_encode(['success' => true]);
     exit;

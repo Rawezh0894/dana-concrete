@@ -33,17 +33,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $debt->execute([$company_id]);
     $row = $debt->fetch(PDO::FETCH_ASSOC);
     
-    // Calculate total debt from purchases
-    $purchases_debt = $pdo->prepare('SELECT 
-        COALESCE(SUM(remaining_usd), 0) as total_remaining_usd,
-        COALESCE(SUM(remaining_iqd), 0) as total_remaining_iqd
+    // Get remaining amounts from purchases
+    $purchases_data = $pdo->prepare("
+        SELECT 
+            COALESCE(SUM(remaining_usd), 0) as remaining_usd,
+            COALESCE(SUM(remaining_iqd), 0) as remaining_iqd,
+            COALESCE(SUM(remaining_iqd / NULLIF(exchange_rate / 100, 0)), 0) as remaining_iqd_converted
         FROM purchases 
-        WHERE company_id = ? AND payment_type = "قەرز"');
-    $purchases_debt->execute([$company_id]);
-    $purchases_row = $purchases_debt->fetch(PDO::FETCH_ASSOC);
+        WHERE company_id = ? AND payment_type = 'قەرز'
+    ");
+    $purchases_data->execute([$company_id]);
+    $purchases_result = $purchases_data->fetch(PDO::FETCH_ASSOC);
     
-    $total_usd = floatval($row['opening_debt_usd']) + floatval($purchases_row['total_remaining_usd']);
-    $total_iqd = floatval($row['opening_debt_iqd']) + floatval($purchases_row['total_remaining_iqd']);
+    $total_usd = floatval($purchases_result['remaining_usd']) + floatval($row['opening_debt_usd']) + floatval($purchases_result['remaining_iqd_converted']);
+    $total_iqd = floatval($purchases_result['remaining_iqd']) + floatval($row['opening_debt_iqd']);
     if (($amount_usd > 0 && $amount_usd > $total_usd) || ($amount_iqd > 0 && $amount_iqd > $total_iqd)) {
         echo json_encode(['success' => false, 'msg' => 'نابێت بڕی پارەی گەرەوا زیاتر بێت لە بڕی قەرز!']);
         exit;
@@ -120,8 +123,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $remaining -= $toPay;
             }
         }
-        // Note: debt_usd and debt_iqd columns don't exist in company table
-        // The debt is calculated from opening_debt + remaining amounts in purchases
+        // Note: debt_usd column doesn't exist in company table, so we don't update it
+        // The debt is calculated from purchases table and opening_debt columns
     }
     // FIFO: Reduce opening_debt_iqd first, then remaining_iqd in purchases
     if ($amount_iqd > 0) {
@@ -147,8 +150,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $remaining -= $toPay;
             }
         }
-        // Note: debt_usd and debt_iqd columns don't exist in company table
-        // The debt is calculated from opening_debt + remaining amounts in purchases
+        // Note: debt_iqd column doesn't exist in company table, so we don't update it
+        // The debt is calculated from purchases table and opening_debt columns
     }
     echo json_encode(['success' => true]);
     exit;
