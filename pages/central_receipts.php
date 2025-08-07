@@ -170,12 +170,15 @@ $receipt_id = isset($_GET['id']) ? $_GET['id'] : null;
         </a>
     </div>
     <?php elseif (isset($_GET['auto_print'])): ?>
-    <!-- No action buttons when auto_print is set -->
+    <!-- Auto print mode - tab will close automatically after printing -->
+    <div class="actions" style="text-align: center; margin-top: 20px;">
+        <small style="color: #666;">پسوڵە بە شێوەیەکی خۆکار چاپ دەکرێت و تابەکە دادەخرێت</small>
+    </div>
     <?php else: ?>
     <div class="actions">
-        <a href="../pages/concrete_receipts.php" class="btn-back">
+        <button onclick="goBack()" class="btn-back">
             گەڕانەوە
-        </a>
+        </button>
         <?php if (hasPermission('print_concrete_receipts')): ?>
         <button onclick="printInPortrait()" class="btn-print">
             چاپکردن
@@ -213,10 +216,43 @@ $receipt_id = isset($_GET['id']) ? $_GET['id'] : null;
             window.print();
         }, 500);
     }
+    
+    function goBack() {
+        // Check if we should return to form
+        const urlParams = new URLSearchParams(window.location.search);
+        const returnToForm = urlParams.get('return_to_form');
+        
+        if (returnToForm === '1') {
+            // Redirect parent window to concrete_receipts with form open
+            if (window.opener) {
+                window.opener.location.href = '../pages/concrete_receipts.php?open_add=1&preserve_data=1';
+            }
+        }
+        
+        // Close this tab
+        window.close();
+    }
 
-    // Redirect after print dialog closes (for manual print)
+    // Close tab after print dialog closes (for both auto and manual print)
     window.addEventListener('afterprint', function() {
-        window.location.href = '../pages/concrete_receipts.php?open_add=1';
+        // Check if we should return to form
+        const urlParams = new URLSearchParams(window.location.search);
+        const returnToForm = urlParams.get('return_to_form');
+        
+        if (returnToForm === '1') {
+            // Redirect parent window to concrete_receipts with form open
+            if (window.opener) {
+                window.opener.location.href = '../pages/concrete_receipts.php?open_add=1&preserve_data=1';
+            }
+        }
+        
+        // Close this tab and return to parent window
+        window.close();
+    });
+    
+    // Handle page unload to ensure proper cleanup
+    window.addEventListener('beforeunload', function() {
+        // This ensures the tab closes properly even if user manually closes it
     });
     </script>
 <?php if (isset($_GET['auto_print'])): ?>

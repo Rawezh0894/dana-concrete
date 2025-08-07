@@ -142,4 +142,54 @@
     gap: 12px;
     align-items: center;
     flex-wrap: wrap;
+}
+
+/* Duplicate receipt row styling */
+#concreteReceiptsTable tbody tr.duplicate-row {
+    background-color: #dc3545 !important;
+    color: red !important;
+    font-weight: bold;
+}
+
+#concreteReceiptsTable tbody tr.duplicate-row:hover {
+    background-color: #c82333 !important;
+    color: red !important;
+}
+
+#concreteReceiptsTable tbody tr.duplicate-row td {
+    color: red !important;
+    border-color: #dc3545 !important;
+}
+
+#concreteReceiptsTable tbody tr.duplicate-row .btn {
+    color: red !important;
+    border-color: red !important;
+}
+
+/* Add a warning icon for duplicate rows */
+.duplicate-warning {
+    color: #ffc107;
+    margin-right: 5px;
+}
+
+/* Ensure duplicate rows are properly styled */
+.duplicate-row {
+    background-color: #dc3545 !important;
+    color: white !important;
+    font-weight: bold;
+}
+
+.duplicate-row:hover {
+    background-color: #c82333 !important;
+    color: white !important;
+}
+
+.duplicate-row td {
+    color: white !important;
+    border-color: #dc3545 !important;
+}
+
+.duplicate-row .btn {
+    color: white !important;
+    border-color: white !important;
 } 

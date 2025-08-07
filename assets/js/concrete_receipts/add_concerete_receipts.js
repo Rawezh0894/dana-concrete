@@ -5,15 +5,16 @@ $(document).ready(function() {
     const storageKey = 'addConcreteReceiptFormData';
     const $form = $('#addConcreteReceiptForm');
     
-    // Check if we're coming from notes page
+    // Check if we're coming from notes page or returning from printing
     const urlParams = new URLSearchParams(window.location.search);
-    const isFromNotes = urlParams.get('open_add') === '1';
+    const isFromNotes = urlParams.get('open_add') === '1' && urlParams.get('preserve_data') !== '1';
+    const isReturningFromPrint = urlParams.get('preserve_data') === '1';
     
     // Make isFromNotes available globally for this script
     window.isFromNotes = isFromNotes;
     
-    if (!window.isFromNotes) {
-        // Only restore data if not coming from notes
+    if (!isFromNotes) {
+        // Restore data if not coming from notes (including when returning from print)
         const saved = localStorage.getItem(storageKey);
         if (saved) {
             try {
@@ -30,7 +31,7 @@ $(document).ready(function() {
             } catch(e) {}
         }
     } else {
-        // Clear localStorage if coming from notes
+        // Clear localStorage if coming from notes (not from print)
         localStorage.removeItem(storageKey);
     }
     // Save form data on change (only if not coming from notes)
@@ -94,17 +95,23 @@ $(document).ready(function() {
                                     // Reset window.isFromNotes to false after saving
                                     window.isFromNotes = false;
                                 }
-                                window.open('../pages/central_receipts.php?id=' + data.id + '&auto_print=1', '_self');
+                                // Open receipt in new tab for printing
+                                window.open('../pages/central_receipts.php?id=' + data.id + '&auto_print=1&return_to_form=1', '_blank');
                             }
                             // Always reset form and close modal
                             $('#addConcreteReceiptForm')[0].reset();
                             $('#addConcreteReceiptModal').modal('hide');
+                            
+                            // Reload data to show the new receipt
                             if (window.reloadConcreteReceipts) window.reloadConcreteReceipts();
                             if (window.reloadConcreteReceiptsSummary) window.reloadConcreteReceiptsSummary();
-                            // Clear localStorage if coming from notes
-                            if (window.isFromNotes) {
-                            }
+                            
+                            // Clear localStorage if coming from notes (but not when returning from print)
+                            const urlParams = new URLSearchParams(window.location.search);
+                            const preserveData = urlParams.get('preserve_data') === '1';
+                            if (window.isFromNotes && !preserveData) {
                                 localStorage.removeItem(storageKey);
+                            }
                             }
                 });
             } else {
@@ -132,9 +139,11 @@ $(document).ready(function() {
     $('#addConcreteReceiptModal').on('show.bs.modal', function() {
         // Check if we're coming from notes page (use global variable)
         const isFromNotes = window.isFromNotes;
+        const urlParams = new URLSearchParams(window.location.search);
+        const preserveData = urlParams.get('preserve_data') === '1';
         
-        // Clear form if coming from notes
-        if (window.isFromNotes) {
+        // Clear form if coming from notes (but not when preserving data)
+        if (window.isFromNotes && !preserveData) {
             $('#addConcreteReceiptForm')[0].reset();
             // Clear all select2 dropdowns
             $('#customer_id, #formulas_id, #mixer_car_id, #mixer_driver_id, #pump_car_id, #pump_driver_id').val('').trigger('change');

@@ -18,6 +18,12 @@ const TableController = {
         }
         data.forEach((row, idx) => {
             const tr = document.createElement('tr');
+            
+            // Apply duplicate styling if row is marked as duplicate
+            if (row.is_duplicate) {
+                tr.classList.add('duplicate-row');
+            }
+            
             columns.forEach(col => {
                 const td = document.createElement('td');
                 td.setAttribute('data-col', col);

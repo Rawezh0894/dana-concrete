@@ -203,7 +203,7 @@ $mixer_drivers = array_filter($employees, function ($emp) {
             <div class="row g-3">
               <div class="col-md-6">
                 <label for="receipt_number" class="form-label">ژمارەی پسوڵە</label>
-                <input type="text" class="form-control" id="receipt_number" name="receipt_number" readonly required>
+                <input type="text" class="form-control" id="receipt_number" name="receipt_number"  required>
               </div>
               <div class="col-md-6">
                 <label for="customer_id" class="form-label">ناوی کڕیار</label>
@@ -474,66 +474,96 @@ $mixer_drivers = array_filter($employees, function ($emp) {
         const modalEl = document.getElementById('addConcreteReceiptModal');
         const modal = new bootstrap.Modal(modalEl);
         
+        // Check if we should preserve data
+        const preserveData = params.get('preserve_data') === '1';
+        
         // Clear form first before opening modal
         const form = document.getElementById('addConcreteReceiptForm');
         if (form) {
           form.reset();
         }
         
-        // Clear localStorage data for this form
-        const storageKey = 'addConcreteReceiptFormData';
-        localStorage.removeItem(storageKey);
+        // Only clear localStorage if not preserving data
+        if (!preserveData) {
+          const storageKey = 'addConcreteReceiptFormData';
+          localStorage.removeItem(storageKey);
+        }
         
         modal.show();
         
         // Wait for modal to be fully shown before filling data
         modalEl.addEventListener('shown.bs.modal', function() {
-          // Reset all form fields first
-          const formFields = [
-            'customer_id', 'location', 'receiver_name', 'meter_amount', 
-            'formulas_id', 'mixer_car_id', 'mixer_driver_id', 
-            'pump_car_id', 'pump_driver_id'
-          ];
-          
-          formFields.forEach(fieldId => {
-            const field = document.getElementById(fieldId);
-            if (field) {
-              if (field.tagName === 'SELECT') {
-                $(field).val('').trigger('change');
-              } else {
-                field.value = '';
-              }
+          if (preserveData) {
+            // Restore data from localStorage but reset specific fields
+            const storageKey = 'addConcreteReceiptFormData';
+            const saved = localStorage.getItem(storageKey);
+            if (saved) {
+              try {
+                const data = JSON.parse(saved);
+                Object.entries(data).forEach(([k, v]) => {
+                  if (k === 'receipt_number') return; // never restore receipt_number
+                  const $el = $('#addConcreteReceiptForm').find(`[name="${k}"]`);
+                  if ($el.is('select')) {
+                    $el.val(v).trigger('change');
+                  } else {
+                    $el.val(v);
+                  }
+                });
+              } catch(e) {}
             }
-          });
-          
-          // Now fill form with data from URL parameters
-          if (params.get('customer_id')) {
-            $('#customer_id').val(params.get('customer_id')).trigger('change');
-          }
-          if (params.get('location')) {
-            document.getElementById('location').value = params.get('location');
-          }
-          if (params.get('receiver_name')) {
-            document.getElementById('receiver_name').value = params.get('receiver_name');
-          }
-          // Note: meter_amount is intentionally not filled from notes to allow manual entry
-          // if (params.get('meter_amount')) {
-          //   document.getElementById('meter_amount').value = params.get('meter_amount');
-          // }
-          if (params.get('formula_id')) {
-            $('#formulas_id').val(params.get('formula_id')).trigger('change');
-          }
-          if (params.get('mixer_car_id')) {
-            $('#mixer_car_id').val(params.get('mixer_car_id')).trigger('change');
-          }
-          if (params.get('mixer_driver_id')) {
-            $('#mixer_driver_id').val(params.get('mixer_driver_id')).trigger('change');
-          }
-          if (params.get('pump_car_id')) {
-            $('#pump_car_id').val(params.get('pump_car_id')).trigger('change');
-          }
-          if (params.get('pump_driver_id')) {
-            $('#pump_driver_id').val(params.get('pump_driver_id')).trigger('change');
+            
+            // Reset specific fields: meter_amount, mixer_car_id, mixer_driver_id
+            $('#meter_amount').val('');
+            $('#mixer_car_id').val('').trigger('change');
+            $('#mixer_driver_id').val('').trigger('change');
+          } else {
+            // Reset all form fields first (original behavior for notes)
+            const formFields = [
+              'customer_id', 'location', 'receiver_name', 'meter_amount', 
+              'formulas_id', 'mixer_car_id', 'mixer_driver_id', 
+              'pump_car_id', 'pump_driver_id'
+            ];
+            
+            formFields.forEach(fieldId => {
+              const field = document.getElementById(fieldId);
+              if (field) {
+                if (field.tagName === 'SELECT') {
+                  $(field).val('').trigger('change');
+                } else {
+                  field.value = '';
+                }
+              }
+            });
+            
+            // Now fill form with data from URL parameters
+            if (params.get('customer_id')) {
+              $('#customer_id').val(params.get('customer_id')).trigger('change');
+            }
+            if (params.get('location')) {
+              document.getElementById('location').value = params.get('location');
+            }
+            if (params.get('receiver_name')) {
+              document.getElementById('receiver_name').value = params.get('receiver_name');
+            }
+            // Note: meter_amount is intentionally not filled from notes to allow manual entry
+            // if (params.get('meter_amount')) {
+            //   document.getElementById('meter_amount').value = params.get('meter_amount');
+            // }
+            if (params.get('formula_id')) {
+              $('#formulas_id').val(params.get('formula_id')).trigger('change');
+            }
+            if (params.get('mixer_car_id')) {
+              $('#mixer_car_id').val(params.get('mixer_car_id')).trigger('change');
+            }
+            if (params.get('mixer_driver_id')) {
+              $('#mixer_driver_id').val(params.get('mixer_driver_id')).trigger('change');
+            }
+            if (params.get('pump_car_id')) {
+              $('#pump_car_id').val(params.get('pump_car_id')).trigger('change');
+            }
+            if (params.get('pump_driver_id')) {
+              $('#pump_driver_id').val(params.get('pump_driver_id')).trigger('change');
+            }
           }
           
           // Manually fetch and set the next receipt number

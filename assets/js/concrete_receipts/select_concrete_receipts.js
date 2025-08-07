@@ -47,7 +47,7 @@ async function loadConcreteReceiptsTable(page = 1, pageSize = 10) {
 
     const mapped = data.data.map((row, idx) => ({
         '#': ((page - 1) * pageSize) + idx + 1,
-        receipt_number: row.receipt_number || '-',
+        receipt_number: (row.is_duplicate ? '<i class="fas fa-exclamation-triangle duplicate-warning" title="ژمارەی پسوڵە دووبارەیە"></i>' : '') + (row.receipt_number || '-'),
         customer_name: row.customer_name || '-',
         location: row.location || '-',
         receiver_name: row.receiver_name || '-', // ✅ نوێ
@@ -75,7 +75,9 @@ async function loadConcreteReceiptsTable(page = 1, pageSize = 10) {
                 buttons += `<button class='btn btn-info btn-sm print-receipt' data-id='${row.id}' title='پرێنت'><i class='fa fa-print'></i></button>`;
             }
             return buttons || '-';
-        })()
+        })(),
+        // Add duplicate flag for styling
+        is_duplicate: row.is_duplicate || false
     }));
 
     // Update summary cards

@@ -90,6 +90,15 @@ try {
     $stmt->execute();
     $receipts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+    // Detect duplicate receipt numbers
+    $receipt_numbers = array_column($receipts, 'receipt_number');
+    $duplicate_numbers = array_unique(array_diff_assoc($receipt_numbers, array_unique($receipt_numbers)));
+    
+    // Mark duplicates in the receipts array
+    foreach ($receipts as &$receipt) {
+        $receipt['is_duplicate'] = in_array($receipt['receipt_number'], $duplicate_numbers);
+    }
+
     // Summary queries
     $summary_sql = '
         SELECT COUNT(*) as total_receipts,
