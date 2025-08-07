@@ -106,9 +106,13 @@ $(document).ready(function() {
     // بۆ purchase - تەنها ئەگەر مۆداڵەکە هەبێت
     if ($('#addPurchaseModal').length > 0) {
         enableSelect2('#company_id', '#addPurchaseModal');
+        enableSelect2('#driver_id', '#addPurchaseModal');
+        enableSelect2('#location_id', '#addPurchaseModal');
     }
     if ($('#editPurchaseModal').length > 0) {
         enableSelect2('#edit_company_id', '#editPurchaseModal');
+        enableSelect2('#edit_driver_id', '#editPurchaseModal');
+        enableSelect2('#edit_location_id', '#editPurchaseModal');
     }
     
     // بۆ concrete receipts - تەنها ئەگەر مۆداڵەکە هەبێت

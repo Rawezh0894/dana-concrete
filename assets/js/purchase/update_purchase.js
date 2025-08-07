@@ -59,6 +59,49 @@ document.getElementById('editPurchaseForm').onsubmit = async function(e) {
     }
     
     const form = e.target;
+    
+    // Validate required fields
+    const requiredFields = [
+        'id', 'company_id', 'driver_id', 'location_id', 'invoice_number', 
+        'material_id', 'date', 'type', 'kg', 'exchange_rate', 'price', 'payment_type'
+    ];
+    
+    const missingFields = [];
+    for (const fieldName of requiredFields) {
+        const field = form.querySelector(`[name="${fieldName}"]`);
+        if (!field || !field.value.trim()) {
+            missingFields.push(fieldName);
+            if (field) field.classList.add('is-invalid');
+        } else {
+            if (field) field.classList.remove('is-invalid');
+        }
+    }
+    
+    // Validate price_per_kg based on type
+    const type = form.querySelector('[name="type"]').value;
+    const pricePerKgIqd = parseFloat(form.querySelector('[name="price_per_kg_iqd"]').value) || 0;
+    const pricePerKgUsd = parseFloat(form.querySelector('[name="price_per_kg_usd"]').value) || 0;
+    
+    if (type === 'دینار' && pricePerKgIqd <= 0) {
+        missingFields.push('price_per_kg_iqd');
+        form.querySelector('[name="price_per_kg_iqd"]').classList.add('is-invalid');
+    }
+    if (type === 'دۆلار' && pricePerKgUsd <= 0) {
+        missingFields.push('price_per_kg_usd');
+        form.querySelector('[name="price_per_kg_usd"]').classList.add('is-invalid');
+    }
+    
+    if (missingFields.length > 0) {
+        Swal.fire('هەڵە!', `تکایە خانەکانی خوارەوە پڕ بکە: ${missingFields.join(', ')}`, 'error');
+        isUpdating = false;
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+        }
+        return false;
+    }
+    
+    // Validate numeric fields
     let hasNegative = false;
     form.querySelectorAll('input[type="number"]').forEach(input => {
         if (parseFloat(input.value) < 0) {
@@ -69,28 +112,6 @@ document.getElementById('editPurchaseForm').onsubmit = async function(e) {
         }
     });
     
-    const type = form.querySelector('[name="type"]').value;
-    const pricePerKgIqd = parseFloat(form.querySelector('[name="price_per_kg_iqd"]').value) || 0;
-    const pricePerKgUsd = parseFloat(form.querySelector('[name="price_per_kg_usd"]').value) || 0;
-    
-    if (type === 'دینار' && pricePerKgIqd < 0) {
-        Swal.fire('هەڵە!', 'بڕی price_per_kg_iqd نابێت منفی بێت!', 'error');
-        isUpdating = false;
-        if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = originalBtnText;
-        }
-        return;
-    }
-    if (type === 'دۆلار' && pricePerKgUsd < 0) {
-        Swal.fire('هەڵە!', 'بڕی price_per_kg_usd نابێت منفی بێت!', 'error');
-        isUpdating = false;
-        if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = originalBtnText;
-        }
-        return;
-    }
     if (hasNegative) {
         Swal.fire('هەڵە!', 'نابێت هیچ بڕێک منفی بێت!', 'error');
         isUpdating = false;
@@ -98,7 +119,7 @@ document.getElementById('editPurchaseForm').onsubmit = async function(e) {
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalBtnText;
         }
-        return;
+        return false;
     }
     
     // Prevent remaining_usd or remaining_iqd if payment_type is 'نەقد'
@@ -112,7 +133,7 @@ document.getElementById('editPurchaseForm').onsubmit = async function(e) {
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalBtnText;
         }
-        return;
+        return false;
     }
     
     const formData = new FormData(form);
@@ -140,6 +161,7 @@ document.getElementById('editPurchaseForm').onsubmit = async function(e) {
             Swal.fire('هەڵە!', data.msg || 'هەڵەیەک ڕویدا', 'error');
         }
     } catch (err) {
+        console.error('Error updating purchase:', err);
         Swal.fire('هەڵە!', 'هەڵەیەک ڕویدا', 'error');
     } finally {
         // Reset updating flag and restore submit button

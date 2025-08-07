@@ -166,6 +166,7 @@ if ($company_id) {
         <div class="modal-dialog modal-md">
             <div class="modal-content">
                 <form id="addDebtForm">
+                    <input type="hidden" name="company_id" value="<?php echo $company_id; ?>">
                     <div class="modal-header">
                         <h5 class="modal-title" id="addDebtModalLabel">دانەوەی قەرز</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -223,6 +224,7 @@ if ($company_id) {
             <div class="modal-content">
                 <form id="editDebtForm">
                     <input type="hidden" id="edit_debt_id" name="id">
+                    <input type="hidden" name="company_id" value="<?php echo $company_id; ?>">
                     <div class="modal-header">
                         <h5 class="modal-title" id="editDebtModalLabel">دەستکاری دانەوەی قەرز</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>

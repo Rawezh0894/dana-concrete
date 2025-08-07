@@ -105,7 +105,7 @@ document.getElementById('addDebtForm').onsubmit = async function(e) {
     
     const form = e.target;
     const formData = new FormData(form);
-    formData.append('company_id', COMPANY_ID);
+    // company_id is already in the form as a hidden field, no need to append
     const amount_usd = parseFloat(form.amount_usd.value) || 0;
     const amount_iqd = parseFloat(form.amount_iqd.value) || 0;
     

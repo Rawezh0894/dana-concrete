@@ -68,27 +68,137 @@ async function loadPurchases() {
 }
 document.addEventListener('DOMContentLoaded', loadPurchases);
 
+// Function to handle dynamic price per kg fields in edit modal
+function handleEditTypeChange() {
+    const typeSelect = document.getElementById('edit_type');
+    const iqdGroup = document.getElementById('edit_pricePerKgIqdGroup');
+    const usdGroup = document.getElementById('edit_pricePerKgUsdGroup');
+    
+    if (typeSelect && iqdGroup && usdGroup) {
+        if (typeSelect.value === 'دینار') {
+            iqdGroup.style.display = 'block';
+            usdGroup.style.display = 'none';
+            document.getElementById('edit_price_per_kg_usd').value = '0';
+        } else if (typeSelect.value === 'دۆلار') {
+            iqdGroup.style.display = 'none';
+            usdGroup.style.display = 'block';
+            document.getElementById('edit_price_per_kg_iqd').value = '0';
+        } else {
+            iqdGroup.style.display = 'block';
+            usdGroup.style.display = 'block';
+        }
+    }
+}
+
+// Function to initialize select2 for edit modal
+function initializeEditModalSelect2() {
+    // Initialize select2 for driver and location in edit modal
+    if (typeof enableSelect2 === 'function') {
+        enableSelect2('#edit_driver_id', '#editPurchaseModal');
+        enableSelect2('#edit_location_id', '#editPurchaseModal');
+    }
+}
+
+// Function to properly set select2 values
+function setSelect2Value(selectElement, value) {
+    if ($(selectElement).hasClass('select2-hidden-accessible')) {
+        $(selectElement).val(value).trigger('change');
+    } else {
+        selectElement.value = value || '';
+    }
+}
+
 document.addEventListener('click', async function(e) {
     if (e.target.closest('.edit-purchase')) {
         const btn = e.target.closest('.edit-purchase');
         const id = btn.dataset.id;
-        // وەرگرتنی زانیاری رکۆرد
-        const res = await fetch(`../process/purchase/select_purchase.php?id=${id}`);
-        const data = await res.json();
-        // پڕکردنەوەی خانەکان
-        for (const key in data) {
-            const input = document.getElementById('edit_' + key);
-            if (input) {
-                if (input.tagName === 'SELECT') {
-                    input.value = data[key];
+        
+        try {
+            // وەرگرتنی زانیاری رکۆرد
+            const res = await fetch(`../process/purchase/select_purchase.php?id=${id}`);
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
+            
+            const text = await res.text();
+            console.log('Raw response for edit:', text);
+            
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (parseError) {
+                console.error('Failed to parse JSON:', parseError);
+                console.error('Raw response:', text);
+                Swal.fire('هەڵە!', 'هەڵەیەک لە وەڵامەکەی سێرڤەر هەیە', 'error');
+                return;
+            }
+            
+            if (!data || Object.keys(data).length === 0) {
+                Swal.fire('هەڵە!', 'هیچ داتایەک نەدۆزرایەوە', 'error');
+                return;
+            }
+            
+            console.log('Purchase data for edit:', data);
+            
+            // پڕکردنەوەی خانەکان
+            const fieldMappings = {
+                'id': 'edit_id',
+                'company_id': 'edit_company_id',
+                'driver_id': 'edit_driver_id',
+                'location_id': 'edit_location_id',
+                'invoice_number': 'edit_invoice_number',
+                'material_id': 'edit_material_id',
+                'bin_id': 'edit_bin_id',
+                'date': 'edit_date',
+                'type': 'edit_type',
+                'kg': 'edit_kg',
+                'price_per_kg_iqd': 'edit_price_per_kg_iqd',
+                'price_per_kg_usd': 'edit_price_per_kg_usd',
+                'exchange_rate': 'edit_exchange_rate',
+                'payment_type': 'edit_payment_type',
+                'price': 'edit_price',
+                'amount_iqd': 'edit_amount_iqd',
+                'paid_usd': 'edit_paid_usd',
+                'paid_iqd': 'edit_paid_iqd',
+                'remaining_usd': 'edit_remaining_usd',
+                'remaining_iqd': 'edit_remaining_iqd'
+            };
+            
+            for (const [dataKey, inputId] of Object.entries(fieldMappings)) {
+                const input = document.getElementById(inputId);
+                if (input) {
+                    const value = data[dataKey];
+                    if (input.tagName === 'SELECT') {
+                        setSelect2Value(input, value);
+                    } else {
+                        input.value = value ?? '';
+                    }
+                    console.log(`Setting ${inputId} to:`, value);
                 } else {
-                    input.value = data[key] ?? '';
+                    console.warn(`Input element not found: ${inputId}`);
                 }
             }
+            
+            // Handle dynamic price per kg fields
+            handleEditTypeChange();
+            
+            // Trigger change events for dynamic fields
+            const typeSelect = document.getElementById('edit_type');
+            if (typeSelect) {
+                typeSelect.dispatchEvent(new Event('change'));
+            }
+            
+            // Initialize select2 for edit modal
+            initializeEditModalSelect2();
+            
+            // show modal
+            const modal = new bootstrap.Modal(document.getElementById('editPurchaseModal'));
+            modal.show();
+            
+        } catch (error) {
+            console.error('Error loading purchase for edit:', error);
+            Swal.fire('هەڵە!', 'هەڵەیەک لە وەرگرتنی داتاکان هەیە', 'error');
         }
-        // show modal
-        const modal = new bootstrap.Modal(document.getElementById('editPurchaseModal'));
-        modal.show();
     }
 });
 
@@ -167,8 +277,8 @@ document.addEventListener('DOMContentLoaded', loadPurchasesFiltered);
 const clearBtn = document.getElementById('clearFilterBtn');
 if (clearBtn) {
     clearBtn.addEventListener('click', function() {
-        if (fromInput) fromInput.value = '';
-        if (toInput) toInput.value = '';
+        document.getElementById('filter_from').value = '';
+        document.getElementById('filter_to').value = '';
         loadPurchasesFiltered();
     });
 }

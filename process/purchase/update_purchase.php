@@ -52,10 +52,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Log parsed variables for debugging
     error_log("Parsed vars: id='$id', company_id='$company_id', driver_id='$driver_id', location_id='$location_id', invoice_number='$invoice_number', bin_id='$bin_id', material_id='$material_id', date='$date', type='$type', kg='$kg', price_per_kg_iqd='$price_per_kg_iqd', price_per_kg_usd='$price_per_kg_usd', exchange_rate='$exchange_rate', price='$price', paid_iqd='$paid_iqd', paid_usd='$paid_usd', remaining_iqd='$remaining_iqd', remaining_usd='$remaining_usd', payment_type='$payment_type', amount_iqd='$amount_iqd'");
 
-    // Validate required fields (accept 0 as valid)
-    if (!$id || !$company_id || !$driver_id || !$location_id || !$invoice_number || !$bin_id || !$material_id || !$date || !$type || !$kg || !$exchange_rate || !$price || !$payment_type) {
-        error_log('Missing required fields for purchase update');
-        echo json_encode(['success' => false, 'msg' => 'هەموو خانە پڕ بکە']);
+    // Validate required fields
+    $missing_fields = [];
+    
+    if (!$id) $missing_fields[] = 'id';
+    if (!$company_id) $missing_fields[] = 'company_id';
+    if (!$driver_id) $missing_fields[] = 'driver_id';
+    if (!$location_id) $missing_fields[] = 'location_id';
+    if (!$invoice_number) $missing_fields[] = 'invoice_number';
+    if (!$material_id) $missing_fields[] = 'material_id';
+    if (!$date) $missing_fields[] = 'date';
+    if (!$type) $missing_fields[] = 'type';
+    if (!$kg) $missing_fields[] = 'kg';
+    if (!$exchange_rate) $missing_fields[] = 'exchange_rate';
+    if (!$price) $missing_fields[] = 'price';
+    if (!$payment_type) $missing_fields[] = 'payment_type';
+    
+    // Validate price_per_kg based on type
+    if ($type === 'دینار' && (!$price_per_kg_iqd || $price_per_kg_iqd <= 0)) {
+        $missing_fields[] = 'price_per_kg_iqd';
+    }
+    if ($type === 'دۆلار' && (!$price_per_kg_usd || $price_per_kg_usd <= 0)) {
+        $missing_fields[] = 'price_per_kg_usd';
+    }
+    
+    if (!empty($missing_fields)) {
+        error_log('Missing required fields for purchase update: ' . implode(', ', $missing_fields));
+        echo json_encode(['success' => false, 'msg' => 'هەموو خانەکان پڕ بکە: ' . implode(', ', $missing_fields)]);
         exit;
     }
 

@@ -19,13 +19,49 @@ if (!hasPermission('view_purchase')) {
 
 if (isset($_GET['id'])) {
     $id = intval($_GET['id']);
-    $stmt = $pdo->prepare("SELECT p.*, l.id as location_id, d.id as driver_id FROM purchases p LEFT JOIN locations l ON p.location = l.name LEFT JOIN drivers d ON p.driver = d.name WHERE p.id = ?");
+    $stmt = $pdo->prepare("
+        SELECT 
+            p.*,
+            l.id as location_id, 
+            d.id as driver_id,
+            c.name as company_name,
+            m.name as material_name,
+            b.name as bin_name
+        FROM purchases p 
+        LEFT JOIN locations l ON p.location = l.name 
+        LEFT JOIN drivers d ON p.driver = d.name
+        LEFT JOIN company c ON p.company_id = c.id
+        LEFT JOIN materials m ON p.material_id = m.id
+        LEFT JOIN bins_silos b ON p.bin_id = b.id
+        WHERE p.id = ?
+    ");
     $stmt->execute([$id]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    
     if ($row) {
-        // Overwrite location and driver fields with their ids for the modal
+        // Ensure all required fields are present with proper defaults
         $row['location_id'] = $row['location_id'] ?? '';
         $row['driver_id'] = $row['driver_id'] ?? '';
+        $row['company_id'] = $row['company_id'] ?? '';
+        $row['material_id'] = $row['material_id'] ?? '';
+        $row['bin_id'] = $row['bin_id'] ?? '';
+        $row['invoice_number'] = $row['invoice_number'] ?? '';
+        $row['date'] = $row['date'] ?? '';
+        $row['type'] = $row['type'] ?? '';
+        $row['kg'] = $row['kg'] ?? 0;
+        $row['price_per_kg_iqd'] = $row['price_per_kg_iqd'] ?? 0;
+        $row['price_per_kg_usd'] = $row['price_per_kg_usd'] ?? 0;
+        $row['exchange_rate'] = $row['exchange_rate'] ?? 0;
+        $row['price'] = $row['price'] ?? 0;
+        $row['amount_iqd'] = $row['amount_iqd'] ?? 0;
+        $row['payment_type'] = $row['payment_type'] ?? '';
+        $row['paid_usd'] = $row['paid_usd'] ?? 0;
+        $row['paid_iqd'] = $row['paid_iqd'] ?? 0;
+        $row['remaining_usd'] = $row['remaining_usd'] ?? 0;
+        $row['remaining_iqd'] = $row['remaining_iqd'] ?? 0;
+        
+        // Log the data being returned for debugging
+        error_log('Purchase data for edit modal: ' . print_r($row, true));
     }
     echo json_encode($row);
     exit;

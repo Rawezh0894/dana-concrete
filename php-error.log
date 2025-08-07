@@ -6014,3 +6014,1116 @@
 )
 
 [05-Aug-2025 09:26:52 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[07-Aug-2025 08:10:20 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754547020
+    [role] => admin
+)
+
+[07-Aug-2025 08:10:20 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[07-Aug-2025 08:14:37 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754547277
+    [role] => admin
+)
+
+[07-Aug-2025 08:14:37 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 09:05:02 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754550302
+    [role] => admin
+)
+
+[07-Aug-2025 09:05:02 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 09:05:12 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754550311
+    [role] => admin
+)
+
+[07-Aug-2025 09:05:12 Europe/Berlin] company/update_company.php POST: Array
+(
+    [id] => 27
+    [name] => Rawezh
+    [currency_type] => دۆلار
+    [opening_debt_usd] => 500
+    [opening_debt_iqd] => 0
+)
+
+[07-Aug-2025 09:05:12 Europe/Berlin] Parsed vars: id='27', name='Rawezh', opening_debt_usd='500', opening_debt_iqd='0', currency_type='دۆلار'
+[07-Aug-2025 09:05:12 Europe/Berlin] Company successfully updated: ID=27, Name=Rawezh, Currency=دۆلار
+[07-Aug-2025 09:05:12 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754550312
+    [role] => admin
+)
+
+[07-Aug-2025 09:05:12 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 09:05:23 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754550323
+    [role] => admin
+)
+
+[07-Aug-2025 09:05:23 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 09:05:33 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754550333
+    [role] => admin
+)
+
+[07-Aug-2025 09:05:33 Europe/Berlin] company/update_company.php POST: Array
+(
+    [id] => 27
+    [name] => Rawezh
+    [currency_type] => دینار
+    [opening_debt_iqd] => 150000
+    [opening_debt_usd] => 0
+)
+
+[07-Aug-2025 09:05:33 Europe/Berlin] Parsed vars: id='27', name='Rawezh', opening_debt_usd='0', opening_debt_iqd='150000', currency_type='دینار'
+[07-Aug-2025 09:05:33 Europe/Berlin] Company successfully updated: ID=27, Name=Rawezh, Currency=دینار
+[07-Aug-2025 09:05:33 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754550333
+    [role] => admin
+)
+
+[07-Aug-2025 09:05:33 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 09:22:20 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754551340
+    [role] => admin
+)
+
+[07-Aug-2025 09:22:20 Europe/Berlin] update_debt.php POST: Array
+(
+    [id] => 8
+    [date] => 2025-08-07
+    [amount_usd] => 0.00
+    [amount_iqd] => 60000
+    [dollar_rate] => 139250
+    [note] => 
+)
+
+[07-Aug-2025 09:22:20 Europe/Berlin] Parsed vars: id='8', company_id='', date='2025-08-07', dolar_rate='0', paid_usd='0', paid_iqd='0', discount='0', note=''
+[07-Aug-2025 09:22:20 Europe/Berlin] Missing required fields for company debt update
+[07-Aug-2025 09:26:17 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754551577
+    [role] => admin
+)
+
+[07-Aug-2025 09:26:17 Europe/Berlin] update_debt.php POST: Array
+(
+    [id] => 9
+    [company_id] => 27
+    [date] => 2025-08-07
+    [amount_usd] => 0.00
+    [amount_iqd] => 170000
+    [dollar_rate] => 139250
+    [note] => 
+)
+
+[07-Aug-2025 09:26:17 Europe/Berlin] Parsed vars: id='9', company_id='27', date='2025-08-07', dolar_rate='139250', paid_usd='0', paid_iqd='170000', discount='0', note=''
+[07-Aug-2025 09:26:17 Europe/Berlin] Found company debt payment for update: Array
+(
+    [id] => 9
+    [amount_usd] => 0.00
+    [amount_iqd] => 160000.00
+)
+
+[07-Aug-2025 09:26:17 Europe/Berlin] PDOException in update_debt.php: SQLSTATE[45000]: <<Unknown error>>: 1644 Stock cannot be negative!
+[07-Aug-2025 09:26:38 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754551598
+    [role] => admin
+)
+
+[07-Aug-2025 09:26:38 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 09:26:46 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754551606
+    [role] => admin
+)
+
+[07-Aug-2025 09:26:46 Europe/Berlin] company/update_company.php POST: Array
+(
+    [id] => 27
+    [name] => Rawezh
+    [currency_type] => دینار
+    [opening_debt_iqd] => 150000
+    [opening_debt_usd] => 0
+)
+
+[07-Aug-2025 09:26:46 Europe/Berlin] Parsed vars: id='27', name='Rawezh', opening_debt_usd='0', opening_debt_iqd='150000', currency_type='دینار'
+[07-Aug-2025 09:26:46 Europe/Berlin] Company successfully updated: ID=27, Name=Rawezh, Currency=دینار
+[07-Aug-2025 09:26:46 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754551606
+    [role] => admin
+)
+
+[07-Aug-2025 09:26:46 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 09:27:05 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754551625
+    [role] => admin
+)
+
+[07-Aug-2025 09:27:05 Europe/Berlin] update_debt.php POST: Array
+(
+    [id] => 10
+    [company_id] => 27
+    [date] => 2025-08-07
+    [amount_usd] => 0.00
+    [amount_iqd] => 60000
+    [dollar_rate] => 139250
+    [note] => 
+)
+
+[07-Aug-2025 09:27:05 Europe/Berlin] Parsed vars: id='10', company_id='27', date='2025-08-07', dolar_rate='139250', paid_usd='0', paid_iqd='60000', discount='0', note=''
+[07-Aug-2025 09:27:05 Europe/Berlin] Found company debt payment for update: Array
+(
+    [id] => 10
+    [amount_usd] => 0.00
+    [amount_iqd] => 50000.00
+)
+
+[07-Aug-2025 09:27:05 Europe/Berlin] Company debt successfully updated: ID=10, Company=Rawezh (ID: 27)
+[07-Aug-2025 09:39:09 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754552349
+    [role] => admin
+)
+
+[07-Aug-2025 09:39:09 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 09:39:18 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754552358
+    [role] => admin
+)
+
+[07-Aug-2025 09:39:18 Europe/Berlin] company/update_company.php POST: Array
+(
+    [id] => 27
+    [name] => Rawezh
+    [currency_type] => دینار
+    [opening_debt_iqd] => 150000
+    [opening_debt_usd] => 0
+)
+
+[07-Aug-2025 09:39:18 Europe/Berlin] Parsed vars: id='27', name='Rawezh', opening_debt_usd='0', opening_debt_iqd='150000', currency_type='دینار'
+[07-Aug-2025 09:39:18 Europe/Berlin] Company successfully updated: ID=27, Name=Rawezh, Currency=دینار
+[07-Aug-2025 09:39:18 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754552358
+    [role] => admin
+)
+
+[07-Aug-2025 09:39:18 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 09:40:57 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754552457
+    [role] => admin
+)
+
+[07-Aug-2025 09:40:57 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 09:55:14 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754553314
+    [role] => admin
+)
+
+[07-Aug-2025 09:55:14 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 09:55:18 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754553318
+    [role] => admin
+)
+
+[07-Aug-2025 09:55:18 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 09:55:25 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754553325
+    [role] => admin
+)
+
+[07-Aug-2025 09:55:25 Europe/Berlin] company/update_company.php POST: Array
+(
+    [id] => 27
+    [name] => Rawezh
+    [currency_type] => دینار
+    [opening_debt_iqd] => 150000
+    [opening_debt_usd] => 0
+)
+
+[07-Aug-2025 09:55:25 Europe/Berlin] Parsed vars: id='27', name='Rawezh', opening_debt_usd='0', opening_debt_iqd='150000', currency_type='دینار'
+[07-Aug-2025 09:55:25 Europe/Berlin] Company successfully updated: ID=27, Name=Rawezh, Currency=دینار
+[07-Aug-2025 09:55:25 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754553325
+    [role] => admin
+)
+
+[07-Aug-2025 09:55:25 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 09:56:43 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754553403
+    [role] => admin
+)
+
+[07-Aug-2025 09:56:43 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 09:56:50 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754553410
+    [role] => admin
+)
+
+[07-Aug-2025 09:56:50 Europe/Berlin] company/update_company.php POST: Array
+(
+    [id] => 27
+    [name] => Rawezh
+    [currency_type] => دینار
+    [opening_debt_iqd] => 150000
+    [opening_debt_usd] => 0
+)
+
+[07-Aug-2025 09:56:50 Europe/Berlin] Parsed vars: id='27', name='Rawezh', opening_debt_usd='0', opening_debt_iqd='150000', currency_type='دینار'
+[07-Aug-2025 09:56:50 Europe/Berlin] Company successfully updated: ID=27, Name=Rawezh, Currency=دینار
+[07-Aug-2025 09:56:50 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754553410
+    [role] => admin
+)
+
+[07-Aug-2025 09:56:50 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 10:10:37 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754554237
+    [role] => admin
+)
+
+[07-Aug-2025 10:10:37 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 10:10:43 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754554243
+    [role] => admin
+)
+
+[07-Aug-2025 10:10:43 Europe/Berlin] company/update_company.php POST: Array
+(
+    [id] => 27
+    [name] => Rawezh
+    [currency_type] => دینار
+    [opening_debt_iqd] => 150000
+    [opening_debt_usd] => 0
+)
+
+[07-Aug-2025 10:10:43 Europe/Berlin] Parsed vars: id='27', name='Rawezh', opening_debt_usd='0', opening_debt_iqd='150000', currency_type='دینار'
+[07-Aug-2025 10:10:43 Europe/Berlin] Company successfully updated: ID=27, Name=Rawezh, Currency=دینار
+[07-Aug-2025 10:10:43 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754554243
+    [role] => admin
+)
+
+[07-Aug-2025 10:10:43 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 10:18:18 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754554698
+    [role] => admin
+)
+
+[07-Aug-2025 10:18:18 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 10:18:31 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754554711
+    [role] => admin
+)
+
+[07-Aug-2025 10:18:31 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 10:18:42 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754554722
+    [role] => admin
+)
+
+[07-Aug-2025 10:18:42 Europe/Berlin] company/update_company.php POST: Array
+(
+    [id] => 27
+    [name] => Rawezh
+    [currency_type] => دینار
+    [opening_debt_iqd] => 150000
+    [opening_debt_usd] => 0
+)
+
+[07-Aug-2025 10:18:42 Europe/Berlin] Parsed vars: id='27', name='Rawezh', opening_debt_usd='0', opening_debt_iqd='150000', currency_type='دینار'
+[07-Aug-2025 10:18:42 Europe/Berlin] Company successfully updated: ID=27, Name=Rawezh, Currency=دینار
+[07-Aug-2025 10:18:42 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754554722
+    [role] => admin
+)
+
+[07-Aug-2025 10:18:42 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 10:22:59 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754554979
+    [role] => admin
+)
+
+[07-Aug-2025 10:22:59 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 10:23:05 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754554985
+    [role] => admin
+)
+
+[07-Aug-2025 10:23:05 Europe/Berlin] company/update_company.php POST: Array
+(
+    [id] => 27
+    [name] => Rawezh
+    [currency_type] => دینار
+    [opening_debt_iqd] => 150000
+    [opening_debt_usd] => 0
+)
+
+[07-Aug-2025 10:23:05 Europe/Berlin] Parsed vars: id='27', name='Rawezh', opening_debt_usd='0', opening_debt_iqd='150000', currency_type='دینار'
+[07-Aug-2025 10:23:05 Europe/Berlin] Company successfully updated: ID=27, Name=Rawezh, Currency=دینار
+[07-Aug-2025 10:23:05 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754554985
+    [role] => admin
+)
+
+[07-Aug-2025 10:23:05 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 10:47:45 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754556465
+    [role] => admin
+)
+
+[07-Aug-2025 10:47:45 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 10:48:20 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754556500
+    [role] => admin
+)
+
+[07-Aug-2025 10:48:20 Europe/Berlin] company/update_company.php POST: Array
+(
+    [id] => 27
+    [name] => Rawezh
+    [currency_type] => دینار
+    [opening_debt_iqd] => 150000
+    [opening_debt_usd] => 0
+)
+
+[07-Aug-2025 10:48:20 Europe/Berlin] Parsed vars: id='27', name='Rawezh', opening_debt_usd='0', opening_debt_iqd='150000', currency_type='دینار'
+[07-Aug-2025 10:48:20 Europe/Berlin] Company successfully updated: ID=27, Name=Rawezh, Currency=دینار
+[07-Aug-2025 10:48:20 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754556500
+    [role] => admin
+)
+
+[07-Aug-2025 10:48:20 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 11:21:39 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754558499
+    [role] => admin
+)
+
+[07-Aug-2025 11:21:39 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 11:21:41 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754558501
+    [role] => admin
+)
+
+[07-Aug-2025 11:21:41 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 13:04:12 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754564652
+    [role] => admin
+)
+
+[07-Aug-2025 13:04:12 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 13:04:15 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754564655
+    [role] => admin
+)
+
+[07-Aug-2025 13:04:15 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 13:04:23 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754564663
+    [role] => admin
+)
+
+[07-Aug-2025 13:04:23 Europe/Berlin] company/update_company.php POST: Array
+(
+    [id] => 27
+    [name] => Rawezh
+    [currency_type] => دینار
+    [opening_debt_iqd] => 150000
+    [opening_debt_usd] => 0
+)
+
+[07-Aug-2025 13:04:23 Europe/Berlin] Parsed vars: id='27', name='Rawezh', opening_debt_usd='0', opening_debt_iqd='150000', currency_type='دینار'
+[07-Aug-2025 13:04:23 Europe/Berlin] Company successfully updated: ID=27, Name=Rawezh, Currency=دینار
+[07-Aug-2025 13:04:23 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754564663
+    [role] => admin
+)
+
+[07-Aug-2025 13:04:23 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 13:09:17 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754564957
+    [role] => admin
+)
+
+[07-Aug-2025 13:09:17 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 13:09:23 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754564963
+    [role] => admin
+)
+
+[07-Aug-2025 13:09:23 Europe/Berlin] company/update_company.php POST: Array
+(
+    [id] => 27
+    [name] => Rawezh
+    [currency_type] => دینار
+    [opening_debt_iqd] => 150000
+    [opening_debt_usd] => 0
+)
+
+[07-Aug-2025 13:09:23 Europe/Berlin] Parsed vars: id='27', name='Rawezh', opening_debt_usd='0', opening_debt_iqd='150000', currency_type='دینار'
+[07-Aug-2025 13:09:23 Europe/Berlin] Company successfully updated: ID=27, Name=Rawezh, Currency=دینار
+[07-Aug-2025 13:09:23 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754564963
+    [role] => admin
+)
+
+[07-Aug-2025 13:09:23 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 13:09:43 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754564983
+    [user_id] => 2
+    [username] => rawezh
+    [role] => user
+)
+
+[07-Aug-2025 13:09:43 Europe/Berlin] DEBUG: role=user, perm=view_dashboard
+[07-Aug-2025 13:09:43 Europe/Berlin] DEBUG: SQL result=0
+[07-Aug-2025 13:09:43 Europe/Berlin] Permission denied for user: 2 to view dashboard
+[07-Aug-2025 13:09:49 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754564989
+    [user_id] => 2
+    [username] => rawezh
+    [role] => user
+)
+
+[07-Aug-2025 13:09:49 Europe/Berlin] DEBUG: role=user, perm=view_dashboard
+[07-Aug-2025 13:09:49 Europe/Berlin] DEBUG: SQL result=0
+[07-Aug-2025 13:09:49 Europe/Berlin] Permission denied for user: 2 to view dashboard
+[07-Aug-2025 13:10:13 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754565013
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[07-Aug-2025 13:10:13 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[07-Aug-2025 13:10:49 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754565049
+    [role] => admin
+)
+
+[07-Aug-2025 13:10:49 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 13:10:55 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754565055
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[07-Aug-2025 13:10:55 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 13:18:44 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754565524
+    [role] => admin
+)
+
+[07-Aug-2025 13:18:44 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 13:19:35 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754565575
+    [role] => admin
+)
+
+[07-Aug-2025 13:19:35 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 13:21:02 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754565662
+    [role] => admin
+)
+
+[07-Aug-2025 13:21:02 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 13:21:38 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754565698
+    [role] => admin
+)
+
+[07-Aug-2025 13:21:38 Europe/Berlin] update_debt.php POST: Array
+(
+    [id] => 25
+    [company_id] => 27
+    [date] => 2025-08-07
+    [amount_usd] => 0.00
+    [amount_iqd] => 180000
+    [dollar_rate] => 139250
+    [note] => 
+)
+
+[07-Aug-2025 13:21:38 Europe/Berlin] Parsed vars: id='25', company_id='27', date='2025-08-07', dollar_rate='139250', amount_usd='0', amount_iqd='180000', note=''
+[07-Aug-2025 13:21:38 Europe/Berlin] Found company debt payment for update: Array
+(
+    [id] => 25
+    [amount_usd] => 0.00
+    [amount_iqd] => 170000.00
+)
+
+[07-Aug-2025 13:21:38 Europe/Berlin] Company debt successfully updated: ID=25, Company=Rawezh (ID: 27)
+[07-Aug-2025 13:21:40 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754565700
+    [role] => admin
+)
+
+[07-Aug-2025 13:21:40 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 13:25:35 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754565935
+    [role] => admin
+)
+
+[07-Aug-2025 13:25:35 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 13:25:42 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754565942
+    [role] => admin
+)
+
+[07-Aug-2025 13:25:42 Europe/Berlin] company/update_company.php POST: Array
+(
+    [id] => 27
+    [name] => Rawezh
+    [currency_type] => دینار
+    [opening_debt_iqd] => 150000
+    [opening_debt_usd] => 0
+)
+
+[07-Aug-2025 13:25:42 Europe/Berlin] Parsed vars: id='27', name='Rawezh', opening_debt_usd='0', opening_debt_iqd='150000', currency_type='دینار'
+[07-Aug-2025 13:25:42 Europe/Berlin] Company successfully updated: ID=27, Name=Rawezh, Currency=دینار
+[07-Aug-2025 13:25:42 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754565942
+    [role] => admin
+)
+
+[07-Aug-2025 13:25:42 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 13:26:12 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754565972
+    [role] => admin
+)
+
+[07-Aug-2025 13:26:12 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 13:26:32 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754565992
+    [role] => admin
+)
+
+[07-Aug-2025 13:26:32 Europe/Berlin] update_debt.php POST: Array
+(
+    [id] => 26
+    [company_id] => 27
+    [date] => 2025-08-07
+    [amount_usd] => 0.00
+    [amount_iqd] => 170000
+    [dollar_rate] => 139250
+    [note] => 
+)
+
+[07-Aug-2025 13:26:32 Europe/Berlin] Parsed vars: id='26', company_id='27', date='2025-08-07', dollar_rate='139250', amount_usd='0', amount_iqd='170000', note=''
+[07-Aug-2025 13:26:32 Europe/Berlin] Found company debt payment for update: Array
+(
+    [id] => 26
+    [amount_usd] => 0.00
+    [amount_iqd] => 160000.00
+)
+
+[07-Aug-2025 13:26:32 Europe/Berlin] Old amounts - USD: 0, IQD: 160000
+[07-Aug-2025 13:26:32 Europe/Berlin] New amounts - USD: 0, IQD: 170000
+[07-Aug-2025 13:26:32 Europe/Berlin] Differences - USD: 0, IQD: 10000
+[07-Aug-2025 13:26:32 Europe/Berlin] Adding IQD difference: 10000
+[07-Aug-2025 13:26:32 Europe/Berlin] Reduced purchase ID 57 remaining IQD by 10000, remaining: 0
+[07-Aug-2025 13:26:32 Europe/Berlin] Company debt successfully updated: ID=26, Company=Rawezh (ID: 27)
+[07-Aug-2025 13:26:39 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754565999
+    [role] => admin
+)
+
+[07-Aug-2025 13:26:39 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 13:37:01 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754566621
+    [role] => admin
+)
+
+[07-Aug-2025 13:37:01 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 13:37:29 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754566649
+    [role] => admin
+)
+
+[07-Aug-2025 13:37:29 Europe/Berlin] Companies retrieved successfully: Count=3
+[07-Aug-2025 13:42:11 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754566931
+    [role] => admin
+)
+
+[07-Aug-2025 13:42:11 Europe/Berlin] update_purchase.php POST: Array
+(
+    [id] => 60
+    [company_id] => 27
+    [driver_id] => 4
+    [location_id] => 3
+    [invoice_number] => 408
+    [material_id] => 1
+    [bin_id] => 1
+    [date] => 2025-08-06
+    [type] => دینار
+    [kg] => 32000.00
+    [price_per_kg_iqd] => 10250.00
+    [price_per_kg_usd] => 0
+    [exchange_rate] => 139850
+    [payment_type] => قەرز
+    [price] => 0
+    [amount_iqd] => 328000.00
+    [paid_usd] => 0
+    [paid_iqd] => 0
+    [remaining_usd] => 0
+    [remaining_iqd] => 328000.00
+)
+
+[07-Aug-2025 13:42:11 Europe/Berlin] Parsed vars: id='60', company_id='27', driver_id='4', location_id='3', invoice_number='408', bin_id='1', material_id='1', date='2025-08-06', type='دینار', kg='32000.00', price_per_kg_iqd='10250.00', price_per_kg_usd='0', exchange_rate='139850', price='0', paid_iqd='0', paid_usd='0', remaining_iqd='328000.00', remaining_usd='0', payment_type='قەرز', amount_iqd='328000.00'
+[07-Aug-2025 13:42:11 Europe/Berlin] Missing required fields for purchase update: price
+[07-Aug-2025 13:43:58 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754567038
+    [role] => admin
+)
+
+[07-Aug-2025 13:43:58 Europe/Berlin] update_purchase.php POST: Array
+(
+    [id] => 60
+    [company_id] => 27
+    [driver_id] => 4
+    [location_id] => 3
+    [invoice_number] => 408
+    [material_id] => 1
+    [bin_id] => 1
+    [date] => 2025-08-06
+    [type] => دینار
+    [kg] => 32000.00
+    [price_per_kg_iqd] => 10250.00
+    [price_per_kg_usd] => 0
+    [exchange_rate] => 139850
+    [payment_type] => قەرز
+    [price] => 0
+    [amount_iqd] => 328000.00
+    [paid_usd] => 0
+    [paid_iqd] => 0
+    [remaining_usd] => 0
+    [remaining_iqd] => 328000.00
+)
+
+[07-Aug-2025 13:43:58 Europe/Berlin] Parsed vars: id='60', company_id='27', driver_id='4', location_id='3', invoice_number='408', bin_id='1', material_id='1', date='2025-08-06', type='دینار', kg='32000.00', price_per_kg_iqd='10250.00', price_per_kg_usd='0', exchange_rate='139850', price='0', paid_iqd='0', paid_usd='0', remaining_iqd='328000.00', remaining_usd='0', payment_type='قەرز', amount_iqd='328000.00'
+[07-Aug-2025 13:43:58 Europe/Berlin] Missing required fields for purchase update: price
+[07-Aug-2025 13:50:14 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754567414
+    [role] => admin
+)
+
+[07-Aug-2025 13:50:14 Europe/Berlin] update_purchase.php POST: Array
+(
+    [id] => 60
+    [company_id] => 27
+    [driver_id] => 4
+    [location_id] => 3
+    [invoice_number] => 408
+    [material_id] => 1
+    [bin_id] => 1
+    [date] => 2025-08-06
+    [type] => دینار
+    [kg] => 32000.00
+    [price_per_kg_iqd] => 10250.00
+    [price_per_kg_usd] => 0
+    [exchange_rate] => 139850
+    [payment_type] => قەرز
+    [price] => 0
+    [amount_iqd] => 328000.00
+    [paid_usd] => 0
+    [paid_iqd] => 0
+    [remaining_usd] => 0
+    [remaining_iqd] => 328000.00
+)
+
+[07-Aug-2025 13:50:14 Europe/Berlin] Parsed vars: id='60', company_id='27', driver_id='4', location_id='3', invoice_number='408', bin_id='1', material_id='1', date='2025-08-06', type='دینار', kg='32000.00', price_per_kg_iqd='10250.00', price_per_kg_usd='0', exchange_rate='139850', price='0', paid_iqd='0', paid_usd='0', remaining_iqd='328000.00', remaining_usd='0', payment_type='قەرز', amount_iqd='328000.00'
+[07-Aug-2025 13:50:14 Europe/Berlin] Missing required fields for purchase update: price
+[07-Aug-2025 13:57:21 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754567841
+    [role] => admin
+)
+
+[07-Aug-2025 13:57:21 Europe/Berlin] update_purchase.php POST: Array
+(
+    [id] => 60
+    [company_id] => 27
+    [driver_id] => 4
+    [location_id] => 3
+    [invoice_number] => 408
+    [material_id] => 1
+    [bin_id] => 1
+    [date] => 2025-08-06
+    [type] => دینار
+    [kg] => 32000.00
+    [price_per_kg_iqd] => 10250.00
+    [price_per_kg_usd] => 0
+    [exchange_rate] => 139850
+    [payment_type] => قەرز
+    [price] => 0
+    [amount_iqd] => 328000.00
+    [paid_usd] => 0
+    [paid_iqd] => 0
+    [remaining_usd] => 0
+    [remaining_iqd] => 328000.00
+)
+
+[07-Aug-2025 13:57:21 Europe/Berlin] Parsed vars: id='60', company_id='27', driver_id='4', location_id='3', invoice_number='408', bin_id='1', material_id='1', date='2025-08-06', type='دینار', kg='32000.00', price_per_kg_iqd='10250.00', price_per_kg_usd='0', exchange_rate='139850', price='0', paid_iqd='0', paid_usd='0', remaining_iqd='328000.00', remaining_usd='0', payment_type='قەرز', amount_iqd='328000.00'
+[07-Aug-2025 13:57:21 Europe/Berlin] Missing required fields for purchase update: price
+[07-Aug-2025 13:58:01 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754567881
+    [role] => admin
+)
+
+[07-Aug-2025 13:58:01 Europe/Berlin] update_purchase.php POST: Array
+(
+    [id] => 60
+    [company_id] => 27
+    [driver_id] => 4
+    [location_id] => 3
+    [invoice_number] => 408
+    [material_id] => 1
+    [bin_id] => 1
+    [date] => 2025-08-06
+    [type] => دینار
+    [kg] => 32000.00
+    [price_per_kg_iqd] => 10250.00
+    [price_per_kg_usd] => 0
+    [exchange_rate] => 139850
+    [payment_type] => قەرز
+    [price] => 0
+    [amount_iqd] => 328000.00
+    [paid_usd] => 0
+    [paid_iqd] => 0
+    [remaining_usd] => 0
+    [remaining_iqd] => 328000.00
+)
+
+[07-Aug-2025 13:58:01 Europe/Berlin] Parsed vars: id='60', company_id='27', driver_id='4', location_id='3', invoice_number='408', bin_id='1', material_id='1', date='2025-08-06', type='دینار', kg='32000.00', price_per_kg_iqd='10250.00', price_per_kg_usd='0', exchange_rate='139850', price='0', paid_iqd='0', paid_usd='0', remaining_iqd='328000.00', remaining_usd='0', payment_type='قەرز', amount_iqd='328000.00'
+[07-Aug-2025 13:58:01 Europe/Berlin] Missing required fields for purchase update: price
