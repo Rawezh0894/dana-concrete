@@ -18,45 +18,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
     // Get the debt payment info
     $stmt = $pdo->prepare('SELECT * FROM debt_payments WHERE id = ?');
     $stmt->execute([$id]);
-    $debt = $stmt->fetch(PDO::FETCH_ASSOC);
-    if (!$debt) {
+    $debt_payment = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$debt_payment) {
         echo json_encode(['success' => false, 'msg' => 'دانەوەی قەرز نەدۆزرایەوە']);
         exit;
     }
-    $company_id = $debt['company_id'];
-    $amount_usd = floatval($debt['amount_usd']);
-    $amount_iqd = floatval($debt['amount_iqd']);
+    $company_id = $debt_payment['company_id'];
+    $amount_usd = floatval($debt_payment['amount_usd']);
+    $amount_iqd = floatval($debt_payment['amount_iqd']);
     // Get company information for notification
-    $stmt = $pdo->prepare("SELECT name, phone FROM company WHERE id = ?");
+    $stmt = $pdo->prepare("SELECT name FROM company WHERE id = ?");
     $stmt->execute([$company_id]);
     $company = $stmt->fetch();
     $company_name = $company['name'] ?? 'Unknown';
-    $company_phone = $company['phone'] ?? 'هیچ ژمارەیەک نییە';
 
-    // Create old values for notification
+    // Create detailed notification
     $old_values = [
         'company_id' => $company_id,
         'company_name' => $company_name,
-        'company_phone' => $company_phone,
-        'amount_usd' => $amount_usd,
-        'amount_iqd' => $amount_iqd,
-        'date' => $debt['date'],
-        'note' => $debt['note'] ?? ''
+        'date' => $debt_payment['date'],
+        'amount_usd' => $debt_payment['amount_usd'],
+        'amount_iqd' => $debt_payment['amount_iqd'],
+        'dollar_rate' => $debt_payment['dollar_rate'],
+        'note' => $debt_payment['note']
     ];
 
     $additional_info = [
-        'action_type' => 'company_debt_payment_deletion',
+        'action_type' => 'company_debt_payment_delete',
         'payment_method' => $amount_usd > 0 ? 'USD' : ($amount_iqd > 0 ? 'IQD' : 'none'),
         'total_amount' => $amount_usd + $amount_iqd
     ];
-
-    // Delete the debt payment
-    $del = $pdo->prepare('DELETE FROM debt_payments WHERE id = ?');
-    $ok = $del->execute([$id]);
-    if (!$ok) {
-        echo json_encode(['success' => false, 'msg' => 'هەڵە لە سڕینەوە']);
-        exit;
-    }
 
     createDetailedNotification(
         $pdo,
@@ -64,52 +55,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
         'delete',
         'debt_payments',
         $id,
-        "پارەدانی قەرزی کۆمپانیا سڕایەوە (کۆمپانیا: $company_name, تەلەفۆن: $company_phone)",
+        "پارەدانی قەرزی کۆمپانیا سڕایەوە (کۆمپانیا: $company_name)",
         $old_values,
         null, // No new values for delete
         $additional_info,
         getUserIP()
     );
-    // Reverse FIFO: add back to purchases first, then opening debt
+
+    // Delete the debt payment record
+    $del = $pdo->prepare('DELETE FROM debt_payments WHERE id = ?');
+    $ok = $del->execute([$id]);
+    if (!$ok) {
+        echo json_encode(['success' => false, 'msg' => 'هەڵە لە سڕینەوە']);
+        exit;
+    }
+
+    // Restore the amounts that were paid
     if ($amount_usd > 0) {
         $remaining = $amount_usd;
-        // 1. FIFO to purchases (from latest to oldest)
-        $purchases = $pdo->prepare('SELECT id, remaining_usd, price FROM purchases WHERE company_id = ? AND type = ? AND payment_type = "قەرز" ORDER BY date DESC, id DESC');
+        
+        // 1. First restore to purchases.remaining_usd (FIFO)
+        $purchases = $pdo->prepare('SELECT id, remaining_usd FROM purchases WHERE company_id = ? AND type = ? AND payment_type = "قەرز" ORDER BY date ASC, id ASC');
         $purchases->execute([$company_id, 'دۆلار']);
         foreach ($purchases->fetchAll(PDO::FETCH_ASSOC) as $row) {
             if ($remaining <= 0) break;
-            $max_add = $row['price'] - $row['remaining_usd'];
-            if ($max_add <= 0) continue;
-            $toAdd = min($max_add, $remaining);
-            $pdo->prepare('UPDATE purchases SET remaining_usd = remaining_usd + ? WHERE id = ?')->execute([$toAdd, $row['id']]);
-            $remaining -= $toAdd;
+            $toRestore = min($row['remaining_usd'], $remaining);
+            $pdo->prepare('UPDATE purchases SET remaining_usd = remaining_usd + ? WHERE id = ?')->execute([$toRestore, $row['id']]);
+            $remaining -= $toRestore;
         }
+        
         // 2. Then restore opening_debt_usd
         if ($remaining > 0) {
             $pdo->prepare('UPDATE company SET opening_debt_usd = opening_debt_usd + ? WHERE id = ?')->execute([$remaining, $company_id]);
         }
-        // Note: debt_usd column doesn't exist in company table, so we don't update it
-        // The debt is calculated from purchases table and opening_debt columns
     }
+    
     if ($amount_iqd > 0) {
         $remaining = $amount_iqd;
-        // 1. FIFO to purchases (from latest to oldest)
-        $purchases = $pdo->prepare('SELECT id, remaining_iqd, amount_iqd FROM purchases WHERE company_id = ? AND type = ? AND payment_type = "قەرز" ORDER BY date DESC, id DESC');
+        
+        // 1. First restore to purchases.remaining_iqd (FIFO)
+        $purchases = $pdo->prepare('SELECT id, remaining_iqd FROM purchases WHERE company_id = ? AND type = ? AND payment_type = "قەرز" ORDER BY date ASC, id ASC');
         $purchases->execute([$company_id, 'دینار']);
         foreach ($purchases->fetchAll(PDO::FETCH_ASSOC) as $row) {
             if ($remaining <= 0) break;
-            $max_add = $row['amount_iqd'] - $row['remaining_iqd'];
-            if ($max_add <= 0) continue;
-            $toAdd = min($max_add, $remaining);
-            $pdo->prepare('UPDATE purchases SET remaining_iqd = remaining_iqd + ? WHERE id = ?')->execute([$toAdd, $row['id']]);
-            $remaining -= $toAdd;
+            $toRestore = min($row['remaining_iqd'], $remaining);
+            $pdo->prepare('UPDATE purchases SET remaining_iqd = remaining_iqd + ? WHERE id = ?')->execute([$toRestore, $row['id']]);
+            $remaining -= $toRestore;
         }
+        
         // 2. Then restore opening_debt_iqd
         if ($remaining > 0) {
             $pdo->prepare('UPDATE company SET opening_debt_iqd = opening_debt_iqd + ? WHERE id = ?')->execute([$remaining, $company_id]);
         }
-        // Note: debt_iqd column doesn't exist in company table, so we don't update it
-        // The debt is calculated from purchases table and opening_debt columns
     }
     echo json_encode(['success' => true]);
     exit;
