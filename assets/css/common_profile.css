@@ -1,0 +1,175 @@
+@import url('../assets/fonts/Rabar_021.ttf');
+        
+.customer-profile-header {
+    margin-top: -20px;
+}
+
+.customer-avatar {
+    transition: all 0.3s ease;
+}
+
+.customer-avatar:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+.customer-name {
+    font-family: 'Rabar_021', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+.financial-card {
+    transition: all 0.3s ease;
+}
+
+.financial-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.customer-status .badge {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+}
+
+/* Light Mode Styles */
+[data-bs-theme="light"] .nav-pills .nav-link:hover {
+    background-color: var(--light-bg) !important;
+    color: var(--primary) !important;
+}
+
+[data-bs-theme="light"] .nav-pills .nav-link.active {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%) !important;
+    color: white !important;
+}
+
+[data-bs-theme="light"] .info-label {
+    color: var(--primary);
+}
+
+[data-bs-theme="light"] .info-value {
+    background: var(--light-bg);
+    border: 1px solid var(--quaternary);
+    color: var(--primary);
+}
+
+[data-bs-theme="light"] .info-value:hover {
+    background: var(--quaternary);
+    border-color: var(--tertiary);
+}
+
+/* Dark Mode Styles - System Dark Colors */
+[data-bs-theme="dark"] .customer-profile-header .card {
+    background: #121212 !important;
+    border: 1px solid #2d2d2d;
+}
+
+[data-bs-theme="dark"] .nav-pills .nav-link {
+    color: var(--dark-text);
+    transition: all 0.3s ease;
+}
+
+[data-bs-theme="dark"] .nav-pills .nav-link:hover {
+    background-color: #2d2d2d !important;
+    color: var(--dark-text) !important;
+}
+
+[data-bs-theme="dark"] .nav-pills .nav-link.active {
+    background: #ffffff !important;
+    color: #121212 !important;
+    border: 1px solid #ffffff;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.2);
+}
+
+[data-bs-theme="dark"] .card {
+    background-color: var(--dark-bg) !important;
+    border: 1px solid #2d2d2d !important;
+}
+
+[data-bs-theme="dark"] .card-header {
+    background: #121212 !important;
+    border-bottom: 1px solid #2d2d2d !important;
+}
+
+[data-bs-theme="dark"] .card-header h5 {
+    color: var(--dark-text) !important;
+}
+
+[data-bs-theme="dark"] .card-header i {
+    color: #aaaaaa !important;
+}
+
+[data-bs-theme="dark"] .info-label {
+    color: var(--dark-text);
+}
+
+[data-bs-theme="dark"] .info-value {
+    background: #121212;
+    border: 1px solid #2d2d2d;
+    color: var(--dark-text);
+}
+
+[data-bs-theme="dark"] .info-value:hover {
+    background: #1e1e1e;
+    border-color: #404040;
+}
+
+[data-bs-theme="dark"] .financial-card {
+    background: rgba(18, 18, 18, 0.9) !important;
+    border: 1px solid rgba(45, 45, 45, 0.5) !important;
+}
+
+[data-bs-theme="dark"] .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
+}
+
+.info-group {
+    margin-bottom: 1.5rem;
+}
+
+.info-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+.info-value {
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.nav-pills .nav-link {
+    transition: all 0.3s ease;
+}
+
+.card {
+    transition: all 0.3s ease;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .customer-name {
+        font-size: 2rem !important;
+    }
+    
+    .customer-avatar {
+        width: 100px !important;
+        height: 100px !important;
+    }
+    
+    .customer-avatar i {
+        font-size: 3rem !important;
+    }
+    
+    .financial-card {
+        margin-bottom: 1rem;
+    }
+}

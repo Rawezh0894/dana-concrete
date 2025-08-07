@@ -29,11 +29,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
     // Check not exceeding current debt (opening + current)
-    $debt = $pdo->prepare('SELECT debt_usd, debt_iqd, opening_debt_usd, opening_debt_iqd FROM company WHERE id = ?');
+    $debt = $pdo->prepare('SELECT opening_debt_usd, opening_debt_iqd FROM company WHERE id = ?');
     $debt->execute([$company_id]);
     $row = $debt->fetch(PDO::FETCH_ASSOC);
-    $total_usd = floatval($row['debt_usd']) + floatval($row['opening_debt_usd']);
-    $total_iqd = floatval($row['debt_iqd']) + floatval($row['opening_debt_iqd']);
+    
+    // Calculate total debt from purchases
+    $purchases_debt = $pdo->prepare('SELECT 
+        COALESCE(SUM(remaining_usd), 0) as total_remaining_usd,
+        COALESCE(SUM(remaining_iqd), 0) as total_remaining_iqd
+        FROM purchases 
+        WHERE company_id = ? AND payment_type = "قەرز"');
+    $purchases_debt->execute([$company_id]);
+    $purchases_row = $purchases_debt->fetch(PDO::FETCH_ASSOC);
+    
+    $total_usd = floatval($row['opening_debt_usd']) + floatval($purchases_row['total_remaining_usd']);
+    $total_iqd = floatval($row['opening_debt_iqd']) + floatval($purchases_row['total_remaining_iqd']);
     if (($amount_usd > 0 && $amount_usd > $total_usd) || ($amount_iqd > 0 && $amount_iqd > $total_iqd)) {
         echo json_encode(['success' => false, 'msg' => 'نابێت بڕی پارەی گەرەوا زیاتر بێت لە بڕی قەرز!']);
         exit;
@@ -110,9 +120,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $remaining -= $toPay;
             }
         }
-        // Update debt_usd by the total paid from purchases (not opening debt)
-        $paid_from_purchases = $amount_usd - ($amount_usd - $remaining) - min($amount_usd, $opening);
-        $pdo->prepare('UPDATE company SET debt_usd = debt_usd - ? WHERE id = ?')->execute([$amount_usd - min($amount_usd, $opening), $company_id]);
+        // Note: debt_usd and debt_iqd columns don't exist in company table
+        // The debt is calculated from opening_debt + remaining amounts in purchases
     }
     // FIFO: Reduce opening_debt_iqd first, then remaining_iqd in purchases
     if ($amount_iqd > 0) {
@@ -138,8 +147,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $remaining -= $toPay;
             }
         }
-        // Update debt_iqd by the total paid from purchases (not opening debt)
-        $pdo->prepare('UPDATE company SET debt_iqd = debt_iqd - ? WHERE id = ?')->execute([$amount_iqd - min($amount_iqd, $opening), $company_id]);
+        // Note: debt_usd and debt_iqd columns don't exist in company table
+        // The debt is calculated from opening_debt + remaining amounts in purchases
     }
     echo json_encode(['success' => true]);
     exit;
