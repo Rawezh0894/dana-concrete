@@ -1,0 +1,221 @@
+.gas-material-field {
+    display: none;
+}
+.gas-material-field.show {
+    display: block;
+}
+.warehouse-hidden-field {
+    display: block;
+}
+.warehouse-hidden-field.hide {
+    display: none;
+}
+
+/* Custom checkbox styling */
+.form-check {
+    margin-bottom: 0.5rem;
+}
+.form-check-input:checked {
+    background-color: var(--seafoam-green);
+    border-color: var(--seafoam-green);
+}
+.form-check-input:focus {
+    border-color: var(--seafoam-green);
+    box-shadow: 0 0 0 0.25rem rgba(76, 175, 80, 0.25);
+}
+.form-check-label {
+    font-weight: 500;
+    color: #333;
+}
+
+/* Auto-filter indicator */
+.auto-filter-indicator {
+    font-size: 0.75rem;
+    color: #666;
+    font-style: italic;
+    opacity: 0.8;
+}
+
+/* Loading animation */
+#loadingRow {
+    background-color: rgba(76, 175, 80, 0.1);
+}
+
+/* Filter card improvements */
+.card-header h6 {
+    margin-bottom: 0;
+}
+
+/* Form control focus improvements */
+.form-control:focus {
+    border-color: var(--seafoam-green);
+    box-shadow: 0 0 0 0.25rem rgba(76, 175, 80, 0.25);
+}
+
+/* Filter improvements */
+.form-control, .form-select {
+    transition: all 0.2s ease-in-out;
+}
+
+.form-control:hover, .form-select:hover {
+    border-color: var(--seafoam-green);
+}
+
+/* Checkbox improvements */
+.form-check-input {
+    transition: all 0.2s ease-in-out;
+}
+
+.form-check-input:hover {
+    border-color: var(--seafoam-green);
+}
+
+/* Auto-filter indicator improvements */
+.auto-filter-indicator {
+    font-size: 0.7rem;
+    color: #888;
+    font-style: normal;
+    opacity: 0.7;
+    margin-top: 0.25rem;
+}
+
+.auto-filter-indicator i {
+    font-size: 0.65rem;
+}
+
+/* Filter card improvements */
+.card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+/* Form improvements */
+.form-label {
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+/* Button improvements */
+.btn {
+    font-weight: 500;
+    border-radius: 6px;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* Table improvements */
+.table {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.table thead th {
+    border-bottom: 2px solid var(--kelly-green);
+    font-weight: 600;
+}
+
+/* Summary cards improvements */
+.card.text-center {
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.card.text-center:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+}
+
+/* Summary card content improvements */
+.card.text-center .fs-4 {
+    line-height: 1.2;
+    margin-bottom: 0.25rem;
+}
+
+.card.text-center .text-muted {
+    opacity: 0.8;
+    font-weight: 400;
+}
+
+/* Currency display improvements */
+.card.text-center .fs-4 br + .text-muted {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.8em !important;
+}
+
+/* Summary card improvements */
+.card.text-center .card-title {
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+}
+
+.card.text-center .fs-4 {
+    font-size: 1.1rem !important;
+    line-height: 1.3;
+}
+
+.card.text-center small {
+    font-size: 0.75rem;
+    opacity: 0.9;
+}
+
+/* Dual currency display */
+.card.text-center .fs-4 .text-muted {
+    font-weight: 300;
+    letter-spacing: 0.5px;
+}
+
+/* Page header improvements */
+.container-fluid h2 {
+    margin-bottom: 0.25rem;
+}
+
+.container-fluid small {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+/* Filter improvements */
+.form-control, .form-select {
+    border-radius: 6px;
+}
+
+.form-check {
+    margin-bottom: 0.75rem;
+}
+
+.form-check-label {
+    cursor: pointer;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .auto-filter-indicator {
+        font-size: 0.65rem;
+    }
+    
+    .form-check {
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* Animation improvements */
+.form-control, .form-select, .form-check-input {
+    transition: all 0.2s ease-in-out;
+}
+
+.form-control:focus, .form-select:focus {
+    transform: scale(1.02);
+}
+
+.form-check-input:checked {
+    transform: scale(1.1);
+}
