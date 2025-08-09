@@ -166,6 +166,35 @@ async function fetchAndPopulateExchangeRate() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Delegated click handlers to ensure buttons work after any table re-render/pagination
+    const table = document.getElementById('otherExpensesTable');
+    if (table) {
+        table.addEventListener('click', function(event) {
+            const target = event.target.closest('button');
+            if (!target) return;
+            // Delete
+            if (target.classList.contains('delete-expense')) {
+                const id = target.dataset.id;
+                console.log('Delegated delete clicked', { id });
+                if (typeof deleteExpense === 'function') {
+                    deleteExpense(id);
+                } else {
+                    console.error('deleteExpense is not available on window');
+                }
+                return;
+            }
+            // Edit
+            if (target.classList.contains('edit-expense')) {
+                const id = target.dataset.id;
+                console.log('Delegated edit clicked', { id });
+                if (typeof openEditModalById === 'function') {
+                    openEditModalById(id);
+                } else {
+                    console.error('openEditModalById is not available on window');
+                }
+            }
+        });
+    }
     // Update USD rate display when page loads
     updateUsdRateDisplay();
     
