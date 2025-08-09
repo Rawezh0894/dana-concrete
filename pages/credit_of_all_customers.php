@@ -40,6 +40,13 @@ $sales_by_customer = [];
 foreach ($sales as $sale) {
     $sales_by_customer[$sale['customer_id']][] = $sale;
 }
+// Sort customers: those with remaining invoice debt first, then by name
+usort($customers, function($a, $b) {
+    $aScore = (floatval($a['total_sales_debt'] ?? 0) > 0) ? 0 : 1;
+    $bScore = (floatval($b['total_sales_debt'] ?? 0) > 0) ? 0 : 1;
+    if ($aScore !== $bScore) return $aScore - $bScore;
+    return strcasecmp($a['name'] ?? '', $b['name'] ?? '');
+});
 ?>
 <!DOCTYPE html>
 <html lang="ku">
@@ -102,10 +109,7 @@ foreach ($sales as $sale) {
                     <i class="fa fa-cube"></i>
                     مەتر سێجا: <?= number_format($c['total_credit_meter'], 2) ?> م³
                 </span>
-                <span>
-                    <i class="fa fa-calculator"></i>
-                    کۆی گشتی: <?= number_format($total_sales_amount, 2) ?> $
-                </span>
+                
                 <span>
                     <i class="fa fa-money-bill-wave"></i>
                     قەرزی سەرەتای: <?= number_format($c['opening_debt_usd'], 2) ?> $
