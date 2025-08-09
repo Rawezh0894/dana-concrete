@@ -156,21 +156,34 @@ async function loadOtherExpenses() {
     ]);
     // Attach delete event
     setTimeout(() => {
-        document.querySelectorAll('.delete-expense').forEach(btn => {
+        const deleteButtons = document.querySelectorAll('.delete-expense');
+        console.log('Binding delete handlers:', { count: deleteButtons.length });
+        deleteButtons.forEach(btn => {
             btn.onclick = function() {
                 const id = this.dataset.id;
-                if (typeof deleteExpense === 'function') deleteExpense(id);
+                console.log('Delete button clicked', { id, hasDeleteFunction: typeof deleteExpense === 'function' });
+                if (typeof deleteExpense === 'function') {
+                    deleteExpense(id);
+                } else {
+                    console.error('deleteExpense function is not available on window');
+                }
             };
         });
     }, 0);
     // Attach edit event
     setTimeout(() => {
-        document.querySelectorAll('.edit-expense').forEach(btn => {
+        const editButtons = document.querySelectorAll('.edit-expense');
+        console.log('Binding edit handlers:', { count: editButtons.length });
+        editButtons.forEach(btn => {
             btn.onclick = async function() {
                 const id = this.dataset.id;
+                console.log('Edit button clicked', { id });
                 // Find the row data
                 const row = data.find(r => r.id == id);
-                if (!row) return;
+                if (!row) {
+                    console.error('Row not found for edit id', { id });
+                    return;
+                }
                 // Populate selects
                 await populateSelect('../process/other_expenses/select_persons.php', 'edit_person_id', row.person_id);
                 await populateSelect('../process/other_expenses/select_employees.php', 'edit_employee_id', row.employee_id);
@@ -286,7 +299,12 @@ async function loadOtherExpenses() {
                 e.preventDefault();
                 const id = document.getElementById('edit_id').value;
                 const data = Object.fromEntries(new FormData(editExpenseForm).entries());
-                await editExpense(id, data);
+                console.log('Submitting edit form (fallback handler)', { id, dataKeys: Object.keys(data) });
+                if (typeof editExpense === 'function') {
+                    await editExpense(id, data);
+                } else {
+                    console.error('editExpense function is not available on window');
+                }
                 const modal = bootstrap.Modal.getInstance(document.getElementById('editExpenseModal'));
                 modal.hide();
             };
