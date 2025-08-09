@@ -10,28 +10,12 @@
 
 /* Print Settings */
 @media print {
-    @page {
-        size: A4 portrait;
-        margin: var(--margin-top) var(--margin-right) var(--margin-bottom) var(--margin-left);
-    }
-    
-    body {
-        background: #fff !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-
-    .no-print {
-        display: none !important;
-    }
-
-    .print-break-after {
-        page-break-after: always;
-    }
-
-    .print-break-inside-avoid {
-        page-break-inside: avoid;
-    }
+    @page { size: A4 portrait; margin: 10mm; }
+    /* Defer to global printSection rules in variables.css to avoid white pages */
+    body { background: #fff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    .no-print { display: none !important; }
+    .print-break-after { page-break-after: always; }
+    .print-break-inside-avoid { page-break-inside: avoid; }
 }
 
 /* Page Layout */

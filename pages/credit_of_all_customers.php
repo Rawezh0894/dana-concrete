@@ -64,7 +64,7 @@ foreach ($sales as $sale) {
     </style>
 </head>
 <body dir="rtl">
-<div class="a4-sheet">
+<div id="printSection" class="a4-sheet">
     <div class="report-header">
         <h1>لیستی قەرزی هەموو کڕیاران</h1>
         <div class="subtitle">ڕاپۆرتی تەواوی مامەڵە قەرزەکان بە وردی</div>
