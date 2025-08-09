@@ -7,7 +7,7 @@ function formatDebtAmount(val, currency) {
 }
 
 function loadDebts() {
-    TableController.showLoading('#debtTable', ['#', 'date', 'amount_usd', 'amount_iqd', 'dollar_rate', 'note', 'actions']);
+    TableController.showLoading('#debtTable', ['#', 'date', 'amount_usd', 'amount_iqd', 'discount_usd', 'dollar_rate', 'note', 'actions']);
     fetch(`../process/company_profile/select_debt.php?company_id=${COMPANY_ID}`)
         .then(res => res.json())
         .then(debts => {
@@ -16,6 +16,7 @@ function loadDebts() {
                 date: debt.date,
                 amount_usd: Number(debt.amount_usd).toLocaleString('en-US') + ' $',
                 amount_iqd: Number(debt.amount_iqd).toLocaleString('en-US') + ' د.ع',
+                discount_usd: Number(debt.discount_usd || 0).toLocaleString('en-US') + ' $',
                 dollar_rate: Number(debt.dollar_rate).toLocaleString('en-US') + ' د.ع',
                 note: debt.note || '',
                 actions: `
@@ -24,6 +25,7 @@ function loadDebts() {
                         data-date="${debt.date}"
                         data-amount_usd="${debt.amount_usd}"
                         data-amount_iqd="${debt.amount_iqd}"
+                        data-discount_usd="${debt.discount_usd || 0}"
                         data-dollar_rate="${debt.dollar_rate}"
                         data-note="${debt.note || ''}"
                         title="دەستکاری">
@@ -34,7 +36,7 @@ function loadDebts() {
                     </button>
                 `
             }));
-            TableController.renderWithPagination('#debtTable', data, ['#', 'date', 'amount_usd', 'amount_iqd', 'dollar_rate', 'note', 'actions'], { pageSize: 10 });
+            TableController.renderWithPagination('#debtTable', data, ['#', 'date', 'amount_usd', 'amount_iqd', 'discount_usd', 'dollar_rate', 'note', 'actions'], { pageSize: 10 });
         });
 }
 // Auto-load on tab show

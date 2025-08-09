@@ -15,21 +15,27 @@ function fetchCompanyCurrencyType() {
 function recalculateAmounts() {
     let amount_usd = parseFloat($('#debt_amount_usd').val()) || 0;
     let amount_iqd = parseFloat($('#debt_amount_iqd').val()) || 0;
+    let discount_usd = parseFloat($('#debt_discount_usd').val()) || 0;
     let dollar_rate = parseFloat($('#debt_dollar_rate').val()) || 150000;
     if (companyCurrencyType === 'دۆلار') {
-        let effective_usd = amount_usd + (amount_iqd / (dollar_rate / 100));
-        let new_remaining = lastTotalRemainingUSD - effective_usd;
+        // Convert IQD payment to USD and add USD discount directly
+        let effective_usd_pay = amount_usd + (amount_iqd / (dollar_rate / 100));
+        let total_usd_effect = effective_usd_pay + discount_usd;
+        let new_remaining = lastTotalRemainingUSD - total_usd_effect;
         $('#total_remaining_usd').val(new_remaining.toLocaleString('en-US') + ' $');
         $('#total_remaining_iqd').val('');
     } else {
-        let effective_iqd = amount_iqd + (amount_usd * (dollar_rate / 100));
-        let new_remaining = lastTotalRemainingIQD - effective_iqd;
+        // Convert USD payment and USD discount to IQD
+        let usd_to_iqd = amount_usd * (dollar_rate / 100);
+        let discount_to_iqd = discount_usd * (dollar_rate / 100);
+        let effective_iqd_pay = amount_iqd + usd_to_iqd + discount_to_iqd;
+        let new_remaining = lastTotalRemainingIQD - effective_iqd_pay;
         $('#total_remaining_iqd').val(new_remaining.toLocaleString('en-US') + ' د.ع');
         $('#total_remaining_usd').val('');
     }
 }
 
-$('#debt_amount_usd, #debt_amount_iqd, #debt_dollar_rate').on('input', recalculateAmounts);
+$('#debt_amount_usd, #debt_amount_iqd, #debt_dollar_rate, #debt_discount_usd').on('input', recalculateAmounts);
 
 async function fetchAndSetDollarRate(inputId) {
     try {
@@ -65,6 +71,10 @@ $('#addDebtModal').on('show.bs.modal', function() {
                 recalculateAmounts();
             });
     });
+    // Ensure discount field exists (if added in HTML later)
+    if (!document.getElementById('debt_discount_usd')) {
+        // no-op; UI may be updated separately
+    }
 });
 
 $('#addDebtForm').on('submit', function(e) {

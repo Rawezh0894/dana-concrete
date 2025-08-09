@@ -88,7 +88,7 @@ if (isset($_GET['company_info'])) {
     echo json_encode($row);
     exit;
 }
-$stmt = $pdo->prepare('SELECT id, date, amount_usd, amount_iqd, dollar_rate, note FROM debt_payments WHERE company_id = ? ORDER BY date DESC, id DESC');
+$stmt = $pdo->prepare('SELECT id, date, amount_usd, amount_iqd, discount_usd, dollar_rate, note FROM debt_payments WHERE company_id = ? ORDER BY date DESC, id DESC');
 $stmt->execute([$company_id]);
 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 echo json_encode($rows);

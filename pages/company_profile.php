@@ -149,6 +149,7 @@ if ($company_id) {
                             <th>بەروار</th>
                             <th>بڕی دۆلار</th>
                             <th>بڕی دینار</th>
+                            <th>داشکاندن (دۆلار)</th>
                             <th>نرخی دۆلار</th>
                             <th>تێبینی</th>
                             <th>کردارەکان</th>
@@ -188,6 +189,10 @@ if ($company_id) {
                                     <input type="number" class="form-control" id="debt_amount_iqd" name="amount_iqd" min="0" step="0.01" value="0">
                                 </div>
                             </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="debt_discount_usd" class="form-label">داشکاندن (تەنیا بە دۆلار)</label>
+                            <input type="number" class="form-control" id="debt_discount_usd" name="discount_usd" min="0" step="0.01" value="0">
                         </div>
                         <div class="mb-3">
                             <label for="debt_dollar_rate" class="form-label">نرخی دۆلار</label>
@@ -246,6 +251,10 @@ if ($company_id) {
                                     <input type="number" class="form-control" id="edit_debt_amount_iqd" name="amount_iqd" min="0" step="0.01" value="0">
                                 </div>
                             </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit_debt_discount_usd" class="form-label">داشکاندن (تەنیا بە دۆلار)</label>
+                            <input type="number" class="form-control" id="edit_debt_discount_usd" name="discount_usd" min="0" step="0.01" value="0">
                         </div>
                         <div class="mb-3">
                             <label for="edit_debt_dollar_rate" class="form-label">نرخی دۆلار</label>

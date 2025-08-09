@@ -26,14 +26,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $amount_usd = floatval($_POST['amount_usd'] ?? 0);
     $amount_iqd = floatval($_POST['amount_iqd'] ?? 0);
     $dollar_rate = floatval($_POST['dollar_rate'] ?? 150000);
+    $discount_usd = floatval($_POST['discount_usd'] ?? 0);
     $note = $_POST['note'] ?? '';
     $user_id = $_SESSION['user_id'];
     
     // Debug logging
     error_log("Processing debt payment - Company ID: $company_id, Date: $date, USD: $amount_usd, IQD: $amount_iqd, Rate: $dollar_rate");
     
-    if (!$company_id || !$date || ($amount_usd <= 0 && $amount_iqd <= 0)) {
-        echo json_encode(['success' => false, 'msg' => 'بە لایەنی کەم یەک بڕ پڕبکە (دۆلار یان دینار)']);
+    if (!$company_id || !$date || ($amount_usd <= 0 && $amount_iqd <= 0 && $discount_usd <= 0)) {
+        echo json_encode(['success' => false, 'msg' => 'بە لایەنی کەم یەک بڕ پڕبکە (دۆلار یان دینار یان داشکاندن)']);
         exit;
     }
     
@@ -62,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     error_log("Debt check - Total USD: $total_usd, Total IQD: $total_iqd");
     error_log("Debt check - Payment USD: $amount_usd, Payment IQD: $amount_iqd");
     
-    if (($amount_usd > 0 && $amount_usd > $total_usd) || ($amount_iqd > 0 && $amount_iqd > $total_iqd)) {
+    if (($amount_usd > 0 && $amount_usd > $total_usd) || ($amount_iqd > 0 && $amount_iqd > $total_iqd) || ($discount_usd > 0 && $discount_usd > $total_usd)) {
         echo json_encode(['success' => false, 'msg' => 'نابێت بڕی پارەی گەرەوا زیاتر بێت لە بڕی قەرز!']);
         exit;
     }
@@ -78,8 +79,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdo->beginTransaction();
 
         // Insert into debt_payments
-        $stmt = $pdo->prepare('INSERT INTO debt_payments (company_id, date, amount_usd, amount_iqd, dollar_rate, note, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)');
-        $ok = $stmt->execute([$company_id, $date, $amount_usd, $amount_iqd, $dollar_rate, $note, $user_id]);
+        $stmt = $pdo->prepare('INSERT INTO debt_payments (company_id, date, amount_usd, amount_iqd, discount_usd, dollar_rate, note, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+        $ok = $stmt->execute([$company_id, $date, $amount_usd, $amount_iqd, $discount_usd, $dollar_rate, $note, $user_id]);
         if (!$ok) {
             error_log('Failed to insert debt payment: ' . print_r($stmt->errorInfo(), true));
             throw new Exception('هەڵە لە تۆمارکردن');
@@ -95,6 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'date' => $date,
             'amount_usd' => $amount_usd,
             'amount_iqd' => $amount_iqd,
+            'discount_usd' => $discount_usd,
             'dollar_rate' => $dollar_rate,
             'note' => $note,
             'created_by' => $user_id
@@ -143,6 +145,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $pdo->prepare('UPDATE purchases SET remaining_usd = remaining_usd - ? WHERE id = ?')->execute([$toPay, $row['id']]);
                     $remaining -= $toPay;
                     error_log("Reduced purchase ID {$row['id']} remaining USD by $toPay, remaining: $remaining");
+                }
+            }
+        }
+
+        // Apply USD discount (no cash box, FIFO against opening and purchases)
+        if ($discount_usd > 0) {
+            $remaining = $discount_usd;
+            // Reduce opening_debt_usd first
+            $stmt = $pdo->prepare('SELECT opening_debt_usd FROM company WHERE id = ?');
+            $stmt->execute([$company_id]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            $opening = floatval($row['opening_debt_usd']);
+            if ($opening > 0) {
+                $toReduce = min($opening, $remaining);
+                $pdo->prepare('UPDATE company SET opening_debt_usd = opening_debt_usd - ? WHERE id = ?')->execute([$toReduce, $company_id]);
+                $remaining -= $toReduce;
+            }
+            // Then FIFO from purchases USD
+            if ($remaining > 0) {
+                $purchases = $pdo->prepare('SELECT id, remaining_usd FROM purchases WHERE company_id = ? AND type = ? AND payment_type = "قەرز" AND remaining_usd > 0 ORDER BY date ASC, id ASC');
+                $purchases->execute([$company_id, 'دۆلار']);
+                foreach ($purchases->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                    if ($remaining <= 0) break;
+                    $toReduce = min($row['remaining_usd'], $remaining);
+                    $pdo->prepare('UPDATE purchases SET remaining_usd = remaining_usd - ? WHERE id = ?')->execute([$toReduce, $row['id']]);
+                    $remaining -= $toReduce;
                 }
             }
         }

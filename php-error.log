@@ -7127,3 +7127,99 @@
 
 [07-Aug-2025 13:58:01 Europe/Berlin] Parsed vars: id='60', company_id='27', driver_id='4', location_id='3', invoice_number='408', bin_id='1', material_id='1', date='2025-08-06', type='دینار', kg='32000.00', price_per_kg_iqd='10250.00', price_per_kg_usd='0', exchange_rate='139850', price='0', paid_iqd='0', paid_usd='0', remaining_iqd='328000.00', remaining_usd='0', payment_type='قەرز', amount_iqd='328000.00'
 [07-Aug-2025 13:58:01 Europe/Berlin] Missing required fields for purchase update: price
+[09-Aug-2025 09:37:33 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754725053
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[09-Aug-2025 09:37:33 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[09-Aug-2025 09:37:41 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754725061
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[09-Aug-2025 09:37:41 Europe/Berlin] Companies retrieved successfully: Count=3
+[09-Aug-2025 09:37:59 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754725078
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[09-Aug-2025 09:37:59 Europe/Berlin] company/add_company.php POST: Array
+(
+    [name] => دەرمان MHA
+    [currency_type] => دۆلار
+    [opening_debt_usd] => 4008
+    [opening_debt_iqd] => 0
+)
+
+[09-Aug-2025 09:37:59 Europe/Berlin] Parsed vars: name='دەرمان MHA', opening_debt_usd='4008', opening_debt_iqd='0', currency_type='دۆلار'
+[09-Aug-2025 09:37:59 Europe/Berlin] Company successfully added: Name=دەرمان MHA, Currency=دۆلار
+[09-Aug-2025 09:37:59 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754725079
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[09-Aug-2025 09:37:59 Europe/Berlin] Companies retrieved successfully: Count=4
+[09-Aug-2025 09:39:50 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754725190
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[09-Aug-2025 09:39:50 Europe/Berlin] Companies retrieved successfully: Count=4
+[09-Aug-2025 09:40:43 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754725243
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[09-Aug-2025 09:40:43 Europe/Berlin] Companies retrieved successfully: Count=4
+[09-Aug-2025 09:41:13 Europe/Berlin] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1754725273
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[09-Aug-2025 09:41:13 Europe/Berlin] update_debt.php POST: Array
+(
+    [id] => 29
+    [company_id] => 30
+    [date] => 2025-08-09
+    [amount_usd] => 4000.00
+    [amount_iqd] => 0.00
+    [discount_usd] => 8
+    [dollar_rate] => 139250
+    [note] => 
+)
+
+[09-Aug-2025 09:41:13 Europe/Berlin] Parsed vars: id='29', company_id='30', date='2025-08-09', dollar_rate='139250', amount_usd='4000', amount_iqd='0', note=''
+[09-Aug-2025 09:41:13 Europe/Berlin] Found company debt payment for update: Array
+(
+    [id] => 29
+    [amount_usd] => 4000.00
+    [amount_iqd] => 0.00
+    [discount_usd] => 5.00
+)
+
+[09-Aug-2025 09:41:13 Europe/Berlin] Old amounts - USD: 4000, IQD: 0
+[09-Aug-2025 09:41:13 Europe/Berlin] New amounts - USD: 4000, IQD: 0
+[09-Aug-2025 09:41:13 Europe/Berlin] Differences - USD: 0, IQD: 0
+[09-Aug-2025 09:41:13 Europe/Berlin] Company debt successfully updated: ID=29, Company=دەرمان MHA (ID: 30)

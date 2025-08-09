@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 07, 2025 at 09:35 AM
+-- Generation Time: Aug 09, 2025 at 09:27 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -35,7 +35,11 @@ CREATE TABLE `debt_payments` (
   `amount_iqd` decimal(20,2) DEFAULT 0.00,
   `note` varchar(255) DEFAULT NULL,
   `created_by` int(11) DEFAULT NULL,
-  `dollar_rate` decimal(10,2) DEFAULT 150000.00
+  `dollar_rate` decimal(10,2) DEFAULT 150000.00,
+  `from_opening_debt_usd` decimal(14,2) DEFAULT 0.00 COMMENT 'Amount paid from opening debt USD (FIFO tracking)',
+  `from_opening_debt_iqd` decimal(20,2) DEFAULT 0.00 COMMENT 'Amount paid from opening debt IQD (FIFO tracking)',
+  `from_purchases_usd` decimal(14,2) DEFAULT 0.00 COMMENT 'Amount paid from purchases USD (FIFO tracking)',
+  `from_purchases_iqd` decimal(20,2) DEFAULT 0.00 COMMENT 'Amount paid from purchases IQD (FIFO tracking)'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -113,7 +117,7 @@ ALTER TABLE `debt_payments`
 -- AUTO_INCREMENT for table `debt_payments`
 --
 ALTER TABLE `debt_payments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- Constraints for dumped tables
