@@ -55,18 +55,13 @@ try {
             oe.material_id,
             oe.gas_total_cost,
             oe.material_total_cost,
-            oe.exchange_rate,
             e.name as employee_name,
             m.name as material_name,
             CASE 
                 WHEN oe.expense_type = 'بەکارهێنانی گاز' THEN oe.gas_total_cost
-                WHEN oe.expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN 
-                    CASE 
-                        WHEN oe.currency_type = 'دۆلار' THEN oe.material_total_cost * oe.exchange_rate / 100
-                        ELSE oe.material_total_cost 
-                    END
+                WHEN oe.expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN oe.material_total_cost
                 ELSE 0
-            END as total_cost_iqd,
+            END as total_cost_usd,
             CASE 
                 WHEN oe.payment_type = 'قەرز' THEN 'pending'
                 ELSE 'paid'
@@ -86,23 +81,11 @@ try {
     $summary_query = "
         SELECT 
             COUNT(*) as expense_count,
-            SUM(CASE WHEN expense_type = 'بەکارهێنانی گاز' THEN gas_total_cost ELSE 0 END) as total_gas_expenses_iqd,
-            SUM(CASE WHEN expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN 
-                CASE 
-                    WHEN currency_type = 'دۆلار' THEN material_total_cost * exchange_rate / 100
-                    ELSE material_total_cost 
-                END
-                ELSE 0 
-            END) as total_material_expenses_iqd,
-            SUM(CASE 
-                WHEN expense_type = 'بەکارهێنانی گاز' THEN gas_total_cost
-                WHEN expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN 
-                    CASE 
-                        WHEN currency_type = 'دۆلار' THEN material_total_cost * exchange_rate / 100
-                        ELSE material_total_cost 
-                    END
-                ELSE 0 
-            END) as total_expenses_iqd
+            SUM(CASE WHEN expense_type = 'بەکارهێنانی گاز' THEN gas_total_cost ELSE 0 END) as total_gas_expenses_usd,
+            SUM(CASE WHEN expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN material_total_cost ELSE 0 END) as total_material_expenses_usd,
+            SUM(CASE WHEN expense_type = 'بەکارهێنانی گاز' THEN gas_total_cost 
+                     WHEN expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN material_total_cost 
+                     ELSE 0 END) as total_expenses_usd
         FROM other_expenses 
         WHERE car_id = ? AND car_id IS NOT NULL AND car_id != 0
     ";
@@ -113,7 +96,7 @@ try {
 
     // Process expenses data
     foreach ($expenses as &$expense) {
-        $expense['total_cost_iqd'] = floatval($expense['total_cost_iqd'] ?? 0);
+        $expense['total_cost_usd'] = floatval($expense['total_cost_usd'] ?? 0);
         $expense['amount_iqd'] = floatval($expense['amount_iqd'] ?? 0);
         $expense['amount_usd'] = floatval($expense['amount_usd'] ?? 0);
         $expense['gas_liters'] = $expense['gas_liters'] ? floatval($expense['gas_liters']) : null;
@@ -122,18 +105,18 @@ try {
 
     // Process summary data
     $summary['expense_count'] = intval($summary['expense_count'] ?? 0);
-    $summary['total_gas_expenses_iqd'] = floatval($summary['total_gas_expenses_iqd'] ?? 0);
-    $summary['total_material_expenses_iqd'] = floatval($summary['total_material_expenses_iqd'] ?? 0);
-    $summary['total_expenses_iqd'] = floatval($summary['total_expenses_iqd'] ?? 0);
+    $summary['total_gas_expenses_usd'] = floatval($summary['total_gas_expenses_usd'] ?? 0);
+    $summary['total_material_expenses_usd'] = floatval($summary['total_material_expenses_usd'] ?? 0);
+    $summary['total_expenses_usd'] = floatval($summary['total_expenses_usd'] ?? 0);
 
     // Prepare response data
     $car_data = [
         'car_id' => $car['id'],
         'car_name' => $car['name'],
         'expense_count' => $summary['expense_count'],
-        'total_gas_expenses_iqd' => $summary['total_gas_expenses_iqd'],
-        'total_material_expenses_iqd' => $summary['total_material_expenses_iqd'],
-        'total_expenses_iqd' => $summary['total_expenses_iqd'],
+        'total_gas_expenses_usd' => $summary['total_gas_expenses_usd'],
+        'total_material_expenses_usd' => $summary['total_material_expenses_usd'],
+        'total_expenses_usd' => $summary['total_expenses_usd'],
         'expenses' => $expenses
     ];
 

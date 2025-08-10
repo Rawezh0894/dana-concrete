@@ -94,23 +94,11 @@ try {
     $summary_query = "
         SELECT 
             COUNT(DISTINCT car_id) as total_cars,
-            SUM(CASE WHEN expense_type = 'بەکارهێنانی گاز' THEN gas_total_cost ELSE 0 END) as total_gas_expenses_iqd,
-            SUM(CASE WHEN expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN 
-                CASE 
-                    WHEN currency_type = 'دۆلار' THEN material_total_cost * exchange_rate / 100
-                    ELSE material_total_cost 
-                END
-                ELSE 0 
-            END) as total_material_expenses_iqd,
-            SUM(CASE 
-                WHEN expense_type = 'بەکارهێنانی گاز' THEN gas_total_cost
-                WHEN expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN 
-                    CASE 
-                        WHEN currency_type = 'دۆلار' THEN material_total_cost * exchange_rate / 100
-                        ELSE material_total_cost 
-                    END
-                ELSE 0 
-            END) as total_expenses_iqd
+            SUM(CASE WHEN expense_type = 'بەکارهێنانی گاز' THEN gas_total_cost ELSE 0 END) as total_gas_expenses_usd,
+            SUM(CASE WHEN expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN material_total_cost ELSE 0 END) as total_material_expenses_usd,
+            SUM(CASE WHEN expense_type = 'بەکارهێنانی گاز' THEN gas_total_cost 
+                     WHEN expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN material_total_cost 
+                     ELSE 0 END) as total_expenses_usd
         FROM other_expenses 
         WHERE $where_clause
     ";
@@ -131,23 +119,11 @@ try {
             c.name as car_name,
             e.name as employee_name,
             COUNT(oe.id) as expense_count,
-            SUM(CASE WHEN oe.expense_type = 'بەکارهێنانی گاز' THEN oe.gas_total_cost ELSE 0 END) as total_gas_expenses_iqd,
-            SUM(CASE WHEN oe.expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN 
-                CASE 
-                    WHEN oe.currency_type = 'دۆلار' THEN oe.material_total_cost * oe.exchange_rate / 100
-                    ELSE oe.material_total_cost 
-                END
-                ELSE 0 
-            END) as total_material_expenses_iqd,
-            SUM(CASE 
-                WHEN oe.expense_type = 'بەکارهێنانی گاز' THEN oe.gas_total_cost
-                WHEN oe.expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN 
-                    CASE 
-                        WHEN oe.currency_type = 'دۆلار' THEN oe.material_total_cost * oe.exchange_rate / 100
-                        ELSE oe.material_total_cost 
-                    END
-                ELSE 0 
-            END) as total_expenses_iqd,
+            SUM(CASE WHEN oe.expense_type = 'بەکارهێنانی گاز' THEN oe.gas_total_cost ELSE 0 END) as total_gas_expenses_usd,
+            SUM(CASE WHEN oe.expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN oe.material_total_cost ELSE 0 END) as total_material_expenses_usd,
+            SUM(CASE WHEN oe.expense_type = 'بەکارهێنانی گاز' THEN oe.gas_total_cost 
+                     WHEN oe.expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN oe.material_total_cost 
+                     ELSE 0 END) as total_expenses_usd,
             CASE 
                 WHEN SUM(CASE WHEN oe.payment_type = 'قەرز' THEN 1 ELSE 0 END) > 0 THEN 'pending'
                 ELSE 'paid'
@@ -157,7 +133,7 @@ try {
         LEFT JOIN employees e ON oe.employee_id = e.id
         GROUP BY c.id, c.name, e.name
         HAVING expense_count > 0
-        ORDER BY total_expenses_iqd DESC
+        ORDER BY total_expenses_usd DESC
     ";
 
     $cars_stmt = $pdo->prepare($cars_query);
@@ -173,17 +149,17 @@ try {
 
     // Process data for better display
     foreach ($cars_data as &$car) {
-        $car['total_gas_expenses_iqd'] = floatval($car['total_gas_expenses_iqd'] ?? 0);
-        $car['total_material_expenses_iqd'] = floatval($car['total_material_expenses_iqd'] ?? 0);
-        $car['total_expenses_iqd'] = floatval($car['total_expenses_iqd'] ?? 0);
+        $car['total_gas_expenses_usd'] = floatval($car['total_gas_expenses_usd'] ?? 0);
+        $car['total_material_expenses_usd'] = floatval($car['total_material_expenses_usd'] ?? 0);
+        $car['total_expenses_usd'] = floatval($car['total_expenses_usd'] ?? 0);
         $car['expense_count'] = intval($car['expense_count'] ?? 0);
     }
 
     // Process summary data
     $summary['total_cars'] = intval($summary['total_cars'] ?? 0);
-    $summary['total_gas_expenses_iqd'] = floatval($summary['total_gas_expenses_iqd'] ?? 0);
-    $summary['total_material_expenses_iqd'] = floatval($summary['total_material_expenses_iqd'] ?? 0);
-    $summary['total_expenses_iqd'] = floatval($summary['total_expenses_iqd'] ?? 0);
+    $summary['total_gas_expenses_usd'] = floatval($summary['total_gas_expenses_usd'] ?? 0);
+    $summary['total_material_expenses_usd'] = floatval($summary['total_material_expenses_usd'] ?? 0);
+    $summary['total_expenses_usd'] = floatval($summary['total_expenses_usd'] ?? 0);
 
     echo json_encode([
         'success' => true,

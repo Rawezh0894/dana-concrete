@@ -68,6 +68,54 @@ usort($customers, function($a, $b) {
     <link href="../assets/css/credit_of_all_customers.css" rel="stylesheet">
     <style>
         /* Remove all inline styles as they are now in the CSS file */
+        
+        /* Filter Section Styling */
+        .filter-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            margin-bottom: 20px;
+        }
+        
+        .filter-section .form-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+        
+        .filter-section .form-control {
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+        
+        .filter-section .form-control:focus {
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+        
+        .filter-section .btn {
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .filter-section .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .gap-2 {
+            gap: 0.5rem !important;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .filter-section .row > div {
+                margin-bottom: 15px;
+            }
+        }
     </style>
 </head>
 <body dir="rtl">
@@ -81,6 +129,33 @@ usort($customers, function($a, $b) {
     <div class="d-flex justify-content-between align-items-center mb-4 no-print">
         <h2 class="section-title">پرینتی قەرزی کڕیارەکان</h2>
         <button class="btn btn-primary" onclick="window.print()"><i class="fa fa-print"></i> پرینت</button>
+    </div>
+
+    <!-- Invoice Number Filter -->
+    <div class="filter-section mb-4 no-print">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="invoiceFilter" class="form-label">
+                        <i class="fa fa-filter"></i> فلتەری ژمارەی پسوڵە:
+                    </label>
+                    <input type="text" id="invoiceFilter" class="form-control" placeholder="ژمارەی پسوڵە بنووسە بۆ فلتەرکردن...">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label class="form-label">کردارەکان:</label>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-secondary" onclick="clearInvoiceFilter()">
+                            <i class="fa fa-times"></i> پاککردنەوە
+                        </button>
+                        <button type="button" class="btn btn-outline-info" onclick="toggleInvoiceVisibility()">
+                            <i class="fa fa-eye-slash"></i> <span id="toggleText">دەرنەکەوتنی ژمارەی پسوڵە</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
   
     <?php foreach ($customers as $c): ?>
@@ -173,5 +248,63 @@ usort($customers, function($a, $b) {
         <button class="btn btn-secondary" onclick="window.history.back()">گەڕانەوە</button>
     </div>
 </div>
+
+<script>
+// Invoice Number Filter Functionality
+let invoiceNumbersVisible = true;
+
+function filterByInvoiceNumber() {
+    const filterValue = document.getElementById('invoiceFilter').value.toLowerCase().trim();
+    const customerCards = document.querySelectorAll('.customer-card');
+    
+    customerCards.forEach(card => {
+        const invoiceCells = card.querySelectorAll('td:nth-child(11)'); // Invoice number column (11th)
+        let shouldShowCard = false;
+        
+        if (filterValue === '') {
+            shouldShowCard = true;
+        } else {
+            invoiceCells.forEach(cell => {
+                const invoiceText = cell.textContent.toLowerCase();
+                if (invoiceText.includes(filterValue)) {
+                    shouldShowCard = true;
+                }
+            });
+        }
+        
+        card.style.display = shouldShowCard ? 'block' : 'none';
+    });
+}
+
+function clearInvoiceFilter() {
+    document.getElementById('invoiceFilter').value = '';
+    filterByInvoiceNumber();
+}
+
+function toggleInvoiceVisibility() {
+    const invoiceColumns = document.querySelectorAll('th:nth-child(11), td:nth-child(11)');
+    const toggleText = document.getElementById('toggleText');
+    
+    invoiceNumbersVisible = !invoiceNumbersVisible;
+    
+    invoiceColumns.forEach(cell => {
+        cell.style.display = invoiceNumbersVisible ? 'table-cell' : 'none';
+    });
+    
+    toggleText.textContent = invoiceNumbersVisible ? 'دەرنەکەوتنی ژمارەی پسوڵە' : 'دەرکەوتنی ژمارەی پسوڵە';
+    
+    // Update button icon
+    const toggleButton = document.querySelector('.btn-outline-info i');
+    toggleButton.className = invoiceNumbersVisible ? 'fa fa-eye-slash' : 'fa fa-eye';
+}
+
+// Add event listener for real-time filtering
+document.addEventListener('DOMContentLoaded', function() {
+    const invoiceFilter = document.getElementById('invoiceFilter');
+    if (invoiceFilter) {
+        invoiceFilter.addEventListener('input', filterByInvoiceNumber);
+    }
+});
+</script>
 </body>
 </html>

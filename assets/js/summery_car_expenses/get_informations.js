@@ -56,14 +56,11 @@ function loadCarExpensesData(filters = {}) {
 
 // Display car expenses summary in table
 function displayCarExpensesSummary() {
-    const tbody = document.querySelector('#carSummaryTable tbody');
-    if (!tbody) {
-        console.error('Table body not found');
-        return;
-    }
+    const tbody = $('#carSummaryTable tbody');
+    tbody.empty();
 
     if (carExpensesData.length === 0) {
-        tbody.innerHTML = `
+        tbody.html(`
             <tr>
                 <td colspan="8" class="text-center text-muted">
                     <div class="py-4">
@@ -74,29 +71,14 @@ function displayCarExpensesSummary() {
                     </div>
                 </td>
             </tr>
-        `;
+        `);
         return;
     }
 
-    tbody.innerHTML = carExpensesData.map(car => `
-        <tr>
-            <td>${car.car_id}</td>
-            <td>${car.car_name || '-'}</td>
-            <td>${car.employee_name || '-'}</td>
-            <td>${car.expense_count || 0}</td>
-            <td class="text-end">${formatCurrency(car.total_gas_expenses_iqd || 0, 'دینار')}</td>
-            <td class="text-end">${formatCurrency(car.total_material_expenses_iqd || 0, 'دینار')}</td>
-            <td class="text-end">${formatCurrency(car.total_expenses_iqd || 0, 'دینار')}</td>
-            <td>
-                <span class="badge ${car.payment_status === 'pending' ? 'bg-warning' : 'bg-success'}">
-                    ${car.payment_status === 'pending' ? 'قەرز' : 'پارەدراو'}
-                </span>
-                <button class="btn btn-sm btn-outline-primary ms-2" onclick="viewCarDetails(${car.car_id})">
-                    <i class="fas fa-eye"></i> وردەکاری
-                </button>
-            </td>
-        </tr>
-    `).join('');
+    carExpensesData.forEach((car, index) => {
+        const row = createCarExpensesRow(car, index + 1);
+        tbody.append(row);
+    });
 }
 
 // Create table row for car expenses
@@ -129,107 +111,34 @@ function createCarExpensesRow(car, index) {
     `;
 }
 
-// Update summary cards with data
+// Update summary cards with current data
 function updateSummaryCards() {
-    if (!summaryStats) {
-        console.log('No summary stats available');
-        return;
-    }
-
     console.log('Updating summary cards with:', summaryStats);
-
-    // Update total cars
-    const totalCarsElement = document.getElementById('total_cars');
-    if (totalCarsElement) {
-        totalCarsElement.textContent = summaryStats.total_cars || 0;
-    }
-
-    // Update total gas expenses (always in دینار)
-    const totalGasExpensesElement = document.getElementById('total_gas_expenses');
-    if (totalGasExpensesElement) {
-        const gasAmount = summaryStats.total_gas_expenses_iqd || 0;
-        totalGasExpensesElement.textContent = formatCurrency(gasAmount, 'دینار');
-    }
-
-    // Update total material expenses (converted to دینار)
-    const totalMaterialExpensesElement = document.getElementById('total_material_expenses');
-    if (totalMaterialExpensesElement) {
-        const materialAmount = summaryStats.total_material_expenses_iqd || 0;
-        totalMaterialExpensesElement.textContent = formatCurrency(materialAmount, 'دینار');
-    }
-
-    // Update total expenses (converted to دینار)
-    const totalExpensesElement = document.getElementById('total_expenses');
-    if (totalExpensesElement) {
-        const totalAmount = summaryStats.total_expenses_iqd || 0;
-        totalExpensesElement.textContent = formatCurrency(totalAmount, 'دینار');
-    }
-
+    
+    $('#total_cars').text(summaryStats.total_cars || 0);
+    $('#total_gas_expenses').text(formatCurrency(summaryStats.total_gas_expenses_usd, 'USD'));
+    $('#total_material_expenses').text(formatCurrency(summaryStats.total_material_expenses_usd, 'USD'));
+    $('#total_expenses').text(formatCurrency(summaryStats.total_expenses_usd, 'USD'));
+    
+    console.log('Summary cards updated:', {
+        total_cars: summaryStats.total_cars || 0,
+        total_gas_expenses_usd: summaryStats.total_gas_expenses_usd || 0,
+        total_material_expenses_usd: summaryStats.total_material_expenses_usd || 0,
+        total_expenses_usd: summaryStats.total_expenses_usd || 0
+    });
+    
     // Update debug info if visible
     updateDebugInfo();
 }
 
 // Update debug information display
 function updateDebugInfo() {
-    const debugContent = document.getElementById('debug_content');
-    if (!debugContent) return;
-
-    const debugInfo = `
-        <div class="row">
-            <div class="col-md-6">
-                <h6>فلتەرەکان:</h6>
-                <ul class="list-unstyled">
-                    <li><strong>سەیارە:</strong> ${window.currentFilters?.car_id || 'هەموو'}</li>
-                    <li><strong>کارمەند:</strong> ${window.currentFilters?.employee_id || 'هەموو'}</li>
-                    <li><strong>لە بەروار:</strong> ${window.currentFilters?.date_from || 'هەموو'}</li>
-                    <li><strong>بۆ بەروار:</strong> ${window.currentFilters?.date_to || 'هەموو'}</li>
-                </ul>
-            </div>
-            <div class="col-md-6">
-                <h6>ئامارەکان:</h6>
-                <ul class="list-unstyled">
-                    <li><strong>کۆی سەیارەکان:</strong> ${summaryStats?.total_cars || 0}</li>
-                    <li><strong>کۆی خەرجی گاز:</strong> ${formatCurrency(summaryStats?.total_gas_expenses_iqd || 0, 'دینار')}</li>
-                    <li><strong>کۆی خەرجی کاڵا:</strong> ${formatCurrency(summaryStats?.total_material_expenses_iqd || 0, 'دینار')}</li>
-                    <li><strong>کۆی گشتی:</strong> ${formatCurrency(summaryStats?.total_expenses_iqd || 0, 'دینار')}</li>
-                </ul>
-            </div>
-        </div>
-        <div class="row mt-3">
-            <div class="col-12">
-                <h6>داتای سەیارەکان:</h6>
-                <small class="text-muted">کۆی: ${carExpensesData?.length || 0} سەیارە</small>
-                ${carExpensesData && carExpensesData.length > 0 ? `
-                    <div class="table-responsive mt-2">
-                        <table class="table table-sm table-bordered">
-                            <thead>
-                                <tr>
-                                    <th>سەیارە</th>
-                                    <th>کارمەند</th>
-                                    <th>خەرجی گاز</th>
-                                    <th>خەرجی کاڵا</th>
-                                    <th>کۆی گشتی</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${carExpensesData.map(car => `
-                                    <tr>
-                                        <td>${car.car_name || car.car_id}</td>
-                                        <td>${car.employee_name || '-'}</td>
-                                        <td>${formatCurrency(car.total_gas_expenses_iqd || 0, 'دینار')}</td>
-                                        <td>${formatCurrency(car.total_material_expenses_iqd || 0, 'دینار')}</td>
-                                        <td>${formatCurrency(car.total_expenses_iqd || 0, 'دینار')}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                ` : '<p class="text-muted">هیچ داتایەک نەدۆزرایەوە</p>'}
-            </div>
-        </div>
-    `;
-
-    debugContent.innerHTML = debugInfo;
+    if ($('#debug_summary').is(':visible')) {
+        $('#debug_car_count').text(carExpensesData.length || 0);
+        $('#debug_gas_total').text('$' + (summaryStats.total_gas_expenses_usd || 0));
+        $('#debug_material_total').text('$' + (summaryStats.total_material_expenses_usd || 0));
+        $('#debug_total').text('$' + (summaryStats.total_expenses_usd || 0));
+    }
 }
 
 // View car details in modal
