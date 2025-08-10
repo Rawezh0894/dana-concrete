@@ -36,40 +36,40 @@ try {
         exit;
     }
 
-    // Get car expenses with details
+    // Get expenses for the specific car
     $expenses_query = "
         SELECT 
             oe.id,
             oe.purpose,
             oe.expense_type,
+            oe.date,
             oe.gas_liters,
             oe.material_quantity,
             oe.usage_unit_type,
-            oe.amount_iqd,
-            oe.amount_usd,
-            oe.currency_type,
-            oe.payment_type,
-            oe.date,
-            oe.car_id,
-            oe.employee_id,
             oe.material_id,
             oe.gas_total_cost,
             oe.material_total_cost,
             e.name as employee_name,
             m.name as material_name,
-            CASE 
+            CASE
                 WHEN oe.expense_type = 'بەکارهێنانی گاز' THEN oe.gas_total_cost
                 WHEN oe.expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN oe.material_total_cost
+                WHEN oe.expense_type = 'خەرجی تر' THEN 
+                    CASE 
+                        WHEN oe.currency_type = 'دۆلار' THEN oe.amount_usd
+                        WHEN oe.currency_type = 'دینار' THEN oe.amount_iqd / oe.exchange_rate * 100
+                        ELSE 0
+                    END
                 ELSE 0
             END as total_cost_usd,
-            CASE 
-                WHEN oe.payment_type = 'قەرز' THEN 'pending'
-                ELSE 'paid'
-            END as payment_status
+            oe.currency_type,
+            oe.amount_iqd,
+            oe.amount_usd,
+            oe.exchange_rate
         FROM other_expenses oe
         LEFT JOIN employees e ON oe.employee_id = e.id
-        LEFT JOIN materials m ON oe.material_id = m.id
-        WHERE oe.car_id = ? AND oe.car_id IS NOT NULL AND oe.car_id != 0
+        LEFT JOIN list_materials m ON oe.material_id = m.id
+        WHERE oe.car_id = ? AND $where_clause
         ORDER BY oe.date DESC
     ";
 
@@ -77,17 +77,25 @@ try {
     $expenses_stmt->execute([$car_id]);
     $expenses = $expenses_stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Calculate summary for this car
+    // Get summary for the specific car
     $summary_query = "
         SELECT 
-            COUNT(*) as expense_count,
+            COUNT(*) as total_expenses,
             SUM(CASE WHEN expense_type = 'بەکارهێنانی گاز' THEN gas_total_cost ELSE 0 END) as total_gas_expenses_usd,
             SUM(CASE WHEN expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN material_total_cost ELSE 0 END) as total_material_expenses_usd,
-            SUM(CASE WHEN expense_type = 'بەکارهێنانی گاز' THEN gas_total_cost 
-                     WHEN expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN material_total_cost 
-                     ELSE 0 END) as total_expenses_usd
+            SUM(CASE 
+                WHEN expense_type = 'بەکارهێنانی گاز' THEN gas_total_cost
+                WHEN expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN material_total_cost
+                WHEN expense_type = 'خەرجی تر' THEN 
+                    CASE 
+                        WHEN currency_type = 'دۆلار' THEN amount_usd
+                        WHEN currency_type = 'دینار' THEN amount_iqd / exchange_rate * 100
+                        ELSE 0
+                    END
+                ELSE 0
+            END) as total_expenses_usd
         FROM other_expenses 
-        WHERE car_id = ? AND car_id IS NOT NULL AND car_id != 0
+        WHERE car_id = ? AND $where_clause
     ";
 
     $summary_stmt = $pdo->prepare($summary_query);

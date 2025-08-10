@@ -90,17 +90,74 @@ try {
     $count_data = $count_stmt->fetch(PDO::FETCH_ASSOC);
     error_log("Debug: Count summary: " . json_encode($count_data));
 
-    // Get summary statistics
+    // Debug: Show expense types breakdown
+    $debug_expense_types_query = "
+        SELECT 
+            expense_type,
+            COUNT(*) as count,
+            SUM(CASE WHEN expense_type = 'بەکارهێنانی گاز' THEN gas_total_cost ELSE 0 END) as gas_costs,
+            SUM(CASE WHEN expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN material_total_cost ELSE 0 END) as material_costs,
+            SUM(CASE WHEN expense_type = 'خەرجی تر' AND currency_type = 'دۆلار' THEN amount_usd ELSE 0 END) as other_usd_costs,
+            SUM(CASE WHEN expense_type = 'خەرجی تر' AND currency_type = 'دینار' THEN amount_iqd ELSE 0 END) as other_iqd_costs
+        FROM other_expenses 
+        $where_clause
+        GROUP BY expense_type
+    ";
+    
+    try {
+        $debug_stmt = $pdo->prepare($debug_expense_types_query);
+        $debug_stmt->execute($params);
+        $debug_expense_types = $debug_stmt->fetchAll(PDO::FETCH_ASSOC);
+        error_log("Debug: Expense types breakdown: " . json_encode($debug_expense_types));
+    } catch (Exception $e) {
+        error_log("Debug: Error getting expense types breakdown: " . $e->getMessage());
+    }
+
+    // Build the WHERE clause for summary query
+    $where_conditions = [];
+    $params = [];
+    
+    if ($car_id && $car_id !== '') {
+        $where_conditions[] = 'car_id = ?';
+        $params[] = $car_id;
+    }
+    
+    if ($employee_id && $employee_id !== '') {
+        $where_conditions[] = 'employee_id = ?';
+        $params[] = $employee_id;
+    }
+    
+    if ($date_from && $date_from !== '') {
+        $where_conditions[] = 'date >= ?';
+        $params[] = $date_from;
+    }
+    if ($date_to && $date_to !== '') {
+        $where_conditions[] = 'date <= ?';
+        $params[] = $date_to;
+    }
+    
+    $where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
+    
+    // Summary query - Fixed to handle different expense types correctly
     $summary_query = "
         SELECT 
             COUNT(DISTINCT car_id) as total_cars,
+            COUNT(*) as total_expenses,
             SUM(CASE WHEN expense_type = 'بەکارهێنانی گاز' THEN gas_total_cost ELSE 0 END) as total_gas_expenses_usd,
             SUM(CASE WHEN expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN material_total_cost ELSE 0 END) as total_material_expenses_usd,
-            SUM(CASE WHEN expense_type = 'بەکارهێنانی گاز' THEN gas_total_cost 
-                     WHEN expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN material_total_cost 
-                     ELSE 0 END) as total_expenses_usd
+            SUM(CASE 
+                WHEN expense_type = 'بەکارهێنانی گاز' THEN gas_total_cost
+                WHEN expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN material_total_cost
+                WHEN expense_type = 'خەرجی تر' THEN 
+                    CASE 
+                        WHEN currency_type = 'دۆلار' THEN amount_usd
+                        WHEN currency_type = 'دینار' THEN amount_iqd / exchange_rate * 100
+                        ELSE 0
+                    END
+                ELSE 0
+            END) as total_expenses_usd
         FROM other_expenses 
-        WHERE $where_clause
+        $where_clause
     ";
 
     $summary_stmt = $pdo->prepare($summary_query);
@@ -112,27 +169,30 @@ try {
     error_log("Summary params: " . json_encode($params));
     error_log("Summary results: " . json_encode($summary));
 
-    // Get car expenses data
+    // Cars query - Fixed to handle different expense types correctly
     $cars_query = "
         SELECT 
             c.id as car_id,
             c.name as car_name,
-            e.name as employee_name,
+            c.plate_number,
             COUNT(oe.id) as expense_count,
             SUM(CASE WHEN oe.expense_type = 'بەکارهێنانی گاز' THEN oe.gas_total_cost ELSE 0 END) as total_gas_expenses_usd,
             SUM(CASE WHEN oe.expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN oe.material_total_cost ELSE 0 END) as total_material_expenses_usd,
-            SUM(CASE WHEN oe.expense_type = 'بەکارهێنانی گاز' THEN oe.gas_total_cost 
-                     WHEN oe.expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN oe.material_total_cost 
-                     ELSE 0 END) as total_expenses_usd,
-            CASE 
-                WHEN SUM(CASE WHEN oe.payment_type = 'قەرز' THEN 1 ELSE 0 END) > 0 THEN 'pending'
-                ELSE 'paid'
-            END as payment_status
+            SUM(CASE 
+                WHEN oe.expense_type = 'بەکارهێنانی گاز' THEN oe.gas_total_cost
+                WHEN oe.expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN oe.material_total_cost
+                WHEN oe.expense_type = 'خەرجی تر' THEN 
+                    CASE 
+                        WHEN oe.currency_type = 'دۆلار' THEN oe.amount_usd
+                        WHEN oe.currency_type = 'دینار' THEN oe.amount_iqd / oe.exchange_rate * 100
+                        ELSE 0
+                    END
+                ELSE 0
+            END) as total_expenses_usd
         FROM cars c
-        LEFT JOIN other_expenses oe ON c.id = oe.car_id AND $where_clause
-        LEFT JOIN employees e ON oe.employee_id = e.id
-        GROUP BY c.id, c.name, e.name
-        HAVING expense_count > 0
+        LEFT JOIN other_expenses oe ON c.id = oe.car_id
+        $where_clause
+        GROUP BY c.id, c.name, c.plate_number
         ORDER BY total_expenses_usd DESC
     ";
 
