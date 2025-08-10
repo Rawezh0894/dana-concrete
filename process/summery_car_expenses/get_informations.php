@@ -23,7 +23,7 @@ try {
     $date_from = isset($_GET['date_from']) ? $_GET['date_from'] : '';
     $date_to = isset($_GET['date_to']) ? $_GET['date_to'] : '';
 
-    // Build WHERE clause
+    // Build WHERE clause for all queries
     $where_conditions = ['car_id IS NOT NULL AND car_id != 0'];
     $params = [];
 
@@ -49,10 +49,39 @@ try {
     }
 
     $where_clause = implode(' AND ', $where_conditions);
+    
+    // Create WHERE clause for cars query (with table alias)
+    $cars_where_conditions = [];
+    $cars_params = [];
+    
+    if ($car_id > 0) {
+        $cars_where_conditions[] = 'oe.car_id = ?';
+        $cars_params[] = $car_id;
+    }
+    
+    if ($employee_id > 0) {
+        $cars_where_conditions[] = 'oe.employee_id = ?';
+        $cars_params[] = $employee_id;
+    }
+    
+    // Only add date filters if they are provided
+    if ($date_from && $date_from !== '') {
+        $cars_where_conditions[] = 'oe.date >= ?';
+        $cars_params[] = $date_from;
+    }
+    
+    if ($date_to && $date_to !== '') {
+        $cars_where_conditions[] = 'oe.date <= ?';
+        $cars_params[] = $date_to;
+    }
+    
+    $cars_where_clause = !empty($cars_where_conditions) ? 'WHERE ' . implode(' AND ', $cars_where_conditions) : '';
 
     // Debug: Log the final WHERE clause and parameters
     error_log("Final WHERE clause: " . $where_clause);
     error_log("Final parameters: " . json_encode($params));
+    error_log("Cars WHERE clause: " . $cars_where_clause);
+    error_log("Cars parameters: " . json_encode($cars_params));
 
     // Debug: Check what car expenses exist in the database
     $debug_query = "
@@ -100,7 +129,7 @@ try {
             SUM(CASE WHEN expense_type = 'خەرجی تر' AND currency_type = 'دۆلار' THEN amount_usd ELSE 0 END) as other_usd_costs,
             SUM(CASE WHEN expense_type = 'خەرجی تر' AND currency_type = 'دینار' THEN amount_iqd ELSE 0 END) as other_iqd_costs
         FROM other_expenses 
-        $where_clause
+        WHERE car_id IS NOT NULL AND car_id != 0
         GROUP BY expense_type
     ";
     
@@ -113,30 +142,8 @@ try {
         error_log("Debug: Error getting expense types breakdown: " . $e->getMessage());
     }
 
-    // Build the WHERE clause for summary query
-    $where_conditions = [];
-    $params = [];
-    
-    if ($car_id && $car_id !== '') {
-        $where_conditions[] = 'car_id = ?';
-        $params[] = $car_id;
-    }
-    
-    if ($employee_id && $employee_id !== '') {
-        $where_conditions[] = 'employee_id = ?';
-        $params[] = $employee_id;
-    }
-    
-    if ($date_from && $date_from !== '') {
-        $where_conditions[] = 'date >= ?';
-        $params[] = $date_from;
-    }
-    if ($date_to && $date_to !== '') {
-        $where_conditions[] = 'date <= ?';
-        $params[] = $date_to;
-    }
-    
-    $where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
+    // Use the WHERE clause already built above
+    $where_clause = 'WHERE ' . $where_clause;
     
     // Summary query - Fixed to handle different expense types correctly
     $summary_query = "
@@ -160,9 +167,16 @@ try {
         $where_clause
     ";
 
-    $summary_stmt = $pdo->prepare($summary_query);
-    $summary_stmt->execute($params);
-    $summary = $summary_stmt->fetch(PDO::FETCH_ASSOC);
+    try {
+        $summary_stmt = $pdo->prepare($summary_query);
+        $summary_stmt->execute($params);
+        $summary = $summary_stmt->fetch(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+        error_log("Error executing summary query: " . $e->getMessage());
+        error_log("Summary query: " . $summary_query);
+        error_log("Summary params: " . json_encode($params));
+        throw $e;
+    }
 
     // Debug: Log the summary query and results
     error_log("Summary query: " . $summary_query);
@@ -190,15 +204,22 @@ try {
                 ELSE 0
             END) as total_expenses_usd
         FROM cars c
-        LEFT JOIN other_expenses oe ON c.id = oe.car_id
-        $where_clause
+        INNER JOIN other_expenses oe ON c.id = oe.car_id
+        $cars_where_clause
         GROUP BY c.id, c.name, c.plate_number
         ORDER BY total_expenses_usd DESC
     ";
 
-    $cars_stmt = $pdo->prepare($cars_query);
-    $cars_stmt->execute($params);
-    $cars_data = $cars_stmt->fetchAll(PDO::FETCH_ASSOC);
+    try {
+        $cars_stmt = $pdo->prepare($cars_query);
+        $cars_stmt->execute($cars_params);
+        $cars_data = $cars_stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+        error_log("Error executing cars query: " . $e->getMessage());
+        error_log("Cars query: " . $cars_query);
+        error_log("Cars params: " . json_encode($cars_params));
+        throw $e;
+    }
 
     // Debug: Log the cars query and results
     error_log("Cars query: " . $cars_query);
