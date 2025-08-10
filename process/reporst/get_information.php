@@ -302,7 +302,7 @@ try {
     $total_employee_expenses_usd = ($usd_iqd_rate > 0 ? ($total_employee_expenses / ($usd_iqd_rate / 100)) : 0);
     $total_expenses_breakdown['employee_payments'] = $total_employee_expenses_usd;
 
-    // Other expenses - only خەرجی تر, خواردنگە, ئۆفیس (not بەکارهێنانی کاڵای کۆگا or بەکارهێنانی گاز) with date filter - includes cash box operations
+    // Other expenses - including all expense types with date filter - includes cash box operations
     $other_expenses_query = "SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd FROM other_expenses WHERE expense_type IN ('خەرجی تر', 'خواردنگە', 'ئۆفیس') $date_condition_date";
     $stmt = $pdo->query($other_expenses_query);
     $row = $stmt->fetch();
@@ -310,6 +310,24 @@ try {
     $other_expenses_iqd = $row['iqd'] ?? 0;
     $other_expenses_total_usd = $other_expenses_usd + (($usd_iqd_rate > 0) ? ($other_expenses_iqd / ($usd_iqd_rate / 100)) : 0);
     $total_expenses_breakdown['other_expenses'] = $other_expenses_total_usd;
+
+    // Material usage from warehouse (بەکارهێنانی کاڵای کۆگا) with date filter
+    $material_usage_query = "SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd FROM other_expenses WHERE expense_type = 'بەکارهێنانی کاڵای کۆگا' $date_condition_date";
+    $stmt = $pdo->query($material_usage_query);
+    $row = $stmt->fetch();
+    $material_usage_usd = $row['usd'] ?? 0;
+    $material_usage_iqd = $row['iqd'] ?? 0;
+    $material_usage_total_usd = $material_usage_usd + (($usd_iqd_rate > 0) ? ($material_usage_iqd / ($usd_iqd_rate / 100)) : 0);
+    $total_expenses_breakdown['material_usage'] = $material_usage_total_usd;
+
+    // Gas usage (بەکارهێنانی گاز) with date filter
+    $gas_usage_query = "SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd FROM other_expenses WHERE expense_type = 'بەکارهێنانی گاز' $date_condition_date";
+    $stmt = $pdo->query($gas_usage_query);
+    $row = $stmt->fetch();
+    $gas_usage_usd = $row['usd'] ?? 0;
+    $gas_usage_iqd = $row['iqd'] ?? 0;
+    $gas_usage_total_usd = $gas_usage_usd + (($usd_iqd_rate > 0) ? ($gas_usage_iqd / ($usd_iqd_rate / 100)) : 0);
+    $total_expenses_breakdown['gas_usage'] = $gas_usage_total_usd;
 
     // Purchases (کڕین) - only cash payments with date filter
     $purchases_query = "SELECT SUM(amount_iqd) as iqd, SUM(amount_iqd / NULLIF(exchange_rate / 100, 0)) as iqd_converted FROM purchases WHERE payment_type = 'نەقد' AND type = 'دینار' $date_condition_date";

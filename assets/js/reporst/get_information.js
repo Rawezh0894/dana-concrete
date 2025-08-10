@@ -113,6 +113,8 @@ function fetchAndRenderReportData() {
                     breakdown: {
                         employee_payments: formatCurrency(Number(data.total_expenses.breakdown?.employee_payments) || 0, 'USD'),
                         other_expenses: formatCurrency(Number(data.total_expenses.breakdown?.other_expenses) || 0, 'USD'),
+                        material_usage: formatCurrency(Number(data.total_expenses.breakdown?.material_usage) || 0, 'USD'),
+                        gas_usage: formatCurrency(Number(data.total_expenses.breakdown?.gas_usage) || 0, 'USD'),
                         purchases: formatCurrency(Number(data.total_expenses.breakdown?.purchases) || 0, 'USD'),
                         purchase_materials: formatCurrency(Number(data.total_expenses.breakdown?.purchase_materials) || 0, 'USD')
                     }
@@ -143,6 +145,16 @@ function fetchAndRenderReportData() {
                                 <div class="col-6">
                                     <small class="text-white-50">خەرجی تر</small>
                                     <div class="text-white small">${card.breakdown.other_expenses}</div>
+                                </div>
+                            </div>
+                            <div class="row mt-1">
+                                <div class="col-6">
+                                    <small class="text-white-50">بەکارهێنانی کاڵا</small>
+                                    <div class="text-white small">${card.breakdown.material_usage}</div>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-white-50">بەکارهێنانی گاز</small>
+                                    <div class="text-white small">${card.breakdown.gas_usage}</div>
                                 </div>
                             </div>
                             <div class="row mt-1">
