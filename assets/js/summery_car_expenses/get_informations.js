@@ -101,6 +101,14 @@ function createCarExpensesRow(car, index) {
 function updateSummaryCards() {
     console.log('Updating summary cards with data:', summaryStats);
     
+    // If summary stats are missing or zero, calculate from car data
+    if (!summaryStats || 
+        summaryStats.total_gas_expenses_usd === 0 || 
+        summaryStats.total_material_expenses_usd === 0) {
+        console.log('Summary stats missing or zero, calculating from car data');
+        calculateSummaryFromCarData();
+    }
+    
     $('#total_cars').text(summaryStats.total_cars || 0);
     $('#total_gas_expenses').text(formatCurrency(summaryStats.total_gas_expenses_usd, 'USD'));
     $('#total_material_expenses').text(formatCurrency(summaryStats.total_material_expenses_usd, 'USD'));
@@ -111,6 +119,34 @@ function updateSummaryCards() {
     console.log('Total gas expenses USD:', summaryStats.total_gas_expenses_usd);
     console.log('Total material expenses USD:', summaryStats.total_material_expenses_usd);
     console.log('Total expenses USD:', summaryStats.total_expenses_usd);
+}
+
+// Calculate summary totals from car data if summary is missing
+function calculateSummaryFromCarData() {
+    if (!carExpensesData || carExpensesData.length === 0) {
+        console.log('No car data available for calculation');
+        return;
+    }
+    
+    console.log('Calculating summary from car data:', carExpensesData);
+    
+    let totalGas = 0;
+    let totalMaterial = 0;
+    let totalExpenses = 0;
+    
+    carExpensesData.forEach(car => {
+        totalGas += parseFloat(car.total_gas_expenses_usd || 0);
+        totalMaterial += parseFloat(car.total_material_expenses_usd || 0);
+        totalExpenses += parseFloat(car.total_expenses_usd || 0);
+    });
+    
+    // Update summary stats
+    summaryStats.total_gas_expenses_usd = totalGas;
+    summaryStats.total_material_expenses_usd = totalMaterial;
+    summaryStats.total_expenses_usd = totalExpenses;
+    summaryStats.total_cars = carExpensesData.length;
+    
+    console.log('Calculated summary stats:', summaryStats);
 }
 
 // View car details in modal
@@ -247,12 +283,37 @@ function displayCarDetails(carData) {
 
 // Utility functions
 function formatCurrency(amount, currency) {
-    if (!amount || isNaN(amount)) return '0';
+    console.log('formatCurrency called with:', amount, currency);
+    
+    if (amount === null || amount === undefined || amount === '') {
+        console.log('Amount is null/undefined/empty, returning $0');
+        return '$0';
+    }
+    
     const num = parseFloat(amount);
+    console.log('Parsed number:', num);
+    
+    if (isNaN(num)) {
+        console.log('Amount is NaN, returning $0');
+        return '$0';
+    }
+    
+    if (num === 0) {
+        console.log('Amount is 0, returning $0');
+        return '$0';
+    }
+    
     if (currency === 'USD') {
-        return '$' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const formatted = '$' + num.toLocaleString('en-US', { 
+            minimumFractionDigits: 2, 
+            maximumFractionDigits: 2 
+        });
+        console.log('Formatted USD:', formatted);
+        return formatted;
     } else {
-        return num.toLocaleString('ar-IQ') + ' د.ع';
+        const formatted = num.toLocaleString('ar-IQ') + ' د.ع';
+        console.log('Formatted IQD:', formatted);
+        return formatted;
     }
 }
 

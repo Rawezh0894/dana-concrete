@@ -202,6 +202,18 @@ $employees = $pdo->query("SELECT id, name FROM employees")->fetchAll(PDO::FETCH_
       canEditCarExpenses: <?php echo hasPermission('edit_car_expenses') ? 'true' : 'false'; ?>
     };
     
+    // Ensure data is loaded when page is ready
+    $(document).ready(function() {
+      // Wait a bit for all scripts to load
+      setTimeout(function() {
+        if (typeof loadCarExpensesData === 'function') {
+          console.log('Loading car expenses data...');
+          loadCarExpensesData();
+        } else {
+          console.error('loadCarExpensesData function not found');
+        }
+      }, 500);
+    });
 
   </script>
 </body>

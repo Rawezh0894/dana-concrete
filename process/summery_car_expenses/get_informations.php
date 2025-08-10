@@ -17,6 +17,11 @@ if (!hasPermission('view_car_expenses_summary')) {
 header('Content-Type: application/json; charset=utf-8');
 
 try {
+    // Test database connection
+    if (!$pdo) {
+        throw new Exception('Database connection failed');
+    }
+    
     // Get filter parameters
     $car_id = isset($_GET['car_id']) ? intval($_GET['car_id']) : 0;
     $employee_id = isset($_GET['employee_id']) ? intval($_GET['employee_id']) : 0;
@@ -48,6 +53,41 @@ try {
     }
 
     $where_clause = implode(' AND ', $where_conditions);
+    
+    // Debug: Log the WHERE clause and parameters
+    error_log("WHERE clause: " . $where_clause);
+    error_log("Parameters: " . json_encode($params));
+
+    // First, let's check if there are any records at all
+    $check_query = "SELECT COUNT(*) as total FROM other_expenses WHERE $where_clause";
+    $check_stmt = $pdo->prepare($check_query);
+    $check_stmt->execute($params);
+    $check_result = $check_stmt->fetch(PDO::FETCH_ASSOC);
+    error_log("Total records found: " . $check_result['total']);
+
+    // Check if there are any cars in the database
+    $cars_check_query = "SELECT COUNT(*) as total FROM cars";
+    $cars_check_stmt = $pdo->query($cars_check_query);
+    $cars_check_result = $cars_check_stmt->fetch(PDO::FETCH_ASSOC);
+    error_log("Total cars in database: " . $cars_check_result['total']);
+
+    // Check if there are any other_expenses with car_id
+    $car_expenses_check_query = "SELECT COUNT(*) as total FROM other_expenses WHERE car_id IS NOT NULL AND car_id != 0";
+    $car_expenses_check_stmt = $pdo->query($car_expenses_check_query);
+    $car_expenses_check_result = $car_expenses_check_stmt->fetch(PDO::FETCH_ASSOC);
+    error_log("Total expenses with car_id: " . $car_expenses_check_result['total']);
+
+    // Check what expense types exist
+    $expense_types_query = "SELECT DISTINCT expense_type FROM other_expenses WHERE car_id IS NOT NULL AND car_id != 0";
+    $expense_types_stmt = $pdo->query($expense_types_query);
+    $expense_types = $expense_types_stmt->fetchAll(PDO::FETCH_COLUMN);
+    error_log("Expense types found: " . json_encode($expense_types));
+
+    // Check what currency types exist
+    $currency_types_query = "SELECT DISTINCT currency_type FROM other_expenses WHERE car_id IS NOT NULL AND car_id != 0";
+    $currency_types_stmt = $pdo->query($currency_types_query);
+    $currency_types = $currency_types_stmt->fetchAll(PDO::FETCH_COLUMN);
+    error_log("Currency types found: " . json_encode($currency_types));
 
     // Get summary statistics with improved calculation
     $summary_query = "
@@ -80,9 +120,11 @@ try {
         WHERE $where_clause
     ";
 
+    error_log("Summary query: " . $summary_query);
     $summary_stmt = $pdo->prepare($summary_query);
     $summary_stmt->execute($params);
     $summary = $summary_stmt->fetch(PDO::FETCH_ASSOC);
+    error_log("Summary result: " . json_encode($summary));
 
     // Get car expenses data with improved calculation
     $cars_query = "
@@ -122,13 +164,15 @@ try {
         LEFT JOIN other_expenses oe ON c.id = oe.car_id AND $where_clause
         LEFT JOIN employees e ON oe.employee_id = e.id
         GROUP BY c.id, c.name, e.name
-        HAVING expense_count > 0
         ORDER BY total_expenses_usd DESC
     ";
 
+    error_log("Cars query: " . $cars_query);
     $cars_stmt = $pdo->prepare($cars_query);
     $cars_stmt->execute($params);
     $cars_data = $cars_stmt->fetchAll(PDO::FETCH_ASSOC);
+    error_log("Cars data count: " . count($cars_data));
+    error_log("First car data: " . json_encode($cars_data[0] ?? 'No data'));
 
     // Process data for better display
     foreach ($cars_data as &$car) {
@@ -143,6 +187,14 @@ try {
     $summary['total_gas_expenses_usd'] = floatval($summary['total_gas_expenses_usd'] ?? 0);
     $summary['total_material_expenses_usd'] = floatval($summary['total_material_expenses_usd'] ?? 0);
     $summary['total_expenses_usd'] = floatval($summary['total_expenses_usd'] ?? 0);
+
+    // If no expenses found, set summary to 0
+    if ($summary['total_cars'] == 0) {
+        $summary['total_cars'] = count($cars_data);
+        $summary['total_gas_expenses_usd'] = 0;
+        $summary['total_material_expenses_usd'] = 0;
+        $summary['total_expenses_usd'] = 0;
+    }
 
     // Debug information
     error_log("Summary data: " . json_encode($summary));

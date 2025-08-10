@@ -85,12 +85,14 @@ $(document).ready(function() {
         $('#filter_date_from').val(todayStr);
         $('#filter_date_to').val(todayStr);
         
-        // Load initial data
-        loadCarExpensesSummary();
+        // Load initial data with a small delay to ensure DOM is ready
+        setTimeout(() => {
+            loadCarExpensesSummary();
+        }, 100);
     }
 
     // Initialize on page load
-    initializeFilters();
+    // initializeFilters(); // Commented out to avoid interference with manual loading
 
     // Export filters to global scope for other scripts
     window.carExpensesFilters = {
