@@ -17,11 +17,6 @@ if (!hasPermission('view_car_expenses_summary')) {
 header('Content-Type: application/json; charset=utf-8');
 
 try {
-    // Test database connection
-    if (!$pdo) {
-        throw new Exception('Database connection failed');
-    }
-    
     // Get filter parameters
     $car_id = isset($_GET['car_id']) ? intval($_GET['car_id']) : 0;
     $employee_id = isset($_GET['employee_id']) ? intval($_GET['employee_id']) : 0;
@@ -42,120 +37,93 @@ try {
         $params[] = $employee_id;
     }
 
-    if ($date_from) {
+    // Only add date filters if they are provided
+    if ($date_from && $date_from !== '') {
         $where_conditions[] = 'date >= ?';
         $params[] = $date_from;
     }
 
-    if ($date_to) {
+    if ($date_to && $date_to !== '') {
         $where_conditions[] = 'date <= ?';
         $params[] = $date_to;
     }
 
     $where_clause = implode(' AND ', $where_conditions);
+
+    // Debug: Log the final WHERE clause and parameters
+    error_log("Final WHERE clause: " . $where_clause);
+    error_log("Final parameters: " . json_encode($params));
+
+    // Debug: Check what car expenses exist in the database
+    $debug_query = "
+        SELECT 
+            car_id,
+            expense_type,
+            gas_total_cost,
+            material_total_cost,
+            amount_usd,
+            amount_iqd,
+            currency_type,
+            date
+        FROM other_expenses 
+        WHERE car_id IS NOT NULL AND car_id != 0
+        ORDER BY date DESC
+        LIMIT 10
+    ";
     
-    // Debug: Log the WHERE clause and parameters
-    error_log("WHERE clause: " . $where_clause);
-    error_log("Parameters: " . json_encode($params));
+    $debug_stmt = $pdo->query($debug_query);
+    $debug_data = $debug_stmt->fetchAll(PDO::FETCH_ASSOC);
+    error_log("Debug: Car expenses in database: " . json_encode($debug_data));
 
-    // First, let's check if there are any records at all
-    $check_query = "SELECT COUNT(*) as total FROM other_expenses WHERE $where_clause";
-    $check_stmt = $pdo->prepare($check_query);
-    $check_stmt->execute($params);
-    $check_result = $check_stmt->fetch(PDO::FETCH_ASSOC);
-    error_log("Total records found: " . $check_result['total']);
+    // Debug: Count total car expenses and cars with expenses
+    $count_query = "
+        SELECT 
+            COUNT(*) as total_expenses,
+            COUNT(DISTINCT car_id) as total_cars_with_expenses,
+            SUM(CASE WHEN expense_type = 'بەکارهێنانی گاز' THEN 1 ELSE 0 END) as gas_expenses_count,
+            SUM(CASE WHEN expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN 1 ELSE 0 END) as material_expenses_count
+        FROM other_expenses 
+        WHERE car_id IS NOT NULL AND car_id != 0
+    ";
+    
+    $count_stmt = $pdo->query($count_query);
+    $count_data = $count_stmt->fetch(PDO::FETCH_ASSOC);
+    error_log("Debug: Count summary: " . json_encode($count_data));
 
-    // Check if there are any cars in the database
-    $cars_check_query = "SELECT COUNT(*) as total FROM cars";
-    $cars_check_stmt = $pdo->query($cars_check_query);
-    $cars_check_result = $cars_check_stmt->fetch(PDO::FETCH_ASSOC);
-    error_log("Total cars in database: " . $cars_check_result['total']);
-
-    // Check if there are any other_expenses with car_id
-    $car_expenses_check_query = "SELECT COUNT(*) as total FROM other_expenses WHERE car_id IS NOT NULL AND car_id != 0";
-    $car_expenses_check_stmt = $pdo->query($car_expenses_check_query);
-    $car_expenses_check_result = $car_expenses_check_stmt->fetch(PDO::FETCH_ASSOC);
-    error_log("Total expenses with car_id: " . $car_expenses_check_result['total']);
-
-    // Check what expense types exist
-    $expense_types_query = "SELECT DISTINCT expense_type FROM other_expenses WHERE car_id IS NOT NULL AND car_id != 0";
-    $expense_types_stmt = $pdo->query($expense_types_query);
-    $expense_types = $expense_types_stmt->fetchAll(PDO::FETCH_COLUMN);
-    error_log("Expense types found: " . json_encode($expense_types));
-
-    // Check what currency types exist
-    $currency_types_query = "SELECT DISTINCT currency_type FROM other_expenses WHERE car_id IS NOT NULL AND car_id != 0";
-    $currency_types_stmt = $pdo->query($currency_types_query);
-    $currency_types = $currency_types_stmt->fetchAll(PDO::FETCH_COLUMN);
-    error_log("Currency types found: " . json_encode($currency_types));
-
-    // Get summary statistics with improved calculation
+    // Get summary statistics
     $summary_query = "
         SELECT 
             COUNT(DISTINCT car_id) as total_cars,
-            SUM(CASE 
-                WHEN expense_type = 'بەکارهێنانی گاز' THEN 
-                    CASE 
-                        WHEN currency_type = 'دۆلار' THEN COALESCE(amount_usd, 0)
-                        WHEN currency_type = 'دینار' THEN COALESCE(amount_iqd, 0) / 139250
-                        ELSE 0 
-                    END
-                ELSE 0 
-            END) as total_gas_expenses_usd,
-            SUM(CASE 
-                WHEN expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN 
-                    CASE 
-                        WHEN currency_type = 'دۆلار' THEN COALESCE(amount_usd, 0)
-                        WHEN currency_type = 'دینار' THEN COALESCE(amount_iqd, 0) / 139250
-                        ELSE 0 
-                    END
-                ELSE 0 
-            END) as total_material_expenses_usd,
-            SUM(CASE 
-                WHEN currency_type = 'دۆلار' THEN COALESCE(amount_usd, 0)
-                WHEN currency_type = 'دینار' THEN COALESCE(amount_iqd, 0) / 139250
-                ELSE 0 
-            END) as total_expenses_usd
+            SUM(CASE WHEN expense_type = 'بەکارهێنانی گاز' THEN gas_total_cost ELSE 0 END) as total_gas_expenses_usd,
+            SUM(CASE WHEN expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN material_total_cost ELSE 0 END) as total_material_expenses_usd,
+            SUM(CASE WHEN expense_type = 'بەکارهێنانی گاز' THEN gas_total_cost 
+                     WHEN expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN material_total_cost 
+                     ELSE 0 END) as total_expenses_usd
         FROM other_expenses 
         WHERE $where_clause
     ";
 
-    error_log("Summary query: " . $summary_query);
     $summary_stmt = $pdo->prepare($summary_query);
     $summary_stmt->execute($params);
     $summary = $summary_stmt->fetch(PDO::FETCH_ASSOC);
-    error_log("Summary result: " . json_encode($summary));
 
-    // Get car expenses data with improved calculation
+    // Debug: Log the summary query and results
+    error_log("Summary query: " . $summary_query);
+    error_log("Summary params: " . json_encode($params));
+    error_log("Summary results: " . json_encode($summary));
+
+    // Get car expenses data
     $cars_query = "
         SELECT 
             c.id as car_id,
             c.name as car_name,
             e.name as employee_name,
             COUNT(oe.id) as expense_count,
-            SUM(CASE 
-                WHEN oe.expense_type = 'بەکارهێنانی گاز' THEN 
-                    CASE 
-                        WHEN oe.currency_type = 'دۆلار' THEN COALESCE(oe.amount_usd, 0)
-                        WHEN oe.currency_type = 'دینار' THEN COALESCE(oe.amount_iqd, 0) / 139250
-                        ELSE 0 
-                    END
-                ELSE 0 
-            END) as total_gas_expenses_usd,
-            SUM(CASE 
-                WHEN oe.expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN 
-                    CASE 
-                        WHEN oe.currency_type = 'دۆلار' THEN COALESCE(oe.amount_usd, 0)
-                        WHEN oe.currency_type = 'دینار' THEN COALESCE(oe.amount_iqd, 0) / 139250
-                        ELSE 0 
-                    END
-                ELSE 0 
-            END) as total_material_expenses_usd,
-            SUM(CASE 
-                WHEN oe.currency_type = 'دۆلار' THEN COALESCE(oe.amount_usd, 0)
-                WHEN oe.currency_type = 'دینار' THEN COALESCE(oe.amount_iqd, 0) / 139250
-                ELSE 0 
-            END) as total_expenses_usd,
+            SUM(CASE WHEN oe.expense_type = 'بەکارهێنانی گاز' THEN oe.gas_total_cost ELSE 0 END) as total_gas_expenses_usd,
+            SUM(CASE WHEN oe.expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN oe.material_total_cost ELSE 0 END) as total_material_expenses_usd,
+            SUM(CASE WHEN oe.expense_type = 'بەکارهێنانی گاز' THEN oe.gas_total_cost 
+                     WHEN oe.expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN oe.material_total_cost 
+                     ELSE 0 END) as total_expenses_usd,
             CASE 
                 WHEN SUM(CASE WHEN oe.payment_type = 'قەرز' THEN 1 ELSE 0 END) > 0 THEN 'pending'
                 ELSE 'paid'
@@ -164,15 +132,20 @@ try {
         LEFT JOIN other_expenses oe ON c.id = oe.car_id AND $where_clause
         LEFT JOIN employees e ON oe.employee_id = e.id
         GROUP BY c.id, c.name, e.name
+        HAVING expense_count > 0
         ORDER BY total_expenses_usd DESC
     ";
 
-    error_log("Cars query: " . $cars_query);
     $cars_stmt = $pdo->prepare($cars_query);
     $cars_stmt->execute($params);
     $cars_data = $cars_stmt->fetchAll(PDO::FETCH_ASSOC);
-    error_log("Cars data count: " . count($cars_data));
-    error_log("First car data: " . json_encode($cars_data[0] ?? 'No data'));
+
+    // Debug: Log the cars query and results
+    error_log("Cars query: " . $cars_query);
+    error_log("Cars results count: " . count($cars_data));
+    if (count($cars_data) > 0) {
+        error_log("First car data: " . json_encode($cars_data[0]));
+    }
 
     // Process data for better display
     foreach ($cars_data as &$car) {
@@ -187,18 +160,6 @@ try {
     $summary['total_gas_expenses_usd'] = floatval($summary['total_gas_expenses_usd'] ?? 0);
     $summary['total_material_expenses_usd'] = floatval($summary['total_material_expenses_usd'] ?? 0);
     $summary['total_expenses_usd'] = floatval($summary['total_expenses_usd'] ?? 0);
-
-    // If no expenses found, set summary to 0
-    if ($summary['total_cars'] == 0) {
-        $summary['total_cars'] = count($cars_data);
-        $summary['total_gas_expenses_usd'] = 0;
-        $summary['total_material_expenses_usd'] = 0;
-        $summary['total_expenses_usd'] = 0;
-    }
-
-    // Debug information
-    error_log("Summary data: " . json_encode($summary));
-    error_log("Cars data count: " . count($cars_data));
 
     echo json_encode([
         'success' => true,

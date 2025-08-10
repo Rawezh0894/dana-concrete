@@ -53,11 +53,14 @@ try {
             oe.car_id,
             oe.employee_id,
             oe.material_id,
+            oe.gas_total_cost,
+            oe.material_total_cost,
             e.name as employee_name,
             m.name as material_name,
             CASE 
-                WHEN oe.currency_type = 'دۆلار' THEN oe.amount_usd 
-                ELSE oe.amount_iqd / 139250 
+                WHEN oe.expense_type = 'بەکارهێنانی گاز' THEN oe.gas_total_cost
+                WHEN oe.expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN oe.material_total_cost
+                ELSE 0
             END as total_cost_usd,
             CASE 
                 WHEN oe.payment_type = 'قەرز' THEN 'pending'
@@ -78,13 +81,11 @@ try {
     $summary_query = "
         SELECT 
             COUNT(*) as expense_count,
-            SUM(CASE WHEN expense_type = 'بەکارهێنانی گاز' THEN 
-                CASE WHEN currency_type = 'دۆلار' THEN amount_usd ELSE amount_iqd / 139250 END 
-                ELSE 0 END) as total_gas_expenses_usd,
-            SUM(CASE WHEN expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN 
-                CASE WHEN currency_type = 'دۆلار' THEN amount_usd ELSE amount_iqd / 139250 END 
-                ELSE 0 END) as total_material_expenses_usd,
-            SUM(CASE WHEN currency_type = 'دۆلار' THEN amount_usd ELSE amount_iqd / 139250 END) as total_expenses_usd
+            SUM(CASE WHEN expense_type = 'بەکارهێنانی گاز' THEN gas_total_cost ELSE 0 END) as total_gas_expenses_usd,
+            SUM(CASE WHEN expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN material_total_cost ELSE 0 END) as total_material_expenses_usd,
+            SUM(CASE WHEN expense_type = 'بەکارهێنانی گاز' THEN gas_total_cost 
+                     WHEN expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN material_total_cost 
+                     ELSE 0 END) as total_expenses_usd
         FROM other_expenses 
         WHERE car_id = ? AND car_id IS NOT NULL AND car_id != 0
     ";

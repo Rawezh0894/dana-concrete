@@ -28,12 +28,14 @@ function loadCarExpensesData(filters = {}) {
         data: params.toString(),
         dataType: 'json',
         success: function(response) {
-            console.log('Server response:', response);
             if (response.success) {
                 carExpensesData = response.data || [];
                 summaryStats = response.summary || {};
+                
+                // Debug logging
                 console.log('Car expenses data:', carExpensesData);
                 console.log('Summary stats:', summaryStats);
+                
                 displayCarExpensesSummary();
                 updateSummaryCards();
             } else {
@@ -43,6 +45,7 @@ function loadCarExpensesData(filters = {}) {
         },
         error: function(xhr, status, error) {
             console.error('AJAX Error:', error);
+            console.error('Response:', xhr.responseText);
             showErrorMessage('هەڵە لە پەیوەندی بە سێرڤەر');
         },
         complete: function() {
@@ -57,7 +60,18 @@ function displayCarExpensesSummary() {
     tbody.empty();
 
     if (carExpensesData.length === 0) {
-        tbody.html('<tr><td colspan="8" class="text-center text-muted">هیچ داتایەک نەدۆزرایەوە</td></tr>');
+        tbody.html(`
+            <tr>
+                <td colspan="8" class="text-center text-muted">
+                    <div class="py-4">
+                        <i class="fas fa-info-circle fa-2x mb-3 text-info"></i>
+                        <h6>هیچ داتایەک نەدۆزرایەوە</h6>
+                        <p class="mb-0">تکایە بەرواری هەڵبژێرە یان فلتەرەکان بگۆڕە</p>
+                        <small class="text-muted">دەتوانیت دوگمەی "تاقیکردنەوەی هەموو داتا" بەکاربهێنیت</small>
+                    </div>
+                </td>
+            </tr>
+        `);
         return;
     }
 
@@ -99,54 +113,32 @@ function createCarExpensesRow(car, index) {
 
 // Update summary cards with current data
 function updateSummaryCards() {
-    console.log('Updating summary cards with data:', summaryStats);
-    
-    // If summary stats are missing or zero, calculate from car data
-    if (!summaryStats || 
-        summaryStats.total_gas_expenses_usd === 0 || 
-        summaryStats.total_material_expenses_usd === 0) {
-        console.log('Summary stats missing or zero, calculating from car data');
-        calculateSummaryFromCarData();
-    }
+    console.log('Updating summary cards with:', summaryStats);
     
     $('#total_cars').text(summaryStats.total_cars || 0);
     $('#total_gas_expenses').text(formatCurrency(summaryStats.total_gas_expenses_usd, 'USD'));
     $('#total_material_expenses').text(formatCurrency(summaryStats.total_material_expenses_usd, 'USD'));
     $('#total_expenses').text(formatCurrency(summaryStats.total_expenses_usd, 'USD'));
     
-    // Debug: Log the actual values being set
-    console.log('Total cars:', summaryStats.total_cars);
-    console.log('Total gas expenses USD:', summaryStats.total_gas_expenses_usd);
-    console.log('Total material expenses USD:', summaryStats.total_material_expenses_usd);
-    console.log('Total expenses USD:', summaryStats.total_expenses_usd);
-}
-
-// Calculate summary totals from car data if summary is missing
-function calculateSummaryFromCarData() {
-    if (!carExpensesData || carExpensesData.length === 0) {
-        console.log('No car data available for calculation');
-        return;
-    }
-    
-    console.log('Calculating summary from car data:', carExpensesData);
-    
-    let totalGas = 0;
-    let totalMaterial = 0;
-    let totalExpenses = 0;
-    
-    carExpensesData.forEach(car => {
-        totalGas += parseFloat(car.total_gas_expenses_usd || 0);
-        totalMaterial += parseFloat(car.total_material_expenses_usd || 0);
-        totalExpenses += parseFloat(car.total_expenses_usd || 0);
+    console.log('Summary cards updated:', {
+        total_cars: summaryStats.total_cars || 0,
+        total_gas_expenses_usd: summaryStats.total_gas_expenses_usd || 0,
+        total_material_expenses_usd: summaryStats.total_material_expenses_usd || 0,
+        total_expenses_usd: summaryStats.total_expenses_usd || 0
     });
     
-    // Update summary stats
-    summaryStats.total_gas_expenses_usd = totalGas;
-    summaryStats.total_material_expenses_usd = totalMaterial;
-    summaryStats.total_expenses_usd = totalExpenses;
-    summaryStats.total_cars = carExpensesData.length;
-    
-    console.log('Calculated summary stats:', summaryStats);
+    // Update debug info if visible
+    updateDebugInfo();
+}
+
+// Update debug information display
+function updateDebugInfo() {
+    if ($('#debug_summary').is(':visible')) {
+        $('#debug_car_count').text(carExpensesData.length || 0);
+        $('#debug_gas_total').text('$' + (summaryStats.total_gas_expenses_usd || 0));
+        $('#debug_material_total').text('$' + (summaryStats.total_material_expenses_usd || 0));
+        $('#debug_total').text('$' + (summaryStats.total_expenses_usd || 0));
+    }
 }
 
 // View car details in modal
@@ -283,37 +275,12 @@ function displayCarDetails(carData) {
 
 // Utility functions
 function formatCurrency(amount, currency) {
-    console.log('formatCurrency called with:', amount, currency);
-    
-    if (amount === null || amount === undefined || amount === '') {
-        console.log('Amount is null/undefined/empty, returning $0');
-        return '$0';
-    }
-    
+    if (!amount || isNaN(amount)) return '0';
     const num = parseFloat(amount);
-    console.log('Parsed number:', num);
-    
-    if (isNaN(num)) {
-        console.log('Amount is NaN, returning $0');
-        return '$0';
-    }
-    
-    if (num === 0) {
-        console.log('Amount is 0, returning $0');
-        return '$0';
-    }
-    
     if (currency === 'USD') {
-        const formatted = '$' + num.toLocaleString('en-US', { 
-            minimumFractionDigits: 2, 
-            maximumFractionDigits: 2 
-        });
-        console.log('Formatted USD:', formatted);
-        return formatted;
+        return '$' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     } else {
-        const formatted = num.toLocaleString('ar-IQ') + ' د.ع';
-        console.log('Formatted IQD:', formatted);
-        return formatted;
+        return num.toLocaleString('ar-IQ') + ' د.ع';
     }
 }
 
@@ -355,3 +322,6 @@ function showErrorMessage(message) {
 // Export functions to global scope
 window.loadCarExpensesData = loadCarExpensesData;
 window.viewCarDetails = viewCarDetails;
+window.carExpensesData = carExpensesData;
+window.summaryStats = summaryStats;
+window.updateDebugInfo = updateDebugInfo;

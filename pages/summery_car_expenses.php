@@ -78,7 +78,7 @@ $employees = $pdo->query("SELECT id, name FROM employees")->fetchAll(PDO::FETCH_
         </select>
       </div>
       <div class="col-md-2">
-        <input type="date" class="form-control" id="filter_date_from" value="<?= date('Y-m-d') ?>" placeholder="لە بەرواری">
+        <input type="date" class="form-control" id="filter_date_from" value="<?= date('Y-m-d', strtotime('-30 days')) ?>" placeholder="لە بەرواری">
       </div>
       <div class="col-md-2">
         <input type="date" class="form-control" id="filter_date_to" value="<?= date('Y-m-d') ?>" placeholder="بۆ بەرواری">
@@ -93,6 +93,28 @@ $employees = $pdo->query("SELECT id, name FROM employees")->fetchAll(PDO::FETCH_
         <button type="button" class="btn btn-sm btn-secondary filter-btn" id="filter_reset" data-filter="reset">
           <i class="fas fa-redo me-1"></i>ڕیفڕێش
         </button>
+      </div>
+    </div>
+    
+    <!-- Debug Info -->
+    <div class="alert alert-info no-print" role="alert">
+      <i class="fas fa-info-circle me-2"></i>
+      <strong>تێبینی:</strong> بۆ دەست گەیشتن بە داتای خەرجی سەیارەکان، دەبێت بەرواری هەڵبژێریت. بەردەستبوونی داتا بەندە بە بەرواری تۆمارکردنی خەرجیەکان.
+      <div class="mt-2">
+        <button type="button" class="btn btn-sm btn-outline-info" id="test_all_data">
+          <i class="fas fa-bug me-1"></i>تاقیکردنەوەی هەموو داتا
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="show_debug_info">
+          <i class="fas fa-code me-1"></i>زانیاری دیباگ
+        </button>
+      </div>
+    </div>
+    
+    <!-- Debug Summary -->
+    <div class="alert alert-secondary no-print" id="debug_summary" style="display: none;" role="alert">
+      <h6><i class="fas fa-code me-2"></i>زانیاری دیباگ</h6>
+      <div id="debug_content">
+        <!-- Debug information will be loaded here -->
       </div>
     </div>
 
@@ -202,18 +224,6 @@ $employees = $pdo->query("SELECT id, name FROM employees")->fetchAll(PDO::FETCH_
       canEditCarExpenses: <?php echo hasPermission('edit_car_expenses') ? 'true' : 'false'; ?>
     };
     
-    // Ensure data is loaded when page is ready
-    $(document).ready(function() {
-      // Wait a bit for all scripts to load
-      setTimeout(function() {
-        if (typeof loadCarExpensesData === 'function') {
-          console.log('Loading car expenses data...');
-          loadCarExpensesData();
-        } else {
-          console.error('loadCarExpensesData function not found');
-        }
-      }, 500);
-    });
 
   </script>
 </body>
