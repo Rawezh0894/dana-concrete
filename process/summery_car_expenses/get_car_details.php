@@ -36,40 +36,45 @@ try {
         exit;
     }
 
-    // Get expenses for the specific car
+    // Get car expenses with details
     $expenses_query = "
         SELECT 
             oe.id,
             oe.purpose,
             oe.expense_type,
-            oe.date,
             oe.gas_liters,
             oe.material_quantity,
             oe.usage_unit_type,
+            oe.amount_iqd,
+            oe.amount_usd,
+            oe.currency_type,
+            oe.payment_type,
+            oe.date,
+            oe.car_id,
+            oe.employee_id,
             oe.material_id,
             oe.gas_total_cost,
             oe.material_total_cost,
+            oe.exchange_rate,
             e.name as employee_name,
             m.name as material_name,
-            CASE
+            CASE 
                 WHEN oe.expense_type = 'بەکارهێنانی گاز' THEN oe.gas_total_cost
-                WHEN oe.expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN oe.material_total_cost
-                WHEN oe.expense_type = 'خەرجی تر' THEN 
+                WHEN oe.expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN 
                     CASE 
-                        WHEN oe.currency_type = 'دۆلار' THEN oe.amount_usd
-                        WHEN oe.currency_type = 'دینار' THEN oe.amount_iqd / oe.exchange_rate * 100
-                        ELSE 0
+                        WHEN oe.currency_type = 'دۆلار' THEN oe.material_total_cost * oe.exchange_rate / 100
+                        ELSE oe.material_total_cost 
                     END
                 ELSE 0
-            END as total_cost_usd,
-            oe.currency_type,
-            oe.amount_iqd,
-            oe.amount_usd,
-            oe.exchange_rate
+            END as total_cost_iqd,
+            CASE 
+                WHEN oe.payment_type = 'قەرز' THEN 'pending'
+                ELSE 'paid'
+            END as payment_status
         FROM other_expenses oe
         LEFT JOIN employees e ON oe.employee_id = e.id
-        LEFT JOIN list_materials m ON oe.material_id = m.id
-        WHERE oe.car_id = ? AND $where_clause
+        LEFT JOIN materials m ON oe.material_id = m.id
+        WHERE oe.car_id = ? AND oe.car_id IS NOT NULL AND oe.car_id != 0
         ORDER BY oe.date DESC
     ";
 
@@ -77,25 +82,29 @@ try {
     $expenses_stmt->execute([$car_id]);
     $expenses = $expenses_stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Get summary for the specific car
+    // Calculate summary for this car
     $summary_query = "
         SELECT 
-            COUNT(*) as total_expenses,
-            SUM(CASE WHEN expense_type = 'بەکارهێنانی گاز' THEN gas_total_cost ELSE 0 END) as total_gas_expenses_usd,
-            SUM(CASE WHEN expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN material_total_cost ELSE 0 END) as total_material_expenses_usd,
+            COUNT(*) as expense_count,
+            SUM(CASE WHEN expense_type = 'بەکارهێنانی گاز' THEN gas_total_cost ELSE 0 END) as total_gas_expenses_iqd,
+            SUM(CASE WHEN expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN 
+                CASE 
+                    WHEN currency_type = 'دۆلار' THEN material_total_cost * exchange_rate / 100
+                    ELSE material_total_cost 
+                END
+                ELSE 0 
+            END) as total_material_expenses_iqd,
             SUM(CASE 
                 WHEN expense_type = 'بەکارهێنانی گاز' THEN gas_total_cost
-                WHEN expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN material_total_cost
-                WHEN expense_type = 'خەرجی تر' THEN 
+                WHEN expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN 
                     CASE 
-                        WHEN currency_type = 'دۆلار' THEN amount_usd
-                        WHEN currency_type = 'دینار' THEN amount_iqd / exchange_rate * 100
-                        ELSE 0
+                        WHEN currency_type = 'دۆلار' THEN material_total_cost * exchange_rate / 100
+                        ELSE material_total_cost 
                     END
-                ELSE 0
-            END) as total_expenses_usd
+                ELSE 0 
+            END) as total_expenses_iqd
         FROM other_expenses 
-        WHERE car_id = ? AND $where_clause
+        WHERE car_id = ? AND car_id IS NOT NULL AND car_id != 0
     ";
 
     $summary_stmt = $pdo->prepare($summary_query);
@@ -104,7 +113,7 @@ try {
 
     // Process expenses data
     foreach ($expenses as &$expense) {
-        $expense['total_cost_usd'] = floatval($expense['total_cost_usd'] ?? 0);
+        $expense['total_cost_iqd'] = floatval($expense['total_cost_iqd'] ?? 0);
         $expense['amount_iqd'] = floatval($expense['amount_iqd'] ?? 0);
         $expense['amount_usd'] = floatval($expense['amount_usd'] ?? 0);
         $expense['gas_liters'] = $expense['gas_liters'] ? floatval($expense['gas_liters']) : null;
@@ -113,18 +122,18 @@ try {
 
     // Process summary data
     $summary['expense_count'] = intval($summary['expense_count'] ?? 0);
-    $summary['total_gas_expenses_usd'] = floatval($summary['total_gas_expenses_usd'] ?? 0);
-    $summary['total_material_expenses_usd'] = floatval($summary['total_material_expenses_usd'] ?? 0);
-    $summary['total_expenses_usd'] = floatval($summary['total_expenses_usd'] ?? 0);
+    $summary['total_gas_expenses_iqd'] = floatval($summary['total_gas_expenses_iqd'] ?? 0);
+    $summary['total_material_expenses_iqd'] = floatval($summary['total_material_expenses_iqd'] ?? 0);
+    $summary['total_expenses_iqd'] = floatval($summary['total_expenses_iqd'] ?? 0);
 
     // Prepare response data
     $car_data = [
         'car_id' => $car['id'],
         'car_name' => $car['name'],
         'expense_count' => $summary['expense_count'],
-        'total_gas_expenses_usd' => $summary['total_gas_expenses_usd'],
-        'total_material_expenses_usd' => $summary['total_material_expenses_usd'],
-        'total_expenses_usd' => $summary['total_expenses_usd'],
+        'total_gas_expenses_iqd' => $summary['total_gas_expenses_iqd'],
+        'total_material_expenses_iqd' => $summary['total_material_expenses_iqd'],
+        'total_expenses_iqd' => $summary['total_expenses_iqd'],
         'expenses' => $expenses
     ];
 

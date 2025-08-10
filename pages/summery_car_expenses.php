@@ -135,7 +135,7 @@ $employees = $pdo->query("SELECT id, name FROM employees")->fetchAll(PDO::FETCH_
           <div class="card-body">
             <i class="fas fa-gas-pump card-icon"></i>
             <h6 class="card-title">کۆی گشتی خەرجی گاز</h6>
-            <div class="fs-4 fw-bold" id="total_gas_expenses">$0</div>
+            <div class="fs-4 fw-bold" id="total_gas_expenses">0 د.ع</div>
             <small class="text-light">کۆی خەرجی گاز</small>
           </div>
         </div>
@@ -145,7 +145,7 @@ $employees = $pdo->query("SELECT id, name FROM employees")->fetchAll(PDO::FETCH_
           <div class="card-body">
             <i class="fas fa-boxes card-icon"></i>
             <h6 class="card-title">کۆی گشتی خەرجی کاڵا</h6>
-            <div class="fs-4 fw-bold" id="total_material_expenses">$0</div>
+            <div class="fs-4 fw-bold" id="total_material_expenses">0 د.ع</div>
             <small class="text-light">کۆی خەرجی کاڵا</small>
           </div>
         </div>
@@ -155,7 +155,7 @@ $employees = $pdo->query("SELECT id, name FROM employees")->fetchAll(PDO::FETCH_
           <div class="card-body">
             <i class="fas fa-dollar-sign card-icon"></i>
             <h6 class="card-title">کۆی گشتی خەرجی</h6>
-            <div class="fs-4 fw-bold" id="total_expenses">$0</div>
+            <div class="fs-4 fw-bold" id="total_expenses">0 د.ع</div>
             <small class="text-light">کۆی هەموو خەرجیەکان</small>
           </div>
         </div>

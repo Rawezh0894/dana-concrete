@@ -26,49 +26,85 @@ $(document).ready(function() {
         });
     });
 
-    // Debug info button
+    // Show debug information
     $('#show_debug_info').on('click', function() {
         const debugSummary = $('#debug_summary');
-        const debugContent = $('#debug_content');
-        
         if (debugSummary.is(':visible')) {
             debugSummary.hide();
-            return;
-        }
-        
-        // Show debug info
-        debugContent.html(`
-            <div class="row">
-                <div class="col-md-6">
-                    <strong>فلتەرەکانی ئێستا:</strong><br>
-                    سەیارە: ${$('#filter_car_id').val() || 'هەموو'}<br>
-                    کارمەند: ${$('#filter_employee_id').val() || 'هەموو'}<br>
-                    لە بەرواری: ${$('#filter_date_from').val() || 'هەموو'}<br>
-                    بۆ بەرواری: ${$('#filter_date_to').val() || 'هەموو'}
-                </div>
-                <div class="col-md-6">
-                    <strong>داتای بەردەست:</strong><br>
-                    ژمارەی سەیارەکان: <span id="debug_car_count">-</span><br>
-                    کۆی خەرجی گاز: <span id="debug_gas_total">-</span><br>
-                    کۆی خەرجی کاڵا: <span id="debug_material_total">-</span><br>
-                    کۆی گشتی: <span id="debug_total">-</span>
-                </div>
-            </div>
-            <div class="mt-2">
-                <small class="text-muted">زانیاری زیاتر لە console دەبینرێت</small>
-            </div>
-        `);
-        
-        debugSummary.show();
-        
-        // Update debug info with current data
-        if (typeof window.carExpensesData !== 'undefined') {
-            $('#debug_car_count').text(window.carExpensesData.length || 0);
-        }
-        if (typeof window.summaryStats !== 'undefined') {
-            $('#debug_gas_total').text('$' + (window.summaryStats.total_gas_expenses_usd || 0));
-            $('#debug_material_total').text('$' + (window.summaryStats.total_material_expenses_usd || 0));
-            $('#debug_total').text('$' + (window.summaryStats.total_expenses_usd || 0));
+        } else {
+            debugSummary.show();
+            // Update debug info with current data
+            if (typeof window.updateDebugInfo === 'function') {
+                window.updateDebugInfo();
+            } else {
+                // Fallback debug display
+                const debugContent = $('#debug_content');
+                if (debugContent.length) {
+                    const currentFilters = {
+                        car_id: $('#filter_car_id').val() || 'هەموو',
+                        employee_id: $('#filter_employee_id').val() || 'هەموو',
+                        date_from: $('#filter_date_from').val() || 'هەموو',
+                        date_to: $('#filter_date_to').val() || 'هەموو'
+                    };
+                    
+                    const debugInfo = `
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>فلتەرەکان:</h6>
+                                <ul class="list-unstyled">
+                                    <li><strong>سەیارە:</strong> ${currentFilters.car_id}</li>
+                                    <li><strong>کارمەند:</strong> ${currentFilters.employee_id}</li>
+                                    <li><strong>لە بەروار:</strong> ${currentFilters.date_from}</li>
+                                    <li><strong>بۆ بەروار:</strong> ${currentFilters.date_to}</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>ئامارەکان:</h6>
+                                <ul class="list-unstyled">
+                                    <li><strong>کۆی سەیارەکان:</strong> ${window.summaryStats?.total_cars || 0}</li>
+                                    <li><strong>کۆی خەرجی گاز:</strong> ${window.summaryStats?.total_gas_expenses_iqd || 0} د.ع</li>
+                                    <li><strong>کۆی خەرجی کاڵا:</strong> ${window.summaryStats?.total_material_expenses_iqd || 0} د.ع</li>
+                                    <li><strong>کۆی گشتی:</strong> ${window.summaryStats?.total_expenses_iqd || 0} د.ع</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <h6>داتای سەیارەکان:</h6>
+                                <small class="text-muted">کۆی: ${window.carExpensesData?.length || 0} سەیارە</small>
+                                ${window.carExpensesData && window.carExpensesData.length > 0 ? `
+                                    <div class="table-responsive mt-2">
+                                        <table class="table table-sm table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th>سەیارە</th>
+                                                    <th>کارمەند</th>
+                                                    <th>خەرجی گاز</th>
+                                                    <th>خەرجی کاڵا</th>
+                                                    <th>کۆی گشتی</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                ${window.carExpensesData.map(car => `
+                                                    <tr>
+                                                        <td>${car.car_name || car.car_id}</td>
+                                                        <td>${car.employee_name || '-'}</td>
+                                                        <td>${car.total_gas_expenses_iqd || 0} د.ع</td>
+                                                        <td>${car.total_material_expenses_iqd || 0} د.ع</td>
+                                                        <td>${car.total_expenses_iqd || 0} د.ع</td>
+                                                    </tr>
+                                                `).join('')}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                ` : '<p class="text-muted">هیچ داتایەک نەدۆزرایەوە</p>'}
+                            </div>
+                        </div>
+                    `;
+                    
+                    debugContent.html(debugInfo);
+                }
+            }
         }
     });
 
