@@ -49,17 +49,33 @@ try {
 
     $where_clause = implode(' AND ', $where_conditions);
 
-    // Get summary statistics
+    // Get summary statistics with improved calculation
     $summary_query = "
         SELECT 
             COUNT(DISTINCT car_id) as total_cars,
-            SUM(CASE WHEN expense_type = 'بەکارهێنانی گاز' THEN 
-                CASE WHEN currency_type = 'دۆلار' THEN amount_usd ELSE amount_iqd / 139250 END 
-                ELSE 0 END) as total_gas_expenses_usd,
-            SUM(CASE WHEN expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN 
-                CASE WHEN currency_type = 'دۆلار' THEN amount_usd ELSE amount_iqd / 139250 END 
-                ELSE 0 END) as total_material_expenses_usd,
-            SUM(CASE WHEN currency_type = 'دۆلار' THEN amount_usd ELSE amount_iqd / 139250 END) as total_expenses_usd
+            SUM(CASE 
+                WHEN expense_type = 'بەکارهێنانی گاز' THEN 
+                    CASE 
+                        WHEN currency_type = 'دۆلار' THEN COALESCE(amount_usd, 0)
+                        WHEN currency_type = 'دینار' THEN COALESCE(amount_iqd, 0) / 139250
+                        ELSE 0 
+                    END
+                ELSE 0 
+            END) as total_gas_expenses_usd,
+            SUM(CASE 
+                WHEN expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN 
+                    CASE 
+                        WHEN currency_type = 'دۆلار' THEN COALESCE(amount_usd, 0)
+                        WHEN currency_type = 'دینار' THEN COALESCE(amount_iqd, 0) / 139250
+                        ELSE 0 
+                    END
+                ELSE 0 
+            END) as total_material_expenses_usd,
+            SUM(CASE 
+                WHEN currency_type = 'دۆلار' THEN COALESCE(amount_usd, 0)
+                WHEN currency_type = 'دینار' THEN COALESCE(amount_iqd, 0) / 139250
+                ELSE 0 
+            END) as total_expenses_usd
         FROM other_expenses 
         WHERE $where_clause
     ";
@@ -68,20 +84,36 @@ try {
     $summary_stmt->execute($params);
     $summary = $summary_stmt->fetch(PDO::FETCH_ASSOC);
 
-    // Get car expenses data
+    // Get car expenses data with improved calculation
     $cars_query = "
         SELECT 
             c.id as car_id,
             c.name as car_name,
             e.name as employee_name,
             COUNT(oe.id) as expense_count,
-            SUM(CASE WHEN oe.expense_type = 'بەکارهێنانی گاز' THEN 
-                CASE WHEN oe.currency_type = 'دۆلار' THEN oe.amount_usd ELSE oe.amount_iqd / 139250 END 
-                ELSE 0 END) as total_gas_expenses_usd,
-            SUM(CASE WHEN oe.expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN 
-                CASE WHEN oe.currency_type = 'دۆلار' THEN oe.amount_usd ELSE oe.amount_iqd / 139250 END 
-                ELSE 0 END) as total_material_expenses_usd,
-            SUM(CASE WHEN oe.currency_type = 'دۆلار' THEN oe.amount_usd ELSE oe.amount_iqd / 139250 END) as total_expenses_usd,
+            SUM(CASE 
+                WHEN oe.expense_type = 'بەکارهێنانی گاز' THEN 
+                    CASE 
+                        WHEN oe.currency_type = 'دۆلار' THEN COALESCE(oe.amount_usd, 0)
+                        WHEN oe.currency_type = 'دینار' THEN COALESCE(oe.amount_iqd, 0) / 139250
+                        ELSE 0 
+                    END
+                ELSE 0 
+            END) as total_gas_expenses_usd,
+            SUM(CASE 
+                WHEN oe.expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN 
+                    CASE 
+                        WHEN oe.currency_type = 'دۆلار' THEN COALESCE(oe.amount_usd, 0)
+                        WHEN oe.currency_type = 'دینار' THEN COALESCE(oe.amount_iqd, 0) / 139250
+                        ELSE 0 
+                    END
+                ELSE 0 
+            END) as total_material_expenses_usd,
+            SUM(CASE 
+                WHEN oe.currency_type = 'دۆلار' THEN COALESCE(oe.amount_usd, 0)
+                WHEN oe.currency_type = 'دینار' THEN COALESCE(oe.amount_iqd, 0) / 139250
+                ELSE 0 
+            END) as total_expenses_usd,
             CASE 
                 WHEN SUM(CASE WHEN oe.payment_type = 'قەرز' THEN 1 ELSE 0 END) > 0 THEN 'pending'
                 ELSE 'paid'
@@ -111,6 +143,10 @@ try {
     $summary['total_gas_expenses_usd'] = floatval($summary['total_gas_expenses_usd'] ?? 0);
     $summary['total_material_expenses_usd'] = floatval($summary['total_material_expenses_usd'] ?? 0);
     $summary['total_expenses_usd'] = floatval($summary['total_expenses_usd'] ?? 0);
+
+    // Debug information
+    error_log("Summary data: " . json_encode($summary));
+    error_log("Cars data count: " . count($cars_data));
 
     echo json_encode([
         'success' => true,

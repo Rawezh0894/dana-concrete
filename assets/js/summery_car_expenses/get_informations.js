@@ -28,9 +28,12 @@ function loadCarExpensesData(filters = {}) {
         data: params.toString(),
         dataType: 'json',
         success: function(response) {
+            console.log('Server response:', response);
             if (response.success) {
                 carExpensesData = response.data || [];
                 summaryStats = response.summary || {};
+                console.log('Car expenses data:', carExpensesData);
+                console.log('Summary stats:', summaryStats);
                 displayCarExpensesSummary();
                 updateSummaryCards();
             } else {
@@ -96,10 +99,18 @@ function createCarExpensesRow(car, index) {
 
 // Update summary cards with current data
 function updateSummaryCards() {
+    console.log('Updating summary cards with data:', summaryStats);
+    
     $('#total_cars').text(summaryStats.total_cars || 0);
     $('#total_gas_expenses').text(formatCurrency(summaryStats.total_gas_expenses_usd, 'USD'));
     $('#total_material_expenses').text(formatCurrency(summaryStats.total_material_expenses_usd, 'USD'));
     $('#total_expenses').text(formatCurrency(summaryStats.total_expenses_usd, 'USD'));
+    
+    // Debug: Log the actual values being set
+    console.log('Total cars:', summaryStats.total_cars);
+    console.log('Total gas expenses USD:', summaryStats.total_gas_expenses_usd);
+    console.log('Total material expenses USD:', summaryStats.total_material_expenses_usd);
+    console.log('Total expenses USD:', summaryStats.total_expenses_usd);
 }
 
 // View car details in modal
