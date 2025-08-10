@@ -7223,3 +7223,124 @@
 [09-Aug-2025 09:41:13 Europe/Berlin] New amounts - USD: 4000, IQD: 0
 [09-Aug-2025 09:41:13 Europe/Berlin] Differences - USD: 0, IQD: 0
 [09-Aug-2025 09:41:13 Europe/Berlin] Company debt successfully updated: ID=29, Company=دەرمان MHA (ID: 30)
+[10-Aug-2025 08:59:42 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754809182
+    [role] => admin
+)
+
+[10-Aug-2025 08:59:42 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[10-Aug-2025 08:59:44 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754809184
+    [role] => admin
+)
+
+[10-Aug-2025 08:59:44 Europe/Berlin] Cars retrieved successfully: Count=15
+[10-Aug-2025 08:59:45 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754809185
+    [role] => admin
+)
+
+[10-Aug-2025 08:59:45 Europe/Berlin] Employees retrieved successfully: Count=18
+[10-Aug-2025 09:01:01 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754809261
+    [role] => admin
+)
+
+[10-Aug-2025 09:01:01 Europe/Berlin] Cars retrieved successfully: Count=15
+[10-Aug-2025 09:01:02 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754809262
+    [role] => admin
+)
+
+[10-Aug-2025 09:01:02 Europe/Berlin] Employees retrieved successfully: Count=18
+[10-Aug-2025 09:06:31 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754809591
+    [role] => admin
+)
+
+[10-Aug-2025 09:06:31 Europe/Berlin] Cars retrieved successfully: Count=15
+[10-Aug-2025 09:06:32 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754809592
+    [role] => admin
+)
+
+[10-Aug-2025 09:06:32 Europe/Berlin] Employees retrieved successfully: Count=18
+[10-Aug-2025 09:19:05 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754810345
+    [role] => admin
+)
+
+[10-Aug-2025 09:19:05 Europe/Berlin] Cars retrieved successfully: Count=15
+[10-Aug-2025 09:19:07 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754810347
+    [role] => admin
+)
+
+[10-Aug-2025 09:19:07 Europe/Berlin] Employees retrieved successfully: Count=18
+[10-Aug-2025 09:19:07 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754810347
+    [role] => admin
+)
+
+[10-Aug-2025 09:19:07 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[10-Aug-2025 09:20:40 Europe/Berlin] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1754810440
+    [role] => admin
+)
+
+[10-Aug-2025 09:20:40 Europe/Berlin] Companies retrieved successfully: Count=4

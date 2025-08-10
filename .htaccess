@@ -87,7 +87,7 @@ php_value max_input_time 300
 
 
 
-# # # **********
+# # **********
 
 # # Enable URL rewriting
 # RewriteEngine On
