@@ -40,7 +40,7 @@ try {
         echo json_encode(['success' => false, 'message' => 'ژمارەی پسوڵە دووبارەیە! تکایە ژمارەیەکی دیکە هەڵبژێرە']);
         exit;
     }
-    $stmt = $pdo->prepare("INSERT INTO concrete_receipts (receipt_number, customer_id, location, meter_amount, formulas_id, pump_car_id, pump_driver_id, mixer_car_id, mixer_driver_id , receiver_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ? , ?)");
+    $stmt = $pdo->prepare("INSERT INTO concrete_receipts (receipt_number, customer_id, location, meter_amount, formulas_id, pump_car_id, pump_driver_id, mixer_car_id, mixer_driver_id, receiver_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     $stmt->execute([
         $receipt_number,
         $customer_id ?: null,
@@ -52,7 +52,6 @@ try {
         $mixer_car_id ?: null,
         $mixer_driver_id ?: null,
         $receiver_name
-
     ]);
     $inserted_id = $pdo->lastInsertId();
 

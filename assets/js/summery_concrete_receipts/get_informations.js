@@ -140,6 +140,9 @@ function updateCustomerSummaryTable(customerSummary) {
         };
     });
     
+    // Store data globally for pagination
+    window.customerSummaryData = formattedData;
+    
     // Use TableController to render with pagination and search
     TableController.renderWithPagination('#customerSummaryTable', formattedData, columns, {
         pageSize: 10,
@@ -501,6 +504,30 @@ function setupFilterListeners() {
         const filterType = $(this).data('filter');
         applyQuickFilter(filterType);
         loadSummaryData();
+    });
+    
+    // Page size selector
+    $('#pageSizeSelector').on('change', function() {
+        const newPageSize = parseInt($(this).val());
+        if (window.customerSummaryData && window.customerSummaryData.length > 0) {
+            // Re-render table with new page size
+            const columns = [
+                '#', 
+                'customer_name', 
+                'receipt_count', 
+                'total_meter', 
+                'total_price', 
+                'notes', 
+                'payment_status', 
+                'formulas', 
+                'actions'
+            ];
+            
+            TableController.renderWithPagination('#customerSummaryTable', window.customerSummaryData, columns, {
+                pageSize: newPageSize,
+                currentPage: 1
+            });
+        }
     });
 }
 

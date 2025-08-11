@@ -122,37 +122,39 @@ const TableController = {
         TableController.render(tableSelector, data, columns);
     },
     renderWithPagination: function(tableSelector, data, columns, options = {}) {
-        const pageSize = options.pageSize || 10;
-        let currentPage = typeof options.currentPage === 'number' ? options.currentPage : 1;
         const table = document.querySelector(tableSelector);
         if (!table) return;
+        
         const thead = table.querySelector('thead');
         const tbody = table.querySelector('tbody');
         if (!thead || !tbody) return;
 
-        // --- Page size selector (top right) ---
-        let sizeSelect = table.parentElement.querySelector('.table-page-size');
+        let currentPage = options.currentPage || 1;
+        let pageSize = options.pageSize || 10;
+
+        // Create page size selector if not exists
+        let sizeSelect = table.parentElement.querySelector('.page-size-selector');
         if (!sizeSelect) {
             sizeSelect = document.createElement('select');
-            sizeSelect.className = 'table-page-size';
-            sizeSelect.style.float = 'right';
-            sizeSelect.style.marginBottom = '8px';
-            [5, 10, 20, 50, 100].forEach(size => {
-                const opt = document.createElement('option');
-                opt.value = size;
-                opt.textContent = size + ' / پەڕ';
-                if (size === pageSize) opt.selected = true;
-                sizeSelect.appendChild(opt);
-            });
-            sizeSelect.onchange = function() {
-                options.pageSize = parseInt(this.value);
-                options.currentPage = 1;
-                TableController.renderWithPagination(tableSelector, data, columns, options);
-            };
+            sizeSelect.className = 'form-select form-select-sm page-size-selector d-inline-block w-auto ms-2';
+            sizeSelect.innerHTML = `
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            `;
+            sizeSelect.value = pageSize;
+
+            // Insert before the table
             table.parentElement.insertBefore(sizeSelect, table);
         }
-        // Update selected value if changed
-        sizeSelect.value = pageSize;
+
+        // Handle page size change
+        sizeSelect.onchange = function() {
+            pageSize = parseInt(this.value);
+            currentPage = 1; // Reset to first page when changing size
+            renderPage(currentPage);
+        };
 
         // Only render header with search inputs if not already present
         let headerRow = thead.querySelector('tr');
@@ -197,6 +199,24 @@ const TableController = {
             const start = (currentPage - 1) * pageSize;
             const end = start + pageSize;
             const pageData = filtered.slice(start, end);
+            
+            // Show "no data" message if filtered data is empty
+            if (filtered.length === 0) {
+                tbody.innerHTML = '';
+                const tr = document.createElement('tr');
+                const td = document.createElement('td');
+                td.colSpan = columns.length;
+                td.className = 'table-empty-state text-center text-muted';
+                td.innerHTML = '<i class="bi bi-inbox"></i><br>هیچ زانیارییەک نەدۆزرایەوە';
+                tr.appendChild(td);
+                tbody.appendChild(tr);
+                
+                // Clear pagination
+                let pagination = table.parentElement.querySelector('.table-pagination');
+                if (pagination) pagination.innerHTML = '';
+                return;
+            }
+            
             TableController.render(tableSelector, pageData, columns, { rowOffset: start });
             renderPaginationControls(totalPages);
         }
@@ -205,18 +225,27 @@ const TableController = {
             let pagination = table.parentElement.querySelector('.table-pagination');
             if (!pagination) {
                 pagination = document.createElement('div');
-                pagination.className = 'table-pagination';
+                pagination.className = 'table-pagination mt-3';
                 table.parentElement.appendChild(pagination);
             }
             pagination.innerHTML = '';
+            
+            // Show total records info
+            const filtered = getFilteredData();
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'text-muted mb-2';
+            infoDiv.innerHTML = `نوێنراوە: ${((currentPage - 1) * pageSize) + 1}-${Math.min(currentPage * pageSize, filtered.length)} لە ${filtered.length} زانیاری`;
+            pagination.appendChild(infoDiv);
+            
             // Prev button with SVG
             const prev = document.createElement('button');
             prev.className = 'btn btn-sm btn-outline-secondary mx-1';
             prev.setAttribute('aria-label', 'پەڕەی پێشوو');
             prev.innerHTML = '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 15L8 10L13 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
             prev.disabled = currentPage === 1;
-            prev.onclick = () => TableController.renderWithPagination(tableSelector, data, columns, { ...options, currentPage: currentPage - 1 });
+            prev.onclick = () => renderPage(currentPage - 1);
             pagination.appendChild(prev);
+            
             for (let i = 1; i <= totalPages; i++) {
                 if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 2) {
                     const btn = document.createElement('button');
@@ -227,7 +256,7 @@ const TableController = {
                         btn.style.transition = 'transform 0.18s';
                         btn.style.transform = 'scale(1.08)';
                     }
-                    btn.onclick = () => TableController.renderWithPagination(tableSelector, data, columns, { ...options, currentPage: i });
+                    btn.onclick = () => renderPage(i);
                     pagination.appendChild(btn);
                 } else if (i === currentPage - 3 || i === currentPage + 3) {
                     const span = document.createElement('span');
@@ -235,19 +264,23 @@ const TableController = {
                     pagination.appendChild(span);
                 }
             }
+            
             // Next button with SVG
             const next = document.createElement('button');
             next.className = 'btn btn-sm btn-outline-secondary mx-1';
             next.setAttribute('aria-label', 'پەڕەی دواتر');
             next.innerHTML = '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 5L12 10L7 15" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
             next.disabled = currentPage === totalPages;
-            next.onclick = () => TableController.renderWithPagination(tableSelector, data, columns, { ...options, currentPage: currentPage + 1 });
+            next.onclick = () => renderPage(currentPage + 1);
             pagination.appendChild(next);
         }
 
+        // Set up search input event listeners
         thead.querySelectorAll('.table-search-input').forEach(input => {
             input.oninput = () => renderPage(1);
         });
+        
+        // Initial render
         renderPage(currentPage);
     }
 };

@@ -80,39 +80,39 @@ $(document).ready(function() {
                     showConfirmButton: false,
                     timer: 1000,
                     timerProgressBar: true,
-                                            didClose: () => {
-                            if (data.id) {
-                                // Save all fields except meter_amount, mixer_car_id, mixer_driver_id (only if not from notes)
-                                if (!window.isFromNotes) {
-                                    const allData = {};
-                                    $form.serializeArray().forEach(({name, value}) => {
-                                        if (!["meter_amount","mixer_car_id","mixer_driver_id","receipt_number"].includes(name)) {
-                                            allData[name] = value;
-                                        }
-                                    });
-                                    localStorage.setItem(storageKey, JSON.stringify(allData));
-                                } else {
-                                    // Reset window.isFromNotes to false after saving
-                                    window.isFromNotes = false;
-                                }
-                                // Open receipt in new tab for printing
-                                window.open('../pages/central_receipts.php?id=' + data.id + '&auto_print=1&return_to_form=1', '_blank');
+                    didClose: () => {
+                        if (data.id) {
+                            // Save all fields except meter_amount, mixer_car_id, mixer_driver_id (only if not from notes)
+                            if (!window.isFromNotes) {
+                                const allData = {};
+                                $form.serializeArray().forEach(({name, value}) => {
+                                    if (!["meter_amount","mixer_car_id","mixer_driver_id","receipt_number"].includes(name)) {
+                                        allData[name] = value;
+                                    }
+                                });
+                                localStorage.setItem(storageKey, JSON.stringify(allData));
+                            } else {
+                                // Reset window.isFromNotes to false after saving
+                                window.isFromNotes = false;
                             }
-                            // Always reset form and close modal
-                            $('#addConcreteReceiptForm')[0].reset();
-                            $('#addConcreteReceiptModal').modal('hide');
-                            
-                            // Reload data to show the new receipt
-                            if (window.reloadConcreteReceipts) window.reloadConcreteReceipts();
-                            if (window.reloadConcreteReceiptsSummary) window.reloadConcreteReceiptsSummary();
-                            
-                            // Clear localStorage if coming from notes (but not when returning from print)
-                            const urlParams = new URLSearchParams(window.location.search);
-                            const preserveData = urlParams.get('preserve_data') === '1';
-                            if (window.isFromNotes && !preserveData) {
-                                localStorage.removeItem(storageKey);
-                            }
-                            }
+                            // Open receipt in new tab for printing
+                            window.open('../pages/central_receipts.php?id=' + data.id + '&auto_print=1&return_to_form=1', '_blank');
+                        }
+                        // Always reset form and close modal
+                        $('#addConcreteReceiptForm')[0].reset();
+                        $('#addConcreteReceiptModal').modal('hide');
+                        
+                        // Reload data to show the new receipt
+                        if (window.reloadConcreteReceipts) window.reloadConcreteReceipts();
+                        if (window.reloadConcreteReceiptsSummary) window.reloadConcreteReceiptsSummary();
+                        
+                        // Clear localStorage if coming from notes (but not when returning from print)
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const preserveData = urlParams.get('preserve_data') === '1';
+                        if (window.isFromNotes && !preserveData) {
+                            localStorage.removeItem(storageKey);
+                        }
+                    }
                 });
             } else {
                 Swal.fire({

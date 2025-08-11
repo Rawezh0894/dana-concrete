@@ -154,8 +154,17 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
 
     <!-- Customer Summary Table -->
     <div class="card no-print">
-      <div class="card-header">
+      <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">پوختەی کڕیاران</h5>
+        <div class="d-flex align-items-center gap-2">
+          <label for="pageSizeSelector" class="form-label mb-0 me-2">ژمارەی نوێنراوەکان:</label>
+          <select id="pageSizeSelector" class="form-select form-select-sm" style="width: auto;">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
       </div>
       <div class="card-body">
         <div class="table-responsive">

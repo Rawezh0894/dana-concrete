@@ -305,3 +305,91 @@
     border-color: #002d5a !important;
     color: white !important;
   }
+
+/* Page size selector styles */
+.page-size-selector {
+    margin-bottom: 15px;
+    max-width: 100px;
+}
+
+/* Pagination styles */
+.table-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    margin-top: 20px;
+}
+
+.table-pagination .btn {
+    min-width: 40px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.table-pagination .btn.active {
+    background-color: var(--seafoam-green);
+    border-color: var(--seafoam-green);
+    color: white;
+}
+
+/* Table empty state */
+.table-empty-state {
+    padding: 40px 20px;
+    text-align: center;
+    color: #6c757d;
+}
+
+.table-empty-state i {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    opacity: 0.5;
+}
+
+/* Loading state */
+.opacity-50 {
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+}
+
+/* Card animations */
+.card-animate-hover {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-animate-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+/* Formula badges */
+.formula-badge {
+    background-color: var(--kelly-green);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    display: inline-block;
+    margin: 2px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .table-pagination {
+        flex-wrap: wrap;
+        gap: 3px;
+    }
+    
+    .table-pagination .btn {
+        min-width: 35px;
+        height: 30px;
+        font-size: 0.9rem;
+    }
+    
+    .page-size-selector {
+        max-width: 80px;
+        font-size: 0.9rem;
+    }
+}
