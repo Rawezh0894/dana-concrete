@@ -1,6 +1,7 @@
 <?php
 // Load environment variables
 require_once __DIR__ . '/env_loader.php';
+require_once __DIR__ . '/timezone_config.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -41,6 +42,10 @@ $options = [
 
 try {
     $pdo = new PDO($dsn, $user, $pass, $options);
+    
+    // Set timezone for MySQL connection using the config function
+    setMySQLTimezone($pdo);
+    
 } catch (PDOException $e) {
     // بڵاوکردنەوەی هەڵەی ڕاستی PDO بۆ تاقیکردنەوە
     die("DB ERROR: " . $e->getMessage());

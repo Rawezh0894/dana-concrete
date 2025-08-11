@@ -14,6 +14,7 @@ if (!hasPermission('add_concrete_receipts')) {
     echo json_encode(['success' => false, 'message' => 'ڕێگەت پێنەدراوە!']);
     exit;
 }
+
 header('Content-Type: application/json');
 try {
     $receipt_number = $_POST['receipt_number'] ?? null;
@@ -26,6 +27,7 @@ try {
     $mixer_car_id = $_POST['mixer_car_id'] ?? null;
     $mixer_driver_id = $_POST['mixer_driver_id'] ?? null;
     $receiver_name = $_POST['receiver_name'] ?? null;
+    
     if (!$receipt_number || !$location || !$meter_amount || !$formulas_id) {
         echo json_encode(['success' => false, 'message' => 'هەموو خانە پڕ بکە']);
         exit;
@@ -40,7 +42,11 @@ try {
         echo json_encode(['success' => false, 'message' => 'ژمارەی پسوڵە دووبارەیە! تکایە ژمارەیەکی دیکە هەڵبژێرە']);
         exit;
     }
-    $stmt = $pdo->prepare("INSERT INTO concrete_receipts (receipt_number, customer_id, location, meter_amount, formulas_id, pump_car_id, pump_driver_id, mixer_car_id, mixer_driver_id, receiver_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    
+    // Get current timestamp in Iraq timezone
+    $current_timestamp = getCurrentTimestamp();
+    
+    $stmt = $pdo->prepare("INSERT INTO concrete_receipts (receipt_number, customer_id, location, meter_amount, formulas_id, pump_car_id, pump_driver_id, mixer_car_id, mixer_driver_id, receiver_name, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     $stmt->execute([
         $receipt_number,
         $customer_id ?: null,
@@ -51,8 +57,10 @@ try {
         $pump_driver_id !== '' ? $pump_driver_id : null,
         $mixer_car_id ?: null,
         $mixer_driver_id ?: null,
-        $receiver_name
+        $receiver_name,
+        $current_timestamp
     ]);
+    
     $inserted_id = $pdo->lastInsertId();
 
     echo json_encode(['success' => true, 'message' => 'پسوڵە بەسەرکەوتوویی زیادکرا!', 'id' => $inserted_id]);
