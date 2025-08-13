@@ -89,46 +89,10 @@ $(document).ready(function() {
   // On page load, fetch and show the real summary values
   // loadFilteredReceipts(); // This is now handled by select_concrete_receipts.js
 
-  // Function to attach event handlers to buttons
+  // Function to attach event handlers to buttons (all handlers are now handled by event delegation in their respective files)
   function attachEventHandlers() {
-    // Edit button handlers
-    $('.edit-receipt').off('click').on('click', function() {
-      var id = $(this).data('id');
-      if (typeof window.loadEditForm === 'function') {
-        window.loadEditForm(id);
-      }
-    });
-    
-    // Delete button handlers
-    $('.delete-receipt').off('click').on('click', function() {
-      var id = $(this).data('id');
-      if (typeof window.deleteReceipt === 'function') {
-        window.deleteReceipt(id);
-      }
-    });
-    
-    // Print button handlers
-    $('.print-receipt').off('click').on('click', function() {
-      var id = $(this).data('id');
-      if (typeof Swal !== 'undefined') {
-        Swal.fire({
-          icon: 'question',
-          title: 'چاپکردن',
-          text: 'دەتەوێت پسوڵە چاپ بکەیت؟',
-          showCancelButton: true,
-          confirmButtonText: 'بەڵێ',
-          cancelButtonText: 'نەخێر',
-        }).then((result) => {
-          if (result.isConfirmed) {
-            window.open('../pages/central_receipts.php?id=' + id, '_self');
-          }
-        });
-      } else {
-        if (window.confirm('دەتەوێت پسوڵە چاپ بکەیت؟')) {
-          window.open('../pages/central_receipts.php?id=' + id, '_self');
-        }
-      }
-    });
+    // All event handlers (edit, delete, print) are now handled by event delegation
+    // in update_concrete_receipts.js, delete_concrete_receipts.js, and select_concrete_receipts.js
   }
 
   // Global function to attach event handlers (called from select_concrete_receipts.js)
