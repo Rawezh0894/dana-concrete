@@ -7355,3 +7355,484 @@
 )
 
 [11-Aug-2025 11:19:48 Europe/Berlin] Dashboard data loaded successfully for user: 1
+[13-Aug-2025 08:38:31 Asia/Baghdad] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1755063511
+    [role] => admin
+)
+
+[13-Aug-2025 08:38:31 Asia/Baghdad] Dashboard data loaded successfully for user: 1
+[13-Aug-2025 08:38:51 Asia/Baghdad] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1755063531
+    [role] => admin
+)
+
+[13-Aug-2025 08:38:51 Asia/Baghdad] update_purchase.php POST: Array
+(
+    [id] => 60
+    [company_id] => 27
+    [driver_id] => 4
+    [location_id] => 3
+    [invoice_number] => 408
+    [material_id] => 1
+    [bin_id] => 1
+    [date] => 2025-08-06
+    [type] => دینار
+    [kg] => 32000.00
+    [price_per_kg_iqd] => 10250.00
+    [price_per_kg_usd] => 0
+    [exchange_rate] => 140300
+    [payment_type] => قەرز
+    [price] => 0
+    [amount_iqd] => 328000.00
+    [paid_usd] => 0
+    [paid_iqd] => 0
+    [remaining_usd] => 0
+    [remaining_iqd] => 328000.00
+)
+
+[13-Aug-2025 08:38:51 Asia/Baghdad] Parsed vars: id='60', company_id='27', driver_id='4', location_id='3', invoice_number='408', bin_id='1', material_id='1', date='2025-08-06', type='دینار', kg='32000.00', price_per_kg_iqd='10250.00', price_per_kg_usd='0', exchange_rate='140300', price='0', paid_iqd='0', paid_usd='0', remaining_iqd='328000.00', remaining_usd='0', payment_type='قەرز', amount_iqd='328000.00'
+[13-Aug-2025 08:38:51 Asia/Baghdad] Missing required fields for purchase update: price
+[13-Aug-2025 08:42:03 Asia/Baghdad] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1755063723
+    [role] => admin
+)
+
+[13-Aug-2025 08:42:03 Asia/Baghdad] update_purchase.php POST: Array
+(
+    [id] => 60
+    [company_id] => 27
+    [driver_id] => 4
+    [location_id] => 3
+    [invoice_number] => 408
+    [material_id] => 1
+    [bin_id] => 1
+    [date] => 2025-08-06
+    [type] => دینار
+    [kg] => 32000.00
+    [price_per_kg_iqd] => 10250.00
+    [price_per_kg_usd] => 0
+    [exchange_rate] => 140300
+    [payment_type] => قەرز
+    [price] => 0
+    [amount_iqd] => 328000.00
+    [paid_usd] => 0
+    [paid_iqd] => 0
+    [remaining_usd] => 0
+    [remaining_iqd] => 328000.00
+)
+
+[13-Aug-2025 08:42:03 Asia/Baghdad] Parsed vars: id='60', company_id='27', driver_id='4', location_id='3', invoice_number='408', bin_id='1', material_id='1', date='2025-08-06', type='دینار', kg='32000.00', price_per_kg_iqd='10250.00', price_per_kg_usd='0', exchange_rate='140300', price='0', paid_iqd='0', paid_usd='0', remaining_iqd='328000.00', remaining_usd='0', payment_type='قەرز', amount_iqd='328000.00'
+[13-Aug-2025 08:42:03 Asia/Baghdad] Missing required fields for purchase update: price
+[13-Aug-2025 08:42:58 Asia/Baghdad] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1755063778
+    [role] => admin
+)
+
+[13-Aug-2025 08:42:58 Asia/Baghdad] update_purchase.php POST: Array
+(
+    [id] => 58
+    [company_id] => 29
+    [driver_id] => 4
+    [location_id] => 3
+    [invoice_number] => A-0140
+    [material_id] => 1
+    [bin_id] => 1
+    [date] => 2025-07-27
+    [type] => دینار
+    [kg] => 36000.00
+    [price_per_kg_iqd] => 10250.00
+    [price_per_kg_usd] => 0
+    [exchange_rate] => 140300
+    [payment_type] => قەرز
+    [price] => 0
+    [amount_iqd] => 369000.00
+    [paid_usd] => 0
+    [paid_iqd] => 0
+    [remaining_usd] => 0
+    [remaining_iqd] => 369000.00
+)
+
+[13-Aug-2025 08:42:58 Asia/Baghdad] Parsed vars: id='58', company_id='29', driver_id='4', location_id='3', invoice_number='A-0140', bin_id='1', material_id='1', date='2025-07-27', type='دینار', kg='36000.00', price_per_kg_iqd='10250.00', price_per_kg_usd='0', exchange_rate='140300', price='0', paid_iqd='0', paid_usd='0', remaining_iqd='369000.00', remaining_usd='0', payment_type='قەرز', amount_iqd='369000.00'
+[13-Aug-2025 08:42:58 Asia/Baghdad] Missing required fields for purchase update: price
+[13-Aug-2025 08:46:07 Asia/Baghdad] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1755063967
+    [role] => admin
+)
+
+[13-Aug-2025 08:46:07 Asia/Baghdad] update_purchase.php POST: Array
+(
+    [id] => 58
+    [company_id] => 29
+    [driver_id] => 4
+    [location_id] => 3
+    [invoice_number] => A-0140
+    [material_id] => 1
+    [bin_id] => 1
+    [date] => 2025-07-27
+    [type] => دینار
+    [kg] => 36000.00
+    [price_per_kg_iqd] => 10250.00
+    [price_per_kg_usd] => 0
+    [exchange_rate] => 140300
+    [payment_type] => قەرز
+    [price] => 0
+    [amount_iqd] => 369000.00
+    [paid_usd] => 0
+    [paid_iqd] => 0
+    [remaining_usd] => 0
+    [remaining_iqd] => 369000.00
+)
+
+[13-Aug-2025 08:46:07 Asia/Baghdad] Parsed vars: id='58', company_id='29', driver_id='4', location_id='3', invoice_number='A-0140', bin_id='1', material_id='1', date='2025-07-27', type='دینار', kg='36000.00', price_per_kg_iqd='10250.00', price_per_kg_usd='0', exchange_rate='140300', price='0', paid_iqd='0', paid_usd='0', remaining_iqd='369000.00', remaining_usd='0', payment_type='قەرز', amount_iqd='369000.00'
+[13-Aug-2025 08:46:07 Asia/Baghdad] Missing required fields for purchase update: price
+[13-Aug-2025 08:51:10 Asia/Baghdad] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1755064270
+    [role] => admin
+)
+
+[13-Aug-2025 08:51:10 Asia/Baghdad] update_purchase.php POST: Array
+(
+    [id] => 58
+    [company_id] => 29
+    [driver] => 5
+    [location] => سلێانی
+    [invoice_number] => A-0140
+    [material_id] => 1
+    [bin_id] => 1
+    [date] => 2025-07-27
+    [type] => دینار
+    [kg] => 36000.00
+    [price_per_kg_iqd] => 10250.00
+    [price_per_kg_usd] => 0
+    [exchange_rate] => 140300
+    [payment_type] => قەرز
+    [price] => 0
+    [amount_iqd] => 369000.00
+    [paid_usd] => 0
+    [paid_iqd] => 0
+    [remaining_usd] => 0
+    [remaining_iqd] => 369000.00
+)
+
+[13-Aug-2025 08:51:10 Asia/Baghdad] Parsed vars: id='58', company_id='29', driver='5', location='سلێانی', invoice_number='A-0140', bin_id='1', material_id='1', date='2025-07-27', type='دینار', kg='36000.00', price_per_kg_iqd='10250.00', price_per_kg_usd='0', exchange_rate='140300', price='0', paid_iqd='0', paid_usd='0', remaining_iqd='369000.00', remaining_usd='0', payment_type='قەرز', amount_iqd='369000.00'
+[13-Aug-2025 08:51:10 Asia/Baghdad] Missing required fields for purchase update: price
+[13-Aug-2025 08:52:59 Asia/Baghdad] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1755064379
+    [role] => admin
+)
+
+[13-Aug-2025 08:52:59 Asia/Baghdad] update_purchase.php POST: Array
+(
+    [id] => 60
+    [company_id] => 27
+    [driver] => 5
+    [location] => سلێانی
+    [invoice_number] => 408
+    [material_id] => 1
+    [bin_id] => 1
+    [date] => 2025-08-06
+    [type] => دینار
+    [kg] => 32000.00
+    [price_per_kg_iqd] => 10250.00
+    [price_per_kg_usd] => 0
+    [exchange_rate] => 140300
+    [payment_type] => قەرز
+    [price] => 0
+    [amount_iqd] => 328000.00
+    [paid_usd] => 0
+    [paid_iqd] => 0
+    [remaining_usd] => 0
+    [remaining_iqd] => 328000.00
+)
+
+[13-Aug-2025 08:52:59 Asia/Baghdad] Parsed vars: id='60', company_id='27', driver='5', location='سلێانی', invoice_number='408', bin_id='1', material_id='1', date='2025-08-06', type='دینار', kg='32000.00', price_per_kg_iqd='10250.00', price_per_kg_usd='0', exchange_rate='140300', price='0', paid_iqd='0', paid_usd='0', remaining_iqd='328000.00', remaining_usd='0', payment_type='قەرز', amount_iqd='328000.00'
+[13-Aug-2025 08:52:59 Asia/Baghdad] Missing required fields for purchase update: price
+[13-Aug-2025 09:59:50 Asia/Baghdad] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1755068390
+    [role] => admin
+)
+
+[13-Aug-2025 09:59:50 Asia/Baghdad] update_purchase.php POST: Array
+(
+    [id] => 60
+    [company_id] => 27
+    [driver_id] => 4
+    [location_id] => 3
+    [invoice_number] => 408
+    [material_id] => 1
+    [bin_id] => 1
+    [date] => 2025-08-06
+    [type] => دینار
+    [kg] => 32000.00
+    [price_per_kg_iqd] => 10250.00
+    [price_per_kg_usd] => 0
+    [exchange_rate] => 140300
+    [payment_type] => قەرز
+    [price] => 328000.00
+    [amount_iqd] => 328000.00
+    [paid_usd] => 0
+    [paid_iqd] => 0
+    [remaining_usd] => 0
+    [remaining_iqd] => 328000.00
+)
+
+[13-Aug-2025 09:59:50 Asia/Baghdad] Parsed vars: id='60', company_id='27', driver_id='4', location_id='3', invoice_number='408', bin_id='1', material_id='1', date='2025-08-06', type='دینار', kg='32000.00', price_per_kg_iqd='10250.00', price_per_kg_usd='0', exchange_rate='140300', price='328000.00', paid_iqd='0', paid_usd='0', remaining_iqd='328000.00', remaining_usd='0', payment_type='قەرز', amount_iqd='328000.00'
+[13-Aug-2025 09:59:50 Asia/Baghdad] Found purchase for update: Array
+(
+    [id] => 60
+    [invoice_number] => 408
+)
+
+[13-Aug-2025 09:59:50 Asia/Baghdad] PHP Warning:  Undefined array key "payment_type" in C:\xampp\htdocs\dana-concrete\process\purchase\update_purchase.php on line 210
+[13-Aug-2025 09:59:50 Asia/Baghdad] Purchase successfully updated: ID=60, Invoice=408, Company=Rawezh
+[13-Aug-2025 10:06:17 Asia/Baghdad] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1755068777
+    [role] => admin
+)
+
+[13-Aug-2025 10:06:17 Asia/Baghdad] update_purchase.php POST: Array
+(
+    [id] => 60
+    [company_id] => 27
+    [driver_id] => 4
+    [location_id] => 3
+    [invoice_number] => 408
+    [material_id] => 1
+    [bin_id] => 1
+    [date] => 2025-08-06
+    [type] => دینار
+    [kg] => 32000.00
+    [price_per_kg_iqd] => 10250.00
+    [price_per_kg_usd] => 0
+    [exchange_rate] => 140300
+    [payment_type] => قەرز
+    [price] => 328000.00
+    [amount_iqd] => 328000.00
+    [paid_usd] => 0
+    [paid_iqd] => 0
+    [remaining_usd] => 0
+    [remaining_iqd] => 328000.00
+)
+
+[13-Aug-2025 10:06:17 Asia/Baghdad] Parsed vars: id='60', company_id='27', driver_id='4', location_id='3', invoice_number='408', bin_id='1', material_id='1', date='2025-08-06', type='دینار', kg='32000.00', price_per_kg_iqd='10250.00', price_per_kg_usd='0', exchange_rate='140300', price='328000.00', paid_iqd='0', paid_usd='0', remaining_iqd='328000.00', remaining_usd='0', payment_type='قەرز', amount_iqd='328000.00'
+[13-Aug-2025 10:06:17 Asia/Baghdad] Found purchase for update: Array
+(
+    [id] => 60
+    [invoice_number] => 408
+)
+
+[13-Aug-2025 10:06:17 Asia/Baghdad] No rows affected when updating purchase: ID=60
+[13-Aug-2025 10:06:25 Asia/Baghdad] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1755068785
+    [role] => admin
+)
+
+[13-Aug-2025 10:06:25 Asia/Baghdad] update_purchase.php POST: Array
+(
+    [id] => 60
+    [company_id] => 27
+    [driver_id] => 6
+    [location_id] => 3
+    [invoice_number] => 408
+    [material_id] => 1
+    [bin_id] => 1
+    [date] => 2025-08-06
+    [type] => دینار
+    [kg] => 32000.00
+    [price_per_kg_iqd] => 10250.00
+    [price_per_kg_usd] => 0
+    [exchange_rate] => 140300
+    [payment_type] => قەرز
+    [price] => 328000.00
+    [amount_iqd] => 328000.00
+    [paid_usd] => 0
+    [paid_iqd] => 0
+    [remaining_usd] => 0
+    [remaining_iqd] => 328000.00
+)
+
+[13-Aug-2025 10:06:25 Asia/Baghdad] Parsed vars: id='60', company_id='27', driver_id='6', location_id='3', invoice_number='408', bin_id='1', material_id='1', date='2025-08-06', type='دینار', kg='32000.00', price_per_kg_iqd='10250.00', price_per_kg_usd='0', exchange_rate='140300', price='328000.00', paid_iqd='0', paid_usd='0', remaining_iqd='328000.00', remaining_usd='0', payment_type='قەرز', amount_iqd='328000.00'
+[13-Aug-2025 10:06:25 Asia/Baghdad] Found purchase for update: Array
+(
+    [id] => 60
+    [invoice_number] => 408
+)
+
+[13-Aug-2025 10:06:25 Asia/Baghdad] PHP Warning:  Undefined array key "payment_type" in C:\xampp\htdocs\dana-concrete\process\purchase\update_purchase.php on line 210
+[13-Aug-2025 10:06:25 Asia/Baghdad] Purchase successfully updated: ID=60, Invoice=408, Company=Rawezh
+[13-Aug-2025 10:10:42 Asia/Baghdad] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1755069042
+    [role] => admin
+)
+
+[13-Aug-2025 10:10:42 Asia/Baghdad] update_purchase.php POST: Array
+(
+    [id] => 60
+    [company_id] => 27
+    [driver_id] => 6
+    [location_id] => 3
+    [invoice_number] => 408
+    [material_id] => 1
+    [bin_id] => 1
+    [date] => 2025-08-06
+    [type] => دینار
+    [kg] => 32000.00
+    [price_per_kg_iqd] => 10250.00
+    [price_per_kg_usd] => 0
+    [exchange_rate] => 140300
+    [payment_type] => قەرز
+    [price] => 328000.00
+    [amount_iqd] => 328000.00
+    [paid_usd] => 0
+    [paid_iqd] => 0
+    [remaining_usd] => 0
+    [remaining_iqd] => 328000.00
+)
+
+[13-Aug-2025 10:10:42 Asia/Baghdad] Parsed vars: id='60', company_id='27', driver_id='6', location_id='3', invoice_number='408', bin_id='1', material_id='1', date='2025-08-06', type='دینار', kg='32000.00', price_per_kg_iqd='10250.00', price_per_kg_usd='0', exchange_rate='140300', price='328000.00', paid_iqd='0', paid_usd='0', remaining_iqd='328000.00', remaining_usd='0', payment_type='قەرز', amount_iqd='328000.00'
+[13-Aug-2025 10:10:42 Asia/Baghdad] Found purchase for update: Array
+(
+    [id] => 60
+    [invoice_number] => 408
+)
+
+[13-Aug-2025 10:10:42 Asia/Baghdad] No rows affected when updating purchase: ID=60
+[13-Aug-2025 10:10:49 Asia/Baghdad] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1755069049
+    [role] => admin
+)
+
+[13-Aug-2025 10:10:49 Asia/Baghdad] update_purchase.php POST: Array
+(
+    [id] => 60
+    [company_id] => 27
+    [driver_id] => 4
+    [location_id] => 3
+    [invoice_number] => 408
+    [material_id] => 1
+    [bin_id] => 1
+    [date] => 2025-08-06
+    [type] => دینار
+    [kg] => 32000.00
+    [price_per_kg_iqd] => 10250.00
+    [price_per_kg_usd] => 0
+    [exchange_rate] => 140300
+    [payment_type] => قەرز
+    [price] => 328000.00
+    [amount_iqd] => 328000.00
+    [paid_usd] => 0
+    [paid_iqd] => 0
+    [remaining_usd] => 0
+    [remaining_iqd] => 328000.00
+)
+
+[13-Aug-2025 10:10:49 Asia/Baghdad] Parsed vars: id='60', company_id='27', driver_id='4', location_id='3', invoice_number='408', bin_id='1', material_id='1', date='2025-08-06', type='دینار', kg='32000.00', price_per_kg_iqd='10250.00', price_per_kg_usd='0', exchange_rate='140300', price='328000.00', paid_iqd='0', paid_usd='0', remaining_iqd='328000.00', remaining_usd='0', payment_type='قەرز', amount_iqd='328000.00'
+[13-Aug-2025 10:10:49 Asia/Baghdad] Found purchase for update: Array
+(
+    [id] => 60
+    [invoice_number] => 408
+)
+
+[13-Aug-2025 10:10:49 Asia/Baghdad] Purchase successfully updated: ID=60, Invoice=408, Company=Rawezh
+[13-Aug-2025 10:15:52 Asia/Baghdad] SESSION: Array
+(
+    [user_id] => 1
+    [username] => Dana
+    [full_name] => ئەدمین
+    [role_id] => 1
+    [LAST_ACTIVITY] => 1755069352
+    [role] => admin
+)
+
+[13-Aug-2025 10:15:52 Asia/Baghdad] update_purchase.php POST: Array
+(
+    [id] => 61
+    [company_id] => 27
+    [driver_id] => 4
+    [location_id] => 3
+    [invoice_number] => 408
+    [material_id] => 2
+    [bin_id] => 3
+    [date] => 2025-08-13
+    [type] => دینار
+    [kg] => 32000.00
+    [price_per_kg_iqd] => 5833
+    [price_per_kg_usd] => 0
+    [exchange_rate] => 140300
+    [payment_type] => قەرز
+    [price] => 186656.00
+    [amount_iqd] => 186656.00
+    [paid_usd] => 0
+    [paid_iqd] => 0
+    [remaining_usd] => 0
+    [remaining_iqd] => 186000
+)
+
+[13-Aug-2025 10:15:52 Asia/Baghdad] Parsed vars: id='61', company_id='27', driver_id='4', location_id='3', invoice_number='408', bin_id='3', material_id='2', date='2025-08-13', type='دینار', kg='32000.00', price_per_kg_iqd='5833', price_per_kg_usd='0', exchange_rate='140300', price='186656.00', paid_iqd='0', paid_usd='0', remaining_iqd='186000', remaining_usd='0', payment_type='قەرز', amount_iqd='186656.00'
+[13-Aug-2025 10:15:52 Asia/Baghdad] Found purchase for update: Array
+(
+    [id] => 61
+    [invoice_number] => 408
+)
+
+[13-Aug-2025 10:15:52 Asia/Baghdad] Purchase successfully updated: ID=61, Invoice=408, Company=Rawezh

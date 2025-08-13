@@ -144,7 +144,7 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
           </div>
           <div class="mb-3">
             <label for="salary" class="form-label">مووچە (د.ع)</label>
-            <input type="text" class="form-control" id="salary" name="salary" readonly required>
+            <input type="text" class="form-control" id="salary" name="salary"  required>
           </div>
           <div class="mb-3">
             <label for="karwanhisabi" class="form-label">کاروانحیسابی</label>
@@ -193,7 +193,7 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
           </div>
           <div class="mb-3">
             <label for="edit_salary" class="form-label">مووچە (د.ع)</label>
-            <input type="text" class="form-control" id="edit_salary" name="salary" readonly required>
+            <input type="text" class="form-control" id="edit_salary" name="salary" required>
           </div>
           <div class="mb-3">
             <label for="edit_karwanhisabi" class="form-label">کاروانحیسابی</label>

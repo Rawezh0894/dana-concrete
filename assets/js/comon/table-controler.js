@@ -31,7 +31,81 @@ const TableController = {
                 if (col === '#') {
                     td.textContent = (options.rowOffset ? options.rowOffset : 0) + idx + 1;
                 } else if (col === 'actions') {
-                    td.innerHTML = row[col] !== undefined ? row[col] : '';
+                    // Handle actions column - ensure HTML content is properly set
+                    if (row[col] !== undefined && row[col] !== null && row[col] !== '') {
+                        td.innerHTML = row[col];
+                        
+                        // Process action buttons to ensure they work properly
+                        td.querySelectorAll('button, a, .btn').forEach(btn => {
+                            // Handle buttons with data-action attributes
+                            if (btn.hasAttribute('data-action')) {
+                                const action = btn.getAttribute('data-action');
+                                const id = btn.getAttribute('data-id');
+                                
+                                // Remove old event listeners and add new ones
+                                const newBtn = btn.cloneNode(true);
+                                Array.from(btn.attributes).forEach(attr => {
+                                    newBtn.setAttribute(attr.name, attr.value);
+                                });
+                                
+                                // Add proper event listener
+                                newBtn.onclick = function(e) {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    
+                                    // Handle different action types
+                                    switch(action) {
+                                        case 'edit':
+                                            if (typeof window.editItem === 'function') {
+                                                window.editItem(id);
+                                            }
+                                            break;
+                                        case 'delete':
+                                            if (typeof window.deleteItem === 'function') {
+                                                window.deleteItem(id);
+                                            }
+                                            break;
+                                        case 'view':
+                                            if (typeof window.viewItem === 'function') {
+                                                window.viewItem(id);
+                                            }
+                                            break;
+                                        case 'print':
+                                            if (typeof window.printItem === 'function') {
+                                                window.printItem(id);
+                                            }
+                                            break;
+                                        default:
+                                            // Try to call the original onclick if it exists
+                                            if (btn.getAttribute('onclick')) {
+                                                try {
+                                                    eval(btn.getAttribute('onclick'));
+                                                } catch (e) {
+                                                    console.warn('Could not execute onclick for action:', action, e);
+                                                }
+                                            }
+                                    }
+                                };
+                                
+                                // Replace the old button
+                                btn.parentNode.replaceChild(newBtn, btn);
+                            } else if (btn.onclick) {
+                                // Handle buttons with existing onclick handlers
+                                const newBtn = btn.cloneNode(true);
+                                Array.from(btn.attributes).forEach(attr => {
+                                    newBtn.setAttribute(attr.name, attr.value);
+                                });
+                                
+                                // Copy the onclick handler
+                                newBtn.onclick = btn.onclick;
+                                
+                                // Replace the old button
+                                btn.parentNode.replaceChild(newBtn, btn);
+                            }
+                        });
+                    } else {
+                        td.innerHTML = '';
+                    }
                 } else if (col === 'select') {
                     td.innerHTML = row[col] !== undefined ? row[col] : '';
                 } else if (["admin", "user", "accountant", "manager"].includes(col)) {
@@ -58,6 +132,189 @@ const TableController = {
                 tr.classList.add('selected');
             };
             tbody.appendChild(tr);
+        });
+        
+        // After rendering, ensure all action buttons have proper event listeners
+        if (options.ensureActionListeners) {
+            this.ensureActionButtonListeners(tableSelector);
+        }
+    },
+    
+    // Method to create action buttons with proper event handling
+    createActionButton: function(action, id, text, className = 'btn btn-sm', icon = '') {
+        const btn = document.createElement('button');
+        btn.className = className;
+        btn.setAttribute('data-action', action);
+        btn.setAttribute('data-id', id);
+        btn.innerHTML = icon + text;
+        
+        btn.onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            switch(action) {
+                case 'edit':
+                    if (typeof window.editItem === 'function') {
+                        window.editItem(id);
+                    }
+                    break;
+                case 'delete':
+                    if (typeof window.deleteItem === 'function') {
+                        window.deleteItem(id);
+                    }
+                    break;
+                case 'view':
+                    if (typeof window.viewItem === 'function') {
+                        window.viewItem(id);
+                    }
+                    break;
+                case 'print':
+                    if (typeof window.printItem === 'function') {
+                        window.printItem(id);
+                    }
+                    break;
+            }
+        };
+        
+        return btn;
+    },
+    
+    // Method to refresh action buttons in a table
+    refreshActionButtons: function(tableSelector) {
+        const tbody = document.querySelector(tableSelector + ' tbody');
+        if (!tbody) return;
+        
+        tbody.querySelectorAll('td[data-col="actions"] button, td[data-col="actions"] .btn, td[data-col="actions"] a').forEach(btn => {
+            if (btn.hasAttribute('data-action')) {
+                const action = btn.getAttribute('data-action');
+                const id = btn.getAttribute('data-id');
+                
+                // Remove old event listeners
+                const newBtn = btn.cloneNode(true);
+                Array.from(btn.attributes).forEach(attr => {
+                    newBtn.setAttribute(attr.name, attr.value);
+                });
+                
+                // Add new event listener
+                newBtn.onclick = function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    switch(action) {
+                        case 'edit':
+                            if (typeof window.editItem === 'function') {
+                                window.editItem(id);
+                            }
+                            break;
+                        case 'delete':
+                            if (typeof window.deleteItem === 'function') {
+                                window.deleteItem(id);
+                            }
+                            break;
+                        case 'view':
+                            if (typeof window.viewItem === 'function') {
+                                window.viewItem(id);
+                            }
+                            break;
+                        case 'print':
+                            if (typeof window.printItem === 'function') {
+                                window.printItem(id);
+                            }
+                            break;
+                    }
+                };
+                
+                btn.parentNode.replaceChild(newBtn, btn);
+            }
+        });
+    },
+    
+    // Method to create custom action buttons with specific functionality
+    createCustomActionButton: function(action, id, text, className = 'btn btn-sm', icon = '', customFunction = null) {
+        const btn = document.createElement('button');
+        btn.className = className;
+        btn.setAttribute('data-action', action);
+        btn.setAttribute('data-id', id);
+        btn.innerHTML = icon + text;
+        
+        btn.onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            if (customFunction && typeof customFunction === 'function') {
+                customFunction(id, e);
+            } else {
+                // Default action handling
+                switch(action) {
+                    case 'edit':
+                        if (typeof window.editItem === 'function') {
+                            window.editItem(id);
+                        }
+                        break;
+                    case 'delete':
+                        if (typeof window.deleteItem === 'function') {
+                            window.deleteItem(id);
+                        }
+                        break;
+                    case 'view':
+                        if (typeof window.viewItem === 'function') {
+                            window.viewItem(id);
+                        }
+                        break;
+                    case 'print':
+                        if (typeof window.printItem === 'function') {
+                            window.printItem(id);
+                        }
+                        break;
+                }
+            }
+        };
+        
+        return btn;
+    },
+    
+    // New method to ensure action button listeners work properly
+    ensureActionButtonListeners: function(tableSelector) {
+        const tbody = document.querySelector(tableSelector + ' tbody');
+        if (!tbody) return;
+        
+        // Find all action buttons and ensure they have proper event listeners
+        tbody.querySelectorAll('td[data-col="actions"] button, td[data-col="actions"] .btn, td[data-col="actions"] a').forEach(btn => {
+            // If button has data attributes for actions, ensure they work
+            if (btn.hasAttribute('data-action')) {
+                const action = btn.getAttribute('data-action');
+                const id = btn.getAttribute('data-id');
+                
+                // Re-attach click event based on action type
+                btn.onclick = function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Handle different action types
+                    switch(action) {
+                        case 'edit':
+                            if (typeof window.editItem === 'function') {
+                                window.editItem(id);
+                            }
+                            break;
+                        case 'delete':
+                            if (typeof window.deleteItem === 'function') {
+                                window.deleteItem(id);
+                            }
+                            break;
+                        case 'view':
+                            if (typeof window.viewItem === 'function') {
+                                window.viewItem(id);
+                            }
+                            break;
+                        default:
+                            // Try to call the original onclick if it exists
+                            if (btn.getAttribute('onclick')) {
+                                eval(btn.getAttribute('onclick'));
+                            }
+                    }
+                };
+            }
         });
     },
     showLoading: function(tableSelector, columns) {
@@ -217,7 +474,7 @@ const TableController = {
                 return;
             }
             
-            TableController.render(tableSelector, pageData, columns, { rowOffset: start });
+            TableController.render(tableSelector, pageData, columns, { rowOffset: start, ensureActionListeners: true });
             renderPaginationControls(totalPages);
         }
 
@@ -282,5 +539,10 @@ const TableController = {
         
         // Initial render
         renderPage(currentPage);
+        
+        // Ensure action listeners work after initial setup
+        setTimeout(() => {
+            this.ensureActionButtonListeners(tableSelector);
+        }, 100);
     }
 };
