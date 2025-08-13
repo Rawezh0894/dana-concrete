@@ -89,6 +89,11 @@ async function loadConcreteReceiptsTable(page = 1, pageSize = 10) {
 
     // Use custom pagination with server-side data
     renderServerSidePagination('#concreteReceiptsTable', mapped, columns, data.pagination, pageSize);
+    
+    // Attach event handlers for the new buttons
+    if (typeof window.attachConcreteReceiptsEventHandlers === 'function') {
+      window.attachConcreteReceiptsEventHandlers();
+    }
 }
 
 // Custom function for server-side pagination
@@ -112,12 +117,7 @@ function renderServerSidePagination(tableSelector, data, columns, pagination, pa
     }
 
     // Render table data
-    TableController.render(tableSelector, data, columns);
-
-    // Re-attach event handlers after table render
-    if (typeof window.attachConcreteReceiptsEventHandlers === 'function') {
-        window.attachConcreteReceiptsEventHandlers();
-    }
+    TableController.render(tableSelector, data, columns, { rowOffset: (pagination.page - 1) * pageSize });
 
     // Add page size selector
     const sizeSelect = document.createElement('select');
