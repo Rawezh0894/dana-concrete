@@ -1,9 +1,11 @@
 $(document).on('click', '.edit-receipt', function() {
     var id = $(this).data('id');
-    $.get('../process/concrete_receipts/select_concrete_receipts.php', function(res) {
-        if (res.success) {
-            var receipt = res.data.find(r => r.id == id);
-            if (!receipt) return Swal.fire('هەڵە!', 'داتای پسوڵە نەدۆزرایەوە', 'error');
+    
+    // Fetch the specific receipt data using the new endpoint
+    $.get('../process/concrete_receipts/get_single_receipt.php', {id: id}, function(res) {
+        if (res.success && res.data) {
+            const receipt = res.data;
+            
             // Fill modal fields
             $('#edit_receipt_id').val(receipt.id);
             $('#edit_receipt_number').val(receipt.receipt_number);
@@ -16,11 +18,16 @@ $(document).on('click', '.edit-receipt', function() {
             $('#edit_pump_driver_id').val(receipt.pump_driver_id);
             $('#edit_mixer_car_id').val(receipt.mixer_car_id);
             $('#edit_mixer_driver_id').val(receipt.mixer_driver_id);
+            
+            // Show the modal
             $('#editConcreteReceiptModal').modal('show');
         } else {
-            Swal.fire('هەڵە!', res.message || 'هەڵەیەک ڕویدا', 'error');
+            Swal.fire('هەڵە!', res.message || 'داتای پسوڵە نەدۆزرایەوە', 'error');
         }
-    }, 'json');
+    }, 'json').fail(function(xhr) {
+        Swal.fire('هەڵە!', 'هەڵەیەک لە وەرگرتنی داتاکان هەیە', 'error');
+        console.error('Error fetching receipt:', xhr);
+    });
 });
 
 // Multiple submission prevention flag

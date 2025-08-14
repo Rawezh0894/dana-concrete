@@ -114,10 +114,8 @@ function renderServerSidePagination(tableSelector, data, columns, pagination, pa
     // Render table data
     TableController.render(tableSelector, data, columns, { rowOffset: (pagination.page - 1) * pageSize });
 
-    // Re-attach event handlers after rendering new table content
-    if (typeof window.attachConcreteReceiptsEventHandlers === 'function') {
-        window.attachConcreteReceiptsEventHandlers();
-    }
+    // Note: Event handlers are now attached using $(document).on() in the individual files,
+    // which means they work for dynamically created elements without needing re-attachment
 
     // Add page size selector
     const sizeSelect = document.createElement('select');
@@ -182,31 +180,9 @@ function renderServerSidePagination(tableSelector, data, columns, pagination, pa
 
 document.addEventListener('DOMContentLoaded', () => {
     loadConcreteReceiptsTable(1, 10);
-    // Also attach event handlers for any elements that might already exist
-    if (typeof window.attachConcreteReceiptsEventHandlers === 'function') {
-        window.attachConcreteReceiptsEventHandlers();
-    }
+    // Note: Event handlers are now attached using $(document).on() in the individual files,
+    // which means they work for dynamically created elements without needing re-attachment
 });
 window.reloadConcreteReceipts = () => loadConcreteReceiptsTable(1, 10);
 
-$(document).on('click', '.print-receipt', function() {
-    var id = $(this).data('id');
-    if (typeof Swal !== 'undefined') {
-        Swal.fire({
-            icon: 'question',
-            title: 'چاپکردن',
-            text: 'دەتەوێت پسوڵە چاپ بکەیت؟',
-            showCancelButton: true,
-            confirmButtonText: 'بەڵێ',
-            cancelButtonText: 'نەخێر',
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.open('../pages/central_receipts.php?id=' + id, '_self');
-            }
-        });
-    } else {
-        if (window.confirm('دەتەوێت پسوڵە چاپ بکەیت؟')) {
-            window.open('../pages/central_receipts.php?id=' + id, '_self');
-        }
-    }
-});
+// Print receipt event handler is now handled in filter.js

@@ -91,45 +91,36 @@ $(document).ready(function() {
 
   // Function to attach event handlers to buttons
   function attachEventHandlers() {
-    // Edit button handlers
-    $('.edit-receipt').off('click').on('click', function() {
-      var id = $(this).data('id');
-      if (typeof window.loadEditForm === 'function') {
-        window.loadEditForm(id);
-      }
-    });
+    // This function is now simplified since event handlers are attached directly
+    // in the individual files (update_concrete_receipts.js, delete_concrete_receipts.js)
+    // We keep this function for backward compatibility but it's no longer needed
     
-    // Delete button handlers
-    $('.delete-receipt').off('click').on('click', function() {
-      var id = $(this).data('id');
-      if (typeof window.deleteReceipt === 'function') {
-        window.deleteReceipt(id);
-      }
-    });
-    
-    // Print button handlers
-    $('.print-receipt').off('click').on('click', function() {
-      var id = $(this).data('id');
-      if (typeof Swal !== 'undefined') {
-        Swal.fire({
-          icon: 'question',
-          title: 'چاپکردن',
-          text: 'دەتەوێت پسوڵە چاپ بکەیت؟',
-          showCancelButton: true,
-          confirmButtonText: 'بەڵێ',
-          cancelButtonText: 'نەخێر',
-        }).then((result) => {
-          if (result.isConfirmed) {
-            window.open('../pages/central_receipts.php?id=' + id, '_self');
-          }
-        });
-      } else {
-        if (window.confirm('دەتەوێت پسوڵە چاپ بکەیت؟')) {
+    // Note: Event handlers are now attached using $(document).on() in the individual files,
+    // which means they work for dynamically created elements without needing re-attachment
+  }
+
+  // Add print receipt event handler
+  $(document).on('click', '.print-receipt', function() {
+    var id = $(this).data('id');
+    if (typeof Swal !== 'undefined') {
+      Swal.fire({
+        icon: 'question',
+        title: 'چاپکردن',
+        text: 'دەتەوێت پسوڵە چاپ بکەیت؟',
+        showCancelButton: true,
+        confirmButtonText: 'بەڵێ',
+        cancelButtonText: 'نەخێر',
+      }).then((result) => {
+        if (result.isConfirmed) {
           window.open('../pages/central_receipts.php?id=' + id, '_self');
         }
+      });
+    } else {
+      if (window.confirm('دەتەوێت پسوڵە چاپ بکەیت؟')) {
+        window.open('../pages/central_receipts.php?id=' + id, '_self');
       }
-    });
-  }
+    }
+  });
 
   // Global function to attach event handlers (called from select_concrete_receipts.js)
   window.attachConcreteReceiptsEventHandlers = attachEventHandlers;
