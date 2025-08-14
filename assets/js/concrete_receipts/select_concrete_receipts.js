@@ -89,11 +89,6 @@ async function loadConcreteReceiptsTable(page = 1, pageSize = 10) {
 
     // Use custom pagination with server-side data
     renderServerSidePagination('#concreteReceiptsTable', mapped, columns, data.pagination, pageSize);
-    
-    // Attach event handlers for the new buttons
-    if (typeof window.attachConcreteReceiptsEventHandlers === 'function') {
-      window.attachConcreteReceiptsEventHandlers();
-    }
 }
 
 // Custom function for server-side pagination
@@ -118,6 +113,11 @@ function renderServerSidePagination(tableSelector, data, columns, pagination, pa
 
     // Render table data
     TableController.render(tableSelector, data, columns, { rowOffset: (pagination.page - 1) * pageSize });
+
+    // Re-attach event handlers after rendering new table content
+    if (typeof window.attachConcreteReceiptsEventHandlers === 'function') {
+        window.attachConcreteReceiptsEventHandlers();
+    }
 
     // Add page size selector
     const sizeSelect = document.createElement('select');
@@ -180,7 +180,13 @@ function renderServerSidePagination(tableSelector, data, columns, pagination, pa
     paginationDiv.appendChild(next);
 }
 
-document.addEventListener('DOMContentLoaded', () => loadConcreteReceiptsTable(1, 10));
+document.addEventListener('DOMContentLoaded', () => {
+    loadConcreteReceiptsTable(1, 10);
+    // Also attach event handlers for any elements that might already exist
+    if (typeof window.attachConcreteReceiptsEventHandlers === 'function') {
+        window.attachConcreteReceiptsEventHandlers();
+    }
+});
 window.reloadConcreteReceipts = () => loadConcreteReceiptsTable(1, 10);
 
 $(document).on('click', '.print-receipt', function() {
