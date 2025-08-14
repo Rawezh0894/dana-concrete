@@ -32,5 +32,4 @@ function attachDeletePersonEvents() {
         };
     });
 }
-document.addEventListener('DOMContentLoaded', attachDeletePersonEvents);
-// Or call attachDeletePersonEvents() after table render in select_person.js
+// Event listeners are now attached centrally in select_person.js after each pagination render

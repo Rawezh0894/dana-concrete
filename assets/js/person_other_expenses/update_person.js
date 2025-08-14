@@ -64,8 +64,7 @@ function attachEditPersonEvents() {
         };
     });
 }
-document.addEventListener('DOMContentLoaded', attachEditPersonEvents);
-// Or call attachEditPersonEvents() after table render in select_person.js
+// Event listeners are now attached centrally in select_person.js after each pagination render
 // Handle edit form submit
 const editPersonForm = document.getElementById('editPersonForm');
 if (editPersonForm) {

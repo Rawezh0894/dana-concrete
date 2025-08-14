@@ -219,6 +219,11 @@ const TableController = {
             
             TableController.render(tableSelector, pageData, columns, { rowOffset: start });
             renderPaginationControls(totalPages);
+            
+            // Call onRenderComplete callback if provided
+            if (options.onRenderComplete && typeof options.onRenderComplete === 'function') {
+                options.onRenderComplete();
+            }
         }
 
         function renderPaginationControls(totalPages) {
@@ -282,5 +287,10 @@ const TableController = {
         
         // Initial render
         renderPage(currentPage);
+        
+        // Call onRenderComplete callback for initial render if provided
+        if (options.onRenderComplete && typeof options.onRenderComplete === 'function') {
+            options.onRenderComplete();
+        }
     }
 };

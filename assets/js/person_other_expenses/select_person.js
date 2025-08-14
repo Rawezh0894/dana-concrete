@@ -26,11 +26,29 @@ async function loadPersons() {
             <button class="btn btn-sm btn-info person-details" data-id="${row.id}"><i class="fa fa-user"></i></button>
         `
     }));
-    TableController.renderWithPagination('#personTable', tableData, ['#', 'name', 'opening_debt_usd', 'opening_debt_iqd', 'actions']);
-    // Attach events after rendering
-    if (typeof attachEditPersonEvents === 'function') attachEditPersonEvents();
-    if (typeof attachDeletePersonEvents === 'function') attachDeletePersonEvents();
-    // Attach person-details button click
+    
+    // Render table with pagination and attach events after each render
+    TableController.renderWithPagination('#personTable', tableData, ['#', 'name', 'opening_debt_usd', 'opening_debt_iqd', 'actions'], {
+        onRenderComplete: function() {
+            // Re-attach all event listeners after each pagination render
+            attachAllPersonEvents();
+        }
+    });
+}
+
+// Function to attach all person-related event listeners
+function attachAllPersonEvents() {
+    // Attach edit person events
+    if (typeof attachEditPersonEvents === 'function') {
+        attachEditPersonEvents();
+    }
+    
+    // Attach delete person events
+    if (typeof attachDeletePersonEvents === 'function') {
+        attachDeletePersonEvents();
+    }
+    
+    // Attach person-details button click events
     document.querySelectorAll('.person-details').forEach(btn => {
         btn.onclick = function() {
             const id = this.dataset.id;
@@ -66,4 +84,8 @@ function updateSummaryCards(summary) {
     document.getElementById('personsOpeningIQD').textContent = formatIQD(summary.persons_opening_debt.iqd);
 }
 
-document.addEventListener('DOMContentLoaded', loadPersons);
+document.addEventListener('DOMContentLoaded', function() {
+    loadPersons();
+    // Also attach events for any elements that might already exist
+    attachAllPersonEvents();
+});
