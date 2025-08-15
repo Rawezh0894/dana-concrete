@@ -26,14 +26,7 @@ $expense_types = [
     'بەکارهێنانی گاز' => 'بەکارهێنانی گاز',
     'خەرجی تر' => 'خەرجی تر',
     'خواردنگە' => 'خواردنگە',
-    'ئۆفیس' => 'ئۆفیس',
-    'خەرجی سەیارە' => 'خەرجی سەیارە',
-    'خەرجی ڕێگە' => 'خەرجی ڕێگە',
-    'خەرجی پاراستن' => 'خەرجی پاراستن',
-    'خەرجی سووڕان' => 'خەرجی سووڕان',
-    'خەرجی بەڕێوەبردنی' => 'خەرجی بەڕێوەبردنی',
-    'خەرجی گەشەپێدان' => 'خەرجی گەشەپێدان',
-    'خەرجی پێویستەکان' => 'خەرجی پێویستەکان'
+    'ئۆفیس' => 'ئۆفیس'
 ];
 ?>
 <!DOCTYPE html>
@@ -203,16 +196,6 @@ $expense_types = [
           <div class="fs-3 fw-bold" id="total_materials">0</div>
           <small>کۆی کاڵای بەکارهاتوو</small>
         </div>
-      </div>
-    </div>
-
-    <!-- Expense Type Summary Section -->
-    <div class="expense-type-summary no-print mb-4">
-      <h5 class="mb-3 text-primary">
-        <i class="fas fa-list-alt me-2"></i>پوختەی خەرجیەکان بە جۆر
-      </h5>
-      <div class="row" id="expense-type-summary">
-        <!-- This will be populated by JavaScript -->
       </div>
     </div>
 

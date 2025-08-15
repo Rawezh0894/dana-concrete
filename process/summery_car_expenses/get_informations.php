@@ -153,9 +153,23 @@ function calculateSummary($data, $pdo, $where_sql, $params) {
     $monthly_data = [];
     
     foreach ($data as $row) {
+        // Calculate total cost including material_total_cost and gas_total_cost
+        $row_total_usd = floatval($row['amount_usd'] ?? 0);
+        $row_total_iqd = floatval($row['amount_iqd'] ?? 0);
+        
+        // Add material total cost if available
+        if ($row['material_total_cost']) {
+            $row_total_iqd += floatval($row['material_total_cost']);
+        }
+        
+        // Add gas total cost if available
+        if ($row['gas_total_cost']) {
+            $row_total_iqd += floatval($row['gas_total_cost']);
+        }
+        
         // Amount totals
-        $summary['total_usd'] += floatval($row['amount_usd'] ?? 0);
-        $summary['total_iqd'] += floatval($row['amount_iqd'] ?? 0);
+        $summary['total_usd'] += $row_total_usd;
+        $summary['total_iqd'] += $row_total_iqd;
         
         // Gas and materials
         if ($row['gas_liters']) {
@@ -178,14 +192,14 @@ function calculateSummary($data, $pdo, $where_sql, $params) {
         if (!isset($expense_types[$expense_type])) {
             $expense_types[$expense_type] = 0;
         }
-        $expense_types[$expense_type] += floatval($row['amount_usd'] ?? 0) + (floatval($row['amount_iqd'] ?? 0) / 150000); // Convert IQD to USD for comparison
+        $expense_types[$expense_type] += $row_total_usd + ($row_total_iqd / 150000); // Convert IQD to USD for comparison
         
         // Collect payment types
         $payment_type = $row['payment_type'];
         if (!isset($payment_types[$payment_type])) {
             $payment_types[$payment_type] = 0;
         }
-        $payment_types[$payment_type] += floatval($row['amount_usd'] ?? 0) + (floatval($row['amount_iqd'] ?? 0) / 150000);
+        $payment_types[$payment_type] += $row_total_usd + ($row_total_iqd / 150000);
         
         // Monthly trend
         $month = date('Y-m', strtotime($row['date']));
@@ -196,8 +210,8 @@ function calculateSummary($data, $pdo, $where_sql, $params) {
                 'count' => 0
             ];
         }
-        $monthly_data[$month]['usd'] += floatval($row['amount_usd'] ?? 0);
-        $monthly_data[$month]['iqd'] += floatval($row['amount_iqd'] ?? 0);
+        $monthly_data[$month]['usd'] += $row_total_usd;
+        $monthly_data[$month]['iqd'] += $row_total_iqd;
         $monthly_data[$month]['count']++;
     }
     
@@ -245,7 +259,7 @@ function calculateCarExpenses($pdo, $where_sql, $params) {
         c.id,
         c.name AS car_name,
         SUM(COALESCE(oe.amount_usd, 0)) AS total_usd,
-        SUM(COALESCE(oe.amount_iqd, 0)) AS total_iqd,
+        SUM(COALESCE(oe.amount_iqd, 0) + COALESCE(oe.material_total_cost, 0) + COALESCE(oe.gas_total_cost, 0)) AS total_iqd,
         COUNT(oe.id) AS expense_count
     FROM cars c
     LEFT JOIN other_expenses oe ON c.id = oe.car_id
