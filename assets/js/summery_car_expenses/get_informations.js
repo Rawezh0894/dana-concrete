@@ -95,6 +95,9 @@ function updateSummaryStats(summary) {
             $(this).text(originalText);
         });
     }
+    
+    // Update expense type summary
+    updateExpenseTypeSummary(expensesData);
 }
 
 // Update expenses table
@@ -127,7 +130,8 @@ function updateExpensesTable(data) {
                 <td>${expense.car_name || '-'}</td>
                 <td>${expense.employee_name || '-'}</td>
                 <td>
-                    <span class="badge bg-${getExpenseTypeColor(expense.expense_type)}">
+                    <span class="badge bg-${getExpenseTypeColor(expense.expense_type)} expense-type-badge">
+                        <i class="fas ${getExpenseTypeIcon(expense.expense_type)} me-1"></i>
                         ${expense.expense_type}
                     </span>
                 </td>
@@ -169,41 +173,54 @@ function updateExpensesTable(data) {
                                     <p><strong>تێبینی:</strong> ${expense.notes || 'هیچ تێبینێک نییە'}</p>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <h6 class="text-success mb-3">
-                                    <i class="fas fa-calculator me-2"></i>پوختەی خەرجی
-                                </h6>
-                                <div class="expense-summary-info">
-                                    <div class="row">
-                                        <div class="col-6">
-                                            <div class="summary-item">
-                                                <span class="label">بڕی دینار:</span>
-                                                <span class="value text-primary">${expense.amount_iqd ? formatNumber(expense.amount_iqd) + ' د.ع' : '0 د.ع'}</span>
-                                            </div>
-                                        </div>
-                                        <div class="col-6">
-                                            <div class="summary-item">
-                                                <span class="label">بڕی دۆلار:</span>
-                                                <span class="value text-success">${expense.amount_usd ? '$' + formatNumber(expense.amount_usd) : '$0.00'}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row mt-2">
-                                        <div class="col-6">
-                                            <div class="summary-item">
-                                                <span class="label">بڕی گاز:</span>
-                                                <span class="value text-warning">${expense.gas_liters ? formatNumber(expense.gas_liters) + ' لیتر' : '0 لیتر'}</span>
-                                            </div>
-                                        </div>
-                                        <div class="col-6">
-                                            <div class="summary-item">
-                                                <span class="label">بڕی کاڵا:</span>
-                                                <span class="value text-info">${expense.material_quantity ? formatNumber(expense.material_quantity) + ' ' + (expense.material_unit_type || '') : '0'}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                                                         <div class="col-md-6">
+                                 <h6 class="text-success mb-3">
+                                     <i class="fas fa-calculator me-2"></i>پوختەی خەرجی
+                                 </h6>
+                                 <div class="expense-summary-info">
+                                     <div class="row">
+                                         <div class="col-6">
+                                             <div class="summary-item">
+                                                 <span class="label">بڕی دینار:</span>
+                                                 <span class="value text-primary">${expense.amount_iqd ? formatNumber(expense.amount_iqd) + ' د.ع' : '0 د.ع'}</span>
+                                             </div>
+                                         </div>
+                                         <div class="col-6">
+                                             <div class="summary-item">
+                                                 <span class="label">بڕی دۆلار:</span>
+                                                 <span class="value text-success">${expense.amount_usd ? '$' + formatNumber(expense.amount_usd) : '$0.00'}</span>
+                                             </div>
+                                         </div>
+                                     </div>
+                                     <div class="row mt-2">
+                                         <div class="col-6">
+                                             <div class="summary-item">
+                                                 <span class="label">بڕی گاز:</span>
+                                                 <span class="value text-warning">${expense.gas_liters ? formatNumber(expense.gas_liters) + ' لیتر' : '0 لیتر'}</span>
+                                             </div>
+                                         </div>
+                                         <div class="col-6">
+                                             <div class="summary-item">
+                                                 <span class="label">بڕی کاڵا:</span>
+                                                 <span class="value text-info">${expense.material_quantity ? formatNumber(expense.material_quantity) + ' ' + (expense.material_unit_type || '') : '0'}</span>
+                                             </div>
+                                         </div>
+                                     </div>
+                                     <div class="row mt-2">
+                                         <div class="col-12">
+                                             <div class="summary-item">
+                                                 <span class="label">جۆری خەرجی:</span>
+                                                 <span class="value">
+                                                     <span class="badge bg-${getExpenseTypeColor(expense.expense_type)} expense-type-badge">
+                                                         <i class="fas ${getExpenseTypeIcon(expense.expense_type)} me-1"></i>
+                                                         ${expense.expense_type}
+                                                     </span>
+                                                 </span>
+                                             </div>
+                                         </div>
+                                     </div>
+                                 </div>
+                             </div>
                         </div>
                     </div>
                 </td>
@@ -405,6 +422,103 @@ function updateTotalRecords(count) {
     $('#total-records').text(count + ' خەرجی');
 }
 
+// Update expense type summary
+function updateExpenseTypeSummary(data) {
+    const summaryContainer = $('#expense-type-summary');
+    summaryContainer.empty();
+    
+    if (data.length === 0) {
+        summaryContainer.append(`
+            <div class="col-12 text-center text-muted py-4">
+                <i class="fas fa-inbox fa-2x mb-2"></i>
+                <br>هیچ داتایەک نییە
+            </div>
+        `);
+        return;
+    }
+    
+    // Group expenses by type
+    const expenseTypeGroups = {};
+    data.forEach(expense => {
+        if (!expenseTypeGroups[expense.expense_type]) {
+            expenseTypeGroups[expense.expense_type] = {
+                count: 0,
+                total_iqd: 0,
+                total_usd: 0,
+                total_gas: 0,
+                total_materials: 0
+            };
+        }
+        
+        expenseTypeGroups[expense.expense_type].count++;
+        expenseTypeGroups[expense.expense_type].total_iqd += parseFloat(expense.amount_iqd || 0);
+        expenseTypeGroups[expense.expense_type].total_usd += parseFloat(expense.amount_usd || 0);
+        expenseTypeGroups[expense.expense_type].total_gas += parseFloat(expense.gas_liters || 0);
+        expenseTypeGroups[expense.expense_type].total_materials += parseFloat(expense.material_quantity || 0);
+    });
+    
+    // Create summary cards for each expense type
+    Object.keys(expenseTypeGroups).forEach(expenseType => {
+        const group = expenseTypeGroups[expenseType];
+        const colorClass = getExpenseTypeColor(expenseType);
+        const icon = getExpenseTypeIcon(expenseType);
+        
+        const summaryCard = `
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                <div class="card expense-type-card h-100 border-0 shadow-sm" style="border-left: 4px solid var(--${colorClass}) !important;">
+                    <div class="card-body p-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="expense-type-icon me-2">
+                                <i class="fas ${icon} fa-2x text-${colorClass}"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="card-title mb-1 text-dark">${expenseType}</h6>
+                                <small class="text-muted">${group.count} خەرجی</small>
+                            </div>
+                        </div>
+                        
+                        <div class="expense-type-stats">
+                            <div class="row text-center">
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <small class="text-muted d-block">دینار</small>
+                                        <strong class="text-primary">${formatNumber(group.total_iqd)} د.ع</strong>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <small class="text-muted d-block">دۆلار</small>
+                                        <strong class="text-success">$${formatNumber(group.total_usd)}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            ${group.total_gas > 0 ? `
+                                <div class="row text-center mt-2">
+                                    <div class="col-6">
+                                        <div class="stat-item">
+                                            <small class="text-muted d-block">گاز</small>
+                                            <strong class="text-warning">${formatNumber(group.total_gas)} لیتر</strong>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="stat-item">
+                                            <small class="text-muted d-block">کاڵا</small>
+                                            <strong class="text-info">${formatNumber(group.total_materials)}</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        summaryContainer.append(summaryCard);
+    });
+}
+
 // Get expense type color
 function getExpenseTypeColor(type) {
     const colors = {
@@ -412,9 +526,35 @@ function getExpenseTypeColor(type) {
         'بەکارهێنانی گاز': 'success',
         'خەرجی تر': 'info',
         'خواردنگە': 'warning',
-        'ئۆفیس': 'secondary'
+        'ئۆفیس': 'secondary',
+        'خەرجی سەیارە': 'danger',
+        'خەرجی ڕێگە': 'dark',
+        'خەرجی پاراستن': 'purple',
+        'خەرجی سووڕان': 'teal',
+        'خەرجی بەڕێوەبردنی': 'indigo',
+        'خەرجی گەشەپێدان': 'pink',
+        'خەرجی پێویستەکان': 'orange'
     };
     return colors[type] || 'secondary';
+}
+
+// Get expense type icon
+function getExpenseTypeIcon(type) {
+    const icons = {
+        'بەکارهێنانی کاڵای کۆگا': 'fa-boxes',
+        'بەکارهێنانی گاز': 'fa-gas-pump',
+        'خەرجی تر': 'fa-ellipsis-h',
+        'خواردنگە': 'fa-utensils',
+        'ئۆفیس': 'fa-building',
+        'خەرجی سەیارە': 'fa-car',
+        'خەرجی ڕێگە': 'fa-road',
+        'خەرجی پاراستن': 'fa-tools',
+        'خەرجی سووڕان': 'fa-oil-can',
+        'خەرجی بەڕێوەبردنی': 'fa-cogs',
+        'خەرجی گەشەپێدان': 'fa-chart-line',
+        'خەرجی پێویستەکان': 'fa-clipboard-list'
+    };
+    return icons[type] || 'fa-money-bill';
 }
 
 // Format number with commas

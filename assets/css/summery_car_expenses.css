@@ -1046,6 +1046,145 @@
     border-right-color: #495057;
 }
 
+/* Expense Type Summary Cards */
+.expense-type-summary {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid #dee2e6;
+}
+
+.expense-type-card {
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.expense-type-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+}
+
+.expense-type-card .card-body {
+    position: relative;
+}
+
+.expense-type-icon {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.05);
+}
+
+.expense-type-stats .stat-item {
+    padding: 0.5rem;
+    border-radius: 6px;
+    background: rgba(0,0,0,0.02);
+    transition: background-color 0.2s ease;
+}
+
+.expense-type-stats .stat-item:hover {
+    background: rgba(0,0,0,0.05);
+}
+
+.expense-type-stats .stat-item small {
+    font-size: 0.75em;
+    font-weight: 500;
+}
+
+.expense-type-stats .stat-item strong {
+    font-size: 0.9em;
+    display: block;
+    margin-top: 0.25rem;
+}
+
+/* Custom expense type badge colors */
+.badge.bg-purple {
+    background-color: #6f42c1 !important;
+}
+
+.badge.bg-teal {
+    background-color: #20c997 !important;
+}
+
+.badge.bg-indigo {
+    background-color: #6610f2 !important;
+}
+
+.badge.bg-pink {
+    background-color: #e83e8c !important;
+}
+
+.badge.bg-orange {
+    background-color: #fd7e14 !important;
+}
+
+.badge.bg-dark {
+    background-color: #343a40 !important;
+}
+
+/* Enhanced expense type display */
+.expense-type-badge {
+    font-size: 0.8em;
+    padding: 0.4em 0.8em;
+    border-radius: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Expense type specific styling */
+.expense-type-warehouse {
+    border-left: 4px solid #007bff;
+}
+
+.expense-type-gas {
+    border-left: 4px solid #28a745;
+}
+
+.expense-type-other {
+    border-left: 4px solid #17a2b8;
+}
+
+.expense-type-food {
+    border-left: 4px solid #ffc107;
+}
+
+.expense-type-office {
+    border-left: 4px solid #6c757d;
+}
+
+.expense-type-car {
+    border-left: 4px solid #dc3545;
+}
+
+.expense-type-road {
+    border-left: 4px solid #343a40;
+}
+
+.expense-type-maintenance {
+    border-left: 4px solid #6f42c1;
+}
+
+.expense-type-fuel {
+    border-left: 4px solid #20c997;
+}
+
+.expense-type-management {
+    border-left: 4px solid #6610f2;
+}
+
+.expense-type-development {
+    border-left: 4px solid #e83e8c;
+}
+
+.expense-type-necessities {
+    border-left: 4px solid #fd7e14;
+}
+
 /* Expandable expense rows */
 .expense-row {
     cursor: pointer;
@@ -1196,6 +1335,14 @@
     
     .btn-group-sm .btn {
         margin-bottom: 0.25rem;
+    }
+    
+    .expense-type-summary {
+        padding: 1rem;
+    }
+    
+    .expense-type-card {
+        margin-bottom: 1rem;
     }
 }
 
