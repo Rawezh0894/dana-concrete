@@ -1,327 +1,732 @@
-// Car Expenses Summary Information Handler
-
 // Global variables
-let carExpensesData = [];
-let summaryStats = {
-    total_cars: 0,
-    total_gas_expenses: 0,
-    total_material_expenses: 0,
-    total_expenses: 0
-};
+let expensesData = [];
+let expenseTypeChart = null;
+let carExpenseChart = null;
 
-// Load car expenses data based on filters
-function loadCarExpensesData(filters = {}) {
-    // Show loading state
-    $('#summary-cards').addClass('loading');
+// Load expenses data
+function loadExpensesData() {
+    showLoading();
     
-    // Build query parameters
-    const params = new URLSearchParams();
-    if (filters.car_id) params.append('car_id', filters.car_id);
-    if (filters.employee_id) params.append('employee_id', filters.employee_id);
-    if (filters.date_from) params.append('date_from', filters.date_from);
-    if (filters.date_to) params.append('date_to', filters.date_to);
-
-    // Make AJAX request
-    $.ajax({
-        url: '../process/summery_car_expenses/get_informations.php',
-        method: 'GET',
-        data: params.toString(),
-        dataType: 'json',
-        success: function(response) {
-            if (response.success) {
-                carExpensesData = response.data || [];
-                summaryStats = response.summary || {};
-                
-                // Debug logging
-                console.log('Car expenses data:', carExpensesData);
-                console.log('Summary stats:', summaryStats);
-                
-                displayCarExpensesSummary();
-                updateSummaryCards();
-            } else {
-                console.error('Error loading data:', response.message);
-                showErrorMessage('هەڵە لە بارکردنی داتا: ' + response.message);
+    const filters = getCurrentFilters();
+    console.log('🚗 Loading expenses data with filters:', filters);
+    console.log('📅 Date range:', filters.from_date, 'to', filters.to_date);
+    
+    // Add timeout
+    const timeoutId = setTimeout(() => {
+        hideLoading();
+        showError('کاتی چاوەڕوانی تەواو بوو. تکایە دووبارە هەوڵ بدە');
+    }, 30000); // 30 seconds
+    
+    const apiUrl = `../process/summery_car_expenses/get_informations.php?${new URLSearchParams(filters)}`;
+    console.log('🌐 API URL:', apiUrl);
+    
+    fetch(apiUrl)
+        .then(response => {
+            clearTimeout(timeoutId);
+            console.log('📡 Response status:', response.status);
+            console.log('📡 Response headers:', response.headers);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-        },
-        error: function(xhr, status, error) {
-            console.error('AJAX Error:', error);
-            console.error('Response:', xhr.responseText);
-            showErrorMessage('هەڵە لە پەیوەندی بە سێرڤەر');
-        },
-        complete: function() {
-            $('#summary-cards').removeClass('loading');
-        }
-    });
+            return response.json();
+        })
+        .then(data => {
+            console.log('📊 Received data:', data);
+            console.log('📊 Data count:', data.data ? data.data.length : 0);
+            console.log('📊 Summary:', data.summary);
+            hideLoading();
+            if (data.success) {
+                expensesData = data.data;
+                updateSummaryStats(data.summary);
+                updateExpensesTable(data.data);
+                updateCharts(data.summary);
+                updateTotalRecords(data.data.length);
+                
+                // Show message if exists
+                if (data.message) {
+                    console.log('💬 Message:', data.message);
+                    showInfo(data.message);
+                }
+            } else {
+                console.error('❌ API Error:', data.error);
+                showError('هەڵە لە وەرگرتنی داتاکان: ' + (data.error || 'هەڵەی نەناسراو'));
+            }
+        })
+        .catch(error => {
+            clearTimeout(timeoutId);
+            hideLoading();
+            console.error('💥 Fetch Error:', error);
+            console.error('💥 Error stack:', error.stack);
+            showError('هەڵە لە پەیوەندی بە سێرڤەر: ' + error.message);
+        });
 }
 
-// Display car expenses summary in table
-function displayCarExpensesSummary() {
-    const tbody = $('#carSummaryTable tbody');
-    tbody.empty();
+// Get current filter values
+function getCurrentFilters() {
+    return {
+        car_id: $('#filter_car_id').val(),
+        employee_id: $('#filter_employee_id').val(),
+        expense_type: $('#filter_expense_type').val(),
+        payment_type: $('#filter_payment_type').val(),
+        from_date: $('#filter_from_date').val(),
+        to_date: $('#filter_to_date').val()
+    };
+}
 
-    if (carExpensesData.length === 0) {
-        tbody.html(`
+// Update summary statistics
+function updateSummaryStats(summary) {
+    $('#total_usd').text('$' + formatNumber(summary.total_usd));
+    $('#total_iqd').text(formatNumber(summary.total_iqd) + ' د.ع');
+    $('#total_cars').text(summary.total_cars);
+    $('#total_expenses').text(summary.total_expenses);
+    $('#total_gas').text(formatNumber(summary.total_gas) + ' لیتر');
+    $('#total_materials').text(summary.total_materials);
+    
+    // Add visual feedback for empty data
+    if (summary.total_expenses === 0) {
+        $('.summary-card').addClass('opacity-50');
+        $('.summary-card small').text('هیچ داتایەک نییە');
+    } else {
+        $('.summary-card').removeClass('opacity-50');
+        $('.summary-card small').each(function() {
+            const originalText = $(this).data('original-text') || $(this).text();
+            $(this).data('original-text', originalText);
+            $(this).text(originalText);
+        });
+    }
+}
+
+// Update expenses table
+function updateExpensesTable(data) {
+    const tbody = $('#expensesTableBody');
+    tbody.empty();
+    
+    if (data.length === 0) {
+        tbody.append(`
             <tr>
-                <td colspan="8" class="text-center text-muted">
-                    <div class="py-4">
-                        <i class="fas fa-info-circle fa-2x mb-3 text-info"></i>
-                        <h6>هیچ داتایەک نەدۆزرایەوە</h6>
-                        <p class="mb-0">تکایە بەرواری هەڵبژێرە یان فلتەرەکان بگۆڕە</p>
-                        <small class="text-muted">دەتوانیت دوگمەی "تاقیکردنەوەی هەموو داتا" بەکاربهێنیت</small>
-                    </div>
+                <td colspan="14" class="text-center text-muted py-4">
+                    <i class="fas fa-inbox fa-2x mb-2"></i>
+                    <br>هیچ داتایەک نەدۆزرا
                 </td>
             </tr>
         `);
         return;
     }
-
-    carExpensesData.forEach((car, index) => {
-        const row = createCarExpensesRow(car, index + 1);
+    
+    data.forEach((expense, index) => {
+        const row = `
+            <tr class="expense-row" data-expense-id="${expense.id || index}">
+                <td>
+                    <button class="btn btn-sm btn-outline-primary expand-btn" onclick="toggleExpenseDetails(${index})" title="پیشاندانی وردەکاری">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    ${index + 1}
+                </td>
+                <td>${formatDate(expense.date)}</td>
+                <td>${expense.car_name || '-'}</td>
+                <td>${expense.employee_name || '-'}</td>
+                <td>
+                    <span class="badge bg-${getExpenseTypeColor(expense.expense_type)}">
+                        ${expense.expense_type}
+                    </span>
+                </td>
+                <td>${expense.purpose || '-'}</td>
+                <td>${expense.gas_liters ? formatNumber(expense.gas_liters) + ' لیتر' : '-'}</td>
+                <td>${expense.material_quantity ? formatNumber(expense.material_quantity) + ' ' + (expense.material_unit_type || '') : '-'}</td>
+                <td>${expense.amount_iqd ? formatNumber(expense.amount_iqd) + ' د.ع' : '-'}</td>
+                <td>${expense.amount_usd ? '$' + formatNumber(expense.amount_usd) : '-'}</td>
+                <td>
+                    <span class="badge bg-${expense.payment_type === 'نەقد' ? 'success' : 'warning'}">
+                        ${expense.payment_type}
+                    </span>
+                </td>
+                <td>${expense.invoice_number || '-'}</td>
+                <td>${formatDate(expense.date)}</td>
+                <td>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-info btn-sm" onclick="showExpenseSummary(${index})" title="پوختەی خەرجی">
+                            <i class="fas fa-chart-pie"></i>
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="showExpenseDetails(${index})" title="وردەکاری">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            <tr class="expense-details-row" id="expense-details-${index}" style="display: none;">
+                <td colspan="14" class="p-0">
+                    <div class="expense-details-content p-3" style="background-color: #f8f9fa; border-left: 4px solid var(--kelly-green);">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-primary mb-3">
+                                    <i class="fas fa-info-circle me-2"></i>وردەکاری خەرجی
+                                </h6>
+                                <div class="expense-details-info">
+                                    <p><strong>مەبەست:</strong> ${expense.purpose || 'هیچ مەبەستێک دیاری نەکراوە'}</p>
+                                    <p><strong>بەرواری درووستکردن:</strong> ${formatDate(expense.created_at || expense.date)}</p>
+                                    <p><strong>ژمارەی فاکتۆر:</strong> ${expense.invoice_number || 'هیچ ژمارەیەک دیاری نەکراوە'}</p>
+                                    <p><strong>تێبینی:</strong> ${expense.notes || 'هیچ تێبینێک نییە'}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-success mb-3">
+                                    <i class="fas fa-calculator me-2"></i>پوختەی خەرجی
+                                </h6>
+                                <div class="expense-summary-info">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <div class="summary-item">
+                                                <span class="label">بڕی دینار:</span>
+                                                <span class="value text-primary">${expense.amount_iqd ? formatNumber(expense.amount_iqd) + ' د.ع' : '0 د.ع'}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="summary-item">
+                                                <span class="label">بڕی دۆلار:</span>
+                                                <span class="value text-success">${expense.amount_usd ? '$' + formatNumber(expense.amount_usd) : '$0.00'}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-6">
+                                            <div class="summary-item">
+                                                <span class="label">بڕی گاز:</span>
+                                                <span class="value text-warning">${expense.gas_liters ? formatNumber(expense.gas_liters) + ' لیتر' : '0 لیتر'}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="summary-item">
+                                                <span class="label">بڕی کاڵا:</span>
+                                                <span class="value text-info">${expense.material_quantity ? formatNumber(expense.material_quantity) + ' ' + (expense.material_unit_type || '') : '0'}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        `;
         tbody.append(row);
     });
 }
 
-// Create table row for car expenses
-function createCarExpensesRow(car, index) {
-    const gasExpenses = formatCurrency(car.total_gas_expenses_usd, 'USD');
-    const materialExpenses = formatCurrency(car.total_material_expenses_usd, 'USD');
-    const totalExpenses = formatCurrency(car.total_expenses_usd, 'USD');
-    const paymentStatus = getPaymentStatusBadge(car.payment_status);
-
-    return `
-        <tr>
-            <td>${index}</td>
-            <td>
-                <strong>${escapeHtml(car.car_name)}</strong>
-                ${car.employee_name ? `<br><small class="text-muted">${escapeHtml(car.employee_name)}</small>` : ''}
-            </td>
-            <td>
-                <span class="badge bg-primary">${car.expense_count}</span>
-            </td>
-            <td class="text-success">${gasExpenses}</td>
-            <td class="text-warning">${materialExpenses}</td>
-            <td class="text-danger fw-bold">${totalExpenses}</td>
-            <td>${paymentStatus}</td>
-            <td>
-                <button class="btn btn-sm btn-view-details" onclick="viewCarDetails(${car.car_id})">
-                    <i class="fas fa-eye me-1"></i>وردەکاری
-                </button>
-            </td>
-        </tr>
-    `;
-}
-
-// Update summary cards with current data
-function updateSummaryCards() {
-    console.log('Updating summary cards with:', summaryStats);
+// Update charts
+function updateCharts(summary) {
+    if (summary.expense_type_distribution && summary.expense_type_distribution.length > 0) {
+        updateExpenseTypeChart(summary.expense_type_distribution);
+    } else {
+        showEmptyChart('expenseTypeChart', 'هیچ داتایەک نییە بۆ پیشاندان');
+    }
     
-    $('#total_cars').text(summaryStats.total_cars || 0);
-    $('#total_gas_expenses').text(formatCurrency(summaryStats.total_gas_expenses_usd, 'USD'));
-    $('#total_material_expenses').text(formatCurrency(summaryStats.total_material_expenses_usd, 'USD'));
-    $('#total_expenses').text(formatCurrency(summaryStats.total_expenses_usd, 'USD'));
-    
-    console.log('Summary cards updated:', {
-        total_cars: summaryStats.total_cars || 0,
-        total_gas_expenses_usd: summaryStats.total_gas_expenses_usd || 0,
-        total_material_expenses_usd: summaryStats.total_material_expenses_usd || 0,
-        total_expenses_usd: summaryStats.total_expenses_usd || 0
-    });
-    
-    // Update debug info if visible
-    updateDebugInfo();
-}
-
-// Update debug information display
-function updateDebugInfo() {
-    if ($('#debug_summary').is(':visible')) {
-        $('#debug_car_count').text(carExpensesData.length || 0);
-        $('#debug_gas_total').text('$' + (summaryStats.total_gas_expenses_usd || 0));
-        $('#debug_material_total').text('$' + (summaryStats.total_material_expenses_usd || 0));
-        $('#debug_total').text('$' + (summaryStats.total_expenses_usd || 0));
+    if (summary.car_expenses && summary.car_expenses.length > 0) {
+        updateCarExpenseChart(summary.car_expenses);
+    } else {
+        showEmptyChart('carExpenseChart', 'هیچ داتایەک نییە بۆ پیشاندان');
     }
 }
 
-// View car details in modal
-function viewCarDetails(carId) {
-    // Show loading in modal
-    $('#carDetailsContent').html('<div class="text-center p-5"><i class="fas fa-spinner fa-spin fa-2x"></i><p class="mt-3">سڕینەوە...</p></div>');
-    $('#carDetailsModal').modal('show');
+// Show empty chart message
+function showEmptyChart(canvasId, message) {
+    const canvas = document.getElementById(canvasId);
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw empty message
+        ctx.fillStyle = '#6c757d';
+        ctx.font = '16px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(message, canvas.width / 2, canvas.height / 2);
+    }
+}
 
-    // Load car details
-    $.ajax({
-        url: '../process/summery_car_expenses/get_car_details.php',
-        method: 'GET',
-        data: { car_id: carId },
-        dataType: 'json',
-        success: function(response) {
-            if (response.success) {
-                displayCarDetails(response.data);
-            } else {
-                $('#carDetailsContent').html(`
-                    <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        هەڵە لە بارکردنی وردەکاری: ${response.message}
-                    </div>
-                `);
+// Handle chart resize
+function handleChartResize() {
+    if (expenseTypeChart) {
+        expenseTypeChart.resize();
+    }
+    if (carExpenseChart) {
+        carExpenseChart.resize();
+    }
+}
+
+// Add resize event listener
+window.addEventListener('resize', handleChartResize);
+
+// Update expense type pie chart
+function updateExpenseTypeChart(data) {
+    const ctx = document.getElementById('expenseTypeChart').getContext('2d');
+    
+    if (expenseTypeChart) {
+        expenseTypeChart.destroy();
+    }
+    
+    const chartData = {
+        labels: data.map(item => item.type),
+        datasets: [{
+            data: data.map(item => item.amount),
+            backgroundColor: [
+                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+                '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0', '#FF6384'
+            ],
+            borderWidth: 2,
+            borderColor: '#fff'
+        }]
+    };
+    
+    expenseTypeChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: chartData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: {
+                padding: {
+                    top: 10,
+                    bottom: 10
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        font: {
+                            size: 12
+                        },
+                        usePointStyle: true,
+                        padding: 15
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            return `${label}: ${formatNumber(value)} (${percentage}%)`;
+                        }
+                    }
+                }
             }
-        },
-        error: function() {
-            $('#carDetailsContent').html(`
-                <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    هەڵە لە پەیوەندی بە سێرڤەر
-                </div>
-            `);
         }
     });
 }
 
-// Display car details in modal
-function displayCarDetails(carData) {
-    const detailsHtml = `
-        <div class="row">
-            <div class="col-md-12 mb-4">
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">
-                            <i class="fas fa-car me-2"></i>
-                            ${escapeHtml(carData.car_name)}
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-3">
-                                <div class="text-center">
-                                    <i class="fas fa-gas-pump fa-3x text-success mb-2"></i>
-                                    <h6>کۆی خەرجی گاز</h6>
-                                    <h4 class="text-success">${formatCurrency(carData.total_gas_expenses_usd, 'USD')}</h4>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="text-center">
-                                    <i class="fas fa-boxes fa-3x text-warning mb-2"></i>
-                                    <h6>کۆی خەرجی کاڵا</h6>
-                                    <h4 class="text-warning">${formatCurrency(carData.total_material_expenses_usd, 'USD')}</h4>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="text-center">
-                                    <i class="fas fa-dollar-sign fa-3x text-danger mb-2"></i>
-                                    <h6>کۆی گشتی</h6>
-                                    <h4 class="text-danger">${formatCurrency(carData.total_expenses_usd, 'USD')}</h4>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="text-center">
-                                    <i class="fas fa-list fa-3x text-info mb-2"></i>
-                                    <h6>ژمارەی خەرجیەکان</h6>
-                                    <h4 class="text-info">${carData.expense_count}</h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header bg-secondary text-white">
-                        <h6 class="mb-0">
-                            <i class="fas fa-list-alt me-2"></i>
-                            وردەکاری خەرجیەکان
-                        </h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-sm table-bordered">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>بەروار</th>
-                                        <th>مەبەست</th>
-                                        <th>جۆری خەرجی</th>
-                                        <th>بڕی گاز</th>
-                                        <th>کاڵا</th>
-                                        <th>بڕی کاڵا</th>
-                                        <th>کۆی نرخ</th>
-                                        <th>دۆخی پارەدان</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${carData.expenses.map(expense => `
-                                        <tr>
-                                            <td>${formatDate(expense.date)}</td>
-                                            <td>${escapeHtml(expense.purpose)}</td>
-                                            <td>${escapeHtml(expense.expense_type)}</td>
-                                            <td>${expense.gas_liters ? expense.gas_liters + ' لیتر' : '-'}</td>
-                                            <td>${expense.material_name || '-'}</td>
-                                            <td>${expense.material_quantity ? expense.material_quantity + ' ' + (expense.usage_unit_type || '') : '-'}</td>
-                                            <td>${formatCurrency(expense.total_cost_usd, 'USD')}</td>
-                                            <td>${getPaymentStatusBadge(expense.payment_status)}</td>
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-
-    $('#carDetailsContent').html(detailsHtml);
-}
-
-// Utility functions
-function formatCurrency(amount, currency) {
-    if (!amount || isNaN(amount)) return '0';
-    const num = parseFloat(amount);
-    if (currency === 'USD') {
-        return '$' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    } else {
-        return num.toLocaleString('ar-IQ') + ' د.ع';
+// Update car expenses bar chart
+function updateCarExpenseChart(data) {
+    const ctx = document.getElementById('carExpenseChart').getContext('2d');
+    
+    if (carExpenseChart) {
+        carExpenseChart.destroy();
     }
+    
+    const chartData = {
+        labels: data.map(item => item.car_name),
+        datasets: [{
+            label: 'خەرجی بە دۆلار',
+            data: data.map(item => item.total_usd),
+            backgroundColor: 'rgba(54, 162, 235, 0.8)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 2,
+            borderRadius: 5,
+            borderSkipped: false
+        }, {
+            label: 'خەرجی بە دینار',
+            data: data.map(item => item.total_iqd / 1000), // Convert to thousands for better display
+            backgroundColor: 'rgba(255, 206, 86, 0.8)',
+            borderColor: 'rgba(255, 206, 86, 1)',
+            borderWidth: 2,
+            borderRadius: 5,
+            borderSkipped: false
+        }]
+    };
+    
+    carExpenseChart = new Chart(ctx, {
+        type: 'bar',
+        data: chartData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: {
+                padding: {
+                    top: 10,
+                    bottom: 10
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value, index, values) {
+                            if (this.getDatasetForEvent) {
+                                const datasetIndex = this.getDatasetForEvent(0).datasetIndex;
+                                if (datasetIndex === 1) {
+                                    return formatNumber(value) + 'K د.ع';
+                                }
+                            }
+                            return '$' + formatNumber(value);
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        font: {
+                            size: 12
+                        },
+                        padding: 15
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.dataset.label || '';
+                            const value = context.parsed.y;
+                            if (context.datasetIndex === 1) {
+                                return `${label}: ${formatNumber(value * 1000)} د.ع`;
+                            }
+                            return `${label}: $${formatNumber(value)}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
 }
 
+// Update total records count
+function updateTotalRecords(count) {
+    $('#total-records').text(count + ' خەرجی');
+}
+
+// Get expense type color
+function getExpenseTypeColor(type) {
+    const colors = {
+        'بەکارهێنانی کاڵای کۆگا': 'primary',
+        'بەکارهێنانی گاز': 'success',
+        'خەرجی تر': 'info',
+        'خواردنگە': 'warning',
+        'ئۆفیس': 'secondary'
+    };
+    return colors[type] || 'secondary';
+}
+
+// Format number with commas
+function formatNumber(num) {
+    if (num === null || num === undefined) return '0';
+    return parseFloat(num).toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+}
+
+// Format date
 function formatDate(dateString) {
     if (!dateString) return '-';
     const date = new Date(dateString);
     return date.toLocaleDateString('ku-IQ');
 }
 
-function getPaymentStatusBadge(status) {
-    switch(status) {
-        case 'paid':
-            return '<span class="badge bg-success">پارەی داوە</span>';
-        case 'pending':
-            return '<span class="badge bg-warning">چاوەڕوان</span>';
-        case 'overdue':
-            return '<span class="badge bg-danger">دواکەوتوو</span>';
-        default:
-            return '<span class="badge bg-secondary">نەزانراو</span>';
+// Show error message
+function showError(message) {
+    // You can implement a better error display system
+    alert('هەڵە: ' + message);
+}
+
+// Show info message
+function showInfo(message) {
+    // Create info alert
+    const infoAlert = `
+        <div class="alert alert-info alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+            <i class="fas fa-info-circle me-2"></i>${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    // Remove existing alerts
+    $('.alert-info').remove();
+    
+    // Add new alert
+    $('body').append(infoAlert);
+    
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+        $('.alert-info').fadeOut();
+    }, 5000);
+}
+
+// Generate comprehensive report
+function generateReport() {
+    showLoading();
+    
+    const filters = getCurrentFilters();
+    const reportData = {
+        filters: filters,
+        data: expensesData,
+        generated_at: new Date().toISOString(),
+        user: '<?php echo $_SESSION["user_name"] ?? "Unknown"; ?>'
+    };
+    
+    // Create report content
+    let reportContent = `
+        <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right;">
+            <h2 style="color: #28a745; text-align: center;">ڕاپۆرتی خەرجیەکانی سەیارەکان</h2>
+            <hr>
+            <p><strong>بەرواری درووستکردن:</strong> ${new Date().toLocaleDateString('ku-IQ')}</p>
+            <p><strong>بەکارهێنەر:</strong> ${reportData.user}</p>
+            
+            <h3>فلتەرەکان:</h3>
+            <ul>
+                ${filters.car_id ? `<li>سەیارە: ${$('#filter_car_id option:selected').text()}</li>` : ''}
+                ${filters.employee_id ? `<li>کارمەند: ${$('#filter_employee_id option:selected').text()}</li>` : ''}
+                ${filters.expense_type ? `<li>جۆری خەرجی: ${$('#filter_expense_type option:selected').text()}</li>` : ''}
+                ${filters.payment_type ? `<li>جۆری پارەدان: ${$('#filter_payment_type option:selected').text()}</li>` : ''}
+                ${filters.from_date ? `<li>لە بەروار: ${filters.from_date}</li>` : ''}
+                ${filters.to_date ? `<li>بۆ بەروار: ${filters.to_date}</li>` : ''}
+            </ul>
+            
+            <h3>ئامارەکان:</h3>
+            <p>کۆی خەرجی بە دۆلار: $${$('#total_usd').text()}</p>
+            <p>کۆی خەرجی بە دینار: ${$('#total_iqd').text()}</p>
+            <p>ژمارەی سەیارەکان: ${$('#total_cars').text()}</p>
+            <p>ژمارەی خەرجیەکان: ${$('#total_expenses').text()}</p>
+        </div>
+    `;
+    
+    // Create new window for report
+    const reportWindow = window.open('', '_blank');
+    reportWindow.document.write(`
+        <!DOCTYPE html>
+        <html dir="rtl">
+        <head>
+            <title>ڕاپۆرتی خەرجیەکانی سەیارەکان</title>
+            <meta charset="UTF-8">
+            <style>
+                body { font-family: Arial, sans-serif; margin: 20px; }
+                table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+                th { background-color: #f2f2f2; }
+                .summary { background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0; }
+            </style>
+        </head>
+        <body>
+            ${reportContent}
+            <div class="summary">
+                <h3>تەفەسڵی خەرجیەکان:</h3>
+                ${generateReportTable()}
+            </div>
+        </body>
+        </html>
+    `);
+    
+    hideLoading();
+}
+
+// Generate report table
+function generateReportTable() {
+    if (expensesData.length === 0) {
+        return '<p>هیچ داتایەک نەدۆزرا</p>';
+    }
+    
+    let table = `
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>بەروار</th>
+                    <th>سەیارە</th>
+                    <th>کارمەند</th>
+                    <th>جۆری خەرجی</th>
+                    <th>مەبەست</th>
+                    <th>بڕی دینار</th>
+                    <th>بڕی دۆلار</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+    
+    expensesData.forEach((expense, index) => {
+        table += `
+            <tr>
+                <td>${index + 1}</td>
+                <td>${formatDate(expense.date)}</td>
+                <td>${expense.car_name || '-'}</td>
+                <td>${expense.employee_name || '-'}</td>
+                <td>${expense.expense_type}</td>
+                <td>${expense.purpose || '-'}</td>
+                <td>${expense.amount_iqd ? formatNumber(expense.amount_iqd) + ' د.ع' : '-'}</td>
+                <td>${expense.amount_usd ? '$' + formatNumber(expense.amount_usd) : '-'}</td>
+            </tr>
+        `;
+    });
+    
+    table += '</tbody></table>';
+    return table;
+}
+
+// Toggle expense details row
+function toggleExpenseDetails(index) {
+    const detailsRow = document.getElementById(`expense-details-${index}`);
+    const expandBtn = document.querySelector(`[onclick="toggleExpenseDetails(${index})"] i`);
+    
+    if (detailsRow.style.display === 'none') {
+        // Show details
+        detailsRow.style.display = 'table-row';
+        expandBtn.classList.remove('fa-chevron-down');
+        expandBtn.classList.add('fa-chevron-up');
+        expandBtn.parentElement.title = 'خەبەکردنەوەی وردەکاری';
+    } else {
+        // Hide details
+        detailsRow.style.display = 'none';
+        expandBtn.classList.remove('fa-chevron-up');
+        expandBtn.classList.add('fa-chevron-down');
+        expandBtn.parentElement.title = 'پیشاندانی وردەکاری';
     }
 }
 
-function escapeHtml(text) {
-    if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+// Show expense summary in a modal
+function showExpenseSummary(index) {
+    const expense = expensesData[index];
+    
+    const summaryContent = `
+        <div class="modal-header">
+            <h5 class="modal-title">
+                <i class="fas fa-chart-pie me-2"></i>پوختەی خەرجی - ${expense.car_name || 'سەیارەی نەناسراو'}
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="summary-card bg-primary text-white p-3 rounded mb-3">
+                        <h6><i class="fas fa-coins me-2"></i>بڕی دینار</h6>
+                        <h4>${expense.amount_iqd ? formatNumber(expense.amount_iqd) + ' د.ع' : '0 د.ع'}</h4>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="summary-card bg-success text-white p-3 rounded mb-3">
+                        <h6><i class="fas fa-dollar-sign me-2"></i>بڕی دۆلار</h6>
+                        <h4>${expense.amount_usd ? '$' + formatNumber(expense.amount_usd) : '$0.00'}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="summary-card bg-warning text-dark p-3 rounded mb-3">
+                        <h6><i class="fas fa-gas-pump me-2"></i>بڕی گاز</h6>
+                        <h4>${expense.gas_liters ? formatNumber(expense.gas_liters) + ' لیتر' : '0 لیتر'}</h4>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="summary-card bg-info text-white p-3 rounded mb-3">
+                        <h6><i class="fas fa-boxes me-2"></i>بڕی کاڵا</h6>
+                        <h4>${expense.material_quantity ? formatNumber(expense.material_quantity) + ' ' + (expense.material_unit_type || '') : '0'}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="expense-details mt-3">
+                <h6 class="text-primary">وردەکاری:</h6>
+                <ul class="list-unstyled">
+                    <li><strong>جۆری خەرجی:</strong> ${expense.expense_type}</li>
+                    <li><strong>مەبەست:</strong> ${expense.purpose || 'هیچ مەبەستێک دیاری نەکراوە'}</li>
+                    <li><strong>جۆری پارەدان:</strong> ${expense.payment_type}</li>
+                    <li><strong>بەروار:</strong> ${formatDate(expense.date)}</li>
+                </ul>
+            </div>
+        </div>
+    `;
+    
+    // Create and show modal
+    showModal('پوختەی خەرجی', summaryContent);
 }
 
-function showErrorMessage(message) {
-    Swal.fire({
-        icon: 'error',
-        title: 'هەڵە',
-        text: message,
-        confirmButtonText: 'باشە'
+// Show expense details in a modal
+function showExpenseDetails(index) {
+    const expense = expensesData[index];
+    
+    const detailsContent = `
+        <div class="modal-header">
+            <h5 class="modal-title">
+                <i class="fas fa-eye me-2"></i>وردەکاری خەرجی - ${expense.car_name || 'سەیارەی نەناسراو'}
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 class="text-primary">زانیاری سەرەکی:</h6>
+                    <table class="table table-sm">
+                        <tr><td><strong>سەیارە:</strong></td><td>${expense.car_name || '-'}</td></tr>
+                        <tr><td><strong>کارمەند:</strong></td><td>${expense.employee_name || '-'}</td></tr>
+                        <tr><td><strong>جۆری خەرجی:</strong></td><td>${expense.expense_type}</td></tr>
+                        <tr><td><strong>مەبەست:</strong></td><td>${expense.purpose || '-'}</td></tr>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="text-success">زانیاری پارە:</h6>
+                    <table class="table table-sm">
+                        <tr><td><strong>بڕی دینار:</strong></td><td>${expense.amount_iqd ? formatNumber(expense.amount_iqd) + ' د.ع' : '-'}</td></tr>
+                        <tr><td><strong>بڕی دۆلار:</strong></td><td>${expense.amount_usd ? '$' + formatNumber(expense.amount_usd) : '-'}</td></tr>
+                        <tr><td><strong>جۆری پارەدان:</strong></td><td>${expense.payment_type}</td></tr>
+                        <tr><td><strong>ژمارەی فاکتۆر:</strong></td><td>${expense.invoice_number || '-'}</td></tr>
+                    </table>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-md-6">
+                    <h6 class="text-warning">زانیاری گاز و کاڵا:</h6>
+                    <table class="table table-sm">
+                        <tr><td><strong>بڕی گاز:</strong></td><td>${expense.gas_liters ? formatNumber(expense.gas_liters) + ' لیتر' : '-'}</td></tr>
+                        <tr><td><strong>بڕی کاڵا:</strong></td><td>${expense.material_quantity ? formatNumber(expense.material_quantity) + ' ' + (expense.material_unit_type || '') : '-'}</td></tr>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="text-info">زانیاری تر:</h6>
+                    <table class="table table-sm">
+                        <tr><td><strong>بەروار:</strong></td><td>${formatDate(expense.date)}</td></tr>
+                        <tr><td><strong>بەرواری درووستکردن:</strong></td><td>${formatDate(expense.created_at || expense.date)}</td></tr>
+                        <tr><td><strong>تێبینی:</strong></td><td>${expense.notes || '-'}</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Create and show modal
+    showModal('وردەکاری خەرجی', detailsContent);
+}
+
+// Show modal function
+function showModal(title, content) {
+    // Remove existing modal if any
+    $('.expense-modal').remove();
+    
+    const modal = `
+        <div class="modal fade expense-modal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    ${content}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    $('body').append(modal);
+    
+    // Show modal
+    const modalElement = $('.expense-modal');
+    modalElement.modal('show');
+    
+    // Remove modal from DOM when hidden
+    modalElement.on('hidden.bs.modal', function() {
+        $(this).remove();
     });
 }
 
-// Export functions to global scope
-window.loadCarExpensesData = loadCarExpensesData;
-window.viewCarDetails = viewCarDetails;
-window.carExpensesData = carExpensesData;
-window.summaryStats = summaryStats;
-window.updateDebugInfo = updateDebugInfo;
+

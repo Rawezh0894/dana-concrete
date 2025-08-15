@@ -1,183 +1,265 @@
 <?php
+session_start();
 require_once '../../config/db_conected.php';
 require_once '../../config/permissions.php';
 
-// Check if user is logged in
-if (!isset($_SESSION['user_id'])) {
-    echo json_encode(['success' => false, 'message' => 'User not logged in']);
-    exit;
-}
-
-// Check if user has permission to view car expenses summary
-if (!hasPermission('view_car_expenses_summary')) {
-    echo json_encode(['success' => false, 'message' => 'Permission denied']);
-    exit;
-}
-
 header('Content-Type: application/json; charset=utf-8');
 
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['success' => false, 'error' => 'Unauthorized']);
+    exit;
+}
+
+if (!hasPermission('view_other_expenses')) {
+    echo json_encode(['success' => false, 'error' => 'ڕێگەت پێنەدراوە!']);
+    exit;
+}
+
+// Get filter parameters
+$car_id = $_GET['car_id'] ?? '';
+$employee_id = $_GET['employee_id'] ?? '';
+$expense_type = $_GET['expense_type'] ?? '';
+$payment_type = $_GET['payment_type'] ?? '';
+$from_date = $_GET['from_date'] ?? '';
+$to_date = $_GET['to_date'] ?? '';
+
+// Debug logging
+error_log("Car Expenses Summary - Filters: " . json_encode([
+    'car_id' => $car_id,
+    'employee_id' => $employee_id,
+    'expense_type' => $expense_type,
+    'payment_type' => $payment_type,
+    'from_date' => $from_date,
+    'to_date' => $to_date
+]));
+
+// Build WHERE clause
+$where = [];
+$params = [];
+
+if ($car_id) {
+    $where[] = "oe.car_id = ?";
+    $params[] = $car_id;
+}
+
+if ($employee_id) {
+    $where[] = "oe.employee_id = ?";
+    $params[] = $employee_id;
+}
+
+if ($expense_type) {
+    $where[] = "oe.expense_type = ?";
+    $params[] = $expense_type;
+}
+
+if ($payment_type) {
+    $where[] = "oe.payment_type = ?";
+    $params[] = $payment_type;
+}
+
+if ($from_date) {
+    $where[] = "DATE(oe.date) >= ?";
+    $params[] = $from_date;
+}
+
+if ($to_date) {
+    $where[] = "DATE(oe.date) <= ?";
+    $params[] = $to_date;
+}
+
+$where_sql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
+
+// Get detailed data
+$sql = "SELECT 
+    oe.*,
+    c.name AS car_name,
+    e.name AS employee_name,
+    m.name AS material_name,
+    oe.usage_unit_type AS material_unit_type
+FROM other_expenses oe
+LEFT JOIN cars c ON oe.car_id = c.id
+LEFT JOIN employees e ON oe.employee_id = e.id
+LEFT JOIN list_materials m ON oe.material_id = m.id
+$where_sql
+ORDER BY oe.date DESC, oe.id DESC";
+
 try {
-    // Get filter parameters
-    $car_id = isset($_GET['car_id']) ? intval($_GET['car_id']) : 0;
-    $employee_id = isset($_GET['employee_id']) ? intval($_GET['employee_id']) : 0;
-    $date_from = isset($_GET['date_from']) ? $_GET['date_from'] : '';
-    $date_to = isset($_GET['date_to']) ? $_GET['date_to'] : '';
-
-    // Build WHERE clause
-    $where_conditions = ['car_id IS NOT NULL AND car_id != 0'];
-    $params = [];
-
-    if ($car_id > 0) {
-        $where_conditions[] = 'car_id = ?';
-        $params[] = $car_id;
-    }
-
-    if ($employee_id > 0) {
-        $where_conditions[] = 'employee_id = ?';
-        $params[] = $employee_id;
-    }
-
-    // Only add date filters if they are provided
-    if ($date_from && $date_from !== '') {
-        $where_conditions[] = 'date >= ?';
-        $params[] = $date_from;
-    }
-
-    if ($date_to && $date_to !== '') {
-        $where_conditions[] = 'date <= ?';
-        $params[] = $date_to;
-    }
-
-    $where_clause = implode(' AND ', $where_conditions);
-
-    // Debug: Log the final WHERE clause and parameters
-    error_log("Final WHERE clause: " . $where_clause);
-    error_log("Final parameters: " . json_encode($params));
-
-    // Debug: Check what car expenses exist in the database
-    $debug_query = "
-        SELECT 
-            car_id,
-            expense_type,
-            gas_total_cost,
-            material_total_cost,
-            amount_usd,
-            amount_iqd,
-            currency_type,
-            date
-        FROM other_expenses 
-        WHERE car_id IS NOT NULL AND car_id != 0
-        ORDER BY date DESC
-        LIMIT 10
-    ";
+    // Debug logging
+    error_log("Car Expenses Summary - SQL: " . $sql);
+    error_log("Car Expenses Summary - Params: " . json_encode($params));
     
-    $debug_stmt = $pdo->query($debug_query);
-    $debug_data = $debug_stmt->fetchAll(PDO::FETCH_ASSOC);
-    error_log("Debug: Car expenses in database: " . json_encode($debug_data));
-
-    // Debug: Count total car expenses and cars with expenses
-    $count_query = "
-        SELECT 
-            COUNT(*) as total_expenses,
-            COUNT(DISTINCT car_id) as total_cars_with_expenses,
-            SUM(CASE WHEN expense_type = 'بەکارهێنانی گاز' THEN 1 ELSE 0 END) as gas_expenses_count,
-            SUM(CASE WHEN expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN 1 ELSE 0 END) as material_expenses_count
-        FROM other_expenses 
-        WHERE car_id IS NOT NULL AND car_id != 0
-    ";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    $count_stmt = $pdo->query($count_query);
-    $count_data = $count_stmt->fetch(PDO::FETCH_ASSOC);
-    error_log("Debug: Count summary: " . json_encode($count_data));
-
-    // Get summary statistics
-    $summary_query = "
-        SELECT 
-            COUNT(DISTINCT car_id) as total_cars,
-            SUM(CASE WHEN expense_type = 'بەکارهێنانی گاز' THEN gas_total_cost ELSE 0 END) as total_gas_expenses_usd,
-            SUM(CASE WHEN expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN material_total_cost ELSE 0 END) as total_material_expenses_usd,
-            SUM(CASE WHEN expense_type = 'بەکارهێنانی گاز' THEN gas_total_cost 
-                     WHEN expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN material_total_cost 
-                     ELSE 0 END) as total_expenses_usd
-        FROM other_expenses 
-        WHERE $where_clause
-    ";
-
-    $summary_stmt = $pdo->prepare($summary_query);
-    $summary_stmt->execute($params);
-    $summary = $summary_stmt->fetch(PDO::FETCH_ASSOC);
-
-    // Debug: Log the summary query and results
-    error_log("Summary query: " . $summary_query);
-    error_log("Summary params: " . json_encode($params));
-    error_log("Summary results: " . json_encode($summary));
-
-    // Get car expenses data
-    $cars_query = "
-        SELECT 
-            c.id as car_id,
-            c.name as car_name,
-            e.name as employee_name,
-            COUNT(oe.id) as expense_count,
-            SUM(CASE WHEN oe.expense_type = 'بەکارهێنانی گاز' THEN oe.gas_total_cost ELSE 0 END) as total_gas_expenses_usd,
-            SUM(CASE WHEN oe.expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN oe.material_total_cost ELSE 0 END) as total_material_expenses_usd,
-            SUM(CASE WHEN oe.expense_type = 'بەکارهێنانی گاز' THEN oe.gas_total_cost 
-                     WHEN oe.expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN oe.material_total_cost 
-                     ELSE 0 END) as total_expenses_usd,
-            CASE 
-                WHEN SUM(CASE WHEN oe.payment_type = 'قەرز' THEN 1 ELSE 0 END) > 0 THEN 'pending'
-                ELSE 'paid'
-            END as payment_status
-        FROM cars c
-        LEFT JOIN other_expenses oe ON c.id = oe.car_id AND $where_clause
-        LEFT JOIN employees e ON oe.employee_id = e.id
-        GROUP BY c.id, c.name, e.name
-        HAVING expense_count > 0
-        ORDER BY total_expenses_usd DESC
-    ";
-
-    $cars_stmt = $pdo->prepare($cars_query);
-    $cars_stmt->execute($params);
-    $cars_data = $cars_stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Debug: Log the cars query and results
-    error_log("Cars query: " . $cars_query);
-    error_log("Cars results count: " . count($cars_data));
-    if (count($cars_data) > 0) {
-        error_log("First car data: " . json_encode($cars_data[0]));
+    error_log("Car Expenses Summary - Data count: " . count($data));
+    
+    // Calculate summary statistics
+    $summary = calculateSummary($data, $pdo, $where_sql, $params);
+    
+    // Add message for empty data
+    $message = '';
+    if (count($data) === 0) {
+        $message = 'هیچ داتایەک نەدۆزرا بۆ ئەم فلتەرەکان. تکایە فلتەرەکان بگۆڕە یان داتای زیاتر زیاد بکە.';
     }
-
-    // Process data for better display
-    foreach ($cars_data as &$car) {
-        $car['total_gas_expenses_usd'] = floatval($car['total_gas_expenses_usd'] ?? 0);
-        $car['total_material_expenses_usd'] = floatval($car['total_material_expenses_usd'] ?? 0);
-        $car['total_expenses_usd'] = floatval($car['total_expenses_usd'] ?? 0);
-        $car['expense_count'] = intval($car['expense_count'] ?? 0);
-    }
-
-    // Process summary data
-    $summary['total_cars'] = intval($summary['total_cars'] ?? 0);
-    $summary['total_gas_expenses_usd'] = floatval($summary['total_gas_expenses_usd'] ?? 0);
-    $summary['total_material_expenses_usd'] = floatval($summary['total_material_expenses_usd'] ?? 0);
-    $summary['total_expenses_usd'] = floatval($summary['total_expenses_usd'] ?? 0);
-
+    
     echo json_encode([
         'success' => true,
-        'data' => $cars_data,
+        'data' => $data,
         'summary' => $summary,
-        'filters' => [
+        'message' => $message,
+        'filters_applied' => [
             'car_id' => $car_id,
             'employee_id' => $employee_id,
-            'date_from' => $date_from,
-            'date_to' => $date_to
+            'expense_type' => $expense_type,
+            'payment_type' => $payment_type,
+            'from_date' => $from_date,
+            'to_date' => $to_date
         ]
     ]);
-
-} catch (Exception $e) {
-    error_log("Error in get_informations.php: " . $e->getMessage());
+    
+} catch (PDOException $e) {
+    error_log("Car Expenses Summary Error: " . $e->getMessage());
     echo json_encode([
         'success' => false,
-        'message' => 'Database error occurred'
+        'error' => 'Database error: ' . $e->getMessage()
     ]);
+} catch (Exception $e) {
+    error_log("Car Expenses Summary General Error: " . $e->getMessage());
+    echo json_encode([
+        'success' => false,
+        'error' => 'General error: ' . $e->getMessage()
+    ]);
+}
+
+function calculateSummary($data, $pdo, $where_sql, $params) {
+    $summary = [
+        'total_usd' => 0,
+        'total_iqd' => 0,
+        'total_cars' => 0,
+        'total_expenses' => count($data),
+        'total_gas' => 0,
+        'total_materials' => 0,
+        'expense_type_distribution' => [],
+        'car_expenses' => [],
+        'monthly_trend' => [],
+        'payment_type_distribution' => []
+    ];
+    
+    // Calculate totals from data
+    $car_ids = [];
+    $expense_types = [];
+    $payment_types = [];
+    $monthly_data = [];
+    
+    foreach ($data as $row) {
+        // Amount totals
+        $summary['total_usd'] += floatval($row['amount_usd'] ?? 0);
+        $summary['total_iqd'] += floatval($row['amount_iqd'] ?? 0);
+        
+        // Gas and materials
+        if ($row['gas_liters']) {
+            $summary['total_gas'] += floatval($row['gas_liters']);
+        }
+        if ($row['material_quantity']) {
+            $summary['total_materials'] += floatval($row['material_quantity']);
+        }
+        
+        // Collect unique cars
+        if ($row['car_id']) {
+            $car_ids[$row['car_id']] = [
+                'id' => $row['car_id'],
+                'name' => $row['car_name']
+            ];
+        }
+        
+        // Collect expense types
+        $expense_type = $row['expense_type'];
+        if (!isset($expense_types[$expense_type])) {
+            $expense_types[$expense_type] = 0;
+        }
+        $expense_types[$expense_type] += floatval($row['amount_usd'] ?? 0) + (floatval($row['amount_iqd'] ?? 0) / 150000); // Convert IQD to USD for comparison
+        
+        // Collect payment types
+        $payment_type = $row['payment_type'];
+        if (!isset($payment_types[$payment_type])) {
+            $payment_types[$payment_type] = 0;
+        }
+        $payment_types[$payment_type] += floatval($row['amount_usd'] ?? 0) + (floatval($row['amount_iqd'] ?? 0) / 150000);
+        
+        // Monthly trend
+        $month = date('Y-m', strtotime($row['date']));
+        if (!isset($monthly_data[$month])) {
+            $monthly_data[$month] = [
+                'usd' => 0,
+                'iqd' => 0,
+                'count' => 0
+            ];
+        }
+        $monthly_data[$month]['usd'] += floatval($row['amount_usd'] ?? 0);
+        $monthly_data[$month]['iqd'] += floatval($row['amount_iqd'] ?? 0);
+        $monthly_data[$month]['count']++;
+    }
+    
+    $summary['total_cars'] = count($car_ids);
+    
+    // Convert expense types to array format for charts
+    foreach ($expense_types as $type => $amount) {
+        $summary['expense_type_distribution'][] = [
+            'type' => $type,
+            'amount' => round($amount, 2)
+        ];
+    }
+    
+    // Convert payment types to array format for charts
+    foreach ($payment_types as $type => $amount) {
+        $summary['payment_type_distribution'][] = [
+            'type' => $type,
+            'amount' => round($amount, 2)
+        ];
+    }
+    
+    // Calculate car-specific expenses
+    $summary['car_expenses'] = calculateCarExpenses($pdo, $where_sql, $params);
+    
+    // Convert monthly data to array format
+    foreach ($monthly_data as $month => $data) {
+        $summary['monthly_trend'][] = [
+            'month' => $month,
+            'usd' => round($data['usd'], 2),
+            'iqd' => round($data['iqd'], 2),
+            'count' => $data['count']
+        ];
+    }
+    
+    // Sort by month
+    usort($summary['monthly_trend'], function($a, $b) {
+        return strcmp($a['month'], $b['month']);
+    });
+    
+    return $summary;
+}
+
+function calculateCarExpenses($pdo, $where_sql, $params) {
+    $car_expenses_sql = "SELECT 
+        c.id,
+        c.name AS car_name,
+        SUM(COALESCE(oe.amount_usd, 0)) AS total_usd,
+        SUM(COALESCE(oe.amount_iqd, 0)) AS total_iqd,
+        COUNT(oe.id) AS expense_count
+    FROM cars c
+    LEFT JOIN other_expenses oe ON c.id = oe.car_id
+    $where_sql
+    GROUP BY c.id, c.name
+    HAVING COUNT(oe.id) > 0
+    ORDER BY total_usd DESC, total_iqd DESC";
+    
+    try {
+        $stmt = $pdo->prepare($car_expenses_sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        return [];
+    }
 }
 ?>
