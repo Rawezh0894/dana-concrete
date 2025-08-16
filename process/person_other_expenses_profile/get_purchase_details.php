@@ -19,7 +19,7 @@ if (!$person_id || !$receipt_number) {
 
 try {
     // Get purchase details for this specific receipt
-    $stmt = $pdo->prepare("
+    $sql = "
         SELECT 
             pm.receipt_number,
             pm.purchase_date,
@@ -28,18 +28,23 @@ try {
             pm.notes,
             pm.created_at,
             COUNT(pm.id) as materials_count,
-            SUM(pm.total_price_usd) as total_price_usd,
-            SUM(pm.total_price_iqd) as total_price_iqd,
-            SUM(pm.paid_amount_usd) as paid_amount_usd,
-            SUM(pm.paid_amount_iqd) as paid_amount_iqd,
-            SUM(pm.remaining_amount_usd) as remaining_amount_usd,
-            SUM(pm.remaining_amount_iqd) as remaining_amount_iqd
+            SUM(COALESCE(pm.total_price_usd, 0)) as total_price_usd,
+            SUM(COALESCE(pm.total_price_iqd, 0)) as total_price_iqd,
+            SUM(COALESCE(pm.paid_amount_usd, 0)) as paid_amount_usd,
+            SUM(COALESCE(pm.paid_amount_iqd, 0)) as paid_amount_iqd,
+            SUM(COALESCE(pm.remaining_amount_usd, 0)) as remaining_amount_usd,
+            SUM(COALESCE(pm.remaining_amount_iqd, 0)) as remaining_amount_iqd
         FROM purchase_materials pm
         WHERE pm.person_id = ? AND pm.receipt_number = ?
         GROUP BY pm.receipt_number, pm.purchase_date, pm.currency_type, pm.payment_type, pm.notes, pm.created_at
         LIMIT 1
-    ");
+    ";
     
+    // Debug: Log the SQL query and parameters
+    error_log("SQL Query: " . $sql);
+    error_log("Parameters: person_id = $person_id, receipt_number = $receipt_number");
+    
+    $stmt = $pdo->prepare($sql);
     $stmt->execute([$person_id, $receipt_number]);
     $purchase = $stmt->fetch(PDO::FETCH_ASSOC);
     
@@ -47,6 +52,9 @@ try {
         echo json_encode(['success' => false, 'error' => 'Purchase receipt not found']);
         exit;
     }
+    
+    // Debug: Log the purchase data
+    error_log("Purchase details for receipt $receipt_number: " . json_encode($purchase));
     
     // Format the data
     $formattedPurchase = [
@@ -64,6 +72,9 @@ try {
         'materials_count' => (int)$purchase['materials_count'],
         'created_at' => $purchase['created_at']
     ];
+    
+    // Debug: Log the final formatted purchase
+    error_log("Final formatted purchase: " . json_encode($formattedPurchase));
     
     echo json_encode([
         'success' => true,

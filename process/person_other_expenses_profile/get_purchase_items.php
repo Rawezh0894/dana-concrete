@@ -19,7 +19,7 @@ if (!$person_id || !$receipt_number) {
 
 try {
     // Get individual purchase items for this specific receipt
-    $stmt = $pdo->prepare("
+    $sql = "
         SELECT 
             pm.id,
             pm.quantity,
@@ -28,17 +28,27 @@ try {
             pm.total_price_usd,
             pm.total_price_iqd,
             lm.name AS material_name,
-            pm.notes
+            pm.notes,
+            pm.receipt_number
         FROM purchase_materials pm
         LEFT JOIN list_materials lm ON pm.material_id = lm.id
         WHERE pm.person_id = ? AND pm.receipt_number = ?
         ORDER BY pm.id ASC
-    ");
+    ";
     
+    // Debug: Log the SQL query and parameters
+    error_log("SQL Query: " . $sql);
+    error_log("Parameters: person_id = $person_id, receipt_number = $receipt_number");
+    
+    $stmt = $pdo->prepare($sql);
     $stmt->execute([$person_id, $receipt_number]);
     $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
+    // Debug: Log the raw items data
+    error_log("Raw items data for receipt $receipt_number: " . json_encode($items));
+    
     if (empty($items)) {
+        error_log("No items found for receipt $receipt_number");
         echo json_encode(['success' => false, 'error' => 'No items found for this receipt']);
         exit;
     }
@@ -46,6 +56,17 @@ try {
     // Format the data
     $formattedItems = [];
     foreach ($items as $item) {
+        // Debug: Log each item to see the values
+        error_log("Processing item ID {$item['id']}: total_price_usd = {$item['total_price_usd']}, quantity = {$item['quantity']}");
+        
+        // Debug: Log the raw item data
+        error_log("Raw item data: " . json_encode($item));
+        
+        // Debug: Check if total_price_usd is null or empty
+        if ($item['total_price_usd'] === null || $item['total_price_usd'] === '') {
+            error_log("WARNING: Item ID {$item['id']} has null/empty total_price_usd");
+        }
+        
         $formattedItems[] = [
             'id' => (int)$item['id'],
             'material_name' => $item['material_name'] ?? 'کاڵای نەناسراو',
@@ -57,6 +78,9 @@ try {
             'notes' => $item['notes'] ?? '-'
         ];
     }
+    
+    // Debug: Log the final formatted items
+    error_log("Final formatted items: " . json_encode($formattedItems));
     
     echo json_encode([
         'success' => true,
