@@ -1,25 +1,17 @@
 // Purchase Materials History for Person Profile
 $(document).ready(function() {
-    console.log('Document ready, setting up purchase materials history');
-    
     // Load purchases when the purchases tab is shown
     $('#purchases-tab').on('click', function() {
-        console.log('Purchases tab clicked');
         loadPurchaseMaterialsHistory();
     });
     
     // Also load when the tab is shown via other means
     $('button[data-bs-target="#purchases"]').on('click', function() {
-        console.log('Purchases button clicked');
         loadPurchaseMaterialsHistory();
     });
-    
-    console.log('Event handlers set up successfully');
 });
 
 function loadPurchaseMaterialsHistory() {
-    console.log('Loading purchase materials history for person ID:', PERSON_ID);
-    
     // Show loading state using TableController
     const columns = ['#', 'receipt_number', 'purchase_date', 'materials_count', 'total_price_usd', 'total_price_iqd', 'currency_type', 'payment_type', 'paid_amount_usd', 'paid_amount_iqd', 'remaining_amount_usd', 'remaining_amount_iqd', 'notes'];
     TableController.showLoading('#purchasesTable', columns);
@@ -30,10 +22,7 @@ function loadPurchaseMaterialsHistory() {
         data: { person_id: PERSON_ID },
         dataType: 'json',
         success: function(response) {
-            console.log('AJAX response received:', response);
-            
             if (response.success) {
-                console.log('Raw purchase data:', response.data);
                 renderPurchaseMaterialsTable(response.data);
             } else {
                 console.error('Error loading purchases:', response.error);
@@ -44,8 +33,6 @@ function loadPurchaseMaterialsHistory() {
         },
         error: function(xhr, status, error) {
             console.error('AJAX Error:', error);
-            console.error('XHR status:', xhr.status);
-            console.error('XHR response:', xhr.responseText);
             // Show error state
             const tbody = $('#purchasesTable tbody');
             tbody.html('<tr><td colspan="13" class="text-center text-danger">هەڵە لە پەیوەندی بە سێرڤەر</td></tr>');
@@ -54,8 +41,6 @@ function loadPurchaseMaterialsHistory() {
 }
 
 function renderPurchaseMaterialsTable(purchases) {
-    console.log('Rendering purchases table with data:', purchases);
-    
     // Define columns for the table
     const columns = [
         '#', 
@@ -75,37 +60,33 @@ function renderPurchaseMaterialsTable(purchases) {
     ];
     
     // Format the data for TableController with expandable functionality
-    const formattedData = purchases.map((purchase, index) => {
-        console.log(`Processing purchase ${index + 1}:`, purchase);
-        console.log(`Receipt ${purchase.receipt_number}: total_price_usd = ${purchase.total_price_usd}, materials_count = ${purchase.materials_count}`);
-        
-        return {
-            receipt_number: purchase.receipt_number || '-',
-            purchase_date: purchase.purchase_date || '-',
-            materials_count: purchase.materials_count || 0,
-            total_price_usd: purchase.total_price_usd,
-            total_price_iqd: purchase.total_price_iqd,
-            currency_type: purchase.currency_type || '-',
-            payment_type: purchase.payment_type || 'نەقد',
-            paid_amount_usd: purchase.paid_amount_usd,
-            paid_amount_iqd: purchase.paid_amount_iqd,
-            remaining_amount_usd: purchase.remaining_amount_usd,
-            remaining_amount_iqd: purchase.remaining_amount_iqd,
-            notes: purchase.notes || '-',
-            actions: `
-                <div class="btn-group btn-group-sm">
-                    <button class="btn btn-outline-info btn-sm" onclick="showPurchaseDetails('${purchase.receipt_number}')" title="پیشاندانی وردەکاری">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                    <button class="btn btn-outline-primary btn-sm" onclick="togglePurchaseItems('${purchase.receipt_number}')" title="پیشاندانی کاڵاکان">
-                        <i class="fas fa-list"></i>
-                    </button>
-                </div>
-            `
-        };
-    });
-    
-    console.log('Formatted data:', formattedData);
+    const formattedData = purchases.map((purchase, index) => ({
+        receipt_number: purchase.receipt_number || '-',
+        purchase_date: purchase.purchase_date || '-',
+        materials_count: purchase.materials_count || 0,
+        total_price_usd: purchase.total_price_usd,
+        total_price_iqd: purchase.total_price_iqd,
+        currency_type: purchase.currency_type || '-',
+        payment_type: purchase.payment_type || 'نەقد',
+        paid_amount_usd: purchase.paid_amount_usd,
+        paid_amount_iqd: purchase.paid_amount_iqd,
+        remaining_amount_usd: purchase.remaining_amount_usd,
+        remaining_amount_iqd: purchase.remaining_amount_iqd,
+        notes: purchase.notes || '-',
+        actions: `
+            <div class="btn-group btn-group-sm">
+                <button class="btn btn-outline-info btn-sm" onclick="showPurchaseDetails('${purchase.receipt_number}')" title="پیشاندانی وردەکاری">
+                    <i class="fas fa-eye"></i>
+                </button>
+                <button class="btn btn-outline-primary btn-sm" onclick="togglePurchaseItems('${purchase.receipt_number}')" title="پیشاندانی کاڵاکان">
+                    <i class="fas fa-list"></i>
+                </button>
+                <button class="btn btn-outline-warning btn-sm" onclick="debugPurchaseData('${purchase.receipt_number}')" title="پشکنینی داتا">
+                    <i class="fas fa-bug"></i>
+                </button>
+            </div>
+        `
+    }));
     
     // Use TableController to render with pagination and search
     TableController.renderWithPagination('#purchasesTable', formattedData, columns, {
@@ -116,8 +97,6 @@ function renderPurchaseMaterialsTable(purchases) {
 
 // Show purchase details in a modal
 function showPurchaseDetails(receiptNumber) {
-    console.log('Fetching purchase details for receipt:', receiptNumber);
-    
     // Fetch detailed information for this receipt
     $.ajax({
         url: '../process/person_other_expenses_profile/get_purchase_details.php',
@@ -128,10 +107,7 @@ function showPurchaseDetails(receiptNumber) {
         },
         dataType: 'json',
         success: function(response) {
-            console.log('AJAX response for details:', response);
-            
             if (response.success) {
-                console.log('Purchase details response:', response.data);
                 showPurchaseDetailsModal(response.data);
             } else {
                 console.error('Error loading purchase details:', response.error);
@@ -139,9 +115,7 @@ function showPurchaseDetails(receiptNumber) {
             }
         },
         error: function(xhr, status, error) {
-            console.error('AJAX Error for details:', error);
-            console.error('XHR status:', xhr.status);
-            console.error('XHR response:', xhr.responseText);
+            console.error('AJAX Error:', error);
             alert('هەڵە لە پەیوەندی بە سێرڤەر');
         }
     });
@@ -149,8 +123,6 @@ function showPurchaseDetails(receiptNumber) {
 
 // Show purchase details modal
 function showPurchaseDetailsModal(purchaseData) {
-    console.log('Showing purchase details modal with data:', purchaseData);
-    
     const modalContent = `
         <div class="modal-header">
             <h5 class="modal-title">
@@ -204,19 +176,14 @@ function showPurchaseDetailsModal(purchaseData) {
 
 // Toggle purchase items display
 function togglePurchaseItems(receiptNumber) {
-    console.log('Toggling purchase items for receipt:', receiptNumber);
-    
     // Check if items are already shown
     const existingRow = $(`#purchase-items-${receiptNumber.replace(/[^a-zA-Z0-9]/g, '')}`);
     
     if (existingRow.length > 0) {
-        console.log('Items already shown, hiding them');
         // Hide items
         existingRow.remove();
         return;
     }
-    
-    console.log('Fetching items for receipt:', receiptNumber);
     
     // Fetch items for this receipt
     $.ajax({
@@ -228,10 +195,7 @@ function togglePurchaseItems(receiptNumber) {
         },
         dataType: 'json',
         success: function(response) {
-            console.log('AJAX response for items:', response);
-            
             if (response.success) {
-                console.log('Purchase items response:', response.data);
                 showPurchaseItems(receiptNumber, response.data);
             } else {
                 console.error('Error loading purchase items:', response.error);
@@ -239,9 +203,7 @@ function togglePurchaseItems(receiptNumber) {
             }
         },
         error: function(xhr, status, error) {
-            console.error('AJAX Error for items:', error);
-            console.error('XHR status:', xhr.status);
-            console.error('XHR response:', xhr.responseText);
+            console.error('AJAX Error:', error);
             alert('هەڵە لە پەیوەندی بە سێرڤەر');
         }
     });
@@ -249,16 +211,12 @@ function togglePurchaseItems(receiptNumber) {
 
 // Show purchase items below the receipt row
 function showPurchaseItems(receiptNumber, items) {
-    console.log('Showing purchase items for receipt:', receiptNumber, 'Items:', items);
-    
     const safeReceiptNumber = receiptNumber.replace(/[^a-zA-Z0-9]/g, '');
     
     // Find the receipt row and insert items below it
     const receiptRow = $(`#purchasesTable tbody tr:contains('${receiptNumber}')`).first();
     
     if (receiptRow.length > 0) {
-        console.log('Found receipt row, creating items row');
-        
         const itemsRow = `
             <tr id="purchase-items-${safeReceiptNumber}" class="purchase-items-row">
                 <td colspan="14" class="p-0">
@@ -267,30 +225,34 @@ function showPurchaseItems(receiptNumber, items) {
                             <i class="fas fa-list me-2"></i>کاڵاکانی پسووڵەی ${receiptNumber}
                         </h6>
                         <div class="table-responsive">
-                            <table class="table table-sm table-bordered">
-                                <thead class="table-light">
+                                                    <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>کاڵا</th>
+                                    <th>بڕ</th>
+                                    <th>یەکەی نرخ</th>
+                                    <th>کۆی نرخ بە دۆلار</th>
+                                    <th>کۆی نرخ بە دینار</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${items.map(item => `
                                     <tr>
-                                        <th>کاڵا</th>
-                                        <th>بڕ</th>
-                                        <th>یەکەی نرخ</th>
-                                        <th>کۆی نرخ بە دۆلار</th>
-                                        <th>کۆی نرخ بە دینار</th>
+                                        <td>${item.material_name || '-'}</td>
+                                        <td>${item.quantity || '-'} ${item.unit_type || ''}</td>
+                                        <td>${item.unit_price_display || '-'}</td>
+                                        <td>$${formatNumber(item.total_price_usd || 0)}</td>
+                                        <td>${formatNumber(item.total_price_iqd || 0)} د.ع</td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    ${items.map(item => {
-                                        console.log('Processing item:', item);
-                                        return `
-                                            <tr>
-                                                <td>${item.material_name || '-'}</td>
-                                                <td>${item.quantity || '-'}</td>
-                                                <td>${item.unit_price || '-'}</td>
-                                                <td>$${formatNumber(item.total_price_usd || 0)}</td>
-                                                <td>${formatNumber(item.total_price_iqd || 0)} د.ع</td>
-                                            </tr>
-                                        `;
-                                    }).join('')}
-                                </tbody>
+                                `).join('')}
+                                                            </tbody>
+                                <tfoot class="table-info">
+                                    <tr>
+                                        <td colspan="3" class="text-end"><strong>کۆی گشتی:</strong></td>
+                                        <td><strong>$${formatNumber(items.reduce((sum, item) => sum + (item.total_price_usd || 0), 0))}</strong></td>
+                                        <td><strong>${formatNumber(items.reduce((sum, item) => sum + (item.total_price_iqd || 0), 0))} د.ع</strong></td>
+                                    </tr>
+                                </tfoot>
                             </table>
                         </div>
                     </div>
@@ -299,16 +261,11 @@ function showPurchaseItems(receiptNumber, items) {
         `;
         
         receiptRow.after(itemsRow);
-        console.log('Items row added successfully');
-    } else {
-        console.error('Receipt row not found for:', receiptNumber);
     }
 }
 
 // Show modal function
 function showModal(title, content) {
-    console.log('Creating modal with title:', title, 'and content length:', content.length);
-    
     // Remove existing modal if any
     $('.purchase-modal').remove();
     
@@ -332,24 +289,158 @@ function showModal(title, content) {
     modalElement.on('hidden.bs.modal', function() {
         $(this).remove();
     });
-    
-    console.log('Modal created and shown successfully');
 }
 
 // Format number function
 function formatNumber(num) {
-    console.log('Formatting number:', num, 'Type:', typeof num);
-    
-    if (num === null || num === undefined) {
-        console.log('Number is null/undefined, returning 0');
-        return '0';
-    }
-    
-    const formatted = parseFloat(num).toLocaleString('en-US', {
+    if (num === null || num === undefined) return '0';
+    return parseFloat(num).toLocaleString('en-US', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
     });
+}
+
+// Debug purchase data function
+function debugPurchaseData(receiptNumber) {
+    $.ajax({
+        url: '../process/person_other_expenses_profile/debug_purchase_data.php',
+        type: 'GET',
+        data: { 
+            person_id: PERSON_ID,
+            receipt_number: receiptNumber 
+        },
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                showDebugModal(response.data);
+            } else {
+                console.error('Error loading debug data:', response.error);
+                alert('هەڵە لە بارکردنی داتای پشکنین');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('AJAX Error:', error);
+            alert('هەڵە لە پەیوەندی بە سێرڤەر');
+        }
+    });
+}
+
+// Show debug modal
+function showDebugModal(debugData) {
+    const modalContent = `
+        <div class="modal-header">
+            <h5 class="modal-title">
+                <i class="fas fa-bug me-2"></i>پشکنینی داتای پسووڵەی ${debugData.receipt_number}
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+            <div class="row mb-3">
+                <div class="col-12">
+                    <h6 class="text-primary">کۆی گشتی:</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>جۆر</th>
+                                    <th>بە دۆلار</th>
+                                    <th>بە دینار</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>کۆی نەخشێندراو</td>
+                                    <td>$${formatNumber(debugData.summary.total_stored_usd)}</td>
+                                    <td>${formatNumber(debugData.summary.total_stored_iqd)} د.ع</td>
+                                </tr>
+                                <tr>
+                                    <td>کۆی ژمێردراو</td>
+                                    <td>$${formatNumber(debugData.summary.total_calculated_usd)}</td>
+                                    <td>${formatNumber(debugData.summary.total_calculated_iqd)} د.ع</td>
+                                </tr>
+                                <tr class="table-warning">
+                                    <td>جیاوازی</td>
+                                    <td>$${formatNumber(debugData.summary.usd_difference)}</td>
+                                    <td>${formatNumber(debugData.summary.iqd_difference)} د.ع</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <h6 class="text-info">وردەکاری هەر ئایتمێک:</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>کاڵا</th>
+                                    <th>بڕ</th>
+                                    <th>یەکەی نرخ</th>
+                                    <th>کۆی نەخشێندراو</th>
+                                    <th>کۆی ژمێردراو</th>
+                                    <th>جیاوازی</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${debugData.items.map(item => `
+                                    <tr class="${item.usd_difference > 0.01 ? 'table-danger' : 'table-success'}">
+                                        <td>${item.material_name || '-'}</td>
+                                        <td>${item.quantity} ${item.unit_type || ''}</td>
+                                        <td>$${formatNumber(item.unit_price_usd)}</td>
+                                        <td>$${formatNumber(item.total_price_usd)}</td>
+                                        <td>$${formatNumber(item.calculated_total_usd)}</td>
+                                        <td>$${formatNumber(item.usd_difference)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-warning" onclick="repairPurchaseData('${debugData.receipt_number}')">
+                <i class="fas fa-wrench me-2"></i>چاککردنەوەی داتا
+            </button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
+        </div>
+    `;
     
-    console.log('Formatted result:', formatted);
-    return formatted;
+    // Create and show modal
+    showModal('پشکنینی داتا', modalContent);
+}
+
+// Repair purchase data function
+function repairPurchaseData(receiptNumber) {
+    if (!confirm('دڵنیای لە چاککردنەوەی داتاکان؟ ئەم کردارە ناتوانرێت هەڵوەشێنرێتەوە.')) {
+        return;
+    }
+    
+    $.ajax({
+        url: '../process/person_other_expenses_profile/repair_purchase_data.php',
+        type: 'GET',
+        data: { 
+            person_id: PERSON_ID,
+            receipt_number: receiptNumber 
+        },
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                alert('داتاکان بە سەرکەوتووی چاککرانەوە!');
+                // Close the debug modal
+                $('.purchase-modal').modal('hide');
+                // Refresh the purchase items display
+                togglePurchaseItems(receiptNumber);
+            } else {
+                console.error('Error repairing data:', response.error);
+                alert('هەڵە لە چاککردنەوەی داتا: ' + response.error);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('AJAX Error:', error);
+            alert('هەڵە لە پەیوەندی بە سێرڤەر');
+        }
+    });
 } 

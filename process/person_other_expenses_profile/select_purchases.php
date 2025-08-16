@@ -18,7 +18,7 @@ if (!$person_id) {
 
 try {
     // Get purchase materials grouped by receipt number for this person
-    $sql = "
+    $stmt = $pdo->prepare("
         SELECT 
             pm.receipt_number,
             pm.purchase_date,
@@ -27,38 +27,24 @@ try {
             pm.notes,
             pm.created_at,
             COUNT(pm.id) as materials_count,
-            SUM(COALESCE(pm.total_price_usd, 0)) as total_price_usd,
-            SUM(COALESCE(pm.total_price_iqd, 0)) as total_price_iqd,
-            SUM(COALESCE(pm.paid_amount_usd, 0)) as paid_amount_usd,
-            SUM(COALESCE(pm.paid_amount_iqd, 0)) as paid_amount_iqd,
-            SUM(COALESCE(pm.remaining_amount_usd, 0)) as remaining_amount_usd,
-            SUM(COALESCE(pm.remaining_amount_iqd, 0)) as remaining_amount_iqd
+            SUM(pm.total_price_usd) as total_price_usd,
+            SUM(pm.total_price_iqd) as total_price_iqd,
+            SUM(pm.paid_amount_usd) as paid_amount_usd,
+            SUM(pm.paid_amount_iqd) as paid_amount_iqd,
+            SUM(pm.remaining_amount_usd) as remaining_amount_usd,
+            SUM(pm.remaining_amount_iqd) as remaining_amount_iqd
         FROM purchase_materials pm
         WHERE pm.person_id = ?
         GROUP BY pm.receipt_number, pm.purchase_date, pm.currency_type, pm.payment_type, pm.notes, pm.created_at
         ORDER BY pm.purchase_date DESC, pm.created_at DESC
-    ";
+    ");
     
-    // Debug: Log the SQL query and parameters
-    error_log("SQL Query: " . $sql);
-    error_log("Parameters: person_id = $person_id");
-    
-    $stmt = $pdo->prepare($sql);
     $stmt->execute([$person_id]);
     $purchases = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-    // Debug: Log the raw data to see what's happening
-    error_log("Raw purchase data for person $person_id: " . json_encode($purchases));
     
     // Format the data
     $formattedPurchases = [];
     foreach ($purchases as $purchase) {
-        // Debug: Log each purchase to see the values
-        error_log("Processing purchase receipt {$purchase['receipt_number']}: total_price_usd = {$purchase['total_price_usd']}, materials_count = {$purchase['materials_count']}");
-        
-        // Debug: Log the raw purchase data
-        error_log("Raw purchase data: " . json_encode($purchase));
-        
         $formattedPurchases[] = [
             'receipt_number' => $purchase['receipt_number'],
             'purchase_date' => $purchase['purchase_date'],
@@ -75,9 +61,6 @@ try {
             'created_at' => $purchase['created_at']
         ];
     }
-    
-    // Debug: Log the final formatted purchases
-    error_log("Final formatted purchases: " . json_encode($formattedPurchases));
     
     echo json_encode([
         'success' => true,

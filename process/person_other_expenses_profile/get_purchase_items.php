@@ -19,7 +19,8 @@ if (!$person_id || !$receipt_number) {
 
 try {
     // Get individual purchase items for this specific receipt
-    $sql = "
+    // Modified query to ensure we get the correct individual item prices
+    $stmt = $pdo->prepare("
         SELECT 
             pm.id,
             pm.quantity,
@@ -29,58 +30,54 @@ try {
             pm.total_price_iqd,
             lm.name AS material_name,
             pm.notes,
-            pm.receipt_number
+            pm.unit_type
         FROM purchase_materials pm
         LEFT JOIN list_materials lm ON pm.material_id = lm.id
         WHERE pm.person_id = ? AND pm.receipt_number = ?
         ORDER BY pm.id ASC
-    ";
+    ");
     
-    // Debug: Log the SQL query and parameters
-    error_log("SQL Query: " . $sql);
-    error_log("Parameters: person_id = $person_id, receipt_number = $receipt_number");
-    
-    $stmt = $pdo->prepare($sql);
     $stmt->execute([$person_id, $receipt_number]);
     $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    // Debug: Log the raw items data
-    error_log("Raw items data for receipt $receipt_number: " . json_encode($items));
-    
     if (empty($items)) {
-        error_log("No items found for receipt $receipt_number");
         echo json_encode(['success' => false, 'error' => 'No items found for this receipt']);
         exit;
     }
     
-    // Format the data
+    // Format the data with proper price calculations
     $formattedItems = [];
     foreach ($items as $item) {
-        // Debug: Log each item to see the values
-        error_log("Processing item ID {$item['id']}: total_price_usd = {$item['total_price_usd']}, quantity = {$item['quantity']}");
+        // Ensure we're using the correct individual item prices
+        $unit_price_usd = (float)$item['unit_price_usd'];
+        $unit_price_iqd = (float)$item['unit_price_iqd'];
+        $quantity = (float)$item['quantity'];
         
-        // Debug: Log the raw item data
-        error_log("Raw item data: " . json_encode($item));
+        // Calculate the correct total price for this specific item
+        $calculated_total_usd = $unit_price_usd * $quantity;
+        $calculated_total_iqd = $unit_price_iqd * $quantity;
         
-        // Debug: Check if total_price_usd is null or empty
-        if ($item['total_price_usd'] === null || $item['total_price_usd'] === '') {
-            error_log("WARNING: Item ID {$item['id']} has null/empty total_price_usd");
-        }
+        // Use the calculated total if it differs significantly from stored total
+        // This helps identify if there's a data inconsistency
+        $final_total_usd = abs($calculated_total_usd - (float)$item['total_price_usd']) < 0.01 ? 
+                          (float)$item['total_price_usd'] : $calculated_total_usd;
+        $final_total_iqd = abs($calculated_total_iqd - (float)$item['total_price_iqd']) < 0.01 ? 
+                          (float)$item['total_price_iqd'] : $calculated_total_iqd;
         
         $formattedItems[] = [
             'id' => (int)$item['id'],
             'material_name' => $item['material_name'] ?? 'کاڵای نەناسراو',
-            'quantity' => $item['quantity'] ?? '-',
-            'unit_price' => $item['unit_price_usd'] ? '$' . number_format($item['unit_price_usd'], 2) : 
-                           ($item['unit_price_iqd'] ? number_format($item['unit_price_iqd'], 0) . ' د.ع' : '-'),
-            'total_price_usd' => (float)$item['total_price_usd'],
-            'total_price_iqd' => (float)$item['total_price_iqd'],
+            'quantity' => $quantity,
+            'unit_type' => $item['unit_type'] ?? '-',
+            'unit_price_usd' => $unit_price_usd,
+            'unit_price_iqd' => $unit_price_iqd,
+            'unit_price_display' => $unit_price_usd ? '$' . number_format($unit_price_usd, 2) : 
+                                   ($unit_price_iqd ? number_format($unit_price_iqd, 0) . ' د.ع' : '-'),
+            'total_price_usd' => $final_total_usd,
+            'total_price_iqd' => $final_total_iqd,
             'notes' => $item['notes'] ?? '-'
         ];
     }
-    
-    // Debug: Log the final formatted items
-    error_log("Final formatted items: " . json_encode($formattedItems));
     
     echo json_encode([
         'success' => true,
