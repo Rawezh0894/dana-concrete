@@ -183,6 +183,10 @@ try {
         $total_price_usd = $material['quantity'] * $material['price_per_unit_usd'];
         $total_price_iqd = $material['quantity'] * $material['price_per_unit_iqd'];
         
+        // Calculate correct remaining amount for this specific item
+        $item_remaining_amount_usd = max(0, $total_price_usd - $paid_amount_usd);
+        $item_remaining_amount_iqd = max(0, $total_price_iqd - $paid_amount_iqd);
+        
         $stmt->execute([
             $_POST['receipt_number'],
             $material['material_id'],
@@ -197,8 +201,8 @@ try {
             $_POST['payment_type'],
             $paid_amount_usd,
             $paid_amount_iqd,
-            $remaining_amount_usd,
-            $remaining_amount_iqd,
+            $item_remaining_amount_usd, // Fixed: Use item-specific remaining amount
+            $item_remaining_amount_iqd, // Fixed: Use item-specific remaining amount
             $_POST['purchase_date'],
             $_POST['notes'] ?? '',
             $transfer_loss,

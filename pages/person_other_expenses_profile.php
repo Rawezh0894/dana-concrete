@@ -62,6 +62,11 @@ if ($person_id) {
             <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">
                 <?php echo htmlspecialchars($person_name); ?>
             </h2>
+            <div>
+                <button class="btn btn-warning me-2" onclick="fixAllRemainingAmounts()" title="چاککردنەوەی هەموو پارەی ماوەکان">
+                    <i class="fas fa-calculator me-2"></i>چاککردنەوەی پارەی ماوەکان
+                </button>
+            </div>
         </div>
         <div class="mb-3">
             <a href="person_other_expenses.php" class="btn"
@@ -314,6 +319,38 @@ if ($person_id) {
     <script src="../assets/js/person_other_expenses_profile/update_debt.js"></script>
     <script src="../assets/js/person_other_expenses_profile/delete_debt.js"></script>
     <script src="../assets/js/person_other_expenses_profile/summary_cards.js"></script>
+    
+    <script>
+        // Fix all remaining amounts function
+        function fixAllRemainingAmounts() {
+            if (!confirm('دڵنیای لە چاککردنەوەی هەموو پارەی ماوەکان؟ ئەم کردارە ناتوانرێت هەڵوەشێنرێتەوە.')) {
+                return;
+            }
+            
+            $.ajax({
+                url: '../process/person_other_expenses_profile/fix_all_remaining_amounts.php',
+                type: 'GET',
+                data: { 
+                    person_id: PERSON_ID
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        alert('هەموو پارەی ماوەکان بە سەرکەوتووی چاککرانەوە!');
+                        // Refresh the page to show updated data
+                        location.reload();
+                    } else {
+                        console.error('Error fixing all remaining amounts:', response.error);
+                        alert('هەڵە لە چاککردنەوەی پارەی ماوەکان: ' + response.error);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', error);
+                    alert('هەڵە لە پەیوەندی بە سێرڤەر');
+                }
+            });
+        }
+    </script>
 </body>
 
 </html>

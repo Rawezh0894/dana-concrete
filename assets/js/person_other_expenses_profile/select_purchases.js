@@ -404,6 +404,9 @@ function showDebugModal(debugData) {
             <button type="button" class="btn btn-warning" onclick="repairPurchaseData('${debugData.receipt_number}')">
                 <i class="fas fa-wrench me-2"></i>چاککردنەوەی داتا
             </button>
+            <button type="button" class="btn btn-danger" onclick="fixRemainingAmounts('${debugData.receipt_number}')">
+                <i class="fas fa-calculator me-2"></i>چاککردنەوەی بڕی ماوە
+            </button>
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
         </div>
     `;
@@ -436,6 +439,41 @@ function repairPurchaseData(receiptNumber) {
             } else {
                 console.error('Error repairing data:', response.error);
                 alert('هەڵە لە چاککردنەوەی داتا: ' + response.error);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('AJAX Error:', error);
+            alert('هەڵە لە پەیوەندی بە سێرڤەر');
+        }
+    });
+} 
+
+// Fix remaining amounts function
+function fixRemainingAmounts(receiptNumber) {
+    if (!confirm('دڵنیای لە چاککردنەوەی پارەی ماوەکان؟ ئەم کردارە ناتوانرێت هەڵوەشێنرێتەوە.')) {
+        return;
+    }
+    
+    $.ajax({
+        url: '../process/person_other_expenses_profile/fix_remaining_amounts.php',
+        type: 'GET',
+        data: { 
+            person_id: PERSON_ID,
+            receipt_number: receiptNumber 
+        },
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                alert('پارەی ماوەکان بە سەرکەوتووی چاککرانەوە!');
+                // Close the debug modal
+                $('.purchase-modal').modal('hide');
+                // Refresh the purchase items display
+                togglePurchaseItems(receiptNumber);
+                // Refresh the main purchases table
+                loadPurchaseMaterialsHistory();
+            } else {
+                console.error('Error fixing remaining amounts:', response.error);
+                alert('هەڵە لە چاککردنەوەی پارەی ماوەکان: ' + response.error);
             }
         },
         error: function(xhr, status, error) {
