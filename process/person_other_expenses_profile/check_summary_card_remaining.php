@@ -1,0 +1,149 @@
+<?php
+session_start();
+require_once '../../config/db_conected.php';
+
+header('Content-Type: application/json');
+
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['success' => false, 'error' => 'Unauthorized']);
+    exit;
+}
+
+$person_id = isset($_GET['person_id']) ? intval($_GET['person_id']) : 0;
+
+if (!$person_id) {
+    echo json_encode(['success' => false, 'error' => 'Person ID is required']);
+    exit;
+}
+
+try {
+    // Get person's opening debt
+    $stmt = $pdo->prepare("SELECT opening_debt_usd, opening_debt_iqd FROM other_expense_persons WHERE id = ?");
+    $stmt->execute([$person_id]);
+    $person = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if (!$person) {
+        echo json_encode(['success' => false, 'error' => 'Person not found']);
+        exit;
+    }
+    
+    // Get total expenses from other_expenses table
+    $stmt = $pdo->prepare("
+        SELECT 
+            SUM(amount_usd) as total_expense_usd,
+            SUM(amount_iqd) as total_expense_iqd,
+            COUNT(*) as expense_count
+        FROM other_expenses 
+        WHERE person_id = ?
+    ");
+    $stmt->execute([$person_id]);
+    $expenses = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    // Get remaining amounts from other_expenses table
+    $stmt = $pdo->prepare("
+        SELECT 
+            SUM(remaining_usd) as total_remaining_usd,
+            SUM(remaining_iqd) as total_remaining_iqd
+        FROM other_expenses 
+        WHERE person_id = ?
+    ");
+    $stmt->execute([$person_id]);
+    $remaining_expenses = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    // Get remaining amounts from purchase_materials table - OLD METHOD (incorrect)
+    $stmt = $pdo->prepare("
+        SELECT 
+            SUM(remaining_amount_usd) as total_remaining_usd_purchase_old,
+            SUM(remaining_amount_iqd) as total_remaining_iqd_purchase_old
+        FROM purchase_materials 
+        WHERE person_id = ?
+    ");
+    $stmt->execute([$person_id]);
+    $remaining_purchase_old = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    // Get remaining amounts from purchase_materials table - NEW METHOD (correct)
+    $stmt = $pdo->prepare("
+        SELECT 
+            SUM(total_price_usd - paid_amount_usd) as total_remaining_usd_purchase_new,
+            SUM(total_price_iqd - paid_amount_iqd) as total_remaining_iqd_purchase_new
+        FROM purchase_materials 
+        WHERE person_id = ?
+    ");
+    $stmt->execute([$person_id]);
+    $remaining_purchase_new = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    // Calculate our debt using OLD method
+    $our_debt_usd_old = ($person['opening_debt_usd'] ?? 0) + 
+                       ($remaining_expenses['total_remaining_usd'] ?? 0) + 
+                       ($remaining_purchase_old['total_remaining_usd_purchase_old'] ?? 0);
+    
+    $our_debt_iqd_old = ($person['opening_debt_iqd'] ?? 0) + 
+                       ($remaining_expenses['total_remaining_iqd'] ?? 0) + 
+                       ($remaining_purchase_old['total_remaining_iqd_purchase_old'] ?? 0);
+    
+    // Calculate our debt using NEW method
+    $our_debt_usd_new = ($person['opening_debt_usd'] ?? 0) + 
+                       ($remaining_expenses['total_remaining_usd'] ?? 0) + 
+                       max(0, ($remaining_purchase_new['total_remaining_usd_purchase_new'] ?? 0));
+    
+    $our_debt_iqd_new = ($person['opening_debt_iqd'] ?? 0) + 
+                       ($remaining_expenses['total_remaining_iqd'] ?? 0) + 
+                       max(0, ($remaining_purchase_new['total_remaining_iqd_purchase_new'] ?? 0));
+    
+    // Calculate differences
+    $usd_difference = abs($our_debt_usd_old - $our_debt_usd_new);
+    $iqd_difference = abs($our_debt_iqd_old - $our_debt_iqd_new);
+    
+    $responseData = [
+        'person_id' => $person_id,
+        'opening_debt_usd' => (float)($person['opening_debt_usd'] ?? 0),
+        'opening_debt_iqd' => (float)($person['opening_debt_iqd'] ?? 0),
+        'expenses' => [
+            'total_expense_usd' => (float)($expenses['total_expense_usd'] ?? 0),
+            'total_expense_iqd' => (float)($expenses['total_expense_iqd'] ?? 0),
+            'expense_count' => (int)($expenses['expense_count'] ?? 0)
+        ],
+        'remaining_expenses' => [
+            'total_remaining_usd' => (float)($remaining_expenses['total_remaining_usd'] ?? 0),
+            'total_remaining_iqd' => (float)($remaining_expenses['total_remaining_iqd'] ?? 0)
+        ],
+        'remaining_purchase_old' => [
+            'total_remaining_usd' => (float)($remaining_purchase_old['total_remaining_usd_purchase_old'] ?? 0),
+            'total_remaining_iqd' => (float)($remaining_purchase_old['total_remaining_iqd_purchase_old'] ?? 0)
+        ],
+        'remaining_purchase_new' => [
+            'total_remaining_usd' => max(0, (float)($remaining_purchase_new['total_remaining_usd_purchase_new'] ?? 0)),
+            'total_remaining_iqd' => max(0, (float)($remaining_purchase_new['total_remaining_iqd_purchase_new'] ?? 0))
+        ],
+        'our_debt_old' => [
+            'usd' => (float)$our_debt_usd_old,
+            'iqd' => (float)$our_debt_iqd_old
+        ],
+        'our_debt_new' => [
+            'usd' => (float)$our_debt_usd_new,
+            'iqd' => (float)$our_debt_iqd_new
+        ],
+        'differences' => [
+            'usd' => (float)$usd_difference,
+            'iqd' => (float)$iqd_difference,
+            'has_issues' => $usd_difference > 0.01 || $iqd_difference > 0.01
+        ]
+    ];
+    
+    echo json_encode([
+        'success' => true,
+        'data' => $responseData
+    ]);
+    
+} catch (PDOException $e) {
+    echo json_encode([
+        'success' => false,
+        'error' => 'Database error: ' . $e->getMessage()
+    ]);
+} catch (Exception $e) {
+    echo json_encode([
+        'success' => false,
+        'error' => 'General error: ' . $e->getMessage()
+    ]);
+}
+?>

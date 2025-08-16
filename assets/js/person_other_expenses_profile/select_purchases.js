@@ -407,6 +407,9 @@ function showDebugModal(debugData) {
             <button type="button" class="btn btn-danger" onclick="fixRemainingAmounts('${debugData.receipt_number}')">
                 <i class="fas fa-calculator me-2"></i>چاککردنەوەی بڕی ماوە
             </button>
+            <button type="button" class="btn btn-info" onclick="checkRemainingAmounts('${debugData.receipt_number}')">
+                <i class="fas fa-search me-2"></i>پشکنینی پارەی ماوە
+            </button>
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
         </div>
     `;
@@ -445,8 +448,122 @@ function repairPurchaseData(receiptNumber) {
             console.error('AJAX Error:', error);
             alert('هەڵە لە پەیوەندی بە سێرڤەر');
         }
+        });
+}
+
+// Check remaining amounts function
+function checkRemainingAmounts(receiptNumber) {
+    $.ajax({
+        url: '../process/person_other_expenses_profile/check_remaining_amounts.php',
+        type: 'GET',
+        data: { 
+            person_id: PERSON_ID,
+            receipt_number: receiptNumber 
+        },
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                showRemainingAmountsModal(response.data);
+            } else {
+                console.error('Error checking remaining amounts:', response.error);
+                alert('هەڵە لە پشکنینی پارەی ماوەکان');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('AJAX Error:', error);
+            alert('هەڵە لە پەیوەندی بە سێرڤەر');
+        }
     });
-} 
+}
+
+// Show remaining amounts modal
+function showRemainingAmountsModal(checkData) {
+    const modalContent = `
+        <div class="modal-header">
+            <h5 class="modal-title">
+                <i class="fas fa-search me-2"></i>پشکنینی پارەی ماوەی پسوووڵەی ${checkData.receipt_number}
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+            <div class="row mb-3">
+                <div class="col-12">
+                    <h6 class="text-primary">کۆی پارەی ماوە:</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>جۆر</th>
+                                    <th>بە دۆلار</th>
+                                    <th>بە دینار</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>کۆی نەخشێندراو</td>
+                                    <td>$${formatNumber(checkData.summary.total_stored_remaining_usd)}</td>
+                                    <td>${formatNumber(checkData.summary.total_stored_remaining_iqd)} د.ع</td>
+                                </tr>
+                                <tr>
+                                    <td>کۆی ژمێردراو</td>
+                                    <td>$${formatNumber(checkData.summary.total_calculated_remaining_usd)}</td>
+                                    <td>${formatNumber(checkData.summary.total_calculated_remaining_iqd)} د.ع</td>
+                                </tr>
+                                <tr class="${checkData.summary.has_issues ? 'table-danger' : 'table-success'}">
+                                    <td>جیاوازی</td>
+                                    <td>$${formatNumber(checkData.summary.total_usd_difference)}</td>
+                                    <td>${formatNumber(checkData.summary.total_iqd_difference)} د.ع</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <h6 class="text-info">وردەکاری هەر ئایتمێک:</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>کاڵا</th>
+                                    <th>بڕ</th>
+                                    <th>کۆی نرخ</th>
+                                    <th>پارەی دراو</th>
+                                    <th>پارەی ماوەی نەخشێندراو</th>
+                                    <th>پارەی ماوەی ژمێردراو</th>
+                                    <th>جیاوازی</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${checkData.items.map(item => `
+                                    <tr class="${item.usd_difference > 0.01 ? 'table-danger' : 'table-success'}">
+                                        <td>${item.material_name || '-'}</td>
+                                        <td>${item.quantity} ${item.unit_type || ''}</td>
+                                        <td>$${formatNumber(item.total_price_usd)}</td>
+                                        <td>$${formatNumber(item.paid_amount_usd)}</td>
+                                        <td>$${formatNumber(item.remaining_amount_usd)}</td>
+                                        <td>$${formatNumber(item.calculated_remaining_usd)}</td>
+                                        <td>$${formatNumber(item.usd_difference)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-danger" onclick="fixRemainingAmounts('${checkData.receipt_number}')">
+                <i class="fas fa-calculator me-2"></i>چاککردنەوەی پارەی ماوە
+            </button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
+        </div>
+    `;
+    
+    // Create and show modal
+    showModal('پشکنینی پارەی ماوە', modalContent);
+}
 
 // Fix remaining amounts function
 function fixRemainingAmounts(receiptNumber) {
