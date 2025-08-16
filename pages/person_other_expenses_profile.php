@@ -36,6 +36,7 @@ if ($person_id) {
     <link href="../assets/css/comon/table.css" rel="stylesheet">
     <link href="../assets/css/comon/style.css" rel="stylesheet">
     <link href="../assets/css/comon/cards.css" rel="stylesheet" />
+    <link href="../assets/css/person_other_expenses_profile.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
@@ -184,6 +185,7 @@ if ($person_id) {
                                 <th>پارەی ماوە بە دۆلار</th>
                                 <th>پارەی ماوە بە دینار</th>
                                 <th>تێبینی</th>
+                                <th>کردارەکان</th>
                             </tr>
                         </thead>
                         <tbody>

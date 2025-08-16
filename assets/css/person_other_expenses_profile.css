@@ -1,0 +1,158 @@
+/* Person Other Expenses Profile Styles */
+
+/* Purchase items expandable rows */
+.purchase-items-row {
+    background-color: #f8f9fa;
+}
+
+.purchase-items-content {
+    border-radius: 0 0 8px 8px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.purchase-items-content .table {
+    margin-bottom: 0;
+}
+
+.purchase-items-content .table th {
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.purchase-items-content .table td {
+    font-size: 0.875rem;
+    vertical-align: middle;
+}
+
+/* Action buttons */
+.btn-group-sm .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    border-radius: 0.2rem;
+}
+
+.btn-group-sm .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+/* Modal styles */
+.purchase-modal .modal-content {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.purchase-modal .modal-header {
+    background: linear-gradient(135deg, var(--kelly-green) 0%, var(--seafoam-green) 100%);
+    color: white;
+    border-radius: 12px 12px 0 0;
+    border-bottom: none;
+}
+
+.purchase-modal .modal-title {
+    color: white;
+    font-weight: bold;
+}
+
+.purchase-modal .btn-close {
+    filter: invert(1);
+}
+
+/* Table improvements */
+.table-responsive {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.table th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85em;
+    letter-spacing: 0.5px;
+}
+
+.table td {
+    vertical-align: middle;
+    padding: 0.75rem 0.5rem;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .purchase-items-content .table-responsive {
+        font-size: 0.8rem;
+    }
+    
+    .btn-group-sm {
+        flex-direction: column;
+    }
+    
+    .btn-group-sm .btn {
+        margin-bottom: 0.25rem;
+    }
+}
+
+/* Animation for expandable rows */
+.purchase-items-row {
+    transition: all 0.3s ease;
+}
+
+.purchase-items-row[style*="display: none"] {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+.purchase-items-row[style*="display: table-row"] {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Loading states */
+.purchase-row.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Summary cards */
+.card-gradient-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+}
+
+.card-gradient-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+    color: white;
+}
+
+.card-gradient-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
+    color: white;
+}
+
+.card-gradient-primary {
+    background: linear-gradient(135deg, #007bff 0%, #6610f2 100%);
+    color: white;
+}
+
+.card-gradient-info {
+    background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);
+    color: white;
+}
+
+.card-animate-hover {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-animate-hover:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.card-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    opacity: 0.8;
+}

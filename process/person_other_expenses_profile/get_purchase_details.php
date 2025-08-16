@@ -10,14 +10,15 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $person_id = isset($_GET['person_id']) ? intval($_GET['person_id']) : 0;
+$receipt_number = isset($_GET['receipt_number']) ? $_GET['receipt_number'] : '';
 
-if (!$person_id) {
-    echo json_encode(['success' => false, 'error' => 'Person ID is required']);
+if (!$person_id || !$receipt_number) {
+    echo json_encode(['success' => false, 'error' => 'Person ID and Receipt Number are required']);
     exit;
 }
 
 try {
-    // Get purchase materials grouped by receipt number for this person
+    // Get purchase details for this specific receipt
     $stmt = $pdo->prepare("
         SELECT 
             pm.receipt_number,
@@ -34,37 +35,39 @@ try {
             SUM(pm.remaining_amount_usd) as remaining_amount_usd,
             SUM(pm.remaining_amount_iqd) as remaining_amount_iqd
         FROM purchase_materials pm
-        WHERE pm.person_id = ?
+        WHERE pm.person_id = ? AND pm.receipt_number = ?
         GROUP BY pm.receipt_number, pm.purchase_date, pm.currency_type, pm.payment_type, pm.notes, pm.created_at
-        ORDER BY pm.purchase_date DESC, pm.created_at DESC
+        LIMIT 1
     ");
     
-    $stmt->execute([$person_id]);
-    $purchases = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $stmt->execute([$person_id, $receipt_number]);
+    $purchase = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if (!$purchase) {
+        echo json_encode(['success' => false, 'error' => 'Purchase receipt not found']);
+        exit;
+    }
     
     // Format the data
-    $formattedPurchases = [];
-    foreach ($purchases as $purchase) {
-        $formattedPurchases[] = [
-            'receipt_number' => $purchase['receipt_number'],
-            'purchase_date' => $purchase['purchase_date'],
-            'currency_type' => $purchase['currency_type'],
-            'payment_type' => $purchase['payment_type'],
-            'total_price_usd' => (float)$purchase['total_price_usd'],
-            'total_price_iqd' => (float)$purchase['total_price_iqd'],
-            'paid_amount_usd' => (float)$purchase['paid_amount_usd'],
-            'paid_amount_iqd' => (float)$purchase['paid_amount_iqd'],
-            'remaining_amount_usd' => (float)$purchase['remaining_amount_usd'],
-            'remaining_amount_iqd' => (float)$purchase['remaining_amount_iqd'],
-            'notes' => $purchase['notes'],
-            'materials_count' => (int)$purchase['materials_count'],
-            'created_at' => $purchase['created_at']
-        ];
-    }
+    $formattedPurchase = [
+        'receipt_number' => $purchase['receipt_number'],
+        'purchase_date' => $purchase['purchase_date'],
+        'currency_type' => $purchase['currency_type'],
+        'payment_type' => $purchase['payment_type'],
+        'total_price_usd' => (float)$purchase['total_price_usd'],
+        'total_price_iqd' => (float)$purchase['total_price_iqd'],
+        'paid_amount_usd' => (float)$purchase['paid_amount_usd'],
+        'paid_amount_iqd' => (float)$purchase['paid_amount_iqd'],
+        'remaining_amount_usd' => (float)$purchase['remaining_amount_usd'],
+        'remaining_amount_iqd' => (float)$purchase['remaining_amount_iqd'],
+        'notes' => $purchase['notes'],
+        'materials_count' => (int)$purchase['materials_count'],
+        'created_at' => $purchase['created_at']
+    ];
     
     echo json_encode([
         'success' => true,
-        'data' => $formattedPurchases
+        'data' => $formattedPurchase
     ]);
     
 } catch (PDOException $e) {
@@ -78,4 +81,4 @@ try {
         'error' => 'General error: ' . $e->getMessage()
     ]);
 }
-?> 
+?>
