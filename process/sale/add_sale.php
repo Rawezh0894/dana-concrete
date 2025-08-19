@@ -48,6 +48,16 @@ try {
         exit;
     }
 
+    // Check for duplicate invoice number
+    if (!empty($invoice_number)) {
+        $dup_stmt = $pdo->prepare("SELECT COUNT(*) FROM sales WHERE invoice_number = ?");
+        $dup_stmt->execute([$invoice_number]);
+        if ($dup_stmt->fetchColumn() > 0) {
+            echo json_encode(['success' => false, 'message' => 'ئەم ژمارەی پسوڵە پێشتر تۆمارکراوە!']);
+            exit;
+        }
+    }
+
     // Get customer name for notification
     $stmt = $pdo->prepare("SELECT name FROM customers WHERE id = ?");
     $stmt->execute([$customer_id]);

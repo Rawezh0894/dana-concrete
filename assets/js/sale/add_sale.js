@@ -369,6 +369,20 @@ $(document).ready(function() {
             return false;
         }
         
+        // Check if invoice number is valid (not duplicate)
+        const invoiceNumber = $('#invoice_number').val().trim();
+        if (invoiceNumber && $('#invoice_number').hasClass('is-invalid')) {
+            Swal.fire({
+                icon: 'error',
+                title: 'هەڵە',
+                text: 'تکایە ژمارەی پسوڵەیەکی تر هەڵبژێرە'
+            });
+            submitting = false;
+            submitBtn.prop('disabled', false);
+            submitBtn.html(originalBtnText);
+            return false;
+        }
+        
         var formData = $(this).serialize();
         $.ajax({
             url: '../process/sale/add_sale.php',
@@ -413,5 +427,54 @@ $(document).ready(function() {
                 submitBtn.html(originalBtnText);
             }
         });
+    });
+
+    // Real-time invoice number validation
+    let invoiceValidationTimeout;
+    $('#invoice_number').on('input', function() {
+        const invoiceNumber = $(this).val().trim();
+        
+        // Clear previous timeout
+        clearTimeout(invoiceValidationTimeout);
+        
+        // Remove previous validation classes
+        $(this).removeClass('is-valid is-invalid');
+        
+        if (invoiceNumber.length === 0) {
+            return;
+        }
+        
+        // Set timeout to avoid too many requests
+        invoiceValidationTimeout = setTimeout(function() {
+            $.ajax({
+                url: '../process/sale/check_invoice_number.php',
+                type: 'POST',
+                data: { invoice_number: invoiceNumber },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success && !response.exists) {
+                        $('#invoice_number').addClass('is-valid');
+                        // Remove any error message
+                        $('#invoice_number').siblings('.invalid-feedback').remove();
+                    } else {
+                        $('#invoice_number').addClass('is-invalid');
+                        // Add error message if not already present
+                        if ($('#invoice_number').siblings('.invalid-feedback').length === 0) {
+                            $('#invoice_number').after('<div class="invalid-feedback">' + (response.error || 'ئەم ژمارەی پسوڵە پێشتر تۆمارکراوە') + '</div>');
+                        }
+                    }
+                },
+                error: function() {
+                    // On error, don't show validation state
+                    console.error('Error checking invoice number');
+                }
+            });
+        }, 500); // Wait 500ms after user stops typing
+    });
+
+    // Clear validation state when modal is hidden
+    $('#addSaleModal').on('hidden.bs.modal', function() {
+        $('#invoice_number').removeClass('is-valid is-invalid');
+        $('#invoice_number').siblings('.invalid-feedback').remove();
     });
 });
