@@ -19,7 +19,15 @@ const TableController = {
         data.forEach((row, idx) => {
             const tr = document.createElement('tr');
             
-            // Apply duplicate styling if row is marked as duplicate
+            // Apply custom row class if provided
+            if (options.rowClass && typeof options.rowClass === 'function') {
+                const rowClass = options.rowClass(row);
+                if (rowClass) {
+                    tr.classList.add(rowClass);
+                }
+            }
+            
+            // Apply duplicate styling if row is marked as duplicate (legacy support)
             if (row.is_duplicate) {
                 tr.classList.add('duplicate-row');
             }
@@ -217,7 +225,10 @@ const TableController = {
                 return;
             }
             
-            TableController.render(tableSelector, pageData, columns, { rowOffset: start });
+            TableController.render(tableSelector, pageData, columns, { 
+                rowOffset: start,
+                rowClass: options.rowClass 
+            });
             renderPaginationControls(totalPages);
             
             // Call onRenderComplete callback if provided

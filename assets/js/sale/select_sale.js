@@ -28,6 +28,15 @@ async function loadSalesTable() {
         TableController.renderWithPagination('#saleTable', [], columns, { pageSize: 10 });
         return;
     }
+    
+    // Check for duplicate invoice numbers
+    const invoiceCounts = {};
+    data.data.forEach(row => {
+        if (row.invoice_number) {
+            invoiceCounts[row.invoice_number] = (invoiceCounts[row.invoice_number] || 0) + 1;
+        }
+    });
+    
     const columns = [
         '#', 'customer_name', 'recipient', 'location', 'invoice_number', 'formula_name', 'order_date',
         'payment_type', 'quantity', 'price_per_unit', 'total_price', 'amount_paid_iq', 'amount_paid_usd',
@@ -63,9 +72,16 @@ async function loadSalesTable() {
         dolar_rate: row.dolar_rate !== null && row.dolar_rate !== undefined && row.dolar_rate !== '' ? formatNumber(row.dolar_rate) : '-',
         notes: row.notes || '-',
         discount: row.discount !== null && row.discount !== undefined && row.discount !== '' ? formatUSD(row.discount) : '-',
-        actions: `${window.userPermissions && window.userPermissions.canEdit ? `<button class='btn btn-warning btn-sm edit-sale' data-id='${row.id}' title='نوێکردنەوە'><i class='fa fa-edit'></i></button>` : ''} ${window.userPermissions && window.userPermissions.canDelete ? `<button class='btn btn-danger btn-sm delete-sale' data-id='${row.id}' title='سڕینەوە'><i class='fa fa-trash'></i></button>` : ''}`
+        actions: `${window.userPermissions && window.userPermissions.canEdit ? `<button class='btn btn-warning btn-sm edit-sale' data-id='${row.id}' title='نوێکردنەوە'><i class='fa fa-edit'></i></button>` : ''} ${window.userPermissions && window.userPermissions.canDelete ? `<button class='btn btn-danger btn-sm delete-sale' data-id='${row.id}' title='سڕینەوە'><i class='fa fa-trash'></i></button>` : ''}`,
+        // Add row class for duplicate highlighting
+        _rowClass: (row.invoice_number && invoiceCounts[row.invoice_number] > 1) ? 'duplicate-invoice-row' : ''
     }));
-    TableController.renderWithPagination('#saleTable', mapped, columns, { pageSize: 10 });
+    
+    // Render table with custom row classes
+    TableController.renderWithPagination('#saleTable', mapped, columns, { 
+        pageSize: 10,
+        rowClass: (row) => row._rowClass || ''
+    });
 }
 document.addEventListener('DOMContentLoaded', loadSalesTable);
 window.reloadSales = loadSalesTable;
@@ -94,6 +110,15 @@ async function loadSalesFiltered() {
         TableController.renderWithPagination('#saleTable', [], columns, { pageSize: 10 });
         return;
     }
+    
+    // Check for duplicate invoice numbers
+    const invoiceCounts = {};
+    data.data.forEach(row => {
+        if (row.invoice_number) {
+            invoiceCounts[row.invoice_number] = (invoiceCounts[row.invoice_number] || 0) + 1;
+        }
+    });
+    
     const columns = [
         '#', 'customer_name', 'recipient', 'location', 'invoice_number', 'formula_name', 'order_date',
         'payment_type', 'quantity', 'price_per_unit', 'total_price', 'amount_paid_iq', 'amount_paid_usd',
@@ -129,9 +154,16 @@ async function loadSalesFiltered() {
         dolar_rate: row.dolar_rate !== null && row.dolar_rate !== undefined && row.dolar_rate !== '' ? formatNumber(row.dolar_rate) : '-',
         notes: row.notes || '-',
         discount: row.discount !== null && row.discount !== undefined && row.discount !== '' ? formatUSD(row.discount) : '-',
-        actions: `${window.userPermissions && window.userPermissions.canEdit ? `<button class='btn btn-warning btn-sm edit-sale' data-id='${row.id}' title='نوێکردنەوە'><i class='fa fa-edit'></i></button>` : ''} ${window.userPermissions && window.userPermissions.canDelete ? `<button class='btn btn-danger btn-sm delete-sale' data-id='${row.id}' title='سڕینەوە'><i class='fa fa-trash'></i></button>` : ''}`
+        actions: `${window.userPermissions && window.userPermissions.canEdit ? `<button class='btn btn-warning btn-sm edit-sale' data-id='${row.id}' title='نوێکردنەوە'><i class='fa fa-edit'></i></button>` : ''} ${window.userPermissions && window.userPermissions.canDelete ? `<button class='btn btn-danger btn-sm delete-sale' data-id='${row.id}' title='سڕینەوە'><i class='fa fa-trash'></i></button>` : ''}`,
+        // Add row class for duplicate highlighting
+        _rowClass: (row.invoice_number && invoiceCounts[row.invoice_number] > 1) ? 'duplicate-invoice-row' : ''
     }));
-    TableController.renderWithPagination('#saleTable', mapped, columns, { pageSize: 10 });
+    
+    // Render table with custom row classes
+    TableController.renderWithPagination('#saleTable', mapped, columns, { 
+        pageSize: 10,
+        rowClass: (row) => row._rowClass || ''
+    });
 }
 
 const fromInput = document.getElementById('filter_from');

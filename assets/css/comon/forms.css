@@ -1,0 +1,55 @@
+/* Duplicate invoice number highlighting */
+.duplicate-invoice-row {
+    background-color: #dc3545 !important;
+    color: white !important;
+}
+
+.duplicate-invoice-row td {
+    color: white !important;
+}
+
+.duplicate-invoice-row button {
+    color: white !important;
+}
+
+.duplicate-invoice-row .btn-warning {
+    background-color: #ffc107 !important;
+    border-color: #ffc107 !important;
+    color: #212529 !important;
+}
+
+.duplicate-invoice-row .btn-danger {
+    background-color: #6c757d !important;
+    border-color: #6c757d !important;
+    color: white !important;
+}
+
+/* Ensure text is visible in duplicate rows */
+.duplicate-invoice-row td,
+.duplicate-invoice-row th {
+    border-color: #dc3545 !important;
+}
+
+/* Override hover effects for duplicate rows */
+.duplicate-invoice-row:hover {
+    background-color: #c82333 !important;
+    color: white !important;
+}
+
+.duplicate-invoice-row:hover td {
+    background-color: #c82333 !important;
+    color: white !important;
+}
+
+/* Ensure buttons remain visible on hover */
+.duplicate-invoice-row:hover .btn-warning {
+    background-color: #e0a800 !important;
+    border-color: #d39e00 !important;
+    color: #212529 !important;
+}
+
+.duplicate-invoice-row:hover .btn-danger {
+    background-color: #5a6268 !important;
+    border-color: #545b62 !important;
+    color: white !important;
+}

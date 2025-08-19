@@ -101,6 +101,13 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
         <button class="btn btn-secondary" id="clearFilterBtn" type="button">پاککردنەوە</button>
       </div>
     </div>
+    
+    <!-- Duplicate invoice number information -->
+    <div class="alert alert-info mb-3" role="alert">
+      <i class="fas fa-info-circle me-2"></i>
+      <strong>تێبینی:</strong> هەر فرۆشتنێک کە ژمارەی پسووڵەکەی دووبارەیە، ڕیزەکەی بە پاشبنەمای سوور و تێکستی سپی نیشاندەدرێت.
+    </div>
+    
     <div class="table-responsive">
         <table class="table table-bordered table-hover align-middle text-center " id="saleTable">
             <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
