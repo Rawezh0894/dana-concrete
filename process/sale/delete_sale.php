@@ -39,6 +39,16 @@ try {
 
     error_log('Found sale for deletion: ' . print_r($sale, true));
 
+    // Validate invoice_number length before copying to recycle bin
+    if (strlen($sale['invoice_number']) > 100) {
+        error_log('Invoice number too long for recycle bin: ' . $sale['invoice_number'] . ' (length: ' . strlen($sale['invoice_number']) . ')');
+        // Try to truncate the invoice number for recycle bin
+        $truncatedInvoiceNumber = substr($sale['invoice_number'], 0, 100);
+        error_log('Truncated invoice number for recycle bin: ' . $truncatedInvoiceNumber);
+    } else {
+        $truncatedInvoiceNumber = $sale['invoice_number'];
+    }
+
     // Copy to recycle_bin_sales
     $copyStmt = $pdo->prepare('INSERT INTO recycle_bin_sales (
         original_id, customer_id, recipient, location, quantity, price_per_unit, total_price, payment_type, amount_paid_usd, amount_paid_iq, dolar_rate, remaining_amount, invoice_number, order_date, notes, formula_id, discount
@@ -58,7 +68,7 @@ try {
         ':amount_paid_iq' => $sale['amount_paid_iq'],
         ':dolar_rate' => $sale['dolar_rate'],
         ':remaining_amount' => $sale['remaining_amount'],
-        ':invoice_number' => $sale['invoice_number'],
+        ':invoice_number' => $truncatedInvoiceNumber,
         ':order_date' => $sale['order_date'],
         ':notes' => $sale['notes'],
         ':formula_id' => $sale['formula_id'],
@@ -117,6 +127,13 @@ try {
         'total_paid' => $sale['amount_paid_usd'] + $sale['amount_paid_iq'],
         'remaining_debt' => $sale['remaining_amount']
     ];
+
+    // Add note about invoice number truncation if it occurred
+    if (strlen($sale['invoice_number']) > 100) {
+        $additional_info['invoice_truncated'] = true;
+        $additional_info['original_invoice_length'] = strlen($sale['invoice_number']);
+        $additional_info['truncated_invoice'] = $truncatedInvoiceNumber;
+    }
 
     $stmt = $pdo->prepare('DELETE FROM sales WHERE id = ?');
     $stmt->execute([$id]);

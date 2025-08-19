@@ -7836,3 +7836,77 @@
 )
 
 [13-Aug-2025 10:15:52 Asia/Baghdad] Purchase successfully updated: ID=61, Invoice=408, Company=Rawezh
+[19-Aug-2025 19:48:20 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1755622100
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[19-Aug-2025 19:48:20 Asia/Baghdad] Dashboard data loaded successfully for user: 1
+[19-Aug-2025 19:49:21 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1755622160
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[19-Aug-2025 19:49:21 Asia/Baghdad] Dashboard data loaded successfully for user: 1
+[19-Aug-2025 19:49:57 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1755622197
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[19-Aug-2025 19:49:57 Asia/Baghdad] add_sale.php POST: Array
+(
+    [customer_id] => 32
+    [recipient] => ڕاوێژ
+    [location] => پیرەمەگرون
+    [invoice_number] => A-0003
+    [formula_id] => 17
+    [order_date] => 2025-08-07
+    [quantity] => 12
+    [price_per_unit] => 45
+    [total_price] => 540.0000
+    [payment_type] => قەرز
+    [amount_paid_iq] => 0
+    [amount_paid_usd] => 0
+    [remaining_amount] => 540.0000
+    [dolar_rate] => 141750
+    [discount] => 0
+    [notes] => 
+)
+
+[19-Aug-2025 19:50:20 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1755622220
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[19-Aug-2025 19:50:20 Asia/Baghdad] add_sale.php POST: Array
+(
+    [customer_id] => 32
+    [recipient] => ڕاوێژ
+    [location] => پیرەمەگرون
+    [invoice_number] => A-0003
+    [formula_id] => 17
+    [order_date] => 2025-08-07
+    [quantity] => 12
+    [price_per_unit] => 45
+    [total_price] => 540.0000
+    [payment_type] => قەرز
+    [amount_paid_iq] => 0
+    [amount_paid_usd] => 0
+    [remaining_amount] => 540.0000
+    [dolar_rate] => 141750
+    [discount] => 0
+    [notes] => 
+)
+
