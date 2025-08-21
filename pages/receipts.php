@@ -60,6 +60,27 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         label[for="show-invoice-number"]:hover {
             color: #003b73;
         }
+        
+        /* Invoice number formatting styles */
+        .receipt-table td {
+            vertical-align: top;
+            line-height: 1.4;
+        }
+        
+        /* Ensure proper spacing for invoice numbers with line breaks */
+        .receipt-table td br {
+            display: block;
+            content: "";
+            margin-top: 0.2rem;
+        }
+        
+        /* Style for invoice number cells */
+        .receipt-table td:nth-child(8),
+        #paid-table td:nth-child(4) {
+            white-space: pre-line;
+            word-wrap: break-word;
+            max-width: 200px;
+        }
     </style>
 </head>
 <body>
@@ -232,6 +253,11 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 
                 // Reload data
                 if (typeof loadSalesData === 'function') loadSalesData();
+                
+                // Re-format invoice numbers after data refresh
+                setTimeout(() => {
+                    formatAllInvoiceNumbers();
+                }, 500);
             });
         }
         
@@ -243,6 +269,9 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             if (savedPreference !== null) {
                 showInvoiceCheckbox.checked = savedPreference === 'true';
                 toggleInvoiceNumberColumn(showInvoiceCheckbox.checked);
+            } else {
+                // If no saved preference, format invoice numbers for default visible state
+                formatAllInvoiceNumbers();
             }
             
             showInvoiceCheckbox.addEventListener('change', function() {
@@ -251,6 +280,46 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 // Save preference to localStorage
                 localStorage.setItem('showInvoiceNumber', isChecked.toString());
             });
+        }
+        
+        // Format all invoice numbers on page load
+        function formatAllInvoiceNumbers() {
+            const table = document.querySelector('.receipt-table');
+            if (table) {
+                const dataRows = table.querySelectorAll('tbody tr');
+                dataRows.forEach(row => {
+                    if (row.children[7]) {
+                        const invoiceCell = row.children[7];
+                        const originalInvoiceNumber = invoiceCell.textContent;
+                        
+                        // Store original invoice number
+                        invoiceCell.setAttribute('data-original-invoice', originalInvoiceNumber);
+                        
+                        // Format to show only 3 invoice numbers per row
+                        const formattedInvoice = formatInvoiceNumbers(originalInvoiceNumber);
+                        invoiceCell.innerHTML = formattedInvoice;
+                    }
+                });
+            }
+            
+            // Also format paid table
+            const paidTable = document.getElementById('paid-table');
+            if (paidTable) {
+                const paidDataRows = paidTable.querySelectorAll('tbody tr');
+                paidDataRows.forEach(row => {
+                    if (row.children[3]) {
+                        const invoiceCell = row.children[3];
+                        const originalInvoiceNumber = invoiceCell.textContent;
+                        
+                        // Store original invoice number
+                        invoiceCell.setAttribute('data-original-invoice', originalInvoiceNumber);
+                        
+                        // Format to show only 3 invoice numbers per row
+                        const formattedInvoice = formatInvoiceNumbers(originalInvoiceNumber);
+                        invoiceCell.innerHTML = formattedInvoice;
+                    }
+                });
+            }
         }
     });
     
@@ -271,6 +340,21 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         dataRows.forEach(row => {
             if (row.children[7]) {
                 row.children[7].style.display = show ? '' : 'none';
+                
+                // Format invoice numbers to show only 3 per row when visible
+                if (show) {
+                    const invoiceCell = row.children[7];
+                    const originalInvoiceNumber = invoiceCell.getAttribute('data-original-invoice') || invoiceCell.textContent;
+                    
+                    // Store original invoice number if not already stored
+                    if (!invoiceCell.getAttribute('data-original-invoice')) {
+                        invoiceCell.setAttribute('data-original-invoice', originalInvoiceNumber);
+                    }
+                    
+                    // Format to show only 3 invoice numbers per row
+                    const formattedInvoice = formatInvoiceNumbers(originalInvoiceNumber);
+                    invoiceCell.innerHTML = formattedInvoice;
+                }
             }
         });
         
@@ -287,9 +371,48 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             paidDataRows.forEach(row => {
                 if (row.children[3]) {
                     row.children[3].style.display = show ? '' : 'none';
+                    
+                    // Format invoice numbers to show only 3 per row when visible
+                    if (show) {
+                        const invoiceCell = row.children[3];
+                        const originalInvoiceNumber = invoiceCell.getAttribute('data-original-invoice') || invoiceCell.textContent;
+                        
+                        // Store original invoice number if not already stored
+                        if (!invoiceCell.getAttribute('data-original-invoice')) {
+                            invoiceCell.setAttribute('data-original-invoice', originalInvoiceNumber);
+                        }
+                        
+                        // Format to show only 3 invoice numbers per row
+                        const formattedInvoice = formatInvoiceNumbers(originalInvoiceNumber);
+                        invoiceCell.innerHTML = formattedInvoice;
+                    }
                 }
             });
         }
+    }
+    
+    // Function to format invoice numbers to show only 3 per row
+    function formatInvoiceNumbers(invoiceNumbers) {
+        if (!invoiceNumbers || invoiceNumbers.trim() === '') {
+            return '';
+        }
+        
+        // Split by comma and clean up
+        const invoices = invoiceNumbers.split(',').map(inv => inv.trim()).filter(inv => inv);
+        
+        if (invoices.length === 0) {
+            return '';
+        }
+        
+        // Group into rows of 3
+        const rows = [];
+        for (let i = 0; i < invoices.length; i += 3) {
+            const row = invoices.slice(i, i + 3);
+            rows.push(row.join(', '));
+        }
+        
+        // Join rows with line breaks
+        return rows.join('<br>');
     }
 </script>
 <script src="../assets/js/receipts/receipts.js"></script>
