@@ -26,6 +26,7 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             #month-filter, label[for="month-filter"],
             #date-from-filter, label[for="date-from-filter"],
             #date-to-filter, label[for="date-to-filter"],
+            #show-invoice-number, label[for="show-invoice-number"],
             #print-btn, .fa-print,
             #refresh-btn, .fa-refresh {
                 display: none !important;
@@ -34,6 +35,30 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             #transaction-type-filter:parent, #transaction-type-filter:parent * {
                 display: none !important;
             }
+        }
+        
+        /* Checkbox styling */
+        #show-invoice-number {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: #003b73;
+        }
+        
+        #show-invoice-number:checked {
+            accent-color: #009688;
+        }
+        
+        label[for="show-invoice-number"] {
+            cursor: pointer;
+            user-select: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        label[for="show-invoice-number"]:hover {
+            color: #003b73;
         }
     </style>
 </head>
@@ -107,6 +132,12 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         <input type="date" id="date-from-filter" style="padding: 0.3rem; font-size: 1rem;">
         <label for="date-to-filter" style="font-weight:bold; margin-right: 1rem;">بۆ بەروار:</label>
         <input type="date" id="date-to-filter" style="padding: 0.3rem; font-size: 1rem;">
+        
+        <!-- Invoice Number Visibility Checkbox -->
+        <label for="show-invoice-number" style="font-weight:bold; margin-right: 1rem; margin-left: 1rem;">
+            <input type="checkbox" id="show-invoice-number" checked style="margin-left: 0.5rem;">
+            نیشاندانی ژمارەی پسووڵە
+        </label>
     </div>
 
     <table class="receipt-table receipt-table-custom">
@@ -186,15 +217,80 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 var month = document.getElementById('month-filter');
                 var dateFrom = document.getElementById('date-from-filter');
                 var dateTo = document.getElementById('date-to-filter');
+                var showInvoiceCheckbox = document.getElementById('show-invoice-number');
+                
                 if (type) type.value = 'all';
                 if (month) month.value = 'all';
                 if (dateFrom) dateFrom.value = '';
                 if (dateTo) dateTo.value = '';
+                if (showInvoiceCheckbox) {
+                    showInvoiceCheckbox.checked = true;
+                    toggleInvoiceNumberColumn(true);
+                    // Clear localStorage preference
+                    localStorage.removeItem('showInvoiceNumber');
+                }
+                
                 // Reload data
                 if (typeof loadSalesData === 'function') loadSalesData();
             });
         }
+        
+        // Invoice number visibility toggle
+        var showInvoiceCheckbox = document.getElementById('show-invoice-number');
+        if (showInvoiceCheckbox) {
+            // Load saved preference
+            const savedPreference = localStorage.getItem('showInvoiceNumber');
+            if (savedPreference !== null) {
+                showInvoiceCheckbox.checked = savedPreference === 'true';
+                toggleInvoiceNumberColumn(showInvoiceCheckbox.checked);
+            }
+            
+            showInvoiceCheckbox.addEventListener('change', function() {
+                const isChecked = this.checked;
+                toggleInvoiceNumberColumn(isChecked);
+                // Save preference to localStorage
+                localStorage.setItem('showInvoiceNumber', isChecked.toString());
+            });
+        }
     });
+    
+    // Function to toggle invoice number column visibility
+    function toggleInvoiceNumberColumn(show) {
+        const table = document.querySelector('.receipt-table');
+        if (!table) return;
+        
+        // Get the invoice number column (8th column, index 7)
+        const headerRow = table.querySelector('thead tr');
+        const dataRows = table.querySelectorAll('tbody tr');
+        
+        if (headerRow && headerRow.children[7]) {
+            headerRow.children[7].style.display = show ? '' : 'none';
+        }
+        
+        // Hide/show invoice number column in all data rows
+        dataRows.forEach(row => {
+            if (row.children[7]) {
+                row.children[7].style.display = show ? '' : 'none';
+            }
+        });
+        
+        // Also handle the paid table if it exists
+        const paidTable = document.getElementById('paid-table');
+        if (paidTable) {
+            const paidHeaderRow = paidTable.querySelector('thead tr');
+            const paidDataRows = paidTable.querySelectorAll('tbody tr');
+            
+            if (paidHeaderRow && paidHeaderRow.children[3]) {
+                paidHeaderRow.children[3].style.display = show ? '' : 'none';
+            }
+            
+            paidDataRows.forEach(row => {
+                if (row.children[3]) {
+                    row.children[3].style.display = show ? '' : 'none';
+                }
+            });
+        }
+    }
 </script>
 <script src="../assets/js/receipts/receipts.js"></script>
 <script src="../assets/js/receipts/select_sale.js"></script>
