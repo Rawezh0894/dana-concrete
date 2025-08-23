@@ -17,8 +17,14 @@ function formatNumber(amount) {
 }
 
 // Function to load purchase summary data
-function loadPurchaseSummary() {
-    fetch('../process/purchase/get_summary.php')
+function loadPurchaseSummary(filterParams = '') {
+    // Build URL with filters
+    let url = '../process/purchase/get_summary.php';
+    if (filterParams) {
+        url += '?' + filterParams;
+    }
+    
+    fetch(url)
         .then(response => response.json())
         .then(result => {
             if (!result.success) {

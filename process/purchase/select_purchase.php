@@ -69,8 +69,14 @@ if (isset($_GET['id'])) {
 
 $from = $_GET['from'] ?? null;
 $to = $_GET['to'] ?? null;
+$company_id = $_GET['company_id'] ?? null;
+$location_id = $_GET['location_id'] ?? null;
+$driver_id = $_GET['driver_id'] ?? null;
+$material_id = $_GET['material_id'] ?? null;
+
 $where = [];
 $params = [];
+
 if ($from) {
     $where[] = "p.date >= ?";
     $params[] = $from;
@@ -79,6 +85,23 @@ if ($to) {
     $where[] = "p.date <= ?";
     $params[] = $to;
 }
+if ($company_id) {
+    $where[] = "p.company_id = ?";
+    $params[] = $company_id;
+}
+if ($location_id) {
+    $where[] = "l.id = ?";
+    $params[] = $location_id;
+}
+if ($driver_id) {
+    $where[] = "d.id = ?";
+    $params[] = $driver_id;
+}
+if ($material_id) {
+    $where[] = "p.material_id = ?";
+    $params[] = $material_id;
+}
+
 $sql = "SELECT p.id, c.name AS company_name, l.name AS location_name, d.name AS driver_name, p.invoice_number, m.name AS material_name, p.date, p.payment_type, p.type, p.kg, p.price_per_kg_usd, p.price_per_kg_iqd, p.price, p.amount_iqd, p.exchange_rate, p.paid_usd, p.paid_iqd, p.remaining_usd, p.remaining_iqd, b.name AS bin_name
 FROM purchases p
 LEFT JOIN company c ON p.company_id = c.id

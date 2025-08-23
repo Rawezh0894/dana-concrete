@@ -1,4 +1,4 @@
-async function loadPurchases() {
+async function loadPurchases(filterParams = '') {
     // Get current month and year
     const now = new Date();
     const currentMonth = now.getMonth() + 1; // JavaScript months are 0-indexed
@@ -14,7 +14,13 @@ async function loadPurchases() {
     if (fromInput && !fromInput.value) fromInput.value = fromDate;
     if (toInput && !toInput.value) toInput.value = toDate;
     
-    let res = await fetch('../process/purchase/select_purchase.php');
+    // Build URL with filters
+    let url = '../process/purchase/select_purchase.php';
+    if (filterParams) {
+        url += '?' + filterParams;
+    }
+    
+    let res = await fetch(url);
     let text = await res.text();
     let data;
     try {

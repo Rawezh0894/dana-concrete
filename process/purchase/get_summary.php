@@ -30,6 +30,38 @@ function fetchDollarRateFromAPI() {
 }
 
 try {
+    // Get filter parameters
+    $company_id = $_GET['company_id'] ?? null;
+    $location_id = $_GET['location_id'] ?? null;
+    $driver_id = $_GET['driver_id'] ?? null;
+    $material_id = $_GET['material_id'] ?? null;
+    
+    // Build filter conditions
+    $filter_conditions = [];
+    $filter_params = [];
+    
+    if ($company_id) {
+        $filter_conditions[] = "p.company_id = ?";
+        $filter_params[] = $company_id;
+    }
+    if ($location_id) {
+        $filter_conditions[] = "l.id = ?";
+        $filter_params[] = $location_id;
+    }
+    if ($driver_id) {
+        $filter_conditions[] = "d.id = ?";
+        $filter_params[] = $driver_id;
+    }
+    if ($material_id) {
+        $filter_conditions[] = "p.material_id = ?";
+        $filter_params[] = $material_id;
+    }
+    
+    $filter_sql = "";
+    if (!empty($filter_conditions)) {
+        $filter_sql = " WHERE " . implode(" AND ", $filter_conditions);
+    }
+    
     // Get exchange rate from API
     $usd_iqd_rate = null;
     $api_rate = fetchDollarRateFromAPI();
@@ -37,27 +69,44 @@ try {
         $usd_iqd_rate = $api_rate;
     }
     
-    // 1. Total debt (کۆی قەرزی ئێمە)
+    // 1. Total debt (کۆی قەرزی ئێمە) - with filters
     $total_debt_usd = 0;
     $total_debt_iqd = 0;
     
-    // Get debt from purchases (remaining amounts) with individual exchange rates
-    $stmt = $pdo->query("
+    // Get debt from purchases (remaining amounts) with individual exchange rates and filters
+    $purchase_debt_sql = "
         SELECT 
-            SUM(remaining_usd) as usd, 
-            SUM(remaining_iqd) as iqd,
-            SUM(remaining_iqd / NULLIF(exchange_rate / 100, 0)) as iqd_converted
-        FROM purchases
-    ");
+            SUM(p.remaining_usd) as usd, 
+            SUM(p.remaining_iqd) as iqd,
+            SUM(p.remaining_iqd / NULLIF(p.exchange_rate / 100, 0)) as iqd_converted
+        FROM purchases p
+        LEFT JOIN company c ON p.company_id = c.id
+        LEFT JOIN locations l ON p.location = l.name
+        LEFT JOIN drivers d ON p.driver = d.name
+        LEFT JOIN materials m ON p.material_id = m.id
+        $filter_sql
+    ";
+    
+    $stmt = $pdo->prepare($purchase_debt_sql);
+    $stmt->execute($filter_params);
     $row = $stmt->fetch();
     $total_debt_usd += floatval($row['usd'] ?? 0);
     $total_debt_usd += floatval($row['iqd_converted'] ?? 0); // Add converted IQD amount
     
-    // Get debt from company opening debts
-    $stmt = $pdo->query("SELECT SUM(opening_debt_usd) as usd, SUM(opening_debt_iqd) as iqd FROM company");
-    $row = $stmt->fetch();
-    $total_debt_usd += floatval($row['usd'] ?? 0);
-    $total_debt_iqd += floatval($row['iqd'] ?? 0);
+    // Get debt from company opening debts - only if company filter is applied
+    if ($company_id) {
+        $stmt = $pdo->prepare("SELECT SUM(opening_debt_usd) as usd, SUM(opening_debt_iqd) as iqd FROM company WHERE id = ?");
+        $stmt->execute([$company_id]);
+        $row = $stmt->fetch();
+        $total_debt_usd += floatval($row['usd'] ?? 0);
+        $total_debt_iqd += floatval($row['iqd'] ?? 0);
+    } else {
+        // If no company filter, get all company opening debts
+        $stmt = $pdo->query("SELECT SUM(opening_debt_usd) as usd, SUM(opening_debt_iqd) as iqd FROM company");
+        $row = $stmt->fetch();
+        $total_debt_usd += floatval($row['usd'] ?? 0);
+        $total_debt_iqd += floatval($row['iqd'] ?? 0);
+    }
     
     // Convert IQD to USD using API rate
     $total_debt_iqd_converted = 0;
@@ -67,21 +116,42 @@ try {
     
     $total_debt_final = $total_debt_usd + $total_debt_iqd_converted;
     
-    // 2. Total companies count (کۆی ژمارەی کۆمپانیاکان)
-    $stmt = $pdo->query("SELECT COUNT(*) as total FROM company");
-    $row = $stmt->fetch();
-    $total_companies = intval($row['total'] ?? 0);
+    // 2. Total companies count (کۆی ژمارەی کۆمپانیاکان) - with filters
+    if ($company_id) {
+        // If specific company is selected, count is 1
+        $total_companies = 1;
+    } else {
+        $stmt = $pdo->query("SELECT COUNT(*) as total FROM company");
+        $row = $stmt->fetch();
+        $total_companies = intval($row['total'] ?? 0);
+    }
     
-    // 3. Indebted companies count (کۆمپانیاکانی قەرزدار)
-    $stmt = $pdo->query("
-        SELECT COUNT(DISTINCT c.id) as indebted_count 
-        FROM company c 
-        LEFT JOIN purchases p ON c.id = p.company_id 
-        WHERE (c.opening_debt_usd > 0 OR c.opening_debt_iqd > 0) 
-           OR (p.remaining_usd > 0 OR p.remaining_iqd > 0)
-    ");
-    $row = $stmt->fetch();
-    $indebted_companies = intval($row['indebted_count'] ?? 0);
+    // 3. Indebted companies count (کۆمپانیاکانی قەرزدار) - with filters
+    if ($company_id) {
+        // If specific company is selected, check if it's indebted
+        $stmt = $pdo->prepare("
+            SELECT 
+                CASE WHEN (c.opening_debt_usd > 0 OR c.opening_debt_iqd > 0) 
+                     OR EXISTS(SELECT 1 FROM purchases p WHERE p.company_id = c.id AND (p.remaining_usd > 0 OR p.remaining_iqd > 0))
+                THEN 1 ELSE 0 END as indebted_count
+            FROM company c 
+            WHERE c.id = ?
+        ");
+        $stmt->execute([$company_id]);
+        $row = $stmt->fetch();
+        $indebted_companies = intval($row['indebted_count'] ?? 0);
+    } else {
+        // If no company filter, get all indebted companies
+        $stmt = $pdo->query("
+            SELECT COUNT(DISTINCT c.id) as indebted_count 
+            FROM company c 
+            LEFT JOIN purchases p ON c.id = p.company_id 
+            WHERE (c.opening_debt_usd > 0 OR c.opening_debt_iqd > 0) 
+               OR (p.remaining_usd > 0 OR p.remaining_iqd > 0)
+        ");
+        $row = $stmt->fetch();
+        $indebted_companies = intval($row['indebted_count'] ?? 0);
+    }
     
     echo json_encode([
         'success' => true,
