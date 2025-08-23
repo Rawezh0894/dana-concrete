@@ -2,6 +2,9 @@
 // Usage: TableController.render(tableSelector, data, columns)
 
 const TableController = {
+    // Store filter states globally
+    filterStates: new Map(),
+    
     render: function(tableSelector, data, columns, options = {}) {
         const tbody = document.querySelector(tableSelector + ' tbody');
         if (!tbody) return;
@@ -13,9 +16,12 @@ const TableController = {
             td.className = 'table-empty-state';
             td.innerHTML = '<i class="bi bi-inbox"></i><br>هیچ زانیارییەک نەدۆزرایەوە';
             tr.appendChild(td);
-            tbody.appendChild(tr);
             return;
         }
+        
+        // Apply stored filters to new data
+        this.applyStoredFilters(tableSelector, data);
+        
         data.forEach((row, idx) => {
             const tr = document.createElement('tr');
             
@@ -50,6 +56,12 @@ const TableController = {
                 } else if (col === 'price_iqd') {
                     const val = parseFloat(row[col]);
                     td.textContent = (val && val !== 0) ? (val.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0}) + ' د.ع') : '-';
+                } else if (col === 'price_per_kg_iqd') {
+                    const val = parseFloat(row[col]);
+                    td.textContent = (val && val !== 0) ? (val.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0}) + ' د.ع') : '-';
+                } else if (col === 'price_per_kg_usd') {
+                    const val = parseFloat(row[col]);
+                    td.textContent = (val && val !== 0) ? ('$' + val.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})) : '-';
                 } else if (col === 'adjustment') {
                     const val = parseFloat(row[col]);
                     td.textContent = (val && val !== 0) ? (val.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' Kg') : '-';
@@ -67,6 +79,9 @@ const TableController = {
             };
             tbody.appendChild(tr);
         });
+        
+        // Apply filters after rendering
+        this.applyStoredFilters(tableSelector);
     },
     showLoading: function(tableSelector, columns) {
         const tbody = document.querySelector(tableSelector + ' tbody');
@@ -118,13 +133,26 @@ const TableController = {
             thead.querySelectorAll('.table-search-input').forEach(input => {
                 filters[input.getAttribute('data-col')] = input.value.trim().toLowerCase();
             });
-            const filtered = data.filter(row => {
+            
+            // Apply stored column filters first
+            const storedFilters = TableController.filterStates.get(tableSelector) || {};
+            let filteredData = data.filter(row => {
+                return Object.entries(storedFilters).every(([col, selectedValues]) => {
+                    if (!selectedValues || selectedValues.length === 0) return true;
+                    const cellValue = row[col] || '';
+                    return selectedValues.includes(cellValue.toString());
+                });
+            });
+            
+            // Then apply search input filters
+            filteredData = filteredData.filter(row => {
                 return Object.entries(filters).every(([col, val]) => {
                     if (!val) return true;
                     return (row[col] + '').toLowerCase().includes(val);
                 });
             });
-            TableController.render(tableSelector, filtered, columns);
+            
+            TableController.render(tableSelector, filteredData, columns);
         }
         thead.querySelectorAll('.table-search-input').forEach(input => {
             input.oninput = filterData;
@@ -197,12 +225,26 @@ const TableController = {
             thead.querySelectorAll('.table-search-input').forEach(input => {
                 filters[input.getAttribute('data-col')] = input.value.trim().toLowerCase();
             });
-            return data.filter(row => {
+            
+            // Apply stored column filters first
+            const storedFilters = TableController.filterStates.get(tableSelector) || {};
+            let filteredData = data.filter(row => {
+                return Object.entries(storedFilters).every(([col, selectedValues]) => {
+                    if (!selectedValues || selectedValues.length === 0) return true;
+                    const cellValue = row[col] || '';
+                    return selectedValues.includes(cellValue.toString());
+                });
+            });
+            
+            // Then apply search input filters
+            filteredData = filteredData.filter(row => {
                 return Object.entries(filters).every(([col, val]) => {
                     if (!val) return true;
                     return (row[col] + '').toLowerCase().includes(val);
                 });
             });
+            
+            return filteredData;
         }
 
         function renderPage(page) {
@@ -417,6 +459,10 @@ const TableController = {
         // Create dropdown
         const dropdown = document.createElement('div');
         dropdown.className = 'filter-dropdown';
+        
+        // Get stored filter state for this column
+        const storedValues = this.getFilterState(tableSelector, columnName);
+        
         dropdown.innerHTML = `
             <div class="filter-dropdown-header">
                 <span>فلتەر بۆ: ${columnName}</span>
@@ -435,7 +481,7 @@ const TableController = {
                 <div class="filter-options">
                     ${sortedValues.map(value => `
                         <label class="filter-option">
-                            <input type="checkbox" class="filter-checkbox" value="${value}" checked>
+                            <input type="checkbox" class="filter-checkbox" value="${value}" ${storedValues.includes(value) ? 'checked' : ''}>
                             <span>${value}</span>
                         </label>
                     `).join('')}
@@ -519,6 +565,9 @@ const TableController = {
         
         // Update filter info
         this.updateFilterInfo(tableSelector, visibleCount, rows.length);
+        
+        // Store filter state
+        this.storeFilterState(tableSelector, columnName, selectedValues);
     },
     
     // Clear column filter
@@ -563,6 +612,9 @@ const TableController = {
         const tableBody = table.querySelector('tbody');
         const totalRows = tableBody.querySelectorAll('tr').length;
         this.updateFilterInfo(tableSelector, totalRows, totalRows);
+        
+        // Clear stored filter state
+        this.clearFilterState(tableSelector, columnName);
     },
     
     // Update row numbers after filtering
@@ -606,22 +658,67 @@ const TableController = {
         // Remove any open dropdowns
         document.querySelectorAll('.filter-dropdown').forEach(dropdown => dropdown.remove());
         
+        // Clear all stored filters
+        this.clearAllFilterStates(tableSelector);
+        
         // Hide clear all filters button
         this.toggleClearAllFiltersButton(tableSelector);
+        
+        // Update filter info to show all rows
+        const tableBody = table.querySelector('tbody');
+        const totalRows = tableBody.querySelectorAll('tr').length;
+        this.updateFilterInfo(tableSelector, totalRows, totalRows);
+        
+        // Refresh the table to show all data
+        this.refreshTableWithFilters(tableSelector);
     },
-
+    
+    // Refresh table with current filters
+    refreshTableWithFilters: function(tableSelector) {
+        // This will be called by the parent function that manages the data
+        // The table will be re-rendered with the current filter state
+        const event = new CustomEvent('tableFiltersChanged', { 
+            detail: { tableSelector: tableSelector } 
+        });
+        document.dispatchEvent(event);
+    },
+    
+    // Apply filters to new data when table is refreshed
+    applyFiltersToNewData: function(tableSelector, newData, columns, options = {}) {
+        // Apply stored filters to new data
+        const filteredData = this.applyStoredFilters(tableSelector, newData);
+        
+        // Render the filtered data
+        this.render(tableSelector, filteredData, columns, options);
+        
+        // Update filter info
+        const visibleCount = filteredData.length;
+        const totalCount = newData.length;
+        this.updateFilterInfo(tableSelector, visibleCount, totalCount);
+        
+        // Show/hide clear all filters button
+        this.toggleClearAllFiltersButton(tableSelector);
+    },
+    
+    // Check if any filters are active for a table
+    hasActiveFilters: function(tableSelector) {
+        const tableFilters = this.filterStates.get(tableSelector);
+        if (!tableFilters) return false;
+        
+        return Object.values(tableFilters).some(values => 
+            values && values.length > 0
+        );
+    },
+    
     // Toggle clear all filters button visibility
     toggleClearAllFiltersButton: function(tableSelector) {
         const table = document.querySelector(tableSelector);
         if (!table) return;
 
-        const thead = table.querySelector('thead');
-        const headerRow = thead.querySelector('tr');
-        const activeFilters = headerRow.querySelectorAll('.filter-icon.active');
-
+        const hasFilters = this.hasActiveFilters(tableSelector);
         const clearAllBtn = table.parentElement.querySelector('.clear-all-filters-btn');
         if (clearAllBtn) {
-            clearAllBtn.style.display = activeFilters.length > 0 ? 'block' : 'none';
+            clearAllBtn.style.display = hasFilters ? 'block' : 'none';
         }
     },
 
@@ -642,10 +739,84 @@ const TableController = {
             newFilterInfoSpan.textContent = `${visibleCount} لە ${totalCount} زانیاری`;
             headerRow.appendChild(newFilterInfoSpan);
         }
+    },
+
+    // Apply stored filters to new data
+    applyStoredFilters: function(tableSelector, data) {
+        const filters = this.filterStates.get(tableSelector) || {};
+        if (Object.keys(filters).length === 0) return data;
+        
+        return data.filter(row => {
+            return Object.entries(filters).every(([col, selectedValues]) => {
+                if (!selectedValues || selectedValues.length === 0) return true;
+                const cellValue = row[col] || '';
+                return selectedValues.includes(cellValue.toString());
+            });
+        });
+    },
+    
+    // Get columns from the table header
+    getColumns: function(tableSelector) {
+        const table = document.querySelector(tableSelector);
+        if (!table) return [];
+        const thead = table.querySelector('thead');
+        if (!thead) return [];
+        const headerRow = thead.querySelector('tr');
+        if (!headerRow) return [];
+        return Array.from(headerRow.children).map(th => th.textContent.trim());
+    },
+    
+    // Store filter state for a column
+    storeFilterState: function(tableSelector, columnName, selectedValues) {
+        if (!this.filterStates.has(tableSelector)) {
+            this.filterStates.set(tableSelector, {});
+        }
+        const tableFilters = this.filterStates.get(tableSelector);
+        tableFilters[columnName] = selectedValues;
+        this.filterStates.set(tableSelector, tableFilters);
+        
+        // Debug logging
+        console.log(`Filter state stored for ${tableSelector} - ${columnName}:`, selectedValues);
+        console.log('Current filter states:', this.filterStates);
+    },
+    
+    // Get stored filter state for a column
+    getFilterState: function(tableSelector, columnName) {
+        const tableFilters = this.filterStates.get(tableSelector);
+        return tableFilters ? tableFilters[columnName] || [] : [];
+    },
+    
+    // Clear filter state for a column
+    clearFilterState: function(tableSelector, columnName) {
+        const tableFilters = this.filterStates.get(tableSelector);
+        if (tableFilters) {
+            delete tableFilters[columnName];
+            this.filterStates.set(tableSelector, tableFilters);
+        }
+    },
+    
+    // Clear all filter states for a table
+    clearAllFilterStates: function(tableSelector) {
+        this.filterStates.delete(tableSelector);
     }
 };
 
 // Make clearAllColumnFilters globally available
 window.clearAllColumnFilters = function(tableSelector) {
     TableController.clearAllColumnFilters(tableSelector);
+};
+
+// Make applyFiltersToNewData globally available
+window.applyFiltersToNewData = function(tableSelector, newData, columns, options = {}) {
+    TableController.applyFiltersToNewData(tableSelector, newData, columns, options);
+};
+
+// Make hasActiveFilters globally available
+window.hasActiveFilters = function(tableSelector) {
+    return TableController.hasActiveFilters(tableSelector);
+};
+
+// Make getFilterState globally available
+window.getFilterState = function(tableSelector, columnName) {
+    return TableController.getFilterState(tableSelector, columnName);
 };

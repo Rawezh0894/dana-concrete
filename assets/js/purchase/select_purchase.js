@@ -70,9 +70,61 @@ async function loadPurchases(filterParams = '') {
         bin_name: row.bin_name || row.bin_id || '',
         actions: `${window.userPermissions && window.userPermissions.canEdit ? `<button class='btn btn-primary btn-sm edit-purchase' data-id='${row.id}' title='دەستکاری'><i class='fa fa-edit'></i></button>` : ''} ${window.userPermissions && window.userPermissions.canDelete ? `<button class='btn btn-danger btn-sm delete-purchase' data-id='${row.id}' title='سڕینەوە'><i class='fa fa-trash'></i></button>` : ''}`
     }));
-    TableController.renderWithPagination('#purchaseTable', mapped, columns, { pageSize: 10 });
+    TableController.renderWithPagination('#purchaseTable', mapped, columns, { 
+        pageSize: 10,
+        onRenderComplete: function() {
+            // Check if there are active filters and apply them
+            if (window.hasActiveFilters && window.hasActiveFilters('#purchaseTable')) {
+                // Apply stored filters to the new data
+                const filteredData = TableController.applyStoredFilters('#purchaseTable', mapped);
+                if (filteredData.length !== mapped.length) {
+                    // Re-render with filtered data
+                    TableController.renderWithPagination('#purchaseTable', filteredData, columns, { 
+                        pageSize: 10 
+                    });
+                }
+            }
+        }
+    });
 }
 document.addEventListener('DOMContentLoaded', loadPurchases);
+
+// Listen for filter changes and refresh table data
+document.addEventListener('tableFiltersChanged', async function(event) {
+    const tableSelector = event.detail.tableSelector;
+    if (tableSelector === '#purchaseTable') {
+        // Refresh the table data while maintaining filters
+        await loadPurchases();
+    }
+});
+
+// Function to refresh table with current filters
+async function refreshTableWithFilters() {
+    try {
+        // Get current filter parameters
+        const companyId = document.getElementById('filter_company')?.value || '';
+        const locationId = document.getElementById('filter_location')?.value || '';
+        const driverId = document.getElementById('filter_driver')?.value || '';
+        const materialId = document.getElementById('filter_material')?.value || '';
+        const fromDate = document.getElementById('filter_from')?.value || '';
+        const toDate = document.getElementById('filter_to')?.value || '';
+        
+        // Build filter parameters
+        const params = new URLSearchParams();
+        if (companyId) params.append('company_id', companyId);
+        if (locationId) params.append('location_id', locationId);
+        if (driverId) params.append('driver_id', driverId);
+        if (materialId) params.append('material_id', materialId);
+        if (fromDate) params.append('from', fromDate);
+        if (toDate) params.append('to', toDate);
+        
+        // Load purchases with current filters
+        await loadPurchases(params.toString());
+        
+    } catch (error) {
+        console.error('Error refreshing table with filters:', error);
+    }
+}
 
 // Function to handle dynamic price per kg fields in edit modal
 function handleEditTypeChange() {

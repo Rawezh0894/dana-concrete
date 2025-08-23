@@ -782,6 +782,19 @@ $(document).ready(function() {
     
     // Apply filters on page load
     setTimeout(applyFilters, 100);
+    
+    // Handle column filter changes
+    document.addEventListener('tableFiltersChanged', function(event) {
+        const tableSelector = event.detail.tableSelector;
+        if (tableSelector === '#purchaseTable') {
+            // Refresh the table data while maintaining column filters
+            setTimeout(() => {
+                if (typeof refreshTableWithFilters === 'function') {
+                    refreshTableWithFilters();
+                }
+            }, 100);
+        }
+    });
 });
 </script>
 </body>
