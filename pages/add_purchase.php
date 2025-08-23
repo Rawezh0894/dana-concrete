@@ -41,10 +41,6 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
     
     <style>
         /* Filter styling */
-        :root {
-            --accent-orange: #f59e0b;
-        }
-        
         .filter-section {
             background: #f8f9fa;
             border-radius: 8px;
@@ -94,32 +90,6 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
             border-color: #1e7e34 !important;
             transform: translateY(-1px);
         }
-        
-        /* Export button styling */
-        #exportExcelBtn {
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
-        }
-        
-        #exportExcelBtn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4);
-        }
-        
-        #exportExcelBtn:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        #exportExcelBtn .fa-spinner {
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
     </style>
     <!-- jQuery (پێش هەموو شت) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -137,9 +107,6 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
         <div class="d-flex gap-2">
             <button class="btn" data-bs-toggle="modal" data-bs-target="#driversManagementModal" style="background: var(--kelly-green); color:white; font-weight: bold;">
                 <i class="fas fa-users me-1"></i>وردەکاری شۆفێرەکان
-            </button>
-            <button class="btn" id="exportExcelBtn" style="background: var(--accent-orange); color:white; font-weight: bold;">
-                <i class="fas fa-file-excel me-1"></i>ئیکسپۆرت بۆ Excel
             </button>
             <?php if (hasPermission('add_purchase')): ?>
             <button class="btn" data-bs-toggle="modal" data-bs-target="#addPurchaseModal" style="background: var(--seafoam-green); color:white; font-weight: bold;">+ زیادکردنی کڕین</button>
@@ -815,99 +782,6 @@ $(document).ready(function() {
     
     // Apply filters on page load
     setTimeout(applyFilters, 100);
-    
-    // Excel Export functionality
-    $('#exportExcelBtn').on('click', function() {
-        exportToExcel();
-    });
-    
-    // Function to export data to Excel
-    function exportToExcel() {
-        // Get current filter values
-        const companyId = $('#filter_company').val();
-        const locationId = $('#filter_location').val();
-        const driverId = $('#filter_driver').val();
-        const materialId = $('#filter_material').val();
-        const fromDate = $('#filter_from').val();
-        const toDate = $('#filter_to').val();
-        
-        // Build filter parameters
-        const params = new URLSearchParams();
-        if (companyId) params.append('company_id', companyId);
-        if (locationId) params.append('location_id', locationId);
-        if (driverId) params.append('driver_id', driverId);
-        if (materialId) params.append('material_id', materialId);
-        if (fromDate) params.append('from', fromDate);
-        if (toDate) params.append('to', toDate);
-        
-        // Show loading state
-        const exportBtn = $('#exportExcelBtn');
-        const originalText = exportBtn.html();
-        exportBtn.prop('disabled', true);
-        exportBtn.html('<i class="fas fa-spinner fa-spin me-1"></i>چاوەڕوان بە...');
-        
-        // Call export API
-        fetch(`../process/purchase/export_excel.php?${params.toString()}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.blob();
-            })
-            .then(blob => {
-                // Create download link
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.style.display = 'none';
-                a.href = url;
-                
-                // Generate filename with current date
-                const now = new Date();
-                const dateStr = now.toISOString().split('T')[0];
-                const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
-                a.download = `purchases_${dateStr}_${timeStr}.xlsx`;
-                
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
-                
-                // Show success message
-                Swal.fire({
-                    icon: 'success',
-                    title: 'سەرکەوتوو',
-                    text: 'فایلەکە بە سەرکەوتوویی داگرا',
-                    confirmButtonText: 'باشە'
-                });
-            })
-            .catch(error => {
-                console.error('Export error:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'هەڵە',
-                    text: 'هەڵەیەک لە کاتی ئیکسپۆرت کردندا هەیە',
-                    confirmButtonText: 'باشە'
-                });
-            })
-            .finally(() => {
-                // Restore button state
-                exportBtn.prop('disabled', false);
-                exportBtn.html(originalText);
-            });
-    }
-    
-    // Handle column filter changes
-    document.addEventListener('tableFiltersChanged', function(event) {
-        const tableSelector = event.detail.tableSelector;
-        if (tableSelector === '#purchaseTable') {
-            // Refresh the table data while maintaining column filters
-            setTimeout(() => {
-                if (typeof refreshTableWithFilters === 'function') {
-                    refreshTableWithFilters();
-                }
-            }, 100);
-        }
-    });
 });
 </script>
 </body>
