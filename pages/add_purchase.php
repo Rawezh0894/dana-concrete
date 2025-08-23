@@ -36,8 +36,89 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
     <link href="../assets/css/comon/select2_design.css" rel="stylesheet">
     <link href="../assets/css/comon/cards.css" rel="stylesheet" />
    
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.rtl.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.rtl.rtl.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <style>
+        /* Multiple choice filter styling */
+        .select2-multiple {
+            width: 100%;
+        }
+        
+        .select2-container--default .select2-selection--multiple {
+            border: 1px solid #ced4da;
+            border-radius: 0.375rem;
+            min-height: 38px;
+        }
+        
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: var(--seafoam-green);
+            color: white;
+            border: none;
+            border-radius: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            margin: 0.125rem;
+        }
+        
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+            color: white;
+            margin-right: 0.25rem;
+        }
+        
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+            color: #f8f9fa;
+        }
+        
+        .select2-container--default .select2-search--inline .select2-search__field {
+            margin-top: 0.25rem;
+        }
+        
+        /* Filter labels styling */
+        .filter-label {
+            font-weight: 600;
+            color: var(--kelly-green);
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Filter counter styling */
+        .filter-counter {
+            background-color: var(--seafoam-green);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-left: 0.5rem;
+        }
+        
+        /* Filter row styling */
+        .filter-row {
+            background-color: #f8f9fa;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid #e9ecef;
+        }
+        
+        /* Active filter indicator */
+        .filter-active {
+            border-color: var(--seafoam-green);
+            background-color: #e8f5e8;
+        }
+        
+        /* Filter section title */
+        .filter-section-title {
+            color: var(--kelly-green);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+    </style>
     <!-- jQuery (پێش هەموو شت) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- select2 -->
@@ -107,6 +188,60 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
         <button class="btn btn-secondary" id="clearFilterBtn" type="button">پاککردنەوە</button>
       </div>
     </div>
+    
+    <!-- Multiple Choice Filters -->
+    <div class="filter-row" id="filterRow">
+      <div class="filter-section-title">
+        <i class="fas fa-filter me-2"></i>فلتەرکردن
+      </div>
+      <div class="row">
+        <div class="col-md-3">
+          <label for="filter_company" class="filter-label">
+            کۆمپانیا
+            <span class="filter-counter" id="companyCounter" style="display: none;">0</span>
+          </label>
+          <select class="form-select select2-multiple" id="filter_company" multiple data-placeholder="هەموو کۆمپانیاکان">
+            <?php foreach ($companies as $comp): ?>
+              <option value="<?= $comp['id'] ?>"><?= htmlspecialchars($comp['name']) ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label for="filter_location" class="filter-label">
+            شوێن
+            <span class="filter-counter" id="locationCounter" style="display: none;">0</span>
+          </label>
+          <select class="form-select select2-multiple" id="filter_location" multiple data-placeholder="هەموو شوێنەکان">
+            <?php foreach ($locations as $loc): ?>
+              <option value="<?= $loc['id'] ?>"><?= htmlspecialchars($loc['name']) ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label for="filter_driver" class="filter-label">
+            شۆفێر
+            <span class="filter-counter" id="driverCounter" style="display: none;">0</span>
+          </label>
+          <select class="form-select select2-multiple" id="filter_driver" multiple data-placeholder="هەموو شۆفێرەکان">
+            <?php foreach ($drivers as $drv): ?>
+              <option value="<?= $drv['id'] ?>"><?= htmlspecialchars($drv['name']) ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label for="filter_material" class="filter-label">
+            مەواد
+            <span class="filter-counter" id="materialCounter" style="display: none;">0</span>
+          </label>
+          <select class="form-select select2-multiple" id="filter_material" multiple data-placeholder="هەموو مەوادەکان">
+            <?php foreach ($materials as $mat): ?>
+              <option value="<?= $mat['id'] ?>"><?= htmlspecialchars($mat['name']) ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+      </div>
+    </div>
+    
     <div class="table-responsive">
         <table class="table table-bordered table-hover align-middle text-center" id="purchaseTable">
             <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
@@ -597,6 +732,235 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
 <script src="../assets/js/purchase/update_purchase.js"></script>
 <script src="../assets/js/drivers/drivers_management.js"></script>
 <script>
+// Initialize multiple choice filters
+$(document).ready(function() {
+    // Initialize select2 for multiple choice filters
+    $('.select2-multiple').select2({
+        theme: 'bootstrap-5',
+        width: '100%',
+        placeholder: function() {
+            return $(this).data('placeholder');
+        },
+        allowClear: true,
+        language: 'ku'
+    });
+    
+    // Handle filter changes
+    $('.select2-multiple').on('change', function() {
+        applyFilters();
+    });
+    
+    // Handle date filter changes
+    $('#filter_from, #filter_to').on('change', function() {
+        applyFilters();
+    });
+    
+    // Clear all filters
+    $('#clearFilterBtn').on('click', function() {
+        clearAllFilters();
+    });
+});
+
+// Function to apply all filters
+function applyFilters() {
+    const filters = {
+        from: $('#filter_from').val(),
+        to: $('#filter_to').val(),
+        companies: $('#filter_company').val() || [],
+        locations: $('#filter_location').val() || [],
+        drivers: $('#filter_driver').val() || [],
+        materials: $('#filter_material').val() || []
+    };
+    
+    // Update filter counters
+    updateFilterCounters(filters);
+    
+    // Update filter row styling
+    updateFilterRowStyling(filters);
+    
+    // Store filters in localStorage for persistence
+    localStorage.setItem('purchaseFilters', JSON.stringify(filters));
+    
+    // Reload purchase data with filters
+    if (typeof loadPurchaseData === 'function') {
+        loadPurchaseData(filters);
+    }
+}
+
+// Function to update filter counters
+function updateFilterCounters(filters) {
+    // Update company counter
+    const companyCount = filters.companies.length;
+    const companyCounter = $('#companyCounter');
+    if (companyCount > 0) {
+        companyCounter.text(companyCount).show();
+    } else {
+        companyCounter.hide();
+    }
+    
+    // Update location counter
+    const locationCount = filters.locations.length;
+    const locationCounter = $('#locationCounter');
+    if (locationCount > 0) {
+        locationCounter.text(locationCount).show();
+    } else {
+        locationCounter.hide();
+    }
+    
+    // Update driver counter
+    const driverCount = filters.drivers.length;
+    const driverCounter = $('#driverCounter');
+    if (driverCount > 0) {
+        driverCounter.text(driverCount).show();
+    } else {
+        driverCounter.hide();
+    }
+    
+    // Update material counter
+    const materialCount = filters.materials.length;
+    const materialCounter = $('#materialCounter');
+    if (materialCount > 0) {
+        materialCounter.text(materialCount).show();
+    } else {
+        materialCounter.hide();
+    }
+}
+
+// Function to update filter row styling
+function updateFilterRowStyling(filters) {
+    const filterRow = $('#filterRow');
+    const hasActiveFilters = filters.from || filters.to || 
+                           filters.companies.length > 0 || 
+                           filters.locations.length > 0 || 
+                           filters.drivers.length > 0 || 
+                           filters.materials.length > 0;
+    
+    if (hasActiveFilters) {
+        filterRow.addClass('filter-active');
+        showActiveFiltersSummary(filters);
+    } else {
+        filterRow.removeClass('filter-active');
+        hideActiveFiltersSummary();
+    }
+}
+
+// Function to show active filters summary
+function showActiveFiltersSummary(filters) {
+    let summary = [];
+    
+    if (filters.from && filters.to) {
+        summary.push(`بەروار: ${filters.from} - ${filters.to}`);
+    } else if (filters.from) {
+        summary.push(`لە بەروار: ${filters.from}`);
+    } else if (filters.to) {
+        summary.push(`بۆ بەروار: ${filters.to}`);
+    }
+    
+    if (filters.companies.length > 0) {
+        const companyNames = filters.companies.map(id => {
+            const option = $(`#filter_company option[value="${id}"]`);
+            return option.text();
+        });
+        summary.push(`کۆمپانیا: ${companyNames.join(', ')}`);
+    }
+    
+    if (filters.locations.length > 0) {
+        const locationNames = filters.locations.map(id => {
+            const option = $(`#filter_location option[value="${id}"]`);
+            return option.text();
+        });
+        summary.push(`شوێن: ${locationNames.join(', ')}`);
+    }
+    
+    if (filters.drivers.length > 0) {
+        const driverNames = filters.drivers.map(id => {
+            const option = $(`#filter_driver option[value="${id}"]`);
+            return option.text();
+        });
+        summary.push(`شۆفێر: ${driverNames.join(', ')}`);
+    }
+    
+    if (filters.materials.length > 0) {
+        const materialNames = filters.materials.map(id => {
+            const option = $(`#filter_material option[value="${id}"]`);
+            return option.text();
+        });
+        summary.push(`مەواد: ${materialNames.join(', ')}`);
+    }
+    
+    // Show summary below the filter row
+    let summaryHtml = '<div class="alert alert-info mt-2 mb-3" id="activeFiltersSummary">';
+    summaryHtml += '<i class="fas fa-info-circle me-2"></i><strong>فلتەرە چالاکەکان:</strong> ';
+    summaryHtml += summary.join(' | ');
+    summaryHtml += '</div>';
+    
+    // Remove existing summary if any
+    $('#activeFiltersSummary').remove();
+    
+    // Add new summary after filter row
+    $('#filterRow').after(summaryHtml);
+}
+
+// Function to hide active filters summary
+function hideActiveFiltersSummary() {
+    $('#activeFiltersSummary').remove();
+}
+
+// Function to clear all filters
+function clearAllFilters() {
+    // Clear date filters
+    $('#filter_from').val('');
+    $('#filter_to').val('');
+    
+    // Clear multiple choice filters
+    $('.select2-multiple').val(null).trigger('change');
+    
+    // Clear localStorage
+    localStorage.removeItem('purchaseFilters');
+    
+    // Reload data without filters
+    if (typeof loadPurchaseData === 'function') {
+        loadPurchaseData({});
+    }
+}
+
+// Function to load saved filters on page load
+function loadSavedFilters() {
+    const savedFilters = localStorage.getItem('purchaseFilters');
+    if (savedFilters) {
+        try {
+            const filters = JSON.parse(savedFilters);
+            
+            // Apply saved filters to form
+            if (filters.from) $('#filter_from').val(filters.from);
+            if (filters.to) $('#filter_to').val(filters.to);
+            if (filters.companies && filters.companies.length > 0) {
+                $('#filter_company').val(filters.companies).trigger('change');
+            }
+            if (filters.locations && filters.locations.length > 0) {
+                $('#filter_location').val(filters.locations).trigger('change');
+            }
+            if (filters.drivers && filters.drivers.length > 0) {
+                $('#filter_driver').val(filters.drivers).trigger('change');
+            }
+            if (filters.materials && filters.materials.length > 0) {
+                $('#filter_material').val(filters.materials).trigger('change');
+            }
+            
+            // Apply filters to data
+            applyFilters();
+        } catch (e) {
+            console.error('Error loading saved filters:', e);
+            localStorage.removeItem('purchaseFilters');
+        }
+    }
+}
+
+// Load saved filters when page loads
+$(document).ready(function() {
+    loadSavedFilters();
+});
+
 // Add modal: dynamic price per kg fields
 $(function() {
     function handleAddTypeChange() {
