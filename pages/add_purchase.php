@@ -90,6 +90,51 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
             border-color: #1e7e34 !important;
             transform: translateY(-1px);
         }
+        
+        .export-btn {
+            background: var(--warning) !important;
+            border-color: var(--warning) !important;
+            color: #212529 !important;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .export-btn:hover {
+            background: #e0a800 !important;
+            border-color: #e0a800 !important;
+            transform: translateY(-1px);
+            color: #212529 !important;
+        }
+        
+        .summary-export-card {
+            background: linear-gradient(135deg, #28a745, #20c997) !important;
+            border: none !important;
+            color: white !important;
+        }
+        
+        .summary-export-card .card-icon {
+            color: white !important;
+            font-size: 2rem !important;
+        }
+        
+        .summary-export-card .card-title {
+            color: white !important;
+            font-weight: bold !important;
+        }
+        
+        .summary-export-card .btn-light {
+            background: rgba(255, 255, 255, 0.9) !important;
+            border: none !important;
+            color: #28a745 !important;
+            font-weight: 600 !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .summary-export-card .btn-light:hover {
+            background: white !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+        }
     </style>
     <!-- jQuery (پێش هەموو شت) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -108,6 +153,9 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
             <button class="btn" data-bs-toggle="modal" data-bs-target="#driversManagementModal" style="background: var(--kelly-green); color:white; font-weight: bold;">
                 <i class="fas fa-users me-1"></i>وردەکاری شۆفێرەکان
             </button>
+            <button class="btn export-btn" onclick="exportPurchaseToExcel()" title="ئیکسپۆرتی هەموو زانیارییەکانی کڕین بۆ Excel">
+                <i class="fas fa-file-excel me-1"></i>ئیکسپۆرتی Excel
+            </button>
             <?php if (hasPermission('add_purchase')): ?>
             <button class="btn" data-bs-toggle="modal" data-bs-target="#addPurchaseModal" style="background: var(--seafoam-green); color:white; font-weight: bold;">+ زیادکردنی کڕین</button>
             <?php endif; ?>
@@ -116,7 +164,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
     
     <!-- Summary Cards -->
     <div class="row mb-4" id="purchaseSummaryCards">
-        <div class="col-lg-4 col-md-6 mb-3">
+        <div class="col-lg-3 col-md-6 mb-3">
             <div class="card text-center shadow  card-gradient-danger card-animate-hover">
                 <div class="card-body">
                     <i class="fas fa-money-bill-wave card-icon"></i>
@@ -126,7 +174,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
                 </div>
             </div>
         </div>
-        <div class="col-lg-4 col-md-6 mb-3">
+        <div class="col-lg-3 col-md-6 mb-3">
             <div class="card text-center shadow  card-gradient-info card-animate-hover">
                 <div class="card-body">
                     <i class="fas fa-building card-icon"></i>
@@ -136,13 +184,24 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
                 </div>
             </div>
         </div>
-        <div class="col-lg-4 col-md-6 mb-3">
+        <div class="col-lg-3 col-md-6 mb-3">
             <div class="card text-center shadow  card-gradient-warning card-animate-hover">
                 <div class="card-body">
                     <i class="fas fa-hand-holding-usd card-icon"></i>
                     <h6 class="card-title">کۆمپانیاکانی قەرزدار</h6>
                     <div class="fs-4 fw-bold" id="indebted-companies">0</div>
                     <small class="text-light">کۆمپانیاکانی قەرزدار</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-center shadow card-animate-hover summary-export-card">
+                <div class="card-body">
+                    <i class="fas fa-file-excel card-icon"></i>
+                    <h6 class="card-title">ئیکسپۆرتی کورتە</h6>
+                    <button class="btn btn-sm btn-light mt-2" onclick="exportPurchaseSummaryToExcel()" title="ئیکسپۆرتی کورتەی کڕینەکان بۆ Excel">
+                        <i class="fas fa-download me-1"></i>داگرتن
+                    </button>
                 </div>
             </div>
         </div>

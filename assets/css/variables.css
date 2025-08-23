@@ -3,6 +3,7 @@
   --kelly-green: #bfd7ed;
   --seafoam-green: #003b73;
   --spearmint: #60a3d9;
+  --warning: #ffc107;
 } 
 @media print {
   body * {
