@@ -39,11 +39,12 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.rtl.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     
-    <!-- SheetJS for Excel processing -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    
     <style>
         /* Filter styling */
+        :root {
+            --accent-orange: #f59e0b;
+        }
+        
         .filter-section {
             background: #f8f9fa;
             border-radius: 8px;
@@ -94,136 +95,30 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
             transform: translateY(-1px);
         }
         
-        /* Excel Import Modal Styling */
-        .filter-icon {
-            cursor: pointer;
-            color: var(--seafoam-green);
-            margin-left: 8px;
-            transition: color 0.3s ease;
+        /* Export button styling */
+        #exportExcelBtn {
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
         }
         
-        .filter-icon:hover {
-            color: var(--kelly-green);
+        #exportExcelBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4);
         }
         
-        .filter-icon.active {
-            color: var(--accent-orange);
+        #exportExcelBtn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
         }
         
-        .filter-dropdown {
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            min-width: 300px;
-            max-height: 400px;
-            overflow-y: auto;
+        #exportExcelBtn .fa-spinner {
+            animation: spin 1s linear infinite;
         }
         
-        .filter-dropdown-header {
-            background: var(--kelly-green);
-            color: white;
-            padding: 12px 16px;
-            border-radius: 8px 8px 0 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .close-filter-btn {
-            background: none;
-            border: none;
-            color: white;
-            cursor: pointer;
-            font-size: 18px;
-        }
-        
-        .filter-dropdown-content {
-            padding: 16px;
-        }
-        
-        .filter-actions {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 16px;
-        }
-        
-        .filter-search {
-            margin-bottom: 16px;
-        }
-        
-        .filter-options {
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        
-        .filter-option {
-            display: flex;
-            align-items: center;
-            padding: 8px 0;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-        
-        .filter-option:hover {
-            background-color: #f8f9fa;
-        }
-        
-        .filter-option input[type="checkbox"] {
-            margin-right: 8px;
-        }
-        
-        .clear-all-filters-btn {
-            margin-bottom: 16px;
-        }
-        
-        .filter-info {
-            font-size: 12px;
-            color: #6c757d;
-            margin-left: 8px;
-        }
-        
-        /* Excel Import Specific Styles */
-        .excel-import-section {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .template-download-section {
-            background: #e8f5e8;
-            border: 1px solid #28a745;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .import-progress {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-        }
-        
-        .import-results {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 20px;
-        }
-        
-        .progress-bar {
-            height: 20px;
-            border-radius: 10px;
-        }
-        
-        .error-list {
-            max-height: 200px;
-            overflow-y: auto;
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            border-radius: 4px;
-            padding: 12px;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
     <!-- jQuery (پێش هەموو شت) -->
@@ -243,8 +138,8 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
             <button class="btn" data-bs-toggle="modal" data-bs-target="#driversManagementModal" style="background: var(--kelly-green); color:white; font-weight: bold;">
                 <i class="fas fa-users me-1"></i>وردەکاری شۆفێرەکان
             </button>
-            <button class="btn" data-bs-toggle="modal" data-bs-target="#excelImportModal" style="background: var(--accent-orange); color:white; font-weight: bold;">
-                <i class="fas fa-file-excel me-1"></i>ئیمپۆرت کردن لە Excel
+            <button class="btn" id="exportExcelBtn" style="background: var(--accent-orange); color:white; font-weight: bold;">
+                <i class="fas fa-file-excel me-1"></i>ئیکسپۆرت بۆ Excel
             </button>
             <?php if (hasPermission('add_purchase')): ?>
             <button class="btn" data-bs-toggle="modal" data-bs-target="#addPurchaseModal" style="background: var(--seafoam-green); color:white; font-weight: bold;">+ زیادکردنی کڕین</button>
@@ -833,130 +728,6 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
 <script src="../assets/js/purchase/purchase.js"></script>
 <script src="../assets/js/purchase/update_purchase.js"></script>
 <script src="../assets/js/drivers/drivers_management.js"></script>
-
-<!-- Excel Import Modal -->
-<div class="modal fade" id="excelImportModal" tabindex="-1" aria-labelledby="excelImportModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="excelImportModalLabel">
-          <i class="fas fa-file-excel me-2"></i>ئیمپۆرت کردن لە Excel
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <!-- Template Download Section -->
-        <div class="card mb-4 template-download-section">
-          <div class="card-header">
-            <h6 class="mb-0">
-              <i class="fas fa-download me-2"></i>داگرتنی نموونەی Excel
-            </h6>
-          </div>
-          <div class="card-body">
-            <p class="text-muted mb-3">سەرەتا نموونەی Excel داگرە و زانیارییەکان لەو شێوەیەدا دابنێ</p>
-            <button type="button" class="btn btn-success" id="downloadTemplateBtn">
-              <i class="fas fa-download me-2"></i>داگرتنی نموونە
-            </button>
-            <div class="mt-3">
-              <h6>ستوونەکان:</h6>
-              <ul class="list-unstyled">
-                <li><strong>کۆمپانیا:</strong> ناوی کۆمپانیا</li>
-                <li><strong>شوێن:</strong> ناوی شوێن</li>
-                <li><strong>شۆفێر:</strong> ناوی شۆفێر</li>
-                <li><strong>ژمارەی پسوڵە:</strong> ژمارەی پسوڵە</li>
-                <li><strong>مەواد:</strong> ناوی مەواد</li>
-                <li><strong>بەروار:</strong> بەروار (YYYY-MM-DD)</li>
-                <li><strong>جۆری پارەدان:</strong> نەقد یان قەرز</li>
-                <li><strong>جۆری دراو:</strong> دینار یان دۆلار</li>
-                <li><strong>کیلۆگرام:</strong> بڕی کیلۆگرام</li>
-                <li><strong>نرخی یەک کیلۆ بە دۆلار:</strong> نرخ بە دۆلار</li>
-                <li><strong>نرخی یەک کیلۆ بە دینار:</strong> نرخ بە دینار</li>
-                <li><strong>نرخ:</strong> کۆی نرخ</li>
-                <li><strong>بڕی پارە بە دینار:</strong> بڕی پارە بە دینار</li>
-                <li><strong>نرخی 100 دۆلار بە دینار:</strong> نرخی 100 دۆلار</li>
-                <li><strong>پارەی دراو بە دۆلار:</strong> پارەی دراو بە دۆلار</li>
-                <li><strong>پارەی دراو بە دینار:</strong> پارەی دراو بە دینار</li>
-                <li><strong>چاو/سایلۆ:</strong> ناوی چاو یان سایلۆ</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <!-- File Upload Section -->
-        <div class="card excel-import-section">
-          <div class="card-header">
-            <h6 class="mb-0">
-              <i class="fas fa-upload me-2"></i>هەڵگرتنی فایل
-            </h6>
-          </div>
-          <div class="card-body">
-            <form id="excelImportForm" enctype="multipart/form-data">
-              <div class="mb-3">
-                <label for="excelFile" class="form-label">هەڵبژاردنی فایلی Excel:</label>
-                <input type="file" class="form-control" id="excelFile" name="excelFile" accept=".xlsx,.xls" required>
-                <div class="form-text">تەنها فایلەکانی Excel (.xlsx, .xls) قبوڵ دەکرێت</div>
-              </div>
-              
-              <div class="mb-3">
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" id="skipFirstRow" checked>
-                  <label class="form-check-label" for="skipFirstRow">
-                    پەڕەی یەکەم بەکاردەهێنرێت (ناونیشانەکان)
-                  </label>
-                </div>
-              </div>
-              
-              <div class="mb-3">
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" id="validateData" checked>
-                  <label class="form-check-label" for="validateData">
-                    پشتڕاستکردنەوەی زانیارییەکان پێش ئیمپۆرت
-                  </label>
-                </div>
-              </div>
-              
-              <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-primary" id="importBtn">
-                  <i class="fas fa-upload me-2"></i>ئیمپۆرت کردن
-                </button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                  <i class="fas fa-times me-2"></i>داخستن
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-
-        <!-- Import Progress Section -->
-        <div id="importProgress" class="import-progress mt-4" style="display: none;">
-          <div class="progress mb-3">
-            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
-          </div>
-          <div class="text-center">
-            <span id="progressText">0%</span>
-          </div>
-        </div>
-
-        <!-- Import Results Section -->
-        <div id="importResults" class="import-results mt-4" style="display: none;">
-          <div class="card">
-            <div class="card-header">
-              <h6 class="mb-0">ئەنجامی ئیمپۆرت</h6>
-            </div>
-            <div class="card-body">
-              <div id="importSummary"></div>
-              <div id="importErrors" class="mt-3" style="display: none;">
-                <h6 class="text-danger">هەڵەکان:</h6>
-                <div id="errorList" class="error-list"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
 <script>
 // Add modal: dynamic price per kg fields
 $(function() {
@@ -1045,6 +816,86 @@ $(document).ready(function() {
     // Apply filters on page load
     setTimeout(applyFilters, 100);
     
+    // Excel Export functionality
+    $('#exportExcelBtn').on('click', function() {
+        exportToExcel();
+    });
+    
+    // Function to export data to Excel
+    function exportToExcel() {
+        // Get current filter values
+        const companyId = $('#filter_company').val();
+        const locationId = $('#filter_location').val();
+        const driverId = $('#filter_driver').val();
+        const materialId = $('#filter_material').val();
+        const fromDate = $('#filter_from').val();
+        const toDate = $('#filter_to').val();
+        
+        // Build filter parameters
+        const params = new URLSearchParams();
+        if (companyId) params.append('company_id', companyId);
+        if (locationId) params.append('location_id', locationId);
+        if (driverId) params.append('driver_id', driverId);
+        if (materialId) params.append('material_id', materialId);
+        if (fromDate) params.append('from', fromDate);
+        if (toDate) params.append('to', toDate);
+        
+        // Show loading state
+        const exportBtn = $('#exportExcelBtn');
+        const originalText = exportBtn.html();
+        exportBtn.prop('disabled', true);
+        exportBtn.html('<i class="fas fa-spinner fa-spin me-1"></i>چاوەڕوان بە...');
+        
+        // Call export API
+        fetch(`../process/purchase/export_excel.php?${params.toString()}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                // Create download link
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                
+                // Generate filename with current date
+                const now = new Date();
+                const dateStr = now.toISOString().split('T')[0];
+                const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
+                a.download = `purchases_${dateStr}_${timeStr}.xlsx`;
+                
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                // Show success message
+                Swal.fire({
+                    icon: 'success',
+                    title: 'سەرکەوتوو',
+                    text: 'فایلەکە بە سەرکەوتوویی داگرا',
+                    confirmButtonText: 'باشە'
+                });
+            })
+            .catch(error => {
+                console.error('Export error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'هەڵە',
+                    text: 'هەڵەیەک لە کاتی ئیکسپۆرت کردندا هەیە',
+                    confirmButtonText: 'باشە'
+                });
+            })
+            .finally(() => {
+                // Restore button state
+                exportBtn.prop('disabled', false);
+                exportBtn.html(originalText);
+            });
+    }
+    
     // Handle column filter changes
     document.addEventListener('tableFiltersChanged', function(event) {
         const tableSelector = event.detail.tableSelector;
@@ -1057,308 +908,6 @@ $(document).ready(function() {
             }, 100);
         }
     });
-});
-
-// Excel Import Functionality
-$(document).ready(function() {
-    // Download template
-    $('#downloadTemplateBtn').on('click', function() {
-        downloadExcelTemplate();
-    });
-    
-    // Handle form submission
-    $('#excelImportForm').on('submit', function(e) {
-        e.preventDefault();
-        importExcelFile();
-    });
-    
-    // Download Excel template
-    function downloadExcelTemplate() {
-        const templateData = [
-            ['کۆمپانیا', 'شوێن', 'شۆفێر', 'ژمارەی پسوڵە', 'مەواد', 'بەروار', 'جۆری پارەدان', 'جۆری دراو', 'کیلۆگرام', 'نرخی یەک کیلۆ بە دۆلار', 'نرخی یەک کیلۆ بە دینار', 'نرخ', 'بڕی پارە بە دینار', 'نرخی 100 دۆلار بە دینار', 'پارەی دراو بە دۆلار', 'پارەی دراو بە دینار', 'چاو/سایلۆ'],
-            ['کۆمپانیای نموونە', 'شوێنی نموونە', 'شۆفێری نموونە', 'INV-001', 'مەوادی نموونە', '2024-01-15', 'قەرز', 'دۆلار', '1000', '50.00', '0', '50000', '0', '150000', '25000', '0', 'چاوی نموونە']
-        ];
-        
-        // Create workbook and worksheet
-        const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.aoa_to_sheet(templateData);
-        
-        // Set column widths
-        const colWidths = [
-            { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 },
-            { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 20 },
-            { wch: 20 }, { wch: 15 }, { wch: 20 }, { wch: 20 }, { wch: 20 },
-            { wch: 20 }, { wch: 15 }
-        ];
-        ws['!cols'] = colWidths;
-        
-        // Add worksheet to workbook
-        XLSX.utils.book_append_sheet(wb, ws, 'کڕین');
-        
-        // Download file
-        XLSX.writeFile(wb, 'نموونەی_کڕین.xlsx');
-    }
-    
-    // Import Excel file
-    function importExcelFile() {
-        const fileInput = document.getElementById('excelFile');
-        const file = fileInput.files[0];
-        
-        if (!file) {
-            Swal.fire('هەڵە', 'تکایە فایلێک هەڵبژێرە', 'error');
-            return;
-        }
-        
-        // Validate file type
-        const allowedTypes = [
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'application/vnd.ms-excel'
-        ];
-        
-        if (!allowedTypes.includes(file.type)) {
-            Swal.fire('هەڵە', 'تەنها فایلەکانی Excel قبوڵ دەکرێت', 'error');
-            return;
-        }
-        
-        // Show progress
-        showImportProgress();
-        
-        // Read file
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-                
-                // Process data
-                processExcelData(jsonData);
-            } catch (error) {
-                console.error('Error reading Excel file:', error);
-                hideImportProgress();
-                Swal.fire('هەڵە', 'هەڵەیەک لە خوێندنەوەی فایلەکە هەیە', 'error');
-            }
-        };
-        
-        reader.readAsArrayBuffer(file);
-    }
-    
-    // Process Excel data
-    function processExcelData(data) {
-        const skipFirstRow = $('#skipFirstRow').is(':checked');
-        const validateData = $('#validateData').is(':checked');
-        
-        let startIndex = skipFirstRow ? 1 : 0;
-        let processedData = [];
-        let errors = [];
-        
-        // Process each row
-        for (let i = startIndex; i < data.length; i++) {
-            const row = data[i];
-            if (row && row.some(cell => cell !== null && cell !== undefined && cell !== '')) {
-                try {
-                    const processedRow = processRow(row, i + 1, validateData);
-                    if (processedRow.success) {
-                        processedData.push(processedRow.data);
-                    } else {
-                        errors.push(processedRow.error);
-                    }
-                } catch (error) {
-                    errors.push(`هەڵە لە ڕیز ${i + 1}: ${error.message}`);
-                }
-            }
-        }
-        
-        // Show results
-        showImportResults(processedData, errors);
-        
-        // Import data if no errors or if user wants to continue
-        if (errors.length === 0 || confirm('هەندێک هەڵە هەیە، دەتەوێت بەردەوام بیت؟')) {
-            importProcessedData(processedData);
-        }
-    }
-    
-    // Process individual row
-    function processRow(row, rowNumber, validateData) {
-        try {
-            // Map columns to data
-            const mappedData = {
-                company_name: row[0] || '',
-                location_name: row[1] || '',
-                driver_name: row[2] || '',
-                invoice_number: row[3] || '',
-                material_name: row[4] || '',
-                date: row[5] || '',
-                payment_type: row[6] || '',
-                type: row[7] || '',
-                kg: parseFloat(row[8]) || 0,
-                price_per_kg_usd: parseFloat(row[9]) || 0,
-                price_per_kg_iqd: parseFloat(row[10]) || 0,
-                price: parseFloat(row[11]) || 0,
-                amount_iqd: parseFloat(row[12]) || 0,
-                exchange_rate: parseFloat(row[13]) || 0,
-                paid_usd: parseFloat(row[14]) || 0,
-                paid_iqd: parseFloat(row[15]) || 0,
-                bin_name: row[16] || ''
-            };
-            
-            // Validate data if required
-            if (validateData) {
-                const validation = validateRowData(mappedData, rowNumber);
-                if (!validation.valid) {
-                    return { success: false, error: validation.error };
-                }
-            }
-            
-            return { success: true, data: mappedData };
-        } catch (error) {
-            return { success: false, error: `هەڵە لە ڕیز ${rowNumber}: ${error.message}` };
-        }
-    }
-    
-    // Validate row data
-    function validateRowData(data, rowNumber) {
-        const errors = [];
-        
-        if (!data.company_name) errors.push('ناوی کۆمپانیا پێویستە');
-        if (!data.location_name) errors.push('ناوی شوێن پێویستە');
-        if (!data.driver_name) errors.push('ناوی شۆفێر پێویستە');
-        if (!data.invoice_number) errors.push('ژمارەی پسوڵە پێویستە');
-        if (!data.material_name) errors.push('ناوی مەواد پێویستە');
-        if (!data.date) errors.push('بەروار پێویستە');
-        if (!data.payment_type) errors.push('جۆری پارەدان پێویستە');
-        if (!data.type) errors.push('جۆری دراو پێویستە');
-        if (data.kg <= 0) errors.push('کیلۆگرام دەبێت لە سفر زیاتر بێت');
-        if (data.price <= 0) errors.push('نرخ دەبێت لە سفر زیاتر بێت');
-        
-        // Validate date format
-        if (data.date && !/^\d{4}-\d{2}-\d{2}$/.test(data.date)) {
-            errors.push('فۆرماتی بەروار دەبێت YYYY-MM-DD بێت');
-        }
-        
-        if (errors.length > 0) {
-            return {
-                valid: false,
-                error: `ڕیز ${rowNumber}: ${errors.join(', ')}`
-            };
-        }
-        
-        return { valid: true };
-    }
-    
-    // Show import progress
-    function showImportProgress() {
-        $('#importProgress').show();
-        $('#importResults').hide();
-        updateProgress(0);
-    }
-    
-    // Hide import progress
-    function hideImportProgress() {
-        $('#importProgress').hide();
-    }
-    
-    // Update progress bar
-    function updateProgress(percentage) {
-        $('.progress-bar').css('width', percentage + '%');
-        $('#progressText').text(percentage + '%');
-    }
-    
-    // Show import results
-    function showImportResults(data, errors) {
-        hideImportProgress();
-        $('#importResults').show();
-        
-        const summary = `
-            <div class="alert alert-info">
-                <strong>کۆی ڕیزەکان:</strong> ${data.length}<br>
-                <strong>هەڵەکان:</strong> ${errors.length}
-            </div>
-        `;
-        
-        $('#importSummary').html(summary);
-        
-        if (errors.length > 0) {
-            $('#importErrors').show();
-            const errorList = errors.map(error => `<div class="text-danger">• ${error}</div>`).join('');
-            $('#errorList').html(errorList);
-        } else {
-            $('#importErrors').hide();
-        }
-    }
-    
-    // Import processed data
-    function importProcessedData(data) {
-        if (data.length === 0) {
-            Swal.fire('هەڵە', 'هیچ داتایەک بۆ ئیمپۆرت نەدۆزرایەوە', 'error');
-            return;
-        }
-        
-        // Show confirmation
-        Swal.fire({
-            title: 'دڵنیای لە ئیمپۆرت؟',
-            text: `${data.length} ڕیز بەردەستە بۆ ئیمپۆرت`,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: 'بەڵێ، ئیمپۆرت بکە',
-            cancelButtonText: 'نەخێر'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                performImport(data);
-            }
-        });
-    }
-    
-    // Perform actual import
-    function performImport(data) {
-        showImportProgress();
-        
-        // Make API call to backend with JSON data
-        fetch('../process/purchase/import_excel.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
-        })
-        .then(response => response.json())
-        .then(result => {
-            hideImportProgress();
-            
-            if (result.success) {
-                // Show success message
-                Swal.fire({
-                    title: 'سەرکەوتوو!',
-                    text: `${result.data.imported_count} ڕیز بە سەرکەوتوویی ئیمپۆرت کرا`,
-                    icon: 'success'
-                }).then(() => {
-                    // Refresh table
-                    if (typeof loadPurchases === 'function') {
-                        loadPurchases();
-                    }
-                    if (typeof loadPurchaseSummary === 'function') {
-                        loadPurchaseSummary();
-                    }
-                    
-                    // Close modal
-                    $('#excelImportModal').modal('hide');
-                    
-                    // Reset form
-                    $('#excelImportForm')[0].reset();
-                    $('#importResults').hide();
-                });
-            } else {
-                // Show error message
-                Swal.fire('هەڵە', result.error || 'هەڵەیەک لە ئیمپۆرت هەیە', 'error');
-            }
-        })
-        .catch(error => {
-            hideImportProgress();
-            console.error('Import error:', error);
-            Swal.fire('هەڵە', 'هەڵەیەک لە ئیمپۆرت هەیە', 'error');
-        });
-    }
 });
 </script>
 </body>
