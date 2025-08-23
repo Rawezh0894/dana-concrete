@@ -106,6 +106,22 @@
   z-index: 10;
 }
 
+/* ستایلی زانیاری فلتەر */
+.filter-info {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.8rem;
+  color: var(--light-text);
+  font-weight: 500;
+  background: rgba(100, 116, 139, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+/* ڕێکخستنی پۆزیشنی هێدەر بۆ فلتەر ئینفۆ */
 .table thead th {
   background-color: var(--light-gray);
   border-bottom: 2px solid #dee2e6;
@@ -117,6 +133,8 @@
   font-size: 1rem;
   letter-spacing: 0.5px;
   position: relative;
+  padding-right: 32px; /* Make room for filter icon */
+  padding-left: 80px; /* Make room for filter info */
 }
 
 /* ناوەڕۆکی تەیبڵ */
@@ -513,10 +531,272 @@
   color: var(--primary-blue);
 }
 
+/* ستایلی ئایکۆنی فلتەر */
+.filter-icon {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: var(--neutral-gray);
+  font-size: 0.8rem;
+  padding: 4px;
+  border-radius: 4px;
+  transition: var(--transition);
+  z-index: 5;
+}
+
+.filter-icon:hover {
+  color: var(--primary-blue);
+  background: rgba(59, 130, 246, 0.1);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.filter-icon.active {
+  color: var(--primary-blue);
+  background: rgba(59, 130, 246, 0.2);
+}
+
+/* ستایلی دروپدۆنی فلتەر */
+.filter-dropdown {
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  box-shadow: 0 8px 32px var(--shadow-dark);
+  min-width: 280px;
+  max-width: 400px;
+  max-height: 400px;
+  overflow: hidden;
+  font-family: 'Rabar_021', sans-serif;
+  animation: filter-dropdown-fade-in 0.2s ease-out;
+}
+
+@keyframes filter-dropdown-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.filter-dropdown-header {
+  background: linear-gradient(135deg, var(--primary-blue), var(--secondary-purple));
+  color: var(--white);
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.close-filter-btn {
+  background: none;
+  border: none;
+  color: var(--white);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: var(--transition);
+}
+
+.close-filter-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.filter-dropdown-content {
+  padding: 16px;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.filter-actions .btn {
+  flex: 1;
+  font-size: 0.8rem;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: var(--transition);
+}
+
+.filter-actions .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--shadow-medium);
+}
+
+.filter-search {
+  margin-bottom: 16px;
+}
+
+.filter-search input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  transition: var(--transition);
+}
+
+.filter-search input:focus {
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  outline: none;
+}
+
+.filter-options {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--ultra-light-gray);
+}
+
+.filter-options::-webkit-scrollbar {
+  width: 6px;
+}
+
+.filter-options::-webkit-scrollbar-track {
+  background: var(--light-gray);
+  border-radius: 3px;
+}
+
+.filter-options::-webkit-scrollbar-thumb {
+  background: var(--primary-blue);
+  border-radius: 3px;
+}
+
+.filter-options::-webkit-scrollbar-thumb:hover {
+  background: #2563eb;
+}
+
+.filter-option {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: var(--transition);
+  border-bottom: 1px solid var(--border-color);
+  background: var(--white);
+}
+
+.filter-option:last-child {
+  border-bottom: none;
+}
+
+.filter-option:hover {
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.filter-option input[type="checkbox"] {
+  margin-left: 8px;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary-blue);
+  cursor: pointer;
+}
+
+.filter-option span {
+  flex: 1;
+  font-size: 0.85rem;
+  color: var(--dark-text);
+  margin-right: 8px;
+}
+
+/* ئەنیمەیشنی هۆڤەر بۆ ئایکۆنی فلتەر */
+.table thead th:hover .filter-icon {
+  color: var(--primary-blue);
+  background: rgba(59, 130, 246, 0.1);
+}
+
+/* ڕیسپۆنسیڤ بۆ فلتەر */
+@media (max-width: 768px) {
+  .filter-dropdown {
+    min-width: 250px;
+    max-width: 300px;
+    left: 10px !important;
+    right: 10px !important;
+    width: calc(100vw - 20px);
+  }
+  
+  .filter-actions {
+    flex-direction: column;
+  }
+  
+  .filter-actions .btn {
+    width: 100%;
+  }
+  
+  .filter-options {
+    max-height: 150px;
+  }
+}
+
+@media (max-width: 480px) {
+  .filter-dropdown {
+    min-width: 200px;
+    max-width: 250px;
+  }
+  
+  .filter-dropdown-header {
+    padding: 10px 12px;
+    font-size: 0.8rem;
+  }
+  
+  .filter-dropdown-content {
+    padding: 12px;
+  }
+  
+  .filter-option {
+    padding: 6px 10px;
+  }
+  
+  .filter-option span {
+    font-size: 0.8rem;
+  }
+}
+
 .table td.description-col, .table th.description-col {
   min-width: 120px;
   max-width: 600px;
   width: 250px;
   white-space: normal;
   word-break: break-word;
+}
+
+/* ستایلی دووگمەی پاککردنەوەی هەموو فلتەرەکان */
+.clear-all-filters-btn {
+  background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+  border: none !important;
+  color: white !important;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+  font-family: 'Rabar_021', sans-serif;
+}
+
+.clear-all-filters-btn:hover {
+  background: linear-gradient(135deg, #d97706, #b45309) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4);
+  color: white !important;
+}
+
+.clear-all-filters-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+}
+
+.clear-all-filters-btn i {
+  margin-left: 6px;
+  font-size: 0.9rem;
 }

@@ -92,6 +92,9 @@ const TableController = {
         if (!headerRow) return;
         // Remove any previous search inputs
         headerRow.querySelectorAll('.table-search-input').forEach(e => e.remove());
+        
+        // Add filter icons to headers
+        this.addFilterIcons(tableSelector, columns);
 
         columns.forEach((col, idx) => {
             const th = headerRow.children[idx];
@@ -168,6 +171,10 @@ const TableController = {
         let headerRow = thead.querySelector('tr');
         if (!headerRow) return;
         headerRow.querySelectorAll('.table-search-input').forEach(e => e.remove());
+        
+        // Add filter icons to headers
+        this.addFilterIcons(tableSelector, columns);
+        
         columns.forEach((col, idx) => {
             const th = headerRow.children[idx];
             if (!th) return;
@@ -303,5 +310,342 @@ const TableController = {
         if (options.onRenderComplete && typeof options.onRenderComplete === 'function') {
             options.onRenderComplete();
         }
+    },
+    
+    // Add filter icon to table headers
+    addFilterIcons: function(tableSelector, columns) {
+        const table = document.querySelector(tableSelector);
+        if (!table) return;
+        
+        const thead = table.querySelector('thead');
+        if (!thead) return;
+        
+        let headerRow = thead.querySelector('tr');
+        if (!headerRow) return;
+        
+        // Remove any existing filter icons
+        headerRow.querySelectorAll('.filter-icon').forEach(icon => icon.remove());
+        
+        // Add clear all filters button if it doesn't exist
+        let clearAllBtn = table.parentElement.querySelector('.clear-all-filters-btn');
+        if (!clearAllBtn) {
+            clearAllBtn = document.createElement('button');
+            clearAllBtn.className = 'btn btn-sm btn-outline-warning clear-all-filters-btn';
+            clearAllBtn.innerHTML = '<i class="fas fa-times-circle me-1"></i>پاککردنەوەی هەموو فلتەرەکان';
+            clearAllBtn.style.display = 'none';
+            clearAllBtn.style.marginBottom = '10px';
+            clearAllBtn.onclick = () => this.clearAllColumnFilters(tableSelector);
+            
+            // Insert before the table
+            table.parentElement.insertBefore(clearAllBtn, table);
+        }
+        
+        // Add filter info to first header cell
+        const firstHeader = headerRow.children[0];
+        const tableBody = table.querySelector('tbody');
+        if (firstHeader && tableBody && !firstHeader.querySelector('.filter-info')) {
+            const filterInfo = document.createElement('span');
+            filterInfo.className = 'filter-info';
+            filterInfo.textContent = `${tableBody.querySelectorAll('tr').length} زانیاری`;
+            firstHeader.appendChild(filterInfo);
+        }
+        
+        columns.forEach((col, idx) => {
+            const th = headerRow.children[idx];
+            if (!th) return;
+            
+            // Skip actions, select, and special columns
+            if (col === 'actions' || col === 'select' || col === '#' || ["admin", "user", "accountant", "manager"].includes(col)) {
+                return;
+            }
+            
+            // Add filter icon
+            const filterIcon = document.createElement('span');
+            filterIcon.className = 'filter-icon';
+            filterIcon.innerHTML = '<i class="fas fa-filter"></i>';
+            filterIcon.title = 'فلتەر';
+            filterIcon.onclick = (e) => {
+                e.stopPropagation();
+                
+                // Toggle active state
+                const isActive = filterIcon.classList.contains('active');
+                
+                // Remove active state from all other icons
+                headerRow.querySelectorAll('.filter-icon').forEach(icon => {
+                    icon.classList.remove('active');
+                });
+                
+                if (!isActive) {
+                    filterIcon.classList.add('active');
+                    this.showFilterDropdown(th, col, tableSelector);
+                } else {
+                    // If already active, clear filter for this column
+                    this.clearColumnFilter(tableSelector, col);
+                }
+            };
+            
+            th.appendChild(filterIcon);
+        });
+    },
+    
+    // Show filter dropdown for a specific column
+    showFilterDropdown: function(headerCell, columnName, tableSelector) {
+        const table = document.querySelector(tableSelector);
+        if (!table) return;
+        
+        // Remove any existing dropdowns
+        document.querySelectorAll('.filter-dropdown').forEach(dropdown => dropdown.remove());
+        
+        // Get unique values for this column
+        const tbody = table.querySelector('tbody');
+        const rows = tbody.querySelectorAll('tr');
+        const uniqueValues = new Set();
+        
+        rows.forEach(row => {
+            const cell = row.querySelector(`td[data-col="${columnName}"]`);
+            if (cell) {
+                const value = cell.textContent.trim();
+                if (value && value !== '-') {
+                    uniqueValues.add(value);
+                }
+            }
+        });
+        
+        // Convert to array and sort
+        const sortedValues = Array.from(uniqueValues).sort();
+        
+        // Create dropdown
+        const dropdown = document.createElement('div');
+        dropdown.className = 'filter-dropdown';
+        dropdown.innerHTML = `
+            <div class="filter-dropdown-header">
+                <span>فلتەر بۆ: ${columnName}</span>
+                <button class="close-filter-btn" onclick="this.closest('.filter-dropdown').remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="filter-dropdown-content">
+                <div class="filter-actions">
+                    <button class="btn btn-sm btn-outline-primary select-all-btn">هەڵبژاردنی هەموو</button>
+                    <button class="btn btn-sm btn-outline-secondary clear-all-btn">پاککردنەوە</button>
+                </div>
+                <div class="filter-search">
+                    <input type="text" class="form-control form-control-sm" placeholder="گەڕان..." onkeyup="this.nextElementSibling.querySelectorAll('.filter-checkbox').forEach(cb => cb.parentElement.style.display = cb.textContent.toLowerCase().includes(this.value.toLowerCase()) ? '' : 'none')">
+                </div>
+                <div class="filter-options">
+                    ${sortedValues.map(value => `
+                        <label class="filter-option">
+                            <input type="checkbox" class="filter-checkbox" value="${value}" checked>
+                            <span>${value}</span>
+                        </label>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+        
+        // Position dropdown
+        const rect = headerCell.getBoundingClientRect();
+        dropdown.style.position = 'absolute';
+        dropdown.style.top = (rect.bottom + window.scrollY) + 'px';
+        dropdown.style.left = rect.left + 'px';
+        dropdown.style.zIndex = '1000';
+        
+        // Add to body
+        document.body.appendChild(dropdown);
+        
+        // Event listeners
+        const selectAllBtn = dropdown.querySelector('.select-all-btn');
+        const clearAllBtn = dropdown.querySelector('.clear-all-btn');
+        const checkboxes = dropdown.querySelectorAll('.filter-checkbox');
+        
+        selectAllBtn.onclick = () => {
+            checkboxes.forEach(cb => cb.checked = true);
+            this.applyColumnFilter(tableSelector, columnName, checkboxes);
+        };
+        
+        clearAllBtn.onclick = () => {
+            checkboxes.forEach(cb => cb.checked = false);
+            this.applyColumnFilter(tableSelector, columnName, checkboxes);
+        };
+        
+        checkboxes.forEach(cb => {
+            cb.onchange = () => {
+                this.applyColumnFilter(tableSelector, columnName, checkboxes);
+            };
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function closeDropdown(e) {
+            if (!dropdown.contains(e.target) && !headerCell.contains(e.target)) {
+                dropdown.remove();
+                document.removeEventListener('click', closeDropdown);
+            }
+        });
+    },
+    
+    // Apply column filter
+    applyColumnFilter: function(tableSelector, columnName, checkboxes) {
+        const table = document.querySelector(tableSelector);
+        if (!table) return;
+        
+        const tbody = table.querySelector('tbody');
+        const rows = tbody.querySelectorAll('tr');
+        
+        // Get selected values
+        const selectedValues = Array.from(checkboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+        
+        // Apply filter
+        let visibleCount = 0;
+        rows.forEach(row => {
+            const cell = row.querySelector(`td[data-col="${columnName}"]`);
+            if (cell) {
+                const value = cell.textContent.trim();
+                if (selectedValues.length === 0 || selectedValues.includes(value)) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            }
+        });
+        
+        // Update row numbers if needed
+        this.updateRowNumbers(tableSelector);
+        
+        // Show/hide clear all filters button
+        this.toggleClearAllFiltersButton(tableSelector);
+        
+        // Update filter info
+        this.updateFilterInfo(tableSelector, visibleCount, rows.length);
+    },
+    
+    // Clear column filter
+    clearColumnFilter: function(tableSelector, columnName) {
+        const table = document.querySelector(tableSelector);
+        if (!table) return;
+        
+        const tbody = table.querySelector('tbody');
+        const rows = tbody.querySelectorAll('tr');
+        
+        // Show all rows
+        rows.forEach(row => {
+            row.style.display = '';
+        });
+        
+        // Update row numbers
+        this.updateRowNumbers(tableSelector);
+        
+        // Remove active state from filter icon for this column
+        const thead = table.querySelector('thead');
+        const headerRow = thead.querySelector('tr');
+        const columnIndex = Array.from(headerRow.children).findIndex(th => {
+            const icon = th.querySelector('.filter-icon');
+            return icon && icon.classList.contains('active');
+        });
+        
+        if (columnIndex !== -1) {
+            const th = headerRow.children[columnIndex];
+            const filterIcon = th.querySelector('.filter-icon');
+            if (filterIcon) {
+                filterIcon.classList.remove('active');
+            }
+        }
+        
+        // Remove any open dropdowns
+        document.querySelectorAll('.filter-dropdown').forEach(dropdown => dropdown.remove());
+        
+        // Update clear all filters button visibility
+        this.toggleClearAllFiltersButton(tableSelector);
+        
+        // Update filter info to show all rows
+        const tableBody = table.querySelector('tbody');
+        const totalRows = tableBody.querySelectorAll('tr').length;
+        this.updateFilterInfo(tableSelector, totalRows, totalRows);
+    },
+    
+    // Update row numbers after filtering
+    updateRowNumbers: function(tableSelector) {
+        const table = document.querySelector(tableSelector);
+        if (!table) return;
+        
+        const tbody = table.querySelector('tbody');
+        const visibleRows = Array.from(tbody.querySelectorAll('tr')).filter(row => row.style.display !== 'none');
+        
+        visibleRows.forEach((row, idx) => {
+            const numberCell = row.querySelector('td[data-col="#"]');
+            if (numberCell) {
+                numberCell.textContent = idx + 1;
+            }
+        });
+    },
+    
+    // Clear all column filters
+    clearAllColumnFilters: function(tableSelector) {
+        const table = document.querySelector(tableSelector);
+        if (!table) return;
+        
+        const tbody = table.querySelector('tbody');
+        const rows = tbody.querySelectorAll('tr');
+        
+        // Show all rows
+        rows.forEach(row => {
+            row.style.display = '';
+        });
+        
+        // Update row numbers
+        this.updateRowNumbers(tableSelector);
+        
+        // Remove active state from filter icons
+        const filterIcons = table.querySelectorAll('.filter-icon');
+        filterIcons.forEach(icon => {
+            icon.classList.remove('active');
+        });
+        
+        // Remove any open dropdowns
+        document.querySelectorAll('.filter-dropdown').forEach(dropdown => dropdown.remove());
+        
+        // Hide clear all filters button
+        this.toggleClearAllFiltersButton(tableSelector);
+    },
+
+    // Toggle clear all filters button visibility
+    toggleClearAllFiltersButton: function(tableSelector) {
+        const table = document.querySelector(tableSelector);
+        if (!table) return;
+
+        const thead = table.querySelector('thead');
+        const headerRow = thead.querySelector('tr');
+        const activeFilters = headerRow.querySelectorAll('.filter-icon.active');
+
+        const clearAllBtn = table.parentElement.querySelector('.clear-all-filters-btn');
+        if (clearAllBtn) {
+            clearAllBtn.style.display = activeFilters.length > 0 ? 'block' : 'none';
+        }
+    },
+
+    // Update filter info
+    updateFilterInfo: function(tableSelector, visibleCount, totalCount) {
+        const table = document.querySelector(tableSelector);
+        if (!table) return;
+
+        const thead = table.querySelector('thead');
+        const headerRow = thead.querySelector('tr');
+        const filterInfoSpan = headerRow.querySelector('.filter-info');
+
+        if (filterInfoSpan) {
+            filterInfoSpan.textContent = `${visibleCount} لە ${totalCount} زانیاری`;
+        } else {
+            const newFilterInfoSpan = document.createElement('span');
+            newFilterInfoSpan.className = 'filter-info text-muted';
+            newFilterInfoSpan.textContent = `${visibleCount} لە ${totalCount} زانیاری`;
+            headerRow.appendChild(newFilterInfoSpan);
+        }
     }
+};
+
+// Make clearAllColumnFilters globally available
+window.clearAllColumnFilters = function(tableSelector) {
+    TableController.clearAllColumnFilters(tableSelector);
 };
