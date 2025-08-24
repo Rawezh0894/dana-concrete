@@ -92,7 +92,7 @@ $sql = "SELECT
     oe.remaining_usd,
     oe.date
 FROM other_expenses oe
-LEFT JOIN person_other_expenses p ON oe.person_id = p.id
+LEFT JOIN other_expense_persons p ON oe.person_id = p.id
 LEFT JOIN employees e ON oe.employee_id = e.id
 LEFT JOIN cars c ON oe.car_id = c.id
 LEFT JOIN materials m ON oe.material_id = m.id
@@ -118,7 +118,7 @@ try {
             SUM(CASE WHEN oe.expense_type NOT IN ('بەکارهێنانی کاڵای کۆگا', 'بەکارهێنانی گاز') THEN COALESCE(oe.amount_usd, 0) ELSE 0 END) as total_other_expenses,
             COUNT(*) as total_expenses
         FROM other_expenses oe
-        LEFT JOIN person_other_expenses p ON oe.person_id = p.id
+        LEFT JOIN other_expense_persons p ON oe.person_id = p.id
         LEFT JOIN employees e ON oe.employee_id = e.id
         LEFT JOIN cars c ON oe.car_id = c.id
         LEFT JOIN materials m ON oe.material_id = m.id

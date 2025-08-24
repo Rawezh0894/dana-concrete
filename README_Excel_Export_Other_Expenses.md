@@ -149,7 +149,7 @@ This document describes the Excel export functionality that has been added to th
 ## Data Relationships
 
 The export system properly handles the following database relationships:
-- `other_expenses` → `person_other_expenses` (Person details)
+- `other_expenses` → `other_expense_persons` (Person details)
 - `other_expenses` → `employees` (Employee details)
 - `other_expenses` → `cars` (Car details)
 - `other_expenses` → `materials` (Material details)
