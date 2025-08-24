@@ -37,6 +37,53 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    
+    <style>
+        .export-btn {
+            background: var(--warning) !important;
+            border-color: var(--warning) !important;
+            color: #212529 !important;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .export-btn:hover {
+            background: #e0a800 !important;
+            border-color: #e0a800 !important;
+            transform: translateY(-1px);
+            color: #212529 !important;
+        }
+        
+        .summary-export-card {
+            background: linear-gradient(135deg, #28a745, #20c997) !important;
+            border: none !important;
+            color: white !important;
+        }
+        
+        .summary-export-card .card-icon {
+            color: white !important;
+            font-size: 2rem !important;
+        }
+        
+        .summary-export-card .card-title {
+            color: white !important;
+            font-weight: bold !important;
+        }
+        
+        .summary-export-card .btn-light {
+            background: rgba(255, 255, 255, 0.9) !important;
+            border: none !important;
+            color: #28a745 !important;
+            font-weight: 600 !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .summary-export-card .btn-light:hover {
+            background: white !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+        }
+    </style>
 
 </head>
 <body dir="rtl">
@@ -46,6 +93,9 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">فرۆشتن</h2>
         <div>
+            <button class="btn export-btn" onclick="exportSaleToExcel()" title="ئیکسپۆرتی هەموو زانیارییەکانی فرۆشتن بۆ Excel">
+                <i class="fas fa-file-excel me-1"></i>ئیکسپۆرتی Excel
+            </button>
             <a href="summery_concrete_receipts.php" class="btn btn-warning me-2" style="color: white; font-weight: bold;">
                 <i class="fas fa-chart-bar me-1"></i>پوختەی پسووڵەکان
             </a>
@@ -57,7 +107,7 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
 
     <!-- Summary Cards -->
     <div class="row mb-4" id="summary-cards">
-        <div class="col-md-4 mb-3">
+        <div class="col-md-3 mb-3">
             <div class="card text-center shadow  card-gradient-danger card-animate-hover">
                 <div class="card-body">
                     <i class="fas fa-money-bill-wave card-icon"></i>
@@ -67,7 +117,7 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-3">
+        <div class="col-md-3 mb-3">
             <div class="card text-center shadow  card-gradient-warning card-animate-hover">
                 <div class="card-body">
                     <i class="fas fa-user-times card-icon"></i>
@@ -77,13 +127,24 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-3">
+        <div class="col-md-3 mb-3">
             <div class="card text-center shadow  card-gradient-success card-animate-hover">
                 <div class="card-body">
                     <i class="fas fa-shopping-cart card-icon"></i>
                     <h6 class="card-title">کۆی فرۆشتنەکان</h6>
                     <div class="fs-4 fw-bold" id="total-sales">0</div>
                     <small class="text-light">ژمارەی هەموو فرۆشتنەکان</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center shadow card-animate-hover summary-export-card">
+                <div class="card-body">
+                    <i class="fas fa-file-excel card-icon"></i>
+                    <h6 class="card-title">ئیکسپۆرتی کورتە</h6>
+                    <button class="btn btn-sm btn-light mt-2" onclick="exportSaleSummaryToExcel()" title="ئیکسپۆرتی کورتەی فرۆشتنەکان بۆ Excel">
+                        <i class="fas fa-download me-1"></i>داگرتن
+                    </button>
                 </div>
             </div>
         </div>
@@ -97,7 +158,16 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
         <label>بۆ بەروار:</label>
         <input type="date" id="filter_to" class="form-control">
       </div>
-      <div class="col-md-2 d-flex align-items-end">
+      <div class="col-md-3">
+        <label for="filter_customer">کڕیار:</label>
+        <select class="form-select" id="filter_customer">
+          <option value="">هەموو کڕیارەکان</option>
+          <?php foreach ($customers as $c): ?>
+            <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['name']) ?></option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <div class="col-md-3 d-flex align-items-end">
         <button class="btn btn-secondary" id="clearFilterBtn" type="button">پاککردنەوە</button>
       </div>
     </div>
@@ -383,6 +453,60 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
 <script src="../assets/js/sale/update_sale.js"></script>
 <script src="../assets/js/sale/sale.js"></script>
 <script src="../assets/js/sale/summary_cards.js"></script>
+
+<script>
+// Filter functionality for customer and date
+$(document).ready(function() {
+    // Add event listeners for all filters
+    $('#filter_customer, #filter_from, #filter_to').on('change', function() {
+        applyFilters();
+    });
+    
+    // Clear all filters
+    $('#clearFilterBtn').on('click', function() {
+        $('#filter_customer').val('');
+        $('#filter_from').val('');
+        $('#filter_to').val('');
+        applyFilters();
+    });
+    
+    // Function to apply all filters
+    function applyFilters() {
+        const customerId = $('#filter_customer').val();
+        const fromDate = $('#filter_from').val();
+        const toDate = $('#filter_to').val();
+        
+        // Build filter parameters
+        const params = new URLSearchParams();
+        if (customerId) params.append('customer_id', customerId);
+        if (fromDate) params.append('from', fromDate);
+        if (toDate) params.append('to', toDate);
+        
+        // Call the existing loadSales function with filters
+        if (typeof loadSales === 'function') {
+            loadSales(params.toString());
+        }
+        
+        // Also update summary cards if the function exists
+        if (typeof loadSummaryCardsData === 'function') {
+            loadSummaryCardsData();
+        }
+    }
+    
+    // Set default date filters to current month
+    const now = new Date();
+    const currentMonth = now.getMonth() + 1;
+    const currentYear = now.getFullYear();
+    const fromDate = `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`;
+    const toDate = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${new Date(currentYear, currentMonth, 0).getDate()}`;
+    
+    if (!$('#filter_from').val()) $('#filter_from').val(fromDate);
+    if (!$('#filter_to').val()) $('#filter_to').val(toDate);
+    
+    // Apply filters on page load
+    setTimeout(applyFilters, 100);
+});
+</script>
 
 </body>
 </html>

@@ -36,3 +36,72 @@ function loadSummaryCardsData() {
         }
     });
 } 
+
+// Function to export sale summary to Excel
+function exportSaleSummaryToExcel() {
+    // Get current filter values
+    const customerId = $('#filter_customer') ? $('#filter_customer').val() : '';
+    const fromDate = $('#filter_from').val() || '';
+    const toDate = $('#filter_to').val() || '';
+    
+    // Create form data
+    const formData = new FormData();
+    formData.append('customer_id', customerId);
+    formData.append('from_date', fromDate);
+    formData.append('to_date', toDate);
+    formData.append('export_type', 'summary');
+    
+    // Show loading message
+    Swal.fire({
+        title: 'چاوەڕوان بە...',
+        text: 'خەملێنراوە بۆ ئیکسپۆرتی کورتەی فرۆشتنەکان',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+    
+    // Make AJAX request to export summary
+    fetch('../process/sale/export_excel.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.blob();
+        }
+        throw new Error('Network response was not ok');
+    })
+    .then(blob => {
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `کورتەی_فرۆشتنەکان_${new Date().toISOString().split('T')[0]}.xls`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        // Show success message
+        Swal.fire({
+            icon: 'success',
+            title: 'سەرکەوتوو!',
+            text: 'کورتەی فرۆشتنەکان بە سەرکەوتوویی ئیکسپۆرت کرا',
+            timer: 2000,
+            showConfirmButton: false
+        });
+    })
+    .catch(error => {
+        console.error('Summary export error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'هەڵە!',
+            text: 'هەڵەیەک لە ئیکسپۆرتی کورتەکە هەیە. تکایە دواتر هەوڵ بدەوە'
+        });
+    });
+}
+
+// Make function globally available
+window.exportSaleSummaryToExcel = exportSaleSummaryToExcel; 
