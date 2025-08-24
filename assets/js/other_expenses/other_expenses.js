@@ -1601,20 +1601,20 @@ document.addEventListener('DOMContentLoaded', function() {
 // Excel Export Function
 function exportOtherExpensesToExcel() {
     // Get current filter values
-    const dateFrom = $('#dateFrom').val() || '';
-    const dateTo = $('#dateTo').val() || '';
-    const monthFilter = $('#monthFilter').val() || '';
-    const carFilter = $('#carFilter').val() || '';
-    const employeeFilter = $('#employeeFilter').val() || '';
-    const personFilter = $('#personFilter').val() || '';
+    const dateFrom = document.getElementById('dateFrom')?.value || '';
+    const dateTo = document.getElementById('dateTo')?.value || '';
+    const monthFilter = document.getElementById('monthFilter')?.value || '';
+    const carFilter = document.getElementById('carFilter')?.value || '';
+    const employeeFilter = document.getElementById('employeeFilter')?.value || '';
+    const personFilter = document.getElementById('personFilter')?.value || '';
     
     // Get expense type filters
     const expenseTypes = [];
-    if ($('#expenseTypeOther').is(':checked')) expenseTypes.push('خەرجی تر');
-    if ($('#expenseTypeMaterial').is(':checked')) expenseTypes.push('بەکارهێنانی کاڵای کۆگا');
-    if ($('#expenseTypeGas').is(':checked')) expenseTypes.push('بەکارهێنانی گاز');
-    if ($('#filter_expense_type_khwardnga').is(':checked')) expenseTypes.push('خواردنگە');
-    if ($('#filter_expense_type_office').is(':checked')) expenseTypes.push('ئۆفیس');
+    if (document.getElementById('expenseTypeOther')?.checked) expenseTypes.push('خەرجی تر');
+    if (document.getElementById('expenseTypeMaterial')?.checked) expenseTypes.push('بەکارهێنانی کاڵای کۆگا');
+    if (document.getElementById('expenseTypeGas')?.checked) expenseTypes.push('بەکارهێنانی گاز');
+    if (document.getElementById('filter_expense_type_khwardnga')?.checked) expenseTypes.push('خواردنگە');
+    if (document.getElementById('filter_expense_type_office')?.checked) expenseTypes.push('ئۆفیس');
     
     // Create form data
     const formData = new FormData();
@@ -1681,20 +1681,20 @@ function exportOtherExpensesToExcel() {
 // Function to export other expenses summary to Excel
 function exportOtherExpensesSummaryToExcel() {
     // Get current filter values
-    const dateFrom = $('#dateFrom').val() || '';
-    const dateTo = $('#dateTo').val() || '';
-    const monthFilter = $('#monthFilter').val() || '';
-    const carFilter = $('#carFilter').val() || '';
-    const employeeFilter = $('#employeeFilter').val() || '';
-    const personFilter = $('#personFilter').val() || '';
+    const dateFrom = document.getElementById('dateFrom')?.value || '';
+    const dateTo = document.getElementById('dateTo')?.value || '';
+    const monthFilter = document.getElementById('monthFilter')?.value || '';
+    const carFilter = document.getElementById('carFilter')?.value || '';
+    const employeeFilter = document.getElementById('employeeFilter')?.value || '';
+    const personFilter = document.getElementById('personFilter')?.value || '';
     
     // Get expense type filters
     const expenseTypes = [];
-    if ($('#expenseTypeOther').is(':checked')) expenseTypes.push('خەرجی تر');
-    if ($('#expenseTypeMaterial').is(':checked')) expenseTypes.push('بەکارهێنانی کاڵای کۆگا');
-    if ($('#expenseTypeGas').is(':checked')) expenseTypes.push('بەکارهێنانی گاز');
-    if ($('#filter_expense_type_khwardnga').is(':checked')) expenseTypes.push('خواردنگە');
-    if ($('#filter_expense_type_office').is(':checked')) expenseTypes.push('ئۆفیس');
+    if (document.getElementById('expenseTypeOther')?.checked) expenseTypes.push('خەرجی تر');
+    if (document.getElementById('expenseTypeMaterial')?.checked) expenseTypes.push('بەکارهێنانی کاڵای کۆگا');
+    if (document.getElementById('expenseTypeGas')?.checked) expenseTypes.push('بەکارهێنانی گاز');
+    if (document.getElementById('filter_expense_type_khwardnga')?.checked) expenseTypes.push('خواردنگە');
+    if (document.getElementById('filter_expense_type_office')?.checked) expenseTypes.push('ئۆفیس');
     
     // Create form data
     const formData = new FormData();
