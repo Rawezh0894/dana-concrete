@@ -29,6 +29,53 @@ if (!isset($_SESSION['user_id'])) {
     <link href="../assets/css/comon/style.css" rel="stylesheet">
     <link href="../assets/css/comon/summary_cards.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <style>
+        .export-btn {
+            background: var(--warning) !important;
+            border-color: var(--warning) !important;
+            color: #212529 !important;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .export-btn:hover {
+            background: #e0a800 !important;
+            border-color: #e0a800 !important;
+            transform: translateY(-1px);
+            color: #212529 !important;
+        }
+        
+        .summary-export-card {
+            background: linear-gradient(135deg, #28a745, #20c997) !important;
+            border: none !important;
+            color: white !important;
+        }
+        
+        .summary-export-card .card-icon {
+            color: white !important;
+            font-size: 2rem !important;
+        }
+        
+        .summary-export-card .card-title {
+            color: white !important;
+            font-weight: bold !important;
+        }
+        
+        .summary-export-card .btn-light {
+            background: rgba(255, 255, 255, 0.9) !important;
+            border: none !important;
+            color: #28a745 !important;
+            font-weight: 600 !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .summary-export-card .btn-light:hover {
+            background: white !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+        }
+    </style>
   
 </head>
 <body dir="rtl">
@@ -40,6 +87,9 @@ if (!isset($_SESSION['user_id'])) {
             <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">خەرجی تر</h2>
             <small class="text-muted">فلتەری ورد - خەرجی سەیارەکان + خەرجی تر</small>
         </div>
+        <button class="btn export-btn" onclick="exportOtherExpensesToExcel()" title="ئیکسپۆرتی هەموو زانیارییەکانی خەرجی تر بۆ Excel">
+            <i class="fas fa-file-excel me-1"></i>ئیکسپۆرتی Excel
+        </button>
         <?php if (hasPermission('add_other_expenses')): ?>
         <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addExpenseModal" style="background: var(--seafoam-green); font-weight: bold;">+ زیادکردنی خەرجی تر</button>
         <?php endif; ?>
@@ -176,6 +226,9 @@ if (!isset($_SESSION['user_id'])) {
                 <button type="button" id="exportReport" class="btn btn-success">
                   <i class="fas fa-download me-1"></i>داگرتنی ڕاپۆرت
                 </button>
+                <button type="button" onclick="exportOtherExpensesToExcel()" class="btn export-btn">
+                  <i class="fas fa-file-excel me-1"></i>ئیکسپۆرتی Excel
+                </button>
               </div>
             </div>
           </div>
@@ -183,7 +236,7 @@ if (!isset($_SESSION['user_id'])) {
       </div>
     </div>
       <div class="row w-100 mt-3 g-3">
-        <div class="col-md-3">
+        <div class="col-md-2">
           <div class="card gradient-card green-gradient">
             <div class="card-body">
               <h6 class="card-title">خەرجی سەیارەکان (کاڵا)</h6>
@@ -192,7 +245,7 @@ if (!isset($_SESSION['user_id'])) {
             </div>
           </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
           <div class="card gradient-card orange-gradient">
             <div class="card-body">
               <h6 class="card-title">خەرجی سەیارەکان (گاز)</h6>
@@ -201,7 +254,7 @@ if (!isset($_SESSION['user_id'])) {
             </div>
           </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
           <div class="card gradient-card teal-gradient">
             <div class="card-body">
               <h6 class="card-title">خەرجی تر</h6>
@@ -210,12 +263,23 @@ if (!isset($_SESSION['user_id'])) {
             </div>
           </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
           <div class="card gradient-card purple-gradient">
             <div class="card-body">
               <h6 class="card-title">کۆی گشتی</h6>
               <div id="totalCarExpenses" class="card-value">$0</div>
               <small>کاڵا + گاز + خەرجی تر</small>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <div class="card gradient-card summary-export-card">
+            <div class="card-body">
+              <i class="fas fa-file-excel card-icon"></i>
+              <h6 class="card-title">ئیکسپۆرتی کورتە</h6>
+              <button class="btn btn-sm btn-light mt-2" onclick="exportOtherExpensesSummaryToExcel()" title="ئیکسپۆرتی کورتەی خەرجی تر بۆ Excel">
+                <i class="fas fa-download me-1"></i>داگرتن
+              </button>
             </div>
           </div>
         </div>
