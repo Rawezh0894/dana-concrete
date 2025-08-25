@@ -6,41 +6,69 @@ function fetchAndRenderReportData() {
     let url = `../process/reporst/get_information.php?filter=${currentReportFilter}`;
     if (fromDate) url += `&from_date=${fromDate}`;
     if (toDate) url += `&to_date=${toDate}`;
+    
+    console.log('Fetching data from:', url);
+    
     fetch(url)
         .then(res => res.json())
         .then(result => {
+            console.log('API Response:', result);
+            
             if (!result.success) {
+                console.error('API Error:', result.error);
                 swalAlert('هەڵە', result.error, 'error');
                 return;
             }
+            
             const data = result.data;
-            const usd_iqd_rate = data.usd_iqd_rate || 0;
-            const company_debt_usd = Number(data.company.usd) || 0;
-            const person_debt_usd = Number(data.person.usd) || 0;
-            const purchases_cash_usd = Number(data.purchases.cash.usd) || 0;
-            const purchases_credit_usd = Number(data.purchases.credit.usd) || 0;
-            const purchases_usd = purchases_cash_usd + purchases_credit_usd;
+            console.log('Data received:', data);
             
             // Cards will be rendered by renderDashboardCards function
-            if (typeof renderDashboardCards === 'function') renderDashboardCards(result);
-            if (typeof renderCharts === 'function') renderCharts(result);
+            if (typeof renderDashboardCards === 'function') {
+                console.log('Calling renderDashboardCards');
+                renderDashboardCards(result);
+            } else {
+                console.error('renderDashboardCards function not found');
+            }
+            
+            if (typeof renderCharts === 'function') {
+                console.log('Calling renderCharts');
+                renderCharts(result);
+            } else {
+                console.error('renderCharts function not found');
+            }
             
             // Populate additional professional reports
             populateEmployeeReports(data);
             populateCarReports(data);
             populateStockReports(data);
             populateActivityReports(data);
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+            swalAlert('هەڵە', 'هەڵە لە وەرگرتنی زانیاری: ' + error.message, 'error');
         });
 }
 
 // Function to render dashboard cards with consistent styling
 function renderDashboardCards(data) {
-    const usd_iqd_rate = data.usd_iqd_rate || 0;
-    const company_debt_usd = Number(data.company?.usd) || 0;
-    const person_debt_usd = Number(data.person?.usd) || 0;
-    const purchases_cash_usd = Number(data.purchases?.cash?.usd) || 0;
-    const purchases_credit_usd = Number(data.purchases?.credit?.usd) || 0;
+    console.log('renderDashboardCards called with data:', data);
+    
+    const usd_iqd_rate = data.data?.usd_iqd_rate || 0;
+    const company_debt_usd = Number(data.data?.company?.usd) || 0;
+    const person_debt_usd = Number(data.data?.person?.usd) || 0;
+    const purchases_cash_usd = Number(data.data?.purchases?.cash?.usd) || 0;
+    const purchases_credit_usd = Number(data.data?.purchases?.credit?.usd) || 0;
     const purchases_usd = purchases_cash_usd + purchases_credit_usd;
+    
+    console.log('Extracted values:', {
+        usd_iqd_rate,
+        company_debt_usd,
+        person_debt_usd,
+        purchases_cash_usd,
+        purchases_credit_usd,
+        purchases_usd
+    });
     
     const cards = [
         {
@@ -48,7 +76,7 @@ function renderDashboardCards(data) {
             label: 'کۆی قەرزی کڕیارەکان',
             icon: 'fa-users',
             cardClass: 'customer-card',
-            value: formatCurrency(data.customer?.usd || 0, 'USD'),
+            value: formatCurrency(data.data?.customer?.usd || 0, 'USD'),
             subtitle: 'قەرزی کڕیارەکان'
         },
         {
@@ -80,7 +108,7 @@ function renderDashboardCards(data) {
             label: 'کۆی نرخی فرۆشتن',
             icon: 'fa-cash-register',
             cardClass: 'sales-card',
-            value: formatCurrency((Number(data.sales?.cash?.usd) || 0) + (Number(data.sales?.credit?.usd) || 0), 'USD'),
+            value: formatCurrency((Number(data.data?.sales?.cash?.usd) || 0) + (Number(data.data?.sales?.credit?.usd) || 0), 'USD'),
             subtitle: 'کۆی فرۆشتنەکان'
         },
         {
@@ -88,7 +116,7 @@ function renderDashboardCards(data) {
             label: 'کۆی پارەی ماوەی کڕین',
             icon: 'fa-wallet',
             cardClass: 'info-card',
-            value: formatCurrency(Number(data.remaining_purchases?.usd) || 0, 'USD'),
+            value: formatCurrency(Number(data.data?.remaining_purchases?.usd) || 0, 'USD'),
             subtitle: 'پارەی ماوە'
         },
         {
@@ -96,7 +124,7 @@ function renderDashboardCards(data) {
             label: 'کۆی داشکاندن',
             icon: 'fa-percent',
             cardClass: 'dark-card',
-            value: formatCurrency(Number(data.discounts?.usd) || 0, 'USD'),
+            value: formatCurrency(Number(data.data?.discounts?.usd) || 0, 'USD'),
             subtitle: 'داشکاندنەکان'
         },
         {
@@ -104,7 +132,7 @@ function renderDashboardCards(data) {
             label: 'قازانجی خاوێن',
             icon: 'fa-coins',
             cardClass: 'success-card',
-            value: formatCurrency(Number(data.net_profit?.usd) || 0, 'USD'),
+            value: formatCurrency(Number(data.data?.net_profit?.usd) || 0, 'USD'),
             subtitle: 'قازانجی خاوێن'
         },
         {
@@ -112,7 +140,7 @@ function renderDashboardCards(data) {
             label: 'کۆی خەرجی',
             icon: 'fa-money-bill-wave',
             cardClass: 'total-expenses-card',
-            value: formatCurrency(Number(data.total_expenses?.usd) || 0, 'USD'),
+            value: formatCurrency(Number(data.data?.total_expenses?.usd) || 0, 'USD'),
             subtitle: 'کۆی خەرجی'
         },
         {
@@ -124,6 +152,8 @@ function renderDashboardCards(data) {
             subtitle: 'نرخی دۆلار بە دینار'
         }
     ];
+    
+    console.log('Cards array created:', cards);
     
     let html = '';
     cards.forEach(card => {
@@ -137,7 +167,16 @@ function renderDashboardCards(data) {
         </div>`;
     });
     
-    document.getElementById('dashboard-summary-cards').innerHTML = html;
+    console.log('HTML generated:', html);
+    console.log('Target element:', document.getElementById('dashboard-summary-cards'));
+    
+    const targetElement = document.getElementById('dashboard-summary-cards');
+    if (targetElement) {
+        targetElement.innerHTML = html;
+        console.log('Cards rendered successfully');
+    } else {
+        console.error('Target element dashboard-summary-cards not found');
+    }
 }
 
 // Function to populate employee reports

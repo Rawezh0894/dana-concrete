@@ -539,6 +539,12 @@ try {
     $current_period_expenses = $total_expenses_usd;
     $current_period_profit = $current_period_sales - $current_period_expenses;
     
+    // Ensure all required variables are defined
+    if (!isset($net_profit)) $net_profit = 0;
+    if (!isset($total_discount)) $total_discount = 0;
+    if (!isset($remaining_purchases_total_usd)) $remaining_purchases_total_usd = 0;
+    if (!isset($remaining_purchases_iqd)) $remaining_purchases_iqd = 0;
+    
     // 6. Debt Analysis
     $debt_analysis = [
         'customer_debt' => $customer_debt_total_usd,
@@ -546,6 +552,13 @@ try {
         'person_debt' => $person_debt_usd
     ];
 
+    // Debug: Log key variables
+    error_log("Debug - Key variables: customer_debt_total_usd=" . $customer_debt_total_usd . 
+              ", company_debt_total_usd=" . $company_debt_total_usd . 
+              ", person_debt_usd=" . $person_debt_usd . 
+              ", net_profit=" . $net_profit . 
+              ", total_expenses_usd=" . $total_expenses_usd);
+    
     // Prepare response data
     $response_data = [
         'success' => true,
@@ -583,6 +596,9 @@ try {
             ]
         ]
     ];
+    
+    // Debug: Log response structure
+    error_log("Debug - Response structure: " . json_encode($response_data));
     
     // 2. Debts by type - Updated to use new calculation method
     $debts_by_type = [
