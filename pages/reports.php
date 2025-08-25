@@ -463,7 +463,7 @@ if (!isset($_SESSION['user_id'])) {
     <!-- Additional Professional Reports Sections -->
     <div class="row g-4 mb-4">
         <!-- Employee Reports Section -->
-        <div class="col-lg-6 col-md-12">
+        <div class="col-lg-4 col-md-12">
             <div class="card shadow-sm report-stat-card">
                 <div class="card-header bg-gradient-primary text-white">
                     <h5 class="mb-0">
@@ -514,7 +514,7 @@ if (!isset($_SESSION['user_id'])) {
         </div>
         
         <!-- Car Reports Section -->
-        <div class="col-lg-6 col-md-12">
+        <div class="col-lg-4 col-md-12">
             <div class="card shadow-sm report-stat-card">
                 <div class="card-header bg-gradient-success text-white">
                     <h5 class="mb-0">
@@ -563,11 +563,9 @@ if (!isset($_SESSION['user_id'])) {
                 </div>
             </div>
         </div>
-    </div>
-    
-    <!-- Stock and Inventory Reports -->
-    <div class="row g-4 mb-4">
-        <div class="col-lg-6 col-md-12">
+        
+        <!-- Stock and Inventory Reports -->
+        <div class="col-lg-4 col-md-12">
             <div class="card shadow-sm report-stat-card">
                 <div class="card-header bg-gradient-warning text-white">
                     <h5 class="mb-0">
@@ -616,9 +614,11 @@ if (!isset($_SESSION['user_id'])) {
                 </div>
             </div>
         </div>
-        
-        <!-- Activity and Performance Reports -->
-        <div class="col-lg-6 col-md-12">
+    </div>
+    
+    <!-- Activity and Performance Reports -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-12 col-md-12">
             <div class="card shadow-sm report-stat-card">
                 <div class="card-header bg-gradient-info text-white">
                     <h5 class="mb-0">
@@ -627,7 +627,7 @@ if (!isset($_SESSION['user_id'])) {
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
-                        <div class="col-md-6">
+                        <div class="col-md-3">
                             <div class="d-flex align-items-center stat-item">
                                 <i class="fa fa-file-invoice fa-2x text-info me-3"></i>
                                 <div>
@@ -636,7 +636,7 @@ if (!isset($_SESSION['user_id'])) {
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-3">
                             <div class="d-flex align-items-center stat-item">
                                 <i class="fa fa-sticky-note fa-2x text-warning me-3"></i>
                                 <div>
@@ -645,7 +645,7 @@ if (!isset($_SESSION['user_id'])) {
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-3">
                             <div class="d-flex align-items-center stat-item">
                                 <i class="fa fa-bell fa-2x text-danger me-3"></i>
                                 <div>
@@ -654,7 +654,7 @@ if (!isset($_SESSION['user_id'])) {
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-3">
                             <div class="d-flex align-items-center stat-item">
                                 <i class="fa fa-exchange-alt fa-2x text-success me-3"></i>
                                 <div>
