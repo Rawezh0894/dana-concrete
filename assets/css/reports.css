@@ -27,6 +27,10 @@
   position: relative;
   overflow: hidden;
   background: #fff;
+  height: 280px; /* Fixed height for all cards */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 .report-card:hover {
   box-shadow: 0 8px 32px 0 rgba(0,59,115,0.16);
@@ -41,6 +45,7 @@
   margin-bottom: 1.1rem;
   letter-spacing: 0.5px;
   color: var(--customer-accent);
+  flex-shrink: 0; /* Prevent title from shrinking */
 }
 .report-card .card-value {
   color: var(--report-card-value);
@@ -48,6 +53,7 @@
   font-weight: bold;
   margin-bottom: 0.2rem;
   font-family: 'Rabar', 'Roboto', sans-serif;
+  flex-shrink: 0; /* Prevent value from shrinking */
 }
 .report-card .section-label {
   font-size: 1.08rem;
@@ -58,11 +64,13 @@
   border-radius: 0.7rem;
   padding: 0.2rem 0.7rem;
   display: inline-block;
+  flex-shrink: 0; /* Prevent label from shrinking */
 }
 .report-card .fa {
   font-size: 2.3rem;
   margin-bottom: 0.7rem;
   filter: drop-shadow(0 2px 8px #003b7320);
+  flex-shrink: 0; /* Prevent icon from shrinking */
 }
 
 
@@ -93,6 +101,7 @@
 .report-card.customer-card {
   border-top: 6px solid var(--customer-accent);
   background: var(--customer-bg);
+  height: 280px; /* Same height as base */
 }
 .report-card.customer-card .card-title,
 .report-card.customer-card .fa,
@@ -107,6 +116,7 @@
 .report-card.company-card {
   border-top: 6px solid var(--company-accent);
   background: var(--company-bg);
+  height: 280px; /* Same height as base */
 }
 .report-card.company-card .card-title,
 .report-card.company-card .fa,
@@ -121,6 +131,7 @@
 .report-card.person-card {
   border-top: 6px solid var(--person-accent);
   background: var(--person-bg);
+  height: 280px; /* Same height as base */
 }
 .report-card.person-card .card-title,
 .report-card.person-card .fa,
@@ -135,6 +146,7 @@
 .report-card.purchases-card {
   border-top: 6px solid var(--purchases-accent);
   background: var(--purchases-bg);
+  height: 280px; /* Same height as base */
 }
 .report-card.purchases-card .card-title,
 .report-card.purchases-card .fa,
@@ -149,6 +161,7 @@
 .report-card.sales-card {
   border-top: 6px solid var(--sales-accent);
   background: var(--sales-bg);
+  height: 280px; /* Same height as base */
 }
 .report-card.sales-card .card-title,
 .report-card.sales-card .fa,
@@ -163,6 +176,7 @@
 .report-card.total-expenses-card {
   border-top: 6px solid #dc3545;
   background: linear-gradient(135deg, #ffe6e6 0%, #f8fffa 100%);
+  height: 280px; /* Same height as base */
 }
 .report-card.total-expenses-card .card-title,
 .report-card.total-expenses-card .fa,
@@ -182,6 +196,7 @@
 .report-card.dollar-rate-card {
   border-top: 6px solid #28a745;
   background: linear-gradient(135deg, #e8f5e9 0%, #f8fffa 100%);
+  height: 280px; /* Same height as base */
 }
 .report-card.dollar-rate-card .card-title,
 .report-card.dollar-rate-card .fa {
@@ -193,16 +208,105 @@
   margin-top: 0.5rem;
 }
 
+/* Info Card */
+.report-card.info-card {
+  border-top: 6px solid #17a2b8;
+  background: linear-gradient(135deg, #e0f7fa 0%, #f8fffa 100%);
+  height: 280px; /* Same height as base */
+}
+.report-card.info-card .card-title,
+.report-card.info-card .fa,
+.report-card.info-card .section-label {
+  color: #17a2b8;
+}
+.report-card.info-card .section-label {
+  background: #e0f7fa;
+}
+
+/* Dark Card */
+.report-card.dark-card {
+  border-top: 6px solid #343a40;
+  background: linear-gradient(135deg, #f8f9fa 0%, #f8fffa 100%);
+  height: 280px; /* Same height as base */
+}
+.report-card.dark-card .card-title,
+.report-card.dark-card .fa,
+.report-card.dark-card .section-label {
+  color: #343a40;
+}
+.report-card.dark-card .section-label {
+  background: #f8f9fa;
+}
+
+/* Success Card */
+.report-card.success-card {
+  border-top: 6px solid #28a745;
+  background: linear-gradient(135deg, #e8f5e9 0%, #f8fffa 100%);
+  height: 280px; /* Same height as base */
+}
+.report-card.success-card .card-title,
+.report-card.success-card .fa,
+.report-card.success-card .section-label {
+  color: #28a745;
+}
+.report-card.success-card .section-label {
+  background: #e8f5e9;
+}
+
+/* Professional Report Cards */
+.report-stat-card {
+  height: 400px; /* Fixed height for professional report cards */
+  display: flex;
+  flex-direction: column;
+}
+
+.report-stat-card .card-header {
+  flex-shrink: 0; /* Prevent header from shrinking */
+}
+
+.report-stat-card .card-body {
+  flex: 1; /* Take remaining space */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.report-stat-card .stat-item {
+  flex-shrink: 0; /* Prevent stat items from shrinking */
+}
+
+/* Ensure consistent heights on mobile */
+@media (max-width: 768px) {
+  .report-stat-card {
+    height: 350px; /* Slightly smaller height on mobile */
+  }
+}
+
 @media (max-width: 768px) {
   .report-card {
     padding: 1.2rem 0.7rem 0.7rem 0.7rem;
     font-size: 0.97rem;
+    height: 250px; /* Slightly smaller height on mobile */
   }
   .report-card .card-title {
     font-size: 1.1rem;
   }
   .report-card .card-value {
     font-size: 1.3rem;
+  }
+  
+  /* Ensure all card types have same height on mobile */
+  .report-card.customer-card,
+  .report-card.company-card,
+  .report-card.person-card,
+  .report-card.purchases-card,
+  .report-card.sales-card,
+  .report-card.total-expenses-card,
+  .report-card.dollar-rate-card,
+  .report-card.info-card,
+  .report-card.dark-card,
+  .report-card.success-card {
+    height: 250px;
   }
 }
 

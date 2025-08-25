@@ -21,184 +21,7 @@ function fetchAndRenderReportData() {
             const purchases_credit_usd = Number(data.purchases.credit.usd) || 0;
             const purchases_usd = purchases_cash_usd + purchases_credit_usd;
             
-            const cards = [
-                {
-                    key: 'customer',
-                    label: 'کۆی قەرزی کڕیارەکان',
-                    icon: 'fa-users',
-                    gradient: 'card-gradient-success',
-                    value: formatCurrency(data.customer.usd, 'USD'),
-                    subtitle: 'قەرزی کڕیارەکان',
-                    showBreakdown: false
-                },
-                {
-                    key: 'company',
-                    label: 'قەرزی ئێمە لەگەڵ کۆمپانیاکان',
-                    icon: 'fa-building',
-                    gradient: 'card-gradient-warning',
-                    value: formatCurrency(company_debt_usd, 'USD'),
-                    subtitle: 'قەرزی کۆمپانیاکان',
-                    showBreakdown: false
-                },
-                {
-                    key: 'person',
-                    label: 'قەرزی ئێمە لەگەڵ کەسانی خەرجی تر',
-                    icon: 'fa-user-tie',
-                    gradient: 'card-gradient-purple',
-                    value: formatCurrency(person_debt_usd, 'USD'),
-                    subtitle: 'قەرزی کەسانی تر',
-                    showBreakdown: false
-                },
-                {
-                    key: 'purchases',
-                    label: 'کۆی نرخی کڕین',
-                    icon: 'fa-cart-plus',
-                    gradient: 'card-gradient-teal',
-                    value: formatCurrency(purchases_usd, 'USD'),
-                    subtitle: 'کۆی کڕینەکان',
-                    showBreakdown: true,
-                    breakdown: {
-                        cash: formatCurrency(purchases_cash_usd, 'USD'),
-                        credit: formatCurrency(purchases_credit_usd, 'USD')
-                    }
-                },
-                {
-                    key: 'sales',
-                    label: 'کۆی نرخی فرۆشتن',
-                    icon: 'fa-cash-register',
-                    gradient: 'card-gradient-orange',
-                    value: formatCurrency((Number(data.sales.cash.usd) || 0) + (Number(data.sales.credit.usd) || 0), 'USD'),
-                    subtitle: 'کۆی فرۆشتنەکان',
-                    showBreakdown: true,
-                    breakdown: {
-                        cash: formatCurrency(Number(data.sales.cash.usd) || 0, 'USD'),
-                        credit: formatCurrency(Number(data.sales.credit.usd) || 0, 'USD')
-                    }
-                },
-                {
-                    key: 'remaining_purchases',
-                    label: 'کۆی پارەی ماوەی کڕین',
-                    icon: 'fa-wallet',
-                    gradient: 'card-gradient-info',
-                    value: formatCurrency(Number(data.remaining_purchases.usd) || 0, 'USD'),
-                    subtitle: 'پارەی ماوە',
-                    showBreakdown: false
-                },
-                {
-                    key: 'discounts',
-                    label: 'کۆی داشکاندن',
-                    icon: 'fa-percent',
-                    gradient: 'card-gradient-dark',
-                    value: formatCurrency(Number(data.discounts.usd) || 0, 'USD'),
-                    subtitle: 'داشکاندنەکان',
-                    showBreakdown: false
-                },
-                {
-                    key: 'net_profit',
-                    label: 'قازانجی خاوێن',
-                    icon: 'fa-coins',
-                    gradient: 'card-gradient-success',
-                    value: formatCurrency(Number(data.net_profit.usd) || 0, 'USD'),
-                    subtitle: 'قازانجی پوخت',
-                    showBreakdown: false
-                },
-                {
-                    key: 'total_expenses',
-                    label: 'کۆی خەرجی',
-                    icon: 'fa-money-bill-wave',
-                    gradient: 'card-gradient-danger',
-                    value: formatCurrency(Number(data.total_expenses.usd) || 0, 'USD'),
-                    subtitle: 'کۆی هەموو خەرجییەکان',
-                    showBreakdown: true,
-                    breakdown: {
-                        employee_payments: formatCurrency(Number(data.total_expenses.breakdown?.employee_payments) || 0, 'USD'),
-                        other_expenses: formatCurrency(Number(data.total_expenses.breakdown?.other_expenses) || 0, 'USD'),
-                        material_usage: formatCurrency(Number(data.total_expenses.breakdown?.material_usage) || 0, 'USD'),
-                        gas_usage: formatCurrency(Number(data.total_expenses.breakdown?.gas_usage) || 0, 'USD'),
-                        purchases: formatCurrency(Number(data.total_expenses.breakdown?.purchases) || 0, 'USD'),
-                        purchase_materials: formatCurrency(Number(data.total_expenses.breakdown?.purchase_materials) || 0, 'USD')
-                    }
-                },
-                {
-                    key: 'dollar_rate',
-                    label: 'نرخی ١٠٠ دۆلار',
-                    icon: 'fa-dollar-sign',
-                    gradient: 'card-gradient-light',
-                    value: formatNumber(Number(data.usd_iqd_rate) || 0) + ' د.ع',
-                    subtitle: 'نرخی ئێستا',
-                    showBreakdown: false
-                }
-            ];
-
-            let html = '';
-            cards.forEach(card => {
-                let breakdownHtml = '';
-                if (card.showBreakdown && card.breakdown) {
-                    if (card.key === 'total_expenses') {
-                        // Special layout for total expenses with 4 breakdown items
-                        breakdownHtml = `
-                            <div class="row mt-2">
-                                <div class="col-6">
-                                    <small class="text-white-50">پارەدان بە کارمەند</small>
-                                    <div class="text-white small">${card.breakdown.employee_payments}</div>
-                                </div>
-                                <div class="col-6">
-                                    <small class="text-white-50">خەرجی تر</small>
-                                    <div class="text-white small">${card.breakdown.other_expenses}</div>
-                                </div>
-                            </div>
-                            <div class="row mt-1">
-                                <div class="col-6">
-                                    <small class="text-white-50">بەکارهێنانی کاڵا</small>
-                                    <div class="text-white small">${card.breakdown.material_usage}</div>
-                                </div>
-                                <div class="col-6">
-                                    <small class="text-white-50">بەکارهێنانی گاز</small>
-                                    <div class="text-white small">${card.breakdown.gas_usage}</div>
-                                </div>
-                            </div>
-                            <div class="row mt-1">
-                                <div class="col-6">
-                                    <small class="text-white-50">کڕین مەواد</small>
-                                    <div class="text-white small">${card.breakdown.purchases}</div>
-                                </div>
-                                <div class="col-6">
-                                    <small class="text-white-50">کڕینی کاڵا</small>
-                                    <div class="text-white small">${card.breakdown.purchase_materials}</div>
-                                </div>
-                            </div>
-                        `;
-                    } else {
-                        // Standard layout for cash/credit breakdown
-                        breakdownHtml = `
-                            <div class="row mt-2">
-                                <div class="col-6">
-                                    <small class="text-white-50">نەقد</small>
-                                    <div class="text-white small">${card.breakdown.cash}</div>
-                                </div>
-                                <div class="col-6">
-                                    <small class="text-white-50">قەرز</small>
-                                    <div class="text-white small">${card.breakdown.credit}</div>
-                                </div>
-                            </div>
-                        `;
-                    }
-                }
-                
-                html += `<div class="col-md-3 col-sm-6 mb-3">
-                    <div class="card text-center shadow ${card.gradient} card-animate-hover">
-                        <div class="card-body">
-                            <i class="fas ${card.icon} card-icon"></i>
-                            <h6 class="card-title text-white">${card.label}</h6>
-                            <div class="fs-4 fw-bold text-white">${card.value}</div>
-                            <small class="text-white">${card.subtitle}</small>
-                            ${breakdownHtml}
-                        </div>
-                    </div>
-                </div>`;
-            });
-            
-            document.getElementById('dashboard-summary-cards').innerHTML = html;
+            // Cards will be rendered by renderDashboardCards function
             if (typeof renderDashboardCards === 'function') renderDashboardCards(result);
             if (typeof renderCharts === 'function') renderCharts(result);
             
@@ -208,6 +31,113 @@ function fetchAndRenderReportData() {
             populateStockReports(data);
             populateActivityReports(data);
         });
+}
+
+// Function to render dashboard cards with consistent styling
+function renderDashboardCards(data) {
+    const usd_iqd_rate = data.usd_iqd_rate || 0;
+    const company_debt_usd = Number(data.company?.usd) || 0;
+    const person_debt_usd = Number(data.person?.usd) || 0;
+    const purchases_cash_usd = Number(data.purchases?.cash?.usd) || 0;
+    const purchases_credit_usd = Number(data.purchases?.credit?.usd) || 0;
+    const purchases_usd = purchases_cash_usd + purchases_credit_usd;
+    
+    const cards = [
+        {
+            key: 'customer',
+            label: 'کۆی قەرزی کڕیارەکان',
+            icon: 'fa-users',
+            cardClass: 'customer-card',
+            value: formatCurrency(data.customer?.usd || 0, 'USD'),
+            subtitle: 'قەرزی کڕیارەکان'
+        },
+        {
+            key: 'company',
+            label: 'قەرزی ئێمە لەگەڵ کۆمپانیاکان',
+            icon: 'fa-building',
+            cardClass: 'company-card',
+            value: formatCurrency(company_debt_usd, 'USD'),
+            subtitle: 'قەرزی کۆمپانیاکان'
+        },
+        {
+            key: 'person',
+            label: 'قەرزی ئێمە لەگەڵ کەسانی خەرجی تر',
+            icon: 'fa-user-tie',
+            cardClass: 'person-card',
+            value: formatCurrency(person_debt_usd, 'USD'),
+            subtitle: 'قەرزی کەسانی تر'
+        },
+        {
+            key: 'purchases',
+            label: 'کۆی نرخی کڕین',
+            icon: 'fa-cart-plus',
+            cardClass: 'purchases-card',
+            value: formatCurrency(purchases_usd, 'USD'),
+            subtitle: 'کۆی کڕینەکان'
+        },
+        {
+            key: 'sales',
+            label: 'کۆی نرخی فرۆشتن',
+            icon: 'fa-cash-register',
+            cardClass: 'sales-card',
+            value: formatCurrency((Number(data.sales?.cash?.usd) || 0) + (Number(data.sales?.credit?.usd) || 0), 'USD'),
+            subtitle: 'کۆی فرۆشتنەکان'
+        },
+        {
+            key: 'remaining_purchases',
+            label: 'کۆی پارەی ماوەی کڕین',
+            icon: 'fa-wallet',
+            cardClass: 'info-card',
+            value: formatCurrency(Number(data.remaining_purchases?.usd) || 0, 'USD'),
+            subtitle: 'پارەی ماوە'
+        },
+        {
+            key: 'discounts',
+            label: 'کۆی داشکاندن',
+            icon: 'fa-percent',
+            cardClass: 'dark-card',
+            value: formatCurrency(Number(data.discounts?.usd) || 0, 'USD'),
+            subtitle: 'داشکاندنەکان'
+        },
+        {
+            key: 'net_profit',
+            label: 'قازانجی خاوێن',
+            icon: 'fa-coins',
+            cardClass: 'success-card',
+            value: formatCurrency(Number(data.net_profit?.usd) || 0, 'USD'),
+            subtitle: 'قازانجی خاوێن'
+        },
+        {
+            key: 'total_expenses',
+            label: 'کۆی خەرجی',
+            icon: 'fa-money-bill-wave',
+            cardClass: 'total-expenses-card',
+            value: formatCurrency(Number(data.total_expenses?.usd) || 0, 'USD'),
+            subtitle: 'کۆی خەرجی'
+        },
+        {
+            key: 'usd_rate',
+            label: 'نرخی ١٠٠ دۆلار',
+            icon: 'fa-dollar-sign',
+            cardClass: 'dollar-rate-card',
+            value: formatCurrency(usd_iqd_rate, 'IQD'),
+            subtitle: 'نرخی دۆلار بە دینار'
+        }
+    ];
+    
+    let html = '';
+    cards.forEach(card => {
+        html += `<div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+            <div class="report-card ${card.cardClass}">
+                <i class="fa ${card.icon}"></i>
+                <div class="card-title">${card.label}</div>
+                <div class="card-value">${card.value}</div>
+                <div class="section-label">${card.subtitle}</div>
+            </div>
+        </div>`;
+    });
+    
+    document.getElementById('dashboard-summary-cards').innerHTML = html;
 }
 
 // Function to populate employee reports
