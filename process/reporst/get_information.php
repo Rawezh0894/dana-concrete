@@ -636,6 +636,9 @@ try {
                 'usd' => $total_expenses_usd,
                 'breakdown' => $total_expenses_breakdown
             ],
+            'total_income' => [
+                'usd' => $total_sales_amount + $gas_income_total_usd - $total_expenses_usd - $total_discounts - $total_expenses_breakdown['purchase_materials'] - $total_expenses_breakdown['employee_payments']
+            ],
             // Additional professional reports data
             'employees' => $employee_stats,
             'cars' => $car_stats,
