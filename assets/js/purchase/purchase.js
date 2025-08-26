@@ -65,9 +65,9 @@ function updateAmountsFor(prefix) {
         if (!remainingIqdFocused) $('#' + prefix + 'remaining_iqd').val(remaining_iqd.toFixed(2));
         $('#' + prefix + 'remaining_usd').val(0);
     } else if (type === 'دۆلار') {
-        $('#' + prefix + 'amount_iqd').prop('readonly', true).val(0);
+        $('#' + prefix + 'amount_iqd').prop('readonly', false).val(0);
         $('#' + prefix + 'price').prop('readonly', false).val(amount.toFixed(2));
-        $('#' + prefix + 'remaining_iqd').prop('readonly', true);
+        $('#' + prefix + 'remaining_iqd').prop('readonly', false);
         $('#' + prefix + 'remaining_usd').prop('readonly', false);
         const paid_iqd_to_usd = paid_iqd * 100 / exchange_rate;
         const remaining_usd = price - (paid_usd + paid_iqd_to_usd);
