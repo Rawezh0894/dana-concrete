@@ -400,6 +400,24 @@ try {
     // Calculate net profit: کۆی فرۆشتن - کۆی خەرجی - داشکاندن
     $total_sales_amount = ($sales['cash']['usd'] ?? 0) + ($sales['credit']['usd'] ?? 0);
     $net_profit = $total_sales_amount - $total_expenses_usd - $total_discounts;
+    
+    // Calculate income: داهات = کۆی نرخی فرۆشتن - کۆی نرخی کڕین - کۆی داشکاندن - کۆی خەرجی تر - کۆی نرخی کڕینی کاڵا - کۆی خەرجی کارمەندان
+    $total_purchases_amount = ($purchases['cash']['usd'] ?? 0) + ($purchases['credit']['usd'] ?? 0) + 
+                              (($purchases['cash']['iqd_converted'] ?? 0) + ($purchases['credit']['iqd_converted'] ?? 0));
+    
+    $income = $total_sales_amount - $total_purchases_amount - $total_discounts - 
+              ($total_expenses_breakdown['other_expenses'] ?? 0) - 
+              ($total_expenses_breakdown['purchase_materials'] ?? 0) - 
+              ($total_expenses_breakdown['employee_payments'] ?? 0);
+    
+    // Debug: Log income calculation
+    error_log("Debug - Income calculation: sales=" . $total_sales_amount . 
+              ", purchases=" . $total_purchases_amount . 
+              ", discounts=" . $total_discounts . 
+              ", other_expenses=" . ($total_expenses_breakdown['other_expenses'] ?? 0) . 
+              ", purchase_materials=" . ($total_expenses_breakdown['purchase_materials'] ?? 0) . 
+              ", employee_payments=" . ($total_expenses_breakdown['employee_payments'] ?? 0) . 
+              ", income=" . $income);
 
     // Additional Professional Reports Data
     
@@ -570,6 +588,7 @@ try {
     // Ensure all required variables are defined
     if (!isset($net_profit)) $net_profit = 0;
     if (!isset($total_discount)) $total_discount = 0;
+    if (!isset($income)) $income = 0;
     if (!isset($remaining_purchases_total_usd)) $remaining_purchases_total_usd = 0;
     if (!isset($remaining_purchases_iqd)) $remaining_purchases_iqd = 0;
     
@@ -600,6 +619,7 @@ try {
             'remaining_purchases' => ['usd' => $remaining_purchases_total_usd, 'iqd' => $remaining_purchases_iqd],
             'discounts' => ['usd' => $total_discount],
             'net_profit' => ['usd' => $net_profit],
+            'income' => ['usd' => $income],
             'total_expenses' => [
                 'usd' => $total_expenses_usd,
                 'breakdown' => $total_expenses_breakdown

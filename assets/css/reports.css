@@ -298,6 +298,21 @@
   background: #efebe9;
 }
 
+/* Income Card */
+.report-card.income-card {
+  border-top: 6px solid #00bcd4;
+  background: linear-gradient(135deg, #e0f7fa 0%, #f8fffa 100%);
+  height: 280px; /* Same height as base */
+}
+.report-card.income-card .card-title,
+.report-card.income-card .fa,
+.report-card.income-card .section-label {
+  color: #00bcd4;
+}
+.report-card.income-card .section-label {
+  background: #e0f7fa;
+}
+
 @media (max-width: 768px) {
   .report-card {
     padding: 1.2rem 0.7rem 0.7rem 0.7rem;
@@ -324,7 +339,8 @@
   .report-card.success-card,
   .report-card.employee-expenses-card,
   .report-card.other-expenses-card,
-  .report-card.purchase-materials-card {
+  .report-card.purchase-materials-card,
+  .report-card.income-card {
     height: 250px;
   }
 }

@@ -130,6 +130,14 @@ function renderDashboardCards(data) {
             subtitle: 'قازانجی خاوێن'
         },
         {
+            key: 'income',
+            label: 'کۆی داهات',
+            icon: 'fa-chart-line',
+            cardClass: 'income-card',
+            value: formatCurrency(Number(data.data?.income?.usd) || 0, 'USD'),
+            subtitle: 'داهات = فرۆشتن - کڕین - داشکاندن - خەرجی تر - کڕینی کاڵا - خەرجی کارمەندان'
+        },
+        {
             key: 'total_expenses',
             label: 'کۆی خەرجی',
             icon: 'fa-money-bill-wave',
