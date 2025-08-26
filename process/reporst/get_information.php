@@ -243,6 +243,20 @@ try {
               ", customer_debt_discounts=" . $customer_debt_discounts . 
               ", total_discount=" . $total_discount);
 
+    // Calculate Income (داهات) = Sales + Gas Income - Purchases - Discounts - Other Expenses - Purchase Materials - Employee Expenses
+    $total_sales_amount = ($sales['cash']['usd'] ?? 0) + ($sales['credit']['usd'] ?? 0);
+    $total_income = $total_sales_amount + $gas_income_total_usd - $purchases_cash_usd - $total_discount - $other_expenses_total_usd - $purchase_materials_total_usd - $total_employee_expenses_usd;
+    
+    // Debug: Log income calculation
+    error_log("Debug - Income calculation: sales=" . $total_sales_amount . 
+              ", gas_income=" . $gas_income_total_usd . 
+              ", purchases=" . $purchases_cash_usd . 
+              ", discounts=" . $total_discount . 
+              ", other_expenses=" . $other_expenses_total_usd . 
+              ", purchase_materials=" . $purchase_materials_total_usd . 
+              ", employee_expenses=" . $total_employee_expenses_usd . 
+              ", total_income=" . $total_income);
+
     // Debt payments (company)
     $debt_payments_query = "SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd FROM debt_payments WHERE 1=1 $date_condition_date";
     $stmt = $pdo->query($debt_payments_query);
@@ -420,19 +434,7 @@ try {
               ", customer_debt_discounts=" . $customer_debt_discounts_total . 
               ", total_discounts=" . $total_discounts);
 
-    // Calculate Income (داهات) = Sales + Gas Income - Purchases - Discounts - Other Expenses - Purchase Materials - Employee Expenses
-    $total_sales_amount = ($sales['cash']['usd'] ?? 0) + ($sales['credit']['usd'] ?? 0);
-    $total_income = $total_sales_amount + $gas_income_total_usd - $purchases_cash_usd - $total_discounts - $other_expenses_total_usd - $purchase_materials_total_usd - $total_employee_expenses_usd;
-    
-    // Debug: Log income calculation
-    error_log("Debug - Income calculation: sales=" . $total_sales_amount . 
-              ", gas_income=" . $gas_income_total_usd . 
-              ", purchases=" . $purchases_cash_usd . 
-              ", discounts=" . $total_discounts . 
-              ", other_expenses=" . $other_expenses_total_usd . 
-              ", purchase_materials=" . $purchase_materials_total_usd . 
-              ", employee_expenses=" . $total_employee_expenses_usd . 
-              ", total_income=" . $total_income);
+
     
 
 
