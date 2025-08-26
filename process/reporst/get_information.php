@@ -598,53 +598,6 @@ try {
         'person_debt' => $person_debt_usd
     ];
 
-    // Calculate Income (داهات) based on the formula:
-    // داهات = کۆی نرخی فرۆشتن + کۆی داهاتی گاز - کۆی نرخی کڕین - کۆی داشکاندن - کۆی خەرجی تر - کۆی نرخی کڕینی کاڵا - کۆی خەرجی کارمەندان
-    
-    // Get total sales (کۆی نرخی فرۆشتن)
-    $total_sales_amount = ($sales['cash']['usd'] ?? 0) + ($sales['credit']['usd'] ?? 0);
-    
-    // Get gas income (کۆی داهاتی گاز) - already calculated above
-    $gas_income_amount = $gas_income_total_usd;
-    
-    // Get total purchases (کۆی نرخی کڕین) - هەموو کڕینەکان (نەقد + قەرز)
-    $total_purchases_amount = ($purchases['cash']['usd'] ?? 0) + ($purchases['credit']['usd'] ?? 0) + ($purchases['cash']['iqd_converted'] ?? 0) + ($purchases['credit']['iqd_converted'] ?? 0);
-    
-    // Debug: Log purchases breakdown
-    error_log("Debug - Purchases breakdown:");
-    error_log("  cash_usd: " . ($purchases['cash']['usd'] ?? 0));
-    error_log("  credit_usd: " . ($purchases['credit']['usd'] ?? 0));
-    error_log("  cash_iqd_converted: " . ($purchases['cash']['iqd_converted'] ?? 0));
-    error_log("  credit_iqd_converted: " . ($purchases['credit']['iqd_converted'] ?? 0));
-    error_log("  total_purchases: " . $total_purchases_amount);
-    
-    // Get total discounts (کۆی داشکاندن) - already calculated above
-    $total_discounts_amount = $total_discounts;
-    
-    // Get other expenses (کۆی خەرجی تر) - expense_type = 'خەرجی تر'
-    $other_expenses_amount = $total_expenses_breakdown['other_expenses'] ?? 0;
-    
-    // Get purchase materials (کۆی نرخی کڕینی کاڵا) - already calculated above
-    $purchase_materials_amount = $total_expenses_breakdown['purchase_materials'] ?? 0;
-    
-    // Get employee expenses (کۆی خەرجی کارمەندان) - already calculated above
-    $employee_expenses_amount = $total_expenses_breakdown['employee_payments'] ?? 0;
-    
-    // Calculate total income
-    $total_income = $total_sales_amount + $gas_income_amount - $total_purchases_amount - $total_discounts_amount - $other_expenses_amount - $purchase_materials_amount - $employee_expenses_amount;
-    
-    // Debug: Log income calculation breakdown
-    error_log("Debug - Income calculation breakdown:");
-    error_log("  total_sales: " . $total_sales_amount);
-    error_log("  gas_income: " . $gas_income_amount);
-    error_log("  total_purchases: " . $total_purchases_amount);
-    error_log("  total_discounts: " . $total_discounts_amount);
-    error_log("  other_expenses: " . $other_expenses_amount);
-    error_log("  purchase_materials: " . $purchase_materials_amount);
-    error_log("  employee_expenses: " . $employee_expenses_amount);
-    error_log("  total_income: " . $total_income);
-    error_log("  Formula: " . $total_sales_amount . " + " . $gas_income_amount . " - " . $total_purchases_amount . " - " . $total_discounts_amount . " - " . $other_expenses_amount . " - " . $purchase_materials_amount . " - " . $employee_expenses_amount . " = " . $total_income);
-    
     // Debug: Log key variables
     error_log("Debug - Key variables: customer_debt_total_usd=" . $customer_debt_total_usd . 
               ", company_debt_total_usd=" . $company_debt_total_usd . 
@@ -664,18 +617,6 @@ try {
             'discounts' => ['usd' => $total_discount],
             'gas_income' => [
                 'usd' => $gas_income_total_usd
-            ],
-            'total_income' => [
-                'usd' => $total_income,
-                'breakdown' => [
-                    'total_sales' => $total_sales_amount,
-                    'gas_income' => $gas_income_amount,
-                    'total_purchases' => $total_purchases_amount,
-                    'total_discounts' => $total_discounts_amount,
-                    'other_expenses' => $other_expenses_amount,
-                    'purchase_materials' => $purchase_materials_amount,
-                    'employee_expenses' => $employee_expenses_amount
-                ]
             ],
             'total_expenses' => [
                 'usd' => $total_expenses_usd,
