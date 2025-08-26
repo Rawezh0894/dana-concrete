@@ -105,6 +105,14 @@ function renderDashboardCards(data) {
             value: formatCurrency((Number(data.data?.sales?.cash?.usd) || 0) + (Number(data.data?.sales?.credit?.usd) || 0), 'USD'),
             subtitle: 'کۆی فرۆشتنەکان'
         },
+        {
+            key: 'total_income',
+            label: 'داهات',
+            icon: 'fa-chart-line',
+            cardClass: 'income-card',
+            value: formatCurrency(Number(data.data?.total_income?.usd) || 0, 'USD'),
+            subtitle: 'کۆی داهات'
+        },
 
         {
             key: 'discounts',
