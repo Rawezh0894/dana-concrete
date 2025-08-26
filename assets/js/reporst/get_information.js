@@ -37,12 +37,6 @@ function fetchAndRenderReportData() {
             } else {
                 console.error('renderCharts function not found');
             }
-            
-            // Populate additional professional reports
-            populateEmployeeReports(data);
-            populateCarReports(data);
-            populateStockReports(data);
-            populateActivityReports(data);
         })
         .catch(error => {
             console.error('Fetch error:', error);
@@ -177,59 +171,6 @@ function renderDashboardCards(data) {
     } else {
         console.error('Target element dashboard-summary-cards not found');
     }
-}
-
-// Function to populate employee reports
-function populateEmployeeReports(data) {
-    // These would be calculated from the backend data
-    const totalEmployees = data.employees?.total || 0;
-    const totalSalary = data.employees?.total_salary || 0;
-    const totalDrivers = data.employees?.drivers || 0;
-    const totalAccountants = data.employees?.accountants || 0;
-    
-    document.getElementById('total-employees').textContent = totalEmployees;
-    document.getElementById('total-salary').textContent = formatCurrency(totalSalary, 'USD');
-    document.getElementById('total-drivers').textContent = totalDrivers;
-    document.getElementById('total-accountants').textContent = totalAccountants;
-}
-
-// Function to populate car reports
-function populateCarReports(data) {
-    const totalCars = data.cars?.total || 0;
-    const totalGasUsed = data.cars?.total_gas_used || 0;
-    const totalGasExpense = data.cars?.total_gas_expense || 0;
-    const avgCarExpense = data.cars?.avg_expense || 0;
-    
-    document.getElementById('total-cars').textContent = totalCars;
-    document.getElementById('total-gas-used').textContent = formatNumber(totalGasUsed) + ' لتر';
-    document.getElementById('total-gas-expense').textContent = formatCurrency(totalGasExpense, 'USD');
-    document.getElementById('avg-car-expense').textContent = formatCurrency(avgCarExpense, 'USD');
-}
-
-// Function to populate stock reports
-function populateStockReports(data) {
-    const totalBins = data.stock?.total_bins || 0;
-    const totalMaterials = data.stock?.total_materials || 0;
-    const lowStockItems = data.stock?.low_stock_items || 0;
-    const totalStockValue = data.stock?.total_value || 0;
-    
-    document.getElementById('total-bins').textContent = totalBins;
-    document.getElementById('total-materials').textContent = totalMaterials;
-    document.getElementById('low-stock-items').textContent = lowStockItems;
-    document.getElementById('total-stock-value').textContent = formatCurrency(totalStockValue, 'USD');
-}
-
-// Function to populate activity reports
-function populateActivityReports(data) {
-    const totalConcreteReceipts = data.activity?.concrete_receipts || 0;
-    const totalNotes = data.activity?.notes || 0;
-    const totalNotifications = data.activity?.notifications || 0;
-    const totalStockAdjustments = data.activity?.stock_adjustments || 0;
-    
-    document.getElementById('total-concrete-receipts').textContent = totalConcreteReceipts;
-    document.getElementById('total-notes').textContent = totalNotes;
-    document.getElementById('total-notifications').textContent = totalNotifications;
-    document.getElementById('total-stock-adjustments').textContent = totalStockAdjustments;
 }
 
 document.addEventListener('DOMContentLoaded', function() {

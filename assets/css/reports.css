@@ -253,35 +253,6 @@
   background: #e8f5e9;
 }
 
-/* Professional Report Cards */
-.report-stat-card {
-  height: 400px; /* Fixed height for professional report cards */
-  display: flex;
-  flex-direction: column;
-}
-
-.report-stat-card .card-header {
-  flex-shrink: 0; /* Prevent header from shrinking */
-}
-
-.report-stat-card .card-body {
-  flex: 1; /* Take remaining space */
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.report-stat-card .stat-item {
-  flex-shrink: 0; /* Prevent stat items from shrinking */
-}
-
-/* Ensure consistent heights on mobile */
-@media (max-width: 768px) {
-  .report-stat-card {
-    height: 350px; /* Slightly smaller height on mobile */
-  }
-}
-
 @media (max-width: 768px) {
   .report-card {
     padding: 1.2rem 0.7rem 0.7rem 0.7rem;
