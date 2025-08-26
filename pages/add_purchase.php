@@ -424,7 +424,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
             </div>
             <div class="col-md-6 mb-3">
               <label for="amount_iqd" class="form-label">بڕی پارە بە دینار</label>
-              <input type="number" class="form-control" id="amount_iqd" name="amount_iqd" min="0" step="0.01" value="0">
+              <input type="number" class="form-control" id="amount_iqd" name="amount_iqd" min="0" step="0.01" value="0" required>
             </div>
           
           </div>
@@ -444,9 +444,9 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
               <label for="remaining_usd" class="form-label">بری پارەی ماوە بە دۆلار</label>
               <input type="number" class="form-control" id="remaining_usd" name="remaining_usd" min="0" step="0.01" value="0">
             </div>
-            <div="col-md-6 mb-3">
+            <div class="col-md-6 mb-3">
               <label for="remaining_iqd" class="form-label">بری پارەی ماوە بە دینار</label>
-              <input type="number" class="form-control" id="remaining_iqd" name="remaining_iqd" min="0" step="0.01" value="0">
+              <input type="number" class="form-control" id="remaining_iqd" name="remaining_iqd" min="0" step="0.01" value="0" required>
             </div>
           </div>
       
