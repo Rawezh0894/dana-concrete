@@ -404,8 +404,8 @@ try {
     // Calculate Income based on the formula:
     // داهات = کۆی نرخی فرۆشتن + کۆی داهاتی گاز - کۆی نرخی کڕین(purchase) - کۆی داشکاندن - کۆی خەرجی تر (expense_type = خەرجی تر) - کۆی نرخی کڕینی کاڵا(purchase_material) - کۆی خەرجی کارمەندان
     
-    // Get total sales (cash + credit)
-    $total_sales_usd = $current_period_sales;
+    // Get total sales (cash + credit) for current period
+    $total_sales_usd = ($sales['cash']['usd'] ?? 0) + ($sales['credit']['usd'] ?? 0);
     
     // Get gas income (from other_expenses where expense_type = 'بەکارهێنانی گاز')
     try {
@@ -416,18 +416,23 @@ try {
                 ELSE 0 
             END) as gas_income_usd
             FROM other_expenses 
-            WHERE expense_type = 'بەکارهێنانی گاز' 
-            AND date BETWEEN ? AND ?";
-        $stmt = $pdo->prepare($gas_income_query);
-        $stmt->execute([$from_date, $to_date]);
+            WHERE expense_type = 'بەکارهێنانی گاز'";
+        
+        if ($use_range) {
+            $gas_income_query .= " AND date >= ? AND date <= ?";
+            $stmt = $pdo->prepare($gas_income_query);
+            $stmt->execute([$from_date, $to_date]);
+        } else {
+            $stmt = $pdo->query($gas_income_query);
+        }
         $gas_income_usd = $stmt->fetchColumn() ?: 0;
     } catch (Exception $e) {
         error_log("Error calculating gas income: " . $e->getMessage());
         $gas_income_usd = 0;
     }
     
-    // Get total purchases (cash + credit)
-    $total_purchases_usd = $current_period_purchases;
+    // Get total purchases (cash + credit) for current period
+    $total_purchases_usd = ($purchases['cash']['usd'] ?? 0) + ($purchases['credit']['usd'] ?? 0) + ($purchases['cash']['iqd_converted'] ?? 0) + ($purchases['credit']['iqd_converted'] ?? 0);
     
     // Get total discounts
     $total_discounts = 0;
@@ -453,10 +458,15 @@ try {
                 ELSE 0 
             END) as other_expenses_usd
             FROM other_expenses 
-            WHERE expense_type = 'خەرجی تر' 
-            AND date BETWEEN ? AND ?";
-        $stmt = $pdo->prepare($other_expenses_query);
-        $stmt->execute([$from_date, $to_date]);
+            WHERE expense_type = 'خەرجی تر'";
+        
+        if ($use_range) {
+            $other_expenses_query .= " AND date >= ? AND date <= ?";
+            $stmt = $pdo->prepare($other_expenses_query);
+            $stmt->execute([$from_date, $to_date]);
+        } else {
+            $stmt = $pdo->query($other_expenses_query);
+        }
         $other_expenses_usd = $stmt->fetchColumn() ?: 0;
     } catch (Exception $e) {
         error_log("Error calculating other expenses: " . $e->getMessage());
@@ -471,10 +481,15 @@ try {
                 WHEN currency_type = 'دینار' THEN total_price_iqd / NULLIF(usd_to_iqd_rate / 100, 0)
                 ELSE 0 
             END) as purchase_materials_usd
-            FROM purchase_materials 
-            WHERE purchase_date BETWEEN ? AND ?";
-        $stmt = $pdo->prepare($purchase_materials_query);
-        $stmt->execute([$from_date, $to_date]);
+            FROM purchase_materials";
+        
+        if ($use_range) {
+            $purchase_materials_query .= " WHERE purchase_date >= ? AND purchase_date <= ?";
+            $stmt = $pdo->prepare($purchase_materials_query);
+            $stmt->execute([$from_date, $to_date]);
+        } else {
+            $stmt = $pdo->query($purchase_materials_query);
+        }
         $purchase_materials_usd = $stmt->fetchColumn() ?: 0;
     } catch (Exception $e) {
         error_log("Error calculating purchase materials: " . $e->getMessage());
@@ -483,13 +498,10 @@ try {
     
     // Get employee payments total
     try {
-        $employee_payments_query = "SELECT 
-            SUM(total) / NULLIF(?, 0) as employee_payments_usd
-            FROM employee_payments 
-            WHERE DATE(CONCAT(pay_month, '-01')) BETWEEN ? AND ?";
-        $stmt = $pdo->prepare($employee_payments_query);
-        $stmt->execute([$usd_iqd_rate / 100, $from_date, $to_date]);
-        $employee_payments_usd = $stmt->fetchColumn() ?: 0;
+        $employee_payments_query = "SELECT SUM(total) as total_payments FROM employee_payments WHERE 1=1 $date_condition_employee_payments";
+        $stmt = $pdo->query($employee_payments_query);
+        $employee_payments_iqd = $stmt->fetchColumn() ?: 0;
+        $employee_payments_usd = ($usd_iqd_rate > 0) ? ($employee_payments_iqd / ($usd_iqd_rate / 100)) : 0;
     } catch (Exception $e) {
         error_log("Error calculating employee payments: " . $e->getMessage());
         $employee_payments_usd = 0;
@@ -688,13 +700,13 @@ try {
     $debt_analysis = [
         'customer_debt' => $customer_debt_total_usd,
         'company_debt' => $company_debt_total_usd,
-        'person_debt' => $person_debt_usd
+        'person_debt' => $person_debt_total_usd
     ];
 
     // Debug: Log key variables
     error_log("Debug - Key variables: customer_debt_total_usd=" . $customer_debt_total_usd . 
               ", company_debt_total_usd=" . $company_debt_total_usd . 
-              ", person_debt_usd=" . $person_debt_usd . 
+              ", person_debt_total_usd=" . $person_debt_total_usd . 
               ", total_expenses_usd=" . $total_expenses_usd);
     
     // Prepare response data
@@ -704,7 +716,7 @@ try {
             'usd_iqd_rate' => $usd_iqd_rate,
             'customer' => ['usd' => $customer_debt_total_usd, 'iqd' => 0],
             'company' => ['usd' => $company_debt_total_usd, 'iqd' => 0],
-            'person' => ['usd' => $person_debt_usd, 'iqd' => 0],
+            'person' => ['usd' => $person_debt_total_usd, 'iqd' => 0],
             'purchases' => $purchases,
             'sales' => $sales,
             'discounts' => ['usd' => $total_discount],
@@ -739,9 +751,9 @@ try {
                 'employee_performance' => $employee_performance,
                 'car_expenses' => $car_expenses,
                 'sales_vs_expenses' => [
-                    'sales' => $current_period_sales,
-                    'expenses' => $current_period_expenses,
-                    'profit' => $current_period_profit
+                    'sales' => $total_sales_usd,
+                    'expenses' => $total_expenses_usd,
+                    'profit' => $total_income_usd
                 ],
                 'debt_analysis' => $debt_analysis
             ]
