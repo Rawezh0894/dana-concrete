@@ -121,8 +121,8 @@ try {
 
     // Purchases (کڕین)
     $purchases = [
-        'cash' => ['usd' => 0, 'iqd' => 0],
-        'credit' => ['usd' => 0, 'iqd' => 0]
+        'cash' => ['usd' => 0, 'iqd' => 0, 'iqd_converted' => 0],
+        'credit' => ['usd' => 0, 'iqd' => 0, 'iqd_converted' => 0]
     ];
     // دینار
     $filter = $_GET['filter'] ?? 'year';
@@ -171,7 +171,7 @@ try {
         }
     }
     // دۆلار
-    $stmt = $pdo->query("SELECT payment_type, SUM(price) as usd FROM purchases WHERE type='دۆلار' GROUP BY payment_type");
+    $stmt = $pdo->query("SELECT payment_type, SUM(price) as usd FROM purchases WHERE type='دۆلار' $date_condition_date GROUP BY payment_type");
     while ($row = $stmt->fetch()) {
         if ($row['payment_type'] === 'نەقد') {
             $purchases['cash']['usd'] = $row['usd'] ?? 0;
@@ -408,10 +408,25 @@ try {
     // Calculate income using only the specific expenses mentioned in the formula
     // داهات = کۆی نرخی فرۆشتن - کۆی نرخی کڕین - کۆی داشکاندن - کۆی خەرجی تر - کۆی نرخی کڕینی کاڵا - کۆی خەرجی کارمەندان
     // Note: We are NOT including material_usage, gas_usage, or purchases from total_expenses_breakdown
-    $income = $total_sales_amount - $total_purchases_amount - $total_discounts - 
-              ($total_expenses_breakdown['other_expenses'] ?? 0) - 
-              ($total_expenses_breakdown['purchase_materials'] ?? 0) - 
-              ($total_expenses_breakdown['employee_payments'] ?? 0);
+    
+    // Step by step calculation for debugging
+    $step1 = $total_sales_amount;
+    $step2 = $step1 - $total_purchases_amount;
+    $step3 = $step2 - $total_discounts;
+    $step4 = $step3 - ($total_expenses_breakdown['other_expenses'] ?? 0);
+    $step5 = $step4 - ($total_expenses_breakdown['purchase_materials'] ?? 0);
+    $step6 = $step5 - ($total_expenses_breakdown['employee_payments'] ?? 0);
+    $income = $step6;
+    
+    // Debug: Log step by step calculation
+    error_log("Debug - Step by step income calculation:");
+    error_log("  Step 1 (Sales): " . $step1);
+    error_log("  Step 2 (Sales - Purchases): " . $step2);
+    error_log("  Step 3 (Step 2 - Discounts): " . $step3);
+    error_log("  Step 4 (Step 3 - Other Expenses): " . $step4);
+    error_log("  Step 5 (Step 4 - Purchase Materials): " . $step5);
+    error_log("  Step 6 (Step 5 - Employee Payments): " . $step6);
+    error_log("  Final Income: " . $income);
     
     // Debug: Log detailed income calculation breakdown
     error_log("Debug - Detailed income calculation:");
@@ -422,6 +437,9 @@ try {
     error_log("  - Purchase Materials: " . ($total_expenses_breakdown['purchase_materials'] ?? 0));
     error_log("  - Employee Payments: " . ($total_expenses_breakdown['employee_payments'] ?? 0));
     error_log("  - Calculated Income: " . $income);
+    
+    // Debug: Log purchases array structure
+    error_log("Debug - Purchases array structure: " . json_encode($purchases));
     
     // Also log the breakdown array to see what's in it
     error_log("Debug - Total expenses breakdown array: " . json_encode($total_expenses_breakdown));
