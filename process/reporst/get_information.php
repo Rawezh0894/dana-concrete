@@ -229,11 +229,25 @@ try {
     $employee_expenses = $row['total_expenses'] ?? 0;
     $employee_expenses_usd = ($usd_iqd_rate > 0) ? ($employee_expenses / ($usd_iqd_rate / 100)) : 0;
 
-    // Discounts (کۆی داشکاندن)
-    $discounts_query = "SELECT SUM(discount) as total_discount FROM sales WHERE 1=1 $date_condition_sales";
-    $stmt = $pdo->query($discounts_query);
+    // Discounts (کۆی داشکاندن) - From sales + customer debt payments
+    $sales_discounts_query = "SELECT SUM(discount) as total_discount FROM sales WHERE 1=1 $date_condition_sales";
+    $stmt = $pdo->query($sales_discounts_query);
     $row = $stmt->fetch();
-    $total_discount = $row['total_discount'] ?? 0;
+    $sales_discounts = $row['total_discount'] ?? 0;
+    
+    // Customer debt payments discounts
+    $customer_debt_discounts_query = "SELECT SUM(discount) as total_discount FROM customer_debt_payments WHERE 1=1 $date_condition_date";
+    $stmt = $pdo->query($customer_debt_discounts_query);
+    $row = $stmt->fetch();
+    $customer_debt_discounts = $row['total_discount'] ?? 0;
+    
+    // Total discounts = sales discounts + customer debt payment discounts
+    $total_discount = $sales_discounts + $customer_debt_discounts;
+    
+    // Debug: Log discount breakdown for first calculation
+    error_log("Debug - First discount calculation: sales_discounts=" . $sales_discounts . 
+              ", customer_debt_discounts=" . $customer_debt_discounts . 
+              ", total_discount=" . $total_discount);
 
     // Debt payments (company)
     $debt_payments_query = "SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd FROM debt_payments WHERE 1=1 $date_condition_date";
@@ -365,10 +379,24 @@ try {
     $total_expenses_usd = array_sum($total_expenses_breakdown);
 
     $total_discounts = 0;
+    // Sales discounts
     $stmt = $pdo->query("SELECT SUM(discount) as total_discount FROM sales WHERE 1=1 $date_condition_sales");
     $row = $stmt->fetch();
-    $total_discounts = $row['total_discount'] ?? 0;
-
+    $sales_discounts_total = $row['total_discount'] ?? 0;
+    
+    // Customer debt payment discounts
+    $stmt = $pdo->query("SELECT SUM(discount) as total_discount FROM customer_debt_payments WHERE 1=1 $date_condition_date");
+    $row = $stmt->fetch();
+    $customer_debt_discounts_total = $row['total_discount'] ?? 0;
+    
+        // Total discounts = sales + customer debt payments
+    $total_discounts = $sales_discounts_total + $customer_debt_discounts_total;
+    
+    // Debug: Log discount breakdown
+    error_log("Debug - Discounts breakdown: sales_discounts=" . $sales_discounts_total . 
+              ", customer_debt_discounts=" . $customer_debt_discounts_total . 
+              ", total_discounts=" . $total_discounts);
+    
     // Calculate net profit: کۆی فرۆشتن - کۆی خەرجی - داشکاندن
     $total_sales_amount = ($sales['cash']['usd'] ?? 0) + ($sales['credit']['usd'] ?? 0);
     $net_profit = $total_sales_amount - $total_expenses_usd - $total_discounts;
