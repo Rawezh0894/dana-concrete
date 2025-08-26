@@ -156,6 +156,15 @@ function renderDashboardCards(data) {
             subtitle: 'داهاتی گاز'
         },
         {
+            key: 'income',
+            label: 'کۆی داهات',
+            icon: 'fa-chart-line',
+            cardClass: 'income-card',
+            value: formatCurrency(data.data?.income?.usd || 0, 'USD'),
+            subtitle: 'داهاتی گشتی',
+            breakdown: data.data?.income?.breakdown
+        },
+        {
             key: 'usd_rate',
             label: 'نرخی ١٠٠ دۆلار',
             icon: 'fa-dollar-sign',
@@ -169,12 +178,29 @@ function renderDashboardCards(data) {
     
     let html = '';
     cards.forEach(card => {
+        let breakdownHtml = '';
+        if (card.breakdown && card.key === 'income') {
+            breakdownHtml = `
+                <div class="income-breakdown" style="margin-top: 0.5rem; font-size: 0.8rem; text-align: left;">
+                    <div><strong>شیکردنەوە:</strong></div>
+                    <div>+ فرۆشتن: ${formatCurrency(card.breakdown.sales || 0, 'USD')}</div>
+                    <div>+ گاز: ${formatCurrency(card.breakdown.gas_income || 0, 'USD')}</div>
+                    <div>- کڕین: ${formatCurrency(card.breakdown.purchases || 0, 'USD')}</div>
+                    <div>- داشکاندن: ${formatCurrency(card.breakdown.discounts || 0, 'USD')}</div>
+                    <div>- خەرجی تر: ${formatCurrency(card.breakdown.other_expenses || 0, 'USD')}</div>
+                    <div>- کاڵای کۆگا: ${formatCurrency(card.breakdown.purchase_materials || 0, 'USD')}</div>
+                    <div>- کارمەندان: ${formatCurrency(card.breakdown.employee_payments || 0, 'USD')}</div>
+                </div>
+            `;
+        }
+        
         html += `<div class="col-lg-3 col-md-4 col-sm-6 mb-3">
             <div class="report-card ${card.cardClass}">
                 <i class="fa ${card.icon}"></i>
                 <div class="card-title">${card.label}</div>
                 <div class="card-value">${card.value}</div>
                 <div class="section-label">${card.subtitle}</div>
+                ${breakdownHtml}
             </div>
         </div>`;
     });

@@ -401,6 +401,35 @@ try {
     // Total expenses
     $total_expenses_usd = array_sum($total_expenses_breakdown);
 
+    // Calculate Income based on the formula:
+    // داهات = کۆی نرخی فرۆشتن + کۆی داهاتی گاز - کۆی نرخی کڕین(purchase) - کۆی داشکاندن - کۆی خەرجی تر (expense_type = خەرجی تر) - کۆی نرخی کڕینی کاڵا(purchase_material) - کۆی خەرجی کارمەندان
+    
+    // Get total sales (cash + credit)
+    $total_sales_usd = $current_period_sales;
+    
+    // Get gas income (from other_expenses where expense_type = 'بەکارهێنانی گاز')
+    try {
+        $gas_income_query = "SELECT 
+            SUM(CASE 
+                WHEN currency_type = 'دۆلار' THEN amount_usd 
+                WHEN currency_type = 'دینار' THEN amount_iqd / NULLIF(exchange_rate / 100, 0)
+                ELSE 0 
+            END) as gas_income_usd
+            FROM other_expenses 
+            WHERE expense_type = 'بەکارهێنانی گاز' 
+            AND date BETWEEN ? AND ?";
+        $stmt = $pdo->prepare($gas_income_query);
+        $stmt->execute([$from_date, $to_date]);
+        $gas_income_usd = $stmt->fetchColumn() ?: 0;
+    } catch (Exception $e) {
+        error_log("Error calculating gas income: " . $e->getMessage());
+        $gas_income_usd = 0;
+    }
+    
+    // Get total purchases (cash + credit)
+    $total_purchases_usd = $current_period_purchases;
+    
+    // Get total discounts
     $total_discounts = 0;
     // Sales discounts
     $stmt = $pdo->query("SELECT SUM(discount) as total_discount FROM sales WHERE 1=1 $date_condition_sales");
@@ -414,6 +443,70 @@ try {
     
         // Total discounts = sales + customer debt payments
     $total_discounts = $sales_discounts_total + $customer_debt_discounts_total;
+    
+    // Get other expenses (expense_type = 'خەرجی تر')
+    try {
+        $other_expenses_query = "SELECT 
+            SUM(CASE 
+                WHEN currency_type = 'دۆلار' THEN amount_usd 
+                WHEN currency_type = 'دینار' THEN amount_iqd / NULLIF(exchange_rate / 100, 0)
+                ELSE 0 
+            END) as other_expenses_usd
+            FROM other_expenses 
+            WHERE expense_type = 'خەرجی تر' 
+            AND date BETWEEN ? AND ?";
+        $stmt = $pdo->prepare($other_expenses_query);
+        $stmt->execute([$from_date, $to_date]);
+        $other_expenses_usd = $stmt->fetchColumn() ?: 0;
+    } catch (Exception $e) {
+        error_log("Error calculating other expenses: " . $e->getMessage());
+        $other_expenses_usd = 0;
+    }
+    
+    // Get purchase materials total
+    try {
+        $purchase_materials_query = "SELECT 
+            SUM(CASE 
+                WHEN currency_type = 'دۆلار' THEN total_price_usd 
+                WHEN currency_type = 'دینار' THEN total_price_iqd / NULLIF(usd_to_iqd_rate / 100, 0)
+                ELSE 0 
+            END) as purchase_materials_usd
+            FROM purchase_materials 
+            WHERE purchase_date BETWEEN ? AND ?";
+        $stmt = $pdo->prepare($purchase_materials_query);
+        $stmt->execute([$from_date, $to_date]);
+        $purchase_materials_usd = $stmt->fetchColumn() ?: 0;
+    } catch (Exception $e) {
+        error_log("Error calculating purchase materials: " . $e->getMessage());
+        $purchase_materials_usd = 0;
+    }
+    
+    // Get employee payments total
+    try {
+        $employee_payments_query = "SELECT 
+            SUM(total) / NULLIF(?, 0) as employee_payments_usd
+            FROM employee_payments 
+            WHERE DATE(CONCAT(pay_month, '-01')) BETWEEN ? AND ?";
+        $stmt = $pdo->prepare($employee_payments_query);
+        $stmt->execute([$usd_iqd_rate / 100, $from_date, $to_date]);
+        $employee_payments_usd = $stmt->fetchColumn() ?: 0;
+    } catch (Exception $e) {
+        error_log("Error calculating employee payments: " . $e->getMessage());
+        $employee_payments_usd = 0;
+    }
+    
+    // Calculate total income
+    $total_income_usd = $total_sales_usd + $gas_income_usd - $total_purchases_usd - $total_discounts - $other_expenses_usd - $purchase_materials_usd - $employee_payments_usd;
+    
+    // Debug: Log income calculation breakdown
+    error_log("Debug - Income calculation: sales=" . $total_sales_usd . 
+              ", gas_income=" . $gas_income_usd . 
+              ", purchases=" . $total_purchases_usd . 
+              ", discounts=" . $total_discounts . 
+              ", other_expenses=" . $other_expenses_usd . 
+              ", purchase_materials=" . $purchase_materials_usd . 
+              ", employee_payments=" . $employee_payments_usd . 
+              ", total_income=" . $total_income_usd);
     
     // Debug: Log discount breakdown
     error_log("Debug - Discounts breakdown: sales_discounts=" . $sales_discounts_total . 
@@ -621,6 +714,18 @@ try {
             'total_expenses' => [
                 'usd' => $total_expenses_usd,
                 'breakdown' => $total_expenses_breakdown
+            ],
+            'income' => [
+                'usd' => $total_income_usd,
+                'breakdown' => [
+                    'sales' => $total_sales_usd,
+                    'gas_income' => $gas_income_usd,
+                    'purchases' => $total_purchases_usd,
+                    'discounts' => $total_discounts,
+                    'other_expenses' => $other_expenses_usd,
+                    'purchase_materials' => $purchase_materials_usd,
+                    'employee_payments' => $employee_payments_usd
+                ]
             ],
             // Additional professional reports data
             'employees' => $employee_stats,
