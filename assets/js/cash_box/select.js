@@ -16,6 +16,7 @@ function mapCashBoxRow(row, idx) {
         '#': idx + 1,
         date: row.date || '',
         type: row.type === 'deposit' ? 'زیادکردن' : (row.type === 'withdraw' ? 'کەمکردنەوە' : ''),
+        in_out: `<span class="in-out-cell ${row.type === 'deposit' ? 'in-out-incoming' : 'in-out-outgoing'}">${row.type === 'deposit' ? 'هاتوو' : 'ڕۆشتوو'}</span>`,
         amount_iqd: formatIQD(row.amount_iqd),
         amount_usd: formatUSD(row.amount_usd),
         currency: row.currency || '',
@@ -42,15 +43,15 @@ function loadCashBoxEntriesFiltered() {
             if (response.success) {
                 var data = response.data || [];
                 var mapped = data.map(mapCashBoxRow);
-                var columns = ['#', 'date', 'type', 'amount_iqd', 'amount_usd', 'currency', 'note', 'created_by_username', 'created_at', 'actions'];
+                var columns = ['#', 'date', 'type', 'in_out', 'amount_iqd', 'amount_usd', 'currency', 'note', 'created_by_username', 'created_at', 'actions'];
                 TableController.renderWithPagination('#cashBoxTable', mapped, columns, { pageSize: 10 });
             } else {
-                TableController.renderWithPagination('#cashBoxTable', [], ['#', 'date', 'type', 'amount_iqd', 'amount_usd', 'currency', 'note', 'created_by_username', 'created_at', 'actions'], { pageSize: 10 });
+                TableController.renderWithPagination('#cashBoxTable', [], ['#', 'date', 'type', 'in_out', 'amount_iqd', 'amount_usd', 'currency', 'note', 'created_by_username', 'created_at', 'actions'], { pageSize: 10 });
                 Swal.fire('هەڵە!', response.error || 'ناتوانرێت زانیاری بخوێنرێتەوە', 'error');
             }
         },
         error: function() {
-            TableController.renderWithPagination('#cashBoxTable', [], ['#', 'date', 'type', 'amount_iqd', 'amount_usd', 'currency', 'note', 'created_by_username', 'created_at', 'actions'], { pageSize: 10 });
+            TableController.renderWithPagination('#cashBoxTable', [], ['#', 'date', 'type', 'in_out', 'amount_iqd', 'amount_usd', 'currency', 'note', 'created_by_username', 'created_at', 'actions'], { pageSize: 10 });
             Swal.fire('هەڵە!', 'هەڵەیەک ڕووی دا لە کۆنێکتکردن.', 'error');
         }
     });
@@ -68,4 +69,55 @@ $(document).ready(function() {
         $('#filter_to').val('');
         loadCashBoxEntriesFiltered();
     });
+    
+    // Excel export functionality
+    $('#exportExcelBtn').on('click', function() {
+        exportToExcel();
+    });
 });
+
+function exportToExcel() {
+    var from = $('#filter_from').val();
+    var to = $('#filter_to').val();
+    var url = '../process/cash_box/export_excel.php';
+    var params = [];
+    if (from) params.push('from=' + encodeURIComponent(from));
+    if (to) params.push('to=' + encodeURIComponent(to));
+    if (params.length) url += '?' + params.join('&');
+    
+    // Show loading state
+    var originalText = $('#exportExcelBtn').html();
+    $('#exportExcelBtn').html('<i class="fas fa-spinner fa-spin me-1"></i>چاوەڕوان بە...');
+    $('#exportExcelBtn').prop('disabled', true);
+    
+    // Create a temporary link to trigger download
+    var link = document.createElement('a');
+    link.href = url;
+    link.download = 'cash_box_export_' + new Date().toISOString().split('T')[0] + '.xls';
+    
+    // Add event listener to restore button state after download starts
+    link.addEventListener('click', function() {
+        setTimeout(function() {
+            $('#exportExcelBtn').html(originalText);
+            $('#exportExcelBtn').prop('disabled', false);
+            // Show success message
+            Swal.fire({
+                icon: 'success',
+                title: 'سەرکەوتوو!',
+                text: 'فایلەکە بە سەرکەوتوویی ئیکسپۆرت کرا',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }, 1000);
+    });
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Fallback: restore button state after a delay
+    setTimeout(function() {
+        $('#exportExcelBtn').html(originalText);
+        $('#exportExcelBtn').prop('disabled', false);
+    }, 2000);
+}

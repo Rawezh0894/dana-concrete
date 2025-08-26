@@ -37,6 +37,7 @@ if (!hasPermission('view_cash_box')) {
     <link href="../assets/css/comon/style.css" rel="stylesheet">
     <link href="../assets/css/comon/cards.css" rel="stylesheet" />
     <link href="../assets/css/comon/summary_cards.css" rel="stylesheet" />
+    <link href="../assets/css/cash_box_custom.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
@@ -47,9 +48,14 @@ if (!hasPermission('view_cash_box')) {
 <div class="container-fluid py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">قاسەکە</h2>
-        <?php if (hasPermission('add_cash_box')): ?>
-        <button class="btn" data-bs-toggle="modal" data-bs-target="#addCashBoxModal" style="background: var(--seafoam-green); color:white; font-weight: bold;">+ زیادکردن</button>
-        <?php endif; ?>
+        <div>
+            <button class="btn btn-success me-2" id="exportExcelBtn" style="font-weight: bold;">
+                <i class="fas fa-file-excel me-1"></i>ئیکسپۆرت بۆ Excel
+            </button>
+            <?php if (hasPermission('add_cash_box')): ?>
+            <button class="btn" data-bs-toggle="modal" data-bs-target="#addCashBoxModal" style="background: var(--seafoam-green); color:white; font-weight: bold;">+ زیادکردن</button>
+            <?php endif; ?>
+        </div>
     </div>
     <!-- Summary Cards -->
     <div class="row mb-4" id="cashBoxSummaryCards">
@@ -94,6 +100,7 @@ if (!hasPermission('view_cash_box')) {
                     <th>#</th>
                     <th>بەروار</th>
                     <th>جۆری مامەڵە</th>
+                    <th>هاتوو/ڕۆشتوو</th>
                     <th>بڕی پارە بە دینار</th>
                     <th>بڕی پارە بە دۆلار</th>
                     <th>جۆری دراو</th>
