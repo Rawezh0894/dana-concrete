@@ -342,8 +342,8 @@ try {
     $gas_usage_iqd = $row['iqd'] ?? 0;
     $gas_usage_total_usd = $gas_usage_usd + (($usd_iqd_rate > 0) ? ($gas_usage_iqd / ($usd_iqd_rate / 100)) : 0);
     $total_expenses_breakdown['gas_usage'] = $gas_usage_total_usd;
-
-    // Gas Income (داهاتی گاز) - Calculate based on specific employees using only gas_total_cost
+    
+    // Gas Income (داهاتی گاز) - Calculate based on specific employees using car_id
     $gas_income_query = "
         SELECT 
             SUM(oe.gas_total_cost) as gas_cost
@@ -357,6 +357,9 @@ try {
     $stmt = $pdo->query($gas_income_query);
     $row = $stmt->fetch();
     $gas_income_total_usd = $row['gas_cost'] ?? 0;
+    
+    // Debug: Log gas income calculation
+    error_log("Debug - Gas income calculation: total_gas_income=" . $gas_income_total_usd);
 
     // Purchases (کڕین) - only cash payments with date filter
     $purchases_query = "SELECT SUM(amount_iqd) as iqd, SUM(amount_iqd / NULLIF(exchange_rate / 100, 0)) as iqd_converted FROM purchases WHERE payment_type = 'نەقد' AND type = 'دینار' $date_condition_date";

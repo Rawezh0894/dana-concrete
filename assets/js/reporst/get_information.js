@@ -167,7 +167,7 @@ function renderDashboardCards(data) {
             icon: 'fa-gas-pump',
             cardClass: 'gas-income-card',
             value: formatCurrency(Number(data.data?.gas_income?.usd) || 0, 'USD'),
-            subtitle: 'داهاتی گاز لە کارمەندەکان'
+            subtitle: 'داهاتی گاز'
         },
         {
             key: 'usd_rate',
