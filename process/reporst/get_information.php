@@ -404,13 +404,10 @@ try {
     // Calculate Income based on the formula:
     // داهات = کۆی نرخی فرۆشتن + کۆی داهاتی گاز - کۆی نرخی کڕین(purchase) - کۆی داشکاندن - کۆی خەرجی تر (expense_type = خەرجی تر) - کۆی نرخی کڕینی کاڵا(purchase_material) - کۆی خەرجی کارمەندان
     
-    // Get total sales (cash + credit) for current period
-    // کۆی نرخی فرۆشتن (نەقد + قەرز) بۆ ماوەی هەڵبژێردراو
-    $total_sales_usd = ($sales['cash']['usd'] ?? 0) + ($sales['credit']['usd'] ?? 0);
+    // Get total sales (cash + credit)
+    $total_sales_usd = $current_period_sales;
     
     // Get gas income (from other_expenses where expense_type = 'بەکارهێنانی گاز')
-    // داهاتی گاز لە خەرجیەکان کە expense_type = 'بەکارهێنانی گاز' نەبێت
-    // ئەمە داهاتی گازە کە لە خەرجیەکانەوە دەردەکەوێت
     try {
         $gas_income_query = "SELECT 
             SUM(CASE 
@@ -419,47 +416,35 @@ try {
                 ELSE 0 
             END) as gas_income_usd
             FROM other_expenses 
-            WHERE expense_type = 'بەکارهێنانی گاز'";
-        
-        if ($use_range) {
-            $gas_income_query .= " AND date >= ? AND date <= ?";
-            $stmt = $pdo->prepare($gas_income_query);
-            $stmt->execute([$from_date, $to_date]);
-        } else {
-            $stmt = $pdo->query($gas_income_query);
-        }
+            WHERE expense_type = 'بەکارهێنانی گاز' 
+            AND date BETWEEN ? AND ?";
+        $stmt = $pdo->prepare($gas_income_query);
+        $stmt->execute([$from_date, $to_date]);
         $gas_income_usd = $stmt->fetchColumn() ?: 0;
-        
-        // Debug: Log gas income
-        error_log("Debug - Gas income (expense_type = 'بەکارهێنانی گاز'): " . $gas_income_usd);
     } catch (Exception $e) {
         error_log("Error calculating gas income: " . $e->getMessage());
         $gas_income_usd = 0;
     }
     
-    // Get total purchases (cash + credit) for current period
-    // کۆی نرخی کڕین (نەقد + قەرز) بۆ ماوەی هەڵبژێردراو
-    $total_purchases_usd = ($purchases['cash']['usd'] ?? 0) + ($purchases['credit']['usd'] ?? 0) + ($purchases['cash']['iqd_converted'] ?? 0) + ($purchases['credit']['iqd_converted'] ?? 0);
+    // Get total purchases (cash + credit)
+    $total_purchases_usd = $current_period_purchases;
     
-    // Get total discounts for current period
-    // کۆی داشکاندنەکان بۆ ماوەی هەڵبژێردراو
+    // Get total discounts
     $total_discounts = 0;
-    // Sales discounts - داشکاندنی فرۆشتن
+    // Sales discounts
     $stmt = $pdo->query("SELECT SUM(discount) as total_discount FROM sales WHERE 1=1 $date_condition_sales");
     $row = $stmt->fetch();
     $sales_discounts_total = $row['total_discount'] ?? 0;
     
-    // Customer debt payment discounts - داشکاندنی قەرزی کڕیار
+    // Customer debt payment discounts
     $stmt = $pdo->query("SELECT SUM(discount) as total_discount FROM customer_debt_payments WHERE 1=1 $date_condition_date");
     $row = $stmt->fetch();
     $customer_debt_discounts_total = $row['total_discount'] ?? 0;
     
-    // Total discounts = sales + customer debt payments
-    // کۆی داشکاندن = داشکاندنی فرۆشتن + داشکاندنی قەرزی کڕیار
+        // Total discounts = sales + customer debt payments
     $total_discounts = $sales_discounts_total + $customer_debt_discounts_total;
     
-    // Get other expenses (expense_type != 'خەرجی تر') - تەنیا ئەو خەرجیانە کە expense_type = 'خەرجی تر' نەبێت
-    // ئەمە هەموو خەرجیەکان هەژمار دەکات جگە لە 'خەرجی تر' وەک: خواردنگە، ئۆفیس، بەکارهێنانی گاز، بەکارهێنانی کاڵای کۆگا
+    // Get other expenses (expense_type = 'خەرجی تر')
     try {
         $other_expenses_query = "SELECT 
             SUM(CASE 
@@ -468,26 +453,17 @@ try {
                 ELSE 0 
             END) as other_expenses_usd
             FROM other_expenses 
-            WHERE expense_type != 'خەرجی تر'";
-        
-        if ($use_range) {
-            $other_expenses_query .= " AND date >= ? AND date <= ?";
-            $stmt = $pdo->prepare($other_expenses_query);
-            $stmt->execute([$from_date, $to_date]);
-        } else {
-            $stmt = $pdo->query($other_expenses_query);
-        }
+            WHERE expense_type = 'خەرجی تر' 
+            AND date BETWEEN ? AND ?";
+        $stmt = $pdo->prepare($other_expenses_query);
+        $stmt->execute([$from_date, $to_date]);
         $other_expenses_usd = $stmt->fetchColumn() ?: 0;
-        
-        // Debug: Log what expenses are included
-        error_log("Debug - Other expenses included (expense_type != 'خەرجی تر'): " . $other_expenses_usd);
     } catch (Exception $e) {
         error_log("Error calculating other expenses: " . $e->getMessage());
         $other_expenses_usd = 0;
     }
     
-    // Get purchase materials total for current period
-    // کۆی نرخی کڕینی کاڵا بۆ ماوەی هەڵبژێردراو
+    // Get purchase materials total
     try {
         $purchase_materials_query = "SELECT 
             SUM(CASE 
@@ -495,53 +471,42 @@ try {
                 WHEN currency_type = 'دینار' THEN total_price_iqd / NULLIF(usd_to_iqd_rate / 100, 0)
                 ELSE 0 
             END) as purchase_materials_usd
-            FROM purchase_materials";
-        
-        if ($use_range) {
-            $purchase_materials_query .= " WHERE purchase_date >= ? AND purchase_date <= ?";
-            $stmt = $pdo->prepare($purchase_materials_query);
-            $stmt->execute([$from_date, $to_date]);
-        } else {
-            $stmt = $pdo->query($purchase_materials_query);
-        }
+            FROM purchase_materials 
+            WHERE purchase_date BETWEEN ? AND ?";
+        $stmt = $pdo->prepare($purchase_materials_query);
+        $stmt->execute([$from_date, $to_date]);
         $purchase_materials_usd = $stmt->fetchColumn() ?: 0;
     } catch (Exception $e) {
         error_log("Error calculating purchase materials: " . $e->getMessage());
         $purchase_materials_usd = 0;
     }
     
-    // Get employee payments total for current period
-    // کۆی خەرجی کارمەندان بۆ ماوەی هەڵبژێردراو
+    // Get employee payments total
     try {
-        $employee_payments_query = "SELECT SUM(total) as total_payments FROM employee_payments WHERE 1=1 $date_condition_employee_payments";
-        $stmt = $pdo->query($employee_payments_query);
-        $employee_payments_iqd = $stmt->fetchColumn() ?: 0;
-        $employee_payments_usd = ($usd_iqd_rate > 0) ? ($employee_payments_iqd / ($usd_iqd_rate / 100)) : 0;
+        $employee_payments_query = "SELECT 
+            SUM(total) / NULLIF(?, 0) as employee_payments_usd
+            FROM employee_payments 
+            WHERE DATE(CONCAT(pay_month, '-01')) BETWEEN ? AND ?";
+        $stmt = $pdo->prepare($employee_payments_query);
+        $stmt->execute([$usd_iqd_rate / 100, $from_date, $to_date]);
+        $employee_payments_usd = $stmt->fetchColumn() ?: 0;
     } catch (Exception $e) {
         error_log("Error calculating employee payments: " . $e->getMessage());
         $employee_payments_usd = 0;
     }
     
-    // Calculate total income based on the formula:
-    // داهات = کۆی نرخی فرۆشتن + کۆی داهاتی گاز - کۆی نرخی کڕین(purchase) - کۆی داشکاندن - کۆی خەرجی تر (expense_type != خەرجی تر) - کۆی نرخی کڕینی کاڵا(purchase_material) - کۆی خەرجی کارمەندان
-    // 
-    // بە واتایەکی تر:
-    // داهات = فرۆشتن + داهاتی گاز - کڕین - داشکاندن - خەرجی تر (خواردنگە، ئۆفیس، گاز، کاڵای کۆگا) - کڕینی کاڵا - خەرجی کارمەندان
-    // 
-    // بە واتایەکی تر:
-    // داهات = داهات + داهاتی گاز - خەرجی - داشکاندن - خەرجی تر - کڕینی کاڵا - خەرجی کارمەندان
+    // Calculate total income
     $total_income_usd = $total_sales_usd + $gas_income_usd - $total_purchases_usd - $total_discounts - $other_expenses_usd - $purchase_materials_usd - $employee_payments_usd;
     
     // Debug: Log income calculation breakdown
-    error_log("Debug - Income calculation breakdown:");
-    error_log("  - Sales (فرۆشتن): " . $total_sales_usd);
-    error_log("  - Gas Income (داهاتی گاز): " . $gas_income_usd);
-    error_log("  - Purchases (کڕین): " . $total_purchases_usd);
-    error_log("  - Discounts (داشکاندن): " . $total_discounts);
-    error_log("  - Other Expenses (خەرجی تر - expense_type != 'خەرجی تر'): " . $other_expenses_usd);
-    error_log("  - Purchase Materials (کڕینی کاڵا): " . $purchase_materials_usd);
-    error_log("  - Employee Payments (خەرجی کارمەندان): " . $employee_payments_usd);
-    error_log("  - Total Income (داهاتی گشتی): " . $total_income_usd);
+    error_log("Debug - Income calculation: sales=" . $total_sales_usd . 
+              ", gas_income=" . $gas_income_usd . 
+              ", purchases=" . $total_purchases_usd . 
+              ", discounts=" . $total_discounts . 
+              ", other_expenses=" . $other_expenses_usd . 
+              ", purchase_materials=" . $purchase_materials_usd . 
+              ", employee_payments=" . $employee_payments_usd . 
+              ", total_income=" . $total_income_usd);
     
     // Debug: Log discount breakdown
     error_log("Debug - Discounts breakdown: sales_discounts=" . $sales_discounts_total . 
@@ -723,13 +688,13 @@ try {
     $debt_analysis = [
         'customer_debt' => $customer_debt_total_usd,
         'company_debt' => $company_debt_total_usd,
-        'person_debt' => $person_debt_total_usd
+        'person_debt' => $person_debt_usd
     ];
 
     // Debug: Log key variables
     error_log("Debug - Key variables: customer_debt_total_usd=" . $customer_debt_total_usd . 
               ", company_debt_total_usd=" . $company_debt_total_usd . 
-              ", person_debt_total_usd=" . $person_debt_total_usd . 
+              ", person_debt_usd=" . $person_debt_usd . 
               ", total_expenses_usd=" . $total_expenses_usd);
     
     // Prepare response data
@@ -739,7 +704,7 @@ try {
             'usd_iqd_rate' => $usd_iqd_rate,
             'customer' => ['usd' => $customer_debt_total_usd, 'iqd' => 0],
             'company' => ['usd' => $company_debt_total_usd, 'iqd' => 0],
-            'person' => ['usd' => $person_debt_total_usd, 'iqd' => 0],
+            'person' => ['usd' => $person_debt_usd, 'iqd' => 0],
             'purchases' => $purchases,
             'sales' => $sales,
             'discounts' => ['usd' => $total_discount],
@@ -774,9 +739,9 @@ try {
                 'employee_performance' => $employee_performance,
                 'car_expenses' => $car_expenses,
                 'sales_vs_expenses' => [
-                    'sales' => $total_sales_usd,
-                    'expenses' => $total_expenses_usd,
-                    'profit' => $total_income_usd
+                    'sales' => $current_period_sales,
+                    'expenses' => $current_period_expenses,
+                    'profit' => $current_period_profit
                 ],
                 'debt_analysis' => $debt_analysis
             ]
