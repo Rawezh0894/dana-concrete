@@ -105,14 +105,7 @@ function renderDashboardCards(data) {
             value: formatCurrency((Number(data.data?.sales?.cash?.usd) || 0) + (Number(data.data?.sales?.credit?.usd) || 0), 'USD'),
             subtitle: 'کۆی فرۆشتنەکان'
         },
-        {
-            key: 'remaining_purchases',
-            label: 'کۆی پارەی ماوەی کڕین',
-            icon: 'fa-wallet',
-            cardClass: 'info-card',
-            value: formatCurrency(Number(data.data?.remaining_purchases?.usd) || 0, 'USD'),
-            subtitle: 'پارەی ماوە'
-        },
+
         {
             key: 'discounts',
             label: 'کۆی داشکاندن',
@@ -121,14 +114,7 @@ function renderDashboardCards(data) {
             value: formatCurrency(Number(data.data?.discounts?.usd) || 0, 'USD'),
             subtitle: 'داشکاندنەکان'
         },
-        {
-            key: 'net_profit',
-            label: 'قازانجی خاوێن',
-            icon: 'fa-coins',
-            cardClass: 'success-card',
-            value: formatCurrency(Number(data.data?.net_profit?.usd) || 0, 'USD'),
-            subtitle: 'قازانجی خاوێن'
-        },
+
         {
             key: 'total_expenses',
             label: 'کۆی خەرجی',
@@ -168,14 +154,6 @@ function renderDashboardCards(data) {
             cardClass: 'gas-income-card',
             value: formatCurrency(Number(data.data?.gas_income?.usd) || 0, 'USD'),
             subtitle: 'داهاتی گاز'
-        },
-        {
-            key: 'total_income',
-            label: 'کۆی داهات',
-            icon: 'fa-chart-line',
-            cardClass: 'income-card',
-            value: formatCurrency(Number(data.data?.total_income?.usd) || 0, 'USD'),
-            subtitle: 'داهاتی کۆی'
         },
         {
             key: 'usd_rate',

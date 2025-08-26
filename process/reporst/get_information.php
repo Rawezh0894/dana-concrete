@@ -183,13 +183,7 @@ try {
     $total_usd = ($purchases['cash']['usd'] ?? 0) + ($purchases['credit']['usd'] ?? 0);
     $total_iqd_converted = ($purchases['cash']['iqd_converted'] ?? 0) + ($purchases['credit']['iqd_converted'] ?? 0);
 
-    // Remaining Purchases
-    $stmt = $pdo->query("SELECT SUM(remaining_usd) as usd, SUM(remaining_iqd) as iqd, SUM(remaining_iqd / NULLIF(exchange_rate / 100, 0)) as iqd_converted FROM purchases");
-    $row = $stmt->fetch();
-    $remaining_purchases_usd = $row['usd'] ?? 0;
-    $remaining_purchases_iqd = $row['iqd'] ?? 0;
-    $remaining_purchases_iqd_converted = $row['iqd_converted'] ?? 0;
-    $remaining_purchases_total_usd = $remaining_purchases_usd + $remaining_purchases_iqd_converted;
+
 
     // Sales (فرۆشتن) - Only USD
     $sales = [
@@ -426,9 +420,7 @@ try {
               ", customer_debt_discounts=" . $customer_debt_discounts_total . 
               ", total_discounts=" . $total_discounts);
     
-    // Calculate net profit: کۆی فرۆشتن - کۆی خەرجی - داشکاندن
-    $total_sales_amount = ($sales['cash']['usd'] ?? 0) + ($sales['credit']['usd'] ?? 0);
-    $net_profit = $total_sales_amount - $total_expenses_usd - $total_discounts;
+
 
     // Additional Professional Reports Data
     
@@ -597,10 +589,7 @@ try {
     $current_period_profit = $current_period_sales - $current_period_expenses;
     
     // Ensure all required variables are defined
-    if (!isset($net_profit)) $net_profit = 0;
     if (!isset($total_discount)) $total_discount = 0;
-    if (!isset($remaining_purchases_total_usd)) $remaining_purchases_total_usd = 0;
-    if (!isset($remaining_purchases_iqd)) $remaining_purchases_iqd = 0;
     
     // 6. Debt Analysis
     $debt_analysis = [
@@ -613,7 +602,6 @@ try {
     error_log("Debug - Key variables: customer_debt_total_usd=" . $customer_debt_total_usd . 
               ", company_debt_total_usd=" . $company_debt_total_usd . 
               ", person_debt_usd=" . $person_debt_usd . 
-              ", net_profit=" . $net_profit . 
               ", total_expenses_usd=" . $total_expenses_usd);
     
     // Prepare response data
@@ -626,18 +614,13 @@ try {
             'person' => ['usd' => $person_debt_usd, 'iqd' => 0],
             'purchases' => $purchases,
             'sales' => $sales,
-            'remaining_purchases' => ['usd' => $remaining_purchases_total_usd, 'iqd' => $remaining_purchases_iqd],
             'discounts' => ['usd' => $total_discount],
-            'net_profit' => ['usd' => $net_profit],
             'gas_income' => [
                 'usd' => $gas_income_total_usd
             ],
             'total_expenses' => [
                 'usd' => $total_expenses_usd,
                 'breakdown' => $total_expenses_breakdown
-            ],
-            'total_income' => [
-                'usd' => $total_sales_amount + $gas_income_total_usd - $total_expenses_usd - $total_discounts - $total_expenses_breakdown['purchase_materials'] - $total_expenses_breakdown['employee_payments']
             ],
             // Additional professional reports data
             'employees' => $employee_stats,
