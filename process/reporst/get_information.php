@@ -121,8 +121,8 @@ try {
 
     // Purchases (کڕین)
     $purchases = [
-        'cash' => ['usd' => 0, 'iqd' => 0, 'iqd_converted' => 0],
-        'credit' => ['usd' => 0, 'iqd' => 0, 'iqd_converted' => 0]
+        'cash' => ['usd' => 0, 'iqd' => 0],
+        'credit' => ['usd' => 0, 'iqd' => 0]
     ];
     // دینار
     $filter = $_GET['filter'] ?? 'year';
@@ -171,7 +171,7 @@ try {
         }
     }
     // دۆلار
-    $stmt = $pdo->query("SELECT payment_type, SUM(price) as usd FROM purchases WHERE type='دۆلار' $date_condition_date GROUP BY payment_type");
+    $stmt = $pdo->query("SELECT payment_type, SUM(price) as usd FROM purchases WHERE type='دۆلار' GROUP BY payment_type");
     while ($row = $stmt->fetch()) {
         if ($row['payment_type'] === 'نەقد') {
             $purchases['cash']['usd'] = $row['usd'] ?? 0;
@@ -184,7 +184,7 @@ try {
     $total_iqd_converted = ($purchases['cash']['iqd_converted'] ?? 0) + ($purchases['credit']['iqd_converted'] ?? 0);
 
     // Remaining Purchases
-    $stmt = $pdo->query("SELECT SUM(remaining_usd) as usd, SUM(remaining_iqd) as iqd, SUM(remaining_iqd / NULLIF(exchange_rate / 100, 0)) as iqd_converted FROM purchases WHERE 1=1 $date_condition_date");
+    $stmt = $pdo->query("SELECT SUM(remaining_usd) as usd, SUM(remaining_iqd) as iqd, SUM(remaining_iqd / NULLIF(exchange_rate / 100, 0)) as iqd_converted FROM purchases");
     $row = $stmt->fetch();
     $remaining_purchases_usd = $row['usd'] ?? 0;
     $remaining_purchases_iqd = $row['iqd'] ?? 0;
@@ -207,7 +207,7 @@ try {
     }
 
     // Remaining Sales
-    $stmt = $pdo->query("SELECT SUM(remaining_amount) as usd, SUM(amount_paid_iq) as iqd, SUM(amount_paid_iq / NULLIF(dolar_rate, 0)) as iqd_converted FROM sales WHERE 1=1 $date_condition_sales");
+    $stmt = $pdo->query("SELECT SUM(remaining_amount) as usd, SUM(amount_paid_iq) as iqd, SUM(amount_paid_iq / NULLIF(dolar_rate, 0)) as iqd_converted FROM sales");
     $row = $stmt->fetch();
     $remaining_sales_usd = $row['usd'] ?? 0;
     $remaining_sales_iqd = $row['iqd'] ?? 0;
@@ -215,7 +215,7 @@ try {
     $remaining_sales_total_usd = $remaining_sales_usd + $remaining_sales_iqd_converted;
 
     // Other Expenses (خەرجی تر)
-    $stmt = $pdo->query("SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd FROM other_expenses WHERE 1=1 $date_condition_date");
+    $stmt = $pdo->query("SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd FROM other_expenses");
     $row = $stmt->fetch();
     $other_expenses_usd = $row['usd'] ?? 0;
     $other_expenses_iqd = $row['iqd'] ?? 0;
@@ -342,6 +342,31 @@ try {
     $gas_usage_iqd = $row['iqd'] ?? 0;
     $gas_usage_total_usd = $gas_usage_usd + (($usd_iqd_rate > 0) ? ($gas_usage_iqd / ($usd_iqd_rate / 100)) : 0);
     $total_expenses_breakdown['gas_usage'] = $gas_usage_total_usd;
+    
+    // Gas Income (داهاتی گاز) - Calculate based on specific employees
+    $gas_income_query = "
+        SELECT 
+            SUM(oe.amount_usd) as usd, 
+            SUM(oe.amount_iqd) as iqd,
+            SUM(oe.gas_total_cost) as gas_cost
+        FROM other_expenses oe
+        INNER JOIN employees e ON oe.employee_id = e.id
+        WHERE oe.expense_type = 'بەکارهێنانی گاز' 
+        AND e.name IN ('سانکۆ', 'کمال باوکی سانکۆ', 'تڕێلەکە', 'کەسارەکە/ئەرکان', 'کەسارەکە/سامی')
+        $date_condition_date
+    ";
+    $stmt = $pdo->query($gas_income_query);
+    $row = $stmt->fetch();
+    $gas_income_usd = $row['usd'] ?? 0;
+    $gas_income_iqd = $row['iqd'] ?? 0;
+    $gas_income_total_usd = $gas_income_usd + (($usd_iqd_rate > 0) ? ($gas_income_iqd / ($usd_iqd_rate / 100)) : 0);
+    $gas_income_gas_cost = $row['gas_cost'] ?? 0;
+    
+    // Debug: Log gas income calculation
+    error_log("Debug - Gas income calculation: usd=" . $gas_income_usd . 
+              ", iqd=" . $gas_income_iqd . 
+              ", gas_cost=" . $gas_income_gas_cost . 
+              ", total_usd=" . $gas_income_total_usd);
 
     // Purchases (کڕین) - only cash payments with date filter
     $purchases_query = "SELECT SUM(amount_iqd) as iqd, SUM(amount_iqd / NULLIF(exchange_rate / 100, 0)) as iqd_converted FROM purchases WHERE payment_type = 'نەقد' AND type = 'دینار' $date_condition_date";
@@ -400,67 +425,6 @@ try {
     // Calculate net profit: کۆی فرۆشتن - کۆی خەرجی - داشکاندن
     $total_sales_amount = ($sales['cash']['usd'] ?? 0) + ($sales['credit']['usd'] ?? 0);
     $net_profit = $total_sales_amount - $total_expenses_usd - $total_discounts;
-    
-    // Calculate income: داهات = کۆی نرخی فرۆشتن - کۆی نرخی کڕین - کۆی داشکاندن - کۆی خەرجی تر - کۆی نرخی کڕینی کاڵا - کۆی خەرجی کارمەندان
-    $total_purchases_amount = ($purchases['cash']['usd'] ?? 0) + ($purchases['credit']['usd'] ?? 0) + 
-                              (($purchases['cash']['iqd_converted'] ?? 0) + ($purchases['credit']['iqd_converted'] ?? 0));
-    
-    // Calculate income using only the specific expenses mentioned in the formula
-    // داهات = کۆی نرخی فرۆشتن - کۆی نرخی کڕین - کۆی داشکاندن - کۆی خەرجی تر - کۆی نرخی کڕینی کاڵا - کۆی خەرجی کارمەندان
-    // Note: We are NOT including material_usage, gas_usage, or purchases from total_expenses_breakdown
-    
-    // Step by step calculation for debugging
-    $step1 = $total_sales_amount;
-    $step2 = $step1 - $total_purchases_amount;
-    $step3 = $step2 - $total_discounts;
-    $step4 = $step3 - ($total_expenses_breakdown['other_expenses'] ?? 0);
-    $step5 = $step4 - ($total_expenses_breakdown['purchase_materials'] ?? 0);
-    $step6 = $step5 - ($total_expenses_breakdown['employee_payments'] ?? 0);
-    $income = $step6;
-    
-    // Debug: Log step by step calculation
-    error_log("Debug - Step by step income calculation:");
-    error_log("  Step 1 (Sales): " . $step1);
-    error_log("  Step 2 (Sales - Purchases): " . $step2);
-    error_log("  Step 3 (Step 2 - Discounts): " . $step3);
-    error_log("  Step 4 (Step 3 - Other Expenses): " . $step4);
-    error_log("  Step 5 (Step 4 - Purchase Materials): " . $step5);
-    error_log("  Step 6 (Step 5 - Employee Payments): " . $step6);
-    error_log("  Final Income: " . $income);
-    
-    // Debug: Log the exact values being used
-    error_log("Debug - Exact values for income calculation:");
-    error_log("  - total_sales_amount: " . $total_sales_amount);
-    error_log("  - total_purchases_amount: " . $total_purchases_amount);
-    error_log("  - total_discounts: " . $total_discounts);
-    error_log("  - other_expenses: " . ($total_expenses_breakdown['other_expenses'] ?? 0));
-    error_log("  - purchase_materials: " . ($total_expenses_breakdown['purchase_materials'] ?? 0));
-    error_log("  - employee_payments: " . ($total_expenses_breakdown['employee_payments'] ?? 0));
-    
-    // Debug: Log detailed income calculation breakdown
-    error_log("Debug - Detailed income calculation:");
-    error_log("  - Total Sales: " . $total_sales_amount);
-    error_log("  - Total Purchases: " . $total_purchases_amount);
-    error_log("  - Total Discounts: " . $total_discounts);
-    error_log("  - Other Expenses: " . ($total_expenses_breakdown['other_expenses'] ?? 0));
-    error_log("  - Purchase Materials: " . ($total_expenses_breakdown['purchase_materials'] ?? 0));
-    error_log("  - Employee Payments: " . ($total_expenses_breakdown['employee_payments'] ?? 0));
-    error_log("  - Calculated Income: " . $income);
-    
-    // Debug: Log purchases array structure
-    error_log("Debug - Purchases array structure: " . json_encode($purchases));
-    
-    // Also log the breakdown array to see what's in it
-    error_log("Debug - Total expenses breakdown array: " . json_encode($total_expenses_breakdown));
-    
-    // Debug: Log income calculation
-    error_log("Debug - Income calculation: sales=" . $total_sales_amount . 
-              ", purchases=" . $total_purchases_amount . 
-              ", discounts=" . $total_discounts . 
-              ", other_expenses=" . ($total_expenses_breakdown['other_expenses'] ?? 0) . 
-              ", purchase_materials=" . ($total_expenses_breakdown['purchase_materials'] ?? 0) . 
-              ", employee_payments=" . ($total_expenses_breakdown['employee_payments'] ?? 0) . 
-              ", income=" . $income);
 
     // Additional Professional Reports Data
     
@@ -661,7 +625,15 @@ try {
             'remaining_purchases' => ['usd' => $remaining_purchases_total_usd, 'iqd' => $remaining_purchases_iqd],
             'discounts' => ['usd' => $total_discount],
             'net_profit' => ['usd' => $net_profit],
-            'income' => ['usd' => $income],
+            'gas_income' => [
+                'usd' => $gas_income_total_usd,
+                'gas_cost' => $gas_income_gas_cost,
+                'breakdown' => [
+                    'usd' => $gas_income_usd,
+                    'iqd' => $gas_income_iqd,
+                    'iqd_converted' => $gas_income_total_usd - $gas_income_usd
+                ]
+            ],
             'total_expenses' => [
                 'usd' => $total_expenses_usd,
                 'breakdown' => $total_expenses_breakdown

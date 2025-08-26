@@ -130,14 +130,6 @@ function renderDashboardCards(data) {
             subtitle: 'قازانجی خاوێن'
         },
         {
-            key: 'income',
-            label: 'داهات',
-            icon: 'fa-chart-line',
-            cardClass: 'income-card',
-            value: formatCurrency(Number(data.data?.income?.usd) || 0, 'USD'),
-            subtitle: 'داهات'
-        },
-        {
             key: 'total_expenses',
             label: 'کۆی خەرجی',
             icon: 'fa-money-bill-wave',
@@ -168,6 +160,14 @@ function renderDashboardCards(data) {
             cardClass: 'purchase-materials-card',
             value: formatCurrency(Number(data.data?.total_expenses?.breakdown?.purchase_materials) || 0, 'USD'),
             subtitle: 'کڕینی کاڵای کۆگا'
+        },
+        {
+            key: 'gas_income',
+            label: 'کۆی داهاتی گاز',
+            icon: 'fa-gas-pump',
+            cardClass: 'gas-income-card',
+            value: formatCurrency(Number(data.data?.gas_income?.usd) || 0, 'USD'),
+            subtitle: 'داهاتی گاز لە کارمەندەکان'
         },
         {
             key: 'usd_rate',
