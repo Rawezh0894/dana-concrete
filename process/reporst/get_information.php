@@ -405,10 +405,26 @@ try {
     $total_purchases_amount = ($purchases['cash']['usd'] ?? 0) + ($purchases['credit']['usd'] ?? 0) + 
                               (($purchases['cash']['iqd_converted'] ?? 0) + ($purchases['credit']['iqd_converted'] ?? 0));
     
+    // Calculate income using only the specific expenses mentioned in the formula
+    // داهات = کۆی نرخی فرۆشتن - کۆی نرخی کڕین - کۆی داشکاندن - کۆی خەرجی تر - کۆی نرخی کڕینی کاڵا - کۆی خەرجی کارمەندان
+    // Note: We are NOT including material_usage, gas_usage, or purchases from total_expenses_breakdown
     $income = $total_sales_amount - $total_purchases_amount - $total_discounts - 
               ($total_expenses_breakdown['other_expenses'] ?? 0) - 
               ($total_expenses_breakdown['purchase_materials'] ?? 0) - 
               ($total_expenses_breakdown['employee_payments'] ?? 0);
+    
+    // Debug: Log detailed income calculation breakdown
+    error_log("Debug - Detailed income calculation:");
+    error_log("  - Total Sales: " . $total_sales_amount);
+    error_log("  - Total Purchases: " . $total_purchases_amount);
+    error_log("  - Total Discounts: " . $total_discounts);
+    error_log("  - Other Expenses: " . ($total_expenses_breakdown['other_expenses'] ?? 0));
+    error_log("  - Purchase Materials: " . ($total_expenses_breakdown['purchase_materials'] ?? 0));
+    error_log("  - Employee Payments: " . ($total_expenses_breakdown['employee_payments'] ?? 0));
+    error_log("  - Calculated Income: " . $income);
+    
+    // Also log the breakdown array to see what's in it
+    error_log("Debug - Total expenses breakdown array: " . json_encode($total_expenses_breakdown));
     
     // Debug: Log income calculation
     error_log("Debug - Income calculation: sales=" . $total_sales_amount . 
