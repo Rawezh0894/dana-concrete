@@ -342,7 +342,7 @@ try {
     $gas_usage_iqd = $row['iqd'] ?? 0;
     $gas_usage_total_usd = $gas_usage_usd + (($usd_iqd_rate > 0) ? ($gas_usage_iqd / ($usd_iqd_rate / 100)) : 0);
     $total_expenses_breakdown['gas_usage'] = $gas_usage_total_usd;
-    
+
     // Gas Income (داهاتی گاز) - Calculate based on specific employees
     $gas_income_query = "
         SELECT 
@@ -356,121 +356,12 @@ try {
         $date_condition_date
     ";
     
-    // Debug: Log the actual SQL query
-    error_log("Debug - Gas income SQL query: " . $gas_income_query);
-    
     $stmt = $pdo->query($gas_income_query);
     $row = $stmt->fetch();
     $gas_income_usd = $row['usd'] ?? 0;
     $gas_income_iqd = $row['iqd'] ?? 0;
     $gas_income_total_usd = $gas_income_usd + (($usd_iqd_rate > 0) ? ($gas_income_iqd / ($usd_iqd_rate / 100)) : 0);
     $gas_income_gas_cost = $row['gas_cost'] ?? 0;
-    
-    // Debug: Log gas income calculation
-    error_log("Debug - Gas income calculation: usd=" . $gas_income_usd . 
-              ", iqd=" . $gas_income_iqd . 
-              ", gas_cost=" . $gas_income_gas_cost . 
-              ", total_usd=" . $gas_income_total_usd);
-    
-    // Debug: Log date condition
-    error_log("Debug - Date condition: filter=" . $filter . 
-              ", use_range=" . ($use_range ? 'true' : 'false') . 
-              ", date_condition_date='" . $date_condition_date . "'");
-    
-    // Additional debugging: Check if employees exist
-    $employee_check_query = "SELECT id, name FROM employees WHERE name IN ('سانکۆ', 'کمال باوکی سانکۆ', 'تڕێلەکە', 'کەسارەکە/ئەرکان', 'کەسارەکە/سامی')";
-    $stmt = $pdo->query($employee_check_query);
-    $found_employees = [];
-    while ($emp_row = $stmt->fetch()) {
-        $found_employees[] = $emp_row['name'];
-    }
-    error_log("Debug - Found employees: " . implode(', ', $found_employees));
-    
-    // Check total gas expenses without employee filter
-    $total_gas_query = "SELECT COUNT(*) as total, SUM(amount_usd) as total_usd, SUM(amount_iqd) as total_iqd FROM other_expenses WHERE expense_type = 'بەکارهێنانی گاز' $date_condition_date";
-    $stmt = $pdo->query($total_gas_query);
-    $total_gas_row = $stmt->fetch();
-    error_log("Debug - Total gas expenses: count=" . ($total_gas_row['total'] ?? 0) . 
-              ", usd=" . ($total_gas_row['total_usd'] ?? 0) . 
-              ", iqd=" . ($total_gas_row['total_iqd'] ?? 0));
-    
-    // Check gas expenses with employee filter but without date filter
-    $gas_with_employee_query = "
-        SELECT 
-            COUNT(*) as total,
-            SUM(oe.amount_usd) as total_usd,
-            SUM(oe.amount_iqd) as total_iqd
-        FROM other_expenses oe
-        INNER JOIN employees e ON oe.employee_id = e.id
-        WHERE oe.expense_type = 'بەکارهێنانی گاز' 
-        AND e.name IN ('سانکۆ', 'کمال باوکی سانکۆ', 'تڕێلەکە', 'کەسارەکە/ئەرکان', 'کەسارەکە/سامی')
-    ";
-    $stmt = $pdo->query($gas_with_employee_query);
-    $gas_employee_row = $stmt->fetch();
-    error_log("Debug - Gas expenses with employee filter (no date): count=" . ($gas_employee_row['total'] ?? 0) . 
-              ", usd=" . ($gas_employee_row['total_usd'] ?? 0) . 
-              ", iqd=" . ($gas_employee_row['total_iqd'] ?? 0));
-    
-    // Check all employees in the system
-    $all_employees_query = "SELECT id, name FROM employees ORDER BY name";
-    $stmt = $pdo->query($all_employees_query);
-    $all_employees = [];
-    while ($emp_row = $stmt->fetch()) {
-        $all_employees[] = $emp_row['name'];
-    }
-    error_log("Debug - All employees in system: " . implode(', ', $all_employees));
-    
-    // Check sample gas expenses to see structure
-    $sample_gas_query = "
-        SELECT 
-            oe.id,
-            oe.expense_type,
-            oe.amount_usd,
-            oe.amount_iqd,
-            oe.employee_id,
-            e.name as employee_name
-        FROM other_expenses oe
-        LEFT JOIN employees e ON oe.employee_id = e.id
-        WHERE oe.expense_type = 'بەکارهێنانی گاز'
-        LIMIT 5
-    ";
-    $stmt = $pdo->query($sample_gas_query);
-    $sample_gas = [];
-    while ($sample_row = $stmt->fetch()) {
-        $sample_gas[] = [
-            'id' => $sample_row['id'],
-            'expense_type' => $sample_row['expense_type'],
-            'amount_usd' => $sample_row['amount_usd'],
-            'amount_iqd' => $sample_row['amount_iqd'],
-            'employee_id' => $sample_row['employee_id'],
-            'employee_name' => $sample_row['employee_name']
-        ];
-    }
-    error_log("Debug - Sample gas expenses: " . json_encode($sample_gas));
-    
-    // Check if there are any gas expenses at all
-    $any_gas_query = "SELECT COUNT(*) as total FROM other_expenses WHERE expense_type = 'بەکارهێنانی گاز'";
-    $stmt = $pdo->query($any_gas_query);
-    $any_gas_count = $stmt->fetchColumn();
-    error_log("Debug - Total gas expenses in system (any): " . $any_gas_count);
-    
-    // Check if there are any gas expenses with employee_id
-    $gas_with_employee_id_query = "SELECT COUNT(*) as total FROM other_expenses WHERE expense_type = 'بەکارهێنانی گاز' AND employee_id IS NOT NULL";
-    $stmt = $pdo->query($gas_with_employee_id_query);
-    $gas_with_employee_id_count = $stmt->fetchColumn();
-    error_log("Debug - Gas expenses with employee_id: " . $gas_with_employee_id_count);
-    
-    // Check if there are any gas expenses with employee_id = 0
-    $gas_with_zero_employee_id_query = "SELECT COUNT(*) as total FROM other_expenses WHERE expense_type = 'بەکارهێنانی گاز' AND employee_id = 0";
-    $stmt = $pdo->query($gas_with_zero_employee_id_query);
-    $gas_with_zero_employee_id_count = $stmt->fetchColumn();
-    error_log("Debug - Gas expenses with employee_id = 0: " . $gas_with_zero_employee_id_count);
-    
-    // Check if there are any gas expenses with employee_id = 0
-    $gas_with_zero_employee_id_query = "SELECT COUNT(*) as total FROM other_expenses WHERE expense_type = 'بەکارهێنانی گاز' AND employee_id = 0";
-    $stmt = $pdo->query($gas_with_zero_employee_id_query);
-    $gas_with_zero_employee_id_count = $stmt->fetchColumn();
-    error_log("Debug - Gas expenses with employee_id = 0: " . $gas_with_zero_employee_id_count);
 
     // Purchases (کڕین) - only cash payments with date filter
     $purchases_query = "SELECT SUM(amount_iqd) as iqd, SUM(amount_iqd / NULLIF(exchange_rate / 100, 0)) as iqd_converted FROM purchases WHERE payment_type = 'نەقد' AND type = 'دینار' $date_condition_date";
