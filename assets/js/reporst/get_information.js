@@ -156,6 +156,14 @@ function renderDashboardCards(data) {
             subtitle: 'داهاتی گاز'
         },
         {
+            key: 'total_income',
+            label: 'کۆی داهات',
+            icon: 'fa-chart-line',
+            cardClass: 'total-income-card',
+            value: formatCurrency(Number(data.data?.total_income?.usd) || 0, 'USD'),
+            subtitle: 'داهاتی گشتی'
+        },
+        {
             key: 'usd_rate',
             label: 'نرخی ١٠٠ دۆلار',
             icon: 'fa-dollar-sign',
