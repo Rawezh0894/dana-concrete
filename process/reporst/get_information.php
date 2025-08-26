@@ -184,7 +184,7 @@ try {
     $total_iqd_converted = ($purchases['cash']['iqd_converted'] ?? 0) + ($purchases['credit']['iqd_converted'] ?? 0);
 
     // Remaining Purchases
-    $stmt = $pdo->query("SELECT SUM(remaining_usd) as usd, SUM(remaining_iqd) as iqd, SUM(remaining_iqd / NULLIF(exchange_rate / 100, 0)) as iqd_converted FROM purchases");
+    $stmt = $pdo->query("SELECT SUM(remaining_usd) as usd, SUM(remaining_iqd) as iqd, SUM(remaining_iqd / NULLIF(exchange_rate / 100, 0)) as iqd_converted FROM purchases WHERE 1=1 $date_condition_date");
     $row = $stmt->fetch();
     $remaining_purchases_usd = $row['usd'] ?? 0;
     $remaining_purchases_iqd = $row['iqd'] ?? 0;
@@ -207,7 +207,7 @@ try {
     }
 
     // Remaining Sales
-    $stmt = $pdo->query("SELECT SUM(remaining_amount) as usd, SUM(amount_paid_iq) as iqd, SUM(amount_paid_iq / NULLIF(dolar_rate, 0)) as iqd_converted FROM sales");
+    $stmt = $pdo->query("SELECT SUM(remaining_amount) as usd, SUM(amount_paid_iq) as iqd, SUM(amount_paid_iq / NULLIF(dolar_rate, 0)) as iqd_converted FROM sales WHERE 1=1 $date_condition_sales");
     $row = $stmt->fetch();
     $remaining_sales_usd = $row['usd'] ?? 0;
     $remaining_sales_iqd = $row['iqd'] ?? 0;
@@ -215,7 +215,7 @@ try {
     $remaining_sales_total_usd = $remaining_sales_usd + $remaining_sales_iqd_converted;
 
     // Other Expenses (خەرجی تر)
-    $stmt = $pdo->query("SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd FROM other_expenses");
+    $stmt = $pdo->query("SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd FROM other_expenses WHERE 1=1 $date_condition_date");
     $row = $stmt->fetch();
     $other_expenses_usd = $row['usd'] ?? 0;
     $other_expenses_iqd = $row['iqd'] ?? 0;
@@ -427,6 +427,15 @@ try {
     error_log("  Step 5 (Step 4 - Purchase Materials): " . $step5);
     error_log("  Step 6 (Step 5 - Employee Payments): " . $step6);
     error_log("  Final Income: " . $income);
+    
+    // Debug: Log the exact values being used
+    error_log("Debug - Exact values for income calculation:");
+    error_log("  - total_sales_amount: " . $total_sales_amount);
+    error_log("  - total_purchases_amount: " . $total_purchases_amount);
+    error_log("  - total_discounts: " . $total_discounts);
+    error_log("  - other_expenses: " . ($total_expenses_breakdown['other_expenses'] ?? 0));
+    error_log("  - purchase_materials: " . ($total_expenses_breakdown['purchase_materials'] ?? 0));
+    error_log("  - employee_payments: " . ($total_expenses_breakdown['employee_payments'] ?? 0));
     
     // Debug: Log detailed income calculation breakdown
     error_log("Debug - Detailed income calculation:");
