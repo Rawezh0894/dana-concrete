@@ -424,7 +424,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
             </div>
             <div class="col-md-6 mb-3">
               <label for="amount_iqd" class="form-label">بڕی پارە بە دینار</label>
-              <input type="number" class="form-control" id="amount_iqd" name="amount_iqd" min="0" step="0.01" value="0" readonly>
+              <input type="number" class="form-control" id="amount_iqd" name="amount_iqd" min="0" step="0.01" value="0">
             </div>
           
           </div>
@@ -446,7 +446,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
             </div>
             <div="col-md-6 mb-3">
               <label for="remaining_iqd" class="form-label">بری پارەی ماوە بە دینار</label>
-              <input type="number" class="form-control" id="remaining_iqd" name="remaining_iqd" min="0" step="0.01" value="0" readonly>
+              <input type="number" class="form-control" id="remaining_iqd" name="remaining_iqd" min="0" step="0.01" value="0">
             </div>
           </div>
       
@@ -700,7 +700,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
             </div>
             <div class="col-md-6 mb-3">
               <label for="edit_amount_iqd" class="form-label">بڕی پارە بە دینار</label>
-              <input type="number" class="form-control" id="edit_amount_iqd" name="amount_iqd" min="0" step="0.01" value="0" required readonly>
+              <input type="number" class="form-control" id="edit_amount_iqd" name="amount_iqd" min="0" step="0.01" value="0" required>
             </div>
           </div>
           <div class="row">
@@ -720,7 +720,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
             </div>
             <div class="col-md-6 mb-3">
               <label for="edit_remaining_iqd" class="form-label">بری پارەی ماوە بە دینار</label>
-              <input type="number" class="form-control" id="edit_remaining_iqd" name="remaining_iqd" min="0" step="0.01" value="0" required readonly>
+              <input type="number" class="form-control" id="edit_remaining_iqd" name="remaining_iqd" min="0" step="0.01" value="0" required>
             </div>
           </div>
         </div>
