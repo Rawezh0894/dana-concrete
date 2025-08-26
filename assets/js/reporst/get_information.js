@@ -131,11 +131,11 @@ function renderDashboardCards(data) {
         },
         {
             key: 'income',
-            label: 'کۆی داهات',
+            label: 'داهات',
             icon: 'fa-chart-line',
             cardClass: 'income-card',
             value: formatCurrency(Number(data.data?.income?.usd) || 0, 'USD'),
-            subtitle: 'داهات = فرۆشتن - کڕین - داشکاندن - خەرجی'
+            subtitle: 'داهات'
         },
         {
             key: 'total_expenses',
