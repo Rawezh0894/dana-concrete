@@ -138,6 +138,30 @@ function renderDashboardCards(data) {
             subtitle: 'کۆی خەرجی'
         },
         {
+            key: 'employee_expenses',
+            label: 'کۆی خەرجی کارمەندان',
+            icon: 'fa-user-tie',
+            cardClass: 'employee-expenses-card',
+            value: formatCurrency(Number(data.data?.total_expenses?.breakdown?.employee_payments) || 0, 'USD'),
+            subtitle: 'پارەدان بە کارمەند'
+        },
+        {
+            key: 'other_expenses',
+            label: 'کۆی خەرجی تر',
+            icon: 'fa-receipt',
+            cardClass: 'other-expenses-card',
+            value: formatCurrency(Number(data.data?.total_expenses?.breakdown?.other_expenses) || 0, 'USD'),
+            subtitle: 'خەرجی تر'
+        },
+        {
+            key: 'purchase_materials',
+            label: 'کۆی نرخی کڕینی کاڵا',
+            icon: 'fa-boxes',
+            cardClass: 'purchase-materials-card',
+            value: formatCurrency(Number(data.data?.total_expenses?.breakdown?.purchase_materials) || 0, 'USD'),
+            subtitle: 'کڕینی کاڵای کۆگا'
+        },
+        {
             key: 'usd_rate',
             label: 'نرخی ١٠٠ دۆلار',
             icon: 'fa-dollar-sign',

@@ -253,6 +253,51 @@
   background: #e8f5e9;
 }
 
+/* Employee Expenses Card */
+.report-card.employee-expenses-card {
+  border-top: 6px solid #9c27b0;
+  background: linear-gradient(135deg, #f3e5f5 0%, #f8fffa 100%);
+  height: 280px; /* Same height as base */
+}
+.report-card.employee-expenses-card .card-title,
+.report-card.employee-expenses-card .fa,
+.report-card.employee-expenses-card .section-label {
+  color: #9c27b0;
+}
+.report-card.employee-expenses-card .section-label {
+  background: #f3e5f5;
+}
+
+/* Other Expenses Card */
+.report-card.other-expenses-card {
+  border-top: 6px solid #ff5722;
+  background: linear-gradient(135deg, #ffebee 0%, #f8fffa 100%);
+  height: 280px; /* Same height as base */
+}
+.report-card.other-expenses-card .card-title,
+.report-card.other-expenses-card .fa,
+.report-card.other-expenses-card .section-label {
+  color: #ff5722;
+}
+.report-card.other-expenses-card .section-label {
+  background: #ffebee;
+}
+
+/* Purchase Materials Card */
+.report-card.purchase-materials-card {
+  border-top: 6px solid #795548;
+  background: linear-gradient(135deg, #efebe9 0%, #f8fffa 100%);
+  height: 280px; /* Same height as base */
+}
+.report-card.purchase-materials-card .card-title,
+.report-card.purchase-materials-card .fa,
+.report-card.purchase-materials-card .section-label {
+  color: #795548;
+}
+.report-card.purchase-materials-card .section-label {
+  background: #efebe9;
+}
+
 @media (max-width: 768px) {
   .report-card {
     padding: 1.2rem 0.7rem 0.7rem 0.7rem;
@@ -276,7 +321,10 @@
   .report-card.dollar-rate-card,
   .report-card.info-card,
   .report-card.dark-card,
-  .report-card.success-card {
+  .report-card.success-card,
+  .report-card.employee-expenses-card,
+  .report-card.other-expenses-card,
+  .report-card.purchase-materials-card {
     height: 250px;
   }
 }
