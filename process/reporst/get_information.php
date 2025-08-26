@@ -343,11 +343,9 @@ try {
     $gas_usage_total_usd = $gas_usage_usd + (($usd_iqd_rate > 0) ? ($gas_usage_iqd / ($usd_iqd_rate / 100)) : 0);
     $total_expenses_breakdown['gas_usage'] = $gas_usage_total_usd;
 
-    // Gas Income (داهاتی گاز) - Calculate based on specific employees
+    // Gas Income (داهاتی گاز) - Calculate based on specific employees using only gas_total_cost
     $gas_income_query = "
         SELECT 
-            SUM(oe.amount_usd) as usd, 
-            SUM(oe.amount_iqd) as iqd,
             SUM(oe.gas_total_cost) as gas_cost
         FROM other_expenses oe
         INNER JOIN employees e ON oe.employee_id = e.id
@@ -358,10 +356,7 @@ try {
     
     $stmt = $pdo->query($gas_income_query);
     $row = $stmt->fetch();
-    $gas_income_usd = $row['usd'] ?? 0;
-    $gas_income_iqd = $row['iqd'] ?? 0;
-    $gas_income_total_usd = $gas_income_usd + (($usd_iqd_rate > 0) ? ($gas_income_iqd / ($usd_iqd_rate / 100)) : 0);
-    $gas_income_gas_cost = $row['gas_cost'] ?? 0;
+    $gas_income_total_usd = $row['gas_cost'] ?? 0;
 
     // Purchases (کڕین) - only cash payments with date filter
     $purchases_query = "SELECT SUM(amount_iqd) as iqd, SUM(amount_iqd / NULLIF(exchange_rate / 100, 0)) as iqd_converted FROM purchases WHERE payment_type = 'نەقد' AND type = 'دینار' $date_condition_date";
@@ -621,13 +616,7 @@ try {
             'discounts' => ['usd' => $total_discount],
             'net_profit' => ['usd' => $net_profit],
             'gas_income' => [
-                'usd' => $gas_income_total_usd,
-                'gas_cost' => $gas_income_gas_cost,
-                'breakdown' => [
-                    'usd' => $gas_income_usd,
-                    'iqd' => $gas_income_iqd,
-                    'iqd_converted' => $gas_income_total_usd - $gas_income_usd
-                ]
+                'usd' => $gas_income_total_usd
             ],
             'total_expenses' => [
                 'usd' => $total_expenses_usd,
