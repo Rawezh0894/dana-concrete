@@ -135,7 +135,7 @@ function renderDashboardCards(data) {
             icon: 'fa-chart-line',
             cardClass: 'income-card',
             value: formatCurrency(Number(data.data?.income?.usd) || 0, 'USD'),
-            subtitle: 'داهات = فرۆشتن - کڕین - داشکاندن - خەرجی تر - کڕینی کاڵا - خەرجی کارمەندان'
+            subtitle: 'داهات = فرۆشتن - کڕین - داشکاندن - خەرجی'
         },
         {
             key: 'total_expenses',

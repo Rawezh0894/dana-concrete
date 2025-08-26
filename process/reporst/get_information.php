@@ -588,7 +588,6 @@ try {
     // Ensure all required variables are defined
     if (!isset($net_profit)) $net_profit = 0;
     if (!isset($total_discount)) $total_discount = 0;
-    if (!isset($income)) $income = 0;
     if (!isset($remaining_purchases_total_usd)) $remaining_purchases_total_usd = 0;
     if (!isset($remaining_purchases_iqd)) $remaining_purchases_iqd = 0;
     
