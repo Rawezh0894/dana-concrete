@@ -180,14 +180,14 @@ try {
         foreach ($data as $index => $row) {
             echo '<tr>';
             echo '<td>' . htmlspecialchars($row['location_name'] ?? '') . '</td>'; // Location name
-        echo '<td class="number">' . number_format($row['amount_iqd'] ?? 0, 0) . '</td>'; // Amount in Dinar
-        echo '<td>' . htmlspecialchars($row['type'] ?? '') . '</td>'; // Purchase Type (دینار/دۆلار)
-        echo '<td>' . htmlspecialchars($row['location_name'] ?? '') . '</td>'; // Purchase Location
-        echo '<td class="number">' . number_format($row['kg'] ?? 0, 0) . '</td>'; // Material Amount in KG
-        echo '<td>' . htmlspecialchars($row['driver_name'] ?? '') . '</td>'; // Driver Name
-        echo '<td>' . htmlspecialchars($row['invoice_number'] ?? '') . '</td>'; // Receipt Number
-        echo '<td>' . htmlspecialchars($row['date'] ?? '') . '</td>'; // Date
-        echo '</tr>';
+            echo '<td class="number">' . number_format($row['amount_iqd'] ?? 0, 0) . '</td>'; // Amount in Dinar
+            echo '<td>' . htmlspecialchars($row['company_name'] ?? '') . '</td>'; // Company name (نوع مشتريات)
+            echo '<td>' . htmlspecialchars($row['location_name'] ?? '') . '</td>'; // Purchase Location
+            echo '<td class="number">' . number_format($row['kg'] ?? 0, 0) . '</td>'; // Material Amount in KG
+            echo '<td>' . htmlspecialchars($row['driver_name'] ?? '') . '</td>'; // Driver Name
+            echo '<td>' . htmlspecialchars($row['invoice_number'] ?? '') . '</td>'; // Receipt Number
+            echo '<td>' . htmlspecialchars($row['date'] ?? '') . '</td>'; // Date
+            echo '</tr>';
         }
         
         echo '</table>';
