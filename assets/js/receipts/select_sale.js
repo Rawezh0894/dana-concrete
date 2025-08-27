@@ -62,9 +62,9 @@ class ReceiptManager {
     handleTooltipShow(e) {
         const cell = e.target.closest('.receipt-number-cell');
         if (cell && cell.classList.contains('truncated')) {
-            const text = cell.textContent.trim();
-            if (text && text.length > 10) {
-                this.showTooltip(text, e.clientX, e.clientY);
+            const fullNumber = cell.getAttribute('data-full-number');
+            if (fullNumber) {
+                this.showTooltip(fullNumber, e.clientX, e.clientY);
             }
         }
     }
@@ -72,6 +72,10 @@ class ReceiptManager {
     handleTooltipHide(e) {
         const cell = e.target.closest('.receipt-number-cell');
         if (cell) {
+            this.hideTooltip();
+        }
+        // Also hide tooltip when moving away from the cell area
+        if (!e.target.closest('.receipt-number-cell')) {
             this.hideTooltip();
         }
     }
@@ -177,15 +181,36 @@ class ReceiptManager {
         
         try {
             const receiptNumber = String(number);
-            const isLong = receiptNumber.length > 10;
             
-            return `
-                <div class="receipt-number-cell ${isLong ? 'truncated' : ''}" 
-                     title="${isLong ? receiptNumber : ''}"
-                     data-full-number="${receiptNumber}">
-                    ${receiptNumber}
-                </div>
-            `;
+            // Check if this is a grouped invoice number (contains commas)
+            if (receiptNumber.includes(',')) {
+                const invoices = receiptNumber.split(',').map(inv => inv.trim());
+                const isLong = invoices.length > 3; // Show tooltip if more than 3 invoices
+                
+                // Format to show only first 3 invoices with indication of more
+                let displayText = invoices.slice(0, 3).join(', ');
+                if (invoices.length > 3) {
+                    displayText += ` (+${invoices.length - 3} more)`;
+                }
+                
+                return `
+                    <div class="receipt-number-cell ${isLong ? 'truncated' : ''}" 
+                         title="${receiptNumber}"
+                         data-full-number="${receiptNumber}">
+                        ${displayText}
+                    </div>
+                `;
+            } else {
+                // Single invoice number
+                const isLong = receiptNumber.length > 10;
+                return `
+                    <div class="receipt-number-cell ${isLong ? 'truncated' : ''}" 
+                         title="${isLong ? receiptNumber : ''}"
+                         data-full-number="${receiptNumber}">
+                        ${receiptNumber}
+                    </div>
+                `;
+            }
         } catch (error) {
             console.warn('Error formatting receipt number:', number, error);
             return `

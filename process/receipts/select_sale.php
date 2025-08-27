@@ -20,7 +20,17 @@ $opening_debt = is_numeric($customer_data['opening_debt_usd']) ? floatval($custo
 $company_name = $customer_data['name'] ?? '';
 $mobile = $customer_data['mobile1'] ?? '';
 
-$sql = "SELECT s.quantity, f.strength_mpa, f.strength_kg, s.price_per_unit, s.total_price, s.invoice_number, s.order_date, s.amount_paid_usd, s.amount_paid_iq, s.remaining_amount 
+$sql = "SELECT 
+        s.order_date,
+        f.strength_mpa, 
+        f.strength_kg,
+        SUM(s.quantity) as total_quantity,
+        s.price_per_unit,
+        SUM(s.total_price) as total_price_sum,
+        GROUP_CONCAT(s.invoice_number ORDER BY s.invoice_number SEPARATOR ',') as invoice_numbers,
+        SUM(s.amount_paid_usd) as total_amount_paid_usd,
+        SUM(s.amount_paid_iq) as total_amount_paid_iq,
+        SUM(s.remaining_amount) as total_remaining_amount
         FROM sales s 
         LEFT JOIN concrete_formulas f ON s.formula_id = f.id 
         WHERE s.customer_id = :customer_id";
@@ -46,18 +56,32 @@ if ($date_to) {
     $sql .= " AND s.order_date <= :date_to";
     $params['date_to'] = $date_to;
 }
+$sql .= " GROUP BY s.order_date, f.strength_mpa, f.strength_kg, s.price_per_unit";
 $sql .= " ORDER BY s.order_date ASC";
+
+// Debug: Log the SQL query
+error_log("Receipt SQL Query: " . $sql);
+
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $data = [];
+
+// Debug: Log the number of rows before grouping
+$rowCount = $stmt->rowCount();
+error_log("Receipt rows before grouping: " . $rowCount);
+
 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-    $quantity = $row['quantity'] . ' م³';
+    $quantity = number_format($row['total_quantity'], 2) . ' م³';
     $rezh = $row['strength_mpa'] ? $row['strength_mpa'] . ' MPa' : ($row['strength_kg'] ? $row['strength_kg'] . ' Kg' : '');
     $ppu = is_numeric($row['price_per_unit']) ? '$' . number_format($row['price_per_unit'], 2, '.', ',') : '';
-    $total = is_numeric($row['total_price']) ? '$' . number_format($row['total_price'], 2, '.', ',') : '';
-    $paid_usd = is_numeric($row['amount_paid_usd']) ? '$' . number_format($row['amount_paid_usd'], 2, '.', ',') : '$0.00';
-    $paid_iqd = is_numeric($row['amount_paid_iq']) ? number_format($row['amount_paid_iq'], 0, '.', ',') . ' د.ع' : '0 د.ع';
-    $remaining = is_numeric($row['remaining_amount']) ? '$' . number_format($row['remaining_amount'], 2, '.', ',') : '$0.00';
+    $total = is_numeric($row['total_price_sum']) ? '$' . number_format($row['total_price_sum'], 2, '.', ',') : '';
+    $paid_usd = is_numeric($row['total_amount_paid_usd']) ? '$' . number_format($row['total_amount_paid_usd'], 2, '.', ',') : '$0.00';
+    $paid_iqd = is_numeric($row['total_amount_paid_iq']) ? number_format($row['total_amount_paid_iq'], 0, '.', ',') . ' د.ع' : '0 د.ع';
+    $remaining = is_numeric($row['total_remaining_amount']) ? '$' . number_format($row['total_remaining_amount'], 2, '.', ',') : '$0.00';
+    
+    // Debug: Log each grouped row
+    error_log("Grouped row - Date: " . $row['order_date'] . ", Ratio: " . $rezh . ", Quantity: " . $row['total_quantity'] . ", Invoices: " . $row['invoice_numbers']);
+    
     $data[] = [
         'quantity' => $quantity,
         'rezh' => $rezh,
@@ -66,10 +90,13 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         'amount_paid_usd' => $paid_usd,
         'amount_paid_iqd' => $paid_iqd,
         'remaining_amount' => $remaining,
-        'invoice_number' => $row['invoice_number'],
+        'invoice_number' => $row['invoice_numbers'],
         'order_date' => $row['order_date']
     ];
 }
+
+// Debug: Log the final data count
+error_log("Receipt final grouped rows: " . count($data));
 
 $response = [
     'sales_data' => $data,

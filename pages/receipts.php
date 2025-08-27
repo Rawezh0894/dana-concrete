@@ -161,6 +161,12 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         </label>
     </div>
 
+    <!-- Grouping Information -->
+    <div style="text-align: center; margin: 1rem 0; padding: 0.5rem; background: #e8f4fd; border: 1px solid #bee5eb; border-radius: 6px; color: #0c5460;">
+        <i class="fa fa-info-circle" style="margin-left: 0.5rem;"></i>
+        <strong>تێبینی:</strong> ئەو ڕیکۆردانەی کە هەمان بەروار و هەمان ڕێژەیان هەیە، بە یەک ڕیز دەنوێنرێنەوە
+    </div>
+
     <table class="receipt-table receipt-table-custom">
         <thead>
             <tr>
