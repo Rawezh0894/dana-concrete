@@ -164,53 +164,29 @@ try {
         
         echo '<table border="1">';
         
-        // Header row
+        // Header row - Only the columns shown in the image, from right to left
         echo '<tr>';
-        echo '<th>#</th>';
-        echo '<th>کۆمپانیا</th>';
-        echo '<th>شوێن</th>';
-        echo '<th>شۆفێر</th>';
-        echo '<th>ژمارەی پسوڵە</th>';
-        echo '<th>مەواد</th>';
-        echo '<th>بەروار</th>';
-        echo '<th>جۆری پارەدان</th>';
-        echo '<th>جۆری دراو</th>';
-        echo '<th>کیلۆگرام</th>';
-        echo '<th>نرخی یەک کیلۆ بە دۆلار</th>';
-        echo '<th>نرخی یەک کیلۆ بە دینار</th>';
-        echo '<th>نرخ</th>';
-        echo '<th>بڕی پارە بە دینار</th>';
-        echo '<th>نرخی 100 دۆلار بە دینار</th>';
-        echo '<th>پارەی دراو بە دۆلار</th>';
-        echo '<th>پارەی دراو بە دینار</th>';
-        echo '<th>پارەی ماوە بە دۆلار</th>';
-        echo '<th>پارەی ماوە بە دینار</th>';
-        echo '<th>چاو/سایلۆ</th>';
+        echo '<th>که نجاره</th>'; // Unnamed column with "که نجاره" value
+        echo '<th>مبلغ / دينار</th>'; // Amount / Dinar
+        echo '<th>نوع مشتريات</th>'; // Purchase Type
+        echo '<th>مکان مشتريات</th>'; // Purchase Location
+        echo '<th>بری مواد</th>'; // Material Amount/Quantity
+        echo '<th>شؤفير</th>'; // Driver/Recipient
+        echo '<th>ژ. پسوله</th>'; // Receipt No.
+        echo '<th>به روار</th>'; // Date
         echo '</tr>';
         
-        // Data rows
+        // Data rows - Only the columns shown in the image, from right to left
         foreach ($data as $index => $row) {
             echo '<tr>';
-            echo '<td>' . ($index + 1) . '</td>';
-            echo '<td>' . htmlspecialchars($row['company_name'] ?? '') . '</td>';
-            echo '<td>' . htmlspecialchars($row['location_name'] ?? '') . '</td>';
-            echo '<td>' . htmlspecialchars($row['driver_name'] ?? '') . '</td>';
-            echo '<td>' . htmlspecialchars($row['invoice_number'] ?? '') . '</td>';
-            echo '<td>' . htmlspecialchars($row['material_name'] ?? '') . '</td>';
-            echo '<td>' . htmlspecialchars($row['date'] ?? '') . '</td>';
-            echo '<td>' . htmlspecialchars($row['payment_type'] ?? '') . '</td>';
-            echo '<td>' . htmlspecialchars($row['type'] ?? '') . '</td>';
-            echo '<td class="number">' . number_format($row['kg'] ?? 0, 2) . '</td>';
-            echo '<td class="number">' . number_format($row['price_per_kg_usd'] ?? 0, 2) . ' $</td>';
-            echo '<td class="number">' . number_format($row['price_per_kg_iqd'] ?? 0, 0) . ' د.ع</td>';
-            echo '<td class="number">' . number_format($row['price'] ?? 0, 2) . '</td>';
-            echo '<td class="number">' . number_format($row['amount_iqd'] ?? 0, 0) . ' د.ع</td>';
-            echo '<td class="number">' . number_format($row['exchange_rate'] ?? 0, 0) . '</td>';
-            echo '<td class="number">' . number_format($row['paid_usd'] ?? 0, 2) . ' $</td>';
-            echo '<td class="number">' . number_format($row['paid_iqd'] ?? 0, 0) . ' د.ع</td>';
-            echo '<td class="number">' . number_format($row['remaining_usd'] ?? 0, 2) . ' $</td>';
-            echo '<td class="number">' . number_format($row['remaining_iqd'] ?? 0, 0) . ' د.ع</td>';
-            echo '<td>' . htmlspecialchars($row['bin_name'] ?? '') . '</td>';
+            echo '<td>که نجاره</td>'; // Fixed value "که نجاره" for all rows
+            echo '<td class="number">' . number_format($row['amount_iqd'] ?? 0, 0) . '</td>'; // Amount in Dinar
+            echo '<td>' . htmlspecialchars($row['type'] ?? '') . '</td>'; // Purchase Type (دینار/دۆلار)
+            echo '<td>' . htmlspecialchars($row['location_name'] ?? '') . '</td>'; // Purchase Location
+            echo '<td class="number">' . number_format($row['kg'] ?? 0, 0) . '</td>'; // Material Amount in KG
+            echo '<td>' . htmlspecialchars($row['driver_name'] ?? '') . '</td>'; // Driver Name
+            echo '<td>' . htmlspecialchars($row['invoice_number'] ?? '') . '</td>'; // Receipt Number
+            echo '<td>' . htmlspecialchars($row['date'] ?? '') . '</td>'; // Date
             echo '</tr>';
         }
         
