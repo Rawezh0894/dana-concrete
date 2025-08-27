@@ -58,6 +58,19 @@ if ($to_date) {
 
 $where_sql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
 
+// Helper function to format remaining amount based on currency type
+function formatRemainingAmount($row) {
+    if ($row['type'] === 'دۆلار') {
+        // If currency type is USD, show remaining USD amount
+        $remaining = $row['remaining_usd'] ?? 0;
+        return number_format($remaining, 2) . ' $';
+    } else {
+        // If currency type is IQD, show remaining IQD amount
+        $remaining = $row['remaining_iqd'] ?? 0;
+        return number_format($remaining, 0) . ' د.ع';
+    }
+}
+
 // Get data
 $sql = "SELECT 
     c.name AS company_name,
@@ -173,7 +186,7 @@ try {
         echo '<th>بڕی مەواد</th>'; // Material Amount
         echo '<th>مکان مشتريات</th>'; // Purchase Location (Companies)
         echo '<th>نوع مشتريات</th>'; // Purchase Type
-        echo '<th>مبلغ / دينار</th>'; // Amount / Dinar (leftmost)
+        echo '<th>پارەی ماوە</th>'; // Remaining Amount (leftmost)
         echo '</tr>';
         
         // Data rows - Columns ordered from right to left as requested
@@ -186,7 +199,7 @@ try {
             echo '<td class="number">' . number_format($row['kg'] ?? 0, 0) . '</td>'; // Material Amount in KG
             echo '<td>' . htmlspecialchars($row['company_name'] ?? '') . '</td>'; // Company name (مکان مشتريات)
             echo '<td>' . htmlspecialchars($row['material_name'] ?? '') . '</td>'; // Material name (نوع مشتريات)
-            echo '<td class="number">' . number_format($row['amount_iqd'] ?? 0, 0) . '</td>'; // Amount in Dinar (leftmost)
+            echo '<td class="number">' . formatRemainingAmount($row) . '</td>'; // Remaining Amount (leftmost)
             echo '</tr>';
         }
         
