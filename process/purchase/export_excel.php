@@ -185,7 +185,7 @@ try {
             echo '<td>' . htmlspecialchars($row['driver_name'] ?? '') . '</td>'; // Driver Name
             echo '<td class="number">' . number_format($row['kg'] ?? 0, 0) . '</td>'; // Material Amount in KG
             echo '<td>' . htmlspecialchars($row['company_name'] ?? '') . '</td>'; // Company name (مکان مشتريات)
-            echo '<td>' . htmlspecialchars($row['type'] ?? '') . '</td>'; // Purchase Type (نوع مشتريات)
+            echo '<td>' . htmlspecialchars($row['material_name'] ?? '') . '</td>'; // Material name (نوع مشتريات)
             echo '<td class="number">' . number_format($row['amount_iqd'] ?? 0, 0) . '</td>'; // Amount in Dinar (leftmost)
             echo '</tr>';
         }
