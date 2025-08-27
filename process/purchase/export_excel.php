@@ -164,9 +164,9 @@ try {
         
         echo '<table border="1">';
         
-        // Header row - Only the columns shown in the image, from right to left
+                // Header row - Only the columns shown in the image, from right to left
         echo '<tr>';
-        echo '<th>که نجاره</th>'; // Unnamed column with "که نجاره" value
+        echo '<th>شوێن</th>'; // Location column
         echo '<th>مبلغ / دينار</th>'; // Amount / Dinar
         echo '<th>نوع مشتريات</th>'; // Purchase Type
         echo '<th>مکان مشتريات</th>'; // Purchase Location
@@ -179,15 +179,15 @@ try {
         // Data rows - Only the columns shown in the image, from right to left
         foreach ($data as $index => $row) {
             echo '<tr>';
-            echo '<td>که نجاره</td>'; // Fixed value "که نجاره" for all rows
-            echo '<td class="number">' . number_format($row['amount_iqd'] ?? 0, 0) . '</td>'; // Amount in Dinar
-            echo '<td>' . htmlspecialchars($row['type'] ?? '') . '</td>'; // Purchase Type (دینار/دۆلار)
-            echo '<td>' . htmlspecialchars($row['location_name'] ?? '') . '</td>'; // Purchase Location
-            echo '<td class="number">' . number_format($row['kg'] ?? 0, 0) . '</td>'; // Material Amount in KG
-            echo '<td>' . htmlspecialchars($row['driver_name'] ?? '') . '</td>'; // Driver Name
-            echo '<td>' . htmlspecialchars($row['invoice_number'] ?? '') . '</td>'; // Receipt Number
-            echo '<td>' . htmlspecialchars($row['date'] ?? '') . '</td>'; // Date
-            echo '</tr>';
+            echo '<td>' . htmlspecialchars($row['location_name'] ?? '') . '</td>'; // Location name
+        echo '<td class="number">' . number_format($row['amount_iqd'] ?? 0, 0) . '</td>'; // Amount in Dinar
+        echo '<td>' . htmlspecialchars($row['type'] ?? '') . '</td>'; // Purchase Type (دینار/دۆلار)
+        echo '<td>' . htmlspecialchars($row['location_name'] ?? '') . '</td>'; // Purchase Location
+        echo '<td class="number">' . number_format($row['kg'] ?? 0, 0) . '</td>'; // Material Amount in KG
+        echo '<td>' . htmlspecialchars($row['driver_name'] ?? '') . '</td>'; // Driver Name
+        echo '<td>' . htmlspecialchars($row['invoice_number'] ?? '') . '</td>'; // Receipt Number
+        echo '<td>' . htmlspecialchars($row['date'] ?? '') . '</td>'; // Date
+        echo '</tr>';
         }
         
         echo '</table>';
