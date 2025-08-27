@@ -164,29 +164,29 @@ try {
         
         echo '<table border="1">';
         
-                // Header row - Only the columns shown in the image, from right to left
+                // Header row - Columns ordered from right to left as requested
         echo '<tr>';
-        echo '<th>شوێن</th>'; // Location column
-        echo '<th>مبلغ / دينار</th>'; // Amount / Dinar
-        echo '<th>نوع مشتريات</th>'; // Purchase Type
-        echo '<th>مکان مشتريات</th>'; // Purchase Location
-        echo '<th>بری مواد</th>'; // Material Amount/Quantity
-        echo '<th>شؤفير</th>'; // Driver/Recipient
+        echo '<th>شوێن</th>'; // Location (rightmost)
+        echo '<th>بەروار</th>'; // Date
         echo '<th>ژ. پسوله</th>'; // Receipt No.
-        echo '<th>به روار</th>'; // Date
+        echo '<th>شؤفير</th>'; // Driver
+        echo '<th>بڕی مەواد</th>'; // Material Amount
+        echo '<th>مکان مشتريات</th>'; // Purchase Location (Companies)
+        echo '<th>نوع مشتريات</th>'; // Purchase Type
+        echo '<th>مبلغ / دينار</th>'; // Amount / Dinar (leftmost)
         echo '</tr>';
         
-        // Data rows - Only the columns shown in the image, from right to left
+        // Data rows - Columns ordered from right to left as requested
         foreach ($data as $index => $row) {
             echo '<tr>';
-            echo '<td>' . htmlspecialchars($row['location_name'] ?? '') . '</td>'; // Location name
-            echo '<td class="number">' . number_format($row['amount_iqd'] ?? 0, 0) . '</td>'; // Amount in Dinar
-            echo '<td>' . htmlspecialchars($row['company_name'] ?? '') . '</td>'; // Company name (نوع مشتريات)
-            echo '<td>' . htmlspecialchars($row['location_name'] ?? '') . '</td>'; // Purchase Location
-            echo '<td class="number">' . number_format($row['kg'] ?? 0, 0) . '</td>'; // Material Amount in KG
-            echo '<td>' . htmlspecialchars($row['driver_name'] ?? '') . '</td>'; // Driver Name
-            echo '<td>' . htmlspecialchars($row['invoice_number'] ?? '') . '</td>'; // Receipt Number
+            echo '<td>' . htmlspecialchars($row['location_name'] ?? '') . '</td>'; // Location (rightmost)
             echo '<td>' . htmlspecialchars($row['date'] ?? '') . '</td>'; // Date
+            echo '<td>' . htmlspecialchars($row['invoice_number'] ?? '') . '</td>'; // Receipt Number
+            echo '<td>' . htmlspecialchars($row['driver_name'] ?? '') . '</td>'; // Driver Name
+            echo '<td class="number">' . number_format($row['kg'] ?? 0, 0) . '</td>'; // Material Amount in KG
+            echo '<td>' . htmlspecialchars($row['company_name'] ?? '') . '</td>'; // Company name (مکان مشتريات)
+            echo '<td>' . htmlspecialchars($row['type'] ?? '') . '</td>'; // Purchase Type (نوع مشتريات)
+            echo '<td class="number">' . number_format($row['amount_iqd'] ?? 0, 0) . '</td>'; // Amount in Dinar (leftmost)
             echo '</tr>';
         }
         
