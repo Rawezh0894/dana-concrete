@@ -744,9 +744,7 @@ try {
                     'profit' => $current_period_profit
                 ],
                 'debt_analysis' => $debt_analysis
-            ],
-            // Material consumption data
-            'material_consumption' => $material_consumption
+            ]
         ]
     ];
     
@@ -825,103 +823,6 @@ try {
     // Use the calculated total debt from above
     $person_debt_usd = $person_debt_total_usd; // This is already calculated correctly above
     // $person_debt_iqd is already calculated correctly above, no need to reassign
-
-    // Calculate Material Consumption based on sales and formulas
-    $material_consumption = [];
-    
-    // Get date range from request parameters
-    $from_date = $_GET['from_date'] ?? null;
-    $to_date = $_GET['to_date'] ?? null;
-    
-    $date_filter = "";
-    $params = [];
-    
-    if ($from_date && $to_date) {
-        $date_filter = "WHERE s.order_date BETWEEN ? AND ?";
-        $params = [$from_date, $to_date];
-    }
-    
-    // Calculate material consumption based on sales quantity and formula ratios
-    $material_consumption_query = "
-        SELECT 
-            'لمی کەسارە' as material_name,
-            'چاوی ١' as bin_name,
-            SUM(s.quantity * cf.black_sand_kg) as total_consumption_kg,
-            SUM(s.quantity * cf.black_sand_kg / 1000) as total_consumption_ton
-        FROM sales s
-        JOIN concrete_formulas cf ON s.formula_id = cf.id
-        $date_filter
-        
-        UNION ALL
-        
-        SELECT 
-            'لمی ڕەش' as material_name,
-            'چاوی ٢' as bin_name,
-            SUM(s.quantity * cf.brown_sand_kg) as total_consumption_kg,
-            SUM(s.quantity * cf.brown_sand_kg / 1000) as total_consumption_ton
-        FROM sales s
-        JOIN concrete_formulas cf ON s.formula_id = cf.id
-        $date_filter
-        
-        UNION ALL
-        
-        SELECT 
-            'چەوی چاوی ٣' as material_name,
-            'چاوی ٣' as bin_name,
-            SUM(s.quantity * cf.gravel_bin3_kg) as total_consumption_kg,
-            SUM(s.quantity * cf.gravel_bin3_kg / 1000) as total_consumption_ton
-        FROM sales s
-        JOIN concrete_formulas cf ON s.formula_id = cf.id
-        $date_filter
-        
-        UNION ALL
-        
-        SELECT 
-            'چەوی چاوی ٤' as material_name,
-            'چاوی ٤' as bin_name,
-            SUM(s.quantity * cf.gravel_bin4_kg) as total_consumption_kg,
-            SUM(s.quantity * cf.gravel_bin4_kg / 1000) as total_consumption_ton
-        FROM sales s
-        JOIN concrete_formulas cf ON s.formula_id = cf.id
-        $date_filter
-        
-        UNION ALL
-        
-        SELECT 
-            'چیمەنتۆی سایلۆی ١ (لاڤارج)' as material_name,
-            'سایلۆی ١' as bin_name,
-            SUM(s.quantity * cf.cement_cem1_kg) as total_consumption_kg,
-            SUM(s.quantity * cf.cement_cem1_kg / 1000) as total_consumption_ton
-        FROM sales s
-        JOIN concrete_formulas cf ON s.formula_id = cf.id
-        $date_filter
-        
-        UNION ALL
-        
-        SELECT 
-            'چیمەنتۆی سایلۆی ٢ (ماس)' as material_name,
-            'سایلۆی ٢' as bin_name,
-            SUM(s.quantity * cf.cement_cem2_kg) as total_consumption_kg,
-            SUM(s.quantity * cf.cement_cem2_kg / 1000) as total_consumption_ton
-        FROM sales s
-        JOIN concrete_formulas cf ON s.formula_id = cf.id
-        $date_filter
-    ";
-    
-    $stmt = $pdo->prepare($material_consumption_query);
-    $stmt->execute($params);
-    
-    while ($row = $stmt->fetch()) {
-        $material_consumption[] = [
-            'material_name' => $row['material_name'],
-            'bin_name' => $row['bin_name'],
-            'consumption_kg' => round($row['total_consumption_kg'], 2),
-            'consumption_ton' => round($row['total_consumption_ton'], 3)
-        ];
-    }
-    
-    // Debug: Log material consumption data
-    error_log("Material consumption data: " . json_encode($material_consumption));
 
     echo json_encode($response_data);
 } catch (Exception $e) {
