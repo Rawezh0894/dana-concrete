@@ -37,6 +37,9 @@ function fetchAndRenderReportData() {
             } else {
                 console.error('renderCharts function not found');
             }
+            
+            // Render material consumption cards
+            renderMaterialConsumptionCards(result);
         })
         .catch(error => {
             console.error('Fetch error:', error);
@@ -188,6 +191,67 @@ function renderDashboardCards(data) {
         console.log('Cards rendered successfully');
     } else {
         console.error('Target element dashboard-summary-cards not found');
+    }
+}
+
+// Function to render material consumption cards
+function renderMaterialConsumptionCards(data) {
+    console.log('renderMaterialConsumptionCards called with data:', data);
+    
+    const materialConsumption = data.data?.material_consumption || [];
+    
+    console.log('Material consumption data:', materialConsumption);
+    
+    if (materialConsumption.length === 0) {
+        console.log('No material consumption data available');
+        return;
+    }
+    
+    let html = '';
+    materialConsumption.forEach(material => {
+        const consumptionKg = formatNumber(material.consumption_kg);
+        const consumptionTon = material.consumption_ton.toFixed(3);
+        
+        html += `<div class="col-lg-4 col-md-6 col-sm-12 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-gradient-info text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-cube me-2"></i>
+                        ${material.material_name}
+                    </h6>
+                </div>
+                <div class="card-body text-center">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="material-consumption-value">
+                                <div class="consumption-number">${consumptionKg}</div>
+                                <div class="consumption-unit">کیلۆگرام</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="material-consumption-value">
+                                <div class="consumption-number">${consumptionTon}</div>
+                                <div class="consumption-unit">طەن</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="material-bin-info mt-2">
+                        <small class="text-muted">
+                            <i class="fas fa-box me-1"></i>
+                            ${material.bin_name}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    });
+    
+    const targetElement = document.getElementById('material-consumption-cards');
+    if (targetElement) {
+        targetElement.innerHTML = html;
+        console.log('Material consumption cards rendered successfully');
+    } else {
+        console.error('Target element material-consumption-cards not found');
     }
 }
 

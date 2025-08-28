@@ -380,3 +380,71 @@
     margin-bottom: 0.3rem;
   }
 }
+
+/* Material Consumption Cards Styles */
+.material-consumption-value {
+  padding: 0.5rem;
+  border-radius: 8px;
+  background: #f8f9fa;
+  margin-bottom: 0.5rem;
+}
+
+.consumption-number {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--seafoam-green, #003b73);
+  margin-bottom: 0.25rem;
+}
+
+.consumption-unit {
+  font-size: 0.9rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.material-bin-info {
+  padding: 0.5rem;
+  background: #e9ecef;
+  border-radius: 6px;
+  border: 1px solid #dee2e6;
+}
+
+.material-bin-info small {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* Material consumption card specific styling */
+#material-consumption-cards .card {
+  transition: all 0.3s ease;
+  border: 1px solid #e9ecef;
+}
+
+#material-consumption-cards .card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+#material-consumption-cards .card-header {
+  border-bottom: none;
+  padding: 1rem;
+}
+
+#material-consumption-cards .card-body {
+  padding: 1.5rem;
+}
+
+/* Responsive adjustments for material consumption cards */
+@media (max-width: 768px) {
+  .consumption-number {
+    font-size: 1.2rem;
+  }
+  
+  .consumption-unit {
+    font-size: 0.8rem;
+  }
+  
+  #material-consumption-cards .card-body {
+    padding: 1rem;
+  }
+}

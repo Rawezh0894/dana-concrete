@@ -388,6 +388,25 @@ if (!isset($_SESSION['user_id'])) {
         <!-- Cards will be rendered here by JS -->
     </div>
     
+    <!-- Material Consumption Card -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-gradient-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-cubes me-2"></i>
+                        بەکارهێنانی ماتریاڵەکان بە پێی فرۆشتنەکان
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row" id="material-consumption-cards">
+                        <!-- Material consumption cards will be rendered here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- Charts Section -->
     <div class="row g-4 mb-4">
         <div class="col-lg-6 col-md-12">
