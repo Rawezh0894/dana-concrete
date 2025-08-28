@@ -215,6 +215,8 @@ function renderDashboardCards(data) {
             subtitle: 'نرخی دۆلار بە دینار'
         },
         // Material Consumption Cards
+        // cement_cem1 = دەلتا + لاڤارج (سایلۆی یەک)
+        // cement_cem2 = ماس (سایلۆی دوو)
         {
             key: 'black_sand_consumption',
             label: 'بەکارهێنانی لمی کەسارە',
@@ -253,7 +255,7 @@ function renderDashboardCards(data) {
             icon: 'fa-industry',
             cardClass: 'material-consumption-card',
             value: formatMaterialConsumption(data.data?.material_consumption?.tons?.cement_cem1 || 0, 'تۆن'),
-            subtitle: 'لاڤارج'
+            subtitle: 'دەلتا + لاڤارج'
         },
         {
             key: 'cement_cem2_consumption',
@@ -315,9 +317,15 @@ function renderDashboardCards(data) {
                 },
                 (data.data?.material_consumption?.tons?.cement_cem1 || 0) + (data.data?.material_consumption?.tons?.cement_cem2 || 0)
             ),
-            subtitle: 'سایلۆی ١ + ٢ - ستۆک vs بەکارهێنان'
+            subtitle: 'سایلۆی ١ (دەلتا+لاڤارج) + سایلۆی ٢ (ماس) - ستۆک vs بەکارهێنان'
         }
     ];
+    
+    // Material consumption summary:
+    // - cement_cem1: دەلتا + لاڤارج (سایلۆی یەک)
+    // - cement_cem2: ماس (سایلۆی دوو)
+    // - Total cement = دەلتا + لاڤارج + ماس
+    // - Total materials = لمی کەسارە + لمی ڕەش + چەوی چاوی ٣ + چەوی چاوی ٤ + دەلتا + لاڤارج + ماس
     
     console.log('Cards array created:', cards);
     

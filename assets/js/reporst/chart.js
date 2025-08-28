@@ -441,6 +441,8 @@ function renderMaterialConsumption(data) {
     }
     
     // Use real data from database
+    // cement_cem1 = دەلتا + لاڤارج (سایلۆی یەک)
+    // cement_cem2 = ماس (سایلۆی دوو)
     const materialData = data.material_consumption?.tons || {};
     
     // If no data, show message
@@ -454,7 +456,7 @@ function renderMaterialConsumption(data) {
         'لمی ڕەش (چاوی ٢)',
         'چەوی چاوی ٣',
         'چەوی چاوی ٤',
-        'چیمەنتۆی سایلۆی ١ (لاڤارج)',
+        'چیمەنتۆی سایلۆی ١ (دەلتا + لاڤارج)',
         'چیمەنتۆی سایلۆی ٢ (ماس)'
     ];
     
@@ -502,7 +504,7 @@ function renderMaterialConsumption(data) {
                 plugins: {
                     title: {
                         display: true,
-                        text: 'بەکارهێنانی ماتریاڵەکان بە جۆر',
+                        text: 'بەکارهێنانی ماتریاڵەکان بە جۆر (دەلتا + لاڤارج + ماس)',
                         font: { size: 16, weight: 'bold' }
                     },
                     legend: {
@@ -527,3 +529,13 @@ function renderMaterialConsumption(data) {
         console.error('Error rendering material consumption chart:', error);
     }
 }
+
+// Material consumption breakdown:
+// - cement_cem1: دەلتا + لاڤارج (سایلۆی یەک)
+// - cement_cem2: ماس (سایلۆی دوو)
+// - black_sand: لمی کەسارە (چاوی یەک)
+// - brown_sand: لمی ڕەش (چاوی دوو)
+// - gravel_bin3: چەوی چاوی سێ
+// - gravel_bin4: چەوی چاوی چوار
+// - Total cement = دەلتا + لاڤارج + ماس
+// - Total materials = لمی کەسارە + لمی ڕەش + چەوی چاوی ٣ + چەوی چاوی ٤ + دەلتا + لاڤارج + ماس

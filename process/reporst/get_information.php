@@ -516,16 +516,22 @@ try {
 
 
     // Calculate material consumption based on sales and formulas
+    // cement_cem1 = دەلتا + لاڤارج (لە سایلۆی یەکدا)
+    // cement_cem2 = ماس (لە سایلۆی دوودا)
+    // Total cement = دەلتا + لاڤارج + ماس
     $material_consumption = [
         'black_sand' => 0,      // لمی کەسارە (چاوی ١)
         'brown_sand' => 0,      // لمی ڕەش (چاوی ٢)  
         'gravel_bin3' => 0,     // چەوی چاوی ٣
         'gravel_bin4' => 0,     // چەوی چاوی ٤
-        'cement_cem1' => 0,     // چیمەنتۆی سایلۆی ١ (لاڤارج)
+        'cement_cem1' => 0,     // چیمەنتۆی سایلۆی ١ (دەلتا + لاڤارج)
         'cement_cem2' => 0      // چیمەنتۆی سایلۆی ٢ (ماس)
     ];
     
     // Get material consumption from sales based on formulas used
+    // cement_cem1_kg = دەلتا + لاڤارج (لە سایلۆی یەکدا)
+    // cement_cem2_kg = ماس (لە سایلۆی دوودا)
+    // Total cement = دەلتا + لاڤارج + ماس
     $material_consumption_query = "
         SELECT 
             s.quantity as cubic_meters,
@@ -558,12 +564,17 @@ try {
     }
     
     // Convert kg to tons for better readability (1 ton = 1000 kg)
+    // cement_cem1_tons = دەلتا + لاڤارج (تۆن)
+    // cement_cem2_tons = ماس (تۆن)
     $material_consumption_tons = [];
     foreach ($material_consumption as $material => $kg_amount) {
         $material_consumption_tons[$material] = round($kg_amount / 1000, 2);
     }
     
     // Get current stock levels for comparison
+    // سایلۆی یەک: دەلتا + لاڤارج
+    // سایلۆی دوو: ماس
+    // Total cement stock = دەلتا + لاڤارج + ماس
     $current_stock = [];
     $stock_query = "
         SELECT 
@@ -816,22 +827,33 @@ try {
                 ],
                 'debt_analysis' => $debt_analysis
             ],
-            // Material consumption data
-            'material_consumption' => [
-                'kg' => $material_consumption,
-                'tons' => $material_consumption_tons,
-                'current_stock' => $current_stock
-            ]
+                // Material consumption data
+    // cement_cem1: دەلتا + لاڤارج (سایلۆی یەک)
+    // cement_cem2: ماس (سایلۆی دوو)
+    'material_consumption' => [
+        'kg' => $material_consumption,
+        'tons' => $material_consumption_tons,
+        'current_stock' => $current_stock
+    ]
         ]
     ];
     
     // Debug: Log material consumption data
+    // Note: cement_cem1 includes both دەلتا and لاڤارج from سایلۆی ١
+    // Note: cement_cem2 includes ماس from سایلۆی ٢
+    // Total cement consumption = دەلتا + لاڤارج + ماس
     error_log("Debug - Material consumption: " . json_encode($material_consumption));
     error_log("Debug - Material consumption tons: " . json_encode($material_consumption_tons));
     error_log("Debug - Current stock: " . json_encode($current_stock));
     
     // Debug: Log response structure
     error_log("Debug - Response structure: " . json_encode($response_data));
+    
+    // Material consumption summary:
+    // - cement_cem1: دەلتا + لاڤارج (سایلۆی یەک)
+    // - cement_cem2: ماس (سایلۆی دوو)
+    // - Total cement consumption = دەلتا + لاڤارج + ماس
+    // - Total material consumption = لمی کەسارە + لمی ڕەش + چەوی چاوی ٣ + چەوی چاوی ٤ + دەلتا + لاڤارج + ماس
     
     // 2. Debts by type - Updated to use new calculation method
     $debts_by_type = [

@@ -563,7 +563,7 @@ if (!isset($_SESSION['user_id'])) {
     <div class="row g-4 mb-4">
         <div class="col-lg-12 col-md-12">
             <div class="card p-3 shadow-sm chart-section">
-                <h5 class="mb-3">بەکارهێنانی ماتریاڵەکان بە جۆر</h5>
+                <h5 class="mb-3">بەکارهێنانی ماتریاڵەکان بە جۆر (دەلتا + لاڤارج + ماس)</h5>
                 <div class="chart-container">
                     <canvas id="chart-material-consumption"></canvas>
                 </div>
