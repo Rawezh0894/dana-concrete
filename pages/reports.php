@@ -208,6 +208,117 @@ if (!isset($_SESSION['user_id'])) {
             background: linear-gradient(135deg, #dc3545, #c82333) !important;
         }
         
+        /* Material Consumption Card Styles */
+        .material-consumption-card {
+            background: linear-gradient(135deg, #6f42c1, #5a32a3) !important;
+            color: white;
+            border: none;
+            transition: all 0.3s ease;
+        }
+        
+        .material-consumption-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(111, 66, 193, 0.4);
+        }
+        
+        .material-consumption-card i {
+            color: #e9ecef;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .material-consumption-card .card-value {
+            color: #ffffff;
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .material-consumption-card .section-label {
+            color: #e9ecef;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        /* Material Summary Card Styles */
+        .material-summary-card {
+            background: linear-gradient(135deg, #20c997, #17a2b8) !important;
+            color: white;
+            border: none;
+            transition: all 0.3s ease;
+        }
+        
+        .material-summary-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(32, 201, 151, 0.4);
+        }
+        
+        .stock-status-card {
+            background: linear-gradient(135deg, #fd7e14, #e83e8c) !important;
+            color: white;
+            border: none;
+            transition: all 0.3s ease;
+        }
+        
+        .stock-status-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(253, 126, 20, 0.4);
+        }
+        
+        .material-summary-card i,
+        .stock-status-card i {
+            color: #e9ecef;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .material-summary-card .card-value,
+        .stock-status-card .card-value {
+            color: #ffffff;
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .material-summary-card .section-label,
+        .stock-status-card .section-label {
+            color: #e9ecef;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        /* Stock vs Consumption Card Styles */
+        .stock-vs-consumption-card {
+            background: linear-gradient(135deg, #6c757d, #495057) !important;
+            color: white;
+            border: none;
+            transition: all 0.3s ease;
+        }
+        
+        .stock-vs-consumption-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(108, 117, 125, 0.4);
+        }
+        
+        .stock-vs-consumption-card i {
+            color: #e9ecef;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .stock-vs-consumption-card .card-value {
+            color: #ffffff;
+            font-size: 1.6rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stock-vs-consumption-card .section-label {
+            color: #e9ecef;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
 
         
         /* Chart Section Styles */
@@ -443,6 +554,18 @@ if (!isset($_SESSION['user_id'])) {
                 <h5 class="mb-3">خەرجی سەیارەکان</h5>
                 <div class="chart-container">
                     <canvas id="chart-car-expenses"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Material Consumption Chart Section -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-12 col-md-12">
+            <div class="card p-3 shadow-sm chart-section">
+                <h5 class="mb-3">بەکارهێنانی ماتریاڵەکان بە جۆر</h5>
+                <div class="chart-container">
+                    <canvas id="chart-material-consumption"></canvas>
                 </div>
             </div>
         </div>

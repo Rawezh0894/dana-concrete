@@ -515,6 +515,77 @@ try {
     
 
 
+    // Calculate material consumption based on sales and formulas
+    $material_consumption = [
+        'black_sand' => 0,      // لمی کەسارە (چاوی ١)
+        'brown_sand' => 0,      // لمی ڕەش (چاوی ٢)  
+        'gravel_bin3' => 0,     // چەوی چاوی ٣
+        'gravel_bin4' => 0,     // چەوی چاوی ٤
+        'cement_cem1' => 0,     // چیمەنتۆی سایلۆی ١ (لاڤارج)
+        'cement_cem2' => 0      // چیمەنتۆی سایلۆی ٢ (ماس)
+    ];
+    
+    // Get material consumption from sales based on formulas used
+    $material_consumption_query = "
+        SELECT 
+            s.quantity as cubic_meters,
+            cf.black_sand_kg,
+            cf.brown_sand_kg,
+            cf.gravel_bin3_kg,
+            cf.gravel_bin4_kg,
+            cf.cement_cem1_kg,
+            cf.cement_cem2_kg
+        FROM sales s
+        JOIN concrete_formulas cf ON s.formula_id = cf.id
+        WHERE 1=1 $date_condition_sales
+    ";
+    
+    try {
+        $stmt = $pdo->query($material_consumption_query);
+        while ($row = $stmt->fetch()) {
+            $cubic_meters = floatval($row['cubic_meters']);
+            
+            // Calculate material consumption for this sale
+            $material_consumption['black_sand'] += floatval($row['black_sand_kg']) * $cubic_meters;
+            $material_consumption['brown_sand'] += floatval($row['brown_sand_kg']) * $cubic_meters;
+            $material_consumption['gravel_bin3'] += floatval($row['gravel_bin3_kg']) * $cubic_meters;
+            $material_consumption['gravel_bin4'] += floatval($row['gravel_bin4_kg']) * $cubic_meters;
+            $material_consumption['cement_cem1'] += floatval($row['cement_cem1_kg']) * $cubic_meters;
+            $material_consumption['cement_cem2'] += floatval($row['cement_cem2_kg']) * $cubic_meters;
+        }
+    } catch (Exception $e) {
+        error_log("Error calculating material consumption: " . $e->getMessage());
+    }
+    
+    // Convert kg to tons for better readability (1 ton = 1000 kg)
+    $material_consumption_tons = [];
+    foreach ($material_consumption as $material => $kg_amount) {
+        $material_consumption_tons[$material] = round($kg_amount / 1000, 2);
+    }
+    
+    // Get current stock levels for comparison
+    $current_stock = [];
+    $stock_query = "
+        SELECT 
+            material_type,
+            SUM(amount) as total_amount,
+            SUM(total_value) as total_value
+        FROM bins_silos 
+        GROUP BY material_type
+    ";
+    
+    try {
+        $stmt = $pdo->query($stock_query);
+        while ($row = $stmt->fetch()) {
+            $current_stock[$row['material_type']] = [
+                'amount' => floatval($row['total_amount']),
+                'value' => floatval($row['total_value'])
+            ];
+        }
+    } catch (Exception $e) {
+        error_log("Error getting current stock: " . $e->getMessage());
+    }
+
     // Additional Professional Reports Data
     
     // Employee Reports
@@ -744,9 +815,20 @@ try {
                     'profit' => $current_period_profit
                 ],
                 'debt_analysis' => $debt_analysis
+            ],
+            // Material consumption data
+            'material_consumption' => [
+                'kg' => $material_consumption,
+                'tons' => $material_consumption_tons,
+                'current_stock' => $current_stock
             ]
         ]
     ];
+    
+    // Debug: Log material consumption data
+    error_log("Debug - Material consumption: " . json_encode($material_consumption));
+    error_log("Debug - Material consumption tons: " . json_encode($material_consumption_tons));
+    error_log("Debug - Current stock: " . json_encode($current_stock));
     
     // Debug: Log response structure
     error_log("Debug - Response structure: " . json_encode($response_data));

@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 renderDebtAnalysis(data);
                 renderEmployeePerformance(data);
                 renderCarExpenses(data);
+                renderMaterialConsumption(data);
             } catch (error) {
                 console.error('Chart rendering error:', error);
             }
@@ -429,5 +430,100 @@ function renderCarExpenses(data) {
         });
     } catch (error) {
         console.error('Error rendering car expenses chart:', error);
+    }
+}
+
+function renderMaterialConsumption(data) {
+    const ctx = document.getElementById('chart-material-consumption');
+    if (!ctx) {
+        console.warn('chart-material-consumption canvas not found');
+        return;
+    }
+    
+    // Use real data from database
+    const materialData = data.material_consumption?.tons || {};
+    
+    // If no data, show message
+    if (Object.keys(materialData).length === 0) {
+        console.warn('No material consumption data available');
+        return;
+    }
+    
+    const labels = [
+        'لمی کەسارە (چاوی ١)',
+        'لمی ڕەش (چاوی ٢)',
+        'چەوی چاوی ٣',
+        'چەوی چاوی ٤',
+        'چیمەنتۆی سایلۆی ١ (لاڤارج)',
+        'چیمەنتۆی سایلۆی ٢ (ماس)'
+    ];
+    
+    const values = [
+        materialData.black_sand || 0,
+        materialData.brown_sand || 0,
+        materialData.gravel_bin3 || 0,
+        materialData.gravel_bin4 || 0,
+        materialData.cement_cem1 || 0,
+        materialData.cement_cem2 || 0
+    ];
+    
+    try {
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'بەکارهێنان (تۆن)',
+                    data: values,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.8)',
+                        'rgba(54, 162, 235, 0.8)',
+                        'rgba(255, 206, 86, 0.8)',
+                        'rgba(75, 192, 192, 0.8)',
+                        'rgba(153, 102, 255, 0.8)',
+                        'rgba(255, 159, 64, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 2,
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                aspectRatio: 2.5,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'بەکارهێنانی ماتریاڵەکان بە جۆر',
+                        font: { size: 16, weight: 'bold' }
+                    },
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: { 
+                        beginAtZero: true,
+                        title: { display: true, text: 'بڕ (تۆن)' }
+                    },
+                    x: {
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 0
+                        }
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error rendering material consumption chart:', error);
     }
 }

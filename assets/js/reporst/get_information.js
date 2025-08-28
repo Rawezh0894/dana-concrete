@@ -44,6 +44,57 @@ function fetchAndRenderReportData() {
         });
 }
 
+// Function to format material consumption values
+function formatMaterialConsumption(value, unit) {
+    if (value === 0) return `0 ${unit}`;
+    if (value < 1) return `${(value * 1000).toFixed(0)} کیلۆگرام`;
+    return `${value.toFixed(2)} ${unit}`;
+}
+
+// Function to get stock status text
+function getStockStatusText(currentStock) {
+    if (!currentStock || Object.keys(currentStock).length === 0) {
+        return 'هیچ زانیارییەک نییە';
+    }
+    
+    let totalItems = 0;
+    let lowStockItems = 0;
+    
+    Object.values(currentStock).forEach(stock => {
+        totalItems++;
+        if (stock.amount < 1000) { // Less than 1 ton
+            lowStockItems++;
+        }
+    });
+    
+    if (lowStockItems === 0) {
+        return 'کۆگا پڕە';
+    } else if (lowStockItems <= totalItems * 0.3) {
+        return 'کۆگا باشە';
+    } else {
+        return 'کۆگا کەمە';
+    }
+}
+
+// Function to format stock vs consumption information
+function formatStockInfo(stock, consumption) {
+    if (!stock || !stock.amount) {
+        return `بەکارهێنان: ${consumption.toFixed(2)} تۆن`;
+    }
+    
+    const stockTons = stock.amount;
+    const consumptionTons = consumption;
+    const remaining = stockTons - consumptionTons;
+    
+    if (remaining <= 0) {
+        return `ستۆک: 0 تۆن (کەمە)`;
+    } else if (remaining < stockTons * 0.2) {
+        return `ستۆک: ${remaining.toFixed(2)} تۆن (کەمە)`;
+    } else {
+        return `ستۆک: ${remaining.toFixed(2)} تۆن (باشە)`;
+    }
+}
+
 // Function to render dashboard cards with consistent styling
 function renderDashboardCards(data) {
     console.log('renderDashboardCards called with data:', data);
@@ -162,6 +213,109 @@ function renderDashboardCards(data) {
             cardClass: 'dollar-rate-card',
             value: formatCurrency(usd_iqd_rate, 'IQD'),
             subtitle: 'نرخی دۆلار بە دینار'
+        },
+        // Material Consumption Cards
+        {
+            key: 'black_sand_consumption',
+            label: 'بەکارهێنانی لمی کەسارە',
+            icon: 'fa-cubes',
+            cardClass: 'material-consumption-card',
+            value: formatMaterialConsumption(data.data?.material_consumption?.tons?.black_sand || 0, 'تۆن'),
+            subtitle: 'چاوی ١ - لمی کەسارە'
+        },
+        {
+            key: 'brown_sand_consumption',
+            label: 'بەکارهێنانی لمی ڕەش',
+            icon: 'fa-cubes',
+            cardClass: 'material-consumption-card',
+            value: formatMaterialConsumption(data.data?.material_consumption?.tons?.brown_sand || 0, 'تۆن'),
+            subtitle: 'چاوی ٢ - لمی ڕەش'
+        },
+        {
+            key: 'gravel_bin3_consumption',
+            label: 'بەکارهێنانی چەوی چاوی ٣',
+            icon: 'fa-cubes',
+            cardClass: 'material-consumption-card',
+            value: formatMaterialConsumption(data.data?.material_consumption?.tons?.gravel_bin3 || 0, 'تۆن'),
+            subtitle: 'چەوی چاوی ٣'
+        },
+        {
+            key: 'gravel_bin4_consumption',
+            label: 'بەکارهێنانی چەوی چاوی ٤',
+            icon: 'fa-cubes',
+            cardClass: 'material-consumption-card',
+            value: formatMaterialConsumption(data.data?.material_consumption?.tons?.gravel_bin4 || 0, 'تۆن'),
+            subtitle: 'چەوی چاوی ٤'
+        },
+        {
+            key: 'cement_cem1_consumption',
+            label: 'بەکارهێنانی چیمەنتۆی سایلۆی ١',
+            icon: 'fa-industry',
+            cardClass: 'material-consumption-card',
+            value: formatMaterialConsumption(data.data?.material_consumption?.tons?.cement_cem1 || 0, 'تۆن'),
+            subtitle: 'لاڤارج'
+        },
+        {
+            key: 'cement_cem2_consumption',
+            label: 'بەکارهێنانی چیمەنتۆی سایلۆی ٢',
+            icon: 'fa-industry',
+            cardClass: 'material-consumption-card',
+            value: formatMaterialConsumption(data.data?.material_consumption?.tons?.cement_cem2 || 0, 'تۆن'),
+            subtitle: 'ماس'
+        },
+        // Material Summary Cards
+        {
+            key: 'total_material_consumption',
+            label: 'کۆی بەکارهێنانی ماتریاڵەکان',
+            icon: 'fa-chart-line',
+            cardClass: 'material-summary-card',
+            value: formatMaterialConsumption(
+                (data.data?.material_consumption?.tons?.black_sand || 0) +
+                (data.data?.material_consumption?.tons?.brown_sand || 0) +
+                (data.data?.material_consumption?.tons?.gravel_bin3 || 0) +
+                (data.data?.material_consumption?.tons?.gravel_bin4 || 0) +
+                (data.data?.material_consumption?.tons?.cement_cem1 || 0) +
+                (data.data?.material_consumption?.tons?.cement_cem2 || 0), 'تۆن'),
+            subtitle: 'کۆی هەموو ماتریاڵەکان'
+        },
+        {
+            key: 'current_stock_status',
+            label: 'دۆخی ئێستای کۆگا',
+            icon: 'fa-warehouse',
+            cardClass: 'stock-status-card',
+            value: getStockStatusText(data.data?.material_consumption?.current_stock || {}),
+            subtitle: 'بەکارهێنانی ماتریاڵەکان'
+        },
+        // Stock vs Consumption Cards
+        {
+            key: 'black_sand_stock',
+            label: 'ستۆکی لمی کەسارە',
+            icon: 'fa-cube',
+            cardClass: 'stock-vs-consumption-card',
+            value: formatStockInfo(data.data?.material_consumption?.current_stock?.['لمی کەسارە'] || {}, data.data?.material_consumption?.tons?.black_sand || 0),
+            subtitle: 'چاوی ١ - ستۆک vs بەکارهێنان'
+        },
+        {
+            key: 'brown_sand_stock',
+            label: 'ستۆکی لمی ڕەش',
+            icon: 'fa-cube',
+            cardClass: 'stock-vs-consumption-card',
+            value: formatStockInfo(data.data?.material_consumption?.current_stock?.['لمی ڕەش'] || {}, data.data?.material_consumption?.tons?.brown_sand || 0),
+            subtitle: 'چاوی ٢ - ستۆک vs بەکارهێنان'
+        },
+        {
+            key: 'cement_stock',
+            label: 'ستۆکی چیمەنتۆ',
+            icon: 'fa-industry',
+            cardClass: 'stock-vs-consumption-card',
+            value: formatStockInfo(
+                {
+                    amount: (data.data?.material_consumption?.current_stock?.['چیمەنتۆ']?.amount || 0) / 1000,
+                    value: data.data?.material_consumption?.current_stock?.['چیمەنتۆ']?.value || 0
+                },
+                (data.data?.material_consumption?.tons?.cement_cem1 || 0) + (data.data?.material_consumption?.tons?.cement_cem2 || 0)
+            ),
+            subtitle: 'سایلۆی ١ + ٢ - ستۆک vs بەکارهێنان'
         }
     ];
     
