@@ -77,24 +77,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $remaining_iqd = isset($_POST['remaining_iqd']) ? floatval($_POST['remaining_iqd']) : 0;
     $remaining_usd = isset($_POST['remaining_usd']) ? floatval($_POST['remaining_usd']) : 0;
     $date = $_POST['date'] ?? '';
-    
-    // ئەگەر بەرواری بەتاڵ بێت، بەرواری ئێستا دابنێ
-    if (empty($date) || $date === '') {
-        $date = date('Y-m-d');
-        error_log("Date was empty, set to current date: " . $date);
-    }
-    
-    // دڵنیابوون کە بەرواری بەتاڵ نییە
-    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
-        $date = date('Y-m-d');
-        error_log("Invalid date format, set to current date: " . $date);
-    }
-    
-    // دڵنیابوون کە بەرواری بەتاڵ نییە
-    if (!$date || $date === '0000-00-00' || $date === '1970-01-01') {
-        $date = date('Y-m-d');
-        error_log("Invalid date value, set to current date: " . $date);
-    }
 
     // id and expense_type are required
     if (!$id) {
