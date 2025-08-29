@@ -321,7 +321,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
             <div class="col-md-6 mb-3">
               <label for="driver_id" class="form-label">شۆفێر</label>
               <div class="input-group">
-                <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#addDriverModal" style="background: var(--seafoam-green); color: white; font-weight: bold;">+</button>
+                <!-- <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#addDriverModal" style="background: var(--seafoam-green); color: white; font-weight: bold;">+</button> -->
                 <select class="form-select select2" id="driver_id" name="driver_id" required>
                   <option value="">شۆفێرەکان</option>
                   <?php foreach ($drivers as $drv): ?>

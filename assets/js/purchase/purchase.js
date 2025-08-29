@@ -55,31 +55,73 @@ function updateAmountsFor(prefix) {
     const amount = (kg / 1000) * pricePerKg;
     const remainingUsdFocused = document.activeElement === document.getElementById(prefix + 'remaining_usd');
     const remainingIqdFocused = document.activeElement === document.getElementById(prefix + 'remaining_iqd');
+    
+    // Remove readonly restrictions - allow all fields to be editable
+    $('#' + prefix + 'price').prop('readonly', false);
+    $('#' + prefix + 'amount_iqd').prop('readonly', false);
+    $('#' + prefix + 'remaining_usd').prop('readonly', false);
+    $('#' + prefix + 'remaining_iqd').prop('readonly', false);
+    
     if (type === 'دینار') {
-        $('#' + prefix + 'price').prop('readonly', true).val(0);
-        $('#' + prefix + 'amount_iqd').prop('readonly', false).val(amount.toFixed(2));
-        $('#' + prefix + 'remaining_usd').prop('readonly', true);
-        $('#' + prefix + 'remaining_iqd').prop('readonly', false);
+        // Auto-calculate amount_iqd based on kg and price_per_kg_iqd
+        if (!document.activeElement || document.activeElement.id !== prefix + 'amount_iqd') {
+            $('#' + prefix + 'amount_iqd').val(amount.toFixed(2));
+        }
+        
+        // Calculate remaining amounts
         const paid_usd_to_iqd = paid_usd * exchange_rate / 100;
         const remaining_iqd = amount_iqd - (paid_iqd + paid_usd_to_iqd);
-        if (!remainingIqdFocused) $('#' + prefix + 'remaining_iqd').val(remaining_iqd.toFixed(2));
-        $('#' + prefix + 'remaining_usd').val(0);
+        if (!remainingIqdFocused) {
+            $('#' + prefix + 'remaining_iqd').val(remaining_iqd.toFixed(2));
+        }
+        
+        // Auto-calculate price in USD for reference
+        if (!document.activeElement || document.activeElement.id !== prefix + 'price') {
+            $('#' + prefix + 'price').val((amount_iqd * 100 / exchange_rate).toFixed(2));
+        }
+        
+        // Auto-calculate remaining USD
+        if (!remainingUsdFocused) {
+            $('#' + prefix + 'remaining_usd').val((remaining_iqd * 100 / exchange_rate).toFixed(2));
+        }
+        
     } else if (type === 'دۆلار') {
-        $('#' + prefix + 'amount_iqd').prop('readonly', true).val(0);
-        $('#' + prefix + 'price').prop('readonly', false).val(amount.toFixed(2));
-        $('#' + prefix + 'remaining_iqd').prop('readonly', true);
-        $('#' + prefix + 'remaining_usd').prop('readonly', false);
+        // Auto-calculate price based on kg and price_per_kg_usd
+        if (!document.activeElement || document.activeElement.id !== prefix + 'price') {
+            $('#' + prefix + 'price').val(amount.toFixed(2));
+        }
+        
+        // Calculate remaining amounts
         const paid_iqd_to_usd = paid_iqd * 100 / exchange_rate;
         const remaining_usd = price - (paid_usd + paid_iqd_to_usd);
-        if (!remainingUsdFocused) $('#' + prefix + 'remaining_usd').val(remaining_usd.toFixed(2));
-        $('#' + prefix + 'remaining_iqd').val(0);
+        if (!remainingUsdFocused) {
+            $('#' + prefix + 'remaining_usd').val(remaining_usd.toFixed(2));
+        }
+        
+        // Auto-calculate amount_iqd for reference
+        if (!document.activeElement || document.activeElement.id !== prefix + 'amount_iqd') {
+            $('#' + prefix + 'amount_iqd').val((price * exchange_rate / 100).toFixed(2));
+        }
+        
+        // Auto-calculate remaining IQD
+        if (!remainingIqdFocused) {
+            $('#' + prefix + 'remaining_iqd').val((remaining_usd * exchange_rate / 100).toFixed(2));
+        }
+        
     } else {
-        $('#' + prefix + 'price').prop('readonly', false).val(0);
-        $('#' + prefix + 'amount_iqd').prop('readonly', false).val(0);
-        $('#' + prefix + 'remaining_usd').prop('readonly', false);
-        $('#' + prefix + 'remaining_iqd').prop('readonly', false);
-        $('#' + prefix + 'remaining_usd').val(0);
-        $('#' + prefix + 'remaining_iqd').val(0);
+        // When no currency type is selected, clear calculated values but keep fields editable
+        if (!document.activeElement || document.activeElement.id !== prefix + 'price') {
+            $('#' + prefix + 'price').val(0);
+        }
+        if (!document.activeElement || document.activeElement.id !== prefix + 'amount_iqd') {
+            $('#' + prefix + 'amount_iqd').val(0);
+        }
+        if (!remainingUsdFocused) {
+            $('#' + prefix + 'remaining_usd').val(0);
+        }
+        if (!remainingIqdFocused) {
+            $('#' + prefix + 'remaining_iqd').val(0);
+        }
     }
 }
 
