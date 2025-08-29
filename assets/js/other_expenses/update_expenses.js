@@ -13,7 +13,17 @@ async function editExpense(id, data) {
 
     const formData = new FormData();
     for (const key in data) {
-        formData.append(key, data[key]);
+        // ئەگەر بەرواری بەتاڵ بێت، بەرواری ئێستا دابنێ
+        if (key === 'date' && (!data[key] || data[key].trim() === '')) {
+            formData.append(key, new Date().toISOString().split('T')[0]);
+        } else {
+            formData.append(key, data[key]);
+        }
+    }
+    
+    // دڵنیابوون کە بەرواری بەتاڵ نییە
+    if (!formData.get('date') || formData.get('date').trim() === '') {
+        formData.set('date', new Date().toISOString().split('T')[0]);
     }
     // Add gas_liters if present in the form
     if (document.getElementById('edit_gas_liters')) {
@@ -72,6 +82,12 @@ async function editExpense(id, data) {
     } else {
         formData.append('currency_type', 'دینار'); // Default value
     }
+    
+    // Add date if empty
+    if (!formData.has('date') || !formData.get('date') || formData.get('date').trim() === '') {
+        formData.set('date', new Date().toISOString().split('T')[0]);
+    }
+    
     formData.append('id', id);
     
     try {
@@ -79,6 +95,25 @@ async function editExpense(id, data) {
         console.log('Form data entries:');
         for (let [key, value] of formData.entries()) {
             console.log(`${key}: ${value}`);
+        }
+        
+        // دڵنیابوون کە بەرواری بەتاڵ نییە
+        if (!formData.get('date') || formData.get('date').trim() === '') {
+            formData.set('date', new Date().toISOString().split('T')[0]);
+            console.log('Date was empty, set to current date:', formData.get('date'));
+        }
+        
+        // دڵنیابوون کە بەرواری بەتاڵ نییە
+        const currentDate = new Date().toISOString().split('T')[0];
+        if (!formData.get('date') || formData.get('date').trim() === '') {
+            formData.set('date', currentDate);
+            console.log('Date was empty, set to current date:', currentDate);
+        }
+        
+        // دڵنیابوون کە بەرواری بەتاڵ نییە
+        if (!formData.get('date') || formData.get('date').trim() === '') {
+            formData.set('date', currentDate);
+            console.log('Date was empty, set to current date:', currentDate);
         }
         
         const res = await fetch('../process/other_expenses/update_expenses.php', {
