@@ -87,11 +87,11 @@ if (!isset($_SESSION['user_id'])) {
             <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">خەرجی تر</h2>
             <small class="text-muted">فلتەری ورد - خەرجی سەیارەکان + خەرجی تر</small>
         </div>
-        <button class="btn export-btn me-2" onclick="exportOtherExpensesToExcel()" title="ئیکسپۆرتی هەموو زانیارییەکانی خەرجی تر بۆ Excel">
+        <button class="btn export-btn" onclick="exportOtherExpensesToExcel()" title="ئیکسپۆرتی هەموو زانیارییەکانی خەرجی تر بۆ Excel">
             <i class="fas fa-file-excel me-1"></i>ئیکسپۆرتی Excel
         </button>
-        <button class="btn btn-warning" onclick="exportOtherExpensesDetailedToExcel()" title="ئیکسپۆرتی وردەکاری خەرجی سەیارەکان بۆ Excel">
-            <i class="fas fa-file-excel me-1"></i>ئیکسپۆرتی وردەکاری سەیارەکان
+        <button class="btn btn-info ms-2" onclick="exportCarsIncomeExcel()" title="ئیکسپۆرتی داهاتی سەیارەکان بۆ Excel">
+            <i class="fas fa-truck me-1"></i>داهاتی سەیارەکان
         </button>
         <?php if (hasPermission('add_other_expenses')): ?>
         <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addExpenseModal" style="background: var(--seafoam-green); font-weight: bold;">+ زیادکردنی خەرجی تر</button>
@@ -282,6 +282,9 @@ if (!isset($_SESSION['user_id'])) {
               <h6 class="card-title">ئیکسپۆرتی کورتە</h6>
               <button class="btn btn-sm btn-light mt-2" onclick="exportOtherExpensesSummaryToExcel()" title="ئیکسپۆرتی کورتەی خەرجی تر بۆ Excel">
                 <i class="fas fa-download me-1"></i>داگرتن
+              </button>
+              <button class="btn btn-sm btn-info mt-2 w-100" onclick="exportCarsIncomeSummaryExcel()" title="ئیکسپۆرتی کورتەی داهاتی سەیارەکان بۆ Excel">
+                <i class="fas fa-truck me-1"></i>داهاتی سەیارەکان
               </button>
             </div>
           </div>
@@ -705,6 +708,6 @@ if (!isset($_SESSION['user_id'])) {
 <script src="../assets/js/other_expenses/delete_expenses.js"></script>
 <script src="../assets/js/other_expenses/update_expenses.js"></script>
     <script src="../assets/js/other_expenses/export_functions.js?v=<?= time() ?>"></script>
-    <script src="../assets/js/other_expenses/car_expenses_export.js"></script>
+    <script src="../assets/js/other_expenses/cars_income_export.js"></script>
 </body>
 </html>

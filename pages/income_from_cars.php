@@ -74,11 +74,11 @@ if (!hasPermission('view_income_from_cars')) {
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3>داهاتی سەیارەکان</h3>
         <div>
-            <button class="btn btn-warning me-2" onclick="exportIncomeFromCarsToExcel()">
-                <i class="fa fa-file-excel"></i> ئیکسپۆرتی داهاتی سەیارەکان
-            </button>
             <button class="btn btn-success" onclick="exportToExcel()">
                 <i class="fa fa-file-excel"></i> دانەوە بۆ Excel
+            </button>
+            <button class="btn btn-warning ms-2" onclick="exportDetailedExcel()">
+                <i class="fa fa-file-excel"></i> ئیکسپۆرتی وردەکاری
             </button>
         </div>
     </div>
@@ -239,7 +239,7 @@ if (!hasPermission('view_income_from_cars')) {
 <script src="../assets/js/swalAlert.js"></script>
 <script src="../assets/js/comon/table-controler.js"></script>
 <script src="../assets/js/income_from_cars/income_from_cars.js"></script>
-<script src="../assets/js/income_from_cars/export_functions.js"></script>
+<script src="../assets/js/other_expenses/cars_income_export.js"></script>
 
 </body>
 </html>
