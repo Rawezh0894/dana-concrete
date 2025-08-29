@@ -763,7 +763,12 @@ $(function() {
     $('#type').on('change', handleAddTypeChange);
     handleAddTypeChange();
 });
-$('#kg, #price_per_kg_iqd, #price_per_kg_usd, #type, #price, #amount_iqd, #paid_usd, #paid_iqd, #exchange_rate').on('input change', function() {
+$('#kg, #price_per_kg_iqd, #price_per_kg_usd, #type, #price, #paid_usd, #paid_iqd, #exchange_rate').on('input change', function() {
+    updateAmountsFor('');
+});
+
+// Special handling for amount_iqd to allow manual input
+$('#amount_iqd').on('input', function() {
     updateAmountsFor('');
 });
 
@@ -775,7 +780,12 @@ $(function() {
     $('#edit_type').on('change', handleEditTypeChange);
     handleEditTypeChange();
 });
-$('#edit_kg, #edit_price_per_kg_iqd, #edit_price_per_kg_usd, #edit_type, #edit_price, #edit_amount_iqd, #edit_paid_usd, #edit_paid_iqd, #edit_exchange_rate').on('input change', function() {
+$('#edit_kg, #edit_price_per_kg_iqd, #edit_price_per_kg_usd, #edit_type, #edit_price, #edit_paid_usd, #edit_paid_iqd, #edit_exchange_rate').on('input change', function() {
+    updateAmountsFor('edit_');
+});
+
+// Special handling for edit_amount_iqd to allow manual input
+$('#edit_amount_iqd').on('input', function() {
     updateAmountsFor('edit_');
 });
 $('#editPurchaseModal').on('shown.bs.modal', function() {

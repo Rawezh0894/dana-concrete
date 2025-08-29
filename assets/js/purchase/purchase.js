@@ -55,9 +55,15 @@ function updateAmountsFor(prefix) {
     const amount = (kg / 1000) * pricePerKg;
     const remainingUsdFocused = document.activeElement === document.getElementById(prefix + 'remaining_usd');
     const remainingIqdFocused = document.activeElement === document.getElementById(prefix + 'remaining_iqd');
+    const amountIqdFocused = document.activeElement === document.getElementById(prefix + 'amount_iqd');
+    
     if (type === 'دینار') {
         $('#' + prefix + 'price').prop('readonly', true).val(0);
-        $('#' + prefix + 'amount_iqd').prop('readonly', false).val(amount.toFixed(2));
+        // Allow manual input for amount_iqd when type is دینار
+        $('#' + prefix + 'amount_iqd').prop('readonly', false);
+        if (!amountIqdFocused) {
+            $('#' + prefix + 'amount_iqd').val(amount.toFixed(2));
+        }
         $('#' + prefix + 'remaining_usd').prop('readonly', true);
         $('#' + prefix + 'remaining_iqd').prop('readonly', false);
         const paid_usd_to_iqd = paid_usd * exchange_rate / 100;
@@ -65,7 +71,8 @@ function updateAmountsFor(prefix) {
         if (!remainingIqdFocused) $('#' + prefix + 'remaining_iqd').val(remaining_iqd.toFixed(2));
         $('#' + prefix + 'remaining_usd').val(0);
     } else if (type === 'دۆلار') {
-        $('#' + prefix + 'amount_iqd').prop('readonly', true).val(0);
+        // Allow manual input for amount_iqd when type is دۆلار
+        $('#' + prefix + 'amount_iqd').prop('readonly', false);
         $('#' + prefix + 'price').prop('readonly', false).val(amount.toFixed(2));
         $('#' + prefix + 'remaining_iqd').prop('readonly', true);
         $('#' + prefix + 'remaining_usd').prop('readonly', false);
@@ -99,7 +106,7 @@ $(document).ready(function() {
     if (priceIqd) priceIqd.value = 0;
     const priceUsd = document.getElementById('price_per_kg_usd');
     if (priceUsd) priceUsd.value = 0;
-    updateAmountsFor('');
+    updateAmountsFor('purchase');
 });
 
 // Excel Export Function
