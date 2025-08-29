@@ -83,10 +83,7 @@ if (!isset($_SESSION['user_id'])) {
 <?php include '../includes/sidebar.php'; ?>
 <div class="container-fluid py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">خەرجی تر</h2>
-            <small class="text-muted">فلتەری ورد - خەرجی سەیارەکان + خەرجی تر</small>
-        </div>
+
         <button class="btn export-btn" onclick="exportOtherExpensesToExcel()" title="ئیکسپۆرتی هەموو زانیارییەکانی خەرجی تر بۆ Excel">
             <i class="fas fa-file-excel me-1"></i>ئیکسپۆرتی Excel
         </button>
@@ -95,21 +92,7 @@ if (!isset($_SESSION['user_id'])) {
         <?php endif; ?>
     </div>
     
-    <!-- Help Section for Warehouse Material Usage -->
-    <div class="alert alert-info mb-4" role="alert">
-        <div class="d-flex align-items-start">
-            <i class="fas fa-info-circle me-2 mt-1"></i>
-            <div>
-                <h6 class="alert-heading mb-2">ڕوونکردنەوە بۆ بەکارهێنانی کاڵای کۆگا</h6>
-                <p class="mb-2">کاتێک جۆری خەرجی "بەکارهێنانی کاڵای کۆگا" هەڵبژێردرا:</p>
-                <ul class="mb-0">
-                    <li><strong>یەکەی کاڵا:</strong> یەکەی بنەڕەتی کاڵا (کارتۆن، بەرمیل، دەبە، دانە، لیتر)</li>
-                    <li><strong>یەکەی بەکارهێنان:</strong> دەتوانیت یەکەی بەکارهێنان هەڵبژێریت (مثلاً کارتۆن یان دانە)</li>
-                    <li><strong>بڕی بنەڕەتی:</strong> بە دانە/لیتر هەژمار دەکرێت بۆ ستۆک</li>
-                </ul>
-            </div>
-        </div>
-    </div>
+
     <div class="mb-4">
       <!-- Advanced Filter Section -->
       <div class="card shadow-sm">
