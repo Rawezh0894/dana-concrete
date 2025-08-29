@@ -77,9 +77,6 @@ if (!hasPermission('view_income_from_cars')) {
             <button class="btn btn-success" onclick="exportToExcel()">
                 <i class="fa fa-file-excel"></i> دانەوە بۆ Excel
             </button>
-            <button class="btn btn-warning ms-2" onclick="exportDetailedExcel()">
-                <i class="fa fa-file-excel"></i> ئیکسپۆرتی وردەکاری
-            </button>
         </div>
     </div>
 
@@ -235,11 +232,9 @@ if (!hasPermission('view_income_from_cars')) {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="../assets/js/swalAlert.js"></script>
 <script src="../assets/js/comon/table-controler.js"></script>
 <script src="../assets/js/income_from_cars/income_from_cars.js"></script>
-<script src="../assets/js/other_expenses/cars_income_export.js"></script>
 
 </body>
 </html>

@@ -90,9 +90,6 @@ if (!isset($_SESSION['user_id'])) {
         <button class="btn export-btn" onclick="exportOtherExpensesToExcel()" title="ئیکسپۆرتی هەموو زانیارییەکانی خەرجی تر بۆ Excel">
             <i class="fas fa-file-excel me-1"></i>ئیکسپۆرتی Excel
         </button>
-        <button class="btn btn-info ms-2" onclick="exportCarsIncomeExcel()" title="ئیکسپۆرتی داهاتی سەیارەکان بۆ Excel">
-            <i class="fas fa-truck me-1"></i>داهاتی سەیارەکان
-        </button>
         <?php if (hasPermission('add_other_expenses')): ?>
         <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addExpenseModal" style="background: var(--seafoam-green); font-weight: bold;">+ زیادکردنی خەرجی تر</button>
         <?php endif; ?>
@@ -282,9 +279,6 @@ if (!isset($_SESSION['user_id'])) {
               <h6 class="card-title">ئیکسپۆرتی کورتە</h6>
               <button class="btn btn-sm btn-light mt-2" onclick="exportOtherExpensesSummaryToExcel()" title="ئیکسپۆرتی کورتەی خەرجی تر بۆ Excel">
                 <i class="fas fa-download me-1"></i>داگرتن
-              </button>
-              <button class="btn btn-sm btn-info mt-2 w-100" onclick="exportCarsIncomeSummaryExcel()" title="ئیکسپۆرتی کورتەی داهاتی سەیارەکان بۆ Excel">
-                <i class="fas fa-truck me-1"></i>داهاتی سەیارەکان
               </button>
             </div>
           </div>
@@ -696,7 +690,6 @@ if (!isset($_SESSION['user_id'])) {
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="../assets/js/comon/table-controler.js"></script>
 <script src="../assets/js/swalAlert.js"></script>
 <script src="../assets/js/other_expenses/error_logger.js"></script>
@@ -708,6 +701,5 @@ if (!isset($_SESSION['user_id'])) {
 <script src="../assets/js/other_expenses/delete_expenses.js"></script>
 <script src="../assets/js/other_expenses/update_expenses.js"></script>
     <script src="../assets/js/other_expenses/export_functions.js?v=<?= time() ?>"></script>
-    <script src="../assets/js/other_expenses/cars_income_export.js"></script>
 </body>
 </html>
