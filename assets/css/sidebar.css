@@ -5,7 +5,7 @@
   left: auto;
   height: calc(100vh - 86px);
   background:white ;
-  width: 270px;
+  width: 300px;
   border-radius: 2rem 0 0 2rem;
   box-shadow: 0 4px 24px 0 var(--seafoam-green, #003b73);
   padding: 1rem 0.5rem;

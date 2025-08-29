@@ -87,8 +87,11 @@ if (!isset($_SESSION['user_id'])) {
             <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">خەرجی تر</h2>
             <small class="text-muted">فلتەری ورد - خەرجی سەیارەکان + خەرجی تر</small>
         </div>
-        <button class="btn export-btn" onclick="exportOtherExpensesToExcel()" title="ئیکسپۆرتی هەموو زانیارییەکانی خەرجی تر بۆ Excel">
+        <button class="btn export-btn me-2" onclick="exportOtherExpensesToExcel()" title="ئیکسپۆرتی هەموو زانیارییەکانی خەرجی تر بۆ Excel">
             <i class="fas fa-file-excel me-1"></i>ئیکسپۆرتی Excel
+        </button>
+        <button class="btn btn-warning" onclick="exportOtherExpensesDetailedToExcel()" title="ئیکسپۆرتی وردەکاری خەرجی سەیارەکان بۆ Excel">
+            <i class="fas fa-file-excel me-1"></i>ئیکسپۆرتی وردەکاری سەیارەکان
         </button>
         <?php if (hasPermission('add_other_expenses')): ?>
         <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addExpenseModal" style="background: var(--seafoam-green); font-weight: bold;">+ زیادکردنی خەرجی تر</button>
@@ -690,6 +693,7 @@ if (!isset($_SESSION['user_id'])) {
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="../assets/js/comon/table-controler.js"></script>
 <script src="../assets/js/swalAlert.js"></script>
 <script src="../assets/js/other_expenses/error_logger.js"></script>
@@ -701,5 +705,6 @@ if (!isset($_SESSION['user_id'])) {
 <script src="../assets/js/other_expenses/delete_expenses.js"></script>
 <script src="../assets/js/other_expenses/update_expenses.js"></script>
     <script src="../assets/js/other_expenses/export_functions.js?v=<?= time() ?>"></script>
+    <script src="../assets/js/other_expenses/car_expenses_export.js"></script>
 </body>
 </html>

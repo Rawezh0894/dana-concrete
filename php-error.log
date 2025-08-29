@@ -7928,3 +7928,48 @@
 )
 
 [24-Aug-2025 09:23:05 Asia/Baghdad] Employees retrieved successfully: Count=18
+[28-Aug-2025 19:32:26 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1756398746
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[28-Aug-2025 19:32:28 Asia/Baghdad] Dashboard data loaded successfully for user: 1
+[28-Aug-2025 19:33:31 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1756398811
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[28-Aug-2025 19:33:31 Asia/Baghdad] Companies retrieved successfully: Count=4
+[28-Aug-2025 19:33:40 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1756398820
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[28-Aug-2025 19:33:40 Asia/Baghdad] company/add_company.php POST: Array
+(
+    [name] => دەشتی 
+    [currency_type] => دینار
+    [opening_debt_iqd] => 0
+    [opening_debt_usd] => 0
+)
+
+[28-Aug-2025 19:33:40 Asia/Baghdad] Parsed vars: name='دەشتی', opening_debt_usd='0', opening_debt_iqd='0', currency_type='دینار'
+[28-Aug-2025 19:33:40 Asia/Baghdad] Company successfully added: Name=دەشتی, Currency=دینار
+[28-Aug-2025 19:33:40 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1756398820
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[28-Aug-2025 19:33:40 Asia/Baghdad] Companies retrieved successfully: Count=5

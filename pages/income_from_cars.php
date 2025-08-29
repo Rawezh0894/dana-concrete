@@ -74,6 +74,9 @@ if (!hasPermission('view_income_from_cars')) {
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3>داهاتی سەیارەکان</h3>
         <div>
+            <button class="btn btn-warning me-2" onclick="exportIncomeFromCarsToExcel()">
+                <i class="fa fa-file-excel"></i> ئیکسپۆرتی داهاتی سەیارەکان
+            </button>
             <button class="btn btn-success" onclick="exportToExcel()">
                 <i class="fa fa-file-excel"></i> دانەوە بۆ Excel
             </button>
@@ -232,9 +235,11 @@ if (!hasPermission('view_income_from_cars')) {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="../assets/js/swalAlert.js"></script>
 <script src="../assets/js/comon/table-controler.js"></script>
 <script src="../assets/js/income_from_cars/income_from_cars.js"></script>
+<script src="../assets/js/income_from_cars/export_functions.js"></script>
 
 </body>
 </html>
