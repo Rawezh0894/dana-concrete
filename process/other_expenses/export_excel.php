@@ -226,8 +226,8 @@ try {
             echo '<td>' . htmlspecialchars($row['payment_type'] ?? '') . '</td>';
             echo '<td>' . htmlspecialchars($row['currency_type'] ?? '') . '</td>';
             echo '<td>' . htmlspecialchars($row['invoice_number'] ?? '') . '</td>';
-            echo '<td class="number">' . number_format($row['amount_iqd'] ?? 0, 0) . ' د.ع</td>';
-            echo '<td class="number">' . number_format($row['amount_usd'] ?? 0, 2) . ' $</td>';
+            echo '<td class="number">' . number_format($row['amount_iqd'] ?? 0, 0) . '</td>';
+            echo '<td class="number">' . number_format($row['amount_usd'] ?? 0, 2) . '</td>';
             echo '<td class="number">' . number_format($row['paid_iqd'] ?? 0, 0) . ' د.ع</td>';
             echo '<td class="number">' . number_format($row['paid_usd'] ?? 0, 2) . ' $</td>';
             echo '<td class="number">' . number_format($row['exchange_rate'] ?? 0, 0) . '</td>';
