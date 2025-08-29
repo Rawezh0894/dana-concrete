@@ -50,23 +50,42 @@ async function exportCarsIncomeExcel() {
         const expensesResponse = await fetch('../process/other_expenses/select_expenses.php');
         const expensesData = await expensesResponse.json();
         
-        if (!carsData.success || !receiptsData.success || !expensesData.success) {
-            console.error('Cars data:', carsData);
-            console.error('Receipts data:', receiptsData);
-            console.error('Expenses data:', expensesData);
-            throw new Error('هەڵە لە وەرگرتنی داتا - تکایە پشکنە');
+        // Check response structure and handle different formats
+        let carsArray, receiptsArray, expensesArray;
+        
+        // Handle cars data (can be direct array or {success: true, data: [...]})
+        if (Array.isArray(carsData)) {
+            carsArray = carsData;
+        } else if (carsData.success && Array.isArray(carsData.data)) {
+            carsArray = carsData.data;
+        } else {
+            throw new Error('هەڵە لە داتای سەیارەکان - تکایە پشکنە');
+        }
+        
+        // Handle receipts data
+        if (receiptsData.success && Array.isArray(receiptsData.data)) {
+            receiptsArray = receiptsData.data;
+        } else {
+            throw new Error('هەڵە لە داتای پسوڵەکان - تکایە پشکنە');
+        }
+        
+        // Handle expenses data
+        if (expensesData.success && Array.isArray(expensesData.expenses)) {
+            expensesArray = expensesData.expenses;
+        } else {
+            throw new Error('هەڵە لە داتای خەرجیەکان - تکایە پشکنە');
         }
         
         // Process data
         console.log('Processing data with USD rate:', usdRate);
-        console.log('Cars data:', carsData.data);
-        console.log('Receipts data:', receiptsData.data);
-        console.log('Expenses data:', expensesData.data);
+        console.log('Cars array:', carsArray);
+        console.log('Receipts array:', receiptsArray);
+        console.log('Expenses array:', expensesArray);
         
         const carsIncomeData = processCarsIncomeData(
-            carsData.data, 
-            receiptsData.data, 
-            expensesData.data, 
+            carsArray, 
+            receiptsArray, 
+            expensesArray, 
             usdRate
         );
         
@@ -265,21 +284,40 @@ async function getCarsIncomeSummary(usdRate) {
         fetch('../process/other_expenses/select_expenses.php').then(r => r.json())
     ]);
     
-    if (!cars.success || !receipts.success || !expenses.success) {
-        console.error('Cars data:', cars);
-        console.error('Receipts data:', receipts);
-        console.error('Expenses data:', expenses);
-        throw new Error('هەڵە لە وەرگرتنی داتا - تکایە پشکنە');
+    // Handle different response structures
+    let carsArray, receiptsArray, expensesArray;
+    
+    // Handle cars data
+    if (Array.isArray(cars)) {
+        carsArray = cars;
+    } else if (cars.success && Array.isArray(cars.data)) {
+        carsArray = cars.data;
+    } else {
+        throw new Error('هەڵە لە داتای سەیارەکان - تکایە پشکنە');
+    }
+    
+    // Handle receipts data
+    if (receipts.success && Array.isArray(receipts.data)) {
+        receiptsArray = receipts.data;
+    } else {
+        throw new Error('هەڵە لە داتای پسوڵەکان - تکایە پشکنە');
+    }
+    
+    // Handle expenses data
+    if (expenses.success && Array.isArray(expenses.expenses)) {
+        expensesArray = expenses.expenses;
+    } else {
+        throw new Error('هەڵە لە داتای خەرجیەکان - تکایە پشکنە');
     }
     
     // Calculate totals
-    const totalConcreteMeters = receipts.data.reduce((total, receipt) => {
+    const totalConcreteMeters = receiptsArray.reduce((total, receipt) => {
         return total + parseFloat(receipt.meter_amount || 0);
     }, 0);
     
     const totalConcreteIncome = totalConcreteMeters * 5;
     
-    const totalGasExpenses = expenses.data
+    const totalGasExpenses = expensesArray
         .filter(expense => expense.expense_type === 'بەکارهێنانی گاز')
         .reduce((total, expense) => {
             return total + parseFloat(expense.gas_total_cost || 0);
@@ -287,7 +325,7 @@ async function getCarsIncomeSummary(usdRate) {
     
     const totalGasExpensesUsd = convertIqdToUsd(totalGasExpenses, usdRate);
     
-    const totalMaterialExpenses = expenses.data
+    const totalMaterialExpenses = expensesArray
         .filter(expense => expense.expense_type === 'بەکارهێنانی کاڵای کۆگا')
         .reduce((total, expense) => {
             let expenseUsd = parseFloat(expense.amount_usd || 0);
@@ -300,7 +338,7 @@ async function getCarsIncomeSummary(usdRate) {
             return total + expenseUsd;
         }, 0);
     
-    const totalOtherExpenses = expenses.data
+    const totalOtherExpenses = expensesArray
         .filter(expense => expense.expense_type === 'خەرجی تر')
         .reduce((total, expense) => {
             let expenseUsd = parseFloat(expense.amount_usd || 0);
@@ -317,7 +355,7 @@ async function getCarsIncomeSummary(usdRate) {
     const netIncome = totalConcreteIncome - totalExpenses;
     
     return {
-        total_cars: cars.data.length,
+        total_cars: carsArray.length,
         total_concrete_meters: totalConcreteMeters,
         total_concrete_income: totalConcreteIncome,
         total_gas_expenses_usd: totalGasExpensesUsd,
