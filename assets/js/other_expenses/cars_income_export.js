@@ -6,7 +6,7 @@ async function getUsdExchangeRate() {
     try {
         const response = await fetch('../process/reporst/get_information.php');
         const data = await response.json();
-        if (data.success && data.data.usd_iqd_rate) {
+        if (data.success && data.data && data.data.usd_iqd_rate) {
             return data.data.usd_iqd_rate;
         }
         return 139250; // Default fallback value
@@ -43,7 +43,7 @@ async function exportCarsIncomeExcel() {
         const carsData = await carsResponse.json();
         
         // Get concrete receipts data (concrete delivered by each car)
-        const receiptsResponse = await fetch('../process/concrete_receipts/get_concrete_receipts.php');
+        const receiptsResponse = await fetch('../process/concrete_receipts/select_concrete_receipts.php');
         const receiptsData = await receiptsResponse.json();
         
         // Get other expenses data
@@ -51,10 +51,18 @@ async function exportCarsIncomeExcel() {
         const expensesData = await expensesResponse.json();
         
         if (!carsData.success || !receiptsData.success || !expensesData.success) {
-            throw new Error('هەڵە لە وەرگرتنی داتا');
+            console.error('Cars data:', carsData);
+            console.error('Receipts data:', receiptsData);
+            console.error('Expenses data:', expensesData);
+            throw new Error('هەڵە لە وەرگرتنی داتا - تکایە پشکنە');
         }
         
         // Process data
+        console.log('Processing data with USD rate:', usdRate);
+        console.log('Cars data:', carsData.data);
+        console.log('Receipts data:', receiptsData.data);
+        console.log('Expenses data:', expensesData.data);
+        
         const carsIncomeData = processCarsIncomeData(
             carsData.data, 
             receiptsData.data, 
@@ -253,12 +261,15 @@ async function getCarsIncomeSummary(usdRate) {
     // Get all required data
     const [cars, receipts, expenses] = await Promise.all([
         fetch('../process/car/select_car.php').then(r => r.json()),
-        fetch('../process/concrete_receipts/get_concrete_receipts.php').then(r => r.json()),
+        fetch('../process/concrete_receipts/select_concrete_receipts.php').then(r => r.json()),
         fetch('../process/other_expenses/select_expenses.php').then(r => r.json())
     ]);
     
     if (!cars.success || !receipts.success || !expenses.success) {
-        throw new Error('هەڵە لە وەرگرتنی داتا');
+        console.error('Cars data:', cars);
+        console.error('Receipts data:', receipts);
+        console.error('Expenses data:', expenses);
+        throw new Error('هەڵە لە وەرگرتنی داتا - تکایە پشکنە');
     }
     
     // Calculate totals
