@@ -1,17 +1,28 @@
 // Summary Cards Data Loading for Sales Page
 $(document).ready(function() {
-    loadSummaryCardsData();
+    loadSummaryCardsData('');
     
     // Refresh summary cards when sales are updated
     $(document).on('saleAdded saleUpdated saleDeleted', function() {
-        loadSummaryCardsData();
+        loadSummaryCardsData('');
     });
 });
 
-function loadSummaryCardsData() {
+function loadSummaryCardsData(filterParams = '') {
+    // Parse filter parameters
+    const params = new URLSearchParams(filterParams);
+    const customerId = params.get('customer_id') || '';
+    const fromDate = params.get('from') || '';
+    const toDate = params.get('to') || '';
+    
     $.ajax({
         url: '../process/sale/get_summary_stats.php',
         type: 'GET',
+        data: {
+            customer_id: customerId,
+            from_date: fromDate,
+            to_date: toDate
+        },
         dataType: 'json',
         success: function(response) {
             if (response.success) {

@@ -499,7 +499,7 @@ $(document).ready(function() {
         
         // Also update summary cards if the function exists
         if (typeof loadSummaryCardsData === 'function') {
-            loadSummaryCardsData();
+            loadSummaryCardsData(params.toString());
         }
     }
     
