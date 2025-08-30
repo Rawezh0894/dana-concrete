@@ -19,12 +19,14 @@ function loadSummaryCardsData() {
                 $('#total-customer-debt').text('$' + response.data.total_customer_debt.toLocaleString());
                 $('#customers-with-debt').text(response.data.customers_with_debt);
                 $('#total-sales').text(response.data.total_sales);
+                $('#total-cubic-meters').text(response.data.total_cubic_meters.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}));
             } else {
                 console.error('Error loading summary data:', response.message);
                 // Set default values
                 $('#total-customer-debt').text('$0');
                 $('#customers-with-debt').text('0');
                 $('#total-sales').text('0');
+                $('#total-cubic-meters').text('0');
             }
         },
         error: function(xhr, status, error) {
@@ -33,6 +35,7 @@ function loadSummaryCardsData() {
             $('#total-customer-debt').text('$0');
             $('#customers-with-debt').text('0');
             $('#total-sales').text('0');
+            $('#total-cubic-meters').text('0');
         }
     });
 } 

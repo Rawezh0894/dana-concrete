@@ -107,7 +107,7 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
 
     <!-- Summary Cards -->
     <div class="row mb-4" id="summary-cards">
-        <div class="col-md-3 mb-3">
+        <div class="col-md-2 mb-3">
             <div class="card text-center shadow  card-gradient-danger card-animate-hover">
                 <div class="card-body">
                     <i class="fas fa-money-bill-wave card-icon"></i>
@@ -117,7 +117,7 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
                 </div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
+        <div class="col-md-2 mb-3">
             <div class="card text-center shadow  card-gradient-warning card-animate-hover">
                 <div class="card-body">
                     <i class="fas fa-user-times card-icon"></i>
@@ -127,7 +127,7 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
                 </div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
+        <div class="col-md-2 mb-3">
             <div class="card text-center shadow  card-gradient-success card-animate-hover">
                 <div class="card-body">
                     <i class="fas fa-shopping-cart card-icon"></i>
@@ -137,7 +137,17 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
                 </div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
+        <div class="col-md-2 mb-3">
+            <div class="card text-center shadow  card-gradient-info card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-cube card-icon"></i>
+                    <h6 class="card-title">کۆی مەتر فرۆشراوەکان</h6>
+                    <div class="fs-4 fw-bold" id="total-cubic-meters">0</div>
+                    <small class="text-light">کۆی م³ فرۆشراوەکان</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 mb-3">
             <div class="card text-center shadow card-animate-hover summary-export-card">
                 <div class="card-body">
                     <i class="fas fa-file-excel card-icon"></i>
