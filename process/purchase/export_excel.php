@@ -234,35 +234,45 @@ try {
             }
         }
         
-        // Add summary rows
-        echo '<tr style="background-color: #f0f0f0; font-weight: bold;">';
-        echo '<td colspan="4" style="text-align: center; background-color: #4CAF50; color: white;">کۆی گشتی</td>';
-        echo '<td class="number" style="background-color: #4CAF50; color: white;">' . number_format($total_kg, 0) . '</td>';
-        echo '<td colspan="2" style="background-color: #4CAF50; color: white;">کۆی ژمارەی کاروانەکان: ' . count($data) . '</td>';
-        echo '<td class="number" style="background-color: #4CAF50; color: white;">';
-        if ($total_remaining_usd > 0) {
-            echo number_format($total_remaining_usd, 2) . ' $';
-        } else {
-            echo number_format($total_remaining_iqd, 0) . ' د.ع';
-        }
-        echo '</td>';
-        echo '</tr>';
-        
-        // Add detailed summary row
-        echo '<tr style="background-color: #e8f5e8;">';
-        echo '<td colspan="4" style="text-align: center; font-weight: bold;">تەفسیلی کۆی گشتی</td>';
-        echo '<td class="number" style="font-weight: bold;">' . number_format($total_kg / 1000, 2) . ' طەن</td>';
-        echo '<td colspan="2" style="text-align: center; font-weight: bold;">' . number_format($total_kg, 0) . ' کیلۆ</td>';
-        echo '<td class="number" style="font-weight: bold;">';
-        if ($total_remaining_usd > 0) {
-            echo number_format($total_remaining_usd, 2) . ' $';
-        } else {
-            echo number_format($total_remaining_iqd, 0) . ' د.ع';
-        }
-        echo '</td>';
-        echo '</tr>';
-        
+        // Remove summary rows from main table to allow Excel filtering
         echo '</table>';
+        
+        // Add summary information below the main table (outside the table for Excel filtering)
+        echo '<br><br>';
+        echo '<table border="1" style="width: 100%; border-collapse: collapse;">';
+        echo '<tr style="background-color: #4CAF50; color: white; font-weight: bold;">';
+        echo '<th colspan="8" style="text-align: center; padding: 12px; font-size: 14px;">کۆی گشتی</th>';
+        echo '</tr>';
+        
+        // Summary row 1
+        echo '<tr style="background-color: #f0f0f0; font-weight: bold;">';
+        echo '<td colspan="4" style="text-align: center; padding: 8px;">کۆی گشتی</td>';
+        echo '<td style="text-align: center; padding: 8px; font-weight: bold;">' . number_format($total_kg, 0) . '</td>';
+        echo '<td colspan="2" style="text-align: center; padding: 8px;">کۆی ژمارەی کاروانەکان: ' . count($data) . '</td>';
+        echo '<td style="text-align: center; padding: 8px; font-weight: bold;">';
+        if ($total_remaining_usd > 0) {
+            echo number_format($total_remaining_usd, 2) . ' $';
+        } else {
+            echo number_format($total_remaining_iqd, 0) . ' د.ع';
+        }
+        echo '</td>';
+        echo '</tr>';
+        
+        // Summary row 2
+        echo '<tr style="background-color: #e8f5e8; font-weight: bold;">';
+        echo '<td colspan="4" style="text-align: center; padding: 8px;">تەفسیلی کۆی گشتی</td>';
+        echo '<td style="text-align: center; padding: 8px; font-weight: bold;">' . number_format($total_kg / 1000, 2) . ' طەن</td>';
+        echo '<td colspan="2" style="text-align: center; padding: 8px;">' . number_format($total_kg, 0) . ' کیلۆ</td>';
+        echo '<td style="text-align: center; padding: 8px; font-weight: bold;">';
+        if ($total_remaining_usd > 0) {
+            echo number_format($total_remaining_usd, 2) . ' $';
+        } else {
+            echo number_format($total_remaining_iqd, 0) . ' د.ع';
+        }
+        echo '</td>';
+        echo '</tr>';
+        echo '</table>';
+        
         echo '</body>';
         echo '</html>';
     }
