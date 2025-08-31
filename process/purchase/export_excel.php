@@ -159,11 +159,12 @@ try {
         
     } elseif ($export_type === 'monthly_report') {
         // Export monthly company report
-        header('Content-Disposition: attachment; filename="ڕاپۆرتی_مانگانەی_کڕینەکان_' . date('Y-m-d') . '.xls"');
+        header('Content-Disposition: attachment; filename="ڕاپۆرتی_مانگانەی_کڕینەکان_و_شۆفێرەکان_' . date('Y-m-d') . '.xls"');
         
-        // Get monthly company report data
+        // Get monthly company and driver report data
         $monthly_sql = "SELECT 
             c.name AS company_name,
+            d.name AS driver_name,
             DATE_FORMAT(p.date, '%Y-%m') AS month_year,
             COUNT(*) AS convoy_count,
             SUM(p.kg) AS total_kg,
@@ -183,8 +184,8 @@ try {
         LEFT JOIN materials m ON p.material_id = m.id
         LEFT JOIN bins_silos b ON p.bin_id = b.id
         $where_sql
-        GROUP BY c.id, c.name, DATE_FORMAT(p.date, '%Y-%m')
-        ORDER BY c.name, month_year DESC";
+        GROUP BY c.id, c.name, d.id, d.name, DATE_FORMAT(p.date, '%Y-%m')
+        ORDER BY c.name, driver_name, month_year DESC";
         
         $monthly_stmt = $pdo->prepare($monthly_sql);
         $monthly_stmt->execute($params);
@@ -207,12 +208,13 @@ try {
         echo '<table border="1">';
         
         // Monthly report header
-        echo '<tr><th colspan="7" style="background-color: #2196F3; color: white; font-size: 16px;">ڕاپۆرتی مانگانەی کڕینەکان</th></tr>';
-        echo '<tr><th colspan="7" style="background-color: #FF9800; color: white; font-size: 14px;">بەروار: ' . date('Y-m-d') . '</th></tr>';
+        echo '<tr><th colspan="8" style="background-color: #2196F3; color: white; font-size: 16px;">ڕاپۆرتی مانگانەی کڕینەکان</th></tr>';
+        echo '<tr><th colspan="8" style="background-color: #FF9800; color: white; font-size: 14px;">بەروار: ' . date('Y-m-d') . '</th></tr>';
         
         // Column headers
         echo '<tr>';
         echo '<th>کۆمپانیا</th>';
+        echo '<th>شۆفێر</th>';
         echo '<th>مانگ</th>';
         echo '<th>کۆی ژمارەی کاروانەکان</th>';
         echo '<th>کۆی کیلۆ</th>';
@@ -225,6 +227,7 @@ try {
         foreach ($monthly_data as $row) {
             echo '<tr>';
             echo '<td>' . htmlspecialchars($row['company_name'] ?? '') . '</td>';
+            echo '<td>' . htmlspecialchars($row['driver_name'] ?? '') . '</td>';
             echo '<td>' . htmlspecialchars($row['month_year'] ?? '') . '</td>';
             echo '<td class="number">' . number_format($row['convoy_count'] ?? 0, 0) . '</td>';
             echo '<td class="number">' . number_format($row['total_kg'] ?? 0, 0) . '</td>';
