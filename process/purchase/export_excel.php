@@ -157,6 +157,87 @@ try {
         echo '</body>';
         echo '</html>';
         
+    } elseif ($export_type === 'monthly_report') {
+        // Export monthly company report
+        header('Content-Disposition: attachment; filename="ڕاپۆرتی_مانگانەی_کڕینەکان_' . date('Y-m-d') . '.xls"');
+        
+        // Get monthly company report data
+        $monthly_sql = "SELECT 
+            c.name AS company_name,
+            DATE_FORMAT(p.date, '%Y-%m') AS month_year,
+            COUNT(*) AS convoy_count,
+            SUM(p.kg) AS total_kg,
+            SUM(p.kg / 1000) AS total_tons,
+            SUM(CASE WHEN p.payment_type = 'قەرز' THEN 
+                CASE WHEN p.type = 'دۆلار' THEN p.remaining_usd ELSE p.remaining_iqd / p.exchange_rate * 100 END
+                ELSE 0 
+            END) AS total_remaining_usd,
+            SUM(CASE WHEN p.payment_type = 'قەرز' THEN 
+                CASE WHEN p.type = 'دینار' THEN p.remaining_iqd ELSE p.remaining_usd * p.exchange_rate / 100 END
+                ELSE 0 
+            END) AS total_remaining_iqd
+        FROM purchases p
+        LEFT JOIN company c ON p.company_id = c.id
+        LEFT JOIN locations l ON p.location = l.name
+        LEFT JOIN drivers d ON p.driver = d.name
+        LEFT JOIN materials m ON p.material_id = m.id
+        LEFT JOIN bins_silos b ON p.bin_id = b.id
+        $where_sql
+        GROUP BY c.id, c.name, DATE_FORMAT(p.date, '%Y-%m')
+        ORDER BY c.name, month_year DESC";
+        
+        $monthly_stmt = $pdo->prepare($monthly_sql);
+        $monthly_stmt->execute($params);
+        $monthly_data = $monthly_stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Start Excel content for monthly report
+        echo '<!DOCTYPE html>';
+        echo '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
+        echo '<head>';
+        echo '<meta charset="UTF-8">';
+        echo '<style>';
+        echo 'table { border-collapse: collapse; width: 100%; }';
+        echo 'th, td { border: 1px solid #000; padding: 8px; text-align: center; }';
+        echo 'th { background-color: #4CAF50; color: white; font-weight: bold; }';
+        echo '.number { text-align: right; }';
+        echo '</style>';
+        echo '</head>';
+        echo '<body>';
+        
+        echo '<table border="1">';
+        
+        // Monthly report header
+        echo '<tr><th colspan="7" style="background-color: #2196F3; color: white; font-size: 16px;">ڕاپۆرتی مانگانەی کڕینەکان</th></tr>';
+        echo '<tr><th colspan="7" style="background-color: #FF9800; color: white; font-size: 14px;">بەروار: ' . date('Y-m-d') . '</th></tr>';
+        
+        // Column headers
+        echo '<tr>';
+        echo '<th>کۆمپانیا</th>';
+        echo '<th>مانگ</th>';
+        echo '<th>کۆی ژمارەی کاروانەکان</th>';
+        echo '<th>کۆی کیلۆ</th>';
+        echo '<th>کۆی طەن</th>';
+        echo '<th>پارەی ماوە (دۆلار)</th>';
+        echo '<th>پارەی ماوە (دینار)</th>';
+        echo '</tr>';
+        
+        // Data rows
+        foreach ($monthly_data as $row) {
+            echo '<tr>';
+            echo '<td>' . htmlspecialchars($row['company_name'] ?? '') . '</td>';
+            echo '<td>' . htmlspecialchars($row['month_year'] ?? '') . '</td>';
+            echo '<td class="number">' . number_format($row['convoy_count'] ?? 0, 0) . '</td>';
+            echo '<td class="number">' . number_format($row['total_kg'] ?? 0, 0) . '</td>';
+            echo '<td class="number">' . number_format($row['total_tons'] ?? 0, 2) . '</td>';
+            echo '<td class="number">$' . number_format($row['total_remaining_usd'] ?? 0, 2) . '</td>';
+            echo '<td class="number">' . number_format($row['total_remaining_iqd'] ?? 0, 0) . ' د.ع</td>';
+            echo '</tr>';
+        }
+        
+        echo '</table>';
+        echo '</body>';
+        echo '</html>';
+        
     } else {
         // Export detailed data
         header('Content-Disposition: attachment; filename="کڕینەکان_' . date('Y-m-d') . '.xls"');

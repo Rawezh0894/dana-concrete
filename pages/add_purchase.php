@@ -156,6 +156,9 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
             <button class="btn export-btn" onclick="exportPurchaseToExcel()" title="ئیکسپۆرتی هەموو زانیارییەکانی کڕین بۆ Excel">
                 <i class="fas fa-file-excel me-1"></i>ئیکسپۆرتی Excel
             </button>
+            <button class="btn" onclick="exportPurchaseMonthlyReport()" style="background: var(--seafoam-green); color: white; font-weight: bold;" title="ڕاپۆرتی مانگانەی کڕینەکان بۆ Excel">
+                <i class="fas fa-chart-line me-1"></i>ڕاپۆرتی مانگانە
+            </button>
             <?php if (hasPermission('add_purchase')): ?>
             <button class="btn" data-bs-toggle="modal" data-bs-target="#addPurchaseModal" style="background: var(--seafoam-green); color:white; font-weight: bold;">+ زیادکردنی کڕین</button>
             <?php endif; ?>
