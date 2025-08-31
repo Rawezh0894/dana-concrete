@@ -117,7 +117,11 @@ try {
         $summary_sql = "SELECT 
             COUNT(DISTINCT p.company_id) as total_companies,
             SUM(CASE WHEN p.payment_type = 'قەرز' THEN p.remaining_usd ELSE 0 END) as total_debt,
-            COUNT(DISTINCT CASE WHEN p.payment_type = 'قەرز' AND p.remaining_usd > 0 THEN p.company_id END) as indebted_companies
+            COUNT(DISTINCT CASE WHEN p.payment_type = 'قەرز' AND p.remaining_usd > 0 THEN p.company_id END) as indebted_companies,
+            COUNT(*) as total_records,
+            SUM(p.kg) as total_kg,
+            SUM(CASE WHEN p.type = 'دۆلار' THEN p.remaining_usd ELSE 0 END) as total_remaining_usd,
+            SUM(CASE WHEN p.type = 'دینار' THEN p.remaining_iqd ELSE 0 END) as total_remaining_iqd
         FROM purchases p
         LEFT JOIN company c ON p.company_id = c.id
         LEFT JOIN locations l ON p.location = l.name
@@ -152,6 +156,21 @@ try {
         echo '<tr><th>کۆی قەرزی ئێمە</th><td class="number">$' . number_format($summary_data['total_debt'] ?? 0, 2) . '</td></tr>';
         echo '<tr><th>کۆی ژمارەی کۆمپانیاکان</th><td class="number">' . number_format($summary_data['total_companies'] ?? 0, 0) . '</td></tr>';
         echo '<tr><th>کۆمپانیاکانی قەرزدار</th><td class="number">' . number_format($summary_data['indebted_companies'] ?? 0, 0) . '</td></tr>';
+        echo '<tr><th>کۆی ژمارەی کاروانەکان</th><td class="number">' . number_format($summary_data['total_records'] ?? 0, 0) . '</td></tr>';
+        echo '<tr><th>کۆی کیلۆ</th><td class="number">' . number_format($summary_data['total_kg'] ?? 0, 0) . ' کگم</td></tr>';
+        echo '<tr><th>کۆی طەن</th><td class="number">' . number_format(($summary_data['total_kg'] ?? 0) / 1000, 2) . ' طەن</td></tr>';
+        
+        // Calculate total remaining amount
+        $total_remaining = 0;
+        $remaining_currency = '';
+        if (($summary_data['total_remaining_usd'] ?? 0) > 0) {
+            $total_remaining = $summary_data['total_remaining_usd'];
+            $remaining_currency = ' $';
+        } else {
+            $total_remaining = $summary_data['total_remaining_iqd'];
+            $remaining_currency = ' د.ع';
+        }
+        echo '<tr><th>کۆی پارەی ماوە</th><td class="number">' . number_format($total_remaining, 2) . $remaining_currency . '</td></tr>';
         
         echo '</table>';
         echo '</body>';
@@ -190,6 +209,10 @@ try {
         echo '</tr>';
         
         // Data rows - Columns ordered from right to left as requested
+        $total_kg = 0;
+        $total_remaining_usd = 0;
+        $total_remaining_iqd = 0;
+        
         foreach ($data as $index => $row) {
             echo '<tr>';
             echo '<td>' . htmlspecialchars($row['location_name'] ?? '') . '</td>'; // Location (rightmost)
@@ -201,7 +224,43 @@ try {
             echo '<td>' . htmlspecialchars($row['material_name'] ?? '') . '</td>'; // Material name (نوع مشتريات)
             echo '<td class="number">' . formatRemainingAmount($row) . '</td>'; // Remaining Amount (leftmost)
             echo '</tr>';
+            
+            // Calculate totals
+            $total_kg += floatval($row['kg'] ?? 0);
+            if ($row['type'] === 'دۆلار') {
+                $total_remaining_usd += floatval($row['remaining_usd'] ?? 0);
+            } else {
+                $total_remaining_iqd += floatval($row['remaining_iqd'] ?? 0);
+            }
         }
+        
+        // Add summary rows
+        echo '<tr style="background-color: #f0f0f0; font-weight: bold;">';
+        echo '<td colspan="4" style="text-align: center; background-color: #4CAF50; color: white;">کۆی گشتی</td>';
+        echo '<td class="number" style="background-color: #4CAF50; color: white;">' . number_format($total_kg, 0) . '</td>';
+        echo '<td colspan="2" style="background-color: #4CAF50; color: white;">کۆی ژمارەی کاروانەکان: ' . count($data) . '</td>';
+        echo '<td class="number" style="background-color: #4CAF50; color: white;">';
+        if ($total_remaining_usd > 0) {
+            echo number_format($total_remaining_usd, 2) . ' $';
+        } else {
+            echo number_format($total_remaining_iqd, 0) . ' د.ع';
+        }
+        echo '</td>';
+        echo '</tr>';
+        
+        // Add detailed summary row
+        echo '<tr style="background-color: #e8f5e8;">';
+        echo '<td colspan="4" style="text-align: center; font-weight: bold;">تەفسیلی کۆی گشتی</td>';
+        echo '<td class="number" style="font-weight: bold;">' . number_format($total_kg / 1000, 2) . ' طەن</td>';
+        echo '<td colspan="2" style="text-align: center; font-weight: bold;">' . number_format($total_kg, 0) . ' کیلۆ</td>';
+        echo '<td class="number" style="font-weight: bold;">';
+        if ($total_remaining_usd > 0) {
+            echo number_format($total_remaining_usd, 2) . ' $';
+        } else {
+            echo number_format($total_remaining_iqd, 0) . ' د.ع';
+        }
+        echo '</td>';
+        echo '</tr>';
         
         echo '</table>';
         echo '</body>';
