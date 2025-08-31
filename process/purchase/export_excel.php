@@ -117,11 +117,7 @@ try {
         $summary_sql = "SELECT 
             COUNT(DISTINCT p.company_id) as total_companies,
             SUM(CASE WHEN p.payment_type = 'قەرز' THEN p.remaining_usd ELSE 0 END) as total_debt,
-            COUNT(DISTINCT CASE WHEN p.payment_type = 'قەرز' AND p.remaining_usd > 0 THEN p.company_id END) as indebted_companies,
-            COUNT(*) as total_records,
-            SUM(p.kg) as total_kg,
-            SUM(CASE WHEN p.type = 'دۆلار' THEN p.remaining_usd ELSE 0 END) as total_remaining_usd,
-            SUM(CASE WHEN p.type = 'دینار' THEN p.remaining_iqd ELSE 0 END) as total_remaining_iqd
+            COUNT(DISTINCT CASE WHEN p.payment_type = 'قەرز' AND p.remaining_usd > 0 THEN p.company_id END) as indebted_companies
         FROM purchases p
         LEFT JOIN company c ON p.company_id = c.id
         LEFT JOIN locations l ON p.location = l.name
@@ -134,43 +130,52 @@ try {
         $summary_stmt->execute($params);
         $summary_data = $summary_stmt->fetch(PDO::FETCH_ASSOC);
         
-        // Start Excel content for summary
+        // Start Excel content for summary with proper table formatting
         echo '<!DOCTYPE html>';
         echo '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
         echo '<head>';
         echo '<meta charset="UTF-8">';
         echo '<style>';
-        echo 'table { border-collapse: collapse; width: 100%; }';
-        echo 'th, td { border: 1px solid #000; padding: 8px; text-align: center; }';
-        echo 'th { background-color: #4CAF50; color: white; font-weight: bold; }';
-        echo '.number { text-align: right; }';
+        echo 'table { border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; }';
+        echo 'th, td { border: 2px solid #000; padding: 15px; text-align: center; vertical-align: middle; }';
+        echo 'th { background-color: #2196F3; color: white; font-weight: bold; font-size: 14px; }';
+        echo 'td { background-color: #ffffff; color: #000000; font-size: 12px; }';
+        echo '.number { text-align: right; font-family: "Courier New", monospace; font-weight: bold; }';
+        echo '.title-row { background-color: #1976D2; font-size: 18px; }';
+        echo '.date-row { background-color: #42A5F5; font-size: 14px; }';
+        echo '.data-row:nth-child(even) { background-color: #f9f9f9; }';
+        echo '.data-row:nth-child(odd) { background-color: #ffffff; }';
         echo '</style>';
         echo '</head>';
         echo '<body>';
         
-        echo '<table border="1">';
+        echo '<table border="1" style="border-collapse: collapse; width: 100%;">';
         
-        // Summary header
-        echo '<tr><th colspan="2" style="background-color: #2196F3; color: white; font-size: 16px;">کورتەی کڕینەکان</th></tr>';
-        echo '<tr><th>بەروار</th><th>' . date('Y-m-d') . '</th></tr>';
-        echo '<tr><th>کۆی قەرزی ئێمە</th><td class="number">$' . number_format($summary_data['total_debt'] ?? 0, 2) . '</td></tr>';
-        echo '<tr><th>کۆی ژمارەی کۆمپانیاکان</th><td class="number">' . number_format($summary_data['total_companies'] ?? 0, 0) . '</td></tr>';
-        echo '<tr><th>کۆمپانیاکانی قەرزدار</th><td class="number">' . number_format($summary_data['indebted_companies'] ?? 0, 0) . '</td></tr>';
-        echo '<tr><th>کۆی ژمارەی کاروانەکان</th><td class="number">' . number_format($summary_data['total_records'] ?? 0, 0) . '</td></tr>';
-        echo '<tr><th>کۆی کیلۆ</th><td class="number">' . number_format($summary_data['total_kg'] ?? 0, 0) . ' کگم</td></tr>';
-        echo '<tr><th>کۆی طەن</th><td class="number">' . number_format(($summary_data['total_kg'] ?? 0) / 1000, 2) . ' طەن</td></tr>';
+        // Summary title row
+        echo '<tr class="title-row">';
+        echo '<th colspan="2" style="text-align: center; padding: 20px;">کورتەی کڕینەکان</th>';
+        echo '</tr>';
         
-        // Calculate total remaining amount
-        $total_remaining = 0;
-        $remaining_currency = '';
-        if (($summary_data['total_remaining_usd'] ?? 0) > 0) {
-            $total_remaining = $summary_data['total_remaining_usd'];
-            $remaining_currency = ' $';
-        } else {
-            $total_remaining = $summary_data['total_remaining_iqd'];
-            $remaining_currency = ' د.ع';
-        }
-        echo '<tr><th>کۆی پارەی ماوە</th><td class="number">' . number_format($total_remaining, 2) . $remaining_currency . '</td></tr>';
+        // Date row
+        echo '<tr class="date-row">';
+        echo '<th colspan="2" style="text-align: center; padding: 15px;">بەرواری ڕاپۆرت: ' . date('Y-m-d') . '</th>';
+        echo '</tr>';
+        
+        // Summary data rows
+        echo '<tr class="data-row">';
+        echo '<th style="text-align: center; min-width: 200px;">کۆی قەرزی ئێمە</th>';
+        echo '<td class="number" style="min-width: 150px;">$' . number_format($summary_data['total_debt'] ?? 0, 2) . '</td>';
+        echo '</tr>';
+        
+        echo '<tr class="data-row">';
+        echo '<th style="text-align: center;">کۆی ژمارەی کۆمپانیاکان</th>';
+        echo '<td class="number">' . number_format($summary_data['total_companies'] ?? 0, 0) . '</td>';
+        echo '</tr>';
+        
+        echo '<tr class="data-row">';
+        echo '<th style="text-align: center;">کۆمپانیاکانی قەرزدار</th>';
+        echo '<td class="number">' . number_format($summary_data['indebted_companies'] ?? 0, 0) . '</td>';
+        echo '</tr>';
         
         echo '</table>';
         echo '</body>';
@@ -180,99 +185,82 @@ try {
         // Export detailed data
         header('Content-Disposition: attachment; filename="کڕینەکان_' . date('Y-m-d') . '.xls"');
         
-        // Start Excel content for detailed export
+        // Start Excel content for detailed export with proper table formatting
         echo '<!DOCTYPE html>';
         echo '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
         echo '<head>';
         echo '<meta charset="UTF-8">';
         echo '<style>';
-        echo 'table { border-collapse: collapse; width: 100%; }';
-        echo 'th, td { border: 1px solid #000; padding: 8px; text-align: center; }';
-        echo 'th { background-color: #4CAF50; color: white; font-weight: bold; }';
-        echo '.number { text-align: right; }';
+        echo 'table { border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; }';
+        echo 'th, td { border: 2px solid #000; padding: 12px; text-align: center; vertical-align: middle; }';
+        echo 'th { background-color: #4CAF50; color: white; font-weight: bold; font-size: 14px; }';
+        echo 'td { background-color: #ffffff; color: #000000; font-size: 12px; }';
+        echo '.number { text-align: right; font-family: "Courier New", monospace; }';
+        echo '.header-row { background-color: #2E7D32; }';
+        echo '.data-row:nth-child(even) { background-color: #f9f9f9; }';
+        echo '.data-row:nth-child(odd) { background-color: #ffffff; }';
+        echo '.data-row:hover { background-color: #e8f5e8; }';
         echo '</style>';
         echo '</head>';
         echo '<body>';
         
-        echo '<table border="1">';
+        echo '<table border="1" style="border-collapse: collapse; width: 100%;">';
         
-                // Header row - Columns ordered from right to left as requested
-        echo '<tr>';
-        echo '<th>شوێن</th>'; // Location (rightmost)
-        echo '<th>بەروار</th>'; // Date
-        echo '<th>ژ. پسوله</th>'; // Receipt No.
-        echo '<th>شؤفير</th>'; // Driver
-        echo '<th>بڕی مەواد</th>'; // Material Amount
-        echo '<th>مکان مشتريات</th>'; // Purchase Location (Companies)
-        echo '<th>نوع مشتريات</th>'; // Purchase Type
-        echo '<th>پارەی ماوە</th>'; // Remaining Amount (leftmost)
+        // Table title row
+        echo '<tr class="header-row">';
+        echo '<th colspan="8" style="text-align: center; font-size: 18px; padding: 20px;">ڕاپۆرتی کڕینەکان</th>';
         echo '</tr>';
         
-        // Data rows - Columns ordered from right to left as requested
-        $total_kg = 0;
-        $total_remaining_usd = 0;
-        $total_remaining_iqd = 0;
+        // Date range row
+        echo '<tr class="header-row">';
+        echo '<th colspan="8" style="text-align: center; font-size: 14px; padding: 15px;">';
+        if ($from_date && $to_date) {
+            echo 'لە بەرواری: ' . $from_date . ' بۆ بەرواری: ' . $to_date;
+        } elseif ($from_date) {
+            echo 'لە بەرواری: ' . $from_date;
+        } elseif ($to_date) {
+            echo 'بۆ بەرواری: ' . $to_date;
+        } else {
+            echo 'هەموو بەروارەکان';
+        }
+        echo '</th>';
+        echo '</tr>';
         
+        // Header row with proper Excel table formatting
+        echo '<tr class="header-row">';
+        echo '<th style="min-width: 120px;">شوێن</th>';
+        echo '<th style="min-width: 100px;">بەروار</th>';
+        echo '<th style="min-width: 120px;">ژمارەی پسووڵە</th>';
+        echo '<th style="min-width: 120px;">شۆفێر</th>';
+        echo '<th style="min-width: 100px;">بڕی مەواد (کگم)</th>';
+        echo '<th style="min-width: 150px;">کۆمپانیا</th>';
+        echo '<th style="min-width: 120px;">جۆری مەواد</th>';
+        echo '<th style="min-width: 120px;">پارەی ماوە</th>';
+        echo '</tr>';
+        
+        // Data rows with alternating colors and proper formatting
         foreach ($data as $index => $row) {
-            echo '<tr>';
-            echo '<td>' . htmlspecialchars($row['location_name'] ?? '') . '</td>'; // Location (rightmost)
-            echo '<td>' . htmlspecialchars($row['date'] ?? '') . '</td>'; // Date
-            echo '<td>' . htmlspecialchars($row['invoice_number'] ?? '') . '</td>'; // Receipt Number
-            echo '<td>' . htmlspecialchars($row['driver_name'] ?? '') . '</td>'; // Driver Name
-            echo '<td class="number">' . number_format($row['kg'] ?? 0, 0) . '</td>'; // Material Amount in KG
-            echo '<td>' . htmlspecialchars($row['company_name'] ?? '') . '</td>'; // Company name (مکان مشتريات)
-            echo '<td>' . htmlspecialchars($row['material_name'] ?? '') . '</td>'; // Material name (نوع مشتريات)
-            echo '<td class="number">' . formatRemainingAmount($row) . '</td>'; // Remaining Amount (leftmost)
+            $rowClass = ($index % 2 == 0) ? 'data-row' : 'data-row';
+            echo '<tr class="' . $rowClass . '">';
+            echo '<td style="text-align: center;">' . htmlspecialchars($row['location_name'] ?? '') . '</td>';
+            echo '<td style="text-align: center;">' . htmlspecialchars($row['date'] ?? '') . '</td>';
+            echo '<td style="text-align: center;">' . htmlspecialchars($row['invoice_number'] ?? '') . '</td>';
+            echo '<td style="text-align: center;">' . htmlspecialchars($row['driver_name'] ?? '') . '</td>';
+            echo '<td class="number" style="text-align: right;">' . number_format($row['kg'] ?? 0, 0) . '</td>';
+            echo '<td style="text-align: center;">' . htmlspecialchars($row['company_name'] ?? '') . '</td>';
+            echo '<td style="text-align: center;">' . htmlspecialchars($row['material_name'] ?? '') . '</td>';
+            echo '<td class="number" style="text-align: right;">' . formatRemainingAmount($row) . '</td>';
             echo '</tr>';
-            
-            // Calculate totals
-            $total_kg += floatval($row['kg'] ?? 0);
-            if ($row['type'] === 'دۆلار') {
-                $total_remaining_usd += floatval($row['remaining_usd'] ?? 0);
-            } else {
-                $total_remaining_iqd += floatval($row['remaining_iqd'] ?? 0);
-            }
         }
         
-        // Remove summary rows from main table to allow Excel filtering
+        // Summary row
+        echo '<tr class="header-row">';
+        echo '<th colspan="4" style="text-align: center;">کۆی گشتی</th>';
+        echo '<th class="number">' . number_format(array_sum(array_column($data, 'kg')), 0) . ' کگم</th>';
+        echo '<th colspan="3" style="text-align: center;">کۆی ڕیزەکان: ' . count($data) . '</th>';
+        echo '</tr>';
+        
         echo '</table>';
-        
-        // Add summary information below the main table (outside the table for Excel filtering)
-        echo '<br><br>';
-        echo '<table border="1" style="width: 100%; border-collapse: collapse;">';
-        echo '<tr style="background-color: #4CAF50; color: white; font-weight: bold;">';
-        echo '<th colspan="8" style="text-align: center; padding: 12px; font-size: 14px;">کۆی گشتی</th>';
-        echo '</tr>';
-        
-        // Summary row 1
-        echo '<tr style="background-color: #f0f0f0; font-weight: bold;">';
-        echo '<td colspan="4" style="text-align: center; padding: 8px;">کۆی گشتی</td>';
-        echo '<td style="text-align: center; padding: 8px; font-weight: bold;">' . number_format($total_kg, 0) . '</td>';
-        echo '<td colspan="2" style="text-align: center; padding: 8px;">کۆی ژمارەی کاروانەکان: ' . count($data) . '</td>';
-        echo '<td style="text-align: center; padding: 8px; font-weight: bold;">';
-        if ($total_remaining_usd > 0) {
-            echo number_format($total_remaining_usd, 2) . ' $';
-        } else {
-            echo number_format($total_remaining_iqd, 0) . ' د.ع';
-        }
-        echo '</td>';
-        echo '</tr>';
-        
-        // Summary row 2
-        echo '<tr style="background-color: #e8f5e8; font-weight: bold;">';
-        echo '<td colspan="4" style="text-align: center; padding: 8px;">تەفسیلی کۆی گشتی</td>';
-        echo '<td style="text-align: center; padding: 8px; font-weight: bold;">' . number_format($total_kg / 1000, 2) . ' طەن</td>';
-        echo '<td colspan="2" style="text-align: center; padding: 8px;">' . number_format($total_kg, 0) . ' کیلۆ</td>';
-        echo '<td style="text-align: center; padding: 8px; font-weight: bold;">';
-        if ($total_remaining_usd > 0) {
-            echo number_format($total_remaining_usd, 2) . ' $';
-        } else {
-            echo number_format($total_remaining_iqd, 0) . ' د.ع';
-        }
-        echo '</td>';
-        echo '</tr>';
-        echo '</table>';
-        
         echo '</body>';
         echo '</html>';
     }
