@@ -25,6 +25,7 @@ $company_name = $company_row ? $company_row['name'] : '';
     <style>
         body { font-family: 'Rabar', 'Rabar_021', sans-serif; direction: rtl; }
     </style>
+    <link href="../assets/css/kurdish-font.css" rel="stylesheet">
 </head>
 <body>
 <div class="receipt-container">

@@ -32,6 +32,7 @@ $debt_id = isset($_GET['id']) ? $_GET['id'] : null;
     <link href="../assets/css/debt_payment_receipt.css" rel="stylesheet">
     <link rel="icon" href="../../../../public/assets/images/logo.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="../assets/css/kurdish-font.css" rel="stylesheet">
 </head>
 <body>
     <div class="receipt" id="receiptTemplate">

@@ -52,6 +52,7 @@ if ($person_id) {
             border-color: var(--seafoam-green) var(--seafoam-green) #fff !important;
         }
     </style>
+    <link href="../assets/css/kurdish-font.css" rel="stylesheet">
 </head>
 
 <body dir="rtl">

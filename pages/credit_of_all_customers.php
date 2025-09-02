@@ -117,6 +117,7 @@ usort($customers, function($a, $b) {
             }
         }
     </style>
+    <link href="../assets/css/kurdish-font.css" rel="stylesheet">
 </head>
 <body dir="rtl">
 <div id="printSection" class="a4-sheet">

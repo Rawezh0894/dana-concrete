@@ -85,6 +85,7 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
         }
     </style>
 
+    <link href="../assets/css/kurdish-font.css" rel="stylesheet">
 </head>
 <body dir="rtl">
 <?php include '../includes/navbar.php'; ?>

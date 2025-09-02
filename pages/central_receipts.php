@@ -35,6 +35,7 @@ $receipt_id = isset($_GET['id']) ? $_GET['id'] : null;
     <!-- Force portrait orientation for printing -->
  
    
+    <link href="../assets/css/kurdish-font.css" rel="stylesheet">
 </head>
 <body>
     <div class="receipt" id="receiptTemplate">

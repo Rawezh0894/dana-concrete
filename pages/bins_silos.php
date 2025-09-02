@@ -40,6 +40,7 @@ $bins = $pdo->query("SELECT * FROM bins_silos")->fetchAll(PDO::FETCH_ASSOC);
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.rtl.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="../assets/css/kurdish-font.css" rel="stylesheet">
 </head>
 <body dir="rtl">
 <?php include '../includes/navbar.php'; ?>

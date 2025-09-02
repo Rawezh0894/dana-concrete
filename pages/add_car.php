@@ -36,6 +36,7 @@ if (!hasPermission('view_car')) {
     <link href="../assets/css/comon/table.css" rel="stylesheet">
     <link href="../assets/css/comon/style.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="../assets/css/kurdish-font.css" rel="stylesheet">
 </head>
 <body dir="rtl">
 <?php include '../includes/navbar.php'; ?>

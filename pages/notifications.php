@@ -115,6 +115,7 @@ require_once '../config/db_conected.php';
             font-style: italic;
         }
     </style>
+    <link href="../assets/css/kurdish-font.css" rel="stylesheet">
 </head>
 <body dir="rtl">
 <?php include '../includes/navbar.php'; ?>

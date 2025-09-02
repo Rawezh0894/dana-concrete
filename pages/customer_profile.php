@@ -17,7 +17,8 @@ if (!isset($_GET['id']) || empty($_GET['id'])) {
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
         <link href="../assets/css/variables.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    </head>
+        <link href="../assets/css/kurdish-font.css" rel="stylesheet">
+</head>
     <body>
         <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background: linear-gradient(135deg, var(--seafoam-green) 0%, var(--kelly-green) 100%);">
             <div class="text-center bg-white p-5 rounded shadow" style="max-width: 500px;">

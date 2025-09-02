@@ -1,0 +1,207 @@
+/* Kurdish Font - Rabar */
+@font-face {
+    font-family: 'Rabar';
+    src: url('../fonts/Rabar_021.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap; /* Better loading performance */
+}
+
+/* Apply Kurdish font to all elements */
+body, 
+.main-content, 
+.card, 
+.table, 
+.btn, 
+.form-control, 
+.form-select, 
+.form-label,
+.navbar,
+.sidebar,
+.modal,
+.dropdown-menu,
+.alert,
+.badge,
+.pagination,
+.breadcrumb,
+.list-group,
+.input-group,
+.btn-group,
+.nav,
+.nav-tabs,
+.nav-pills,
+.navbar-nav,
+.sidebar-menu,
+.sidebar-link,
+.sidebar-group,
+.sidebar-submenu {
+    font-family: 'Rabar', 'Arial', 'Tahoma', sans-serif !important;
+}
+
+/* Headings with bold weight */
+h1, h2, h3, h4, h5, h6,
+.card-title, 
+.page-header h2,
+.navbar-brand,
+.sidebar-title {
+    font-family: 'Rabar', 'Arial', 'Tahoma', sans-serif !important;
+    font-weight: bold;
+}
+
+/* Buttons with bold weight */
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-success,
+.btn-danger,
+.btn-warning,
+.btn-info,
+.btn-light,
+.btn-dark,
+.btn-outline-primary,
+.btn-outline-secondary,
+.btn-outline-success,
+.btn-outline-danger,
+.btn-outline-warning,
+.btn-outline-info,
+.btn-outline-light,
+.btn-outline-dark {
+    font-family: 'Rabar', 'Arial', 'Tahoma', sans-serif !important;
+    font-weight: bold;
+}
+
+/* Form elements */
+.form-control,
+.form-select,
+.form-label,
+.form-check-label,
+.input-group-text,
+.form-text,
+.invalid-feedback,
+.valid-feedback {
+    font-family: 'Rabar', 'Arial', 'Tahoma', sans-serif !important;
+}
+
+/* Table elements */
+.table th,
+.table td,
+.table thead th,
+.table tbody td,
+.table-striped tbody tr:nth-of-type(odd) td {
+    font-family: 'Rabar', 'Arial', 'Tahoma', sans-serif !important;
+}
+
+/* Text utilities */
+.text-muted,
+small,
+.lead,
+.display-1,
+.display-2,
+.display-3,
+.display-4,
+.display-5,
+.display-6 {
+    font-family: 'Rabar', 'Arial', 'Tahoma', sans-serif !important;
+}
+
+/* Navigation elements */
+.navbar-nav .nav-link,
+.sidebar-menu .sidebar-link,
+.sidebar-group-toggle,
+.dropdown-item,
+.pagination .page-link,
+.breadcrumb-item {
+    font-family: 'Rabar', 'Arial', 'Tahoma', sans-serif !important;
+}
+
+/* Modal elements */
+.modal-title,
+.modal-body,
+.modal-footer,
+.modal-header {
+    font-family: 'Rabar', 'Arial', 'Tahoma', sans-serif !important;
+}
+
+/* Alert elements */
+.alert,
+.alert-primary,
+.alert-secondary,
+.alert-success,
+.alert-danger,
+.alert-warning,
+.alert-info,
+.alert-light,
+.alert-dark {
+    font-family: 'Rabar', 'Arial', 'Tahoma', sans-serif !important;
+}
+
+/* Card elements */
+.card-header,
+.card-body,
+.card-footer,
+.card-title,
+.card-text {
+    font-family: 'Rabar', 'Arial', 'Tahoma', sans-serif !important;
+}
+
+/* List elements */
+.list-group-item,
+.dropdown-menu .dropdown-item {
+    font-family: 'Rabar', 'Arial', 'Tahoma', sans-serif !important;
+}
+
+/* Badge elements */
+.badge,
+.badge-primary,
+.badge-secondary,
+.badge-success,
+.badge-danger,
+.badge-warning,
+.badge-info,
+.badge-light,
+.badge-dark {
+    font-family: 'Rabar', 'Arial', 'Tahoma', sans-serif !important;
+}
+
+/* Custom classes for better Kurdish text rendering */
+.kurdish-text {
+    font-family: 'Rabar', 'Arial', 'Tahoma', sans-serif !important;
+    direction: rtl;
+    text-align: right;
+}
+
+.kurdish-text-bold {
+    font-family: 'Rabar', 'Arial', 'Tahoma', sans-serif !important;
+    font-weight: bold;
+    direction: rtl;
+    text-align: right;
+}
+
+/* Ensure proper RTL support */
+[dir="rtl"] {
+    font-family: 'Rabar', 'Arial', 'Tahoma', sans-serif !important;
+}
+
+/* Fix for specific elements that might override the font */
+.swal2-title,
+.swal2-content,
+.swal2-confirm,
+.swal2-cancel {
+    font-family: 'Rabar', 'Arial', 'Tahoma', sans-serif !important;
+}
+
+/* DataTables support */
+.dataTables_wrapper,
+.dataTables_filter,
+.dataTables_length,
+.dataTables_info,
+.dataTables_paginate {
+    font-family: 'Rabar', 'Arial', 'Tahoma', sans-serif !important;
+}
+
+/* Select2 support */
+.select2-container,
+.select2-selection,
+.select2-results {
+    font-family: 'Rabar', 'Arial', 'Tahoma', sans-serif !important;
+}

@@ -82,6 +82,7 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             max-width: 200px;
         }
     </style>
+    <link href="../assets/css/kurdish-font.css" rel="stylesheet">
 </head>
 <body>
 <!-- Print & Refresh Buttons (outside container) -->

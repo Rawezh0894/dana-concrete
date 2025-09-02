@@ -65,6 +65,7 @@ if (!hasPermission('view_income_from_cars')) {
             }
         }
     </style>
+    <link href="../assets/css/kurdish-font.css" rel="stylesheet">
 </head>
 <body dir="rtl">
 <?php include '../includes/navbar.php'; ?>

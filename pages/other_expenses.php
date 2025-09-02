@@ -77,6 +77,7 @@ if (!isset($_SESSION['user_id'])) {
         }
     </style>
   
+    <link href="../assets/css/kurdish-font.css" rel="stylesheet">
 </head>
 <body dir="rtl">
 <?php include '../includes/navbar.php'; ?>
