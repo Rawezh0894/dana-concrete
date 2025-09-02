@@ -98,6 +98,11 @@ function loadStockHistory() {
     const startDate = $('#filter_start_date').val() || '';
     const endDate = $('#filter_end_date').val() || '';
     
+    // Add loading animation to table
+    const tbody = $('#stockHistoryTable tbody');
+    tbody.addClass('loading');
+    tbody.html('<tr><td colspan="8" class="text-center"><i class="fas fa-spinner fa-spin fa-2x"></i><br>چاوەڕوان بە...</td></tr>');
+    
     $.ajax({
         url: '../process/monthly_stock/get_stock_history.php',
         type: 'GET',
@@ -108,14 +113,18 @@ function loadStockHistory() {
         },
         dataType: 'json',
         success: function(response) {
+            tbody.removeClass('loading');
             if (response.success) {
                 displayStockHistory(response.data);
             } else {
                 console.error('Error loading stock history:', response.message);
+                tbody.html('<tr><td colspan="8" class="text-center text-danger"><i class="fas fa-exclamation-triangle fa-2x"></i><br>هەڵەیەک ڕویدا</td></tr>');
             }
         },
         error: function() {
+            tbody.removeClass('loading');
             console.error('Error loading stock history');
+            tbody.html('<tr><td colspan="8" class="text-center text-danger"><i class="fas fa-exclamation-triangle fa-2x"></i><br>هەڵەیەک لە پەیوەندی بە سێرڤەرەوە ڕویدا</td></tr>');
         }
     });
 }
