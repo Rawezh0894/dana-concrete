@@ -19,7 +19,6 @@ $(document).ready(function() {
 // Map stock history row for table display
 function mapStockHistoryRow(row, idx) {
     return {
-        '#': idx + 1,
         'bin_name': row.bin_name || '',
         'material_type': row.material_type || '',
         'amount': formatNumber(row.amount || 0) + ' کیلۆ',
@@ -114,7 +113,7 @@ function loadStockHistory() {
     const endDate = $('#filter_end_date').val() || '';
     
     // Show loading state
-    const columns = ['#', 'bin_name', 'material_type', 'amount', 'total_value', 'average_price', 'month_year', 'recorded_date', 'created_by_username'];
+    const columns = ['bin_name', 'material_type', 'amount', 'total_value', 'average_price', 'month_year', 'recorded_date', 'created_by_username'];
     TableController.showLoading('#stockHistoryTable', columns);
     
     $.ajax({
