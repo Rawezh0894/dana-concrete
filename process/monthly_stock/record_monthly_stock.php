@@ -43,6 +43,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Get the result message
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         
+        // Close cursor to avoid "pending result sets" error
+        $stmt->closeCursor();
+        
         // Create notification
         createDetailedNotification(
             $pdo,

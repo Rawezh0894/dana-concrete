@@ -53,6 +53,9 @@ try {
     $stmt->execute($params);
     $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
+    // Close cursor to avoid "pending result sets" error
+    $stmt->closeCursor();
+    
     // Get current stock for comparison
     $current_stock_sql = "SELECT id, name, material_type, amount, total_value, average_price FROM bins_silos";
     if ($bin_id) {
