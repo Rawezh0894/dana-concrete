@@ -227,7 +227,7 @@ function exportPurchaseMonthlyReport() {
         const a = document.createElement('a');
         a.style.display = 'none';
         a.href = url;
-        a.download = `ڕاپۆرتی_مانگانەی_کڕینەکان_${new Date().toISOString().split('T')[0]}.xls`;
+        a.download = `ڕاپۆرتی_مانگانەی_کڕینەکان_و_شۆفێرەکان_${new Date().toISOString().split('T')[0]}.xls`;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
