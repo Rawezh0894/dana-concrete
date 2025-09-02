@@ -16,6 +16,21 @@ $(document).ready(function() {
     });
 });
 
+// Map stock history row for table display
+function mapStockHistoryRow(row, idx) {
+    return {
+        '#': idx + 1,
+        'bin_name': row.bin_name || '',
+        'material_type': row.material_type || '',
+        'amount': formatNumber(row.amount || 0) + ' کیلۆ',
+        'total_value': formatNumber(row.total_value || 0) + ' د.ع',
+        'average_price': formatNumber(row.average_price || 0) + ' د.ع',
+        'month_year': row.month_year || '',
+        'recorded_date': formatDate(row.recorded_date),
+        'created_by_username': row.created_by_username || 'سیستەم'
+    };
+}
+
 // Record monthly stock
 function recordMonthlyStock() {
     const monthYear = $('#month_year').val();
@@ -92,11 +107,15 @@ function recordMonthlyStock() {
     });
 }
 
-// Load stock history
+// Load stock history with TableController
 function loadStockHistory() {
     const binId = $('#filter_bin').val() || '';
     const startDate = $('#filter_start_date').val() || '';
     const endDate = $('#filter_end_date').val() || '';
+    
+    // Show loading state
+    const columns = ['#', 'bin_name', 'material_type', 'amount', 'total_value', 'average_price', 'month_year', 'recorded_date', 'created_by_username'];
+    TableController.showLoading('#stockHistoryTable', columns);
     
     $.ajax({
         url: '../process/monthly_stock/get_stock_history.php',
@@ -109,50 +128,27 @@ function loadStockHistory() {
         dataType: 'json',
         success: function(response) {
             if (response.success) {
-                displayStockHistory(response.data);
+                const data = response.data || [];
+                const mapped = data.map(mapStockHistoryRow);
+                TableController.renderWithPagination('#stockHistoryTable', mapped, columns, { 
+                    pageSize: 10,
+                    onRenderComplete: function() {
+                        // Any additional actions after table render
+                    }
+                });
             } else {
-                console.error('Error loading stock history:', response.message);
+                TableController.renderWithPagination('#stockHistoryTable', [], columns, { pageSize: 10 });
+                Swal.fire('هەڵە!', response.message || 'ناتوانرێت زانیاری بخوێنرێتەوە', 'error');
             }
         },
         error: function() {
-            console.error('Error loading stock history');
+            TableController.renderWithPagination('#stockHistoryTable', [], columns, { pageSize: 10 });
+            Swal.fire('هەڵە!', 'هەڵەیەک ڕووی دا لە کۆنێکتکردن.', 'error');
         }
     });
 }
 
-// Display stock history in table
-function displayStockHistory(data) {
-    const tbody = $('#stockHistoryTable tbody');
-    tbody.empty();
-    
-    if (data.length === 0) {
-        tbody.append(`
-            <tr>
-                <td colspan="8" class="text-center text-muted">
-                    <i class="fas fa-inbox fa-2x mb-2"></i><br>
-                    هیچ تۆمارێک نەدۆزرایەوە
-                </td>
-            </tr>
-        `);
-        return;
-    }
-    
-    data.forEach(function(item) {
-        const row = `
-            <tr>
-                <td>${item.bin_name || ''}</td>
-                <td>${item.material_type || ''}</td>
-                <td class="text-end">${formatNumber(item.amount || 0)}</td>
-                <td class="text-end">${formatNumber(item.total_value || 0)} د.ع</td>
-                <td class="text-end">${formatNumber(item.average_price || 0)} د.ع</td>
-                <td>${item.month_year || ''}</td>
-                <td>${formatDate(item.recorded_date)}</td>
-                <td>${item.created_by_username || 'سیستەم'}</td>
-            </tr>
-        `;
-        tbody.append(row);
-    });
-}
+
 
 // Load summary data
 function loadSummaryData() {
@@ -163,18 +159,20 @@ function loadSummaryData() {
         success: function(response) {
             if (response.success) {
                 // Update summary cards
-                $('#total-bins').text(response.current_stock.length);
+                $('#total-bins').text(response.current_stock ? response.current_stock.length : 0);
                 
                 // Count unique months
-                const uniqueMonths = [...new Set(response.data.map(item => item.month_year))];
+                const uniqueMonths = response.data ? [...new Set(response.data.map(item => item.month_year))] : [];
                 $('#recorded-months').text(uniqueMonths.length);
                 
                 // Calculate current total amount
-                const currentTotalAmount = response.current_stock.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0);
+                const currentTotalAmount = response.current_stock ? 
+                    response.current_stock.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0) : 0;
                 $('#current-total-amount').text(formatNumber(currentTotalAmount));
                 
                 // Calculate current total value
-                const currentTotalValue = response.current_stock.reduce((sum, item) => sum + parseFloat(item.total_value || 0), 0);
+                const currentTotalValue = response.current_stock ? 
+                    response.current_stock.reduce((sum, item) => sum + parseFloat(item.total_value || 0), 0) : 0;
                 $('#current-total-value').text(formatNumber(currentTotalValue) + ' د.ع');
             }
         },

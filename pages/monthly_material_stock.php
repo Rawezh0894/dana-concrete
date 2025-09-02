@@ -75,6 +75,72 @@ $bins = $bins_stmt->fetchAll(PDO::FETCH_ASSOC);
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
             color: white;
         }
+        
+        /* Table Controller Styles */
+        .table-search-input {
+            margin-top: 5px;
+            font-size: 0.85rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 4px 8px;
+        }
+        
+        .table-search-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .table-pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            margin-top: 15px;
+        }
+        
+        .table-pagination button {
+            min-width: 35px;
+            height: 35px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        
+        .table-pagination button.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+            color: white;
+        }
+        
+        .page-size-selector {
+            margin-bottom: 10px;
+            max-width: 100px;
+        }
+        
+        .table-empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #6c757d;
+            font-style: italic;
+        }
+        
+        .table-empty-state i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        
+        /* Selected row styling */
+        .table tbody tr.selected {
+            background-color: rgba(102, 126, 234, 0.1);
+            border-left: 4px solid #667eea;
+        }
+        
+        /* Loading spinner */
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -240,6 +306,7 @@ $bins = $bins_stmt->fetchAll(PDO::FETCH_ASSOC);
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="../assets/js/comon/table-controler.js"></script>
     <script src="../assets/js/monthly_stock/monthly_stock.js"></script>
 </body>
 </html>
