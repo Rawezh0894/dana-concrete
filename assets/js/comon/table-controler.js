@@ -250,7 +250,7 @@ const TableController = {
             const filtered = getFilteredData();
             const infoDiv = document.createElement('div');
             infoDiv.className = 'text-muted mb-2';
-            infoDiv.innerHTML = `نوێنراوە: ${((currentPage - 1) * pageSize) + 1}-${Math.min(currentPage * pageSize, filtered.length)} لە ${filtered.length} زانیاری`;
+            // infoDiv.innerHTML = `نوێنراوە: ${((currentPage - 1) * pageSize) + 1}-${Math.min(currentPage * pageSize, filtered.length)} لە ${filtered.length} زانیاری`;
             pagination.appendChild(infoDiv);
             
             // Prev button with SVG
