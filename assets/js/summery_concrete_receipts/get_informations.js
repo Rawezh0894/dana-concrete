@@ -670,8 +670,8 @@ function copySelectedReceipts() {
         }
     });
     
-    // Format only receipt numbers for copying
-    const copyText = receiptNumbers.join('\n');
+    // Format only receipt numbers for copying (horizontally)
+    const copyText = receiptNumbers.join(' ');
     
     // Copy to clipboard
     if (navigator.clipboard && window.isSecureContext) {
