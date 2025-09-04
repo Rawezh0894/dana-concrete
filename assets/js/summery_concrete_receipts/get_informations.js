@@ -661,71 +661,22 @@ function copySelectedReceipts() {
         return;
     }
     
-    // Collect data from selected receipts
-    const receiptsData = [];
+    // Collect only receipt numbers
+    const receiptNumbers = [];
     selectedReceipts.each(function() {
-        const receiptData = $(this).data('receipt-data');
-        receiptsData.push(receiptData);
+        const receiptNumber = $(this).data('receipt-number');
+        if (receiptNumber) {
+            receiptNumbers.push(receiptNumber);
+        }
     });
     
-    // Format data for copying
-    let copyText = `وردەکاری پسووڵەکانی کڕیار: ${currentCustomerName}\n`;
-    copyText += `کۆی پسووڵەکان: ${receiptsData.length}\n`;
-    copyText += `بەروار: ${new Date().toLocaleDateString('ku-IQ')}\n`;
-    copyText += `${'='.repeat(50)}\n\n`;
-    
-    // Add table header
-    copyText += `ژمارەی پسووڵە\tشوێن\tوەرگر\tبڕی مەتر سێجا\tنرخی مەتر سێجا\tتێبینی\tدۆخی پارەدان\tفۆرمۆلا\tمیکسەر\tپەمپ\tبەروار\n`;
-    copyText += `${'-'.repeat(100)}\n`;
-    
-    // Add receipt data
-    receiptsData.forEach((receipt, index) => {
-        const priceDisplay = receipt.price_per_meter ? 
-            `$${receipt.price_per_meter.toLocaleString()}` : 
-            'نەدەراوە';
-        
-        const paymentStatus = receipt.payment_status === 'paid' ? 
-            'پارەی داوە' : 
-            'پارەی نەداوە';
-        
-        const formattedDate = formatDate(receipt.created_at);
-        
-        copyText += `${receipt.receipt_number}\t`;
-        copyText += `${receipt.location || '-'}\t`;
-        copyText += `${receipt.receiver_name || '-'}\t`;
-        copyText += `${receipt.meter_amount} م³\t`;
-        copyText += `${priceDisplay}\t`;
-        copyText += `${receipt.notes || '-'}\t`;
-        copyText += `${paymentStatus}\t`;
-        copyText += `${receipt.formula_name || '-'}\t`;
-        copyText += `${receipt.mixer_info || '-'}\t`;
-        copyText += `${receipt.pump_info || '-'}\t`;
-        copyText += `${formattedDate}\n`;
-    });
-    
-    // Add summary
-    const totalMeterAmount = receiptsData.reduce((sum, receipt) => sum + parseFloat(receipt.meter_amount || 0), 0);
-    const totalPrice = receiptsData.reduce((sum, receipt) => {
-        const price = parseFloat(receipt.price_per_meter || 0);
-        const amount = parseFloat(receipt.meter_amount || 0);
-        return sum + (price * amount);
-    }, 0);
-    
-    copyText += `\n${'='.repeat(50)}\n`;
-    copyText += `کۆی گشتی مەتر سێجا: ${totalMeterAmount.toFixed(2)} م³\n`;
-    copyText += `کۆی گشتی نرخ: $${totalPrice.toLocaleString()}\n`;
+    // Format only receipt numbers for copying
+    const copyText = receiptNumbers.join('\n');
     
     // Copy to clipboard
     if (navigator.clipboard && window.isSecureContext) {
         // Use modern clipboard API
-        navigator.clipboard.writeText(copyText).then(() => {
-            Swal.fire({
-                icon: 'success',
-                title: 'سەرکەوتوو!',
-                text: `زانیاری ${receiptsData.length} پسووڵە کۆپی کرا بۆ کلیپبۆرد`,
-                confirmButtonText: 'باشە'
-            });
-        }).catch(err => {
+        navigator.clipboard.writeText(copyText).catch(err => {
             console.error('Failed to copy: ', err);
             fallbackCopyTextToClipboard(copyText);
         });
@@ -751,14 +702,7 @@ function fallbackCopyTextToClipboard(text) {
     
     try {
         const successful = document.execCommand('copy');
-        if (successful) {
-            Swal.fire({
-                icon: 'success',
-                title: 'سەرکەوتوو!',
-                text: `زانیاری ${$('.receipt-checkbox:checked').length} پسووڵە کۆپی کرا بۆ کلیپبۆرد`,
-                confirmButtonText: 'باشە'
-            });
-        } else {
+        if (!successful) {
             throw new Error('Copy command was unsuccessful');
         }
     } catch (err) {
