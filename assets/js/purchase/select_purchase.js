@@ -180,8 +180,47 @@ document.addEventListener('click', async function(e) {
                     for (const [dataKey, inputId] of Object.entries(fieldMappings)) {
                         const input = document.getElementById(inputId);
                         if (input) {
-                            const value = data[dataKey];
+                            let value = data[dataKey];
+                            
+                            // For select2 elements, we need to set the option text, not just the value
                             if (input.tagName === 'SELECT') {
+                                if (inputId === 'edit_driver_id' && data.driver_name) {
+                                    // For driver, set the option text to match the name
+                                    $(input).find('option').each(function() {
+                                        if ($(this).text().trim() === data.driver_name) {
+                                            value = $(this).val();
+                                        }
+                                    });
+                                } else if (inputId === 'edit_location_id' && data.location_name) {
+                                    // For location, set the option text to match the name
+                                    $(input).find('option').each(function() {
+                                        if ($(this).text().trim() === data.location_name) {
+                                            value = $(this).val();
+                                        }
+                                    });
+                                } else if (inputId === 'edit_company_id' && data.company_name) {
+                                    // For company, set the option text to match the name
+                                    $(input).find('option').each(function() {
+                                        if ($(this).text().trim() === data.company_name) {
+                                            value = $(this).val();
+                                        }
+                                    });
+                                } else if (inputId === 'edit_material_id' && data.material_name) {
+                                    // For material, set the option text to match the name
+                                    $(input).find('option').each(function() {
+                                        if ($(this).text().trim() === data.material_name) {
+                                            value = $(this).val();
+                                        }
+                                    });
+                                } else if (inputId === 'edit_bin_id' && data.bin_name) {
+                                    // For bin, set the option text to match the name
+                                    $(input).find('option').each(function() {
+                                        if ($(this).text().trim() === data.bin_name) {
+                                            value = $(this).val();
+                                        }
+                                    });
+                                }
+                                
                                 setSelect2Value(input, value);
                             } else {
                                 input.value = value ?? '';

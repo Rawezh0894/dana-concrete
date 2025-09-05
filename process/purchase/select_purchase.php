@@ -23,7 +23,9 @@ if (isset($_GET['id'])) {
         SELECT 
             p.*,
             l.id as location_id, 
+            l.name as location_name,
             d.id as driver_id,
+            d.name as driver_name,
             c.name as company_name,
             m.name as material_name,
             b.name as bin_name
@@ -41,10 +43,15 @@ if (isset($_GET['id'])) {
     if ($row) {
         // Ensure all required fields are present with proper defaults
         $row['location_id'] = $row['location_id'] ?? '';
+        $row['location_name'] = $row['location_name'] ?? '';
         $row['driver_id'] = $row['driver_id'] ?? '';
+        $row['driver_name'] = $row['driver_name'] ?? '';
         $row['company_id'] = $row['company_id'] ?? '';
+        $row['company_name'] = $row['company_name'] ?? '';
         $row['material_id'] = $row['material_id'] ?? '';
+        $row['material_name'] = $row['material_name'] ?? '';
         $row['bin_id'] = $row['bin_id'] ?? '';
+        $row['bin_name'] = $row['bin_name'] ?? '';
         $row['invoice_number'] = $row['invoice_number'] ?? '';
         $row['date'] = $row['date'] ?? '';
         $row['type'] = $row['type'] ?? '';
