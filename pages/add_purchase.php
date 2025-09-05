@@ -843,15 +843,8 @@ $(document).ready(function() {
         }
     }
     
-    // Set default date filters to current month
-    const now = new Date();
-    const currentMonth = now.getMonth() + 1;
-    const currentYear = now.getFullYear();
-    const fromDate = `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`;
-    const toDate = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${new Date(currentYear, currentMonth, 0).getDate()}`;
-    
-    if (!$('#filter_from').val()) $('#filter_from').val(fromDate);
-    if (!$('#filter_to').val()) $('#filter_to').val(toDate);
+
+    // No default date filters - show all records by default
     
     // Apply filters on page load
     setTimeout(applyFilters, 100);
