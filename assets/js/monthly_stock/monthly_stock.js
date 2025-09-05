@@ -26,7 +26,12 @@ function mapStockHistoryRow(row, idx) {
         'average_price': formatNumber(row.average_price || 0) + ' د.ع',
         'month_year': row.month_year || '',
         'recorded_date': formatDate(row.recorded_date),
-        'created_by_username': row.created_by_username || 'سیستەم'
+        'created_by_username': row.created_by_username || 'سیستەم',
+        'actions': `
+            <button class="btn btn-sm btn-danger" onclick="deleteMonthlyStockRecord(${row.id}, '${row.bin_name}', '${row.month_year}')" title="سڕینەوە">
+                <i class="fas fa-trash"></i>
+            </button>
+        `
     };
 }
 
@@ -113,7 +118,7 @@ function loadStockHistory() {
     const endDate = $('#filter_end_date').val() || '';
     
     // Show loading state
-    const columns = ['bin_name', 'material_type', 'amount', 'total_value', 'average_price', 'month_year', 'recorded_date', 'created_by_username'];
+    const columns = ['bin_name', 'material_type', 'amount', 'total_value', 'average_price', 'month_year', 'recorded_date', 'created_by_username', 'actions'];
     TableController.showLoading('#stockHistoryTable', columns);
     
     $.ajax({
@@ -268,4 +273,82 @@ function formatDate(dateString) {
     if (!dateString) return '';
     const date = new Date(dateString);
     return date.toLocaleDateString('ku-Arab-IQ');
+}
+
+// Delete monthly stock record
+function deleteMonthlyStockRecord(recordId, binName, monthYear) {
+    // Show confirmation dialog
+    Swal.fire({
+        title: 'دڵنیابوونەوە',
+        html: `
+            <div style="text-align: right; direction: rtl;">
+                <p>ئایا دڵنیایت کە دەتەوێت ئەم تۆمارە بسڕیتەوە؟</p>
+                <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                    <strong>شوێن:</strong> ${binName}<br>
+                    <strong>مانگ:</strong> ${monthYear}
+                </div>
+                <p style="color: #dc3545; font-weight: bold;">ئەم کردارە ناگەڕێتەوە!</p>
+            </div>
+        `,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'بەڵێ، بسڕەرەوە',
+        cancelButtonText: 'نەخێر',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Show loading
+            Swal.fire({
+                title: 'چاوەڕوان بە...',
+                text: 'تۆمارەکە سڕایەوە',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            // Make delete request
+            $.ajax({
+                url: '../process/monthly_stock/delete_monthly_stock.php',
+                type: 'POST',
+                data: {
+                    record_id: recordId
+                },
+                dataType: 'json',
+                success: function(response) {
+                    Swal.close();
+                    
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'سەرکەوتوو!',
+                            text: response.message,
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                        
+                        // Reload data
+                        loadStockHistory();
+                        loadSummaryData();
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'هەڵە!',
+                            text: response.message
+                        });
+                    }
+                },
+                error: function() {
+                    Swal.close();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'هەڵە!',
+                        text: 'هەڵەیەک لە پەیوەندی بە سێرڤەرەوە ڕویدا'
+                    });
+                }
+            });
+        }
+    });
 }

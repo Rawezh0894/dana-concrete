@@ -288,6 +288,7 @@ $bins = $bins_stmt->fetchAll(PDO::FETCH_ASSOC);
                                             <th>مانگ</th>
                                             <th>بەرواری تۆمارکردن</th>
                                             <th>تۆمارکراو لەلایەن</th>
+                                            <th>کردارەکان</th>
                                         </tr>
                                     </thead>
                                     <tbody>

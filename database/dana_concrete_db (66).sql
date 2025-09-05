@@ -2392,14 +2392,14 @@ CREATE TRIGGER `trg_after_delete_sale` AFTER DELETE ON `sales` FOR EACH ROW BEGI
         UPDATE bins_silos 
         SET amount = amount + v_black_sand_kg, 
             total_value = (amount * average_price)
-        WHERE id = 1;
+        WHERE id = 2;
     END IF;
 
     IF v_brown_sand_kg > 0 THEN
         UPDATE bins_silos 
         SET amount = amount + v_brown_sand_kg, 
             total_value = (amount * average_price)
-        WHERE id = 2;
+        WHERE id = 1;
     END IF;
 
     IF v_gravel_bin3_kg > 0 THEN
