@@ -1,19 +1,4 @@
 async function loadPurchases(filterParams = '') {
-    // Get current month and year
-    const now = new Date();
-    const currentMonth = now.getMonth() + 1; // JavaScript months are 0-indexed
-    const currentYear = now.getFullYear();
-    
-    // Set default filter to current month
-    const fromDate = `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`;
-    const toDate = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${new Date(currentYear, currentMonth, 0).getDate()}`;
-    
-    // Update filter inputs if they exist
-    const fromInput = document.getElementById('filter_from');
-    const toInput = document.getElementById('filter_to');
-    if (fromInput && !fromInput.value) fromInput.value = fromDate;
-    if (toInput && !toInput.value) toInput.value = toDate;
-    
     // Build URL with filters
     let url = '../process/purchase/select_purchase.php';
     if (filterParams) {
@@ -278,7 +263,7 @@ if (fromInput && toInput) {
     toInput.addEventListener('input', loadPurchasesFiltered);
 }
 
-document.addEventListener('DOMContentLoaded', loadPurchasesFiltered);
+document.addEventListener('DOMContentLoaded', loadPurchases);
 
 const clearBtn = document.getElementById('clearFilterBtn');
 if (clearBtn) {
