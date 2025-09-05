@@ -843,10 +843,7 @@ $(document).ready(function() {
         }
     }
     
-
-    // No default date filters - show all records by default
-    
-    // Apply filters on page load
+    // Apply filters on page load (shows all records by default)
     setTimeout(applyFilters, 100);
 });
 </script>
