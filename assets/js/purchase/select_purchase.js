@@ -93,9 +93,11 @@ function initializeEditModalSelect2() {
 // Function to properly set select2 values
 function setSelect2Value(selectElement, value) {
     console.log(`Setting select2 value for ${selectElement.id}:`, value);
+    console.log(`Element type:`, selectElement.tagName);
     console.log(`Select2 initialized:`, $(selectElement).hasClass('select2-hidden-accessible'));
     
     if ($(selectElement).hasClass('select2-hidden-accessible')) {
+        // This is a select2 element (either original SELECT or hidden input)
         $(selectElement).val(value).trigger('change');
         console.log(`Value set via select2 for ${selectElement.id}`);
     } else {
@@ -186,7 +188,9 @@ document.addEventListener('click', async function(e) {
                     if (input) {
                         const value = data[dataKey];
                         console.log(`Found input ${inputId}, setting value:`, value);
-                        if (input.tagName === 'SELECT') {
+                        
+                        // Check if it's a select2 element (either SELECT or hidden input with select2 class)
+                        if (input.tagName === 'SELECT' || input.classList.contains('select2-hidden-accessible')) {
                             setSelect2Value(input, value);
                         } else {
                             input.value = value ?? '';
