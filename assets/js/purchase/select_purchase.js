@@ -95,30 +95,18 @@ function initializeEditModalSelect2() {
 
 // Function to properly set select2 values
 function setSelect2Value(selectElement, value) {
-    console.log('setSelect2Value called:', {
-        elementId: selectElement.id,
-        value: value,
-        isSelect2: $(selectElement).hasClass('select2-hidden-accessible'),
-        currentValue: $(selectElement).val()
-    });
-    
     if ($(selectElement).hasClass('select2-hidden-accessible')) {
         // This is a select2 element
-        console.log('Setting select2 value:', value);
         $(selectElement).val(value).trigger('change');
         
         // Force select2 to update its display
         setTimeout(() => {
-            console.log('Triggering select2 change event');
             $(selectElement).trigger('change.select2');
-            console.log('Select2 value after change:', $(selectElement).val());
         }, 50);
     } else {
         // Regular select element
-        console.log('Setting regular select value:', value);
         selectElement.value = value || '';
         $(selectElement).trigger('change');
-        console.log('Regular select value after change:', selectElement.value);
     }
 }
 
@@ -153,20 +141,6 @@ document.addEventListener('click', async function(e) {
             }
             
             console.log('Purchase data for edit:', data);
-            console.log('Driver data:', {
-                id: data.driver_id,
-                name: data.driver_name,
-                stored_name: data.driver
-            });
-            console.log('Location data:', {
-                id: data.location_id,
-                name: data.location_name,
-                stored_name: data.location
-            });
-            console.log('Company data:', {
-                id: data.company_id,
-                name: data.company_name
-            });
             
             // Show modal first
             const modal = new bootstrap.Modal(document.getElementById('editPurchaseModal'));
@@ -179,31 +153,6 @@ document.addEventListener('click', async function(e) {
                 
                 // Wait for select2 to be fully initialized, then populate fields
                 setTimeout(() => {
-                    // Log available options for debugging
-                    console.log('Available driver options:');
-                    $('#edit_driver_id option').each(function() {
-                        console.log('Driver option:', {
-                            value: $(this).val(),
-                            text: $(this).text().trim()
-                        });
-                    });
-                    
-                    console.log('Available location options:');
-                    $('#edit_location_id option').each(function() {
-                        console.log('Location option:', {
-                            value: $(this).val(),
-                            text: $(this).text().trim()
-                        });
-                    });
-                    
-                    console.log('Available company options:');
-                    $('#edit_company_id option').each(function() {
-                        console.log('Company option:', {
-                            value: $(this).val(),
-                            text: $(this).text().trim()
-                        });
-                    });
-                    
                     // پڕکردنەوەی خانەکان
                     const fieldMappings = {
                         'id': 'edit_id',
@@ -232,87 +181,46 @@ document.addEventListener('click', async function(e) {
                         const input = document.getElementById(inputId);
                         if (input) {
                             let value = data[dataKey];
-                            console.log(`Processing ${inputId} (${dataKey}):`, {
-                                originalValue: value,
-                                inputType: input.tagName,
-                                isSelect2: $(input).hasClass('select2-hidden-accessible')
-                            });
                             
                             // For select2 elements, we need to set the option text, not just the value
                             if (input.tagName === 'SELECT') {
                                 if (inputId === 'edit_driver_id' && data.driver_name) {
-                                    console.log('Looking for driver option with name:', data.driver_name);
                                     // For driver, set the option text to match the name
                                     $(input).find('option').each(function() {
-                                        console.log('Driver option:', {
-                                            value: $(this).val(),
-                                            text: $(this).text().trim(),
-                                            matches: $(this).text().trim() === data.driver_name
-                                        });
                                         if ($(this).text().trim() === data.driver_name) {
                                             value = $(this).val();
-                                            console.log('Found matching driver option:', value);
                                         }
                                     });
                                 } else if (inputId === 'edit_location_id' && data.location_name) {
-                                    console.log('Looking for location option with name:', data.location_name);
                                     // For location, set the option text to match the name
                                     $(input).find('option').each(function() {
-                                        console.log('Location option:', {
-                                            value: $(this).val(),
-                                            text: $(this).text().trim(),
-                                            matches: $(this).text().trim() === data.location_name
-                                        });
                                         if ($(this).text().trim() === data.location_name) {
                                             value = $(this).val();
-                                            console.log('Found matching location option:', value);
                                         }
                                     });
                                 } else if (inputId === 'edit_company_id' && data.company_name) {
-                                    console.log('Looking for company option with name:', data.company_name);
                                     // For company, set the option text to match the name
                                     $(input).find('option').each(function() {
-                                        console.log('Company option:', {
-                                            value: $(this).val(),
-                                            text: $(this).text().trim(),
-                                            matches: $(this).text().trim() === data.company_name
-                                        });
                                         if ($(this).text().trim() === data.company_name) {
                                             value = $(this).val();
-                                            console.log('Found matching company option:', value);
                                         }
                                     });
                                 } else if (inputId === 'edit_material_id' && data.material_name) {
-                                    console.log('Looking for material option with name:', data.material_name);
                                     // For material, set the option text to match the name
                                     $(input).find('option').each(function() {
-                                        console.log('Material option:', {
-                                            value: $(this).val(),
-                                            text: $(this).text().trim(),
-                                            matches: $(this).text().trim() === data.material_name
-                                        });
                                         if ($(this).text().trim() === data.material_name) {
                                             value = $(this).val();
-                                            console.log('Found matching material option:', value);
                                         }
                                     });
                                 } else if (inputId === 'edit_bin_id' && data.bin_name) {
-                                    console.log('Looking for bin option with name:', data.bin_name);
                                     // For bin, set the option text to match the name
                                     $(input).find('option').each(function() {
-                                        console.log('Bin option:', {
-                                            value: $(this).val(),
-                                            text: $(this).text().trim(),
-                                            matches: $(this).text().trim() === data.bin_name
-                                        });
                                         if ($(this).text().trim() === data.bin_name) {
                                             value = $(this).val();
-                                            console.log('Found matching bin option:', value);
                                         }
                                     });
                                 }
                                 
-                                console.log(`Final value for ${inputId}:`, value);
                                 setSelect2Value(input, value);
                             } else {
                                 input.value = value ?? '';
