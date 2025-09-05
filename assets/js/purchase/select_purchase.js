@@ -87,39 +87,26 @@ function initializeEditModalSelect2() {
     if (typeof enableSelect2 === 'function') {
         enableSelect2('#edit_driver_id', '#editPurchaseModal');
         enableSelect2('#edit_location_id', '#editPurchaseModal');
+        enableSelect2('#edit_company_id', '#editPurchaseModal');
+        enableSelect2('#edit_material_id', '#editPurchaseModal');
+        enableSelect2('#edit_bin_id', '#editPurchaseModal');
     }
 }
 
 // Function to properly set select2 values
 function setSelect2Value(selectElement, value) {
-    console.log(`Setting select2 value for ${selectElement.id}:`, value);
-    console.log(`Element type:`, selectElement.tagName);
-    console.log(`Select2 initialized:`, $(selectElement).hasClass('select2-hidden-accessible'));
-    
     if ($(selectElement).hasClass('select2-hidden-accessible')) {
-        // This is a select2 element (either original SELECT or hidden input)
+        // This is a select2 element
         $(selectElement).val(value).trigger('change');
         
         // Force select2 to update its display
         setTimeout(() => {
             $(selectElement).trigger('change.select2');
-            // Additional force refresh
-            $(selectElement).select2('destroy');
-            $(selectElement).select2({
-                dropdownParent: $('#editPurchaseModal'),
-                width: '100%',
-                placeholder: "هەڵبژێرە",
-                dir: "rtl"
-            });
-            $(selectElement).val(value).trigger('change');
-        }, 100);
-        
-        console.log(`Value set via select2 for ${selectElement.id}`);
+        }, 50);
     } else {
-        // If select2 is not initialized yet, set the value directly and trigger change
+        // Regular select element
         selectElement.value = value || '';
         $(selectElement).trigger('change');
-        console.log(`Value set directly for ${selectElement.id}`);
     }
 }
 
@@ -154,8 +141,6 @@ document.addEventListener('click', async function(e) {
             }
             
             console.log('Purchase data for edit:', data);
-            console.log('Driver ID from data:', data.driver_id);
-            console.log('Location ID from data:', data.location_id);
             
             // Show modal first
             const modal = new bootstrap.Modal(document.getElementById('editPurchaseModal'));
@@ -163,84 +148,59 @@ document.addEventListener('click', async function(e) {
             
             // Wait for modal to be fully shown, then initialize select2 and populate fields
             $('#editPurchaseModal').off('shown.bs.modal.edit').on('shown.bs.modal.edit', function() {
-                // Check if elements exist
-                const driverSelect = document.getElementById('edit_driver_id');
-                const locationSelect = document.getElementById('edit_location_id');
-                console.log('Driver select element:', driverSelect);
-                console.log('Location select element:', locationSelect);
-                
-                // Initialize select2 for edit modal
+                // Initialize select2 for edit modal first
                 initializeEditModalSelect2();
                 
-                // Wait a bit for select2 to initialize, then populate fields
+                // Wait for select2 to be fully initialized, then populate fields
                 setTimeout(() => {
-                    // Ensure select2 is fully rendered
-                    $('#edit_driver_id, #edit_location_id').each(function() {
-                        if ($(this).hasClass('select2-hidden-accessible')) {
-                            $(this).select2('destroy');
-                            $(this).select2({
-                                dropdownParent: $('#editPurchaseModal'),
-                                width: '100%',
-                                placeholder: "هەڵبژێرە",
-                                dir: "rtl"
-                            });
-                        }
-                    });
+                    // پڕکردنەوەی خانەکان
+                    const fieldMappings = {
+                        'id': 'edit_id',
+                        'company_id': 'edit_company_id',
+                        'driver_id': 'edit_driver_id',
+                        'location_id': 'edit_location_id',
+                        'invoice_number': 'edit_invoice_number',
+                        'material_id': 'edit_material_id',
+                        'bin_id': 'edit_bin_id',
+                        'date': 'edit_date',
+                        'type': 'edit_type',
+                        'kg': 'edit_kg',
+                        'price_per_kg_iqd': 'edit_price_per_kg_iqd',
+                        'price_per_kg_usd': 'edit_price_per_kg_usd',
+                        'exchange_rate': 'edit_exchange_rate',
+                        'payment_type': 'edit_payment_type',
+                        'price': 'edit_price',
+                        'amount_iqd': 'edit_amount_iqd',
+                        'paid_usd': 'edit_paid_usd',
+                        'paid_iqd': 'edit_paid_iqd',
+                        'remaining_usd': 'edit_remaining_usd',
+                        'remaining_iqd': 'edit_remaining_iqd'
+                    };
                     
-                    // Wait a bit more for select2 to be ready, then populate fields
-                    setTimeout(() => {
-                        // پڕکردنەوەی خانەکان
-                const fieldMappings = {
-                    'id': 'edit_id',
-                    'company_id': 'edit_company_id',
-                    'driver_id': 'edit_driver_id',
-                    'location_id': 'edit_location_id',
-                    'invoice_number': 'edit_invoice_number',
-                    'material_id': 'edit_material_id',
-                    'bin_id': 'edit_bin_id',
-                    'date': 'edit_date',
-                    'type': 'edit_type',
-                    'kg': 'edit_kg',
-                    'price_per_kg_iqd': 'edit_price_per_kg_iqd',
-                    'price_per_kg_usd': 'edit_price_per_kg_usd',
-                    'exchange_rate': 'edit_exchange_rate',
-                    'payment_type': 'edit_payment_type',
-                    'price': 'edit_price',
-                    'amount_iqd': 'edit_amount_iqd',
-                    'paid_usd': 'edit_paid_usd',
-                    'paid_iqd': 'edit_paid_iqd',
-                    'remaining_usd': 'edit_remaining_usd',
-                    'remaining_iqd': 'edit_remaining_iqd'
-                };
-                
-                for (const [dataKey, inputId] of Object.entries(fieldMappings)) {
-                    const input = document.getElementById(inputId);
-                    if (input) {
-                        const value = data[dataKey];
-                        console.log(`Found input ${inputId}, setting value:`, value);
-                        
-                        // Check if it's a select2 element (either SELECT or hidden input with select2 class)
-                        if (input.tagName === 'SELECT' || input.classList.contains('select2-hidden-accessible')) {
-                            setSelect2Value(input, value);
+                    for (const [dataKey, inputId] of Object.entries(fieldMappings)) {
+                        const input = document.getElementById(inputId);
+                        if (input) {
+                            const value = data[dataKey];
+                            if (input.tagName === 'SELECT') {
+                                setSelect2Value(input, value);
+                            } else {
+                                input.value = value ?? '';
+                            }
+                            console.log(`Setting ${inputId} to:`, value);
                         } else {
-                            input.value = value ?? '';
+                            console.warn(`Input element not found: ${inputId}`);
                         }
-                        console.log(`Setting ${inputId} to:`, value);
-                    } else {
-                        console.warn(`Input element not found: ${inputId}`);
                     }
-                }
-                        
-                        // Handle dynamic price per kg fields
-                        handleEditTypeChange();
-                        
-                        // Trigger change events for dynamic fields
-                        const typeSelect = document.getElementById('edit_type');
-                        if (typeSelect) {
-                            typeSelect.dispatchEvent(new Event('change'));
-                        }
-                    }, 100);
-                }, 200);
+                    
+                    // Handle dynamic price per kg fields
+                    handleEditTypeChange();
+                    
+                    // Trigger change events for dynamic fields
+                    const typeSelect = document.getElementById('edit_type');
+                    if (typeSelect) {
+                        typeSelect.dispatchEvent(new Event('change'));
+                    }
+                }, 300);
             });
             
         } catch (error) {
