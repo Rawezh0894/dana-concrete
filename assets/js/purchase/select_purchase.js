@@ -99,6 +99,21 @@ function setSelect2Value(selectElement, value) {
     if ($(selectElement).hasClass('select2-hidden-accessible')) {
         // This is a select2 element (either original SELECT or hidden input)
         $(selectElement).val(value).trigger('change');
+        
+        // Force select2 to update its display
+        setTimeout(() => {
+            $(selectElement).trigger('change.select2');
+            // Additional force refresh
+            $(selectElement).select2('destroy');
+            $(selectElement).select2({
+                dropdownParent: $('#editPurchaseModal'),
+                width: '100%',
+                placeholder: "هەڵبژێرە",
+                dir: "rtl"
+            });
+            $(selectElement).val(value).trigger('change');
+        }, 100);
+        
         console.log(`Value set via select2 for ${selectElement.id}`);
     } else {
         // If select2 is not initialized yet, set the value directly and trigger change
@@ -159,7 +174,22 @@ document.addEventListener('click', async function(e) {
                 
                 // Wait a bit for select2 to initialize, then populate fields
                 setTimeout(() => {
-                // پڕکردنەوەی خانەکان
+                    // Ensure select2 is fully rendered
+                    $('#edit_driver_id, #edit_location_id').each(function() {
+                        if ($(this).hasClass('select2-hidden-accessible')) {
+                            $(this).select2('destroy');
+                            $(this).select2({
+                                dropdownParent: $('#editPurchaseModal'),
+                                width: '100%',
+                                placeholder: "هەڵبژێرە",
+                                dir: "rtl"
+                            });
+                        }
+                    });
+                    
+                    // Wait a bit more for select2 to be ready, then populate fields
+                    setTimeout(() => {
+                        // پڕکردنەوەی خانەکان
                 const fieldMappings = {
                     'id': 'edit_id',
                     'company_id': 'edit_company_id',
@@ -200,16 +230,17 @@ document.addEventListener('click', async function(e) {
                         console.warn(`Input element not found: ${inputId}`);
                     }
                 }
-                
-                    // Handle dynamic price per kg fields
-                    handleEditTypeChange();
-                    
-                    // Trigger change events for dynamic fields
-                    const typeSelect = document.getElementById('edit_type');
-                    if (typeSelect) {
-                        typeSelect.dispatchEvent(new Event('change'));
-                    }
-                }, 100);
+                        
+                        // Handle dynamic price per kg fields
+                        handleEditTypeChange();
+                        
+                        // Trigger change events for dynamic fields
+                        const typeSelect = document.getElementById('edit_type');
+                        if (typeSelect) {
+                            typeSelect.dispatchEvent(new Event('change'));
+                        }
+                    }, 100);
+                }, 200);
             });
             
         } catch (error) {
