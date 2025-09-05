@@ -92,10 +92,17 @@ function initializeEditModalSelect2() {
 
 // Function to properly set select2 values
 function setSelect2Value(selectElement, value) {
+    console.log(`Setting select2 value for ${selectElement.id}:`, value);
+    console.log(`Select2 initialized:`, $(selectElement).hasClass('select2-hidden-accessible'));
+    
     if ($(selectElement).hasClass('select2-hidden-accessible')) {
         $(selectElement).val(value).trigger('change');
+        console.log(`Value set via select2 for ${selectElement.id}`);
     } else {
+        // If select2 is not initialized yet, set the value directly and trigger change
         selectElement.value = value || '';
+        $(selectElement).trigger('change');
+        console.log(`Value set directly for ${selectElement.id}`);
     }
 }
 
@@ -130,61 +137,76 @@ document.addEventListener('click', async function(e) {
             }
             
             console.log('Purchase data for edit:', data);
+            console.log('Driver ID from data:', data.driver_id);
+            console.log('Location ID from data:', data.location_id);
             
-            // پڕکردنەوەی خانەکان
-            const fieldMappings = {
-                'id': 'edit_id',
-                'company_id': 'edit_company_id',
-                'driver_id': 'edit_driver_id',
-                'location_id': 'edit_location_id',
-                'invoice_number': 'edit_invoice_number',
-                'material_id': 'edit_material_id',
-                'bin_id': 'edit_bin_id',
-                'date': 'edit_date',
-                'type': 'edit_type',
-                'kg': 'edit_kg',
-                'price_per_kg_iqd': 'edit_price_per_kg_iqd',
-                'price_per_kg_usd': 'edit_price_per_kg_usd',
-                'exchange_rate': 'edit_exchange_rate',
-                'payment_type': 'edit_payment_type',
-                'price': 'edit_price',
-                'amount_iqd': 'edit_amount_iqd',
-                'paid_usd': 'edit_paid_usd',
-                'paid_iqd': 'edit_paid_iqd',
-                'remaining_usd': 'edit_remaining_usd',
-                'remaining_iqd': 'edit_remaining_iqd'
-            };
-            
-            for (const [dataKey, inputId] of Object.entries(fieldMappings)) {
-                const input = document.getElementById(inputId);
-                if (input) {
-                    const value = data[dataKey];
-                    if (input.tagName === 'SELECT') {
-                        setSelect2Value(input, value);
-                    } else {
-                        input.value = value ?? '';
-                    }
-                    console.log(`Setting ${inputId} to:`, value);
-                } else {
-                    console.warn(`Input element not found: ${inputId}`);
-                }
-            }
-            
-            // Handle dynamic price per kg fields
-            handleEditTypeChange();
-            
-            // Trigger change events for dynamic fields
-            const typeSelect = document.getElementById('edit_type');
-            if (typeSelect) {
-                typeSelect.dispatchEvent(new Event('change'));
-            }
-            
-            // Initialize select2 for edit modal
-            initializeEditModalSelect2();
-            
-            // show modal
+            // Show modal first
             const modal = new bootstrap.Modal(document.getElementById('editPurchaseModal'));
             modal.show();
+            
+            // Wait for modal to be fully shown, then initialize select2 and populate fields
+            $('#editPurchaseModal').off('shown.bs.modal.edit').on('shown.bs.modal.edit', function() {
+                // Check if elements exist
+                const driverSelect = document.getElementById('edit_driver_id');
+                const locationSelect = document.getElementById('edit_location_id');
+                console.log('Driver select element:', driverSelect);
+                console.log('Location select element:', locationSelect);
+                
+                // Initialize select2 for edit modal
+                initializeEditModalSelect2();
+                
+                // Wait a bit for select2 to initialize, then populate fields
+                setTimeout(() => {
+                // پڕکردنەوەی خانەکان
+                const fieldMappings = {
+                    'id': 'edit_id',
+                    'company_id': 'edit_company_id',
+                    'driver_id': 'edit_driver_id',
+                    'location_id': 'edit_location_id',
+                    'invoice_number': 'edit_invoice_number',
+                    'material_id': 'edit_material_id',
+                    'bin_id': 'edit_bin_id',
+                    'date': 'edit_date',
+                    'type': 'edit_type',
+                    'kg': 'edit_kg',
+                    'price_per_kg_iqd': 'edit_price_per_kg_iqd',
+                    'price_per_kg_usd': 'edit_price_per_kg_usd',
+                    'exchange_rate': 'edit_exchange_rate',
+                    'payment_type': 'edit_payment_type',
+                    'price': 'edit_price',
+                    'amount_iqd': 'edit_amount_iqd',
+                    'paid_usd': 'edit_paid_usd',
+                    'paid_iqd': 'edit_paid_iqd',
+                    'remaining_usd': 'edit_remaining_usd',
+                    'remaining_iqd': 'edit_remaining_iqd'
+                };
+                
+                for (const [dataKey, inputId] of Object.entries(fieldMappings)) {
+                    const input = document.getElementById(inputId);
+                    if (input) {
+                        const value = data[dataKey];
+                        console.log(`Found input ${inputId}, setting value:`, value);
+                        if (input.tagName === 'SELECT') {
+                            setSelect2Value(input, value);
+                        } else {
+                            input.value = value ?? '';
+                        }
+                        console.log(`Setting ${inputId} to:`, value);
+                    } else {
+                        console.warn(`Input element not found: ${inputId}`);
+                    }
+                }
+                
+                    // Handle dynamic price per kg fields
+                    handleEditTypeChange();
+                    
+                    // Trigger change events for dynamic fields
+                    const typeSelect = document.getElementById('edit_type');
+                    if (typeSelect) {
+                        typeSelect.dispatchEvent(new Event('change'));
+                    }
+                }, 100);
+            });
             
         } catch (error) {
             console.error('Error loading purchase for edit:', error);
