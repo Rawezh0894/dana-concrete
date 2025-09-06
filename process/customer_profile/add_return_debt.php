@@ -67,7 +67,9 @@ try {
     
     $total_debt_usd = $opening_debt_usd + $sales_remaining;
 
-    if ($total_paid_usd > $total_debt_usd) {
+    // Allow small tolerance for floating-point precision (1 cent)
+    $tolerance = 0.01;
+    if ($total_paid_usd > ($total_debt_usd + $tolerance)) {
         error_log('Payment amount exceeds total debt: payment=' . $total_paid_usd . ', debt=' . $total_debt_usd);
         echo json_encode(['success' => false, 'msg' => 'بڕی پارەی داوە نابێت زیاتر بێت لە قەرز!']);
         exit;

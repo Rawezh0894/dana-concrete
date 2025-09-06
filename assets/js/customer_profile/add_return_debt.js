@@ -175,9 +175,10 @@ document.getElementById('addCustomerDebtForm').addEventListener('submit', async 
         return;
     }
 
-    // Check if payment exceeds total debt
+    // Check if payment exceeds total debt (with floating-point precision tolerance)
     const totalDebt = CUSTOMER_CURRENT_DEBT + CUSTOMER_OPENING_DEBT_USD;
-    if (total_paid_usd > totalDebt) {
+    const tolerance = 0.01; // Allow 1 cent tolerance for floating-point precision
+    if (total_paid_usd > (totalDebt + tolerance)) {
         Swal.fire('هەڵە', `بڕی پارەی داوە (${total_paid_usd.toFixed(2)} USD) نابێت زیاتر بێت لە قەرز (${totalDebt.toFixed(2)} USD)!`, 'error');
         submitting = false;
         if (submitBtn) {
