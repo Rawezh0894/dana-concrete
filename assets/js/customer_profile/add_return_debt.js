@@ -80,16 +80,19 @@ function calculateRemainingDebt() {
     // Calculate remaining debt (داخیلکردنی قەرزی پێشوو)
     const remainingDebt = (CUSTOMER_CURRENT_DEBT + CUSTOMER_OPENING_DEBT_USD) - total_payment;
     
+    // Handle floating-point precision issues - if very close to zero, treat as zero
+    const adjustedRemainingDebt = Math.abs(remainingDebt) < 0.01 ? 0 : remainingDebt;
+    
     // Format and display remaining debt
     const remainingElement = document.getElementById('customer_debt_remaining');
     if (remainingElement) {
-        remainingElement.value = remainingDebt.toFixed(2) + ' USD';
+        remainingElement.value = adjustedRemainingDebt.toFixed(2) + ' USD';
         
         // Change color based on remaining debt
-        if (remainingDebt < 0) {
+        if (adjustedRemainingDebt < 0) {
             remainingElement.style.color = 'red';
             remainingElement.style.fontWeight = 'bold';
-        } else if (remainingDebt === 0) {
+        } else if (adjustedRemainingDebt === 0) {
             remainingElement.style.color = 'green';
             remainingElement.style.fontWeight = 'bold';
         } else {
