@@ -175,6 +175,18 @@ document.getElementById('addCustomerDebtForm').addEventListener('submit', async 
         return;
     }
 
+    // Check if payment exceeds total debt
+    const totalDebt = CUSTOMER_CURRENT_DEBT + CUSTOMER_OPENING_DEBT_USD;
+    if (total_paid_usd > totalDebt) {
+        Swal.fire('هەڵە', `بڕی پارەی داوە (${total_paid_usd.toFixed(2)} USD) نابێت زیاتر بێت لە قەرز (${totalDebt.toFixed(2)} USD)!`, 'error');
+        submitting = false;
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+        }
+        return;
+    }
+
     const formData = new FormData();
     formData.append('customer_id', customer_id);
     formData.append('date', date);
