@@ -285,14 +285,22 @@ class ReceiptManager {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
+            const textResponse = await response.text();
             let data;
             try {
-                data = await response.json();
+                data = JSON.parse(textResponse);
             } catch (jsonError) {
                 console.error('JSON parsing error:', jsonError);
-                const textResponse = await response.text();
                 console.error('Raw response:', textResponse);
-                throw new Error('داتای نەدراوە بە شێوەیەکی دروست (JSON)');
+                
+                // Check if response contains HTML error (PHP error)
+                if (textResponse.includes('<br />') || textResponse.includes('<b>')) {
+                    throw new Error('هەڵەی سێرڤەر: داتاکان بە شێوەیەکی دروست نەگەڕانەوە');
+                } else if (textResponse.trim() === '') {
+                    throw new Error('داتای خاڵی گەڕایەوە لە سێرڤەرەوە');
+                } else {
+                    throw new Error('داتای نەدراوە بە شێوەیەکی دروست (JSON)');
+                }
             }
 
             this.renderSalesData(data);
@@ -310,6 +318,13 @@ class ReceiptManager {
         if (!response || typeof response !== 'object') {
             console.error('Invalid response format:', response);
             this.showError('داتای نەدراوە بە شێوەیەکی دروست');
+            return;
+        }
+
+        // Check for error in response
+        if (response.error) {
+            console.error('Server error:', response.error);
+            this.showError(response.error);
             return;
         }
 

@@ -1,24 +1,37 @@
 <?php
-ini_set('display_errors', 1);
+// Disable error display to prevent HTML output in JSON response
+ini_set('display_errors', 0);
 error_reporting(E_ALL);
+// Log errors instead of displaying them
+ini_set('log_errors', 1);
+
 require_once '../../config/db_conected.php';
 header('Content-Type: application/json; charset=utf-8');
 $customer_id = isset($_GET['customer_id']) ? intval($_GET['customer_id']) : 0;
-if (!$customer_id) { echo json_encode([]); exit; }
+if (!$customer_id) { 
+    echo json_encode(['error' => 'Customer ID is required', 'sales_data' => []]); 
+    exit; 
+}
 
 $type = isset($_GET['type']) ? $_GET['type'] : 'all';
 $month = isset($_GET['month']) ? $_GET['month'] : 'all';
 $date_from = isset($_GET['date_from']) ? $_GET['date_from'] : '';
 $date_to = isset($_GET['date_to']) ? $_GET['date_to'] : '';
 
-// Get customer information including opening debt, name, and mobile
-$customer_sql = "SELECT opening_debt_usd, name, mobile1 FROM customers WHERE id = :customer_id";
-$customer_stmt = $pdo->prepare($customer_sql);
-$customer_stmt->execute(['customer_id' => $customer_id]);
-$customer_data = $customer_stmt->fetch(PDO::FETCH_ASSOC);
-$opening_debt = is_numeric($customer_data['opening_debt_usd']) ? floatval($customer_data['opening_debt_usd']) : 0;
-$company_name = $customer_data['name'] ?? '';
-$mobile = $customer_data['mobile1'] ?? '';
+try {
+    // Get customer information including opening debt, name, and mobile
+    $customer_sql = "SELECT opening_debt_usd, name, mobile1 FROM customers WHERE id = :customer_id";
+    $customer_stmt = $pdo->prepare($customer_sql);
+    $customer_stmt->execute(['customer_id' => $customer_id]);
+    $customer_data = $customer_stmt->fetch(PDO::FETCH_ASSOC);
+    $opening_debt = is_numeric($customer_data['opening_debt_usd']) ? floatval($customer_data['opening_debt_usd']) : 0;
+    $company_name = $customer_data['name'] ?? '';
+    $mobile = $customer_data['mobile1'] ?? '';
+} catch (Exception $e) {
+    error_log("Database error in select_sale.php: " . $e->getMessage());
+    echo json_encode(['error' => 'Database error occurred', 'sales_data' => []]);
+    exit;
+}
 
 $sql = "SELECT 
         s.order_date,
@@ -62,15 +75,16 @@ $sql .= " ORDER BY s.order_date ASC";
 // Debug: Log the SQL query
 error_log("Receipt SQL Query: " . $sql);
 
-$stmt = $pdo->prepare($sql);
-$stmt->execute($params);
-$data = [];
+try {
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    $data = [];
 
-// Debug: Log the number of rows before grouping
-$rowCount = $stmt->rowCount();
-error_log("Receipt rows before grouping: " . $rowCount);
+    // Debug: Log the number of rows before grouping
+    $rowCount = $stmt->rowCount();
+    error_log("Receipt rows before grouping: " . $rowCount);
 
-while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     $quantity = number_format($row['total_quantity'], 2) . ' م³';
     $rezh = $row['strength_mpa'] ? $row['strength_mpa'] . ' MPa' : ($row['strength_kg'] ? $row['strength_kg'] . ' Kg' : '');
     $ppu = is_numeric($row['price_per_unit']) ? '$' . number_format($row['price_per_unit'], 2, '.', ',') : '';
@@ -93,18 +107,23 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         'invoice_number' => $row['invoice_numbers'],
         'order_date' => $row['order_date']
     ];
+    }
+
+    // Debug: Log the final data count
+    error_log("Receipt final grouped rows: " . count($data));
+
+    $response = [
+        'sales_data' => $data,
+        'opening_debt' => '$' . number_format($opening_debt, 2, '.', ','),
+        'customer_info' => [
+            'company_name' => $company_name,
+            'mobile' => $mobile
+        ]
+    ];
+
+    echo json_encode($response, JSON_UNESCAPED_UNICODE);
+    
+} catch (Exception $e) {
+    error_log("Database error in select_sale.php main query: " . $e->getMessage());
+    echo json_encode(['error' => 'Database error occurred', 'sales_data' => []]);
 }
-
-// Debug: Log the final data count
-error_log("Receipt final grouped rows: " . count($data));
-
-$response = [
-    'sales_data' => $data,
-    'opening_debt' => '$' . number_format($opening_debt, 2, '.', ','),
-    'customer_info' => [
-        'company_name' => $company_name,
-        'mobile' => $mobile
-    ]
-];
-
-echo json_encode($response, JSON_UNESCAPED_UNICODE);
