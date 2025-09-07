@@ -21,7 +21,6 @@ class ReceiptManager {
         try {
             this.createTooltip();
             this.bindEvents();
-            this.loadLocations();
             this.loadSalesData();
         } catch (error) {
             console.error('Error initializing ReceiptManager:', error);
@@ -44,7 +43,7 @@ class ReceiptManager {
 
     bindEvents() {
         // Bind filter events
-        const filters = ['transaction-type-filter', 'month-filter', 'date-from-filter', 'date-to-filter', 'location-filter'];
+        const filters = ['transaction-type-filter', 'month-filter', 'date-from-filter', 'date-to-filter'];
         filters.forEach(filterId => {
             const element = document.getElementById(filterId);
             if (element) {
@@ -261,30 +260,6 @@ class ReceiptManager {
         }
     }
 
-    async loadLocations() {
-        try {
-            const response = await fetch(`../process/receipts/get_locations.php?customer_id=${CUSTOMER_ID}`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            
-            const data = await response.json();
-            const locationFilter = document.getElementById('location-filter');
-            
-            if (locationFilter && data.locations) {
-                locationFilter.innerHTML = '';
-                data.locations.forEach(location => {
-                    const option = document.createElement('option');
-                    option.value = location;
-                    option.textContent = location;
-                    locationFilter.appendChild(option);
-                });
-            }
-        } catch (error) {
-            console.error('Error loading locations:', error);
-        }
-    }
-
     async loadSalesData() {
         if (this.isLoading) return;
 
@@ -295,15 +270,13 @@ class ReceiptManager {
             const month = this.getSelectedMonth();
             const date_from = this.getDateFrom();
             const date_to = this.getDateTo();
-            const locations = this.getSelectedLocations();
             
             const params = new URLSearchParams({
                 customer_id: CUSTOMER_ID,
                 type,
                 month,
                 date_from,
-                date_to,
-                locations: locations.join(',')
+                date_to
             });
 
             const response = await fetch(`../process/receipts/select_sale.php?${params.toString()}`);
@@ -490,14 +463,6 @@ class ReceiptManager {
     getDateTo() {
         const dateToElem = document.getElementById('date-to-filter');
         return dateToElem ? dateToElem.value : '';
-    }
-
-    getSelectedLocations() {
-        const locationFilter = document.getElementById('location-filter');
-        if (!locationFilter) return [];
-        
-        const selectedOptions = Array.from(locationFilter.selectedOptions);
-        return selectedOptions.map(option => option.value);
     }
 }
 

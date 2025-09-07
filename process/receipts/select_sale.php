@@ -10,7 +10,6 @@ $type = isset($_GET['type']) ? $_GET['type'] : 'all';
 $month = isset($_GET['month']) ? $_GET['month'] : 'all';
 $date_from = isset($_GET['date_from']) ? $_GET['date_from'] : '';
 $date_to = isset($_GET['date_to']) ? $_GET['date_to'] : '';
-$locations = isset($_GET['locations']) ? $_GET['locations'] : '';
 
 // Get customer information including opening debt, name, and mobile
 $customer_sql = "SELECT opening_debt_usd, name, mobile1 FROM customers WHERE id = :customer_id";
@@ -57,19 +56,6 @@ if ($date_to) {
     $sql .= " AND s.order_date <= :date_to";
     $params['date_to'] = $date_to;
 }
-
-// Handle location filtering
-if ($locations && $locations !== '') {
-    $locationArray = explode(',', $locations);
-    $locationArray = array_filter(array_map('trim', $locationArray)); // Remove empty values and trim
-    
-    if (!empty($locationArray)) {
-        $placeholders = str_repeat('?,', count($locationArray) - 1) . '?';
-        $sql .= " AND s.location IN ($placeholders)";
-        // Add location parameters directly to the array
-        $params = array_merge($params, $locationArray);
-    }
-}
 $sql .= " GROUP BY s.order_date, f.strength_mpa, f.strength_kg, s.price_per_unit";
 $sql .= " ORDER BY s.order_date ASC";
 
@@ -77,7 +63,7 @@ $sql .= " ORDER BY s.order_date ASC";
 error_log("Receipt SQL Query: " . $sql);
 
 $stmt = $pdo->prepare($sql);
-$stmt->execute(array_values($params));
+$stmt->execute($params);
 $data = [];
 
 // Debug: Log the number of rows before grouping
