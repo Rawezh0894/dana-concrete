@@ -160,6 +160,12 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             <input type="checkbox" id="show-invoice-number" checked style="margin-left: 0.5rem;">
             نیشاندانی ژمارەی پسووڵە
         </label>
+        
+        <!-- Force Debt Pagination Checkbox -->
+        <label for="force-debt-pagination" style="font-weight:bold; margin-right: 1rem; margin-left: 1rem;">
+            <input type="checkbox" id="force-debt-pagination" style="margin-left: 0.5rem;">
+            جیاکردنەوەی زانیارییەکانی قەرز
+        </label>
     </div>
 
    
@@ -201,23 +207,21 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
     </table>
     
     <!-- زانیارییەکانی قەرز -->
-    <div class="debt-summary">
-        <div class="debt-summary-row">
-            <div class="debt-summary-box">
-                <i class="fa fa-history"></i>
-                <span class="debt-label">قەرزی پێشوو:</span>
-                <span class="debt-value" id="opening-debt">$0.00</span>
-            </div>
-            <div class="debt-summary-box">
-                <i class="fa fa-money-bill-wave"></i>
-                <span class="debt-label">پارەی ماوە:</span>
-                <span class="debt-value" id="remaining-amount">$0.00</span>
-            </div>
-            <div class="debt-summary-box total-box">
-                <i class="fa fa-calculator"></i>
-                <span class="debt-label">کۆی گشتی پارەی ماوە:</span>
-                <span class="debt-value" id="total-debt">$0.00</span>
-            </div>
+    <div class="debt-summary" id="debt-summary-container">
+        <!-- Pagination controls -->
+        <div class="debt-pagination" id="debt-pagination" style="display: none;">
+            <button id="prev-page-btn" onclick="changeDebtPage(-1)">
+                <i class="fa fa-chevron-right"></i> پێشوو
+            </button>
+            <span class="page-info" id="debt-page-info">لاپەڕەی 1 لە 1</span>
+            <button id="next-page-btn" onclick="changeDebtPage(1)">
+                دواتر <i class="fa fa-chevron-left"></i>
+            </button>
+        </div>
+        
+        <!-- Debt summary pages -->
+        <div id="debt-summary-pages">
+            <!-- Pages will be dynamically generated -->
         </div>
     </div>
     
@@ -241,6 +245,7 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 var dateFrom = document.getElementById('date-from-filter');
                 var dateTo = document.getElementById('date-to-filter');
                 var showInvoiceCheckbox = document.getElementById('show-invoice-number');
+                var forceDebtPaginationCheckbox = document.getElementById('force-debt-pagination');
                 
                 if (type) type.value = 'all';
                 if (month) month.value = 'all';
@@ -251,6 +256,11 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                     toggleInvoiceNumberColumn(true);
                     // Clear localStorage preference
                     localStorage.removeItem('showInvoiceNumber');
+                }
+                if (forceDebtPaginationCheckbox) {
+                    forceDebtPaginationCheckbox.checked = false;
+                    // Clear localStorage preference
+                    localStorage.removeItem('forceDebtPagination');
                 }
                 
                 // Reload data
@@ -281,6 +291,32 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 toggleInvoiceNumberColumn(isChecked);
                 // Save preference to localStorage
                 localStorage.setItem('showInvoiceNumber', isChecked.toString());
+            });
+        }
+        
+        // Force debt pagination toggle
+        var forceDebtPaginationCheckbox = document.getElementById('force-debt-pagination');
+        if (forceDebtPaginationCheckbox) {
+            // Load saved preference
+            const savedPaginationPreference = localStorage.getItem('forceDebtPagination');
+            if (savedPaginationPreference !== null) {
+                forceDebtPaginationCheckbox.checked = savedPaginationPreference === 'true';
+            }
+            
+            forceDebtPaginationCheckbox.addEventListener('change', function() {
+                const isChecked = this.checked;
+                // Save preference to localStorage
+                localStorage.setItem('forceDebtPagination', isChecked.toString());
+                
+                // Reload debt summary with new pagination setting
+                if (window.receiptManager && window.OPENING_DEBT !== undefined && window.REMAINING_TOTAL !== undefined) {
+                    const debtData = {
+                        openingDebt: window.OPENING_DEBT,
+                        remainingAmount: window.REMAINING_TOTAL,
+                        totalDebt: window.OPENING_DEBT + window.REMAINING_TOTAL
+                    };
+                    window.receiptManager.initializeDebtPagination(debtData);
+                }
             });
         }
         
@@ -415,6 +451,21 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         
         // Join rows with line breaks
         return rows.join('<br>');
+    }
+    
+    // Function to change debt summary pages
+    function changeDebtPage(direction) {
+        if (!window.receiptManager) return;
+        
+        const currentPage = window.DEBT_CURRENT_PAGE || 0;
+        const totalPages = window.DEBT_TOTAL_PAGES || 1;
+        const newPage = currentPage + direction;
+        
+        if (newPage >= 0 && newPage < totalPages) {
+            window.DEBT_CURRENT_PAGE = newPage;
+            window.receiptManager.showDebtPage(newPage);
+            window.receiptManager.updateDebtPaginationControls();
+        }
     }
 </script>
 <script src="../assets/js/receipts/receipts.js"></script>

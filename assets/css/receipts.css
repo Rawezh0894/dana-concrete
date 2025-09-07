@@ -426,6 +426,94 @@ body {
 .debt-summary-box.total-box .debt-value {
     color: #fff;
 }
+
+/* Pagination controls for debt summary */
+.debt-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin: 1rem 0;
+    padding: 0.5rem;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+}
+
+.debt-pagination button {
+    padding: 0.5rem 1rem;
+    background: var(--seafoam-green);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease;
+}
+
+.debt-pagination button:hover {
+    background: #0056b3;
+}
+
+.debt-pagination button:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+}
+
+.debt-pagination .page-info {
+    font-weight: bold;
+    color: var(--seafoam-green);
+    font-size: 1rem;
+}
+
+/* Debt summary page styling */
+.debt-summary-page {
+    display: none;
+}
+
+.debt-summary-page.active {
+    display: block;
+}
+
+/* Page break controls for print */
+@media print {
+    .debt-summary-page-break {
+        page-break-before: always;
+    }
+    
+    .debt-summary-page-break:first-child {
+        page-break-before: avoid;
+    }
+    
+    .debt-pagination {
+        display: none !important;
+    }
+    
+    .debt-summary {
+        margin: 0.5rem 0;
+        padding: 0.5rem;
+    }
+    
+    .debt-summary-row {
+        gap: 0.5rem;
+    }
+    
+    .debt-summary-box {
+        padding: 0.5rem 0.8rem;
+        min-width: 150px;
+        font-size: 0.9rem;
+    }
+    
+    /* Show all pages when printing */
+    .debt-summary-page {
+        display: block !important;
+    }
+    
+    /* Add some spacing between pages in print */
+    .debt-summary-page:not(:first-child) {
+        margin-top: 2rem;
+    }
+}
 .table td,
 .table th {
     white-space: normal;

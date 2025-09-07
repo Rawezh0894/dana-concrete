@@ -447,17 +447,146 @@ class ReceiptManager {
         window.REMAINING_TOTAL = remainingValue;
         window.OPENING_DEBT = openingDebtValue;
         
-        // Update UI elements
-        const elements = {
-            'opening-debt': this.formatCurrency(openingDebtValue),
-            'remaining-amount': this.formatCurrency(remainingValue),
-            'total-debt': this.formatCurrency(totalRemaining)
+        // Create debt summary data for pagination
+        const debtData = {
+            openingDebt: openingDebtValue,
+            remainingAmount: remainingValue,
+            totalDebt: totalRemaining
         };
-
-        Object.entries(elements).forEach(([id, value]) => {
-            const element = document.getElementById(id);
-            if (element) element.textContent = value;
+        
+        // Initialize pagination
+        this.initializeDebtPagination(debtData);
+    }
+    
+    initializeDebtPagination(debtData) {
+        const container = document.getElementById('debt-summary-pages');
+        const pagination = document.getElementById('debt-pagination');
+        
+        if (!container) return;
+        
+        // Calculate if we need pagination (if content would overflow)
+        const needsPagination = this.checkIfPaginationNeeded();
+        
+        if (needsPagination) {
+            // Create multiple pages
+            this.createDebtPages(debtData);
+            pagination.style.display = 'flex';
+            window.DEBT_CURRENT_PAGE = 0;
+            window.DEBT_TOTAL_PAGES = 2; // We'll split into 2 pages
+            this.updateDebtPaginationControls();
+        } else {
+            // Show single page
+            this.createSingleDebtPage(debtData);
+            pagination.style.display = 'none';
+        }
+    }
+    
+    checkIfPaginationNeeded() {
+        // Check if we need pagination based on content size and layout
+        const openingDebt = window.OPENING_DEBT || 0;
+        const remainingAmount = window.REMAINING_TOTAL || 0;
+        const totalDebt = openingDebt + remainingAmount;
+        
+        // Check if any of the debt values are very large (would cause layout issues)
+        const hasLargeValues = totalDebt > 1000000 || openingDebt > 500000 || remainingAmount > 500000;
+        
+        // Check if we have significant amounts that would benefit from pagination
+        const hasSignificantDebt = totalDebt > 100000;
+        
+        // Force pagination if we have very large values or if user preference is set
+        const forcePagination = localStorage.getItem('forceDebtPagination') === 'true';
+        
+        return hasLargeValues || hasSignificantDebt || forcePagination;
+    }
+    
+    createDebtPages(debtData) {
+        const container = document.getElementById('debt-summary-pages');
+        if (!container) return;
+        
+        // Page 1: Opening debt and remaining amount
+        const page1 = document.createElement('div');
+        page1.className = 'debt-summary-page';
+        page1.innerHTML = `
+            <div class="debt-summary-row">
+                <div class="debt-summary-box">
+                    <i class="fa fa-history"></i>
+                    <span class="debt-label">قەرزی پێشوو:</span>
+                    <span class="debt-value">${this.formatCurrency(debtData.openingDebt)}</span>
+                </div>
+                <div class="debt-summary-box">
+                    <i class="fa fa-money-bill-wave"></i>
+                    <span class="debt-label">پارەی ماوە:</span>
+                    <span class="debt-value">${this.formatCurrency(debtData.remainingAmount)}</span>
+                </div>
+            </div>
+        `;
+        
+        // Page 2: Total debt
+        const page2 = document.createElement('div');
+        page2.className = 'debt-summary-page debt-summary-page-break';
+        page2.innerHTML = `
+            <div class="debt-summary-row">
+                <div class="debt-summary-box total-box">
+                    <i class="fa fa-calculator"></i>
+                    <span class="debt-label">کۆی گشتی پارەی ماوە:</span>
+                    <span class="debt-value">${this.formatCurrency(debtData.totalDebt)}</span>
+                </div>
+            </div>
+        `;
+        
+        container.innerHTML = '';
+        container.appendChild(page1);
+        container.appendChild(page2);
+        
+        // Show only first page initially
+        this.showDebtPage(0);
+    }
+    
+    createSingleDebtPage(debtData) {
+        const container = document.getElementById('debt-summary-pages');
+        if (!container) return;
+        
+        container.innerHTML = `
+            <div class="debt-summary-row">
+                <div class="debt-summary-box">
+                    <i class="fa fa-history"></i>
+                    <span class="debt-label">قەرزی پێشوو:</span>
+                    <span class="debt-value">${this.formatCurrency(debtData.openingDebt)}</span>
+                </div>
+                <div class="debt-summary-box">
+                    <i class="fa fa-money-bill-wave"></i>
+                    <span class="debt-label">پارەی ماوە:</span>
+                    <span class="debt-value">${this.formatCurrency(debtData.remainingAmount)}</span>
+                </div>
+                <div class="debt-summary-box total-box">
+                    <i class="fa fa-calculator"></i>
+                    <span class="debt-label">کۆی گشتی پارەی ماوە:</span>
+                    <span class="debt-value">${this.formatCurrency(debtData.totalDebt)}</span>
+                </div>
+            </div>
+        `;
+    }
+    
+    showDebtPage(pageIndex) {
+        const pages = document.querySelectorAll('.debt-summary-page');
+        pages.forEach((page, index) => {
+            page.style.display = index === pageIndex ? 'block' : 'none';
         });
+    }
+    
+    updateDebtPaginationControls() {
+        const prevBtn = document.getElementById('prev-page-btn');
+        const nextBtn = document.getElementById('next-page-btn');
+        const pageInfo = document.getElementById('debt-page-info');
+        
+        if (!prevBtn || !nextBtn || !pageInfo) return;
+        
+        const currentPage = window.DEBT_CURRENT_PAGE || 0;
+        const totalPages = window.DEBT_TOTAL_PAGES || 1;
+        
+        prevBtn.disabled = currentPage === 0;
+        nextBtn.disabled = currentPage === totalPages - 1;
+        pageInfo.textContent = `لاپەڕەی ${currentPage + 1} لە ${totalPages}`;
     }
 
     getSelectedTransactionType() {
