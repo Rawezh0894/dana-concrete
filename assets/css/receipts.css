@@ -295,6 +295,23 @@ body {
         font-size: 0.9rem;
     }
     
+    .debt-summary-single-row {
+        gap: 0.5rem;
+        flex-direction: column;
+    }
+    
+    .debt-summary-item {
+        padding: 0.5rem 0.8rem;
+        min-width: 150px;
+        font-size: 0.9rem;
+    }
+    
+    .debt-summary-separator {
+        width: 30px;
+        height: 30px;
+        font-size: 1.2rem;
+    }
+    
     .receipt-notes {
         margin-top: 1rem;
         padding: 0.5rem 1rem;
@@ -378,6 +395,49 @@ body {
     flex-wrap: wrap;
 }
 
+.debt-summary-single-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    text-align: center;
+}
+
+.debt-summary-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #fff;
+    border: 1px solid var(--seafoam-green);
+    border-radius: 6px;
+    padding: 0.8rem 1rem;
+    min-width: 180px;
+    box-shadow: 0 1px 4px #003b7310;
+}
+
+.debt-summary-item.total-item {
+    background: var(--seafoam-green);
+    color: #fff;
+    border: 1px solid var(--seafoam-green);
+    min-width: 200px;
+}
+
+.debt-summary-separator {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--seafoam-green);
+    background: #f4f8fc;
+    border: 2px solid var(--seafoam-green);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px #003b7320;
+}
+
 .debt-summary-box {
     display: flex;
     align-items: center;
@@ -405,6 +465,15 @@ body {
     color: #fff;
 }
 
+.debt-summary-item i {
+    color: var(--seafoam-green);
+    font-size: 1.2rem;
+}
+
+.debt-summary-item.total-item i {
+    color: #fff;
+}
+
 .debt-label {
     color: #222;
     font-weight: bold;
@@ -416,6 +485,10 @@ body {
     color: #fff;
 }
 
+.debt-summary-item.total-item .debt-label {
+    color: #fff;
+}
+
 .debt-value {
     color: var(--seafoam-green);
     font-weight: bold;
@@ -424,6 +497,10 @@ body {
 }
 
 .debt-summary-box.total-box .debt-value {
+    color: #fff;
+}
+
+.debt-summary-item.total-item .debt-value {
     color: #fff;
 }
 .table td,
@@ -539,4 +616,24 @@ body {
     color: var(--seafoam-green);
     font-weight: bold;
     margin-right: 0.25rem;
+}
+
+/* Responsive styles for debt summary */
+@media (max-width: 768px) {
+    .debt-summary-single-row {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .debt-summary-separator {
+        transform: rotate(90deg);
+        width: 30px;
+        height: 30px;
+        font-size: 1.2rem;
+    }
+    
+    .debt-summary-item {
+        min-width: 100%;
+        justify-content: center;
+    }
 }

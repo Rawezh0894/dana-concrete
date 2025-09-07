@@ -202,18 +202,20 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
     
     <!-- زانیارییەکانی قەرز -->
     <div class="debt-summary">
-        <div class="debt-summary-row">
-            <div class="debt-summary-box">
+        <div class="debt-summary-single-row">
+            <div class="debt-summary-item">
                 <i class="fa fa-history"></i>
                 <span class="debt-label">قەرزی پێشوو:</span>
                 <span class="debt-value" id="opening-debt">$0.00</span>
             </div>
-            <div class="debt-summary-box">
+            <div class="debt-summary-separator">+</div>
+            <div class="debt-summary-item">
                 <i class="fa fa-money-bill-wave"></i>
                 <span class="debt-label">پارەی ماوە:</span>
                 <span class="debt-value" id="remaining-amount">$0.00</span>
             </div>
-            <div class="debt-summary-box total-box">
+            <div class="debt-summary-separator">=</div>
+            <div class="debt-summary-item total-item">
                 <i class="fa fa-calculator"></i>
                 <span class="debt-label">کۆی گشتی پارەی ماوە:</span>
                 <span class="debt-value" id="total-debt">$0.00</span>
