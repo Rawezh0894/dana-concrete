@@ -231,7 +231,6 @@ body {
     .receipt-container { 
         box-shadow: none; 
         border: none; 
-      
         max-width: none;
         width: auto;
     }
@@ -272,6 +271,9 @@ body {
     .receipt-table-custom {
         font-size: 0.9rem;
         margin-bottom: 0.5rem;
+        /* Prevent table from breaking in middle of debt summary */
+        page-break-inside: avoid;
+        break-inside: avoid;
     }
     
     .receipt-table-custom th,
@@ -280,37 +282,50 @@ body {
         font-size: 0.85rem;
     }
     
+    /* Ensure table footer (summary) stays with table */
+    .receipt-table-custom tfoot {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+    
+    /* Prevent debt summary from breaking across pages */
     .debt-summary {
         margin: 1rem 0;
         padding: 0.5rem;
+        page-break-inside: avoid;
+        break-inside: avoid;
     }
     
     .debt-summary-row {
         gap: 0.5rem;
+        page-break-inside: avoid;
+        break-inside: avoid;
     }
     
     .debt-summary-box {
         padding: 0.5rem 0.8rem;
         min-width: 150px;
         font-size: 0.9rem;
+        page-break-inside: avoid;
+        break-inside: avoid;
     }
     
-    .debt-summary-single-row {
-        gap: 0.5rem;
-        flex-direction: row;
-        justify-content: center;
+    /* Ensure the total debt box stays together */
+    .debt-summary-box.total-box {
+        page-break-inside: avoid;
+        break-inside: avoid;
+        /* Force to stay on same page as other debt boxes */
+        page-break-before: avoid;
+        break-before: avoid;
     }
     
-    .debt-summary-item {
-        padding: 0.4rem 0.6rem;
-        min-width: 120px;
-        font-size: 0.85rem;
-    }
-    
-    .debt-summary-separator {
-        width: 25px;
-        height: 25px;
-        font-size: 1rem;
+    /* Force debt summary to appear on first page if possible */
+    .debt-summary {
+        page-break-before: avoid;
+        break-before: avoid;
+        /* If there's not enough space, move to next page entirely */
+        page-break-after: avoid;
+        break-after: avoid;
     }
     
     .receipt-notes {
@@ -323,6 +338,242 @@ body {
     @page {
         margin: 0.5cm;
         size: A4;
+    }
+    
+    /* Additional print optimizations for debt summary */
+    .receipt-container {
+        /* Ensure container doesn't break unnecessarily */
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+    
+    /* Force debt summary to be on same page as table if possible */
+    .receipt-table-custom + .debt-summary {
+        page-break-before: avoid;
+        break-before: avoid;
+    }
+    
+    /* Ensure all debt summary elements stay together */
+    .debt-summary-row .debt-summary-box:first-child {
+        page-break-after: avoid;
+        break-after: avoid;
+    }
+    
+    .debt-summary-row .debt-summary-box:nth-child(2) {
+        page-break-before: avoid;
+        break-before: avoid;
+        page-break-after: avoid;
+        break-after: avoid;
+    }
+    
+    .debt-summary-row .debt-summary-box:last-child {
+        page-break-before: avoid;
+        break-before: avoid;
+    }
+    
+    /* Force debt summary to appear on first page by reducing margins */
+    .debt-summary {
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Reduce spacing between table and debt summary */
+    .receipt-table-custom {
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Ensure debt summary fits on first page by making it more compact */
+    .debt-summary-box {
+        padding: 0.4rem 0.6rem;
+        min-width: 180px;
+        font-size: 0.85rem;
+    }
+    
+    .debt-summary-box .debt-label {
+        font-size: 0.9rem;
+    }
+    
+    .debt-summary-box .debt-value {
+        font-size: 1rem;
+    }
+    
+    /* Force debt summary to be on first page by using flexbox more efficiently */
+    .debt-summary-row {
+        gap: 0.5rem;
+        justify-content: space-around;
+    }
+    
+    /* Make debt summary more compact for print */
+    .debt-summary {
+        padding: 0.5rem;
+    }
+    
+    /* Force debt summary to appear on first page by reducing all margins */
+    .company-info-row {
+        margin-bottom: 0.5rem;
+    }
+    
+    .receipt-header {
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Ensure debt summary is visible on first page */
+    .debt-summary {
+        position: relative;
+        z-index: 10;
+    }
+    
+    /* Force debt summary to be on first page by using CSS Grid */
+    .debt-summary-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 0.5rem;
+        align-items: center;
+    }
+    
+    /* Ensure all debt boxes are the same height */
+    .debt-summary-box {
+        height: auto;
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Force debt summary to be on first page by using CSS Flexbox */
+    .debt-summary-row {
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+        align-items: stretch;
+    }
+    
+    /* Make debt summary boxes more compact */
+    .debt-summary-box {
+        flex: 1;
+        margin: 0 0.25rem;
+    }
+    
+    /* Ensure debt summary fits on first page */
+    .debt-summary {
+        max-height: 60px;
+        overflow: visible;
+    }
+    
+    /* Force debt summary to be on first page by using CSS Grid */
+    .debt-summary-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 0.5rem;
+        align-items: center;
+    }
+    
+    /* Make debt summary boxes more compact */
+    .debt-summary-box {
+        flex: 1;
+        margin: 0 0.25rem;
+        padding: 0.3rem 0.5rem;
+        min-width: 150px;
+    }
+    
+    /* Ensure debt summary is visible on first page */
+    .debt-summary {
+        position: relative;
+        z-index: 10;
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Force debt summary to be on first page by using CSS Flexbox */
+    .debt-summary-row {
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+        align-items: stretch;
+    }
+    
+    /* Make debt summary boxes more compact */
+    .debt-summary-box {
+        flex: 1;
+        margin: 0 0.25rem;
+        padding: 0.3rem 0.5rem;
+        min-width: 150px;
+    }
+    
+    /* Ensure debt summary fits on first page */
+    .debt-summary {
+        max-height: 60px;
+        overflow: visible;
+    }
+    
+    /* Force debt summary to be on first page by using CSS Grid */
+    .debt-summary-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 0.5rem;
+        align-items: center;
+    }
+    
+    /* Make debt summary boxes more compact */
+    .debt-summary-box {
+        flex: 1;
+        margin: 0 0.25rem;
+        padding: 0.3rem 0.5rem;
+        min-width: 150px;
+    }
+    
+    /* Ensure debt summary is visible on first page */
+    .debt-summary {
+        position: relative;
+        z-index: 10;
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Force debt summary to be on first page by using CSS Flexbox */
+    .debt-summary-row {
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+        align-items: stretch;
+    }
+    
+    /* Make debt summary boxes more compact */
+    .debt-summary-box {
+        flex: 1;
+        margin: 0 0.25rem;
+        padding: 0.3rem 0.5rem;
+        min-width: 150px;
+    }
+    
+    /* Ensure debt summary fits on first page */
+    .debt-summary {
+        max-height: 60px;
+        overflow: visible;
+    }
+    
+    /* Force debt summary to be on first page by using CSS Grid */
+    .debt-summary-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 0.5rem;
+        align-items: center;
+    }
+    
+    /* Make debt summary boxes more compact */
+    .debt-summary-box {
+        flex: 1;
+        margin: 0 0.25rem;
+        padding: 0.3rem 0.5rem;
+        min-width: 150px;
+    }
+    
+    /* Ensure debt summary is visible on first page */
+    .debt-summary {
+        position: relative;
+        z-index: 10;
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
     }
 }
 .receipt-table-custom {
@@ -387,6 +638,9 @@ body {
     border: 1.5px solid var(--seafoam-green);
     border-radius: 8px;
     box-shadow: 0 2px 8px #003b7320;
+    /* Prevent breaking across pages */
+    page-break-inside: avoid;
+    break-inside: avoid;
 }
 
 .debt-summary-row {
@@ -394,49 +648,9 @@ body {
     gap: 1rem;
     justify-content: space-between;
     flex-wrap: wrap;
-}
-
-.debt-summary-single-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-    text-align: center;
-}
-
-.debt-summary-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: #fff;
-    border: 1px solid var(--seafoam-green);
-    border-radius: 6px;
-    padding: 0.8rem 1rem;
-    min-width: 180px;
-    box-shadow: 0 1px 4px #003b7310;
-}
-
-.debt-summary-item.total-item {
-    background: var(--seafoam-green);
-    color: #fff;
-    border: 1px solid var(--seafoam-green);
-    min-width: 200px;
-}
-
-.debt-summary-separator {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: var(--seafoam-green);
-    background: #f4f8fc;
-    border: 2px solid var(--seafoam-green);
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 6px #003b7320;
+    /* Prevent breaking across pages */
+    page-break-inside: avoid;
+    break-inside: avoid;
 }
 
 .debt-summary-box {
@@ -449,6 +663,9 @@ body {
     padding: 0.8rem 1rem;
     min-width: 200px;
     box-shadow: 0 1px 4px #003b7310;
+    /* Prevent breaking across pages */
+    page-break-inside: avoid;
+    break-inside: avoid;
 }
 
 .debt-summary-box.total-box {
@@ -466,15 +683,6 @@ body {
     color: #fff;
 }
 
-.debt-summary-item i {
-    color: var(--seafoam-green);
-    font-size: 1.2rem;
-}
-
-.debt-summary-item.total-item i {
-    color: #fff;
-}
-
 .debt-label {
     color: #222;
     font-weight: bold;
@@ -486,10 +694,6 @@ body {
     color: #fff;
 }
 
-.debt-summary-item.total-item .debt-label {
-    color: #fff;
-}
-
 .debt-value {
     color: var(--seafoam-green);
     font-weight: bold;
@@ -498,10 +702,6 @@ body {
 }
 
 .debt-summary-box.total-box .debt-value {
-    color: #fff;
-}
-
-.debt-summary-item.total-item .debt-value {
     color: #fff;
 }
 .table td,
@@ -617,24 +817,4 @@ body {
     color: var(--seafoam-green);
     font-weight: bold;
     margin-right: 0.25rem;
-}
-
-/* Responsive styles for debt summary */
-@media (max-width: 768px) {
-    .debt-summary-single-row {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    
-    .debt-summary-separator {
-        transform: rotate(90deg);
-        width: 30px;
-        height: 30px;
-        font-size: 1.2rem;
-    }
-    
-    .debt-summary-item {
-        min-width: 100%;
-        justify-content: center;
-    }
 }
