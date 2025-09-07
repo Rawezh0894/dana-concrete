@@ -297,19 +297,20 @@ body {
     
     .debt-summary-single-row {
         gap: 0.5rem;
-        flex-direction: column;
+        flex-direction: row;
+        justify-content: center;
     }
     
     .debt-summary-item {
-        padding: 0.5rem 0.8rem;
-        min-width: 150px;
-        font-size: 0.9rem;
+        padding: 0.4rem 0.6rem;
+        min-width: 120px;
+        font-size: 0.85rem;
     }
     
     .debt-summary-separator {
-        width: 30px;
-        height: 30px;
-        font-size: 1.2rem;
+        width: 25px;
+        height: 25px;
+        font-size: 1rem;
     }
     
     .receipt-notes {
