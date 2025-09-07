@@ -81,6 +81,36 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             word-wrap: break-word;
             max-width: 200px;
         }
+        
+        /* Location filter styling */
+        #location-filter {
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            background-color: #fff;
+            min-height: 40px;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+        
+        #location-filter:focus {
+            border-color: #003b73;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 59, 115, 0.3);
+        }
+        
+        #location-filter option {
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        
+        #location-filter option:hover {
+            background-color: #f0f8ff;
+        }
+        
+        #location-filter option:checked {
+            background-color: #003b73;
+            color: white;
+        }
     </style>
     <link href="../assets/css/kurdish-font.css" rel="stylesheet">
 </head>
@@ -157,10 +187,15 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         
         <!-- Location Filter -->
         <label for="location-filter" style="font-weight:bold; margin-right: 1rem;">شوێن:</label>
-        <select id="location-filter" style="padding: 0.3rem 1rem; font-size: 1rem;">
-            <option value="all">هەموو شوێنەکان</option>
-            <!-- Options will be loaded by JavaScript -->
-        </select>
+        <div style="display: inline-block; position: relative;">
+            <select id="location-filter" multiple style="padding: 0.3rem 1rem; font-size: 1rem; min-width: 200px;">
+                <!-- Options will be loaded by JavaScript -->
+            </select>
+            <div style="margin-top: 0.5rem;">
+                <button type="button" id="select-all-locations" style="padding: 0.2rem 0.5rem; font-size: 0.8rem; background: #28a745; color: white; border: none; border-radius: 3px; cursor: pointer; margin-right: 0.5rem;">هەموو</button>
+                <button type="button" id="clear-all-locations" style="padding: 0.2rem 0.5rem; font-size: 0.8rem; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer;">پاکردنەوە</button>
+            </div>
+        </div>
         
         <!-- Invoice Number Visibility Checkbox -->
         <label for="show-invoice-number" style="font-weight:bold; margin-right: 1rem; margin-left: 1rem;">
@@ -175,7 +210,6 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             <tr>
                 <th>پێوانە</th>
                 <th>ڕێژە</th>
-                <th>شوێن</th>
                 <th>نرخی 1 م 3</th>
                 <th>کۆی نرخ</th>
                 <th>پارەی دراو (USD)</th>
@@ -248,14 +282,17 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 var month = document.getElementById('month-filter');
                 var dateFrom = document.getElementById('date-from-filter');
                 var dateTo = document.getElementById('date-to-filter');
-                var location = document.getElementById('location-filter');
+                var locationFilter = document.getElementById('location-filter');
                 var showInvoiceCheckbox = document.getElementById('show-invoice-number');
                 
                 if (type) type.value = 'all';
                 if (month) month.value = 'all';
                 if (dateFrom) dateFrom.value = '';
                 if (dateTo) dateTo.value = '';
-                if (location) location.value = 'all';
+                if (locationFilter) {
+                    // Clear all selected locations
+                    Array.from(locationFilter.options).forEach(option => option.selected = false);
+                }
                 if (showInvoiceCheckbox) {
                     showInvoiceCheckbox.checked = true;
                     toggleInvoiceNumberColumn(true);
@@ -291,6 +328,32 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 toggleInvoiceNumberColumn(isChecked);
                 // Save preference to localStorage
                 localStorage.setItem('showInvoiceNumber', isChecked.toString());
+            });
+        }
+        
+        // Location filter helper functions
+        var selectAllBtn = document.getElementById('select-all-locations');
+        var clearAllBtn = document.getElementById('clear-all-locations');
+        
+        if (selectAllBtn) {
+            selectAllBtn.addEventListener('click', function() {
+                var locationFilter = document.getElementById('location-filter');
+                if (locationFilter) {
+                    Array.from(locationFilter.options).forEach(option => option.selected = true);
+                    // Trigger change event to reload data
+                    locationFilter.dispatchEvent(new Event('change'));
+                }
+            });
+        }
+        
+        if (clearAllBtn) {
+            clearAllBtn.addEventListener('click', function() {
+                var locationFilter = document.getElementById('location-filter');
+                if (locationFilter) {
+                    Array.from(locationFilter.options).forEach(option => option.selected = false);
+                    // Trigger change event to reload data
+                    locationFilter.dispatchEvent(new Event('change'));
+                }
             });
         }
         

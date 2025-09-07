@@ -1,4 +1,6 @@
 <?php
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 require_once '../../config/db_conected.php';
 header('Content-Type: application/json; charset=utf-8');
 
@@ -9,14 +11,8 @@ if (!$customer_id) {
 }
 
 try {
-    // Get unique locations for this customer
-    $sql = "SELECT DISTINCT s.location 
-            FROM sales s 
-            WHERE s.customer_id = :customer_id 
-            AND s.location IS NOT NULL 
-            AND s.location != '' 
-            ORDER BY s.location ASC";
-    
+    // Get unique locations for this customer from sales table
+    $sql = "SELECT DISTINCT location FROM sales WHERE customer_id = :customer_id AND location IS NOT NULL AND location != '' ORDER BY location ASC";
     $stmt = $pdo->prepare($sql);
     $stmt->execute(['customer_id' => $customer_id]);
     
@@ -27,11 +23,8 @@ try {
     
     echo json_encode(['locations' => $locations], JSON_UNESCAPED_UNICODE);
     
-} catch (PDOException $e) {
-    error_log('PDOException in get_locations.php: ' . $e->getMessage());
-    echo json_encode(['locations' => []]);
 } catch (Exception $e) {
-    error_log('Exception in get_locations.php: ' . $e->getMessage());
-    echo json_encode(['locations' => []]);
+    error_log("Error getting locations: " . $e->getMessage());
+    echo json_encode(['locations' => [], 'error' => 'هەڵە لە بارکردنی شوێنەکان'], JSON_UNESCAPED_UNICODE);
 }
 ?>
