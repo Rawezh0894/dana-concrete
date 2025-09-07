@@ -155,6 +155,13 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         <label for="date-to-filter" style="font-weight:bold; margin-right: 1rem;">بۆ بەروار:</label>
         <input type="date" id="date-to-filter" style="padding: 0.3rem; font-size: 1rem;">
         
+        <!-- Location Filter -->
+        <label for="location-filter" style="font-weight:bold; margin-right: 1rem;">شوێن:</label>
+        <select id="location-filter" style="padding: 0.3rem 1rem; font-size: 1rem;">
+            <option value="all">هەموو شوێنەکان</option>
+            <!-- Options will be loaded by JavaScript -->
+        </select>
+        
         <!-- Invoice Number Visibility Checkbox -->
         <label for="show-invoice-number" style="font-weight:bold; margin-right: 1rem; margin-left: 1rem;">
             <input type="checkbox" id="show-invoice-number" checked style="margin-left: 0.5rem;">
@@ -168,6 +175,7 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             <tr>
                 <th>پێوانە</th>
                 <th>ڕێژە</th>
+                <th>شوێن</th>
                 <th>نرخی 1 م 3</th>
                 <th>کۆی نرخ</th>
                 <th>پارەی دراو (USD)</th>
@@ -240,12 +248,14 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 var month = document.getElementById('month-filter');
                 var dateFrom = document.getElementById('date-from-filter');
                 var dateTo = document.getElementById('date-to-filter');
+                var location = document.getElementById('location-filter');
                 var showInvoiceCheckbox = document.getElementById('show-invoice-number');
                 
                 if (type) type.value = 'all';
                 if (month) month.value = 'all';
                 if (dateFrom) dateFrom.value = '';
                 if (dateTo) dateTo.value = '';
+                if (location) location.value = 'all';
                 if (showInvoiceCheckbox) {
                     showInvoiceCheckbox.checked = true;
                     toggleInvoiceNumberColumn(true);

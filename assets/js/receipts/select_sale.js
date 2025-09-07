@@ -21,6 +21,7 @@ class ReceiptManager {
         try {
             this.createTooltip();
             this.bindEvents();
+            this.loadLocations();
             this.loadSalesData();
         } catch (error) {
             console.error('Error initializing ReceiptManager:', error);
@@ -43,7 +44,7 @@ class ReceiptManager {
 
     bindEvents() {
         // Bind filter events
-        const filters = ['transaction-type-filter', 'month-filter', 'date-from-filter', 'date-to-filter'];
+        const filters = ['transaction-type-filter', 'month-filter', 'date-from-filter', 'date-to-filter', 'location-filter'];
         filters.forEach(filterId => {
             const element = document.getElementById(filterId);
             if (element) {
@@ -124,7 +125,7 @@ class ReceiptManager {
         if (tbody) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="9" class="table-loading">
+                    <td colspan="10" class="table-loading">
                         <div style="text-align: center; padding: 2rem;">
                             <i class="fa fa-spinner fa-spin" style="font-size: 2rem; color: var(--seafoam-green); margin-bottom: 1rem;"></i>
                             <p style="margin: 0; color: #666; font-size: 1rem;">لە بارکردنی داتاکان...</p>
@@ -141,7 +142,7 @@ class ReceiptManager {
         if (tbody) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="9" class="table-empty">
+                    <td colspan="10" class="table-empty">
                         <i class="fa fa-inbox" style="font-size: 3rem; color: #dee2e6; margin-bottom: 1rem; display: block;"></i>
                         <p style="margin: 0.5rem 0; font-size: 1.1rem; color: #6c757d;">هیچ داتایەک نەدۆزرایەوە</p>
                         <small style="display: block; color: #adb5bd; font-size: 0.9rem;">تکایە فلتەرەکان بگۆڕە یان داتای نوێ زیاد بکە</small>
@@ -160,7 +161,7 @@ class ReceiptManager {
             const errorMessage = message || 'هەڵەی نەناسراو';
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="9" style="text-align: center; padding: 2rem; color: #dc3545;">
+                    <td colspan="10" style="text-align: center; padding: 2rem; color: #dc3545;">
                         <i class="fa fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
                         <p>هەڵە لە بارکردنی داتاکان</p>
                         <small style="display: block; margin: 0.5rem 0; font-size: 0.9rem;">${errorMessage}</small>
@@ -270,13 +271,15 @@ class ReceiptManager {
             const month = this.getSelectedMonth();
             const date_from = this.getDateFrom();
             const date_to = this.getDateTo();
+            const location = this.getSelectedLocation();
             
             const params = new URLSearchParams({
                 customer_id: CUSTOMER_ID,
                 type,
                 month,
                 date_from,
-                date_to
+                date_to,
+                location
             });
 
             const response = await fetch(`../process/receipts/select_sale.php?${params.toString()}`);
@@ -342,6 +345,7 @@ class ReceiptManager {
                     <tr class="receipt-row" data-receipt-id="${row.invoice_number || ''}">
                         <td>${row.quantity || ''}</td>
                         <td>${row.rezh || ''}</td>
+                        <td>${row.location || ''}</td>
                         <td>${this.formatCurrency(row.price_per_unit)}</td>
                         <td>${this.formatCurrency(row.total_price)}</td>
                         <td>${this.formatCurrency(row.amount_paid_usd)}</td>
@@ -464,6 +468,34 @@ class ReceiptManager {
         const dateToElem = document.getElementById('date-to-filter');
         return dateToElem ? dateToElem.value : '';
     }
+
+    getSelectedLocation() {
+        const locationElem = document.getElementById('location-filter');
+        return locationElem ? locationElem.value : 'all';
+    }
+
+    async loadLocations() {
+        try {
+            const response = await fetch(`../process/receipts/get_locations.php?customer_id=${CUSTOMER_ID}`);
+            const data = await response.json();
+            
+            const locationSelect = document.getElementById('location-filter');
+            if (locationSelect && data.locations) {
+                // Clear existing options except the first one
+                locationSelect.innerHTML = '<option value="all">هەموو شوێنەکان</option>';
+                
+                // Add location options
+                data.locations.forEach(location => {
+                    const option = document.createElement('option');
+                    option.value = location;
+                    option.textContent = location;
+                    locationSelect.appendChild(option);
+                });
+            }
+        } catch (error) {
+            console.error('Error loading locations:', error);
+        }
+    }
 }
 
 // Initialize the receipt manager when DOM is loaded
@@ -534,6 +566,15 @@ function getDateTo() {
     } catch (error) {
         console.warn('Error in getDateTo:', error);
         return '';
+    }
+}
+
+function getSelectedLocation() {
+    try {
+        return window.receiptManager ? window.receiptManager.getSelectedLocation() : 'all';
+    } catch (error) {
+        console.warn('Error in getSelectedLocation:', error);
+        return 'all';
     }
 }
 

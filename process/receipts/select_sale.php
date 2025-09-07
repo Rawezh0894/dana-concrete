@@ -10,6 +10,7 @@ $type = isset($_GET['type']) ? $_GET['type'] : 'all';
 $month = isset($_GET['month']) ? $_GET['month'] : 'all';
 $date_from = isset($_GET['date_from']) ? $_GET['date_from'] : '';
 $date_to = isset($_GET['date_to']) ? $_GET['date_to'] : '';
+$location = isset($_GET['location']) ? $_GET['location'] : 'all';
 
 // Get customer information including opening debt, name, and mobile
 $customer_sql = "SELECT opening_debt_usd, name, mobile1 FROM customers WHERE id = :customer_id";
@@ -24,6 +25,7 @@ $sql = "SELECT
         s.order_date,
         f.strength_mpa, 
         f.strength_kg,
+        s.location,
         SUM(s.quantity) as total_quantity,
         s.price_per_unit,
         SUM(s.total_price) as total_price_sum,
@@ -56,7 +58,11 @@ if ($date_to) {
     $sql .= " AND s.order_date <= :date_to";
     $params['date_to'] = $date_to;
 }
-$sql .= " GROUP BY s.order_date, f.strength_mpa, f.strength_kg, s.price_per_unit";
+if ($location !== 'all') {
+    $sql .= " AND s.location = :location";
+    $params['location'] = $location;
+}
+$sql .= " GROUP BY s.order_date, f.strength_mpa, f.strength_kg, s.price_per_unit, s.location";
 $sql .= " ORDER BY s.order_date ASC";
 
 // Debug: Log the SQL query
@@ -85,6 +91,7 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     $data[] = [
         'quantity' => $quantity,
         'rezh' => $rezh,
+        'location' => $row['location'] ?? '',
         'price_per_unit' => $ppu,
         'total_price' => $total,
         'amount_paid_usd' => $paid_usd,
