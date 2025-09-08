@@ -31,7 +31,7 @@ $stmt = $pdo->query($sql);
 $customers = $stmt->fetchAll();
 
 // گەڕانەوەی هەموو مامەڵە قەرزەکان (پارەی ماوە) بۆ هەموو کڕیارە قەرزارەکان
-$sales_sql = "SELECT s.*, c.name as customer_name, c.mobile1, f.name as formula_name FROM sales s JOIN customers c ON s.customer_id = c.id LEFT JOIN concrete_formulas f ON s.formula_id = f.id WHERE s.payment_type = 'قەرز' AND s.remaining_amount > 0 ORDER BY c.name ASC, s.order_date DESC";
+$sales_sql = "SELECT s.*, c.name as customer_name, c.mobile1, f.strength_mpa, f.strength_kg FROM sales s JOIN customers c ON s.customer_id = c.id LEFT JOIN concrete_formulas f ON s.formula_id = f.id WHERE s.payment_type = 'قەرز' AND s.remaining_amount > 0 ORDER BY c.name ASC, s.order_date DESC";
 $sales_stmt = $pdo->query($sales_sql);
 $sales = $sales_stmt->fetchAll();
 
@@ -146,9 +146,9 @@ usort($customers, function($a, $b) {
             <div class="col-md-3">
                 <div class="form-group">
                     <label for="formulaFilter" class="form-label">
-                        <i class="fa fa-filter"></i> فلتەری ڕێژە:
+                        <i class="fa fa-filter"></i> فلتەری ڕێژە (MPA/Kg):
                     </label>
-                    <input type="text" id="formulaFilter" class="form-control" placeholder="ڕێژە بنووسە بۆ فلتەرکردن...">
+                    <input type="text" id="formulaFilter" class="form-control" placeholder="MPA یان Kg بنووسە بۆ فلتەرکردن...">
                 </div>
             </div>
             <div class="col-md-6">
@@ -233,7 +233,21 @@ usort($customers, function($a, $b) {
                             <td><?= $i+1 ?></td>
                             <td><?= htmlspecialchars($s['recipient']) ?></td>
                             <td><?= htmlspecialchars($s['location']) ?></td>
-                            <td><?= htmlspecialchars($s['formula_name'] ?? '-') ?></td>
+                            <td>
+                                <?php 
+                                $strength_mpa = $s['strength_mpa'] ?? '';
+                                $strength_kg = $s['strength_kg'] ?? '';
+                                if ($strength_mpa && $strength_kg) {
+                                    echo htmlspecialchars($strength_mpa . ' MPA + ' . $strength_kg . ' Kg');
+                                } elseif ($strength_mpa) {
+                                    echo htmlspecialchars($strength_mpa . ' MPA');
+                                } elseif ($strength_kg) {
+                                    echo htmlspecialchars($strength_kg . ' Kg');
+                                } else {
+                                    echo '-';
+                                }
+                                ?>
+                            </td>
                             <td><?= number_format($s['quantity'], 2) ?> م³</td>
                             <td><?= number_format($s['price_per_unit'], 2) ?> $</td>
                             <td><?= number_format($s['total_price'], 2) ?> $</td>
