@@ -208,13 +208,13 @@ usort($customers, function($a, $b) {
                             <th>#</th>
                             <th>وەرگر</th>
                             <th>شوێن</th>
-                            <th>ڕێژە (Mpa)</th>
                             <th>مەتر</th>
                             <th>نرخ/مەتر</th>
                             <th>کۆی گشتی</th>
                             <th>دراو ($)</th>
                             <th>دراو (IQD)</th>
                             <th>ماوە</th>
+                            <th>داشکاندن</th>
                             <th>ژ.فاکتور</th>
                             <th>ڕێکەوت</th>
                         </tr>
@@ -225,13 +225,13 @@ usort($customers, function($a, $b) {
                             <td><?= $i+1 ?></td>
                             <td><?= htmlspecialchars($s['recipient']) ?></td>
                             <td><?= htmlspecialchars($s['location']) ?></td>
-                            <td><?= htmlspecialchars($s['rezh'] ?? 'N/A') ?> Mpa</td>
                             <td><?= number_format($s['quantity'], 2) ?> م³</td>
                             <td><?= number_format($s['price_per_unit'], 2) ?> $</td>
                             <td><?= number_format($s['total_price'], 2) ?> $</td>
                             <td><?= number_format($s['amount_paid_usd'], 2) ?> $</td>
                             <td><?= number_format($s['amount_paid_iq'], 0) ?> د.ع</td>
                             <td><?= number_format($s['remaining_amount'], 2) ?> $</td>
+                            <td><?= number_format($s['discount'], 2) ?> $</td>
                             <td><?= htmlspecialchars($s['invoice_number']) ?></td>
                             <td><?= htmlspecialchars($s['order_date']) ?></td>
                         </tr>
@@ -259,7 +259,7 @@ function filterByInvoiceNumber() {
     const customerCards = document.querySelectorAll('.customer-card');
     
     customerCards.forEach(card => {
-        const invoiceCells = card.querySelectorAll('td:nth-child(10)'); // Invoice number column (10th)
+        const invoiceCells = card.querySelectorAll('td:nth-child(11)'); // Invoice number column (11th)
         let shouldShowCard = false;
         
         if (filterValue === '') {
@@ -283,7 +283,7 @@ function clearInvoiceFilter() {
 }
 
 function toggleInvoiceVisibility() {
-    const invoiceColumns = document.querySelectorAll('th:nth-child(10), td:nth-child(10)');
+    const invoiceColumns = document.querySelectorAll('th:nth-child(11), td:nth-child(11)');
     const toggleText = document.getElementById('toggleText');
     
     invoiceNumbersVisible = !invoiceNumbersVisible;
