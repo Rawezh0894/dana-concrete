@@ -31,7 +31,7 @@ $stmt = $pdo->query($sql);
 $customers = $stmt->fetchAll();
 
 // گەڕانەوەی هەموو مامەڵە قەرزەکان (پارەی ماوە) بۆ هەموو کڕیارە قەرزارەکان
-$sales_sql = "SELECT s.*, c.name as customer_name, c.mobile1 FROM sales s JOIN customers c ON s.customer_id = c.id WHERE s.payment_type = 'قەرز' AND s.remaining_amount > 0 ORDER BY c.name ASC, s.order_date DESC";
+$sales_sql = "SELECT s.*, c.name as customer_name, c.mobile1, f.name as formula_name FROM sales s JOIN customers c ON s.customer_id = c.id LEFT JOIN concrete_formulas f ON s.formula_id = f.id WHERE s.payment_type = 'قەرز' AND s.remaining_amount > 0 ORDER BY c.name ASC, s.order_date DESC";
 $sales_stmt = $pdo->query($sales_sql);
 $sales = $sales_stmt->fetchAll();
 
@@ -132,10 +132,10 @@ usort($customers, function($a, $b) {
         <button class="btn btn-primary" onclick="window.print()"><i class="fa fa-print"></i> پرینت</button>
     </div>
 
-    <!-- Invoice Number Filter -->
+    <!-- Filters -->
     <div class="filter-section mb-4 no-print">
         <div class="row">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="form-group">
                     <label for="invoiceFilter" class="form-label">
                         <i class="fa fa-filter"></i> فلتەری ژمارەی پسوڵە:
@@ -143,12 +143,20 @@ usort($customers, function($a, $b) {
                     <input type="text" id="invoiceFilter" class="form-control" placeholder="ژمارەی پسوڵە بنووسە بۆ فلتەرکردن...">
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="formulaFilter" class="form-label">
+                        <i class="fa fa-filter"></i> فلتەری ڕێژە:
+                    </label>
+                    <input type="text" id="formulaFilter" class="form-control" placeholder="ڕێژە بنووسە بۆ فلتەرکردن...">
+                </div>
+            </div>
+            <div class="col-md-6">
                 <div class="form-group">
                     <label class="form-label">کردارەکان:</label>
                     <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-outline-secondary" onclick="clearInvoiceFilter()">
-                            <i class="fa fa-times"></i> پاککردنەوە
+                        <button type="button" class="btn btn-outline-secondary" onclick="clearAllFilters()">
+                            <i class="fa fa-times"></i> پاککردنەوەی هەموو فلتەرەکان
                         </button>
                         <button type="button" class="btn btn-outline-info" onclick="toggleInvoiceVisibility()">
                             <i class="fa fa-eye-slash"></i> <span id="toggleText">دەرنەکەوتنی ژمارەی پسوڵە</span>
@@ -208,6 +216,7 @@ usort($customers, function($a, $b) {
                             <th>#</th>
                             <th>وەرگر</th>
                             <th>شوێن</th>
+                            <th>ڕێژە</th>
                             <th>مەتر</th>
                             <th>نرخ/مەتر</th>
                             <th>کۆی گشتی</th>
@@ -224,6 +233,7 @@ usort($customers, function($a, $b) {
                             <td><?= $i+1 ?></td>
                             <td><?= htmlspecialchars($s['recipient']) ?></td>
                             <td><?= htmlspecialchars($s['location']) ?></td>
+                            <td><?= htmlspecialchars($s['formula_name'] ?? '-') ?></td>
                             <td><?= number_format($s['quantity'], 2) ?> م³</td>
                             <td><?= number_format($s['price_per_unit'], 2) ?> $</td>
                             <td><?= number_format($s['total_price'], 2) ?> $</td>
@@ -249,39 +259,69 @@ usort($customers, function($a, $b) {
 </div>
 
 <script>
-// Invoice Number Filter Functionality
+// Filter Functionality
 let invoiceNumbersVisible = true;
 
-function filterByInvoiceNumber() {
-    const filterValue = document.getElementById('invoiceFilter').value.toLowerCase().trim();
+function applyFilters() {
+    const invoiceFilterValue = document.getElementById('invoiceFilter').value.toLowerCase().trim();
+    const formulaFilterValue = document.getElementById('formulaFilter').value.toLowerCase().trim();
     const customerCards = document.querySelectorAll('.customer-card');
     
     customerCards.forEach(card => {
-        const invoiceCells = card.querySelectorAll('td:nth-child(10)'); // Invoice number column (10th after removing discount)
-        let shouldShowCard = false;
+        const invoiceCells = card.querySelectorAll('td:nth-child(11)'); // Invoice number column (11th after adding formula)
+        const formulaCells = card.querySelectorAll('td:nth-child(4)'); // Formula column (4th)
         
-        if (filterValue === '') {
-            shouldShowCard = true;
-        } else {
+        let shouldShowCard = true;
+        
+        // Check invoice filter
+        if (invoiceFilterValue !== '') {
+            let invoiceMatch = false;
             invoiceCells.forEach(cell => {
                 const invoiceText = cell.textContent.toLowerCase();
-                if (invoiceText.includes(filterValue)) {
-                    shouldShowCard = true;
+                if (invoiceText.includes(invoiceFilterValue)) {
+                    invoiceMatch = true;
                 }
             });
+            if (!invoiceMatch) shouldShowCard = false;
+        }
+        
+        // Check formula filter
+        if (formulaFilterValue !== '') {
+            let formulaMatch = false;
+            formulaCells.forEach(cell => {
+                const formulaText = cell.textContent.toLowerCase();
+                if (formulaText.includes(formulaFilterValue)) {
+                    formulaMatch = true;
+                }
+            });
+            if (!formulaMatch) shouldShowCard = false;
         }
         
         card.style.display = shouldShowCard ? 'block' : 'none';
     });
 }
 
+function filterByInvoiceNumber() {
+    applyFilters();
+}
+
+function filterByFormula() {
+    applyFilters();
+}
+
+function clearAllFilters() {
+    document.getElementById('invoiceFilter').value = '';
+    document.getElementById('formulaFilter').value = '';
+    applyFilters();
+}
+
 function clearInvoiceFilter() {
     document.getElementById('invoiceFilter').value = '';
-    filterByInvoiceNumber();
+    applyFilters();
 }
 
 function toggleInvoiceVisibility() {
-    const invoiceColumns = document.querySelectorAll('th:nth-child(10), td:nth-child(10)');
+    const invoiceColumns = document.querySelectorAll('th:nth-child(11), td:nth-child(11)');
     const toggleText = document.getElementById('toggleText');
     
     invoiceNumbersVisible = !invoiceNumbersVisible;
@@ -297,11 +337,16 @@ function toggleInvoiceVisibility() {
     toggleButton.className = invoiceNumbersVisible ? 'fa fa-eye-slash' : 'fa fa-eye';
 }
 
-// Add event listener for real-time filtering
+// Add event listeners for real-time filtering
 document.addEventListener('DOMContentLoaded', function() {
     const invoiceFilter = document.getElementById('invoiceFilter');
     if (invoiceFilter) {
         invoiceFilter.addEventListener('input', filterByInvoiceNumber);
+    }
+    
+    const formulaFilter = document.getElementById('formulaFilter');
+    if (formulaFilter) {
+        formulaFilter.addEventListener('input', filterByFormula);
     }
 });
 </script>
