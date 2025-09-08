@@ -208,6 +208,7 @@ usort($customers, function($a, $b) {
                             <th>#</th>
                             <th>وەرگر</th>
                             <th>شوێن</th>
+                            <th>ڕێژە</th>
                             <th>مەتر</th>
                             <th>نرخ/مەتر</th>
                             <th>کۆی گشتی</th>
@@ -225,6 +226,7 @@ usort($customers, function($a, $b) {
                             <td><?= $i+1 ?></td>
                             <td><?= htmlspecialchars($s['recipient']) ?></td>
                             <td><?= htmlspecialchars($s['location']) ?></td>
+                            <td><?= htmlspecialchars($s['rezh']) ?></td>
                             <td><?= number_format($s['quantity'], 2) ?> م³</td>
                             <td><?= number_format($s['price_per_unit'], 2) ?> $</td>
                             <td><?= number_format($s['total_price'], 2) ?> $</td>
@@ -259,7 +261,7 @@ function filterByInvoiceNumber() {
     const customerCards = document.querySelectorAll('.customer-card');
     
     customerCards.forEach(card => {
-        const invoiceCells = card.querySelectorAll('td:nth-child(11)'); // Invoice number column (11th)
+        const invoiceCells = card.querySelectorAll('td:nth-child(12)'); // Invoice number column (12th after adding ڕێژە column)
         let shouldShowCard = false;
         
         if (filterValue === '') {
@@ -283,7 +285,7 @@ function clearInvoiceFilter() {
 }
 
 function toggleInvoiceVisibility() {
-    const invoiceColumns = document.querySelectorAll('th:nth-child(11), td:nth-child(11)');
+    const invoiceColumns = document.querySelectorAll('th:nth-child(12), td:nth-child(12)'); // Updated to 12th position after adding ڕێژە column
     const toggleText = document.getElementById('toggleText');
     
     invoiceNumbersVisible = !invoiceNumbersVisible;
