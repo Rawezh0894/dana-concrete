@@ -1,17 +1,10 @@
 <?php
 session_start();
 require_once '../../config/db_conected.php';
-require_once '../../config/permissions.php';
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
     echo json_encode(['success' => false, 'message' => 'کاربر لاگین نەکراوە']);
-    exit;
-}
-
-// Check if user has permission to delete locations
-if (!hasPermission('delete_location')) {
-    echo json_encode(['success' => false, 'message' => 'توانای دەست گەیشتنت نییە بۆ سڕینەوەی شوێنەکان']);
     exit;
 }
 
@@ -49,22 +42,6 @@ try {
     $result = $stmt->execute([$location_id]);
     
     if ($result) {
-        // Log the activity
-        if (function_exists('log_user_activity')) {
-            log_user_activity(
-                $_SESSION['user_id'],
-                $_SESSION['username'] ?? 'Unknown',
-                'delete',
-                'locations',
-                'شوێنەکە سڕایەوە: ' . $location['name'],
-                $location_id,
-                'locations',
-                json_encode($location),
-                '',
-                $_SERVER['REMOTE_ADDR'] ?? ''
-            );
-        }
-        
         echo json_encode(['success' => true, 'message' => 'شوێنەکە بە سەرکەوتوویی سڕایەوە']);
     } else {
         echo json_encode(['success' => false, 'message' => 'هەڵەیەک ڕوویدا لە سڕینەوەی شوێنەکە']);
@@ -72,6 +49,6 @@ try {
     
 } catch (PDOException $e) {
     error_log("Database error in delete_location.php: " . $e->getMessage());
-    echo json_encode(['success' => false, 'message' => 'هەڵەیەک ڕوویدا لە داتابەیس']);
+    echo json_encode(['success' => false, 'message' => 'هەڵەیەک ڕوویدا لە داتابەیس: ' . $e->getMessage()]);
 }
 ?>

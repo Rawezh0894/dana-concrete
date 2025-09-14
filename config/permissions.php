@@ -9,9 +9,9 @@ function hasPermission($perm) {
     
     // Special handling for location permissions
     if (in_array($perm, ['view_location', 'add_location', 'edit_location', 'delete_location'])) {
-        // For now, allow all users to manage locations
+        // For now, allow all logged in users to manage locations
         // You can modify this logic based on your requirements
-        return true;
+        return isset($_SESSION['user_id']);
     }
     
     // Debug output
