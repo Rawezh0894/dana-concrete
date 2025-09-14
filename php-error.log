@@ -7973,3 +7973,48 @@
 )
 
 [28-Aug-2025 19:33:40 Asia/Baghdad] Companies retrieved successfully: Count=5
+[11-Sep-2025 16:28:26 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1757597306
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[11-Sep-2025 16:28:26 Asia/Baghdad] Dashboard data loaded successfully for user: 1
+[11-Sep-2025 16:32:42 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1757597562
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[11-Sep-2025 16:32:42 Asia/Baghdad] Companies retrieved successfully: Count=5
+[11-Sep-2025 16:32:52 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1757597572
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[11-Sep-2025 16:32:52 Asia/Baghdad] company/add_company.php POST: Array
+(
+    [name] => سۆران
+    [currency_type] => دینار
+    [opening_debt_iqd] => 0
+    [opening_debt_usd] => 0
+)
+
+[11-Sep-2025 16:32:52 Asia/Baghdad] Parsed vars: name='سۆران', opening_debt_usd='0', opening_debt_iqd='0', currency_type='دینار'
+[11-Sep-2025 16:32:52 Asia/Baghdad] Company successfully added: Name=سۆران, Currency=دینار
+[11-Sep-2025 16:32:52 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1757597572
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[11-Sep-2025 16:32:52 Asia/Baghdad] Companies retrieved successfully: Count=6

@@ -515,7 +515,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
         </div>
 
         <!-- Drivers List -->
-        <div class="card">
+        <div class="card mb-4">
           <div class="card-header">
             <h6 class="mb-0">لیستی شۆفێرەکان</h6>
           </div>
@@ -532,6 +532,29 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
                 </thead>
                 <tbody>
                   <!-- Drivers will be loaded here -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Locations List -->
+        <div class="card">
+          <div class="card-header">
+            <h6 class="mb-0">لیستی شوێنەکان</h6>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-bordered table-hover" id="locationsTable">
+                <thead style="background: var(--kelly-green); color: white;">
+                  <tr>
+                    <th>#</th>
+                    <th>ناوی شوێن</th>
+                    <th>کردارەکان</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- Locations will be loaded here -->
                 </tbody>
               </table>
             </div>
@@ -754,6 +777,8 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
 <script src="../assets/js/purchase/summary.js"></script>
 <script src="../assets/js/location_driver/driver.js"></script>
 <script src="../assets/js/location_driver/location.js"></script>
+<script src="../assets/js/location_driver/load_locations.js"></script>
+<script src="../assets/js/location_driver/delete_location.js"></script>
 <script src="../assets/js/purchase/delete_purchase.js"></script>
 <script src="../assets/js/purchase/purchase.js"></script>
 <script src="../assets/js/purchase/update_purchase.js"></script>

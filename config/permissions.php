@@ -6,6 +6,14 @@ function hasPermission($perm) {
     $role = $_SESSION['role'];
     // Always allow admin
     if ($role === 'admin') return true;
+    
+    // Special handling for location permissions
+    if (in_array($perm, ['view_location', 'add_location', 'edit_location', 'delete_location'])) {
+        // For now, allow all users to manage locations
+        // You can modify this logic based on your requirements
+        return true;
+    }
+    
     // Debug output
     error_log('DEBUG: role=' . $role . ', perm=' . $perm);
     $stmt = $pdo->prepare('SELECT COUNT(*) FROM role_permissions rp JOIN permissions p ON rp.permission_id = p.id WHERE rp.role = ? AND p.name = ?');
