@@ -28,8 +28,8 @@ try {
     }
     
     // Check if location is being used in purchases
-    $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM purchases WHERE location_id = ?");
-    $stmt->execute([$location_id]);
+    $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM purchases WHERE location = ?");
+    $stmt->execute([$location['name']]);
     $usage = $stmt->fetch(PDO::FETCH_ASSOC);
     
     if ($usage['count'] > 0) {
