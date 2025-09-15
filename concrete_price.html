@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dana Concrete Factory - Price List</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         @font-face {
             font-family: 'Rabar';
@@ -34,6 +35,8 @@
             position: relative;
             border-radius: 2px;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
         .watermark {
@@ -188,6 +191,7 @@
             position: relative;
             z-index: 2;
             margin: 30px 0;
+            flex: 1;
         }
 
         .intro-section {
@@ -212,7 +216,7 @@
 
         .intro-header {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             align-items: center;
             margin-bottom: 15px;
             padding-bottom: 10px;
@@ -344,7 +348,7 @@
         .footer {
             position: relative;
             z-index: 2;
-            margin-top: 40px;
+            margin-top: auto;
             padding-top: 25px;
             border-top: 2px solid #e5e7eb;
         }
@@ -403,10 +407,23 @@
 
         .contact-info {
             background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
-            border-radius: 8px;
-            padding: 15px;
+            border-radius: 12px;
+            padding: 20px;
             margin-top: 25px;
             border: 1px solid #cbd5e1;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .contact-info::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #1e40af, #3b82f6, #60a5fa);
         }
 
         .contact-info h3 {
@@ -417,10 +434,27 @@
         }
 
         .contact-info p {
-            font-size: 12px;
-            color: #475569;
-            margin-bottom: 5px;
-            font-weight: 500;
+            font-size: 13px;
+            color: #374151;
+            margin-bottom: 0;
+            font-weight: 600;
+            line-height: 1.6;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .contact-icon {
+            font-size: 16px;
+            color: #1e40af;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        .contact-separator {
+            color: #6b7280;
+            font-weight: 400;
+            margin: 0 8px;
         }
 
         @media print {
@@ -435,17 +469,22 @@
                 margin: 0;
                 font-size: 11pt;
                 line-height: 1.3;
+                height: 100vh;
+                overflow: hidden;
             }
             
             .a4-page {
                 width: 100%;
-                height: auto;
+                min-height: 100vh;
                 box-shadow: none;
                 margin: 0;
-                padding: 10mm;
+                padding: 8mm;
                 border: none;
                 border-radius: 0;
                 overflow: visible;
+                display: flex;
+                flex-direction: column;
+                page-break-inside: avoid;
             }
 
             .watermark {
@@ -515,6 +554,8 @@
 
             .content {
                 margin: 5px 0;
+                flex: 1;
+                page-break-inside: avoid;
             }
 
             .intro-section {
@@ -530,6 +571,9 @@
             }
 
             .intro-header {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
                 margin-bottom: 8px;
                 padding-bottom: 5px;
                 border-bottom: 1px solid #e2e8f0;
@@ -596,9 +640,11 @@
             }
 
             .footer {
-                margin-top: 20px;
+                margin-top: auto;
                 padding-top: 15px;
                 border-top: 1px solid #e5e7eb;
+                page-break-inside: avoid;
+                position: relative;
             }
 
             .regards {
@@ -634,10 +680,36 @@
 
             .contact-info {
                 background: #f1f5f9;
-                border-radius: 6px;
-                padding: 10px;
+                border-radius: 8px;
+                padding: 12px;
                 margin-top: 15px;
                 border: 1px solid #cbd5e1;
+                page-break-inside: avoid;
+                position: relative;
+            }
+
+            .contact-info::before {
+                display: none;
+            }
+
+            .contact-info p {
+                font-size: 10pt;
+                color: #374151;
+                margin-bottom: 0;
+                font-weight: 600;
+                line-height: 1.4;
+            }
+
+            .contact-icon {
+                font-size: 12pt;
+                margin-right: 5px;
+                color: #1e40af;
+            }
+
+            .contact-separator {
+                color: #6b7280;
+                font-weight: 400;
+                margin: 0 5px;
             }
 
             .contact-info h3 {
@@ -663,17 +735,20 @@
             <div class="header-content">
                 <!-- Document Info -->
                 <div class="document-info">
+                 
                     <!-- <div>
-                        <span>ژمارە:</span>
-                        <span class="value">2025/001</span>
-                    </div> -->
-                    <div>
                         <span>بەروار: </span>
                         <span class="value">____/____/2025</span>
+                    </div> -->
+                    <div>
+                        
+                        <span class="value">______________</span>
+                        <span>:NO </span>
                     </div>
                     <div>
-                        <span>Date:</span>
-                        <span class="value">____/____/2025</span>
+                        
+                        <span class="value">2025/____/____</span>
+                        <span>:Date</span>
                     </div>
                 </div>
 
@@ -702,8 +777,9 @@
             <!-- Introduction Section -->
             <div class="intro-section">
                 <div class="intro-header">
+                    <div class="intro-recipient" style="font-size: 16px; font-weight: bold;">بەڕێز: د.عمار - کۆمپانیای ئیسرا</div>
                     <div class="intro-title">بابەت: دەرخستە</div>
-                    <div class="intro-recipient">بەڕێز: د.عمار - کۆمپانیای ئیسرا</div>
+
                 </div>
                 <div class="intro-text">
                   ئاگاداری بەڕێزتان دەکەین کە لیستی خوارەوە بریتییە لە نرخی دابینکردنی کۆنکرێتی کارگەکەمان بۆ پڕۆژەکەتان.
@@ -746,8 +822,9 @@
         </div>
 
         <!-- Footer -->
+         <br>
         <div class="footer">
-            <div class="regards">
+            <div class="regards" style="font-size: 16px; font-weight: bold; text-align: center;">
                 لەگەڵ ڕێزدا....
             </div>
 
@@ -764,19 +841,42 @@
                     <div class="label">ئیمزا</div>
                     <div class="content">
                         <strong>دانا علی جەلال</strong><br>
-                        بەڕێوەبەری کارگە<br>
-                        کارگەی کونکریتی دانا
+                        
+                        کارگەی کۆنکرێتی دانا
                     </div>
                 </div>
             </div>
 
             <!-- Contact Information -->
-            <!-- <div class="contact-info">
-                <h3>زانیاری پەیوەندی:</h3>
-                <p><strong>ناونیشان:</strong> سلێمانی، هەرێمی کوردستان، عێراق</p>
-                <p><strong>تەلەفۆن:</strong> +964 ____________</p>
-                <p><strong>ئیمەیڵ:</strong> info@danaconcrete.com</p>
-            </div> -->
+             <br>
+             <br>
+             <br>
+             <br>
+             <br>
+             <br>
+             <br>
+             <br>
+             <br>
+             <br>
+             <br>
+             <br>
+             <br>
+             <br>
+            <div class="contact-info"  style="font-size:12px;"> 
+                <p style="font-size:12px;">
+                    <i class="bi bi-geo-alt-fill contact-icon"></i>
+                    <strong></strong> سلێمانی، تاسڵوجە - نزیک بازگەی کەڵەوانان
+                    
+                    <i class="bi bi-telephone-fill contact-icon"></i>
+                    <strong></strong> 1454 144 0773
+                    
+                    <i class="bi bi-telephone-fill contact-icon"></i>
+                    <strong></strong> 0101 995 0772
+                    
+                    <i class="bi bi-telephone-fill contact-icon"></i>
+                    <strong></strong> 0543 152 0750
+                </p>
+            </div>
         </div>
     </div>
 </body>

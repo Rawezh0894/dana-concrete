@@ -102,8 +102,16 @@ function loadLocationSelects() {
                 
                 // Reinitialize select2 if it exists
                 if (typeof $().select2 === 'function') {
-                    locationSelect.select2();
-                    editLocationSelect.select2();
+                    locationSelect.select2('destroy').select2({
+                        theme: 'bootstrap-5',
+                        placeholder: 'شوێن هەڵبژێرە',
+                        allowClear: true
+                    });
+                    editLocationSelect.select2('destroy').select2({
+                        theme: 'bootstrap-5',
+                        placeholder: 'شوێن هەڵبژێرە',
+                        allowClear: true
+                    });
                 }
             }
         },
