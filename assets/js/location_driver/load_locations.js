@@ -102,14 +102,28 @@ function loadLocationSelects() {
                 
                 // Reinitialize select2 if it exists
                 if (typeof $().select2 === 'function') {
-                    locationSelect.select2('destroy').select2({
-                        theme: 'bootstrap-5',
+                    // Destroy existing select2 instances
+                    if (locationSelect.hasClass('select2-hidden-accessible')) {
+                        locationSelect.select2('destroy');
+                    }
+                    if (editLocationSelect.hasClass('select2-hidden-accessible')) {
+                        editLocationSelect.select2('destroy');
+                    }
+                    
+                    // Reinitialize select2 with proper configuration
+                    locationSelect.select2({
+                        dropdownParent: $('#addPurchaseModal'),
+                        width: '100%',
                         placeholder: 'شوێن هەڵبژێرە',
+                        dir: 'rtl',
                         allowClear: true
                     });
-                    editLocationSelect.select2('destroy').select2({
-                        theme: 'bootstrap-5',
+                    
+                    editLocationSelect.select2({
+                        dropdownParent: $('#editPurchaseModal'),
+                        width: '100%',
                         placeholder: 'شوێن هەڵبژێرە',
+                        dir: 'rtl',
                         allowClear: true
                     });
                 }

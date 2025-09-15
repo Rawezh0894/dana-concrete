@@ -32,16 +32,30 @@ document.getElementById('addLocationForm').onsubmit = async function(e) {
         filterOpt.textContent = data.name;
         filterSelect.appendChild(filterOpt);
         
-        // گەڕاندنەوەی select2
+        // گەڕاندنەوەی select2 بە شێوەیەکی دروست
         if (typeof $().select2 === 'function') {
-            $(select).select2('destroy').select2({
-                theme: 'bootstrap-5',
+            // Destroy existing select2 instances
+            if ($(select).hasClass('select2-hidden-accessible')) {
+                $(select).select2('destroy');
+            }
+            if ($(editSelect).hasClass('select2-hidden-accessible')) {
+                $(editSelect).select2('destroy');
+            }
+            
+            // Reinitialize select2 with proper configuration
+            $(select).select2({
+                dropdownParent: $('#addPurchaseModal'),
+                width: '100%',
                 placeholder: 'شوێن هەڵبژێرە',
+                dir: 'rtl',
                 allowClear: true
             });
-            $(editSelect).select2('destroy').select2({
-                theme: 'bootstrap-5',
+            
+            $(editSelect).select2({
+                dropdownParent: $('#editPurchaseModal'),
+                width: '100%',
                 placeholder: 'شوێن هەڵبژێرە',
+                dir: 'rtl',
                 allowClear: true
             });
         }
