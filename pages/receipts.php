@@ -28,6 +28,7 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             #date-to-filter, label[for="date-to-filter"],
             #location-filter, label[for="location-filter"],
             #show-invoice-number, label[for="show-invoice-number"],
+            #force-debt-pagination, label[for="force-debt-pagination"],
             #print-btn, .fa-print,
             #refresh-btn, .fa-refresh {
                 display: none !important;
