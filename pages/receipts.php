@@ -28,6 +28,7 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             #date-to-filter, label[for="date-to-filter"],
             #location-filter, label[for="location-filter"],
             #show-invoice-number, label[for="show-invoice-number"],
+            #show-opening-debt, label[for="show-opening-debt"],
             #force-debt-pagination, label[for="force-debt-pagination"],
             #print-btn, .fa-print,
             #refresh-btn, .fa-refresh {
@@ -169,6 +170,12 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             <option value="all">هەموو</option>
         </select>
         
+        <!-- Show Opening Debt Checkbox -->
+        <label for="show-opening-debt" style="font-weight:bold; margin-right: 1rem; margin-left: 1rem;">
+            <input type="checkbox" id="show-opening-debt" checked style="margin-left: 0.5rem;">
+            نیشاندانی قەرزی پێشوو
+        </label>
+        
         <!-- Force Debt Pagination Checkbox -->
         <label for="force-debt-pagination" style="font-weight:bold; margin-right: 1rem; margin-left: 1rem;">
             <input type="checkbox" id="force-debt-pagination" style="margin-left: 0.5rem;">
@@ -254,6 +261,7 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 var dateTo = document.getElementById('date-to-filter');
                 var location = document.getElementById('location-filter');
                 var showInvoiceCheckbox = document.getElementById('show-invoice-number');
+                var showOpeningDebtCheckbox = document.getElementById('show-opening-debt');
                 var forceDebtPaginationCheckbox = document.getElementById('force-debt-pagination');
                 
                 if (type) type.value = 'all';
@@ -266,6 +274,11 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                     toggleInvoiceNumberColumn(true);
                     // Clear localStorage preference
                     localStorage.removeItem('showInvoiceNumber');
+                }
+                if (showOpeningDebtCheckbox) {
+                    showOpeningDebtCheckbox.checked = true;
+                    // Clear localStorage preference
+                    localStorage.removeItem('showOpeningDebt');
                 }
                 if (forceDebtPaginationCheckbox) {
                     forceDebtPaginationCheckbox.checked = false;
@@ -301,6 +314,25 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 toggleInvoiceNumberColumn(isChecked);
                 // Save preference to localStorage
                 localStorage.setItem('showInvoiceNumber', isChecked.toString());
+            });
+        }
+        
+        // Show opening debt toggle
+        var showOpeningDebtCheckbox = document.getElementById('show-opening-debt');
+        if (showOpeningDebtCheckbox) {
+            // Load saved preference
+            const savedOpeningDebtPreference = localStorage.getItem('showOpeningDebt');
+            if (savedOpeningDebtPreference !== null) {
+                showOpeningDebtCheckbox.checked = savedOpeningDebtPreference === 'true';
+            }
+            
+            showOpeningDebtCheckbox.addEventListener('change', function() {
+                const isChecked = this.checked;
+                // Save preference to localStorage
+                localStorage.setItem('showOpeningDebt', isChecked.toString());
+                
+                // Toggle opening debt display
+                toggleOpeningDebtDisplay(isChecked);
             });
         }
         
@@ -461,6 +493,20 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         
         // Join rows with line breaks
         return rows.join('<br>');
+    }
+    
+    // Function to toggle opening debt display
+    function toggleOpeningDebtDisplay(show) {
+        const debtSummaryContainer = document.getElementById('debt-summary-container');
+        if (!debtSummaryContainer) return;
+        
+        if (show) {
+            // Show opening debt
+            debtSummaryContainer.style.display = 'block';
+        } else {
+            // Hide opening debt
+            debtSummaryContainer.style.display = 'none';
+        }
     }
     
     // Function to change debt summary pages
