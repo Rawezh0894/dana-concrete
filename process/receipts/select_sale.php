@@ -17,6 +17,7 @@ $type = isset($_GET['type']) ? $_GET['type'] : 'all';
 $month = isset($_GET['month']) ? $_GET['month'] : 'all';
 $date_from = isset($_GET['date_from']) ? $_GET['date_from'] : '';
 $date_to = isset($_GET['date_to']) ? $_GET['date_to'] : '';
+$location = isset($_GET['location']) ? $_GET['location'] : 'all';
 
 try {
     // Get customer information including opening debt, name, and mobile
@@ -68,6 +69,10 @@ if ($date_from) {
 if ($date_to) {
     $sql .= " AND s.order_date <= :date_to";
     $params['date_to'] = $date_to;
+}
+if ($location !== 'all') {
+    $sql .= " AND s.location = :location";
+    $params['location'] = $location;
 }
 $sql .= " GROUP BY s.order_date, f.strength_mpa, f.strength_kg, s.price_per_unit";
 $sql .= " ORDER BY s.order_date ASC";

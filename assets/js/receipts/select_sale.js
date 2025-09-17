@@ -43,7 +43,7 @@ class ReceiptManager {
 
     bindEvents() {
         // Bind filter events
-        const filters = ['transaction-type-filter', 'month-filter', 'date-from-filter', 'date-to-filter'];
+        const filters = ['transaction-type-filter', 'month-filter', 'date-from-filter', 'date-to-filter', 'location-filter'];
         filters.forEach(filterId => {
             const element = document.getElementById(filterId);
             if (element) {
@@ -270,13 +270,15 @@ class ReceiptManager {
             const month = this.getSelectedMonth();
             const date_from = this.getDateFrom();
             const date_to = this.getDateTo();
+            const location = this.getSelectedLocation();
             
             const params = new URLSearchParams({
                 customer_id: CUSTOMER_ID,
                 type,
                 month,
                 date_from,
-                date_to
+                date_to,
+                location
             });
 
             const response = await fetch(`../process/receipts/select_sale.php?${params.toString()}`);
@@ -608,6 +610,11 @@ class ReceiptManager {
         const dateToElem = document.getElementById('date-to-filter');
         return dateToElem ? dateToElem.value : '';
     }
+
+    getSelectedLocation() {
+        const locationElem = document.getElementById('location-filter');
+        return locationElem ? locationElem.value : 'all';
+    }
 }
 
 // Initialize the receipt manager when DOM is loaded
@@ -678,6 +685,15 @@ function getDateTo() {
     } catch (error) {
         console.warn('Error in getDateTo:', error);
         return '';
+    }
+}
+
+function getSelectedLocation() {
+    try {
+        return window.receiptManager ? window.receiptManager.getSelectedLocation() : 'all';
+    } catch (error) {
+        console.warn('Error in getSelectedLocation:', error);
+        return 'all';
     }
 }
 

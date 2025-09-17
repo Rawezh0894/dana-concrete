@@ -26,6 +26,7 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             #month-filter, label[for="month-filter"],
             #date-from-filter, label[for="date-from-filter"],
             #date-to-filter, label[for="date-to-filter"],
+            #location-filter, label[for="location-filter"],
             #show-invoice-number, label[for="show-invoice-number"],
             #print-btn, .fa-print,
             #refresh-btn, .fa-refresh {
@@ -161,6 +162,12 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             نیشاندانی ژمارەی پسووڵە
         </label>
         
+        <!-- Location Filter -->
+        <label for="location-filter" style="font-weight:bold; margin-right: 1rem;">شوێن:</label>
+        <select id="location-filter" style="padding: 0.3rem 1rem; font-size: 1rem;">
+            <option value="all">هەموو</option>
+        </select>
+        
         <!-- Force Debt Pagination Checkbox -->
         <label for="force-debt-pagination" style="font-weight:bold; margin-right: 1rem; margin-left: 1rem;">
             <input type="checkbox" id="force-debt-pagination" style="margin-left: 0.5rem;">
@@ -244,6 +251,7 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 var month = document.getElementById('month-filter');
                 var dateFrom = document.getElementById('date-from-filter');
                 var dateTo = document.getElementById('date-to-filter');
+                var location = document.getElementById('location-filter');
                 var showInvoiceCheckbox = document.getElementById('show-invoice-number');
                 var forceDebtPaginationCheckbox = document.getElementById('force-debt-pagination');
                 
@@ -251,6 +259,7 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 if (month) month.value = 'all';
                 if (dateFrom) dateFrom.value = '';
                 if (dateTo) dateTo.value = '';
+                if (location) location.value = 'all';
                 if (showInvoiceCheckbox) {
                     showInvoiceCheckbox.checked = true;
                     toggleInvoiceNumberColumn(true);
@@ -471,5 +480,6 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 <script src="../assets/js/receipts/receipts.js"></script>
 <script src="../assets/js/receipts/select_sale.js"></script>
 <script src="../assets/js/receipts/select_return_debt.js"></script>
+<script src="../assets/js/receipts/load_locations.js"></script>
 </body>
 </html>
