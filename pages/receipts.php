@@ -187,12 +187,11 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
     <table class="receipt-table receipt-table-custom">
         <thead>
             <tr>
+                <th>شوێن</th>
                 <th>پێوانە</th>
                 <th>ڕێژە</th>
                 <th>نرخی 1 م 3</th>
                 <th>کۆی نرخ</th>
-                <th>پارەی دراو (USD)</th>
-                <th>پارەی دراو (د.ع)</th>
                 <th>پارەی ماوە</th>
                 <th>ژمارەی پسووڵە</th>
                 <th>بەروار</th>
@@ -368,8 +367,8 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             if (table) {
                 const dataRows = table.querySelectorAll('tbody tr');
                 dataRows.forEach(row => {
-                    if (row.children[7]) {
-                        const invoiceCell = row.children[7];
+                    if (row.children[6]) {
+                        const invoiceCell = row.children[6];
                         const originalInvoiceNumber = invoiceCell.textContent;
                         
                         // Store original invoice number
@@ -408,22 +407,22 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         const table = document.querySelector('.receipt-table');
         if (!table) return;
         
-        // Get the invoice number column (8th column, index 7)
+        // Get the invoice number column (7th column, index 6)
         const headerRow = table.querySelector('thead tr');
         const dataRows = table.querySelectorAll('tbody tr');
         
-        if (headerRow && headerRow.children[7]) {
-            headerRow.children[7].style.display = show ? '' : 'none';
+        if (headerRow && headerRow.children[6]) {
+            headerRow.children[6].style.display = show ? '' : 'none';
         }
         
         // Hide/show invoice number column in all data rows
         dataRows.forEach(row => {
-            if (row.children[7]) {
-                row.children[7].style.display = show ? '' : 'none';
+            if (row.children[6]) {
+                row.children[6].style.display = show ? '' : 'none';
                 
                 // Format invoice numbers to show only 3 per row when visible
                 if (show) {
-                    const invoiceCell = row.children[7];
+                    const invoiceCell = row.children[6];
                     const originalInvoiceNumber = invoiceCell.getAttribute('data-original-invoice') || invoiceCell.textContent;
                     
                     // Store original invoice number if not already stored
@@ -502,13 +501,13 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             const secondCell = summaryRow.querySelector('td:last-child');
             
             if (firstCell && secondCell) {
-                // If invoice column is visible, use 4 and 5 colspans (total 9 columns)
-                // If invoice column is hidden, use 3 and 6 colspans (total 9 columns)
+                // If invoice column is visible, use 3 and 5 colspans (total 8 columns)
+                // If invoice column is hidden, use 2 and 6 colspans (total 8 columns)
                 if (showInvoiceColumn) {
-                    firstCell.setAttribute('colspan', '4');
+                    firstCell.setAttribute('colspan', '3');
                     secondCell.setAttribute('colspan', '5');
                 } else {
-                    firstCell.setAttribute('colspan', '3');
+                    firstCell.setAttribute('colspan', '2');
                     secondCell.setAttribute('colspan', '6');
                 }
             }

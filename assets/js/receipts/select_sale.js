@@ -357,12 +357,11 @@ class ReceiptManager {
 
                 return `
                     <tr class="receipt-row" data-receipt-id="${row.invoice_number || ''}">
+                        <td>${row.location || ''}</td>
                         <td>${row.quantity || ''}</td>
                         <td>${row.rezh || ''}</td>
                         <td>${this.formatCurrency(row.price_per_unit)}</td>
                         <td>${this.formatCurrency(row.total_price)}</td>
-                        <td>${this.formatCurrency(row.amount_paid_usd)}</td>
-                        <td>${row.amount_paid_iqd || ''}</td>
                         <td>${this.formatCurrency(row.remaining_amount)}</td>
                         <td>${this.formatReceiptNumber(row.invoice_number)}</td>
                         <td>${this.formatDate(row.order_date)}</td>
@@ -419,9 +418,9 @@ class ReceiptManager {
             const showInvoiceColumn = showInvoiceCheckbox ? showInvoiceCheckbox.checked : true;
             
             // Set colspan based on invoice column visibility
-            // When invoice column is visible: 4 + 5 = 9 columns
-            // When invoice column is hidden: 3 + 6 = 9 columns
-            const firstColspan = showInvoiceColumn ? '4' : '3';
+            // When invoice column is visible: 3 + 5 = 8 columns
+            // When invoice column is hidden: 2 + 6 = 8 columns
+            const firstColspan = showInvoiceColumn ? '3' : '2';
             const secondColspan = showInvoiceColumn ? '5' : '6';
             
             tfoot.innerHTML = `

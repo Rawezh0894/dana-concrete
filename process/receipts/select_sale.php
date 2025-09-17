@@ -42,14 +42,13 @@ try {
 
 $sql = "SELECT 
         s.order_date,
+        s.location,
         f.strength_mpa, 
         f.strength_kg,
         SUM(s.quantity) as total_quantity,
         s.price_per_unit,
         SUM(s.total_price) as total_price_sum,
         GROUP_CONCAT(s.invoice_number ORDER BY s.invoice_number SEPARATOR ',') as invoice_numbers,
-        SUM(s.amount_paid_usd) as total_amount_paid_usd,
-        SUM(s.amount_paid_iq) as total_amount_paid_iq,
         SUM(s.remaining_amount) as total_remaining_amount
         FROM sales s 
         LEFT JOIN concrete_formulas f ON s.formula_id = f.id 
@@ -80,7 +79,7 @@ if ($location !== 'all') {
     $sql .= " AND s.location = :location";
     $params['location'] = $location;
 }
-$sql .= " GROUP BY s.order_date, f.strength_mpa, f.strength_kg, s.price_per_unit";
+$sql .= " GROUP BY s.order_date, s.location, f.strength_mpa, f.strength_kg, s.price_per_unit";
 $sql .= " ORDER BY s.order_date ASC";
 
 // Debug: Log the SQL query
@@ -100,20 +99,17 @@ try {
     $rezh = $row['strength_mpa'] ? $row['strength_mpa'] . ' MPa' : ($row['strength_kg'] ? $row['strength_kg'] . ' Kg' : '');
     $ppu = is_numeric($row['price_per_unit']) ? '$' . number_format($row['price_per_unit'], 2, '.', ',') : '';
     $total = is_numeric($row['total_price_sum']) ? '$' . number_format($row['total_price_sum'], 2, '.', ',') : '';
-    $paid_usd = is_numeric($row['total_amount_paid_usd']) ? '$' . number_format($row['total_amount_paid_usd'], 2, '.', ',') : '$0.00';
-    $paid_iqd = is_numeric($row['total_amount_paid_iq']) ? number_format($row['total_amount_paid_iq'], 0, '.', ',') . ' د.ع' : '0 د.ع';
     $remaining = is_numeric($row['total_remaining_amount']) ? '$' . number_format($row['total_remaining_amount'], 2, '.', ',') : '$0.00';
     
     // Debug: Log each grouped row
     error_log("Grouped row - Date: " . $row['order_date'] . ", Ratio: " . $rezh . ", Quantity: " . $row['total_quantity'] . ", Invoices: " . $row['invoice_numbers']);
     
     $data[] = [
+        'location' => $row['location'] ?? '',
         'quantity' => $quantity,
         'rezh' => $rezh,
         'price_per_unit' => $ppu,
         'total_price' => $total,
-        'amount_paid_usd' => $paid_usd,
-        'amount_paid_iqd' => $paid_iqd,
         'remaining_amount' => $remaining,
         'invoice_number' => $row['invoice_numbers'],
         'order_date' => $row['order_date']
