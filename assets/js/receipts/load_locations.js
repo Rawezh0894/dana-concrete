@@ -1,14 +1,25 @@
 // Load locations for receipts filter
 function loadLocationsForReceipts() {
     console.log('Loading locations for receipts...');
-    fetch('../process/location_driver/select_locations.php')
+    
+    // First load sales data to get locations
+    const params = new URLSearchParams({
+        customer_id: CUSTOMER_ID,
+        type: 'all',
+        month: 'all',
+        date_from: '',
+        date_to: '',
+        location: 'all'
+    });
+    
+    fetch(`../process/receipts/select_sale.php?${params.toString()}`)
         .then(response => {
             console.log('Response status:', response.status);
             return response.json();
         })
         .then(data => {
-            console.log('Locations data received:', data);
-            if (data.success && data.locations) {
+            console.log('Sales data received:', data);
+            if (data.locations) {
                 const locationSelect = document.getElementById('location-filter');
                 if (locationSelect) {
                     // Clear existing options except the first one
@@ -17,8 +28,8 @@ function loadLocationsForReceipts() {
                     // Add location options
                     data.locations.forEach(location => {
                         const option = document.createElement('option');
-                        option.value = location.name;
-                        option.textContent = location.name;
+                        option.value = location.location;
+                        option.textContent = location.location;
                         locationSelect.appendChild(option);
                     });
                     console.log('Locations loaded successfully:', data.locations.length, 'locations');
@@ -26,7 +37,7 @@ function loadLocationsForReceipts() {
                     console.error('Location select element not found');
                 }
             } else {
-                console.error('Error loading locations:', data.message || 'Unknown error');
+                console.error('No locations found in sales data');
             }
         })
         .catch(error => {

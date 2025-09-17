@@ -28,6 +28,12 @@ try {
     $opening_debt = is_numeric($customer_data['opening_debt_usd']) ? floatval($customer_data['opening_debt_usd']) : 0;
     $company_name = $customer_data['name'] ?? '';
     $mobile = $customer_data['mobile1'] ?? '';
+    
+    // Get unique locations from sales table for this customer
+    $locations_sql = "SELECT DISTINCT location FROM sales WHERE customer_id = :customer_id AND location IS NOT NULL AND location != '' ORDER BY location ASC";
+    $locations_stmt = $pdo->prepare($locations_sql);
+    $locations_stmt->execute(['customer_id' => $customer_id]);
+    $locations = $locations_stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
     error_log("Database error in select_sale.php: " . $e->getMessage());
     echo json_encode(['error' => 'Database error occurred', 'sales_data' => []]);
@@ -123,7 +129,8 @@ try {
         'customer_info' => [
             'company_name' => $company_name,
             'mobile' => $mobile
-        ]
+        ],
+        'locations' => $locations
     ];
 
     echo json_encode($response, JSON_UNESCAPED_UNICODE);
