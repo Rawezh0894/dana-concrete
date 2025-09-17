@@ -414,13 +414,21 @@ class ReceiptManager {
             const totalValue = typeof total === 'number' ? total : 0;
             const remainingValue = typeof remainingTotal === 'number' ? remainingTotal : 0;
             
+            // Check if invoice number column is visible
+            const showInvoiceCheckbox = document.getElementById('show-invoice-number');
+            const showInvoiceColumn = showInvoiceCheckbox ? showInvoiceCheckbox.checked : true;
+            
+            // Set colspan based on invoice column visibility
+            const firstColspan = showInvoiceColumn ? '4' : '3';
+            const secondColspan = showInvoiceColumn ? '5' : '6';
+            
             tfoot.innerHTML = `
                 <tr class="summary-row">
-                    <td colspan="4">
+                    <td colspan="${firstColspan}">
                         <i class="fa fa-calculator"></i>
                         کۆی نرخ: ${this.formatCurrency(totalValue)}
                     </td>
-                    <td colspan="5">
+                    <td colspan="${secondColspan}">
                         <i class="fa fa-money-bill-wave"></i>
                         کۆی پارەی ماوە: ${this.formatCurrency(remainingValue)}
                     </td>

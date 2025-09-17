@@ -469,6 +469,30 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 }
             });
         }
+        
+        // Update colspan in summary row to match visible columns
+        updateSummaryColspan(show);
+    }
+    
+    // Function to update summary row colspan based on visible columns
+    function updateSummaryColspan(showInvoiceColumn) {
+        const summaryRow = document.querySelector('.summary-row');
+        if (summaryRow) {
+            const firstCell = summaryRow.querySelector('td:first-child');
+            const secondCell = summaryRow.querySelector('td:last-child');
+            
+            if (firstCell && secondCell) {
+                // If invoice column is visible, use 4 and 5 colspans
+                // If invoice column is hidden, use 3 and 6 colspans
+                if (showInvoiceColumn) {
+                    firstCell.setAttribute('colspan', '4');
+                    secondCell.setAttribute('colspan', '5');
+                } else {
+                    firstCell.setAttribute('colspan', '3');
+                    secondCell.setAttribute('colspan', '6');
+                }
+            }
+        }
     }
     
     // Function to format invoice numbers to show only 3 per row
