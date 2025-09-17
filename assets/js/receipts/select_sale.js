@@ -467,6 +467,17 @@ class ReceiptManager {
         
         // Initialize pagination
         this.initializeDebtPagination(debtData);
+        
+        // Also update the debt summary immediately based on current checkbox state
+        setTimeout(() => {
+            const showOpeningDebtCheckbox = document.getElementById('show-opening-debt');
+            if (showOpeningDebtCheckbox) {
+                const isChecked = showOpeningDebtCheckbox.checked;
+                if (typeof toggleOpeningDebtDisplay === 'function') {
+                    toggleOpeningDebtDisplay(isChecked);
+                }
+            }
+        }, 100);
     }
     
     initializeDebtPagination(debtData) {
