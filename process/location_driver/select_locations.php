@@ -15,7 +15,7 @@ try {
     
     echo json_encode([
         'success' => true,
-        'locations' => $locations
+        'data' => $locations
     ]);
     
 } catch (PDOException $e) {

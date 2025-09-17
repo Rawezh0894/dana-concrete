@@ -540,64 +540,24 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
     
     // Function to toggle opening debt display
     function toggleOpeningDebtDisplay(show) {
-        console.log('toggleOpeningDebtDisplay called with:', show);
         const debtSummaryContainer = document.getElementById('debt-summary-container');
-        if (!debtSummaryContainer) {
-            console.log('debt-summary-container not found');
-            return;
-        }
+        if (!debtSummaryContainer) return;
         
         // Find all debt summary boxes
         const openingDebtBoxes = debtSummaryContainer.querySelectorAll('.debt-summary-box');
-        console.log('Found debt boxes:', openingDebtBoxes.length);
         
-        openingDebtBoxes.forEach((box, index) => {
+        openingDebtBoxes.forEach(box => {
             const label = box.querySelector('.debt-label');
             if (label) {
                 const labelText = label.textContent;
-                console.log(`Box ${index}: ${labelText}`);
-                
                 if (labelText.includes('قەرزی پێشوو')) {
                     // Show/hide only the opening debt box
                     box.style.display = show ? 'block' : 'none';
-                    console.log('Opening debt box display set to:', show ? 'block' : 'none');
-                } else if (labelText.includes('پارەی ماوە')) {
-                    // Always show remaining amount
-                    box.style.display = 'block';
-                    console.log('Remaining amount box always shown');
-                } else if (labelText.includes('کۆی گشتی')) {
-                    // Update total debt calculation based on opening debt visibility
-                    const valueElement = box.querySelector('.debt-value');
-                    if (valueElement) {
-                        const openingDebt = window.OPENING_DEBT || 0;
-                        const remainingAmount = window.REMAINING_TOTAL || 0;
-                        
-                        console.log('Opening debt:', openingDebt, 'Remaining amount:', remainingAmount);
-                        
-                        if (show) {
-                            // Show total including opening debt
-                            const totalDebt = openingDebt + remainingAmount;
-                            valueElement.textContent = formatCurrency(totalDebt);
-                            console.log('Total debt (with opening):', totalDebt);
-                        } else {
-                            // Show only remaining amount as total
-                            valueElement.textContent = formatCurrency(remainingAmount);
-                            console.log('Total debt (without opening):', remainingAmount);
-                        }
-                    }
+                } else if (labelText.includes('پارەی ماوە') || labelText.includes('کۆی گشتی')) {
+                    // Always show remaining amount and total debt
                     box.style.display = 'block';
                 }
             }
-        });
-    }
-    
-    // Helper function to format currency
-    function formatCurrency(amount) {
-        if (!amount && amount !== 0) return '$0.00';
-        const num = parseFloat(amount.toString().replace(/[$,]/g, '')) || 0;
-        return '$' + num.toLocaleString('en-US', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
         });
     }
     

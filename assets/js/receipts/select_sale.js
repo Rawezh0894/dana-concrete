@@ -458,12 +458,6 @@ class ReceiptManager {
         window.REMAINING_TOTAL = remainingValue;
         window.OPENING_DEBT = openingDebtValue;
         
-        console.log('Global values set:', {
-            OPENING_DEBT: window.OPENING_DEBT,
-            REMAINING_TOTAL: window.REMAINING_TOTAL,
-            RECEIPT_TOTAL: window.RECEIPT_TOTAL
-        });
-        
         // Create debt summary data for pagination
         const debtData = {
             openingDebt: openingDebtValue,
@@ -473,17 +467,6 @@ class ReceiptManager {
         
         // Initialize pagination
         this.initializeDebtPagination(debtData);
-        
-        // Also update the debt summary immediately based on current checkbox state
-        setTimeout(() => {
-            const showOpeningDebtCheckbox = document.getElementById('show-opening-debt');
-            if (showOpeningDebtCheckbox) {
-                const isChecked = showOpeningDebtCheckbox.checked;
-                if (typeof toggleOpeningDebtDisplay === 'function') {
-                    toggleOpeningDebtDisplay(isChecked);
-                }
-            }
-        }, 100);
     }
     
     initializeDebtPagination(debtData) {
@@ -552,20 +535,12 @@ class ReceiptManager {
         // Page 2: Total debt
         const page2 = document.createElement('div');
         page2.className = 'debt-summary-page debt-summary-page-break';
-        
-        // Check if opening debt should be shown
-        const showOpeningDebtCheckbox = document.getElementById('show-opening-debt');
-        const showOpeningDebt = showOpeningDebtCheckbox ? showOpeningDebtCheckbox.checked : true;
-        
-        // Calculate total based on opening debt visibility
-        const totalDebt = showOpeningDebt ? debtData.totalDebt : debtData.remainingAmount;
-        
         page2.innerHTML = `
             <div class="debt-summary-row">
                 <div class="debt-summary-box total-box">
                     <i class="fa fa-calculator"></i>
                     <span class="debt-label">کۆی گشتی پارەی ماوە:</span>
-                    <span class="debt-value">${this.formatCurrency(totalDebt)}</span>
+                    <span class="debt-value">${this.formatCurrency(debtData.totalDebt)}</span>
                 </div>
             </div>
         `;
@@ -582,16 +557,9 @@ class ReceiptManager {
         const container = document.getElementById('debt-summary-pages');
         if (!container) return;
         
-        // Check if opening debt should be shown
-        const showOpeningDebtCheckbox = document.getElementById('show-opening-debt');
-        const showOpeningDebt = showOpeningDebtCheckbox ? showOpeningDebtCheckbox.checked : true;
-        
-        // Calculate total based on opening debt visibility
-        const totalDebt = showOpeningDebt ? debtData.totalDebt : debtData.remainingAmount;
-        
         container.innerHTML = `
             <div class="debt-summary-row">
-                <div class="debt-summary-box" style="display: ${showOpeningDebt ? 'block' : 'none'}">
+                <div class="debt-summary-box">
                     <i class="fa fa-history"></i>
                     <span class="debt-label">قەرزی پێشوو:</span>
                     <span class="debt-value">${this.formatCurrency(debtData.openingDebt)}</span>
@@ -604,7 +572,7 @@ class ReceiptManager {
                 <div class="debt-summary-box total-box">
                     <i class="fa fa-calculator"></i>
                     <span class="debt-label">کۆی گشتی پارەی ماوە:</span>
-                    <span class="debt-value">${this.formatCurrency(totalDebt)}</span>
+                    <span class="debt-value">${this.formatCurrency(debtData.totalDebt)}</span>
                 </div>
             </div>
         `;

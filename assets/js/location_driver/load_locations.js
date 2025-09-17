@@ -6,7 +6,7 @@ function loadLocations() {
         dataType: 'json',
         success: function(response) {
             if (response.success) {
-                const locations = response.data;
+                const locations = response.data || [];
                 const tbody = $('#locationsTable tbody');
                 tbody.empty();
                 
@@ -68,7 +68,7 @@ function loadLocationSelects() {
         dataType: 'json',
         success: function(response) {
             if (response.success) {
-                const locations = response.data;
+                const locations = response.data || [];
                 
                 // Update location select in add purchase modal
                 const locationSelect = $('#location_id');
