@@ -553,38 +553,11 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 if (labelText.includes('قەرزی پێشوو')) {
                     // Show/hide only the opening debt box
                     box.style.display = show ? 'block' : 'none';
-                } else if (labelText.includes('پارەی ماوە')) {
-                    // Always show remaining amount
-                    box.style.display = 'block';
-                } else if (labelText.includes('کۆی گشتی')) {
-                    // Update total debt calculation based on opening debt visibility
-                    const valueElement = box.querySelector('.debt-value');
-                    if (valueElement) {
-                        const openingDebt = window.OPENING_DEBT || 0;
-                        const remainingAmount = window.REMAINING_TOTAL || 0;
-                        
-                        if (show) {
-                            // Show total including opening debt
-                            const totalDebt = openingDebt + remainingAmount;
-                            valueElement.textContent = formatCurrency(totalDebt);
-                        } else {
-                            // Show only remaining amount as total
-                            valueElement.textContent = formatCurrency(remainingAmount);
-                        }
-                    }
+                } else if (labelText.includes('پارەی ماوە') || labelText.includes('کۆی گشتی')) {
+                    // Always show remaining amount and total debt
                     box.style.display = 'block';
                 }
             }
-        });
-    }
-    
-    // Helper function to format currency
-    function formatCurrency(amount) {
-        if (!amount && amount !== 0) return '$0.00';
-        const num = parseFloat(amount.toString().replace(/[$,]/g, '')) || 0;
-        return '$' + num.toLocaleString('en-US', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
         });
     }
     
