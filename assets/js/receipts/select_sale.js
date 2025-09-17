@@ -419,6 +419,8 @@ class ReceiptManager {
             const showInvoiceColumn = showInvoiceCheckbox ? showInvoiceCheckbox.checked : true;
             
             // Set colspan based on invoice column visibility
+            // When invoice column is visible: 4 + 5 = 9 columns
+            // When invoice column is hidden: 3 + 6 = 9 columns
             const firstColspan = showInvoiceColumn ? '4' : '3';
             const secondColspan = showInvoiceColumn ? '5' : '6';
             

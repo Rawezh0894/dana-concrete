@@ -472,6 +472,26 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         
         // Update colspan in summary row to match visible columns
         updateSummaryColspan(show);
+        
+        // Also update the summary row if it exists
+        if (window.receiptManager && window.receiptManager.updateSummary) {
+            // Get current totals from the summary row
+            const summaryRow = document.querySelector('.summary-row');
+            if (summaryRow) {
+                const firstCellText = summaryRow.querySelector('td:first-child')?.textContent || '';
+                const secondCellText = summaryRow.querySelector('td:last-child')?.textContent || '';
+                
+                // Extract totals from the text (basic parsing)
+                const totalMatch = firstCellText.match(/کۆی نرخ: \$?([\d,]+\.?\d*)/);
+                const remainingMatch = secondCellText.match(/کۆی پارەی ماوە: \$?([\d,]+\.?\d*)/);
+                
+                if (totalMatch && remainingMatch) {
+                    const total = parseFloat(totalMatch[1].replace(/,/g, ''));
+                    const remaining = parseFloat(remainingMatch[1].replace(/,/g, ''));
+                    window.receiptManager.updateSummary(total, remaining);
+                }
+            }
+        }
     }
     
     // Function to update summary row colspan based on visible columns
@@ -482,8 +502,8 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             const secondCell = summaryRow.querySelector('td:last-child');
             
             if (firstCell && secondCell) {
-                // If invoice column is visible, use 4 and 5 colspans
-                // If invoice column is hidden, use 3 and 6 colspans
+                // If invoice column is visible, use 4 and 5 colspans (total 9 columns)
+                // If invoice column is hidden, use 3 and 6 colspans (total 9 columns)
                 if (showInvoiceColumn) {
                     firstCell.setAttribute('colspan', '4');
                     secondCell.setAttribute('colspan', '5');
