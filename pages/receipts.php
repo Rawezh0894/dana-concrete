@@ -500,13 +500,22 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         const debtSummaryContainer = document.getElementById('debt-summary-container');
         if (!debtSummaryContainer) return;
         
-        if (show) {
-            // Show opening debt
-            debtSummaryContainer.style.display = 'block';
-        } else {
-            // Hide opening debt
-            debtSummaryContainer.style.display = 'none';
-        }
+        // Find all debt summary boxes
+        const openingDebtBoxes = debtSummaryContainer.querySelectorAll('.debt-summary-box');
+        
+        openingDebtBoxes.forEach(box => {
+            const label = box.querySelector('.debt-label');
+            if (label) {
+                const labelText = label.textContent;
+                if (labelText.includes('قەرزی پێشوو')) {
+                    // Show/hide only the opening debt box
+                    box.style.display = show ? 'block' : 'none';
+                } else if (labelText.includes('پارەی ماوە') || labelText.includes('کۆی گشتی')) {
+                    // Always show remaining amount and total debt
+                    box.style.display = 'block';
+                }
+            }
+        });
     }
     
     // Function to change debt summary pages
