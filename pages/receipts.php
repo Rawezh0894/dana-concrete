@@ -225,6 +225,61 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             font-size: 12px;
         }
         
+        /* Company Header Styling */
+        .company-info {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+        .company-logo {
+            flex-shrink: 0;
+        }
+        
+        .company-logo .receipt-logo {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(0, 59, 115, 0.3);
+        }
+        
+        .company-text {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+        
+        .company-name-en {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #003b73;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            letter-spacing: 1px;
+        }
+        
+        .company-tagline-en {
+            font-size: 0.9rem;
+            color: #6c757d;
+            font-style: italic;
+            margin-bottom: 0.5rem;
+        }
+        
+        .company-name-ku {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #003b73;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            font-family: 'Rabar', sans-serif;
+        }
+        
+        .company-tagline-ku {
+            font-size: 0.85rem;
+            color: #6c757d;
+            font-style: italic;
+            font-family: 'Rabar', sans-serif;
+        }
+        
         /* Responsive Design */
         @media (max-width: 768px) {
             .filter-row {
@@ -239,6 +294,25 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             .filter-group.checkbox-group {
                 flex-direction: row;
                 justify-content: flex-start;
+            }
+            
+            .company-info {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+            
+            .company-name-en {
+                font-size: 1.8rem;
+            }
+            
+            .company-name-ku {
+                font-size: 1.5rem;
+            }
+            
+            .company-logo .receipt-logo {
+                width: 60px;
+                height: 60px;
             }
         }
         .contact-info {
@@ -307,9 +381,16 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 </div>
 <div class="receipt-container">
     <div class="receipt-header">
-        <div class="receipt-title">دانا کۆنکرێت</div>
-        <div class="logo-circle">
-            <img src="../assets/images/Screenshot_2025-07-05_103044-removebg-preview.png" alt="Dana Concrete Logo" class="receipt-logo" />
+        <div class="company-info">
+            <div class="company-logo">
+                <img src="../assets/images/Screenshot_2025-07-05_103044-removebg-preview.png" alt="Dana Concrete Logo" class="receipt-logo" />
+            </div>
+            <div class="company-text">
+                <div class="company-name-en">Dana Concrete</div>
+                <div class="company-tagline-en">for ready mixed concrete</div>
+                <div class="company-name-ku">دانا کۆنکرێت</div>
+                <div class="company-tagline-ku">بۆ کۆنکرێتی ئامادەکراو</div>
+            </div>
         </div>
             <div class="receipt-meta">
         <div class="payment-date-row">
