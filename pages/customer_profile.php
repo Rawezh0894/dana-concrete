@@ -865,15 +865,31 @@ if ($customer_id) {
                 errorMessage = 'تکایە لانیکەم یەک فرۆشتن هەڵبژێرە!';
             } else {
                 let totalAllocated = 0;
+                let hasInvalidAmount = false;
+                
                 checkboxes.forEach(checkbox => {
                     const amountInput = document.querySelector(`.sale-amount[data-sale-id="${checkbox.value}"]`);
                     const amount = parseFloat(amountInput.value) || 0;
+                    const maxAmount = parseFloat(amountInput.getAttribute('max')) || 0;
+                    
+                    if (amount > maxAmount) {
+                        isValid = false;
+                        errorMessage = `بڕی پارە بۆ فرۆشتن ${checkbox.value} نابێت زیاتر بێت لە ${maxAmount.toFixed(2)} $!`;
+                        hasInvalidAmount = true;
+                    }
+                    
+                    if (amount <= 0) {
+                        isValid = false;
+                        errorMessage = `بڕی پارە بۆ فرۆشتن ${checkbox.value} دەبێت گەورەتر بێت لە سفر!`;
+                        hasInvalidAmount = true;
+                    }
+                    
                     totalAllocated += amount;
                 });
                 
-                if (Math.abs(totalAllocated - totalPaidUsd) > 0.01) {
+                if (!hasInvalidAmount && Math.abs(totalAllocated - totalPaidUsd) > 0.01) {
                     isValid = false;
-                    errorMessage = `کۆی بڕی پارەی دابەشکراو دەبێت یەکسان بێت بە کۆی پارەی داوە!`;
+                    errorMessage = `کۆی بڕی پارەی دابەشکراو (${totalAllocated.toFixed(2)} $) دەبێت یەکسان بێت بە کۆی پارەی داوە (${totalPaidUsd.toFixed(2)} $)!`;
                 }
             }
         } else {

@@ -70,12 +70,45 @@ try {
     
     $total_debt_usd = $opening_debt_usd + $sales_remaining;
 
-    // Allow small tolerance for floating-point precision (1 cent)
+    // Validate payment amount based on payment type
     $tolerance = 0.01;
-    if ($total_paid_usd > ($total_debt_usd + $tolerance)) {
-        error_log('Payment amount exceeds total debt: payment=' . $total_paid_usd . ', debt=' . $total_debt_usd);
-        echo json_encode(['success' => false, 'msg' => 'بڕی پارەی داوە نابێت زیاتر بێت لە قەرز!']);
-        exit;
+    
+    if ($payment_type === 'opening_debt_only') {
+        // Only validate against opening debt
+        if ($total_paid_usd > ($opening_debt_usd + $tolerance)) {
+            error_log('Payment amount exceeds opening debt: payment=' . $total_paid_usd . ', opening_debt=' . $opening_debt_usd);
+            echo json_encode(['success' => false, 'msg' => 'بڕی پارەی داوە نابێت زیاتر بێت لە قەرزی سەرەتایی!']);
+            exit;
+        }
+    } elseif ($payment_type === 'specific_sales') {
+        // Validate against selected sales only
+        if (!empty($specific_sales)) {
+            $total_selected_remaining = 0;
+            foreach ($specific_sales as $sale_id => $amount) {
+                $stmt = $pdo->prepare("SELECT remaining_amount FROM sales WHERE id = ? AND customer_id = ? AND remaining_amount > 0");
+                $stmt->execute([$sale_id, $customer_id]);
+                $sale = $stmt->fetch(PDO::FETCH_ASSOC);
+                if ($sale) {
+                    $total_selected_remaining += floatval($sale['remaining_amount']);
+                }
+            }
+            
+            if ($total_paid_usd > ($total_selected_remaining + $tolerance)) {
+                error_log('Payment amount exceeds selected sales remaining: payment=' . $total_paid_usd . ', selected_remaining=' . $total_selected_remaining);
+                echo json_encode(['success' => false, 'msg' => 'بڕی پارەی داوە نابێت زیاتر بێت لە کۆی ماوەی فرۆشتنە هەڵبژاردەکان!']);
+                exit;
+            }
+        } else {
+            echo json_encode(['success' => false, 'msg' => 'تکایە لانیکەم یەک فرۆشتن هەڵبژێرە!']);
+            exit;
+        }
+    } else {
+        // FIFO - validate against total debt
+        if ($total_paid_usd > ($total_debt_usd + $tolerance)) {
+            error_log('Payment amount exceeds total debt: payment=' . $total_paid_usd . ', debt=' . $total_debt_usd);
+            echo json_encode(['success' => false, 'msg' => 'بڕی پارەی داوە نابێت زیاتر بێت لە کۆی قەرز!']);
+            exit;
+        }
     }
 
     // 3. زیادکردنی قەرزە گەڕاوەکە بەپێی جۆری پارەدان
