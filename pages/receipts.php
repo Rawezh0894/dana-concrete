@@ -225,6 +225,65 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             font-size: 12px;
         }
         
+        /* Glass Morphism Effect for Receipt Header */
+        .receipt-header {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .receipt-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.1) 0%, 
+                rgba(255, 255, 255, 0.05) 50%, 
+                rgba(255, 255, 255, 0.1) 100%);
+            pointer-events: none;
+        }
+        
+        .receipt-header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, 
+                rgba(0, 59, 115, 0.8) 0%, 
+                rgba(0, 123, 255, 0.6) 50%, 
+                rgba(0, 59, 115, 0.8) 100%);
+            border-radius: 15px 15px 0 0;
+        }
+        
+        .receipt-title {
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo-circle {
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 4px 15px rgba(0, 59, 115, 0.3);
+        }
+        
+        .receipt-meta {
+            position: relative;
+            z-index: 1;
+        }
+        
         /* Responsive Design */
         @media (max-width: 768px) {
             .filter-row {
@@ -291,65 +350,6 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             color: #6b7280;
             font-weight: 400;
             margin: 0 8px;
-        }
-        
-        /* Glass Morphism Effect for Receipt Header */
-        .receipt-header {
-            background: rgba(255, 255, 255, 0.25);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            border-radius: 15px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .receipt-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, 
-                rgba(255, 255, 255, 0.1) 0%, 
-                rgba(255, 255, 255, 0.05) 50%, 
-                rgba(255, 255, 255, 0.1) 100%);
-            pointer-events: none;
-        }
-        
-        .receipt-header::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, 
-                rgba(0, 59, 115, 0.8) 0%, 
-                rgba(0, 123, 255, 0.6) 50%, 
-                rgba(0, 59, 115, 0.8) 100%);
-            border-radius: 15px 15px 0 0;
-        }
-        
-        .receipt-title {
-            position: relative;
-            z-index: 1;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        
-        .logo-circle {
-            position: relative;
-            z-index: 1;
-            box-shadow: 0 4px 15px rgba(0, 59, 115, 0.3);
-        }
-        
-        .receipt-meta {
-            position: relative;
-            z-index: 1;
         }
     </style>
     <link href="../assets/css/kurdish-font.css" rel="stylesheet">
