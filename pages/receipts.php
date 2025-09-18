@@ -225,98 +225,115 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             font-size: 12px;
         }
         
-        /* Contact Footer Styles */
-        .contact-footer {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-top: 3px solid #007bff;
-            margin-top: 2rem;
+        /* Professional Footer Styles */
+        .professional-footer {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            margin-top: 3rem;
             padding: 2rem 0;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+            position: relative;
+            overflow: hidden;
         }
         
-        .contact-footer-content {
+        .professional-footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #007bff, #28a745, #ffc107, #dc3545);
+        }
+        
+        .footer-content {
             max-width: 1200px;
             margin: 0 auto;
-            display: flex;
-            justify-content: space-around;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 2rem;
-            padding: 0 1rem;
         }
         
-        .contact-item {
+        .footer-section {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            background: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            min-width: 300px;
+            gap: 1.5rem;
         }
         
-        .contact-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        }
-        
-        .contact-icon-wrapper {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        .footer-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(255,255,255,0.1);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255,255,255,0.2);
             flex-shrink: 0;
         }
         
-        .contact-icon-wrapper i {
-            color: white;
-            font-size: 20px;
+        .footer-icon i {
+            font-size: 24px;
+            color: #fff;
         }
         
-        .contact-details {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-        
-        .contact-label {
+        .footer-details h3 {
+            margin: 0 0 0.5rem 0;
+            font-size: 18px;
             font-weight: 600;
-            color: #495057;
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            color: #fff;
         }
         
-        .contact-value {
-            color: #6c757d;
-            font-size: 16px;
-            font-weight: 500;
+        .footer-details p {
+            margin: 0;
+            font-size: 14px;
+            color: rgba(255,255,255,0.8);
+            line-height: 1.5;
         }
         
         .phone-numbers {
             display: flex;
             flex-direction: column;
-            gap: 0.3rem;
+            gap: 0.5rem;
         }
         
         .phone-number {
-            color: #007bff;
-            font-weight: 600;
-            font-size: 16px;
-            padding: 0.2rem 0.5rem;
-            background: rgba(0, 123, 255, 0.1);
-            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 25px;
+            color: #fff;
+            font-weight: 500;
             transition: all 0.3s ease;
+            text-decoration: none;
         }
         
         .phone-number:hover {
-            background: rgba(0, 123, 255, 0.2);
+            background: rgba(255,255,255,0.2);
             transform: translateX(5px);
+        }
+        
+        .phone-number i {
+            font-size: 14px;
+            color: #4CAF50;
+        }
+        
+        .footer-bottom {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .footer-bottom p {
+            margin: 0;
+            font-size: 12px;
+            color: rgba(255,255,255,0.6);
         }
         
         /* Responsive Design */
@@ -335,25 +352,19 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 justify-content: flex-start;
             }
             
-            .contact-footer-content {
-                flex-direction: column;
-                gap: 1.5rem;
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+                text-align: center;
             }
             
-            .contact-item {
-                min-width: 100%;
-                max-width: 400px;
+            .footer-section {
+                flex-direction: column;
+                text-align: center;
             }
             
             .phone-numbers {
-                flex-direction: row;
-                flex-wrap: wrap;
-                gap: 0.5rem;
-            }
-            
-            .phone-number {
-                font-size: 14px;
-                padding: 0.3rem 0.8rem;
+                align-items: center;
             }
         }
     </style>
@@ -548,34 +559,49 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         </div>
     </div>
     
-    <!-- Contact Information Footer -->
-    <div class="contact-footer">
-        <div class="contact-footer-content">
-            <div class="contact-item">
-                <div class="contact-icon-wrapper">
+    <!-- Professional Footer -->
+    <footer class="professional-footer">
+        <div class="footer-content">
+            <!-- Address Section -->
+            <div class="footer-section">
+                <div class="footer-icon">
                     <i class="fa fa-map-marker-alt"></i>
                 </div>
-                <div class="contact-details">
-                    <span class="contact-label">ناونیشان</span>
-                    <span class="contact-value">سلێمانی، تاسڵوجە - نزیک بازگەی کەڵەوانان</span>
+                <div class="footer-details">
+                    <h3>ناونیشان</h3>
+                    <p>سلێمانی، تاسڵوجە - نزیک بازگەی کەڵەوانان</p>
                 </div>
             </div>
             
-            <div class="contact-item">
-                <div class="contact-icon-wrapper">
+            <!-- Contact Section -->
+            <div class="footer-section">
+                <div class="footer-icon">
                     <i class="fa fa-phone"></i>
                 </div>
-                <div class="contact-details">
-                    <span class="contact-label">ژمارەی تەلەفۆن</span>
+                <div class="footer-details">
+                    <h3>ژمارەی تەلەفۆن</h3>
                     <div class="phone-numbers">
-                        <span class="phone-number">1454 144 0773</span>
-                        <span class="phone-number">0101 995 0772</span>
-                        <span class="phone-number">0543 152 0750</span>
+                        <a href="tel:07731454144" class="phone-number">
+                            <i class="fa fa-phone"></i>
+                            1454 144 0773
+                        </a>
+                        <a href="tel:0772010101" class="phone-number">
+                            <i class="fa fa-phone"></i>
+                            0101 995 0772
+                        </a>
+                        <a href="tel:07501543054" class="phone-number">
+                            <i class="fa fa-phone"></i>
+                            0543 152 0750
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2024 دانا کۆنکرێت - هەموو مافەکان پارێزراون</p>
+        </div>
+    </footer>
    
 </div>
 <script>
