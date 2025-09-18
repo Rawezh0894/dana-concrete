@@ -160,7 +160,7 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         
         <!-- Invoice Number Visibility Checkbox -->
         <label for="show-invoice-number" style="font-weight:bold; margin-right: 1rem; margin-left: 1rem;">
-            <input type="checkbox" id="show-invoice-number" checked style="margin-left: 0.5rem;">
+            <input type="checkbox" id="show-invoice-number" style="margin-left: 0.5rem;">
             نیشاندانی ژمارەی پسووڵە
         </label>
         
@@ -269,8 +269,8 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 if (dateTo) dateTo.value = '';
                 if (location) location.value = 'all';
                 if (showInvoiceCheckbox) {
-                    showInvoiceCheckbox.checked = true;
-                    toggleInvoiceNumberColumn(true);
+                    showInvoiceCheckbox.checked = false;
+                    toggleInvoiceNumberColumn(false);
                     // Clear localStorage preference
                     localStorage.removeItem('showInvoiceNumber');
                 }
@@ -288,9 +288,11 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 // Reload data
                 if (typeof loadSalesData === 'function') loadSalesData();
                 
-                // Re-format invoice numbers after data refresh
+                // Re-format invoice numbers after data refresh (only if column is visible)
                 setTimeout(() => {
-                    formatAllInvoiceNumbers();
+                    if (showInvoiceCheckbox && showInvoiceCheckbox.checked) {
+                        formatAllInvoiceNumbers();
+                    }
                 }, 500);
             });
         }
@@ -304,8 +306,9 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 showInvoiceCheckbox.checked = savedPreference === 'true';
                 toggleInvoiceNumberColumn(showInvoiceCheckbox.checked);
             } else {
-                // If no saved preference, format invoice numbers for default visible state
-                formatAllInvoiceNumbers();
+                // If no saved preference, default to hidden state
+                showInvoiceCheckbox.checked = false;
+                toggleInvoiceNumberColumn(false);
             }
             
             showInvoiceCheckbox.addEventListener('change', function() {
