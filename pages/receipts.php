@@ -225,6 +225,100 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             font-size: 12px;
         }
         
+        /* Contact Footer Styles */
+        .contact-footer {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-top: 3px solid #007bff;
+            margin-top: 2rem;
+            padding: 2rem 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .contact-footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+            padding: 0 1rem;
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            min-width: 300px;
+        }
+        
+        .contact-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .contact-icon-wrapper {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .contact-icon-wrapper i {
+            color: white;
+            font-size: 20px;
+        }
+        
+        .contact-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .contact-label {
+            font-weight: 600;
+            color: #495057;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .contact-value {
+            color: #6c757d;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .phone-numbers {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+        
+        .phone-number {
+            color: #007bff;
+            font-weight: 600;
+            font-size: 16px;
+            padding: 0.2rem 0.5rem;
+            background: rgba(0, 123, 255, 0.1);
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+        
+        .phone-number:hover {
+            background: rgba(0, 123, 255, 0.2);
+            transform: translateX(5px);
+        }
+        
         /* Responsive Design */
         @media (max-width: 768px) {
             .filter-row {
@@ -239,6 +333,27 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             .filter-group.checkbox-group {
                 flex-direction: row;
                 justify-content: flex-start;
+            }
+            
+            .contact-footer-content {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+            
+            .contact-item {
+                min-width: 100%;
+                max-width: 400px;
+            }
+            
+            .phone-numbers {
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+            
+            .phone-number {
+                font-size: 14px;
+                padding: 0.3rem 0.8rem;
             }
         }
     </style>
@@ -434,18 +549,32 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
     </div>
     
     <!-- Contact Information Footer -->
-    <div class="contact-info" style="font-size:12px; margin-top: 2rem; text-align: center; padding: 1rem; border-top: 1px solid #dee2e6;"> 
-        <p style="font-size:12px; margin: 0; line-height: 1.6;">
-            <i class="fa fa-map-marker-alt" style="margin-left: 0.5rem; color: #6c757d;"></i>
-            <strong>ناونیشان:</strong> سلێمانی، تاسڵوجە - نزیک بازگەی کەڵەوانان
-            <br>
-            <i class="fa fa-phone" style="margin-left: 0.5rem; color: #6c757d;"></i>
-            <strong>ژ.م:</strong> 1454 144 0773
-            <i class="fa fa-phone" style="margin-left: 1rem; color: #6c757d;"></i>
-            <strong>ژ.م:</strong> 0101 995 0772
-            <i class="fa fa-phone" style="margin-left: 1rem; color: #6c757d;"></i>
-            <strong>ژ.م:</strong> 0543 152 0750
-        </p>
+    <div class="contact-footer">
+        <div class="contact-footer-content">
+            <div class="contact-item">
+                <div class="contact-icon-wrapper">
+                    <i class="fa fa-map-marker-alt"></i>
+                </div>
+                <div class="contact-details">
+                    <span class="contact-label">ناونیشان</span>
+                    <span class="contact-value">سلێمانی، تاسڵوجە - نزیک بازگەی کەڵەوانان</span>
+                </div>
+            </div>
+            
+            <div class="contact-item">
+                <div class="contact-icon-wrapper">
+                    <i class="fa fa-phone"></i>
+                </div>
+                <div class="contact-details">
+                    <span class="contact-label">ژمارەی تەلەفۆن</span>
+                    <div class="phone-numbers">
+                        <span class="phone-number">1454 144 0773</span>
+                        <span class="phone-number">0101 995 0772</span>
+                        <span class="phone-number">0543 152 0750</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
    
 </div>
