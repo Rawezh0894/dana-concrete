@@ -84,6 +84,12 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             word-wrap: break-word;
             max-width: 200px;
         }
+        
+        /* Hide invoice number column by default */
+        .receipt-table th:nth-child(7),
+        .receipt-table td:nth-child(7) {
+            display: none;
+        }
     </style>
     <link href="../assets/css/kurdish-font.css" rel="stylesheet">
 </head>
