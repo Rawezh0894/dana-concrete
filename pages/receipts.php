@@ -88,7 +88,13 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         /* Hide invoice number column by default */
         .receipt-table th:nth-child(7),
         .receipt-table td:nth-child(7) {
-            display: none;
+            display: none !important;
+        }
+        
+        /* Show invoice number column when explicitly enabled */
+        .receipt-table th:nth-child(7).show-invoice,
+        .receipt-table td:nth-child(7).show-invoice {
+            display: table-cell !important;
         }
     </style>
     <link href="../assets/css/kurdish-font.css" rel="stylesheet">
@@ -421,13 +427,21 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         const dataRows = table.querySelectorAll('tbody tr');
         
         if (headerRow && headerRow.children[6]) {
-            headerRow.children[6].style.display = show ? '' : 'none';
+            if (show) {
+                headerRow.children[6].classList.add('show-invoice');
+            } else {
+                headerRow.children[6].classList.remove('show-invoice');
+            }
         }
         
         // Hide/show invoice number column in all data rows
         dataRows.forEach(row => {
             if (row.children[6]) {
-                row.children[6].style.display = show ? '' : 'none';
+                if (show) {
+                    row.children[6].classList.add('show-invoice');
+                } else {
+                    row.children[6].classList.remove('show-invoice');
+                }
                 
                 // Format invoice numbers to show only 3 per row when visible
                 if (show) {
