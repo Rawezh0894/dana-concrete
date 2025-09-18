@@ -225,115 +225,11 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             font-size: 12px;
         }
         
-        /* Professional Footer Styles */
-        .professional-footer {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-            color: white;
-            margin-top: 3rem;
-            padding: 2rem 0;
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .professional-footer::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #007bff, #28a745, #ffc107, #dc3545);
-        }
-        
-        .footer-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 2rem;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 3rem;
-            align-items: center;
-        }
-        
-        .footer-section {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-        
-        .footer-icon {
-            width: 60px;
-            height: 60px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255,255,255,0.2);
-            flex-shrink: 0;
-        }
-        
-        .footer-icon i {
-            font-size: 24px;
-            color: #fff;
-        }
-        
-        .footer-details h3 {
-            margin: 0 0 0.5rem 0;
-            font-size: 18px;
-            font-weight: 600;
-            color: #fff;
-        }
-        
-        .footer-details p {
-            margin: 0;
-            font-size: 14px;
-            color: rgba(255,255,255,0.8);
-            line-height: 1.5;
-        }
-        
-        .phone-numbers {
+        /* Make container use flexbox for sticky footer */
+        .receipt-container {
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
-        }
-        
-        .phone-number {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            background: rgba(255,255,255,0.1);
-            border-radius: 25px;
-            color: #fff;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            text-decoration: none;
-        }
-        
-        .phone-number:hover {
-            background: rgba(255,255,255,0.2);
-            transform: translateX(5px);
-        }
-        
-        .phone-number i {
-            font-size: 14px;
-            color: #4CAF50;
-        }
-        
-        .footer-bottom {
-            text-align: center;
-            margin-top: 2rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .footer-bottom p {
-            margin: 0;
-            font-size: 12px;
-            color: rgba(255,255,255,0.6);
+            min-height: 100vh;
         }
         
         /* Responsive Design */
@@ -350,21 +246,6 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             .filter-group.checkbox-group {
                 flex-direction: row;
                 justify-content: flex-start;
-            }
-            
-            .footer-content {
-                grid-template-columns: 1fr;
-                gap: 2rem;
-                text-align: center;
-            }
-            
-            .footer-section {
-                flex-direction: column;
-                text-align: center;
-            }
-            
-            .phone-numbers {
-                align-items: center;
             }
         }
     </style>
@@ -559,49 +440,20 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         </div>
     </div>
     
-    <!-- Professional Footer -->
-    <footer class="professional-footer">
-        <div class="footer-content">
-            <!-- Address Section -->
-            <div class="footer-section">
-                <div class="footer-icon">
-                    <i class="fa fa-map-marker-alt"></i>
-                </div>
-                <div class="footer-details">
-                    <h3>ناونیشان</h3>
-                    <p>سلێمانی، تاسڵوجە - نزیک بازگەی کەڵەوانان</p>
-                </div>
-            </div>
-            
-            <!-- Contact Section -->
-            <div class="footer-section">
-                <div class="footer-icon">
-                    <i class="fa fa-phone"></i>
-                </div>
-                <div class="footer-details">
-                    <h3>ژمارەی تەلەفۆن</h3>
-                    <div class="phone-numbers">
-                        <a href="tel:07731454144" class="phone-number">
-                            <i class="fa fa-phone"></i>
-                            1454 144 0773
-                        </a>
-                        <a href="tel:0772010101" class="phone-number">
-                            <i class="fa fa-phone"></i>
-                            0101 995 0772
-                        </a>
-                        <a href="tel:07501543054" class="phone-number">
-                            <i class="fa fa-phone"></i>
-                            0543 152 0750
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="footer-bottom">
-            <p>&copy; 2024 دانا کۆنکرێت - هەموو مافەکان پارێزراون</p>
-        </div>
-    </footer>
+    <!-- Contact Information Footer -->
+    <div class="contact-info" style="font-size:12px; margin-top: auto; text-align: center; padding: 1rem; border-top: 1px solid #dee2e6; position: sticky; bottom: 0; background: white; z-index: 10;"> 
+        <p style="font-size:12px; margin: 0; line-height: 1.6;">
+            <i class="fa fa-map-marker-alt" style="margin-left: 0.5rem; color: #6c757d;"></i>
+            <strong>ناونیشان:</strong> سلێمانی، تاسڵوجە - نزیک بازگەی کەڵەوانان
+            <br>
+            <i class="fa fa-phone" style="margin-left: 0.5rem; color: #6c757d;"></i>
+            <strong>ژ.م:</strong> 1454 144 0773
+            <i class="fa fa-phone" style="margin-left: 1rem; color: #6c757d;"></i>
+            <strong>ژ.م:</strong> 0101 995 0772
+            <i class="fa fa-phone" style="margin-left: 1rem; color: #6c757d;"></i>
+            <strong>ژ.م:</strong> 0543 152 0750
+        </p>
+    </div>
    
 </div>
 <script>
