@@ -96,6 +96,149 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         .receipt-table td:nth-child(7).show-invoice {
             display: table-cell !important;
         }
+        
+        /* Filter Section Styles */
+        .filter-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 1px solid #dee2e6;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .filter-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        
+        .filter-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            min-width: 200px;
+            flex: 1;
+        }
+        
+        .filter-group.checkbox-group {
+            flex-direction: row;
+            align-items: center;
+            min-width: auto;
+        }
+        
+        .filter-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 5px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .filter-label i {
+            color: #6c757d;
+            font-size: 12px;
+        }
+        
+        .filter-select,
+        .filter-input {
+            padding: 8px 12px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+            transition: all 0.2s ease;
+            font-family: 'Rabar', sans-serif;
+        }
+        
+        .filter-select:focus,
+        .filter-input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+        
+        .filter-checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #495057;
+            font-size: 14px;
+            margin: 0;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: background-color 0.2s ease;
+        }
+        
+        .filter-checkbox-label:hover {
+            background-color: rgba(0, 123, 255, 0.05);
+        }
+        
+        .filter-checkbox {
+            display: none;
+        }
+        
+        .checkmark {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #ced4da;
+            border-radius: 4px;
+            position: relative;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        
+        .filter-checkbox:checked + .checkmark {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        
+        .filter-checkbox:checked + .checkmark::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .filter-checkbox-label i {
+            color: #6c757d;
+            font-size: 12px;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .filter-row {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .filter-group {
+                min-width: 100%;
+            }
+            
+            .filter-group.checkbox-group {
+                flex-direction: row;
+                justify-content: flex-start;
+            }
+        }
     </style>
     <link href="../assets/css/kurdish-font.css" rel="stylesheet">
 </head>
@@ -138,61 +281,98 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             <span class="customer-mobile">ژ.م کڕیار</span>
         </div>
     </div>
-    <!-- Transaction Type Filter -->
-    <div style="text-align: center; margin: 1rem 0;">
-        <label for="transaction-type-filter" style="font-weight:bold;">جۆری مامەڵە:</label>
-        <select id="transaction-type-filter" style="padding: 0.3rem 1rem; font-size: 1rem;">
-            <option value="all">هەموو</option>
-            <option value="cash">نەقد</option>
-            <option value="debt">قەرز</option>
-            <option value="has_remaining">پارەی ماوە</option>
-        </select>
-        <!-- Month Filter -->
-        <label for="month-filter" style="font-weight:bold; margin-right: 1rem;">مانگ:</label>
-        <select id="month-filter" style="padding: 0.3rem 1rem; font-size: 1rem;">
-            <option value="all">All</option>
-            <option value="01">January</option>
-            <option value="02">February</option>
-            <option value="03">March</option>
-            <option value="04">April</option>
-            <option value="05">May</option>
-            <option value="06">June</option>
-            <option value="07">July</option>
-            <option value="08">August</option>
-            <option value="09">September</option>
-            <option value="10">October</option>
-            <option value="11">November</option>
-            <option value="12">December</option>
-        </select>
-        <!-- Date Range Filter -->
-        <label for="date-from-filter" style="font-weight:bold; margin-right: 1rem;">لە بەروار:</label>
-        <input type="date" id="date-from-filter" style="padding: 0.3rem; font-size: 1rem;">
-        <label for="date-to-filter" style="font-weight:bold; margin-right: 1rem;">بۆ بەروار:</label>
-        <input type="date" id="date-to-filter" style="padding: 0.3rem; font-size: 1rem;">
-        
-        <!-- Invoice Number Visibility Checkbox -->
-        <label for="show-invoice-number" style="font-weight:bold; margin-right: 1rem; margin-left: 1rem;">
-            <input type="checkbox" id="show-invoice-number" style="margin-left: 0.5rem;">
-            نیشاندانی ژمارەی پسووڵە
-        </label>
-        
-        <!-- Location Filter -->
-        <label for="location-filter" style="font-weight:bold; margin-right: 1rem;">شوێن:</label>
-        <select id="location-filter" style="padding: 0.3rem 1rem; font-size: 1rem;">
-            <option value="all">هەموو</option>
-        </select>
-        
-        <!-- Show Opening Debt Checkbox -->
-        <label for="show-opening-debt" style="font-weight:bold; margin-right: 1rem; margin-left: 1rem;">
-            <input type="checkbox" id="show-opening-debt" checked style="margin-left: 0.5rem;">
-            نیشاندانی قەرزی پێشوو
-        </label>
-        
-        <!-- Force Debt Pagination Checkbox -->
-        <label for="force-debt-pagination" style="font-weight:bold; margin-right: 1rem; margin-left: 1rem;">
-            <input type="checkbox" id="force-debt-pagination" style="margin-left: 0.5rem;">
-            جیاکردنەوەی زانیارییەکانی قەرز
-        </label>
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <div class="filter-container">
+            <!-- Row 1: Main Filters -->
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="transaction-type-filter" class="filter-label">
+                        <i class="fa fa-filter"></i> جۆری مامەڵە:
+                    </label>
+                    <select id="transaction-type-filter" class="filter-select">
+                        <option value="all">هەموو</option>
+                        <option value="cash">نەقد</option>
+                        <option value="debt">قەرز</option>
+                        <option value="has_remaining">پارەی ماوە</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="month-filter" class="filter-label">
+                        <i class="fa fa-calendar"></i> مانگ:
+                    </label>
+                    <select id="month-filter" class="filter-select">
+                        <option value="all">هەموو</option>
+                        <option value="01">کانوونی دووەم</option>
+                        <option value="02">شوبات</option>
+                        <option value="03">ئازار</option>
+                        <option value="04">نیسان</option>
+                        <option value="05">ئایار</option>
+                        <option value="06">حوزەیران</option>
+                        <option value="07">تەممووز</option>
+                        <option value="08">ئاب</option>
+                        <option value="09">ئەیلوول</option>
+                        <option value="10">تشرینی یەکەم</option>
+                        <option value="11">تشرینی دووەم</option>
+                        <option value="12">کانوونی یەکەم</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="location-filter" class="filter-label">
+                        <i class="fa fa-map-marker-alt"></i> شوێن:
+                    </label>
+                    <select id="location-filter" class="filter-select">
+                        <option value="all">هەموو</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Row 2: Date Range Filters -->
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="date-from-filter" class="filter-label">
+                        <i class="fa fa-calendar-alt"></i> لە بەروار:
+                    </label>
+                    <input type="date" id="date-from-filter" class="filter-input">
+                </div>
+                
+                <div class="filter-group">
+                    <label for="date-to-filter" class="filter-label">
+                        <i class="fa fa-calendar-alt"></i> بۆ بەروار:
+                    </label>
+                    <input type="date" id="date-to-filter" class="filter-input">
+                </div>
+            </div>
+            
+            <!-- Row 3: Display Options -->
+            <div class="filter-row">
+                <div class="filter-group checkbox-group">
+                    <label for="show-invoice-number" class="filter-checkbox-label">
+                        <input type="checkbox" id="show-invoice-number" class="filter-checkbox">
+                        <span class="checkmark"></span>
+                        <i class="fa fa-file-invoice"></i> نیشاندانی ژمارەی پسووڵە
+                    </label>
+                </div>
+                
+                <div class="filter-group checkbox-group">
+                    <label for="show-opening-debt" class="filter-checkbox-label">
+                        <input type="checkbox" id="show-opening-debt" checked class="filter-checkbox">
+                        <span class="checkmark"></span>
+                        <i class="fa fa-credit-card"></i> نیشاندانی قەرزی پێشوو
+                    </label>
+                </div>
+                
+                <div class="filter-group checkbox-group">
+                    <label for="force-debt-pagination" class="filter-checkbox-label">
+                        <input type="checkbox" id="force-debt-pagination" class="filter-checkbox">
+                        <span class="checkmark"></span>
+                        <i class="fa fa-columns"></i> جیاکردنەوەی زانیارییەکانی قەرز
+                    </label>
+                </div>
+            </div>
+        </div>
     </div>
 
    
