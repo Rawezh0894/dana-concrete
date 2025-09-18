@@ -291,11 +291,11 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                         <i class="fa fa-filter"></i> جۆری مامەڵە:
                     </label>
                     <select id="transaction-type-filter" class="filter-select">
-                        <option value="all">هەموو</option>
-                        <option value="cash">نەقد</option>
-                        <option value="debt">قەرز</option>
-                        <option value="has_remaining">پارەی ماوە</option>
-                    </select>
+            <option value="all">هەموو</option>
+            <option value="cash">نەقد</option>
+            <option value="debt">قەرز</option>
+            <option value="has_remaining">پارەی ماوە</option>
+        </select>
                 </div>
                 
                 <div class="filter-group">
@@ -316,16 +316,16 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                         <option value="10">تشرینی یەکەم</option>
                         <option value="11">تشرینی دووەم</option>
                         <option value="12">کانوونی یەکەم</option>
-                    </select>
+        </select>
                 </div>
                 
                 <div class="filter-group">
                     <label for="location-filter" class="filter-label">
                         <i class="fa fa-map-marker-alt"></i> شوێن:
-                    </label>
+        </label>
                     <select id="location-filter" class="filter-select">
-                        <option value="all">هەموو</option>
-                    </select>
+            <option value="all">هەموو</option>
+        </select>
                 </div>
             </div>
             
@@ -353,7 +353,7 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                         <input type="checkbox" id="show-invoice-number" class="filter-checkbox">
                         <span class="checkmark"></span>
                         <i class="fa fa-file-invoice"></i> نیشاندانی ژمارەی پسووڵە
-                    </label>
+        </label>
                 </div>
                 
                 <div class="filter-group checkbox-group">
@@ -361,7 +361,7 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                         <input type="checkbox" id="show-opening-debt" checked class="filter-checkbox">
                         <span class="checkmark"></span>
                         <i class="fa fa-credit-card"></i> نیشاندانی قەرزی پێشوو
-                    </label>
+        </label>
                 </div>
                 
                 <div class="filter-group checkbox-group">
@@ -483,7 +483,7 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 // Re-format invoice numbers after data refresh (only if column is visible)
                 setTimeout(() => {
                     if (showInvoiceCheckbox && showInvoiceCheckbox.checked) {
-                        formatAllInvoiceNumbers();
+                    formatAllInvoiceNumbers();
                     }
                 }, 500);
             });
@@ -729,25 +729,12 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
     
     // Function to toggle opening debt display
     function toggleOpeningDebtDisplay(show) {
-        const debtSummaryContainer = document.getElementById('debt-summary-container');
-        if (!debtSummaryContainer) return;
-        
-        // Find all debt summary boxes
-        const openingDebtBoxes = debtSummaryContainer.querySelectorAll('.debt-summary-box');
-        
-        openingDebtBoxes.forEach(box => {
-            const label = box.querySelector('.debt-label');
-            if (label) {
-                const labelText = label.textContent;
-                if (labelText.includes('قەرزی پێشوو')) {
-                    // Show/hide only the opening debt box
-                    box.style.display = show ? 'block' : 'none';
-                } else if (labelText.includes('پارەی ماوە') || labelText.includes('کۆی گشتی')) {
-                    // Always show remaining amount and total debt
-                    box.style.display = 'block';
-                }
-            }
-        });
+        // Instead of just hiding/showing, recreate the debt summary with current checkbox state
+        if (window.receiptManager && window.receiptManager.updateDebtSummary) {
+            const openingDebt = window.OPENING_DEBT || 0;
+            const remainingTotal = window.REMAINING_TOTAL || 0;
+            window.receiptManager.updateDebtSummary(openingDebt, remainingTotal);
+        }
     }
     
     // Function to change debt summary pages

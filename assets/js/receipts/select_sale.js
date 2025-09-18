@@ -528,16 +528,25 @@ class ReceiptManager {
         const container = document.getElementById('debt-summary-pages');
         if (!container) return;
         
+        // Check if opening debt should be shown
+        const showOpeningDebtCheckbox = document.getElementById('show-opening-debt');
+        const showOpeningDebt = showOpeningDebtCheckbox ? showOpeningDebtCheckbox.checked : true;
+        
+        // Create opening debt box conditionally
+        const openingDebtBox = showOpeningDebt ? `
+            <div class="debt-summary-box">
+                <i class="fa fa-history"></i>
+                <span class="debt-label">قەرزی پێشوو:</span>
+                <span class="debt-value">${this.formatCurrency(debtData.openingDebt)}</span>
+            </div>
+        ` : '';
+        
         // Page 1: Opening debt and remaining amount
         const page1 = document.createElement('div');
         page1.className = 'debt-summary-page';
         page1.innerHTML = `
             <div class="debt-summary-row">
-                <div class="debt-summary-box">
-                    <i class="fa fa-history"></i>
-                    <span class="debt-label">قەرزی پێشوو:</span>
-                    <span class="debt-value">${this.formatCurrency(debtData.openingDebt)}</span>
-                </div>
+                ${openingDebtBox}
                 <div class="debt-summary-box">
                     <i class="fa fa-money-bill-wave"></i>
                     <span class="debt-label">پارەی ماوە:</span>
@@ -571,13 +580,22 @@ class ReceiptManager {
         const container = document.getElementById('debt-summary-pages');
         if (!container) return;
         
+        // Check if opening debt should be shown
+        const showOpeningDebtCheckbox = document.getElementById('show-opening-debt');
+        const showOpeningDebt = showOpeningDebtCheckbox ? showOpeningDebtCheckbox.checked : true;
+        
+        // Create opening debt box conditionally
+        const openingDebtBox = showOpeningDebt ? `
+            <div class="debt-summary-box">
+                <i class="fa fa-history"></i>
+                <span class="debt-label">قەرزی پێشوو:</span>
+                <span class="debt-value">${this.formatCurrency(debtData.openingDebt)}</span>
+            </div>
+        ` : '';
+        
         container.innerHTML = `
             <div class="debt-summary-row">
-                <div class="debt-summary-box">
-                    <i class="fa fa-history"></i>
-                    <span class="debt-label">قەرزی پێشوو:</span>
-                    <span class="debt-value">${this.formatCurrency(debtData.openingDebt)}</span>
-                </div>
+                ${openingDebtBox}
                 <div class="debt-summary-box">
                     <i class="fa fa-money-bill-wave"></i>
                     <span class="debt-label">پارەی ماوە:</span>
