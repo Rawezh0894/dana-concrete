@@ -225,13 +225,6 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             font-size: 12px;
         }
         
-        /* Make container use flexbox for sticky footer */
-        .receipt-container {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-        
         /* Responsive Design */
         @media (max-width: 768px) {
             .filter-row {
@@ -248,6 +241,57 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 justify-content: flex-start;
             }
         }
+        .contact-info {
+            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 25px;
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .contact-info::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #1e40af, #3b82f6, #60a5fa);
+        }
+
+        .contact-info h3 {
+            color: #1e3a8a;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .contact-info p {
+            font-size: 13px;
+            color: #374151;
+            margin-bottom: 0;
+            font-weight: 600;
+            line-height: 1.6;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .contact-icon {
+            font-size: 16px;
+            color: #1e40af;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        .contact-separator {
+            color: #6b7280;
+            font-weight: 400;
+            margin: 0 8px;
+        }
     </style>
     <link href="../assets/css/kurdish-font.css" rel="stylesheet">
 </head>
@@ -263,10 +307,10 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 </div>
 <div class="receipt-container">
     <div class="receipt-header">
+        <div class="receipt-title">دانا کۆنکرێت</div>
         <div class="logo-circle">
             <img src="../assets/images/Screenshot_2025-07-05_103044-removebg-preview.png" alt="Dana Concrete Logo" class="receipt-logo" />
         </div>
-        <div class="receipt-title">دانا کۆنکرێت</div>
             <div class="receipt-meta">
         <div class="payment-date-row">
             <i class="fa fa-calendar-alt"></i>
@@ -441,7 +485,7 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
     </div>
     
     <!-- Contact Information Footer -->
-    <div class="contact-info" style="font-size:12px; margin-top: auto; text-align: center; padding: 1rem; border-top: 1px solid #dee2e6; position: sticky; bottom: 0; background: white; z-index: 10;"> 
+    <div class="contact-info" style="font-size:12px; margin-top: 2rem; text-align: center; padding: 1rem; border-top: 1px solid #dee2e6;"> 
         <p style="font-size:12px; margin: 0; line-height: 1.6;">
             <i class="fa fa-map-marker-alt" style="margin-left: 0.5rem; color: #6c757d;"></i>
             <strong>ناونیشان:</strong> سلێمانی، تاسڵوجە - نزیک بازگەی کەڵەوانان
