@@ -220,8 +220,6 @@ usort($customers, function($a, $b) {
                             <th>مەتر</th>
                             <th>نرخ/مەتر</th>
                             <th>کۆی گشتی</th>
-                            <th>دراو ($)</th>
-                            <th>دراو (IQD)</th>
                             <th>ماوە</th>
                             <th>ژ.فاکتور</th>
                             <th>ڕێکەوت</th>
@@ -251,8 +249,6 @@ usort($customers, function($a, $b) {
                             <td><?= number_format($s['quantity'], 2) ?> م³</td>
                             <td><?= number_format($s['price_per_unit'], 2) ?> $</td>
                             <td><?= number_format($s['total_price'], 2) ?> $</td>
-                            <td><?= number_format($s['amount_paid_usd'], 2) ?> $</td>
-                            <td><?= number_format($s['amount_paid_iq'], 0) ?> د.ع</td>
                             <td><?= number_format($s['remaining_amount'], 2) ?> $</td>
                             <td><?= htmlspecialchars($s['invoice_number']) ?></td>
                             <td><?= htmlspecialchars($s['order_date']) ?></td>
@@ -282,7 +278,7 @@ function applyFilters() {
     const customerCards = document.querySelectorAll('.customer-card');
     
     customerCards.forEach(card => {
-        const invoiceCells = card.querySelectorAll('td:nth-child(11)'); // Invoice number column (11th after adding formula)
+        const invoiceCells = card.querySelectorAll('td:nth-child(9)'); // Invoice number column (9th after removing paid columns)
         const formulaCells = card.querySelectorAll('td:nth-child(4)'); // Formula column (4th)
         
         let shouldShowCard = true;
@@ -335,7 +331,7 @@ function clearInvoiceFilter() {
 }
 
 function toggleInvoiceVisibility() {
-    const invoiceColumns = document.querySelectorAll('th:nth-child(11), td:nth-child(11)');
+    const invoiceColumns = document.querySelectorAll('th:nth-child(9), td:nth-child(9)');
     const toggleText = document.getElementById('toggleText');
     
     invoiceNumbersVisible = !invoiceNumbersVisible;
