@@ -417,6 +417,14 @@ class ReceiptManager {
             const showInvoiceCheckbox = document.getElementById('show-invoice-number');
             const showInvoiceColumn = showInvoiceCheckbox ? showInvoiceCheckbox.checked : true;
             
+            // Check if opening debt should be included in total calculation
+            const showOpeningDebtCheckbox = document.getElementById('show-opening-debt');
+            const includeOpeningDebt = showOpeningDebtCheckbox ? showOpeningDebtCheckbox.checked : true;
+            
+            // Calculate total based on checkbox state
+            const openingDebt = window.OPENING_DEBT || 0;
+            const totalRemaining = includeOpeningDebt ? (openingDebt + remainingValue) : remainingValue;
+            
             // Set colspan based on invoice column visibility
             // When invoice column is visible: 3 + 5 = 8 columns
             // When invoice column is hidden: 2 + 6 = 8 columns
@@ -431,7 +439,7 @@ class ReceiptManager {
                     </td>
                     <td colspan="${secondColspan}">
                         <i class="fa fa-money-bill-wave"></i>
-                        کۆی پارەی ماوە: ${this.formatCurrency(remainingValue)}
+                        کۆی پارەی ماوە: ${this.formatCurrency(totalRemaining)}
                     </td>
                 </tr>
             `;
@@ -451,7 +459,13 @@ class ReceiptManager {
         
         // Ensure remainingTotal is a number
         const remainingValue = typeof remainingTotal === 'number' ? remainingTotal : 0;
-        const totalRemaining = openingDebtValue + remainingValue;
+        
+        // Check if opening debt should be included in total calculation
+        const showOpeningDebtCheckbox = document.getElementById('show-opening-debt');
+        const includeOpeningDebt = showOpeningDebtCheckbox ? showOpeningDebtCheckbox.checked : true;
+        
+        // Calculate total based on checkbox state
+        const totalRemaining = includeOpeningDebt ? (openingDebtValue + remainingValue) : remainingValue;
         
         // Store global values
         window.RECEIPT_TOTAL = totalRemaining;
