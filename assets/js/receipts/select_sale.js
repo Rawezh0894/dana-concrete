@@ -417,13 +417,8 @@ class ReceiptManager {
             const showInvoiceCheckbox = document.getElementById('show-invoice-number');
             const showInvoiceColumn = showInvoiceCheckbox ? showInvoiceCheckbox.checked : true;
             
-            // Check if opening debt should be included in total calculation
-            const showOpeningDebtCheckbox = document.getElementById('show-opening-debt');
-            const includeOpeningDebt = showOpeningDebtCheckbox ? showOpeningDebtCheckbox.checked : true;
-            
-            // Calculate total based on checkbox state
-            const openingDebt = window.OPENING_DEBT || 0;
-            const totalRemaining = includeOpeningDebt ? (openingDebt + remainingValue) : remainingValue;
+            // Note: Table summary should NOT be affected by opening debt filter
+            // The table shows only sales transaction totals, not opening debt
             
             // Set colspan based on invoice column visibility
             // When invoice column is visible: 3 + 5 = 8 columns
@@ -439,7 +434,7 @@ class ReceiptManager {
                     </td>
                     <td colspan="${secondColspan}">
                         <i class="fa fa-money-bill-wave"></i>
-                        کۆی پارەی ماوە: ${this.formatCurrency(totalRemaining)}
+                        کۆی پارەی ماوە: ${this.formatCurrency(remainingValue)}
                     </td>
                 </tr>
             `;

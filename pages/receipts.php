@@ -528,19 +528,15 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 // Toggle opening debt display
                 toggleOpeningDebtDisplay(isChecked);
                 
-                // Recalculate totals based on checkbox state
+                // Recalculate debt summary based on checkbox state
                 if (window.receiptManager && window.receiptManager.updateDebtSummary) {
                     const openingDebt = window.OPENING_DEBT || 0;
                     const remainingTotal = window.REMAINING_TOTAL || 0;
                     window.receiptManager.updateDebtSummary(openingDebt, remainingTotal);
                 }
                 
-                // Also update the table summary
-                if (window.receiptManager && window.receiptManager.updateSummary) {
-                    const total = window.RECEIPT_TOTAL || 0;
-                    const remainingTotal = window.REMAINING_TOTAL || 0;
-                    window.receiptManager.updateSummary(total, remainingTotal);
-                }
+                // Note: Table summary is NOT affected by opening debt filter
+                // The table shows only sales transaction totals, not opening debt
             });
         }
         
