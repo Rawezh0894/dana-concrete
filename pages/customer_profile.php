@@ -235,7 +235,7 @@ if ($customer_id) {
     </div>
     <!-- Add Customer Debt Modal -->
     <div class="modal fade" id="addCustomerDebtModal" tabindex="-1" aria-labelledby="addCustomerDebtModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
+      <div class="modal-dialog modal-xl">
         <div class="modal-content">
           <form id="addCustomerDebtForm">
             <div class="modal-header">
@@ -264,9 +264,34 @@ if ($customer_id) {
                 </div>
               </div>
               <div class="row mb-3">
+                <div class="col-md-12">
+                  <label for="customer_debt_payment_type" class="form-label">جۆری پارەدان</label>
+                  <select class="form-control" id="customer_debt_payment_type" name="payment_type" required>
+                    <option value="fifo">FIFO (یەکەم دەرچوو - یەکەم داهات)</option>
+                    <option value="opening_debt_only">تەنها قەرزی سەرەتایی</option>
+                    <option value="specific_sales">فرۆشتنێکی دیاریکراو</option>
+                  </select>
+                </div>
+              </div>
+              <div class="row mb-3" id="specific_sales_section" style="display: none;">
+                <div class="col-md-12">
+                  <label class="form-label"><i class="fa fa-list"></i> هەڵبژاردنی فرۆشتنەکان</label>
+                  <div class="alert alert-info">
+                    <i class="fa fa-info-circle"></i> پارەکەت بۆ ئەم فرۆشتنانە دەبڕدرێت (دەتوانیت چەند فرۆشتنێک هەڵبژێریت):
+                  </div>
+                  <div class="card">
+                    <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                      <div id="sales_selection_container">
+                        <!-- Sales will be loaded here by JavaScript -->
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row mb-3">
                 <div class="col-md-6">
                   <label for="customer_debt_discount" class="form-label">داشکاندن (USD)</label>
-                  <input type="number" class="form-control" id="customer_debt_discount" name="discount" min="0" step="0.01" value="0">
+                  <input type="number" class="form-control" id="customer_debt_discount" name="discount" min="0" step="0.0001" value="0">
                 </div>
                 <div class="col-md-6">
                   <label for="customer_debt_remaining" class="form-label">قەرزی ماوە (USD)</label>
@@ -288,7 +313,7 @@ if ($customer_id) {
     </div>
     <!-- Edit Customer Debt Modal -->
     <div class="modal fade" id="editCustomerDebtModal" tabindex="-1" aria-labelledby="editCustomerDebtModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
+      <div class="modal-dialog modal-xl">
         <div class="modal-content">
           <form id="editCustomerDebtForm">
             <input type="hidden" id="edit_customer_debt_id" name="id">
@@ -318,9 +343,34 @@ if ($customer_id) {
                 </div>
               </div>
               <div class="row mb-3">
+                <div class="col-md-12">
+                  <label for="edit_customer_debt_payment_type" class="form-label">جۆری پارەدان</label>
+                  <select class="form-control" id="edit_customer_debt_payment_type" name="payment_type" required>
+                    <option value="fifo">FIFO (یەکەم دەرچوو - یەکەم داهات)</option>
+                    <option value="opening_debt_only">تەنها قەرزی سەرەتایی</option>
+                    <option value="specific_sales">فرۆشتنێکی دیاریکراو</option>
+                  </select>
+                </div>
+              </div>
+              <div class="row mb-3" id="edit_specific_sales_section" style="display: none;">
+                <div class="col-md-12">
+                  <label class="form-label"><i class="fa fa-list"></i> هەڵبژاردنی فرۆشتنەکان</label>
+                  <div class="alert alert-info">
+                    <i class="fa fa-info-circle"></i> پارەکەت بۆ ئەم فرۆشتنانە دەبڕدرێت (دەتوانیت چەند فرۆشتنێک هەڵبژێریت):
+                  </div>
+                  <div class="card">
+                    <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                      <div id="edit_sales_selection_container">
+                        <!-- Sales will be loaded here by JavaScript -->
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row mb-3">
                 <div class="col-md-6">
                   <label for="edit_customer_debt_discount" class="form-label">داشکاندن (USD)</label>
-                  <input type="number" class="form-control" id="edit_customer_debt_discount" name="discount" min="0" step="0.01">
+                  <input type="number" class="form-control" id="edit_customer_debt_discount" name="discount" min="0" step="0.0001">
                 </div>
               </div>
               <div class="mb-3">
@@ -428,6 +478,11 @@ if ($customer_id) {
                 document.getElementById('addCustomerDebtForm').reset();
                 document.getElementById('customer_debt_date').value = new Date().toISOString().split('T')[0];
                 // Dollar rate will be updated by API in add_return_debt.js
+                
+                // Reset validation state
+                setTimeout(() => {
+                    validatePaymentInputs();
+                }, 100);
             });
         }
         
@@ -466,14 +521,414 @@ if ($customer_id) {
                 
                 // Get customer's total debt (this would need to be fetched from server)
                 // For now, just show the calculated total
-                remainingInput.value = totalPaid.toFixed(2) + ' USD';
+                remainingInput.value = totalPaid.toFixed(4) + ' USD';
             }
             
             [paidUsdInput, paidIqdInput, discountInput, dolarRateInput].forEach(input => {
                 input.addEventListener('input', calculateRemaining);
             });
         }
+        
+        // Payment type change handlers
+        const paymentTypeSelect = document.getElementById('customer_debt_payment_type');
+        if (paymentTypeSelect) {
+            paymentTypeSelect.addEventListener('change', handlePaymentTypeChange);
+        }
+        
+        const editPaymentTypeSelect = document.getElementById('edit_customer_debt_payment_type');
+        if (editPaymentTypeSelect) {
+            editPaymentTypeSelect.addEventListener('change', handleEditPaymentTypeChange);
+        }
+        
+        // Add real-time validation for payment amounts
+        const paymentInputs = ['customer_debt_paid_usd', 'customer_debt_paid_iqd', 'customer_debt_discount', 'customer_debt_dolar_rate'];
+        paymentInputs.forEach(inputId => {
+            const input = document.getElementById(inputId);
+            if (input) {
+                input.addEventListener('input', function() {
+                    // Add visual feedback for validation
+                    validatePaymentInputs();
+                });
+            }
+        });
     });
+    
+    // Payment type selection handler
+    function handlePaymentTypeChange() {
+        const paymentType = document.getElementById('customer_debt_payment_type').value;
+        const specificSalesSection = document.getElementById('specific_sales_section');
+        
+        if (paymentType === 'specific_sales') {
+            specificSalesSection.style.display = 'block';
+            loadSalesForSelection();
+        } else {
+            specificSalesSection.style.display = 'none';
+        }
+    }
+    
+    // Edit payment type selection handler
+    function handleEditPaymentTypeChange() {
+        const paymentType = document.getElementById('edit_customer_debt_payment_type').value;
+        const specificSalesSection = document.getElementById('edit_specific_sales_section');
+        
+        if (paymentType === 'specific_sales') {
+            specificSalesSection.style.display = 'block';
+            loadSalesForEditSelection();
+        } else {
+            specificSalesSection.style.display = 'none';
+        }
+    }
+    
+    // Load sales for selection
+    function loadSalesForSelection() {
+        if (!CUSTOMER_ID) return;
+        
+        $.get('../process/customer_profile/select_sale.php', { 
+            customer_id: CUSTOMER_ID, 
+            remaining_only: 1 
+        }, function(data) {
+            if (data && data.sales) {
+                const container = document.getElementById('sales_selection_container');
+                container.innerHTML = '';
+                
+                data.sales.forEach(sale => {
+                    const saleDiv = document.createElement('div');
+                    saleDiv.className = 'card mb-3';
+                    saleDiv.innerHTML = `
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-1">
+                                    <div class="form-check">
+                                        <input class="form-check-input sale-checkbox" type="checkbox" 
+                                               value="${sale.id}" id="sale_${sale.id}" 
+                                               data-remaining="${sale.remaining_amount}">
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <small class="text-muted">ژ.فاکتور:</small><br>
+                                            <strong>${sale.invoice_number}</strong>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <small class="text-muted">بەروار:</small><br>
+                                            <strong>${sale.order_date}</strong>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <small class="text-muted">ماوە:</small><br>
+                                            <strong class="text-danger">${parseFloat(sale.remaining_amount).toFixed(2)} $</strong>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <small class="text-muted">وەرگر:</small><br>
+                                            <strong>${sale.recipient}</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small">بڕی پارە:</label>
+                                    <div class="input-group input-group-sm">
+                                        <input type="number" class="form-control sale-amount" 
+                                               data-sale-id="${sale.id}" min="0" max="${sale.remaining_amount}" 
+                                               step="0.01" placeholder="0.00">
+                                        <span class="input-group-text">$</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(saleDiv);
+                });
+                
+                // Add event listeners for amount inputs
+                container.querySelectorAll('.sale-amount').forEach(input => {
+                    input.addEventListener('input', function() {
+                        validatePaymentInputs();
+                    });
+                });
+                
+                // Add event listeners for checkboxes
+                container.querySelectorAll('.sale-checkbox').forEach(checkbox => {
+                    checkbox.addEventListener('change', function() {
+                        validatePaymentInputs();
+                    });
+                });
+            }
+        }, 'json');
+    }
+    
+    // Load sales for edit selection
+    function loadSalesForEditSelection() {
+        if (!CUSTOMER_ID) return;
+        
+        $.get('../process/customer_profile/select_sale.php', { 
+            customer_id: CUSTOMER_ID, 
+            remaining_only: 1 
+        }, function(data) {
+            if (data && data.sales) {
+                const container = document.getElementById('edit_sales_selection_container');
+                container.innerHTML = '';
+                
+                data.sales.forEach(sale => {
+                    const saleDiv = document.createElement('div');
+                    saleDiv.className = 'card mb-3';
+                    saleDiv.innerHTML = `
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-1">
+                                    <div class="form-check">
+                                        <input class="form-check-input edit-sale-checkbox" type="checkbox" 
+                                               value="${sale.id}" id="edit_sale_${sale.id}" 
+                                               data-remaining="${sale.remaining_amount}">
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <small class="text-muted">ژ.فاکتور:</small><br>
+                                            <strong>${sale.invoice_number}</strong>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <small class="text-muted">بەروار:</small><br>
+                                            <strong>${sale.order_date}</strong>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <small class="text-muted">ماوە:</small><br>
+                                            <strong class="text-danger">${parseFloat(sale.remaining_amount).toFixed(2)} $</strong>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <small class="text-muted">وەرگر:</small><br>
+                                            <strong>${sale.recipient}</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small">بڕی پارە:</label>
+                                    <div class="input-group input-group-sm">
+                                        <input type="number" class="form-control edit-sale-amount" 
+                                               data-sale-id="${sale.id}" min="0" max="${sale.remaining_amount}" 
+                                               step="0.01" placeholder="0.00">
+                                        <span class="input-group-text">$</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(saleDiv);
+                });
+                
+                // Add event listeners for amount inputs
+                container.querySelectorAll('.edit-sale-amount').forEach(input => {
+                    input.addEventListener('input', function() {
+                        validatePaymentInputs();
+                    });
+                });
+                
+                // Add event listeners for checkboxes
+                container.querySelectorAll('.edit-sale-checkbox').forEach(checkbox => {
+                    checkbox.addEventListener('change', function() {
+                        validatePaymentInputs();
+                    });
+                });
+            }
+        }, 'json');
+    }
+    
+    // Validate specific sales payment
+    function validateSpecificSalesPayment() {
+        const checkboxes = document.querySelectorAll('.sale-checkbox:checked');
+        const totalAmount = parseFloat(document.getElementById('customer_debt_paid_usd').value) || 0;
+        const totalIqd = parseFloat(document.getElementById('customer_debt_paid_iqd').value) || 0;
+        const dolarRate = parseFloat(document.getElementById('customer_debt_dolar_rate').value) || 150000;
+        const discount = parseFloat(document.getElementById('customer_debt_discount').value) || 0;
+        
+        const totalPaidUsd = totalAmount + (totalIqd / (dolarRate / 100)) + discount;
+        let allocatedAmount = 0;
+        
+        checkboxes.forEach(checkbox => {
+            const amountInput = document.querySelector(`.sale-amount[data-sale-id="${checkbox.value}"]`);
+            const amount = parseFloat(amountInput.value) || 0;
+            allocatedAmount += amount;
+        });
+        
+        if (Math.abs(allocatedAmount - totalPaidUsd) > 0.01) {
+            alert('کۆی بڕی پارەی دابەشکراو دەبێت یەکسان بێت بە کۆی پارەی داوە!');
+            return false;
+        }
+        
+        return true;
+    }
+    
+    // Comprehensive payment validation
+    function validatePayment() {
+        const paymentType = document.getElementById('customer_debt_payment_type').value;
+        const totalAmount = parseFloat(document.getElementById('customer_debt_paid_usd').value) || 0;
+        const totalIqd = parseFloat(document.getElementById('customer_debt_paid_iqd').value) || 0;
+        const dolarRate = parseFloat(document.getElementById('customer_debt_dolar_rate').value) || 150000;
+        const discount = parseFloat(document.getElementById('customer_debt_discount').value) || 0;
+        
+        const totalPaidUsd = totalAmount + (totalIqd / (dolarRate / 100)) + discount;
+        
+        if (totalPaidUsd <= 0) {
+            alert('بڕی پارەی داوە دەبێت گەورەتر بێت لە سفر!');
+            return false;
+        }
+        
+        if (paymentType === 'opening_debt_only') {
+            // Validate against opening debt only
+            if (totalPaidUsd > CUSTOMER_OPENING_DEBT_USD) {
+                alert(`بڕی پارەی داوە (${totalPaidUsd.toFixed(2)} $) نابێت زیاتر بێت لە قەرزی سەرەتایی (${CUSTOMER_OPENING_DEBT_USD.toFixed(2)} $)!`);
+                return false;
+            }
+        } else if (paymentType === 'specific_sales') {
+            // Validate specific sales selection
+            const checkboxes = document.querySelectorAll('.sale-checkbox:checked');
+            if (checkboxes.length === 0) {
+                alert('تکایە لانیکەم یەک فرۆشتن هەڵبژێرە!');
+                return false;
+            }
+            
+            // Check if any selected sale has invalid amount
+            let hasInvalidAmount = false;
+            let totalAllocated = 0;
+            
+            checkboxes.forEach(checkbox => {
+                const amountInput = document.querySelector(`.sale-amount[data-sale-id="${checkbox.value}"]`);
+                const amount = parseFloat(amountInput.value) || 0;
+                const maxAmount = parseFloat(amountInput.getAttribute('max')) || 0;
+                
+                if (amount > maxAmount) {
+                    alert(`بڕی پارە بۆ فرۆشتن ${checkbox.value} نابێت زیاتر بێت لە ${maxAmount.toFixed(2)} $!`);
+                    hasInvalidAmount = true;
+                }
+                
+                if (amount <= 0) {
+                    alert(`بڕی پارە بۆ فرۆشتن ${checkbox.value} دەبێت گەورەتر بێت لە سفر!`);
+                    hasInvalidAmount = true;
+                }
+                
+                totalAllocated += amount;
+            });
+            
+            if (hasInvalidAmount) return false;
+            
+            if (Math.abs(totalAllocated - totalPaidUsd) > 0.01) {
+                alert(`کۆی بڕی پارەی دابەشکراو (${totalAllocated.toFixed(2)} $) دەبێت یەکسان بێت بە کۆی پارەی داوە (${totalPaidUsd.toFixed(2)} $)!`);
+                return false;
+            }
+        } else {
+            // FIFO validation - check against total debt
+            const totalDebt = CUSTOMER_CURRENT_DEBT + CUSTOMER_OPENING_DEBT_USD;
+            if (totalPaidUsd > totalDebt) {
+                alert(`بڕی پارەی داوە (${totalPaidUsd.toFixed(2)} $) نابێت زیاتر بێت لە کۆی قەرز (${totalDebt.toFixed(2)} $)!`);
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    // Real-time validation with visual feedback
+    function validatePaymentInputs() {
+        const paymentType = document.getElementById('customer_debt_payment_type').value;
+        const totalAmount = parseFloat(document.getElementById('customer_debt_paid_usd').value) || 0;
+        const totalIqd = parseFloat(document.getElementById('customer_debt_paid_iqd').value) || 0;
+        const dolarRate = parseFloat(document.getElementById('customer_debt_dolar_rate').value) || 150000;
+        const discount = parseFloat(document.getElementById('customer_debt_discount').value) || 0;
+        
+        const totalPaidUsd = totalAmount + (totalIqd / (dolarRate / 100)) + discount;
+        
+        // Reset all input styles
+        const inputs = ['customer_debt_paid_usd', 'customer_debt_paid_iqd', 'customer_debt_discount'];
+        inputs.forEach(inputId => {
+            const input = document.getElementById(inputId);
+            if (input) {
+                input.classList.remove('is-invalid', 'is-valid');
+            }
+        });
+        
+        // Validate based on payment type
+        let isValid = true;
+        let errorMessage = '';
+        
+        if (totalPaidUsd <= 0) {
+            isValid = false;
+            errorMessage = 'بڕی پارەی داوە دەبێت گەورەتر بێت لە سفر!';
+        } else if (paymentType === 'opening_debt_only') {
+            if (totalPaidUsd > CUSTOMER_OPENING_DEBT_USD) {
+                isValid = false;
+                errorMessage = `بڕی پارەی داوە نابێت زیاتر بێت لە قەرزی سەرەتایی (${CUSTOMER_OPENING_DEBT_USD.toFixed(2)} $)!`;
+            }
+        } else if (paymentType === 'specific_sales') {
+            const checkboxes = document.querySelectorAll('.sale-checkbox:checked');
+            if (checkboxes.length === 0) {
+                isValid = false;
+                errorMessage = 'تکایە لانیکەم یەک فرۆشتن هەڵبژێرە!';
+            } else {
+                let totalAllocated = 0;
+                checkboxes.forEach(checkbox => {
+                    const amountInput = document.querySelector(`.sale-amount[data-sale-id="${checkbox.value}"]`);
+                    const amount = parseFloat(amountInput.value) || 0;
+                    totalAllocated += amount;
+                });
+                
+                if (Math.abs(totalAllocated - totalPaidUsd) > 0.01) {
+                    isValid = false;
+                    errorMessage = `کۆی بڕی پارەی دابەشکراو دەبێت یەکسان بێت بە کۆی پارەی داوە!`;
+                }
+            }
+        } else {
+            // FIFO validation
+            const totalDebt = CUSTOMER_CURRENT_DEBT + CUSTOMER_OPENING_DEBT_USD;
+            if (totalPaidUsd > totalDebt) {
+                isValid = false;
+                errorMessage = `بڕی پارەی داوە نابێت زیاتر بێت لە کۆی قەرز (${totalDebt.toFixed(2)} $)!`;
+            }
+        }
+        
+        // Apply visual feedback
+        inputs.forEach(inputId => {
+            const input = document.getElementById(inputId);
+            if (input && totalPaidUsd > 0) {
+                input.classList.add(isValid ? 'is-valid' : 'is-invalid');
+            }
+        });
+        
+        // Update submit button state
+        const submitBtn = document.querySelector('#addCustomerDebtForm button[type="submit"]');
+        if (submitBtn) {
+            if (!isValid) {
+                submitBtn.disabled = true;
+                submitBtn.classList.add('btn-danger');
+                submitBtn.classList.remove('btn-primary');
+            } else {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('btn-danger');
+                submitBtn.classList.add('btn-primary');
+            }
+        }
+        
+        // Show/hide error message
+        let errorDiv = document.getElementById('payment-validation-error');
+        if (!errorDiv) {
+            errorDiv = document.createElement('div');
+            errorDiv.id = 'payment-validation-error';
+            errorDiv.className = 'alert alert-danger mt-2';
+            document.getElementById('addCustomerDebtForm').appendChild(errorDiv);
+        }
+        
+        if (!isValid && errorMessage) {
+            errorDiv.innerHTML = `<i class="fa fa-exclamation-triangle"></i> ${errorMessage}`;
+            errorDiv.style.display = 'block';
+        } else {
+            errorDiv.style.display = 'none';
+        }
+        
+        return isValid;
+    }
+    
+    // Make validation function globally available
+    window.validatePayment = validatePayment;
+    window.validatePaymentInputs = validatePaymentInputs;
 </script>
 
 

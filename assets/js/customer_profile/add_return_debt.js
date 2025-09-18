@@ -86,7 +86,7 @@ function calculateRemainingDebt() {
     // Format and display remaining debt
     const remainingElement = document.getElementById('customer_debt_remaining');
     if (remainingElement) {
-        remainingElement.value = adjustedRemainingDebt.toFixed(2) + ' USD';
+        remainingElement.value = adjustedRemainingDebt.toFixed(4) + ' USD';
         
         // Change color based on remaining debt
         if (adjustedRemainingDebt < 0) {
@@ -160,6 +160,21 @@ document.getElementById('addCustomerDebtForm').addEventListener('submit', async 
     const paid_iqd = parseFloat(document.getElementById('customer_debt_paid_iqd').value) || 0;
     const discount = parseFloat(document.getElementById('customer_debt_discount').value) || 0;
     const note = document.getElementById('customer_debt_note').value;
+    const payment_type = document.getElementById('customer_debt_payment_type').value;
+    
+    // Collect specific sales data if payment type is specific_sales
+    let specific_sales = {};
+    if (payment_type === 'specific_sales') {
+        const checkboxes = document.querySelectorAll('.sale-checkbox:checked');
+        checkboxes.forEach(checkbox => {
+            const amountInput = document.querySelector(`.sale-amount[data-sale-id="${checkbox.value}"]`);
+            const amount = parseFloat(amountInput.value) || 0;
+            if (amount > 0) {
+                specific_sales[checkbox.value] = amount;
+            }
+        });
+        
+    }
 
     // هەژمارکردنی بڕی پارەی داوە بە دۆلار
     let paid_iqd_usd = dolar_rate > 0 ? paid_iqd / (dolar_rate / 100) : 0;
@@ -175,11 +190,8 @@ document.getElementById('addCustomerDebtForm').addEventListener('submit', async 
         return;
     }
 
-    // Check if payment exceeds total debt (with floating-point precision tolerance)
-    const totalDebt = CUSTOMER_CURRENT_DEBT + CUSTOMER_OPENING_DEBT_USD;
-    const tolerance = 0.01; // Allow 1 cent tolerance for floating-point precision
-    if (total_paid_usd > (totalDebt + tolerance)) {
-        Swal.fire('هەڵە', `بڕی پارەی داوە (${total_paid_usd.toFixed(2)} USD) نابێت زیاتر بێت لە قەرز (${totalDebt.toFixed(2)} USD)!`, 'error');
+    // Validate payment before proceeding
+    if (typeof validatePayment === 'function' && !validatePayment()) {
         submitting = false;
         if (submitBtn) {
             submitBtn.disabled = false;
@@ -187,6 +199,8 @@ document.getElementById('addCustomerDebtForm').addEventListener('submit', async 
         }
         return;
     }
+
+    // Additional validation is now handled by the comprehensive validatePayment function
 
     const formData = new FormData();
     formData.append('customer_id', customer_id);
@@ -196,6 +210,12 @@ document.getElementById('addCustomerDebtForm').addEventListener('submit', async 
     formData.append('paid_iqd', paid_iqd);
     formData.append('discount', discount);
     formData.append('note', note);
+    formData.append('payment_type', payment_type);
+    
+    // Add specific sales data if applicable
+    if (payment_type === 'specific_sales' && Object.keys(specific_sales).length > 0) {
+        formData.append('specific_sales', JSON.stringify(specific_sales));
+    }
 
     try {
         const res = await fetch('../process/customer_profile/add_return_debt.php', {

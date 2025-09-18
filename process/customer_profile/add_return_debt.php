@@ -33,6 +33,9 @@ try {
     $paid_iqd = floatval($_POST['paid_iqd'] ?? 0);
     $discount = floatval($_POST['discount'] ?? 0);
     $note = $_POST['note'] ?? '';
+    $payment_type = $_POST['payment_type'] ?? 'fifo';
+    $specific_sales_json = $_POST['specific_sales'] ?? '{}';
+    $specific_sales = json_decode($specific_sales_json, true) ?? [];
 
     // Log parsed variables for debugging
     error_log("Parsed vars: customer_id='$customer_id', date='$date', dolar_rate='$dolar_rate', paid_usd='$paid_usd', paid_iqd='$paid_iqd', discount='$discount', note='$note'");
@@ -75,34 +78,74 @@ try {
         exit;
     }
 
-    // 3. زیادکردنی قەرزە گەڕاوەکە
-    // بۆیە پێویستە بزانین چەند لە opening_debt_usd و چەند لە sales کەم دەکەین
+    // 3. زیادکردنی قەرزە گەڕاوەکە بەپێی جۆری پارەدان
     $usd_left = $total_paid_usd;
     $from_sales_usd = 0;
     $from_opening_debt_usd = 0;
-
-    // پێچەوانە: سەرەتا opening_debt_usd کەم بکە
     $paid_from_opening = 0;
     $paid_from_sales = 0;
-    if ($opening_debt_usd > 0) {
-        $to_deduct = min($opening_debt_usd, $usd_left);
-        $upd = $pdo->prepare("UPDATE customers SET opening_debt_usd = GREATEST(opening_debt_usd - ?, 0) WHERE id = ?");
-        $upd->execute([$to_deduct, $customer_id]);
-        $paid_from_opening = $to_deduct;
-        $usd_left -= $to_deduct;
-    }
-    // پاشان لە sales کەم بکە بە FIFO
-    if ($usd_left > 0) {
-        $stmt = $pdo->prepare("SELECT id, remaining_amount FROM sales WHERE customer_id = ? AND remaining_amount > 0 ORDER BY order_date ASC, id ASC");
-        $stmt->execute([$customer_id]);
-        $sales = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        foreach ($sales as $sale) {
-            if ($usd_left <= 0) break;
-            $to_deduct = min($sale['remaining_amount'], $usd_left);
-            $upd = $pdo->prepare("UPDATE sales SET remaining_amount = remaining_amount - ? WHERE id = ?");
-            $upd->execute([$to_deduct, $sale['id']]);
+    $payment_allocations = [];
+
+    if ($payment_type === 'opening_debt_only') {
+        // تەنها قەرزی سەرەتایی
+        if ($opening_debt_usd > 0) {
+            $to_deduct = min($opening_debt_usd, $usd_left);
+            $upd = $pdo->prepare("UPDATE customers SET opening_debt_usd = GREATEST(opening_debt_usd - ?, 0) WHERE id = ?");
+            $upd->execute([$to_deduct, $customer_id]);
+            $paid_from_opening = $to_deduct;
             $usd_left -= $to_deduct;
-            $paid_from_sales += $to_deduct;
+        }
+    } elseif ($payment_type === 'specific_sales') {
+        // فرۆشتنێکی دیاریکراو
+        if (!empty($specific_sales)) {
+            foreach ($specific_sales as $sale_id => $amount) {
+                $amount = floatval($amount);
+                if ($amount <= 0) continue;
+                
+                // چێککردنی فرۆشتن
+                $stmt = $pdo->prepare("SELECT id, remaining_amount FROM sales WHERE id = ? AND customer_id = ? AND remaining_amount > 0");
+                $stmt->execute([$sale_id, $customer_id]);
+                $sale = $stmt->fetch(PDO::FETCH_ASSOC);
+                
+                if (!$sale) {
+                    error_log("Sale not found or no remaining amount: ID=$sale_id, Customer=$customer_id");
+                    continue;
+                }
+                
+                $to_deduct = min($sale['remaining_amount'], $amount, $usd_left);
+                if ($to_deduct > 0) {
+                    $upd = $pdo->prepare("UPDATE sales SET remaining_amount = remaining_amount - ? WHERE id = ?");
+                    $upd->execute([$to_deduct, $sale_id]);
+                    $usd_left -= $to_deduct;
+                    $paid_from_sales += $to_deduct;
+                    $payment_allocations[] = ['sale_id' => $sale_id, 'amount' => $to_deduct];
+                }
+            }
+        }
+    } else {
+        // FIFO (کۆنەکە)
+        // سەرەتا opening_debt_usd کەم بکە
+        if ($opening_debt_usd > 0) {
+            $to_deduct = min($opening_debt_usd, $usd_left);
+            $upd = $pdo->prepare("UPDATE customers SET opening_debt_usd = GREATEST(opening_debt_usd - ?, 0) WHERE id = ?");
+            $upd->execute([$to_deduct, $customer_id]);
+            $paid_from_opening = $to_deduct;
+            $usd_left -= $to_deduct;
+        }
+        // پاشان لە sales کەم بکە بە FIFO
+        if ($usd_left > 0) {
+            $stmt = $pdo->prepare("SELECT id, remaining_amount FROM sales WHERE customer_id = ? AND remaining_amount > 0 ORDER BY order_date ASC, id ASC");
+            $stmt->execute([$customer_id]);
+            $sales = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($sales as $sale) {
+                if ($usd_left <= 0) break;
+                $to_deduct = min($sale['remaining_amount'], $usd_left);
+                $upd = $pdo->prepare("UPDATE sales SET remaining_amount = remaining_amount - ? WHERE id = ?");
+                $upd->execute([$to_deduct, $sale['id']]);
+                $usd_left -= $to_deduct;
+                $paid_from_sales += $to_deduct;
+                $payment_allocations[] = ['sale_id' => $sale['id'], 'amount' => $to_deduct];
+            }
         }
     }
 
@@ -114,8 +157,8 @@ try {
     $customer_phone = $customer['mobile1'] ?? 'هیچ ژمارەیەک نییە';
 
     // زیادکردنی قەرزە گەڕاوەکە لە customer_debt_payments
-    $stmt = $pdo->prepare('INSERT INTO customer_debt_payments (customer_id, date, dolar_rate, paid_usd, paid_iqd, discount, note, from_opening_debt_usd, from_sales_usd) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
-    $ok = $stmt->execute([$customer_id, $date, $dolar_rate, $paid_usd, $paid_iqd, $discount, $note, $paid_from_opening, $paid_from_sales]);
+    $stmt = $pdo->prepare('INSERT INTO customer_debt_payments (customer_id, date, dolar_rate, paid_usd, paid_iqd, discount, note, payment_type, from_opening_debt_usd, from_sales_usd) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    $ok = $stmt->execute([$customer_id, $date, $dolar_rate, $paid_usd, $paid_iqd, $discount, $note, $payment_type, $paid_from_opening, $paid_from_sales]);
     
     if (!$ok) {
         error_log('Failed to insert debt payment record');
@@ -124,6 +167,14 @@ try {
     }
     
     $debt_payment_id = $pdo->lastInsertId();
+
+    // Create payment allocation records if specific sales were selected
+    if (!empty($payment_allocations)) {
+        $stmt = $pdo->prepare('INSERT INTO customer_payment_allocations (debt_payment_id, sale_id, allocated_amount) VALUES (?, ?, ?)');
+        foreach ($payment_allocations as $allocation) {
+            $stmt->execute([$debt_payment_id, $allocation['sale_id'], $allocation['amount']]);
+        }
+    }
 
     // Create detailed notification with customer information
     $new_values = [

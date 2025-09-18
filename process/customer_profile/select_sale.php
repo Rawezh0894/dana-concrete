@@ -69,19 +69,40 @@ try {
         exit;
     }
     
-    $stmt = $pdo->prepare('
-        SELECT s.*, c.name AS customer_name, f.name AS formula_name
-        FROM sales s
-        LEFT JOIN customers c ON s.customer_id = c.id
-        LEFT JOIN concrete_formulas f ON s.formula_id = f.id
-        WHERE s.customer_id = ?
-        ORDER BY s.id DESC
-    ');
-    $stmt->execute([$customer_id]);
-    $sales = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // Check if we need only sales with remaining debt
+    $remaining_only = isset($_GET['remaining_only']) && $_GET['remaining_only'] == '1';
     
-    error_log('Customer sales retrieved: Customer=' . $customer_id . ', Count=' . count($sales));
-    echo json_encode(['success' => true, 'data' => $sales]);
+    if ($remaining_only) {
+        // Get only sales with remaining debt for payment allocation
+        $stmt = $pdo->prepare('
+            SELECT s.*, c.name AS customer_name, f.strength_mpa, f.strength_kg
+            FROM sales s
+            LEFT JOIN customers c ON s.customer_id = c.id
+            LEFT JOIN concrete_formulas f ON s.formula_id = f.id
+            WHERE s.customer_id = ? AND s.payment_type = "قەرز" AND s.remaining_amount > 0
+            ORDER BY s.order_date ASC, s.id ASC
+        ');
+        $stmt->execute([$customer_id]);
+        $sales = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        error_log('Customer remaining sales retrieved: Customer=' . $customer_id . ', Count=' . count($sales));
+        echo json_encode(['success' => true, 'sales' => $sales]);
+    } else {
+        // Get all sales
+        $stmt = $pdo->prepare('
+            SELECT s.*, c.name AS customer_name, f.name AS formula_name
+            FROM sales s
+            LEFT JOIN customers c ON s.customer_id = c.id
+            LEFT JOIN concrete_formulas f ON s.formula_id = f.id
+            WHERE s.customer_id = ?
+            ORDER BY s.id DESC
+        ');
+        $stmt->execute([$customer_id]);
+        $sales = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        error_log('Customer sales retrieved: Customer=' . $customer_id . ', Count=' . count($sales));
+        echo json_encode(['success' => true, 'data' => $sales]);
+    }
     
 } catch (PDOException $e) {
     error_log('PDOException in select_sale.php: ' . $e->getMessage());
