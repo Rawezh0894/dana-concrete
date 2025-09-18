@@ -31,7 +31,7 @@ $stmt = $pdo->query($sql);
 $customers = $stmt->fetchAll();
 
 // گەڕانەوەی هەموو مامەڵە قەرزەکان (پارەی ماوە) بۆ هەموو کڕیارە قەرزارەکان
-$sales_sql = "SELECT s.*, c.name as customer_name, c.mobile1, f.strength_mpa, f.strength_kg FROM sales s JOIN customers c ON s.customer_id = c.id LEFT JOIN concrete_formulas f ON s.formula_id = f.id WHERE s.payment_type = 'قەرز' AND s.remaining_amount > 0 ORDER BY c.name ASC, s.order_date DESC";
+$sales_sql = "SELECT s.*, c.name as customer_name, c.mobile1, f.strength_mpa, f.strength_kg FROM sales s JOIN customers c ON s.customer_id = c.id LEFT JOIN concrete_formulas f ON s.formula_id = f.id WHERE s.payment_type = 'قەرز' AND s.remaining_amount > 0 ORDER BY c.name ASC, s.order_date ASC";
 $sales_stmt = $pdo->query($sales_sql);
 $sales = $sales_stmt->fetchAll();
 
