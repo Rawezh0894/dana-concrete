@@ -437,37 +437,9 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             }
         });
         
-        // Also handle the paid table if it exists
-        const paidTable = document.getElementById('paid-table');
-        if (paidTable) {
-            const paidHeaderRow = paidTable.querySelector('thead tr');
-            const paidDataRows = paidTable.querySelectorAll('tbody tr');
-            
-            if (paidHeaderRow && paidHeaderRow.children[3]) {
-                paidHeaderRow.children[3].style.display = show ? '' : 'none';
-            }
-            
-            paidDataRows.forEach(row => {
-                if (row.children[3]) {
-                    row.children[3].style.display = show ? '' : 'none';
-                    
-                    // Format invoice numbers to show only 3 per row when visible
-                    if (show) {
-                        const invoiceCell = row.children[3];
-                        const originalInvoiceNumber = invoiceCell.getAttribute('data-original-invoice') || invoiceCell.textContent;
-                        
-                        // Store original invoice number if not already stored
-                        if (!invoiceCell.getAttribute('data-original-invoice')) {
-                            invoiceCell.setAttribute('data-original-invoice', originalInvoiceNumber);
-                        }
-                        
-                        // Format to show only 3 invoice numbers per row
-                        const formattedInvoice = formatInvoiceNumbers(originalInvoiceNumber);
-                        invoiceCell.innerHTML = formattedInvoice;
-                    }
-                }
-            });
-        }
+        // Note: The paid table doesn't have an invoice number column, so we don't need to handle it here
+        // The paid table only has: Paid Amount USD, Paid Amount IQD, Payment Date, and Note columns
+        // The invoice number filter should only affect the main receipt table
         
         // Update colspan in summary row to match visible columns
         updateSummaryColspan(show);
