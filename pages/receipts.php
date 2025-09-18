@@ -22,6 +22,12 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         body { font-family: 'Rabar', 'Rabar_021', sans-serif; direction: rtl; }
     
         @media print {
+            /* Hide entire filter section */
+            .filter-section {
+                display: none !important;
+            }
+            
+            /* Hide individual filter elements (backup) */
             #transaction-type-filter, label[for="transaction-type-filter"],
             #month-filter, label[for="month-filter"],
             #date-from-filter, label[for="date-from-filter"],
@@ -32,10 +38,6 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             #force-debt-pagination, label[for="force-debt-pagination"],
             #print-btn, .fa-print,
             #refresh-btn, .fa-refresh {
-                display: none !important;
-            }
-            /* Also hide the parent div if needed */
-            #transaction-type-filter:parent, #transaction-type-filter:parent * {
                 display: none !important;
             }
         }
