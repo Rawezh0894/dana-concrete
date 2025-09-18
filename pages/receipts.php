@@ -433,6 +433,20 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         </div>
     </div>
     
+    <!-- Contact Information Footer -->
+    <div class="contact-info" style="font-size:12px; margin-top: 2rem; text-align: center; padding: 1rem; border-top: 1px solid #dee2e6;"> 
+        <p style="font-size:12px; margin: 0; line-height: 1.6;">
+            <i class="fa fa-map-marker-alt" style="margin-left: 0.5rem; color: #6c757d;"></i>
+            <strong>ناونیشان:</strong> سلێمانی، تاسڵوجە - نزیک بازگەی کەڵەوانان
+            <br>
+            <i class="fa fa-phone" style="margin-left: 0.5rem; color: #6c757d;"></i>
+            <strong>ژ.م:</strong> 1454 144 0773
+            <i class="fa fa-phone" style="margin-left: 1rem; color: #6c757d;"></i>
+            <strong>ژ.م:</strong> 0101 995 0772
+            <i class="fa fa-phone" style="margin-left: 1rem; color: #6c757d;"></i>
+            <strong>ژ.م:</strong> 0543 152 0750
+        </p>
+    </div>
    
 </div>
 <script>
