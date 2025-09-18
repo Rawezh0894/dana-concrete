@@ -492,6 +492,13 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
      <br>
      <br>
      <br>
+     <br>
+     <br>
+     <br>
+     <br>
+     <br>
+     <br>
+     <br>
     <div class="contact-info" style="font-size:12px; margin-top: 2rem; text-align: center; padding: 1rem; border-top: 1px solid #dee2e6;"> 
         <p style="font-size:12px; margin: 0; line-height: 1.6;">
             <i class="fa fa-map-marker-alt" style="margin-left: 0.5rem; color: #6c757d;"></i>
