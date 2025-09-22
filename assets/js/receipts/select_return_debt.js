@@ -96,7 +96,7 @@ function loadReturnDebt() {
                         </tr>
                     `;
                 });
-                // Add total row if any payments
+                // Add total row if any payments, otherwise show "no payments" message
                 if (data.length > 0) {
                     let grandTotalUsd = (iqdConversionPossible ? (totalPaidUsd + totalIqdToUsd) : totalPaidUsd);
                     let totalText = '';
@@ -110,6 +110,16 @@ function loadReturnDebt() {
                         <td colspan="2" style="font-weight:bold;">${totalText}</td>
                             <td colspan="2" style="font-weight:bold;">کۆی پارەی واسڵ کراو</td>
                             
+                        </tr>
+                    `;
+                } else {
+                    // Show "no payments" message when there are no payments
+                    paidTableBody.innerHTML = `
+                        <tr>
+                            <td colspan="4" style="text-align: center; padding: 2rem; color: #6c757d; font-style: italic;">
+                                <i class="fa fa-info-circle" style="margin-left: 0.5rem;"></i>
+                                هیچ پارەدانێک نیە
+                            </td>
                         </tr>
                     `;
                 }
