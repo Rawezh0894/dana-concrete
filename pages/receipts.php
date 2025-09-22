@@ -399,7 +399,24 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 </div>
             </div>
             
-            <!-- Row 3: Display Options -->
+            <!-- Row 3: Paid Table Date Range Filters -->
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="paid-date-from-filter" class="filter-label">
+                        <i class="fa fa-money-bill-wave"></i> لە بەروار (پارەی واسڵ کراو):
+                    </label>
+                    <input type="date" id="paid-date-from-filter" class="filter-input">
+                </div>
+                
+                <div class="filter-group">
+                    <label for="paid-date-to-filter" class="filter-label">
+                        <i class="fa fa-money-bill-wave"></i> بۆ بەروار (پارەی واسڵ کراو):
+                    </label>
+                    <input type="date" id="paid-date-to-filter" class="filter-input">
+                </div>
+            </div>
+            
+            <!-- Row 4: Display Options -->
             <div class="filter-row">
                 <div class="filter-group checkbox-group">
                     <label for="show-invoice-number" class="filter-checkbox-label">
@@ -530,6 +547,8 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 var month = document.getElementById('month-filter');
                 var dateFrom = document.getElementById('date-from-filter');
                 var dateTo = document.getElementById('date-to-filter');
+                var paidDateFrom = document.getElementById('paid-date-from-filter');
+                var paidDateTo = document.getElementById('paid-date-to-filter');
                 var location = document.getElementById('location-filter');
                 var showInvoiceCheckbox = document.getElementById('show-invoice-number');
                 var showOpeningDebtCheckbox = document.getElementById('show-opening-debt');
@@ -539,6 +558,8 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 if (month) month.value = 'all';
                 if (dateFrom) dateFrom.value = '';
                 if (dateTo) dateTo.value = '';
+                if (paidDateFrom) paidDateFrom.value = '';
+                if (paidDateTo) paidDateTo.value = '';
                 if (location) location.value = 'all';
                 if (showInvoiceCheckbox) {
                     showInvoiceCheckbox.checked = false;
@@ -642,6 +663,28 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                         totalDebt: window.OPENING_DEBT + window.REMAINING_TOTAL
                     };
                     window.receiptManager.initializeDebtPagination(debtData);
+                }
+            });
+        }
+        
+        // Paid table date range filters
+        var paidDateFromFilter = document.getElementById('paid-date-from-filter');
+        var paidDateToFilter = document.getElementById('paid-date-to-filter');
+        
+        if (paidDateFromFilter) {
+            paidDateFromFilter.addEventListener('change', function() {
+                // Reload paid table data when date filter changes
+                if (typeof loadReturnDebt === 'function') {
+                    loadReturnDebt();
+                }
+            });
+        }
+        
+        if (paidDateToFilter) {
+            paidDateToFilter.addEventListener('change', function() {
+                // Reload paid table data when date filter changes
+                if (typeof loadReturnDebt === 'function') {
+                    loadReturnDebt();
                 }
             });
         }

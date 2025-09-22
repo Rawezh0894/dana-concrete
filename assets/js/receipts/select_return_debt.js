@@ -14,8 +14,18 @@ function getDateTo() {
     return dateToElem ? dateToElem.value : '';
 }
 
+function getPaidDateFrom() {
+    const paidDateFromElem = document.getElementById('paid-date-from-filter');
+    return paidDateFromElem ? paidDateFromElem.value : '';
+}
+
+function getPaidDateTo() {
+    const paidDateToElem = document.getElementById('paid-date-to-filter');
+    return paidDateToElem ? paidDateToElem.value : '';
+}
+
 // Listen for filter changes and reload paid-table
-['month-filter', 'date-from-filter', 'date-to-filter'].forEach(function(id) {
+['month-filter', 'date-from-filter', 'date-to-filter', 'paid-date-from-filter', 'paid-date-to-filter'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) {
         el.addEventListener('change', function() {
@@ -30,8 +40,8 @@ function loadReturnDebt() {
         return Promise.reject('CUSTOMER_ID not defined');
     }
     const month = getSelectedMonth();
-    const date_from = getDateFrom();
-    const date_to = getDateTo();
+    const date_from = getPaidDateFrom();
+    const date_to = getPaidDateTo();
     const params = new URLSearchParams({
         customer_id: CUSTOMER_ID,
         month,
