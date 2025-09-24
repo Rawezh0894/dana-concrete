@@ -75,9 +75,22 @@ if ($date_to) {
     $sql .= " AND s.order_date <= :date_to";
     $params['date_to'] = $date_to;
 }
-if ($location !== 'all') {
-    $sql .= " AND s.location = :location";
-    $params['location'] = $location;
+if ($location !== 'all' && $location !== 'none') {
+    // Handle multiple locations (comma-separated)
+    if (strpos($location, ',') !== false) {
+        $locations = explode(',', $location);
+        $locationPlaceholders = [];
+        foreach ($locations as $index => $loc) {
+            $paramName = 'location_' . $index;
+            $locationPlaceholders[] = ':' . $paramName;
+            $params[$paramName] = trim($loc);
+        }
+        $sql .= " AND s.location IN (" . implode(',', $locationPlaceholders) . ")";
+    } else {
+        // Single location
+        $sql .= " AND s.location = :location";
+        $params['location'] = $location;
+    }
 }
 $sql .= " GROUP BY s.order_date, s.location, f.strength_mpa, f.strength_kg, s.price_per_unit";
 $sql .= " ORDER BY s.order_date ASC";

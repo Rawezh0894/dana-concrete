@@ -292,6 +292,109 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             font-weight: 400;
             margin: 0 8px;
         }
+        
+        /* Location Multi-Select Styles */
+        .location-multiselect {
+            position: relative;
+            width: 100%;
+        }
+        
+        .location-select-header {
+            padding: 8px 12px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            font-family: 'Rabar', sans-serif;
+            transition: all 0.2s ease;
+            min-height: 38px;
+        }
+        
+        .location-select-header:hover {
+            border-color: #007bff;
+        }
+        
+        .location-select-header.active {
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+        
+        .location-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #ced4da;
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .location-option {
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .location-option:hover {
+            background-color: rgba(0, 123, 255, 0.05);
+        }
+        
+        .location-option:first-child {
+            border-bottom: 1px solid #dee2e6;
+            font-weight: 600;
+        }
+        
+        .location-checkbox {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: #007bff;
+        }
+        
+        .location-option label {
+            cursor: pointer;
+            font-size: 14px;
+            font-family: 'Rabar', sans-serif;
+            margin: 0;
+            flex: 1;
+        }
+        
+        #location-dropdown-icon {
+            transition: transform 0.2s ease;
+            font-size: 12px;
+            color: #6c757d;
+        }
+        
+        .location-select-header.active #location-dropdown-icon {
+            transform: rotate(180deg);
+        }
+        
+        /* Mobile responsiveness for location multi-select */
+        @media (max-width: 768px) {
+            .location-dropdown {
+                max-height: 150px;
+            }
+            
+            .location-option {
+                padding: 10px 12px;
+            }
+            
+            .location-option label {
+                font-size: 13px;
+            }
+        }
     </style>
     <link href="../assets/css/kurdish-font.css" rel="stylesheet">
 </head>
@@ -375,10 +478,22 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 <div class="filter-group">
                     <label for="location-filter" class="filter-label">
                         <i class="fa fa-map-marker-alt"></i> شوێن:
-        </label>
-                    <select id="location-filter" class="filter-select">
-            <option value="all">هەموو</option>
-        </select>
+                    </label>
+                    <div class="location-multiselect" id="location-multiselect">
+                        <div class="location-select-header" onclick="toggleLocationDropdown()">
+                            <span id="location-select-text">هەموو شوێنەکان</span>
+                            <i class="fa fa-chevron-down" id="location-dropdown-icon"></i>
+                        </div>
+                        <div class="location-dropdown" id="location-dropdown" style="display: none;">
+                            <div class="location-option">
+                                <input type="checkbox" id="location-all" class="location-checkbox" checked>
+                                <label for="location-all">هەموو شوێنەکان</label>
+                            </div>
+                            <div id="location-options-container">
+                                <!-- Location options will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             
@@ -549,7 +664,6 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 var dateTo = document.getElementById('date-to-filter');
                 var paidDateFrom = document.getElementById('paid-date-from-filter');
                 var paidDateTo = document.getElementById('paid-date-to-filter');
-                var location = document.getElementById('location-filter');
                 var showInvoiceCheckbox = document.getElementById('show-invoice-number');
                 var showOpeningDebtCheckbox = document.getElementById('show-opening-debt');
                 var forceDebtPaginationCheckbox = document.getElementById('force-debt-pagination');
@@ -560,7 +674,9 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 if (dateTo) dateTo.value = '';
                 if (paidDateFrom) paidDateFrom.value = '';
                 if (paidDateTo) paidDateTo.value = '';
-                if (location) location.value = 'all';
+                
+                // Reset location multi-select
+                resetLocationMultiSelect();
                 if (showInvoiceCheckbox) {
                     showInvoiceCheckbox.checked = false;
                     toggleInvoiceNumberColumn(false);
@@ -870,6 +986,93 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             window.receiptManager.updateDebtPaginationControls();
         }
     }
+    
+    // Location Multi-Select Functions
+    function toggleLocationDropdown() {
+        const dropdown = document.getElementById('location-dropdown');
+        const header = document.querySelector('.location-select-header');
+        const icon = document.getElementById('location-dropdown-icon');
+        
+        if (dropdown.style.display === 'none' || dropdown.style.display === '') {
+            dropdown.style.display = 'block';
+            header.classList.add('active');
+            icon.style.transform = 'rotate(180deg)';
+        } else {
+            dropdown.style.display = 'none';
+            header.classList.remove('active');
+            icon.style.transform = 'rotate(0deg)';
+        }
+    }
+    
+    function resetLocationMultiSelect() {
+        // Check the "all" option and uncheck others
+        const allCheckbox = document.getElementById('location-all');
+        const locationCheckboxes = document.querySelectorAll('.location-checkbox:not(#location-all)');
+        
+        if (allCheckbox) {
+            allCheckbox.checked = true;
+        }
+        
+        locationCheckboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        
+        updateLocationSelectText();
+    }
+    
+    function updateLocationSelectText() {
+        const allCheckbox = document.getElementById('location-all');
+        const locationCheckboxes = document.querySelectorAll('.location-checkbox:not(#location-all)');
+        const selectText = document.getElementById('location-select-text');
+        
+        if (allCheckbox && allCheckbox.checked) {
+            selectText.textContent = 'هەموو شوێنەکان';
+            return;
+        }
+        
+        const selectedLocations = Array.from(locationCheckboxes)
+            .filter(checkbox => checkbox.checked)
+            .map(checkbox => checkbox.nextElementSibling.textContent);
+        
+        if (selectedLocations.length === 0) {
+            selectText.textContent = 'هیچ شوێنێک هەڵنەبژارد';
+        } else if (selectedLocations.length === 1) {
+            selectText.textContent = selectedLocations[0];
+        } else if (selectedLocations.length <= 3) {
+            selectText.textContent = selectedLocations.join(', ');
+        } else {
+            selectText.textContent = `${selectedLocations.length} شوێن هەڵبژارد`;
+        }
+    }
+    
+    function getSelectedLocations() {
+        const allCheckbox = document.getElementById('location-all');
+        const locationCheckboxes = document.querySelectorAll('.location-checkbox:not(#location-all)');
+        
+        if (allCheckbox && allCheckbox.checked) {
+            return 'all';
+        }
+        
+        const selectedLocations = Array.from(locationCheckboxes)
+            .filter(checkbox => checkbox.checked)
+            .map(checkbox => checkbox.value);
+        
+        return selectedLocations.length > 0 ? selectedLocations.join(',') : 'none';
+    }
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+        const multiselect = document.getElementById('location-multiselect');
+        if (multiselect && !multiselect.contains(event.target)) {
+            const dropdown = document.getElementById('location-dropdown');
+            const header = document.querySelector('.location-select-header');
+            const icon = document.getElementById('location-dropdown-icon');
+            
+            if (dropdown) dropdown.style.display = 'none';
+            if (header) header.classList.remove('active');
+            if (icon) icon.style.transform = 'rotate(0deg)';
+        }
+    });
 </script>
 <script src="../assets/js/receipts/receipts.js"></script>
 <script src="../assets/js/receipts/select_sale.js"></script>

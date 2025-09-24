@@ -648,8 +648,8 @@ class ReceiptManager {
     }
 
     getSelectedLocation() {
-        const locationElem = document.getElementById('location-filter');
-        return locationElem ? locationElem.value : 'all';
+        // Use the new multi-select function
+        return typeof getSelectedLocations === 'function' ? getSelectedLocations() : 'all';
     }
 }
 
