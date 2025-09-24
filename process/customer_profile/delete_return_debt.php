@@ -33,8 +33,8 @@ try {
         exit;
     }
 
-    // وەرگرتنی زانیاری قەرزەکە
-    $stmt = $pdo->prepare('SELECT customer_id, paid_usd, paid_iqd, discount, dolar_rate, from_opening_debt_usd, from_sales_usd, date, note FROM customer_debt_payments WHERE id = ?');
+    // وەرگرتنی زانیاری قەرزەکە لەگەڵ payment_type
+    $stmt = $pdo->prepare('SELECT customer_id, paid_usd, paid_iqd, discount, dolar_rate, from_opening_debt_usd, from_sales_usd, date, note, payment_type FROM customer_debt_payments WHERE id = ?');
     $stmt->execute([$id]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
     
@@ -53,35 +53,102 @@ try {
     $dolar_rate = floatval($row['dolar_rate']);
     $from_opening_debt_usd = floatval($row['from_opening_debt_usd']);
     $from_sales_usd = floatval($row['from_sales_usd']);
+    $payment_type = $row['payment_type'];
 
     // هەژمارکردنی بڕی IQD بۆ USD
     $paid_iqd_usd = $dolar_rate > 0 ? $paid_iqd / ($dolar_rate / 100) : 0;
     $total_usd = $paid_usd + $paid_iqd_usd + $discount;
 
-    // زیادکردنی بۆ opening_debt_usd تەنها بۆ بڕی from_opening_debt_usd
-    if ($from_opening_debt_usd > 0) {
-        $upd = $pdo->prepare("UPDATE customers SET opening_debt_usd = opening_debt_usd + ? WHERE id = ?");
-        $upd->execute([$from_opening_debt_usd, $customer_id]);
-    }
-    
-    // زیادکردنی بۆ sales.remaining_amount تەنها بۆ بڕی from_sales_usd
-    if ($from_sales_usd > 0) {
-        // زیادکردنی بۆ sales.remaining_amount بە FIFO
-        $usd_left = $from_sales_usd;
-        $stmt = $pdo->prepare("SELECT id, remaining_amount, total_price FROM sales WHERE customer_id = ? ORDER BY order_date ASC, id ASC");
-        $stmt->execute([$customer_id]);
-        $sales = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        foreach ($sales as $sale) {
-            if ($usd_left <= 0) break;
-            $max_add = $sale['total_price'] - $sale['remaining_amount'];
-            $to_add = min($max_add, $usd_left);
-            if ($to_add > 0) {
-                $upd = $pdo->prepare("UPDATE sales SET remaining_amount = remaining_amount + ? WHERE id = ?");
-                $upd->execute([$to_add, $sale['id']]);
-                $usd_left -= $to_add;
+    // Handle deletion based on payment type
+    switch ($payment_type) {
+        case 'opening_debt_only':
+            // تەنها قەرزی سەرەتایی - گەڕاندنەوەی بۆ opening_debt_usd
+            if ($from_opening_debt_usd > 0) {
+                $upd = $pdo->prepare("UPDATE customers SET opening_debt_usd = opening_debt_usd + ? WHERE id = ?");
+                $upd->execute([$from_opening_debt_usd, $customer_id]);
+                error_log("Restored $from_opening_debt_usd USD to opening debt for customer $customer_id");
             }
-        }
+            break;
+            
+        case 'specific_sales':
+            // فرۆشتنێکی دیاریکراو - گەڕاندنەوەی بۆ فرۆشتنە دیاریکراوەکان
+            $stmt = $pdo->prepare("SELECT sale_id, allocated_amount FROM customer_payment_allocations WHERE debt_payment_id = ?");
+            $stmt->execute([$id]);
+            $allocations = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            foreach ($allocations as $allocation) {
+                $sale_id = $allocation['sale_id'];
+                $allocated_amount = floatval($allocation['allocated_amount']);
+                
+                // گەڕاندنەوەی بڕەکە بۆ فرۆشتنەکە
+                $upd = $pdo->prepare("UPDATE sales SET remaining_amount = remaining_amount + ? WHERE id = ? AND customer_id = ?");
+                $upd->execute([$allocated_amount, $sale_id, $customer_id]);
+                error_log("Restored $allocated_amount USD to sale $sale_id for customer $customer_id");
+            }
+            break;
+            
+        case 'fifo':
+        default:
+            // FIFO - گەڕاندنەوەی بە LIFO (Last In, First Out)
+            
+            // یەکەم بۆ opening_debt_usd
+            if ($from_opening_debt_usd > 0) {
+                $upd = $pdo->prepare("UPDATE customers SET opening_debt_usd = opening_debt_usd + ? WHERE id = ?");
+                $upd->execute([$from_opening_debt_usd, $customer_id]);
+                error_log("Restored $from_opening_debt_usd USD to opening debt for customer $customer_id");
+            }
+            
+            // پاشان بۆ sales بە LIFO - بەکارهێنانی allocation records
+            if ($from_sales_usd > 0) {
+                // یەکەم هەوڵی بەکارهێنانی allocation records
+                $stmt = $pdo->prepare("SELECT sale_id, allocated_amount FROM customer_payment_allocations WHERE debt_payment_id = ? ORDER BY id DESC");
+                $stmt->execute([$id]);
+                $allocations = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                
+                if (!empty($allocations)) {
+                    // بەکارهێنانی allocation records بۆ گەڕاندنەوەی تەواو
+                    foreach ($allocations as $allocation) {
+                        $sale_id = $allocation['sale_id'];
+                        $allocated_amount = floatval($allocation['allocated_amount']);
+                        
+                        $upd = $pdo->prepare("UPDATE sales SET remaining_amount = remaining_amount + ? WHERE id = ? AND customer_id = ?");
+                        $upd->execute([$allocated_amount, $sale_id, $customer_id]);
+                        error_log("Restored $allocated_amount USD to sale $sale_id for customer $customer_id (FIFO allocation)");
+                    }
+                } else {
+                    // Fallback: گەڕاندنەوەی بە LIFO ئەگەر allocation records نەبوون
+                    $usd_left = $from_sales_usd;
+                    
+                    $stmt = $pdo->prepare("SELECT id, remaining_amount, total_price FROM sales WHERE customer_id = ? AND remaining_amount < total_price ORDER BY order_date DESC, id DESC");
+                    $stmt->execute([$customer_id]);
+                    $sales = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                    
+                    foreach ($sales as $sale) {
+                        if ($usd_left <= 0) break;
+                        $max_add = $sale['total_price'] - $sale['remaining_amount'];
+                        $to_add = min($max_add, $usd_left);
+                        if ($to_add > 0) {
+                            $upd = $pdo->prepare("UPDATE sales SET remaining_amount = remaining_amount + ? WHERE id = ?");
+                            $upd->execute([$to_add, $sale['id']]);
+                            $usd_left -= $to_add;
+                            error_log("Restored $to_add USD to sale {$sale['id']} for customer $customer_id (LIFO fallback)");
+                        }
+                    }
+                    
+                    // ئەگەر هێشتا پارە ماوە، بگەڕێنەوە بۆ opening_debt_usd
+                    if ($usd_left > 0) {
+                        $upd = $pdo->prepare("UPDATE customers SET opening_debt_usd = opening_debt_usd + ? WHERE id = ?");
+                        $upd->execute([$usd_left, $customer_id]);
+                        error_log("Restored remaining $usd_left USD to opening debt for customer $customer_id (LIFO overflow)");
+                    }
+                }
+            }
+            break;
     }
+
+    // سڕینەوەی payment allocations یان ئەگەر هەیە
+    $delAllocations = $pdo->prepare('DELETE FROM customer_payment_allocations WHERE debt_payment_id = ?');
+    $delAllocations->execute([$id]);
 
     // سڕینەوەی قەرزەکە
     $del = $pdo->prepare('DELETE FROM customer_debt_payments WHERE id = ?');
