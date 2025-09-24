@@ -395,6 +395,20 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 font-size: 13px;
             }
         }
+        
+        /* Summary row styling */
+        .summary-row td {
+            text-align: center !important;
+            font-weight: bold;
+            background-color: #e8f4fd;
+            border-top: 2px solid #007bff;
+            padding: 12px 8px;
+        }
+        
+        .summary-row td i {
+            margin-left: 8px;
+            color: #007bff;
+        }
     </style>
     <link href="../assets/css/kurdish-font.css" rel="stylesheet">
 </head>

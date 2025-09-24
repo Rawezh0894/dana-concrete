@@ -429,15 +429,15 @@ class ReceiptManager {
             
             tfoot.innerHTML = `
                 <tr class="summary-row">
-                    <td colspan="${firstColspan}">
+                    <td colspan="${firstColspan}" style="text-align: center;">
                         <i class="fa fa-cube"></i>
                         کۆی پێوانە: ${totalQuantity || '0.00 م³'}
                     </td>
-                    <td colspan="${secondColspan}">
+                    <td colspan="${secondColspan}" style="text-align: center;">
                         <i class="fa fa-calculator"></i>
                         کۆی نرخ: ${this.formatCurrency(totalValue)}
                     </td>
-                    <td colspan="${thirdColspan}">
+                    <td colspan="${thirdColspan}" style="text-align: center;">
                         <i class="fa fa-money-bill-wave"></i>
                         کۆی پارەی ماوە: ${this.formatCurrency(remainingValue)}
                     </td>
