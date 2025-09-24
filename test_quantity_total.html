@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Quantity Total</title>
+    <style>
+        body { font-family: 'Arial', sans-serif; direction: rtl; padding: 20px; }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        
+        .summary-row {
+            background-color: #e8f4fd;
+            font-weight: bold;
+        }
+        
+        .summary-row td {
+            border-top: 2px solid #007bff;
+        }
+        
+        .test-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <h1>تستکردنی کۆی پێوانە (Total Quantity)</h1>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>شوێن</th>
+                <th>پێوانە</th>
+                <th>ڕێژە</th>
+                <th>نرخی 1 م³</th>
+                <th>کۆی نرخ</th>
+                <th>پارەی ماوە</th>
+                <th>ژمارەی پسووڵە</th>
+                <th>بەروار</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>سلێمانی</td>
+                <td>15.50 م³</td>
+                <td>25 MPa</td>
+                <td>$45.00</td>
+                <td>$697.50</td>
+                <td>$200.00</td>
+                <td>INV001</td>
+                <td>2024-01-15</td>
+            </tr>
+            <tr>
+                <td>هەولێر</td>
+                <td>22.75 م³</td>
+                <td>30 MPa</td>
+                <td>$50.00</td>
+                <td>$1,137.50</td>
+                <td>$500.00</td>
+                <td>INV002</td>
+                <td>2024-01-16</td>
+            </tr>
+            <tr>
+                <td>کەرکوک</td>
+                <td>8.25 م³</td>
+                <td>20 MPa</td>
+                <td>$40.00</td>
+                <td>$330.00</td>
+                <td>$0.00</td>
+                <td>INV003</td>
+                <td>2024-01-17</td>
+            </tr>
+        </tbody>
+        <tfoot id="receipt-table-footer">
+            <!-- Summary will be loaded here -->
+        </tfoot>
+    </table>
+    
+    <div class="test-info">
+        <h3>زانیارییەکانی تێست:</h3>
+        <p><strong>کۆی پێوانە:</strong> 15.50 + 22.75 + 8.25 = 46.50 م³</p>
+        <p><strong>کۆی نرخ:</strong> $697.50 + $1,137.50 + $330.00 = $2,165.00</p>
+        <p><strong>کۆی پارەی ماوە:</strong> $200.00 + $500.00 + $0.00 = $700.00</p>
+        <button onclick="testUpdateSummary()">تستکردنی updateSummary</button>
+    </div>
+
+    <script>
+        // Mock ReceiptManager for testing
+        class MockReceiptManager {
+            formatCurrency(value) {
+                if (typeof value === 'number') {
+                    return '$' + value.toLocaleString('en-US', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                }
+                return value;
+            }
+            
+            updateSummary(total, remainingTotal, totalQuantity = null) {
+                const tfoot = document.getElementById('receipt-table-footer');
+                if (tfoot) {
+                    // Ensure values are numbers
+                    const totalValue = typeof total === 'number' ? total : 0;
+                    const remainingValue = typeof remainingTotal === 'number' ? remainingTotal : 0;
+                    
+                    // Set colspan based on invoice column visibility
+                    const firstColspan = '2';  // Location + Quantity
+                    const secondColspan = '2'; // Ratio + Price per unit
+                    const thirdColspan = '4'; // Total + Remaining + Invoice + Date
+                    
+                    tfoot.innerHTML = `
+                        <tr class="summary-row">
+                            <td colspan="${firstColspan}">
+                                <i class="fa fa-cube"></i>
+                                کۆی پێوانە: ${totalQuantity || '0.00 م³'}
+                            </td>
+                            <td colspan="${secondColspan}">
+                                <i class="fa fa-calculator"></i>
+                                کۆی نرخ: ${this.formatCurrency(totalValue)}
+                            </td>
+                            <td colspan="${thirdColspan}">
+                                <i class="fa fa-money-bill-wave"></i>
+                                کۆی پارەی ماوە: ${this.formatCurrency(remainingValue)}
+                            </td>
+                        </tr>
+                    `;
+                }
+            }
+        }
+        
+        function testUpdateSummary() {
+            const receiptManager = new MockReceiptManager();
+            
+            // Test data
+            const totalQuantity = '46.50 م³';
+            const totalPrice = 2165.00;
+            const remainingAmount = 700.00;
+            
+            // Update summary
+            receiptManager.updateSummary(totalPrice, remainingAmount, totalQuantity);
+            
+            alert('کۆی پێوانە بە سەرکەوتوویی زیادکرا!\n\n' +
+                  'کۆی پێوانە: ' + totalQuantity + '\n' +
+                  'کۆی نرخ: ' + receiptManager.formatCurrency(totalPrice) + '\n' +
+                  'کۆی پارەی ماوە: ' + receiptManager.formatCurrency(remainingAmount));
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            testUpdateSummary();
+        });
+    </script>
+</body>
+</html>

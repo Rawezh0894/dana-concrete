@@ -107,12 +107,17 @@ try {
     $rowCount = $stmt->rowCount();
     error_log("Receipt rows before grouping: " . $rowCount);
 
+    $totalQuantitySum = 0; // Track total quantity for summary
+    
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     $quantity = number_format($row['total_quantity'], 2) . ' م³';
     $rezh = $row['strength_mpa'] ? $row['strength_mpa'] . ' MPa' : ($row['strength_kg'] ? $row['strength_kg'] . ' Kg' : '');
     $ppu = is_numeric($row['price_per_unit']) ? '$' . number_format($row['price_per_unit'], 2, '.', ',') : '';
     $total = is_numeric($row['total_price_sum']) ? '$' . number_format($row['total_price_sum'], 2, '.', ',') : '';
     $remaining = is_numeric($row['total_remaining_amount']) ? '$' . number_format($row['total_remaining_amount'], 2, '.', ',') : '$0.00';
+    
+    // Add to total quantity sum
+    $totalQuantitySum += floatval($row['total_quantity']);
     
     // Debug: Log each grouped row
     error_log("Grouped row - Date: " . $row['order_date'] . ", Ratio: " . $rezh . ", Quantity: " . $row['total_quantity'] . ", Invoices: " . $row['invoice_numbers']);
@@ -135,6 +140,7 @@ try {
     $response = [
         'sales_data' => $data,
         'opening_debt' => '$' . number_format($opening_debt, 2, '.', ','),
+        'total_quantity' => number_format($totalQuantitySum, 2) . ' م³',
         'customer_info' => [
             'company_name' => $company_name,
             'mobile' => $mobile

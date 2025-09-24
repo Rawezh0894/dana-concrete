@@ -901,17 +901,39 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             // Get current totals from the summary row
             const summaryRow = document.querySelector('.summary-row');
             if (summaryRow) {
-                const firstCellText = summaryRow.querySelector('td:first-child')?.textContent || '';
-                const secondCellText = summaryRow.querySelector('td:last-child')?.textContent || '';
+                const cells = summaryRow.querySelectorAll('td');
                 
-                // Extract totals from the text (basic parsing)
-                const totalMatch = firstCellText.match(/کۆی نرخ: \$?([\d,]+\.?\d*)/);
-                const remainingMatch = secondCellText.match(/کۆی پارەی ماوە: \$?([\d,]+\.?\d*)/);
-                
-                if (totalMatch && remainingMatch) {
-                    const total = parseFloat(totalMatch[1].replace(/,/g, ''));
-                    const remaining = parseFloat(remainingMatch[1].replace(/,/g, ''));
-                    window.receiptManager.updateSummary(total, remaining);
+                if (cells.length >= 3) {
+                    // New layout with quantity total
+                    const quantityText = cells[0]?.textContent || '';
+                    const totalText = cells[1]?.textContent || '';
+                    const remainingText = cells[2]?.textContent || '';
+                    
+                    // Extract totals from the text (basic parsing)
+                    const quantityMatch = quantityText.match(/کۆی پێوانە: ([\d,]+\.?\d* م³)/);
+                    const totalMatch = totalText.match(/کۆی نرخ: \$?([\d,]+\.?\d*)/);
+                    const remainingMatch = remainingText.match(/کۆی پارەی ماوە: \$?([\d,]+\.?\d*)/);
+                    
+                    if (totalMatch && remainingMatch) {
+                        const total = parseFloat(totalMatch[1].replace(/,/g, ''));
+                        const remaining = parseFloat(remainingMatch[1].replace(/,/g, ''));
+                        const quantity = quantityMatch ? quantityMatch[1] : '0.00 م³';
+                        window.receiptManager.updateSummary(total, remaining, quantity);
+                    }
+                } else if (cells.length === 2) {
+                    // Old layout fallback
+                    const firstCellText = cells[0]?.textContent || '';
+                    const secondCellText = cells[1]?.textContent || '';
+                    
+                    // Extract totals from the text (basic parsing)
+                    const totalMatch = firstCellText.match(/کۆی نرخ: \$?([\d,]+\.?\d*)/);
+                    const remainingMatch = secondCellText.match(/کۆی پارەی ماوە: \$?([\d,]+\.?\d*)/);
+                    
+                    if (totalMatch && remainingMatch) {
+                        const total = parseFloat(totalMatch[1].replace(/,/g, ''));
+                        const remaining = parseFloat(remainingMatch[1].replace(/,/g, ''));
+                        window.receiptManager.updateSummary(total, remaining);
+                    }
                 }
             }
         }
@@ -921,18 +943,21 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
     function updateSummaryColspan(showInvoiceColumn) {
         const summaryRow = document.querySelector('.summary-row');
         if (summaryRow) {
-            const firstCell = summaryRow.querySelector('td:first-child');
-            const secondCell = summaryRow.querySelector('td:last-child');
+            const cells = summaryRow.querySelectorAll('td');
             
-            if (firstCell && secondCell) {
-                // If invoice column is visible, use 3 and 5 colspans (total 8 columns)
-                // If invoice column is hidden, use 2 and 6 colspans (total 8 columns)
+            if (cells.length >= 3) {
+                // New layout: 2 + 2 + 4 = 8 columns
+                cells[0].setAttribute('colspan', '2'); // Location + Quantity
+                cells[1].setAttribute('colspan', '2'); // Ratio + Price per unit
+                cells[2].setAttribute('colspan', '4'); // Total + Remaining + Invoice + Date
+            } else if (cells.length === 2) {
+                // Fallback for old layout
                 if (showInvoiceColumn) {
-                    firstCell.setAttribute('colspan', '3');
-                    secondCell.setAttribute('colspan', '5');
+                    cells[0].setAttribute('colspan', '3');
+                    cells[1].setAttribute('colspan', '5');
                 } else {
-                    firstCell.setAttribute('colspan', '2');
-                    secondCell.setAttribute('colspan', '6');
+                    cells[0].setAttribute('colspan', '2');
+                    cells[1].setAttribute('colspan', '6');
                 }
             }
         }
