@@ -64,6 +64,33 @@ function validateBackupFile($file_path) {
     return false;
 }
 
+function fixCollationIssues($file_path) {
+    $content = file_get_contents($file_path);
+    if ($content === false) {
+        return false;
+    }
+    
+    // Replace problematic collations with compatible ones
+    $replacements = [
+        'utf8mb4_0900_ai_ci' => 'utf8mb4_unicode_ci',
+        'utf8mb4_0900_as_cs' => 'utf8mb4_unicode_ci',
+        'utf8mb4_0900_as_ci' => 'utf8mb4_unicode_ci',
+        'utf8mb4_0900_bin' => 'utf8mb4_bin',
+        'utf8mb4_ja_0900_as_cs' => 'utf8mb4_unicode_ci',
+        'utf8mb4_ja_0900_as_cs_ks' => 'utf8mb4_unicode_ci'
+    ];
+    
+    $fixed_content = $content;
+    foreach ($replacements as $old => $new) {
+        $fixed_content = str_replace($old, $new, $fixed_content);
+    }
+    
+    // Also remove problematic SET statements
+    $fixed_content = preg_replace('/SET NAMES utf8mb4 COLLATE utf8mb4_0900_[^;]+;/', 'SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;', $fixed_content);
+    
+    return file_put_contents($file_path, $fixed_content);
+}
+
 function findMysqldumpPath() {
     // Common paths for mysqldump on different systems
     $possible_paths = [
@@ -151,6 +178,8 @@ try {
         '--skip-comments',
         '--skip-add-locks',
         '--skip-disable-keys',
+        '--compatible=mysql40',
+        '--skip-set-charset',
         escapeshellarg($database)
     ];
     
@@ -175,6 +204,11 @@ try {
     if (!validateBackupFile($backup_path)) {
         unlink($backup_path); // Remove invalid backup file
         throw new Exception('فایلەکەی باک ئەپ نادروستە - لەوانەیە هەڵەیەک لە دروستکردنیدا هەبێت');
+    }
+    
+    // Fix any collation compatibility issues
+    if (!fixCollationIssues($backup_path)) {
+        error_log("Warning: Could not fix collation issues in backup file: {$backup_filename}");
     }
     
     // Log backup creation
