@@ -31,10 +31,20 @@ if ($action !== 'create_backup') {
 }
 
 try {
+    // Log backup attempt
+    error_log("=== BACKUP CREATION STARTED ===");
+    error_log("Host: {$host}");
+    error_log("Database: {$database}");
+    error_log("Username: {$username}");
+    error_log("Backup directory: {$backup_dir}");
+    
     // Create backup filename with timestamp
     $timestamp = date('Y-m-d_H-i-s');
     $backup_filename = "backup_{$database}_{$timestamp}.sql";
     $backup_path = $backup_dir . $backup_filename;
+    
+    error_log("Backup filename: {$backup_filename}");
+    error_log("Backup path: {$backup_path}");
     
     // Try mysqldump first
     $mysqldump_success = false;
@@ -52,13 +62,16 @@ try {
     
     $command = null;
     foreach ($possible_paths as $path) {
+        error_log("Checking mysqldump path: {$path}");
         if (file_exists($path) || $path === 'mysqldump') {
             $command = $path;
+            error_log("Found mysqldump at: {$path}");
             break;
         }
     }
     
     if ($command) {
+        error_log("Using mysqldump command: {$command}");
         // Build command parameters
         $params = [
             '--host=' . escapeshellarg($host),
@@ -81,13 +94,21 @@ try {
         
         $full_command = $command . ' ' . implode(' ', $params) . ' > ' . escapeshellarg($backup_path);
         
+        error_log("Executing mysqldump command: {$full_command}");
+        
         // Execute backup command
         $output = [];
         $return_code = 0;
         exec($full_command . ' 2>&1', $output, $return_code);
         
+        error_log("mysqldump return code: {$return_code}");
+        error_log("mysqldump output: " . implode(' ', $output));
+        
         if ($return_code === 0 && file_exists($backup_path) && filesize($backup_path) > 0) {
             $mysqldump_success = true;
+            error_log("mysqldump backup successful");
+        } else {
+            error_log("mysqldump backup failed");
         }
     }
     
@@ -96,8 +117,10 @@ try {
         error_log("mysqldump not available, trying PHP-based backup");
         
         // Connect to database
+        error_log("Connecting to database...");
         $pdo = new PDO("mysql:host={$host};dbname={$database};charset=utf8mb4", $username, $password);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        error_log("Database connection successful");
         
         // Create backup file
         $backup_content = "-- Database Backup Created: " . date('Y-m-d H:i:s') . "\n";
@@ -111,10 +134,13 @@ try {
         $backup_content .= "SET time_zone = \"+00:00\";\n\n";
         
         // Get all tables
+        error_log("Getting list of tables...");
         $stmt = $pdo->query("SHOW TABLES");
         $tables = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        error_log("Found " . count($tables) . " tables");
         
         foreach ($tables as $table) {
+            error_log("Processing table: {$table}");
             $backup_content .= "-- Table structure for table `{$table}`\n";
             
             // Get table structure
@@ -153,11 +179,16 @@ try {
         $backup_content .= "SET FOREIGN_KEY_CHECKS=1;\n";
         
         // Write backup to file
-        file_put_contents($backup_path, $backup_content);
+        error_log("Writing backup to file: {$backup_path}");
+        $bytes_written = file_put_contents($backup_path, $backup_content);
+        error_log("Bytes written: {$bytes_written}");
         
         if (!file_exists($backup_path) || filesize($backup_path) === 0) {
+            error_log("Backup file creation failed or empty");
             throw new Exception('فایلەکەی باک ئەپ دروست نەبوو یان بەتاڵە');
         }
+        
+        error_log("PHP-based backup completed successfully");
     }
     
     // Log backup creation
