@@ -36,8 +36,16 @@ echo "POST Data: " . $postdata . "<br><br>";
 
 $result = file_get_contents($url, false, $context);
 
-echo "<h3>Response:</h3>";
-echo "<pre>" . htmlspecialchars($result) . "</pre>";
+echo "<h3>Raw Response (first 500 chars):</h3>";
+echo "<pre>" . htmlspecialchars(substr($result, 0, 500)) . "</pre>";
+
+echo "<h3>Response Length:</h3>";
+echo strlen($result) . " characters<br>";
+
+echo "<h3>Response Headers:</h3>";
+if (isset($http_response_header)) {
+    echo "<pre>" . print_r($http_response_header, true) . "</pre>";
+}
 
 // Try to parse JSON
 $data = json_decode($result, true);
@@ -54,7 +62,13 @@ if ($data) {
     }
 } else {
     echo "<p style='color: red;'>❌ Failed to parse JSON response</p>";
-    echo "<p>This might indicate a PHP error or unexpected output.</p>";
+    echo "<p>JSON Error: " . json_last_error_msg() . "</p>";
+    
+    // Show what we actually got
+    echo "<h3>What we actually received:</h3>";
+    echo "<pre style='background: #f0f0f0; padding: 10px; border: 1px solid #ccc;'>";
+    echo htmlspecialchars($result);
+    echo "</pre>";
 }
 
 echo "<hr>";
