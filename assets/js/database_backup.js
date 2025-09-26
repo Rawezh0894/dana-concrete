@@ -42,7 +42,7 @@ function createBackup() {
     // Simulate progress for better UX
     simulateProgress();
     
-    fetch('../process/backup/create_backup.php', {
+    fetch('../process/backup/create_backup_enhanced.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

@@ -55,9 +55,26 @@ try {
     $current_backup_filename = "pre_restore_backup_{$database}_" . date('Y-m-d_H-i-s') . ".sql";
     $current_backup_path = $backup_dir . $current_backup_filename;
     
-    // Create current database backup
-    $backup_command = "C:\\xampp\\mysql\\bin\\mysqldump.exe";
-    if (file_exists($backup_command)) {
+    // Create current database backup - try different paths
+    $possible_mysqldump_paths = [
+        "C:\\xampp\\mysql\\bin\\mysqldump.exe",  // XAMPP Windows
+        "mysqldump",                              // System PATH
+        "/usr/bin/mysqldump",                     // Linux standard
+        "/usr/local/bin/mysqldump",               // Linux alternative
+        "/opt/mysql/bin/mysqldump",               // Custom MySQL installation
+        "C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysqldump.exe", // MySQL Server Windows
+        "C:\\Program Files (x86)\\MySQL\\MySQL Server 8.0\\bin\\mysqldump.exe" // MySQL Server Windows x86
+    ];
+    
+    $backup_command = null;
+    foreach ($possible_mysqldump_paths as $path) {
+        if (file_exists($path) || $path === 'mysqldump') {
+            $backup_command = $path;
+            break;
+        }
+    }
+    
+    if ($backup_command) {
         $backup_params = [
             '--host=' . escapeshellarg($host),
             '--user=' . escapeshellarg($username),
@@ -85,12 +102,27 @@ try {
         }
     }
     
-    // Build mysql command for restoration
-    $mysql_command = "C:\\xampp\\mysql\\bin\\mysql.exe";
+    // Build mysql command for restoration - try different paths
+    $possible_mysql_paths = [
+        "C:\\xampp\\mysql\\bin\\mysql.exe",  // XAMPP Windows
+        "mysql",                              // System PATH
+        "/usr/bin/mysql",                     // Linux standard
+        "/usr/local/bin/mysql",               // Linux alternative
+        "/opt/mysql/bin/mysql",               // Custom MySQL installation
+        "C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql.exe", // MySQL Server Windows
+        "C:\\Program Files (x86)\\MySQL\\MySQL Server 8.0\\bin\\mysql.exe" // MySQL Server Windows x86
+    ];
     
-    // Check if mysql exists
-    if (!file_exists($mysql_command)) {
-        throw new Exception('mysql نەدۆزرایەوە لە شوێنی چاوەڕوانکراو');
+    $mysql_command = null;
+    foreach ($possible_mysql_paths as $path) {
+        if (file_exists($path) || $path === 'mysql') {
+            $mysql_command = $path;
+            break;
+        }
+    }
+    
+    if (!$mysql_command) {
+        throw new Exception('mysql نەدۆزرایەوە لە هیچ شوێنێکدا. تکایە دڵنیابە کە MySQL دامەزراوە');
     }
     
     // Build restoration command

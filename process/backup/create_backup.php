@@ -42,12 +42,27 @@ try {
     $backup_filename = "backup_{$database}_{$timestamp}.sql";
     $backup_path = $backup_dir . $backup_filename;
     
-    // Build mysqldump command
-    $command = "C:\\xampp\\mysql\\bin\\mysqldump.exe";
+    // Build mysqldump command - try different paths
+    $possible_paths = [
+        "C:\\xampp\\mysql\\bin\\mysqldump.exe",  // XAMPP Windows
+        "mysqldump",                              // System PATH
+        "/usr/bin/mysqldump",                     // Linux standard
+        "/usr/local/bin/mysqldump",               // Linux alternative
+        "/opt/mysql/bin/mysqldump",               // Custom MySQL installation
+        "C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysqldump.exe", // MySQL Server Windows
+        "C:\\Program Files (x86)\\MySQL\\MySQL Server 8.0\\bin\\mysqldump.exe" // MySQL Server Windows x86
+    ];
     
-    // Check if mysqldump exists
-    if (!file_exists($command)) {
-        throw new Exception('mysqldump نەدۆزرایەوە لە شوێنی چاوەڕوانکراو');
+    $command = null;
+    foreach ($possible_paths as $path) {
+        if (file_exists($path) || $path === 'mysqldump') {
+            $command = $path;
+            break;
+        }
+    }
+    
+    if (!$command) {
+        throw new Exception('mysqldump نەدۆزرایەوە لە هیچ شوێنێکدا. تکایە دڵنیابە کە MySQL دامەزراوە');
     }
     
     // Build command parameters
