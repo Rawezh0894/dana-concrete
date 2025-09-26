@@ -9,14 +9,17 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// Get database configuration - use root user for XAMPP
-$host = env('DB_HOST', 'localhost');
-$username = 'root';  // Use root user for XAMPP
-$password = '';      // Empty password for root
-$database = env('DB_NAME', 'dana_concrete_db');
+// Get database configuration
 
-// Log database configuration for debugging
-error_log("Database config - Host: $host, User: $username, Database: $database");
+$host = env('DB_HOST', 'localhost');
+$username = env('DB_USERNAME', 'dana_user');
+$password = env('DB_PASSWORD', 'Rawezh.Jaza@0894');
+$database = env('DB_DATABASE', 'dana_concrete_db');
+
+// $host = env('DB_HOST', 'localhost');
+// $username = env('DB_USERNAME', 'root');
+// $password = env('DB_PASSWORD', '');
+// $database = env('DB_DATABASE', 'dana_concrete_db');
 
 // Set backup directory
 $backup_dir = '../../backups/';
@@ -39,29 +42,12 @@ try {
     $backup_filename = "backup_{$database}_{$timestamp}.sql";
     $backup_path = $backup_dir . $backup_filename;
     
-    // Build mysqldump command - try multiple possible paths
-    $possible_paths = [
-        "C:\\xampp\\mysql\\bin\\mysqldump.exe",
-        "C:\\xampp\\mysql\\bin\\mysqldump",
-        "mysqldump.exe",
-        "mysqldump"
-    ];
-    
-    $command = null;
-    foreach ($possible_paths as $path) {
-        if (file_exists($path) || (strpos($path, '\\') === false && shell_exec("where $path"))) {
-            $command = $path;
-            break;
-        }
-    }
+    // Build mysqldump command
+    $command = "C:\\xampp\\mysql\\bin\\mysqldump.exe";
     
     // Check if mysqldump exists
-    if (!$command) {
-        $error_details = "mysqldump نەدۆزرایەوە لە شوێنەکانی چاوەڕوانکراو:\n";
-        foreach ($possible_paths as $path) {
-            $error_details .= "- $path: " . (file_exists($path) ? "موجودە" : "نەموجودە") . "\n";
-        }
-        throw new Exception($error_details);
+    if (!file_exists($command)) {
+        throw new Exception('mysqldump نەدۆزرایەوە لە شوێنی چاوەڕوانکراو');
     }
     
     // Build command parameters
@@ -86,22 +72,13 @@ try {
     
     $full_command = $command . ' ' . implode(' ', $params) . ' > ' . escapeshellarg($backup_path);
     
-    // Log the command being executed (for debugging)
-    error_log("Executing backup command: " . $full_command);
-    
     // Execute backup command
     $output = [];
     $return_code = 0;
     exec($full_command . ' 2>&1', $output, $return_code);
     
-    // Log the output for debugging
-    error_log("Backup command output: " . implode("\n", $output));
-    error_log("Backup command return code: " . $return_code);
-    
     if ($return_code !== 0) {
-        $error_message = 'هەڵە لە دروستکردنی باک ئەپ: ' . implode(' ', $output);
-        error_log("Backup creation failed: " . $error_message);
-        throw new Exception($error_message);
+        throw new Exception('هەڵە لە دروستکردنی باک ئەپ: ' . implode(' ', $output));
     }
     
     // Check if backup file was created and has content

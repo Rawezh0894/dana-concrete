@@ -9,11 +9,17 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// Get database configuration - use root user for XAMPP
+// Get database configuration
+
 $host = env('DB_HOST', 'localhost');
-$username = 'root';  // Use root user for XAMPP
-$password = '';      // Empty password for root
-$database = env('DB_NAME', 'dana_concrete_db');
+$username = env('DB_USERNAME', 'dana_user');
+$password = env('DB_PASSWORD', 'Rawezh.Jaza@0894');
+$database = env('DB_DATABASE', 'dana_concrete_db');
+
+// $host = env('DB_HOST', 'localhost');
+// $username = env('DB_USERNAME', 'root');
+// $password = env('DB_PASSWORD', '');
+// $database = env('DB_DATABASE', 'dana_concrete_db');
 
 // Get request data
 $input = json_decode(file_get_contents('php://input'), true);
