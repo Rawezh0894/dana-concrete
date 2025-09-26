@@ -32,12 +32,29 @@ $context = stream_context_create([
 ]);
 
 // Make the request to the backup script
-$url = 'http://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['REQUEST_URI']) . '/process/backup/create_backup.php';
+$url = 'http://' . $_SERVER['HTTP_HOST'] . '/process/backup/create_backup.php';
 echo "Request URL: " . $url . "<br>";
 echo "POST Data: " . $postdata . "<br>";
 echo "Session Cookie: " . $session_cookie . "<br><br>";
 
-$result = file_get_contents($url, false, $context);
+echo "<h3>Making HTTP request...</h3>";
+$result = @file_get_contents($url, false, $context);
+
+if ($result === false) {
+    echo "<p style='color: red;'>❌ HTTP request failed!</p>";
+    $error = error_get_last();
+    if ($error) {
+        echo "Error: " . $error['message'] . "<br>";
+    }
+    
+    // Try alternative approach - direct file include
+    echo "<h3>Trying direct file execution...</h3>";
+    $_POST = json_decode($postdata, true);
+    ob_start();
+    include 'process/backup/create_backup.php';
+    $result = ob_get_clean();
+    echo "Direct execution result length: " . strlen($result) . " characters<br>";
+}
 
 echo "<h3>Raw Response (first 500 chars):</h3>";
 echo "<pre>" . htmlspecialchars(substr($result, 0, 500)) . "</pre>";
