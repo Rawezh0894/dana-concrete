@@ -99,16 +99,20 @@ function findMysqldumpPath() {
         '/usr/local/bin/mysqldump',
         '/opt/mysql/bin/mysqldump',
         '/usr/local/mysql/bin/mysqldump',
+        '/usr/bin/mariadb-dump',  // MariaDB alternative
+        '/usr/local/bin/mariadb-dump',
         // Windows XAMPP path (for local development)
         'C:\\xampp\\mysql\\bin\\mysqldump.exe',
         // Try to find in PATH
-        'mysqldump'
+        'mysqldump',
+        'mariadb-dump'
     ];
     
     foreach ($possible_paths as $path) {
         // For Windows XAMPP, check if file exists
         if (strpos($path, 'C:\\') === 0) {
             if (file_exists($path)) {
+                error_log("Found mysqldump at Windows path: " . $path);
                 return $path;
             }
         } else {
@@ -118,17 +122,27 @@ function findMysqldumpPath() {
             exec("which " . escapeshellarg($path) . " 2>/dev/null", $output, $return_code);
             
             if ($return_code === 0 && !empty($output)) {
-                return trim($output[0]);
+                $found_path = trim($output[0]);
+                error_log("Found mysqldump via which: " . $found_path);
+                
+                // Test if it actually works
+                exec($found_path . " --version 2>/dev/null", $version_output, $version_code);
+                if ($version_code === 0) {
+                    error_log("mysqldump version test successful: " . implode(' ', $version_output));
+                    return $found_path;
+                }
             }
             
             // Also try direct execution test
             exec($path . " --version 2>/dev/null", $output, $return_code);
             if ($return_code === 0) {
+                error_log("Found mysqldump via direct test: " . $path);
                 return $path;
             }
         }
     }
     
+    error_log("mysqldump not found in any of the expected paths");
     return false;
 }
 
@@ -183,16 +197,36 @@ try {
         escapeshellarg($database)
     ];
     
-    // Build the full command with proper error redirection
-    $full_command = $command . ' ' . implode(' ', $params) . ' > ' . escapeshellarg($backup_path) . ' 2>/dev/null';
+    // Build the full command with error logging
+    $error_log_file = $backup_dir . 'backup_error_' . time() . '.log';
+    $full_command = $command . ' ' . implode(' ', $params) . ' > ' . escapeshellarg($backup_path) . ' 2> ' . escapeshellarg($error_log_file);
+    
+    // Log the command being executed
+    error_log("Executing backup command: " . $full_command);
     
     // Execute backup command
     $output = [];
     $return_code = 0;
     exec($full_command, $output, $return_code);
     
+    // Check for errors
     if ($return_code !== 0) {
-        throw new Exception('هەڵە لە دروستکردنی باک ئەپ: ' . implode(' ', $output));
+        $error_content = file_exists($error_log_file) ? file_get_contents($error_log_file) : 'No error log found';
+        error_log("Backup command failed with return code: $return_code");
+        error_log("Error output: " . $error_content);
+        error_log("Command output: " . implode(' ', $output));
+        
+        // Clean up error log file
+        if (file_exists($error_log_file)) {
+            unlink($error_log_file);
+        }
+        
+        throw new Exception('هەڵە لە دروستکردنی باک ئەپ. کۆد: ' . $return_code . '. زانیاری زیاتر لە error log ببینە.');
+    }
+    
+    // Clean up error log file if backup was successful
+    if (file_exists($error_log_file)) {
+        unlink($error_log_file);
     }
     
     // Check if backup file was created and has content
