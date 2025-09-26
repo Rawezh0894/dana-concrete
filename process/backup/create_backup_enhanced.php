@@ -18,8 +18,21 @@ $database = env('DB_DATABASE', 'dana_concrete_db');
 // Set backup directory
 $backup_dir = '../../backups/';
 if (!file_exists($backup_dir)) {
-    mkdir($backup_dir, 0755, true);
+    error_log("Creating backup directory: {$backup_dir}");
+    if (!mkdir($backup_dir, 0755, true)) {
+        error_log("Failed to create backup directory: {$backup_dir}");
+        throw new Exception('نەتوانرا دایرەکتۆری باک ئەپ دروست بکرێت');
+    }
 }
+
+// Check if directory is writable
+if (!is_writable($backup_dir)) {
+    error_log("Backup directory is not writable: {$backup_dir}");
+    error_log("Directory permissions: " . substr(sprintf('%o', fileperms($backup_dir)), -4));
+    throw new Exception('دایرەکتۆری باک ئەپ ناتوانرێت بنووسرێت');
+}
+
+error_log("Backup directory is writable: {$backup_dir}");
 
 // Get request data
 $input = json_decode(file_get_contents('php://input'), true);
@@ -186,13 +199,17 @@ try {
         // Write backup to file
         error_log("Writing backup to file: {$backup_path}");
         error_log("Backup content length: " . strlen($backup_content) . " characters");
+        error_log("Target directory permissions: " . substr(sprintf('%o', fileperms($backup_dir)), -4));
+        error_log("Target directory owner: " . (function_exists('posix_getpwuid') ? posix_getpwuid(fileowner($backup_dir))['name'] : 'Unknown'));
         
+        // Try to write the file
         $bytes_written = file_put_contents($backup_path, $backup_content);
         error_log("Bytes written: {$bytes_written}");
         
         if ($bytes_written === false) {
             error_log("file_put_contents failed");
-            throw new Exception('نەتوانرا فایلەکە بنووسرێت');
+            error_log("Last error: " . error_get_last()['message']);
+            throw new Exception('نەتوانرا فایلەکە بنووسرێت - دەستپێگەیشتنی فایل نەماوە');
         }
         
         if (!file_exists($backup_path)) {
