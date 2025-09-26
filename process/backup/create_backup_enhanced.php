@@ -70,7 +70,7 @@ try {
         }
     }
     
-    if ($command) {
+    if ($command && function_exists('exec')) {
         error_log("Using mysqldump command: {$command}");
         // Build command parameters
         $params = [
@@ -106,10 +106,15 @@ try {
         
         if ($return_code === 0 && file_exists($backup_path) && filesize($backup_path) > 0) {
             $mysqldump_success = true;
-            error_log("mysqldump backup successful");
+            error_log("mysqldump backup successful - File size: " . filesize($backup_path) . " bytes");
         } else {
-            error_log("mysqldump backup failed");
+            error_log("mysqldump backup failed - Return code: {$return_code}, File exists: " . (file_exists($backup_path) ? 'Yes' : 'No') . ", File size: " . (file_exists($backup_path) ? filesize($backup_path) : 'N/A') . " bytes");
+            if (file_exists($backup_path)) {
+                error_log("Backup file content preview: " . substr(file_get_contents($backup_path), 0, 200));
+            }
         }
+    } else {
+        error_log("mysqldump not available or exec() function disabled");
     }
     
     // If mysqldump failed, try PHP-based backup
@@ -180,12 +185,27 @@ try {
         
         // Write backup to file
         error_log("Writing backup to file: {$backup_path}");
+        error_log("Backup content length: " . strlen($backup_content) . " characters");
+        
         $bytes_written = file_put_contents($backup_path, $backup_content);
         error_log("Bytes written: {$bytes_written}");
         
-        if (!file_exists($backup_path) || filesize($backup_path) === 0) {
-            error_log("Backup file creation failed or empty");
-            throw new Exception('فایلەکەی باک ئەپ دروست نەبوو یان بەتاڵە');
+        if ($bytes_written === false) {
+            error_log("file_put_contents failed");
+            throw new Exception('نەتوانرا فایلەکە بنووسرێت');
+        }
+        
+        if (!file_exists($backup_path)) {
+            error_log("Backup file does not exist after writing");
+            throw new Exception('فایلەکەی باک ئەپ دروست نەبوو');
+        }
+        
+        $file_size = filesize($backup_path);
+        error_log("Final backup file size: {$file_size} bytes");
+        
+        if ($file_size === 0) {
+            error_log("Backup file is empty");
+            throw new Exception('فایلەکەی باک ئەپ بەتاڵە');
         }
         
         error_log("PHP-based backup completed successfully");
