@@ -51,8 +51,27 @@ function createBackup() {
             action: 'create_backup'
         })
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        return response.text().then(text => {
+            console.log('Raw response:', text);
+            try {
+                return JSON.parse(text);
+            } catch (e) {
+                console.error('JSON parse error:', e);
+                console.error('Response text:', text);
+                throw new Error('Invalid JSON response: ' + text.substring(0, 200));
+            }
+        });
+    })
     .then(data => {
+        console.log('Parsed data:', data);
         updateProgress(100);
         
         setTimeout(() => {
@@ -68,6 +87,7 @@ function createBackup() {
         }, 1000);
     })
     .catch(error => {
+        console.error('Fetch error:', error);
         showProgress(false);
         showAlert('هەڵەیەک ڕوویدا: ' + error.message, 'danger');
     });

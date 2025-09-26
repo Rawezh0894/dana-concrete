@@ -1,4 +1,7 @@
 <?php
+// Ensure no output before JSON
+ob_start();
+
 session_start();
 require_once '../../config/db_conected.php';
 
@@ -126,10 +129,16 @@ try {
     ];
     
     error_log("Sending success response: " . json_encode($response));
+    
+    // Clean any output buffer and send JSON
+    ob_clean();
     echo json_encode($response);
     
 } catch (Exception $e) {
     error_log("Backup creation error: " . $e->getMessage());
+    
+    // Clean any output buffer and send JSON
+    ob_clean();
     echo json_encode([
         'success' => false,
         'message' => $e->getMessage()
