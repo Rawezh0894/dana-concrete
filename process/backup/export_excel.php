@@ -67,7 +67,11 @@ function generateExcelFile($pdo, $export_type, $table_name) {
         return false;
     }
 
-    // Write to file
+    // Add UTF-8 BOM for proper Excel encoding
+    $bom = "\xEF\xBB\xBF";
+    $excel_content = $bom . $excel_content;
+
+    // Write to file with UTF-8 encoding
     file_put_contents($file_path, $excel_content);
     
     return $file_path;
@@ -129,39 +133,73 @@ function createAllTablesExcel($pdo) {
     $stmt = $pdo->query("SHOW TABLES");
     $tables = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-    $excel_content = '';
-    $excel_content .= "خشتە,ژمارەی ڕیزەکان,سایزی خشتە,داتاکانی نموونە\n";
-
-    foreach ($tables as $table) {
-        // Get row count
-        $stmt = $pdo->prepare("SELECT COUNT(*) FROM `$table`");
-        $stmt->execute();
-        $row_count = $stmt->fetchColumn();
-
-        // Get table size
-        $stmt = $pdo->prepare("
-            SELECT ROUND(((data_length + index_length) / 1024 / 1024), 2) AS 'Size in MB'
-            FROM information_schema.tables 
-            WHERE table_schema = ? AND table_name = ?
-        ");
-        $stmt->execute([env('DB_DATABASE', 'dana_concrete_db'), $table]);
-        $table_size = $stmt->fetchColumn();
-
-        // Get sample data (first 3 rows)
-        $stmt = $pdo->prepare("SELECT * FROM `$table` LIMIT 3");
-        $stmt->execute();
-        $sample_data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        $sample_text = '';
-        if (!empty($sample_data)) {
-            $sample_text = json_encode($sample_data, JSON_UNESCAPED_UNICODE);
-            $sample_text = str_replace(["\n", "\r"], " ", $sample_text);
-        }
-
-        $excel_content .= "$table,$row_count,{$table_size} MB," . escapeCsvValue($sample_text) . "\n";
-    }
-
+    // Create a multi-sheet Excel-like structure using XML format
+    $excel_content = createMultiSheetExcel($pdo, $tables);
+    
     return $excel_content;
+}
+
+function createMultiSheetExcel($pdo, $tables) {
+    // Create Excel XML structure with proper UTF-8 encoding
+    $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+    $xml .= '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"' . "\n";
+    $xml .= ' xmlns:o="urn:schemas-microsoft-com:office:office"' . "\n";
+    $xml .= ' xmlns:x="urn:schemas-microsoft-com:office:excel"' . "\n";
+    $xml .= ' xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"' . "\n";
+    $xml .= ' xmlns:html="http://www.w3.org/TR/REC-html40">' . "\n";
+    
+    // Add styles with UTF-8 support
+    $xml .= '<Styles>' . "\n";
+    $xml .= '<Style ss:ID="Header">' . "\n";
+    $xml .= '<Font ss:Bold="1" ss:Color="#FFFFFF" ss:FontName="Arial Unicode MS"/>' . "\n";
+    $xml .= '<Interior ss:Color="#4472C4" ss:Pattern="Solid"/>' . "\n";
+    $xml .= '</Style>' . "\n";
+    $xml .= '<Style ss:ID="Data">' . "\n";
+    $xml .= '<Font ss:FontName="Arial Unicode MS"/>' . "\n";
+    $xml .= '</Style>' . "\n";
+    $xml .= '</Styles>' . "\n";
+    
+    foreach ($tables as $table) {
+        // Create worksheet for each table
+        $xml .= '<Worksheet ss:Name="' . escapeExcelValue($table) . '">' . "\n";
+        $xml .= '<Table>' . "\n";
+        
+        // Get table structure
+        $stmt = $pdo->prepare("DESCRIBE `$table`");
+        $stmt->execute();
+        $columns = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        if (!empty($columns)) {
+            // Add header row
+            $xml .= '<Row>' . "\n";
+            foreach ($columns as $column) {
+                $xml .= '<Cell ss:StyleID="Header"><Data ss:Type="String">' . escapeExcelValue($column['Field']) . '</Data></Cell>' . "\n";
+            }
+            $xml .= '</Row>' . "\n";
+            
+            // Get table data (limit to 1000 rows per table for performance)
+            $stmt = $pdo->prepare("SELECT * FROM `$table` ORDER BY id DESC LIMIT 1000");
+            $stmt->execute();
+            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Add data rows
+            foreach ($data as $row) {
+                $xml .= '<Row>' . "\n";
+                foreach ($row as $value) {
+                    $type = is_numeric($value) ? 'Number' : 'String';
+                    $xml .= '<Cell ss:StyleID="Data"><Data ss:Type="' . $type . '">' . escapeExcelValue($value) . '</Data></Cell>' . "\n";
+                }
+                $xml .= '</Row>' . "\n";
+            }
+        }
+        
+        $xml .= '</Table>' . "\n";
+        $xml .= '</Worksheet>' . "\n";
+    }
+    
+    $xml .= '</Workbook>';
+    
+    return $xml;
 }
 
 function createSalesReportExcel($pdo) {
@@ -249,7 +287,7 @@ function generateFilename($export_type, $table_name = '') {
         case 'table':
             return "export_{$table_name}_{$timestamp}.csv";
         case 'all_tables':
-            return "export_all_tables_{$timestamp}.csv";
+            return "export_all_tables_{$timestamp}.xls";
         case 'sales_report':
             return "export_sales_report_{$timestamp}.csv";
         case 'customers_report':
@@ -259,6 +297,24 @@ function generateFilename($export_type, $table_name = '') {
         default:
             return "export_{$timestamp}.csv";
     }
+}
+
+function escapeExcelValue($value) {
+    if (is_null($value)) {
+        return '';
+    }
+    
+    $value = (string) $value;
+    
+    // Convert to UTF-8 if not already
+    if (!mb_check_encoding($value, 'UTF-8')) {
+        $value = mb_convert_encoding($value, 'UTF-8', 'auto');
+    }
+    
+    // Escape XML special characters
+    $value = htmlspecialchars($value, ENT_XML1 | ENT_COMPAT, 'UTF-8');
+    
+    return $value;
 }
 
 function escapeCsvValue($value) {
