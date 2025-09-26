@@ -9,16 +9,11 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// Get database configuration
+// Get database configuration - use root user for XAMPP
 $host = env('DB_HOST', 'localhost');
+$username = 'root';  // Use root user for XAMPP
+$password = '';      // Empty password for root
 $database = env('DB_NAME', 'dana_concrete_db');
-
-// Use root user for restore operations (most reliable)
-$username = 'root';
-$password = '';
-
-// Log the configuration being used
-error_log("Restore using: host=$host, user=$username, database=$database");
 
 // Get request data
 $input = json_decode(file_get_contents('php://input'), true);
@@ -85,36 +80,12 @@ try {
     }
     
     // Build mysql command for restoration
-    // Try multiple possible paths for mysql
-    $possible_paths = [
-        "C:\\xampp\\mysql\\bin\\mysql.exe",
-        "C:\\xampp\\mysql\\bin\\mysql",
-        "mysql.exe",
-        "mysql"
-    ];
+    $mysql_command = "C:\\xampp\\mysql\\bin\\mysql.exe";
     
-    $mysql_command = null;
-    foreach ($possible_paths as $path) {
-        if (file_exists($path) || $path === "mysql.exe" || $path === "mysql") {
-            // Test if command works
-            $test_output = [];
-            $test_return = 0;
-            exec($path . ' --version 2>&1', $test_output, $test_return);
-            
-            if ($test_return === 0) {
-                $mysql_command = $path;
-                break;
-            }
-        }
+    // Check if mysql exists
+    if (!file_exists($mysql_command)) {
+        throw new Exception('mysql نەدۆزرایەوە لە شوێنی چاوەڕوانکراو');
     }
-    
-    if (!$mysql_command) {
-        error_log("mysql not found. Tried paths: " . implode(', ', $possible_paths));
-        throw new Exception('mysql نەدۆزرایەوە. تکایە دڵنیابە کە MySQL/MariaDB دامەزراوە و لە PATH-دا هەیە');
-    }
-    
-    // Log the command being used
-    error_log("Using mysql command: " . $mysql_command);
     
     // Build restoration command
     $restore_params = [
@@ -127,22 +98,13 @@ try {
     
     $restore_command = $mysql_command . ' ' . implode(' ', $restore_params) . ' < ' . escapeshellarg($backup_path);
     
-    // Log the full command for debugging
-    error_log("Full restore command: " . $restore_command);
-    
     // Execute restoration command
     $output = [];
     $return_code = 0;
     exec($restore_command . ' 2>&1', $output, $return_code);
     
-    // Log output for debugging
-    error_log("Restore command output: " . implode("\n", $output));
-    error_log("Restore return code: " . $return_code);
-    
     if ($return_code !== 0) {
-        $error_message = 'هەڵە لە گەڕاندنەوەی داتابەیس: ' . implode(' ', $output);
-        error_log("Restore command failed: " . $error_message);
-        throw new Exception($error_message);
+        throw new Exception('هەڵە لە گەڕاندنەوەی داتابەیس: ' . implode(' ', $output));
     }
     
     // Verify restoration by checking if database has tables

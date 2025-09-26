@@ -2,16 +2,11 @@
 // Auto backup cron script for Dana Concrete
 require_once '../../config/db_conected.php';
 
-// Get database configuration
+// Get database configuration - use root user for XAMPP
 $host = env('DB_HOST', 'localhost');
+$username = 'root';  // Use root user for XAMPP
+$password = '';      // Empty password for root
 $database = env('DB_NAME', 'dana_concrete_db');
-
-// Use root user for backup operations (most reliable)
-$username = 'root';
-$password = '';
-
-// Log the configuration being used
-error_log("Auto backup using: host=$host, user=$username, database=$database");
 
 // Set backup directory
 $backup_dir = '../../backups/';
