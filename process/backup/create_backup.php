@@ -36,6 +36,34 @@ if ($action !== 'create_backup') {
     exit;
 }
 
+function validateBackupFile($file_path) {
+    // Read first few lines of the backup file
+    $handle = fopen($file_path, 'r');
+    if (!$handle) {
+        return false;
+    }
+    
+    $first_line = fgets($handle);
+    fclose($handle);
+    
+    // Check if the first line contains mysqldump warnings or errors
+    if (strpos($first_line, 'mysqldump:') !== false || 
+        strpos($first_line, 'Warning:') !== false ||
+        strpos($first_line, 'Error:') !== false) {
+        return false;
+    }
+    
+    // Check if it starts with proper SQL comment or SET statement
+    $valid_starts = ['--', '/*!', 'SET ', 'DROP ', 'CREATE '];
+    foreach ($valid_starts as $start) {
+        if (strpos(trim($first_line), $start) === 0) {
+            return true;
+        }
+    }
+    
+    return false;
+}
+
 function findMysqldumpPath() {
     // Common paths for mysqldump on different systems
     $possible_paths = [
@@ -119,15 +147,20 @@ try {
         '--lock-tables=false',
         '--set-charset',
         '--default-character-set=utf8mb4',
+        '--no-tablespaces',
+        '--skip-comments',
+        '--skip-add-locks',
+        '--skip-disable-keys',
         escapeshellarg($database)
     ];
     
-    $full_command = $command . ' ' . implode(' ', $params) . ' > ' . escapeshellarg($backup_path);
+    // Build the full command with proper error redirection
+    $full_command = $command . ' ' . implode(' ', $params) . ' > ' . escapeshellarg($backup_path) . ' 2>/dev/null';
     
     // Execute backup command
     $output = [];
     $return_code = 0;
-    exec($full_command . ' 2>&1', $output, $return_code);
+    exec($full_command, $output, $return_code);
     
     if ($return_code !== 0) {
         throw new Exception('هەڵە لە دروستکردنی باک ئەپ: ' . implode(' ', $output));
@@ -136,6 +169,12 @@ try {
     // Check if backup file was created and has content
     if (!file_exists($backup_path) || filesize($backup_path) === 0) {
         throw new Exception('فایلەکەی باک ئەپ دروست نەبوو یان بەتاڵە');
+    }
+    
+    // Validate backup file content
+    if (!validateBackupFile($backup_path)) {
+        unlink($backup_path); // Remove invalid backup file
+        throw new Exception('فایلەکەی باک ئەپ نادروستە - لەوانەیە هەڵەیەک لە دروستکردنیدا هەبێت');
     }
     
     // Log backup creation
