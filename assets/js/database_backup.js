@@ -190,6 +190,10 @@ function simulateProgress() {
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize backup list controls
     initializeBackupListControls();
+    
+    // Initialize Excel export controls
+    initializeExcelExportControls();
+    
     console.log('Database Backup page loaded successfully');
 });
 
@@ -457,4 +461,103 @@ function deleteSelectedBackups() {
             });
         });
     }
+}
+
+// Excel Export Functions
+function initializeExcelExportControls() {
+    // Add event listeners for export buttons
+    const exportButtons = document.querySelectorAll('[data-export-type]');
+    exportButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const exportType = this.dataset.exportType;
+            const tableName = this.dataset.tableName || '';
+            exportToExcel(exportType, tableName);
+        });
+    });
+}
+
+function exportToExcel(exportType, tableName = '') {
+    showProgress(true);
+    updateProgress(0);
+    
+    // Simulate progress for better UX
+    simulateProgress();
+    
+    fetch('../process/backup/export_excel.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            action: 'export_excel',
+            export_type: exportType,
+            table_name: tableName
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        updateProgress(100);
+        
+        setTimeout(() => {
+            showProgress(false);
+            if (data.success) {
+                showAlert('فایلەکەی Excel بە سەرکەوتوویی دروستکرا!', 'success');
+                
+                // Download the file
+                downloadExcelFile(data.file_path, data.filename);
+            } else {
+                showAlert('هەڵەیەک ڕوویدا: ' + data.message, 'danger');
+            }
+        }, 1000);
+    })
+    .catch(error => {
+        showProgress(false);
+        showAlert('هەڵەیەک ڕوویدا: ' + error.message, 'danger');
+    });
+}
+
+function downloadExcelFile(filePath, filename) {
+    // Create a temporary link to download the file
+    const link = document.createElement('a');
+    link.href = filePath;
+    link.download = filename;
+    link.style.display = 'none';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Clean up the file after download
+    setTimeout(() => {
+        fetch('../process/backup/delete_export.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'delete_export',
+                file_path: filePath
+            })
+        });
+    }, 5000);
+}
+
+function exportTableData(tableName) {
+    exportToExcel('table', tableName);
+}
+
+function exportAllTables() {
+    exportToExcel('all_tables');
+}
+
+function exportSalesReport() {
+    exportToExcel('sales_report');
+}
+
+function exportCustomersReport() {
+    exportToExcel('customers_report');
+}
+
+function exportMaterialsReport() {
+    exportToExcel('materials_report');
 }
