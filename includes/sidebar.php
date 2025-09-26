@@ -144,5 +144,8 @@ $logout_pages = ['logout.php'];
     <?php if (hasPermission('view_notifications')): ?>
       <li><a href="../pages/notifications.php" class="sidebar-link<?php if($current_page == 'notifications.php') echo ' active'; ?>"><i class="bi bi-bell me-2"></i> ئاگادارکردنەوەکان</a></li>
     <?php endif; ?>
+    <?php if (hasPermission('view_users')): ?>
+      <li><a href="../pages/database_backup.php" class="sidebar-link<?php if($current_page == 'database_backup.php') echo ' active'; ?>"><i class="bi bi-database me-2"></i> باک ئەپی داتابەیس</a></li>
+    <?php endif; ?>
   </ul>
 </aside>
