@@ -17,13 +17,15 @@ echo "<h3>Testing Backup via HTTP Request:</h3>";
 // Create the POST data
 $postdata = json_encode(['action' => 'create_backup']);
 
-// Set up the context for HTTP request
+// Set up the context for HTTP request with session cookie
+$session_cookie = 'PHPSESSID=' . session_id();
 $context = stream_context_create([
     'http' => [
         'method' => 'POST',
         'header' => [
             'Content-Type: application/json',
-            'Content-Length: ' . strlen($postdata)
+            'Content-Length: ' . strlen($postdata),
+            'Cookie: ' . $session_cookie
         ],
         'content' => $postdata
     ]
@@ -32,7 +34,8 @@ $context = stream_context_create([
 // Make the request to the backup script
 $url = 'http://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['REQUEST_URI']) . '/process/backup/create_backup.php';
 echo "Request URL: " . $url . "<br>";
-echo "POST Data: " . $postdata . "<br><br>";
+echo "POST Data: " . $postdata . "<br>";
+echo "Session Cookie: " . $session_cookie . "<br><br>";
 
 $result = file_get_contents($url, false, $context);
 
