@@ -86,13 +86,22 @@ try {
     
     $full_command = $command . ' ' . implode(' ', $params) . ' > ' . escapeshellarg($backup_path);
     
+    // Log the command for debugging
+    error_log("Backup command: " . $full_command);
+    
     // Execute backup command
     $output = [];
     $return_code = 0;
     exec($full_command . ' 2>&1', $output, $return_code);
     
+    // Log the output for debugging
+    error_log("Backup command output: " . implode(' ', $output));
+    error_log("Backup command return code: " . $return_code);
+    
     if ($return_code !== 0) {
-        throw new Exception('هەڵە لە دروستکردنی باک ئەپ: ' . implode(' ', $output));
+        $error_message = 'هەڵە لە دروستکردنی باک ئەپ: ' . implode(' ', $output);
+        error_log("Backup failed: " . $error_message);
+        throw new Exception($error_message);
     }
     
     // Check if backup file was created and has content
@@ -101,18 +110,23 @@ try {
     }
     
     // Log backup creation
-    error_log("Database backup created: {$backup_filename} (" . formatFileSize(filesize($backup_path)) . ")");
+    $file_size = filesize($backup_path);
+    error_log("Database backup created successfully: {$backup_filename} (" . formatFileSize($file_size) . ")");
     
     // Update auto backup schedule if needed
     updateAutoBackupSchedule();
     
-    echo json_encode([
+    // Send success response
+    $response = [
         'success' => true,
         'message' => 'باک ئەپ بە سەرکەوتوویی دروستکرا',
         'filename' => $backup_filename,
-        'size' => filesize($backup_path),
+        'size' => $file_size,
         'path' => $backup_path
-    ]);
+    ];
+    
+    error_log("Sending success response: " . json_encode($response));
+    echo json_encode($response);
     
 } catch (Exception $e) {
     error_log("Backup creation error: " . $e->getMessage());
