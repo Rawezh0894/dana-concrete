@@ -42,10 +42,7 @@ function createBackup() {
     // Simulate progress for better UX
     simulateProgress();
     
-    console.log('🚀 Starting backup creation...');
-    console.log('📡 Sending request to: ../process/backup/create_backup_enhanced.php');
-    
-    fetch('../process/backup/create_backup_enhanced.php', {
+    fetch('../process/backup/create_backup.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -54,45 +51,23 @@ function createBackup() {
             action: 'create_backup'
         })
     })
-    .then(response => {
-        console.log('📥 Response received:', response);
-        console.log('📊 Response status:', response.status);
-        console.log('📋 Response headers:', response.headers);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        return response.json();
-    })
+    .then(response => response.json())
     .then(data => {
-        console.log('✅ Response data:', data);
-        console.log('🎯 Success status:', data.success);
-        console.log('💬 Message:', data.message);
-        
         updateProgress(100);
         
         setTimeout(() => {
             showProgress(false);
             if (data.success) {
-                console.log('🎉 Backup created successfully!');
                 showAlert('باک ئەپ بە سەرکەوتوویی دروستکرا!', 'success');
                 setTimeout(() => {
                     location.reload();
                 }, 2000);
             } else {
-                console.error('❌ Backup failed:', data.message);
                 showAlert('هەڵەیەک ڕوویدا: ' + data.message, 'danger');
             }
         }, 1000);
     })
     .catch(error => {
-        console.error('💥 Fetch error:', error);
-        console.error('🔍 Error details:', {
-            name: error.name,
-            message: error.message,
-            stack: error.stack
-        });
         showProgress(false);
         showAlert('هەڵەیەک ڕوویدا: ' + error.message, 'danger');
     });
@@ -110,10 +85,6 @@ function restoreBackup(filename) {
         // Simulate progress
         simulateProgress();
         
-        console.log('🔄 Starting backup restoration...');
-        console.log('📁 Restoring file:', filename);
-        console.log('📡 Sending request to: ../process/backup/restore_backup.php');
-        
         fetch('../process/backup/restore_backup.php', {
             method: 'POST',
             headers: {
@@ -124,41 +95,20 @@ function restoreBackup(filename) {
                 filename: filename
             })
         })
-        .then(response => {
-            console.log('📥 Restore response received:', response);
-            console.log('📊 Restore response status:', response.status);
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
-            console.log('✅ Restore response data:', data);
-            console.log('🎯 Restore success status:', data.success);
-            console.log('💬 Restore message:', data.message);
-            
             updateProgress(100);
             
             setTimeout(() => {
                 showProgress(false);
                 if (data.success) {
-                    console.log('🎉 Database restored successfully!');
                     showAlert('داتابەیس بە سەرکەوتوویی گەڕێندرایەوە!', 'success');
                 } else {
-                    console.error('❌ Restore failed:', data.message);
                     showAlert('هەڵەیەک ڕوویدا: ' + data.message, 'danger');
                 }
             }, 1000);
         })
         .catch(error => {
-            console.error('💥 Restore fetch error:', error);
-            console.error('🔍 Restore error details:', {
-                name: error.name,
-                message: error.message,
-                stack: error.stack
-            });
             showProgress(false);
             showAlert('هەڵەیەک ڕوویدا: ' + error.message, 'danger');
         });

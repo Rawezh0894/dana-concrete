@@ -42,20 +42,19 @@ try {
     $backup_filename = "backup_{$database}_{$timestamp}.sql";
     $backup_path = $backup_dir . $backup_filename;
     
-    // Build mysqldump command - try different paths
+    // Find mysqldump command - try multiple common locations
     $possible_paths = [
-        "C:\\xampp\\mysql\\bin\\mysqldump.exe",  // XAMPP Windows
-        "mysqldump",                              // System PATH
-        "/usr/bin/mysqldump",                     // Linux standard
-        "/usr/local/bin/mysqldump",               // Linux alternative
-        "/opt/mysql/bin/mysqldump",               // Custom MySQL installation
-        "C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysqldump.exe", // MySQL Server Windows
-        "C:\\Program Files (x86)\\MySQL\\MySQL Server 8.0\\bin\\mysqldump.exe" // MySQL Server Windows x86
+        '/usr/bin/mysqldump',           // Standard Linux location
+        '/usr/local/bin/mysqldump',     // Alternative Linux location
+        '/opt/mysql/bin/mysqldump',      // Custom MySQL installation
+        '/usr/local/mysql/bin/mysqldump', // macOS/Homebrew
+        'C:\\xampp\\mysql\\bin\\mysqldump.exe', // Windows XAMPP
+        'mysqldump'                     // If in PATH
     ];
     
     $command = null;
     foreach ($possible_paths as $path) {
-        if (file_exists($path) || $path === 'mysqldump') {
+        if (file_exists($path) || ($path === 'mysqldump' && shell_exec('which mysqldump'))) {
             $command = $path;
             break;
         }

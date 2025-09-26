@@ -55,20 +55,19 @@ try {
     $current_backup_filename = "pre_restore_backup_{$database}_" . date('Y-m-d_H-i-s') . ".sql";
     $current_backup_path = $backup_dir . $current_backup_filename;
     
-    // Create current database backup - try different paths
+    // Find mysqldump command for pre-restore backup
     $possible_mysqldump_paths = [
-        "C:\\xampp\\mysql\\bin\\mysqldump.exe",  // XAMPP Windows
-        "mysqldump",                              // System PATH
-        "/usr/bin/mysqldump",                     // Linux standard
-        "/usr/local/bin/mysqldump",               // Linux alternative
-        "/opt/mysql/bin/mysqldump",               // Custom MySQL installation
-        "C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysqldump.exe", // MySQL Server Windows
-        "C:\\Program Files (x86)\\MySQL\\MySQL Server 8.0\\bin\\mysqldump.exe" // MySQL Server Windows x86
+        '/usr/bin/mysqldump',
+        '/usr/local/bin/mysqldump',
+        '/opt/mysql/bin/mysqldump',
+        '/usr/local/mysql/bin/mysqldump',
+        'C:\\xampp\\mysql\\bin\\mysqldump.exe',
+        'mysqldump'
     ];
     
     $backup_command = null;
     foreach ($possible_mysqldump_paths as $path) {
-        if (file_exists($path) || $path === 'mysqldump') {
+        if (file_exists($path) || ($path === 'mysqldump' && shell_exec('which mysqldump'))) {
             $backup_command = $path;
             break;
         }
@@ -102,20 +101,19 @@ try {
         }
     }
     
-    // Build mysql command for restoration - try different paths
+    // Find mysql command for restoration
     $possible_mysql_paths = [
-        "C:\\xampp\\mysql\\bin\\mysql.exe",  // XAMPP Windows
-        "mysql",                              // System PATH
-        "/usr/bin/mysql",                     // Linux standard
-        "/usr/local/bin/mysql",               // Linux alternative
-        "/opt/mysql/bin/mysql",               // Custom MySQL installation
-        "C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql.exe", // MySQL Server Windows
-        "C:\\Program Files (x86)\\MySQL\\MySQL Server 8.0\\bin\\mysql.exe" // MySQL Server Windows x86
+        '/usr/bin/mysql',
+        '/usr/local/bin/mysql',
+        '/opt/mysql/bin/mysql',
+        '/usr/local/mysql/bin/mysql',
+        'C:\\xampp\\mysql\\bin\\mysql.exe',
+        'mysql'
     ];
     
     $mysql_command = null;
     foreach ($possible_mysql_paths as $path) {
-        if (file_exists($path) || $path === 'mysql') {
+        if (file_exists($path) || ($path === 'mysql' && shell_exec('which mysql'))) {
             $mysql_command = $path;
             break;
         }
