@@ -107,6 +107,7 @@ $params = [
     '--skip-comments',
     '--skip-add-locks',
     '--skip-disable-keys',
+    '--skip-set-charset',
     escapeshellarg($database)
 ];
 
