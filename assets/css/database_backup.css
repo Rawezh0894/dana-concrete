@@ -334,3 +334,78 @@
     0% { transform: translate(-50%, -50%) rotate(0deg); }
     100% { transform: translate(-50%, -50%) rotate(360deg); }
 }
+
+/* Excel Export Styles */
+.export-group {
+    margin-bottom: 20px;
+}
+
+.export-group h6 {
+    color: var(--seafoam-green);
+    font-weight: bold;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 10px;
+}
+
+.export-group .btn {
+    margin: 5px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.export-group .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.export-group .btn-success {
+    background: #28a745;
+    border-color: #28a745;
+}
+
+.export-group .btn-success:hover {
+    background: #218838;
+    border-color: #1e7e34;
+}
+
+.export-group .btn-primary {
+    background: var(--seafoam-green);
+    border-color: var(--seafoam-green);
+}
+
+.export-group .btn-primary:hover {
+    background: #002a5c;
+    border-color: #002a5c;
+}
+
+.export-group .btn-info {
+    background: #17a2b8;
+    border-color: #17a2b8;
+}
+
+.export-group .btn-info:hover {
+    background: #138496;
+    border-color: #117a8b;
+}
+
+/* Export button icons */
+.export-group .btn i {
+    margin-left: 8px;
+}
+
+/* Responsive export buttons */
+@media (max-width: 768px) {
+    .export-group .d-flex {
+        flex-direction: column;
+    }
+    
+    .export-group .btn {
+        width: 100%;
+        margin: 5px 0;
+    }
+}
+
+/* Export section spacing */
+.backup-card .card-body .export-group:last-child {
+    margin-bottom: 0;
+}

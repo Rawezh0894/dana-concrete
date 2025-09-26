@@ -175,6 +175,61 @@ function formatFileSize($bytes) {
         </div>
     </div>
 
+    <!-- Excel Export Section -->
+    <div class="backup-card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-file-excel"></i>
+                Export بۆ Excel
+            </h5>
+        </div>
+        <div class="card-body">
+            <!-- Table Exports -->
+            <div class="export-group mb-4">
+                <h6 class="mb-3">
+                    <i class="fas fa-table"></i>
+                    Export خشتەکان
+                </h6>
+                <div class="d-flex flex-wrap gap-2">
+                    <button class="btn btn-success" data-export-type="table" data-table-name="customers">
+                        <i class="fas fa-file-excel"></i> Export کڕیاران
+                    </button>
+                    <button class="btn btn-success" data-export-type="table" data-table-name="sales">
+                        <i class="fas fa-file-excel"></i> Export فرۆشتن
+                    </button>
+                    <button class="btn btn-success" data-export-type="table" data-table-name="materials">
+                        <i class="fas fa-file-excel"></i> Export ماددەکان
+                    </button>
+                    <button class="btn btn-success" data-export-type="table" data-table-name="purchases">
+                        <i class="fas fa-file-excel"></i> Export کڕین
+                    </button>
+                    <button class="btn btn-primary" data-export-type="all_tables">
+                        <i class="fas fa-file-excel"></i> Export هەموو خشتەکان
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Report Exports -->
+            <div class="export-group">
+                <h6 class="mb-3">
+                    <i class="fas fa-chart-bar"></i>
+                    Export ڕاپۆرتەکان
+                </h6>
+                <div class="d-flex flex-wrap gap-2">
+                    <button class="btn btn-info" data-export-type="sales_report">
+                        <i class="fas fa-chart-line"></i> ڕاپۆرتی فرۆشتن
+                    </button>
+                    <button class="btn btn-info" data-export-type="customers_report">
+                        <i class="fas fa-users"></i> ڕاپۆرتی کڕیاران
+                    </button>
+                    <button class="btn btn-info" data-export-type="materials_report">
+                        <i class="fas fa-boxes"></i> ڕاپۆرتی ماددەکان
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Progress Bar -->
     <div class="progress-container" id="progressContainer">
         <div class="d-flex justify-content-between align-items-center mb-2">
