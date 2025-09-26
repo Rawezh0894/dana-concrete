@@ -10,16 +10,15 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 // Get database configuration
-
 $host = env('DB_HOST', 'localhost');
-$username = env('DB_USERNAME', 'dana_user');
-$password = env('DB_PASSWORD', 'Rawezh.Jaza@0894');
-$database = env('DB_DATABASE', 'dana_concrete_db');
+$database = env('DB_NAME', 'dana_concrete_db');
 
-// $host = env('DB_HOST', 'localhost');
-// $username = env('DB_USERNAME', 'root');
-// $password = env('DB_PASSWORD', '');
-// $database = env('DB_DATABASE', 'dana_concrete_db');
+// Use root user for backup operations (most reliable)
+$username = 'root';
+$password = '';
+
+// Log the configuration being used
+error_log("Backup using: host=$host, user=$username, database=$database");
 
 // Set backup directory
 $backup_dir = '../../backups/';
@@ -42,13 +41,41 @@ try {
     $backup_filename = "backup_{$database}_{$timestamp}.sql";
     $backup_path = $backup_dir . $backup_filename;
     
-    // Build mysqldump command
-    $command = "C:\\xampp\\mysql\\bin\\mysqldump.exe";
+    // Try multiple possible paths for mysqldump
+    $possible_paths = [
+        "C:\\xampp\\mysql\\bin\\mysqldump.exe",
+        "C:\\xampp\\mysql\\bin\\mysqldump",
+        "mysqldump.exe",
+        "mysqldump"
+    ];
     
-    // Check if mysqldump exists
-    if (!file_exists($command)) {
-        throw new Exception('mysqldump نەدۆزرایەوە لە شوێنی چاوەڕوانکراو');
+    $command = null;
+    foreach ($possible_paths as $path) {
+        if (file_exists($path) || $path === "mysqldump.exe" || $path === "mysqldump") {
+            // Test if command works
+            $test_output = [];
+            $test_return = 0;
+            exec($path . ' --version 2>&1', $test_output, $test_return);
+            
+            if ($test_return === 0) {
+                $command = $path;
+                break;
+            }
+        }
     }
+    
+    if (!$command) {
+        // Log all possible paths for debugging
+        error_log("mysqldump not found. Tried paths: " . implode(', ', $possible_paths));
+        error_log("PHP exec function available: " . (function_exists('exec') ? 'Yes' : 'No'));
+        error_log("PHP shell_exec function available: " . (function_exists('shell_exec') ? 'Yes' : 'No'));
+        error_log("PHP system function available: " . (function_exists('system') ? 'Yes' : 'No'));
+        
+        throw new Exception('mysqldump نەدۆزرایەوە. تکایە دڵنیابە کە MySQL/MariaDB دامەزراوە و لە PATH-دا هەیە');
+    }
+    
+    // Log the command being used
+    error_log("Using mysqldump command: " . $command);
     
     // Build command parameters
     $params = [
@@ -72,22 +99,36 @@ try {
     
     $full_command = $command . ' ' . implode(' ', $params) . ' > ' . escapeshellarg($backup_path);
     
+    // Log the full command for debugging
+    error_log("Full backup command: " . $full_command);
+    
     // Execute backup command
     $output = [];
     $return_code = 0;
     exec($full_command . ' 2>&1', $output, $return_code);
     
+    // Log output for debugging
+    error_log("Command output: " . implode("\n", $output));
+    error_log("Return code: " . $return_code);
+    
     if ($return_code !== 0) {
-        throw new Exception('هەڵە لە دروستکردنی باک ئەپ: ' . implode(' ', $output));
+        $error_message = 'هەڵە لە دروستکردنی باک ئەپ: ' . implode(' ', $output);
+        error_log("Backup command failed: " . $error_message);
+        throw new Exception($error_message);
     }
     
     // Check if backup file was created and has content
-    if (!file_exists($backup_path) || filesize($backup_path) === 0) {
-        throw new Exception('فایلەکەی باک ئەپ دروست نەبوو یان بەتاڵە');
+    if (!file_exists($backup_path)) {
+        throw new Exception('فایلەکەی باک ئەپ دروست نەبوو');
+    }
+    
+    $file_size = filesize($backup_path);
+    if ($file_size === 0) {
+        throw new Exception('فایلەکەی باک ئەپ بەتاڵە');
     }
     
     // Log backup creation
-    error_log("Database backup created: {$backup_filename} (" . formatFileSize(filesize($backup_path)) . ")");
+    error_log("Database backup created: {$backup_filename} (" . formatFileSize($file_size) . ")");
     
     // Update auto backup schedule if needed
     updateAutoBackupSchedule();
@@ -96,7 +137,7 @@ try {
         'success' => true,
         'message' => 'باک ئەپ بە سەرکەوتوویی دروستکرا',
         'filename' => $backup_filename,
-        'size' => filesize($backup_path),
+        'size' => $file_size,
         'path' => $backup_path
     ]);
     

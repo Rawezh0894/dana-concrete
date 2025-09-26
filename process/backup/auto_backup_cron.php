@@ -3,16 +3,15 @@
 require_once '../../config/db_conected.php';
 
 // Get database configuration
-
 $host = env('DB_HOST', 'localhost');
-$username = env('DB_USERNAME', 'dana_user');
-$password = env('DB_PASSWORD', 'Rawezh.Jaza@0894');
-$database = env('DB_DATABASE', 'dana_concrete_db');
+$database = env('DB_NAME', 'dana_concrete_db');
 
-// $host = env('DB_HOST', 'localhost');
-// $username = env('DB_USERNAME', 'root');
-// $password = env('DB_PASSWORD', '');
-// $database = env('DB_DATABASE', 'dana_concrete_db');
+// Use root user for backup operations (most reliable)
+$username = 'root';
+$password = '';
+
+// Log the configuration being used
+error_log("Auto backup using: host=$host, user=$username, database=$database");
 
 // Set backup directory
 $backup_dir = '../../backups/';
