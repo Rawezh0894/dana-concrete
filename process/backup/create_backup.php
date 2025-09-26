@@ -192,8 +192,6 @@ try {
         '--skip-comments',
         '--skip-add-locks',
         '--skip-disable-keys',
-        '--compatible=mysql40',
-        '--skip-set-charset',
         escapeshellarg($database)
     ];
     
