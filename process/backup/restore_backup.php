@@ -55,25 +55,9 @@ try {
     $current_backup_filename = "pre_restore_backup_{$database}_" . date('Y-m-d_H-i-s') . ".sql";
     $current_backup_path = $backup_dir . $current_backup_filename;
     
-    // Find mysqldump command for pre-restore backup
-    $possible_mysqldump_paths = [
-        '/usr/bin/mysqldump',
-        '/usr/local/bin/mysqldump',
-        '/opt/mysql/bin/mysqldump',
-        '/usr/local/mysql/bin/mysqldump',
-        'C:\\xampp\\mysql\\bin\\mysqldump.exe',
-        'mysqldump'
-    ];
-    
-    $backup_command = null;
-    foreach ($possible_mysqldump_paths as $path) {
-        if (file_exists($path) || ($path === 'mysqldump' && shell_exec('which mysqldump'))) {
-            $backup_command = $path;
-            break;
-        }
-    }
-    
-    if ($backup_command) {
+    // Create current database backup
+    $backup_command = "C:\\xampp\\mysql\\bin\\mysqldump.exe";
+    if (file_exists($backup_command)) {
         $backup_params = [
             '--host=' . escapeshellarg($host),
             '--user=' . escapeshellarg($username),
@@ -101,26 +85,12 @@ try {
         }
     }
     
-    // Find mysql command for restoration
-    $possible_mysql_paths = [
-        '/usr/bin/mysql',
-        '/usr/local/bin/mysql',
-        '/opt/mysql/bin/mysql',
-        '/usr/local/mysql/bin/mysql',
-        'C:\\xampp\\mysql\\bin\\mysql.exe',
-        'mysql'
-    ];
+    // Build mysql command for restoration
+    $mysql_command = "C:\\xampp\\mysql\\bin\\mysql.exe";
     
-    $mysql_command = null;
-    foreach ($possible_mysql_paths as $path) {
-        if (file_exists($path) || ($path === 'mysql' && shell_exec('which mysql'))) {
-            $mysql_command = $path;
-            break;
-        }
-    }
-    
-    if (!$mysql_command) {
-        throw new Exception('mysql نەدۆزرایەوە لە هیچ شوێنێکدا. تکایە دڵنیابە کە MySQL دامەزراوە');
+    // Check if mysql exists
+    if (!file_exists($mysql_command)) {
+        throw new Exception('mysql نەدۆزرایەوە لە شوێنی چاوەڕوانکراو');
     }
     
     // Build restoration command

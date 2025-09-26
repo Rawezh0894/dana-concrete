@@ -42,26 +42,11 @@ try {
     $backup_filename = "auto_backup_{$database}_{$timestamp}.sql";
     $backup_path = $backup_dir . $backup_filename;
     
-    // Find mysqldump command - try multiple common locations
-    $possible_paths = [
-        '/usr/bin/mysqldump',           // Standard Linux location
-        '/usr/local/bin/mysqldump',     // Alternative Linux location
-        '/opt/mysql/bin/mysqldump',      // Custom MySQL installation
-        '/usr/local/mysql/bin/mysqldump', // macOS/Homebrew
-        'C:\\xampp\\mysql\\bin\\mysqldump.exe', // Windows XAMPP
-        'mysqldump'                     // If in PATH
-    ];
+    // Build mysqldump command
+    $command = "C:\\xampp\\mysql\\bin\\mysqldump.exe";
     
-    $command = null;
-    foreach ($possible_paths as $path) {
-        if (file_exists($path) || ($path === 'mysqldump' && shell_exec('which mysqldump'))) {
-            $command = $path;
-            break;
-        }
-    }
-    
-    if (!$command) {
-        throw new Exception('mysqldump not found in any expected location');
+    if (!file_exists($command)) {
+        throw new Exception('mysqldump not found');
     }
     
     // Build command parameters

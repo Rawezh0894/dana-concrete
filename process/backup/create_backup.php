@@ -1,7 +1,4 @@
 <?php
-// Ensure no output before JSON
-ob_start();
-
 session_start();
 require_once '../../config/db_conected.php';
 
@@ -39,33 +36,71 @@ if ($action !== 'create_backup') {
     exit;
 }
 
+function findMysqldumpPath() {
+    // Common paths for mysqldump on different systems
+    $possible_paths = [
+        // Linux/Unix paths
+        '/usr/bin/mysqldump',
+        '/usr/local/bin/mysqldump',
+        '/opt/mysql/bin/mysqldump',
+        '/usr/local/mysql/bin/mysqldump',
+        // Windows XAMPP path (for local development)
+        'C:\\xampp\\mysql\\bin\\mysqldump.exe',
+        // Try to find in PATH
+        'mysqldump'
+    ];
+    
+    foreach ($possible_paths as $path) {
+        // For Windows XAMPP, check if file exists
+        if (strpos($path, 'C:\\') === 0) {
+            if (file_exists($path)) {
+                return $path;
+            }
+        } else {
+            // For Linux/Unix, check if command is executable
+            $output = [];
+            $return_code = 0;
+            exec("which " . escapeshellarg($path) . " 2>/dev/null", $output, $return_code);
+            
+            if ($return_code === 0 && !empty($output)) {
+                return trim($output[0]);
+            }
+            
+            // Also try direct execution test
+            exec($path . " --version 2>/dev/null", $output, $return_code);
+            if ($return_code === 0) {
+                return $path;
+            }
+        }
+    }
+    
+    return false;
+}
+
 try {
     // Create backup filename with timestamp
     $timestamp = date('Y-m-d_H-i-s');
     $backup_filename = "backup_{$database}_{$timestamp}.sql";
     $backup_path = $backup_dir . $backup_filename;
     
-    // Find mysqldump command - try multiple common locations
-    $possible_paths = [
-        '/usr/bin/mysqldump',           // Standard Linux location
-        '/usr/local/bin/mysqldump',     // Alternative Linux location
-        '/opt/mysql/bin/mysqldump',      // Custom MySQL installation
-        '/usr/local/mysql/bin/mysqldump', // macOS/Homebrew
-        'C:\\xampp\\mysql\\bin\\mysqldump.exe', // Windows XAMPP
-        'mysqldump'                     // If in PATH
-    ];
+    // Build mysqldump command - detect system and find mysqldump
+    $command = findMysqldumpPath();
     
-    $command = null;
-    foreach ($possible_paths as $path) {
-        if (file_exists($path) || ($path === 'mysqldump' && shell_exec('which mysqldump'))) {
-            $command = $path;
-            break;
-        }
-    }
-    
+    // Check if mysqldump exists
     if (!$command) {
-        throw new Exception('mysqldump نەدۆزرایەوە لە هیچ شوێنێکدا. تکایە دڵنیابە کە MySQL دامەزراوە');
+        // Log debug information
+        error_log("mysqldump not found. Searched paths: " . implode(', ', [
+            '/usr/bin/mysqldump',
+            '/usr/local/bin/mysqldump', 
+            '/opt/mysql/bin/mysqldump',
+            '/usr/local/mysql/bin/mysqldump',
+            'mysqldump'
+        ]));
+        throw new Exception('mysqldump نەدۆزرایەوە لە شوێنی چاوەڕوانکراو. تکایە دڵنیابە کە MySQL نصبکراوە');
     }
+    
+    // Log the mysqldump path being used
+    error_log("Using mysqldump at: " . $command);
     
     // Build command parameters
     $params = [
@@ -89,22 +124,13 @@ try {
     
     $full_command = $command . ' ' . implode(' ', $params) . ' > ' . escapeshellarg($backup_path);
     
-    // Log the command for debugging
-    error_log("Backup command: " . $full_command);
-    
     // Execute backup command
     $output = [];
     $return_code = 0;
     exec($full_command . ' 2>&1', $output, $return_code);
     
-    // Log the output for debugging
-    error_log("Backup command output: " . implode(' ', $output));
-    error_log("Backup command return code: " . $return_code);
-    
     if ($return_code !== 0) {
-        $error_message = 'هەڵە لە دروستکردنی باک ئەپ: ' . implode(' ', $output);
-        error_log("Backup failed: " . $error_message);
-        throw new Exception($error_message);
+        throw new Exception('هەڵە لە دروستکردنی باک ئەپ: ' . implode(' ', $output));
     }
     
     // Check if backup file was created and has content
@@ -113,32 +139,21 @@ try {
     }
     
     // Log backup creation
-    $file_size = filesize($backup_path);
-    error_log("Database backup created successfully: {$backup_filename} (" . formatFileSize($file_size) . ")");
+    error_log("Database backup created: {$backup_filename} (" . formatFileSize(filesize($backup_path)) . ")");
     
     // Update auto backup schedule if needed
     updateAutoBackupSchedule();
     
-    // Send success response
-    $response = [
+    echo json_encode([
         'success' => true,
         'message' => 'باک ئەپ بە سەرکەوتوویی دروستکرا',
         'filename' => $backup_filename,
-        'size' => $file_size,
+        'size' => filesize($backup_path),
         'path' => $backup_path
-    ];
-    
-    error_log("Sending success response: " . json_encode($response));
-    
-    // Clean any output buffer and send JSON
-    ob_clean();
-    echo json_encode($response);
+    ]);
     
 } catch (Exception $e) {
     error_log("Backup creation error: " . $e->getMessage());
-    
-    // Clean any output buffer and send JSON
-    ob_clean();
     echo json_encode([
         'success' => false,
         'message' => $e->getMessage()
