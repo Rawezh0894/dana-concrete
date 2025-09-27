@@ -24,36 +24,33 @@ function getPaidDateTo() {
     return paidDateToElem ? paidDateToElem.value : '';
 }
 
-function getJobFilter() {
-    const jobFilterElem = document.getElementById('job-filter');
-    return jobFilterElem ? jobFilterElem.value : 'all';
+function getWorkProject() {
+    const workProjectElem = document.getElementById('work-project-filter');
+    return workProjectElem ? workProjectElem.value : '';
 }
 
-function getJobSpecificInput() {
-    const jobSpecificInputElem = document.getElementById('job-specific-input');
-    return jobSpecificInputElem ? jobSpecificInputElem.value.trim() : '';
+function getWorkProjectType() {
+    const workProjectTypeElem = document.getElementById('work-project-type-filter');
+    return workProjectTypeElem ? workProjectTypeElem.value : 'all';
 }
 
 // Listen for filter changes and reload paid-table
-['month-filter', 'date-from-filter', 'date-to-filter', 'paid-date-from-filter', 'paid-date-to-filter', 'job-filter', 'job-specific-input'].forEach(function(id) {
+['month-filter', 'date-from-filter', 'date-to-filter', 'paid-date-from-filter', 'paid-date-to-filter', 'work-project-filter', 'work-project-type-filter'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) {
-        if (id === 'job-specific-input') {
-            // Use input event for text input with debouncing
-            let timeout;
-            el.addEventListener('input', function() {
-                clearTimeout(timeout);
-                timeout = setTimeout(() => {
-                    loadReturnDebt();
-                }, 500);
-            });
-        } else {
-            el.addEventListener('change', function() {
-                loadReturnDebt();
-            });
-        }
+        el.addEventListener('change', function() {
+            loadReturnDebt();
+        });
     }
 });
+
+// Add input event listener for work-project-filter (for real-time search)
+var workProjectFilter = document.getElementById('work-project-filter');
+if (workProjectFilter) {
+    workProjectFilter.addEventListener('input', function() {
+        loadReturnDebt();
+    });
+}
 
 function loadReturnDebt() {
     if (typeof CUSTOMER_ID === 'undefined' || !CUSTOMER_ID) {
@@ -63,29 +60,22 @@ function loadReturnDebt() {
     const month = getSelectedMonth();
     const date_from = getPaidDateFrom();
     const date_to = getPaidDateTo();
-    const job_filter = getJobFilter();
-    const job_specific = getJobSpecificInput();
+    const work_project = getWorkProject();
+    const work_project_type = getWorkProjectType();
     const params = new URLSearchParams({
         customer_id: CUSTOMER_ID,
         month,
         date_from,
         date_to,
-        job_filter,
-        job_specific
+        work_project,
+        work_project_type
     });
     return fetch('../process/receipts/select_return_debt.php?' + params.toString())
         .then(res => {
             if (!res.ok) {
                 throw new Error(`HTTP error! status: ${res.status}`);
             }
-            return res.text().then(text => {
-                try {
-                    return JSON.parse(text);
-                } catch (e) {
-                    console.error('Invalid JSON response:', text);
-                    throw new Error('Invalid JSON response from server');
-                }
-            });
+            return res.json();
         })
         .then(data => {
             // Find USD to IQD rate from the first row of the main table
@@ -129,25 +119,12 @@ function loadReturnDebt() {
                     totalPaidUsd += amountUsd;
                     totalPaidIqd += amountIqd;
                     totalIqdToUsd += iqdToUsd;
-                    // Build enhanced note with related information
-                    let enhancedNote = row.note && row.note.trim() ? row.note : '';
-                    if (row.related_locations || row.related_invoices) {
-                        if (enhancedNote) enhancedNote += '<br>';
-                        if (row.related_locations) {
-                            enhancedNote += '<small style="color: #6c757d;"><i class="fa fa-map-marker-alt"></i> ' + row.related_locations + '</small>';
-                        }
-                        if (row.related_invoices) {
-                            if (row.related_locations) enhancedNote += '<br>';
-                            enhancedNote += '<small style="color: #6c757d;"><i class="fa fa-file-invoice"></i> ' + row.related_invoices + '</small>';
-                        }
-                    }
-                    
                     paidTableBody.innerHTML += `
                         <tr>
                             <td>${'$' + (amountUsd ? amountUsd.toLocaleString() : '0')}</td>
                             <td>${amountIqd ? amountIqd.toLocaleString() + ' د.ع' : '0 د.ع'}</td>
                             <td>${row.date}</td>
-                            <td>${enhancedNote || '–'}</td>
+                            <td>${row.note && row.note.trim() ? row.note : '–'}</td>
                         </tr>
                     `;
                 });
