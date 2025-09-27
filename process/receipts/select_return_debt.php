@@ -21,33 +21,57 @@ if ($job_filter === 'specific' && $job_specific) {
             LEFT JOIN customer_payment_allocations cpa ON cdp.id = cpa.debt_payment_id
             LEFT JOIN sales s ON cpa.sale_id = s.id
             WHERE cdp.customer_id = :customer_id";
-} else {
-    $sql = "SELECT paid_usd, paid_iqd, date, discount, note, dolar_rate FROM customer_debt_payments WHERE customer_id = :customer_id";
-}
-
-$params = ['customer_id' => $customer_id];
-
-if ($month !== 'all') {
-    $sql .= " AND MONTH(cdp.date) = :month";
-    $params['month'] = $month;
-}
-if ($date_from) {
-    $sql .= " AND cdp.date >= :date_from";
-    $params['date_from'] = $date_from;
-}
-if ($date_to) {
-    $sql .= " AND cdp.date <= :date_to";
-    $params['date_to'] = $date_to;
-}
-if ($job_filter === 'specific' && $job_specific) {
+    
+    $params = ['customer_id' => $customer_id];
+    
+    if ($month !== 'all') {
+        $sql .= " AND MONTH(cdp.date) = :month";
+        $params['month'] = $month;
+    }
+    if ($date_from) {
+        $sql .= " AND cdp.date >= :date_from";
+        $params['date_from'] = $date_from;
+    }
+    if ($date_to) {
+        $sql .= " AND cdp.date <= :date_to";
+        $params['date_to'] = $date_to;
+    }
     $sql .= " AND (cdp.note LIKE :job_specific OR s.location LIKE :job_specific OR s.invoice_number LIKE :job_specific)";
     $params['job_specific'] = '%' . $job_specific . '%';
+    $sql .= " ORDER BY cdp.date ASC";
+} else {
+    $sql = "SELECT paid_usd, paid_iqd, date, discount, note, dolar_rate FROM customer_debt_payments WHERE customer_id = :customer_id";
+    
+    $params = ['customer_id' => $customer_id];
+    
+    if ($month !== 'all') {
+        $sql .= " AND MONTH(date) = :month";
+        $params['month'] = $month;
+    }
+    if ($date_from) {
+        $sql .= " AND date >= :date_from";
+        $params['date_from'] = $date_from;
+    }
+    if ($date_to) {
+        $sql .= " AND date <= :date_to";
+        $params['date_to'] = $date_to;
+    }
+    $sql .= " ORDER BY date ASC";
 }
-$sql .= " ORDER BY cdp.date ASC";
-$stmt = $pdo->prepare($sql);
-$stmt->execute($params);
-$data = [];
-while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-    $data[] = $row;
+try {
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    $data = [];
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $data[] = $row;
+    }
+    echo json_encode($data, JSON_UNESCAPED_UNICODE);
+} catch (Exception $e) {
+    // Log the error for debugging
+    error_log("Error in select_return_debt.php: " . $e->getMessage());
+    error_log("SQL: " . $sql);
+    error_log("Params: " . print_r($params, true));
+    
+    // Return empty array on error
+    echo json_encode([], JSON_UNESCAPED_UNICODE);
 }
-echo json_encode($data, JSON_UNESCAPED_UNICODE);

@@ -78,7 +78,14 @@ function loadReturnDebt() {
             if (!res.ok) {
                 throw new Error(`HTTP error! status: ${res.status}`);
             }
-            return res.json();
+            return res.text().then(text => {
+                try {
+                    return JSON.parse(text);
+                } catch (e) {
+                    console.error('Invalid JSON response:', text);
+                    throw new Error('Invalid JSON response from server');
+                }
+            });
         })
         .then(data => {
             // Find USD to IQD rate from the first row of the main table
