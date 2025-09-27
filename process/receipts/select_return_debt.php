@@ -8,6 +8,8 @@ if (!$customer_id) { echo json_encode([]); exit; }
 $month = isset($_GET['month']) ? $_GET['month'] : 'all';
 $date_from = isset($_GET['date_from']) ? $_GET['date_from'] : '';
 $date_to = isset($_GET['date_to']) ? $_GET['date_to'] : '';
+$job_filter = isset($_GET['job_filter']) ? $_GET['job_filter'] : 'all';
+$job_specific = isset($_GET['job_specific']) ? trim($_GET['job_specific']) : '';
 
 $sql = "SELECT paid_usd, paid_iqd, date, discount, note, dolar_rate FROM customer_debt_payments WHERE customer_id = :customer_id";
 $params = ['customer_id' => $customer_id];
@@ -22,6 +24,10 @@ if ($date_from) {
 if ($date_to) {
     $sql .= " AND date <= :date_to";
     $params['date_to'] = $date_to;
+}
+if ($job_filter === 'specific' && $job_specific) {
+    $sql .= " AND note LIKE :job_specific";
+    $params['job_specific'] = '%' . $job_specific . '%';
 }
 $sql .= " ORDER BY date ASC";
 $stmt = $pdo->prepare($sql);

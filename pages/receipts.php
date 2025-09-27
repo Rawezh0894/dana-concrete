@@ -33,6 +33,9 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             #date-from-filter, label[for="date-from-filter"],
             #date-to-filter, label[for="date-to-filter"],
             #location-filter, label[for="location-filter"],
+            #job-filter, label[for="job-filter"],
+            #job-specific-group, label[for="job-specific-input"],
+            #job-specific-input,
             #show-invoice-number, label[for="show-invoice-number"],
             #show-opening-debt, label[for="show-opening-debt"],
             #force-debt-pagination, label[for="force-debt-pagination"],
@@ -396,6 +399,28 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             }
         }
         
+        /* Job filter specific styles */
+        #job-specific-group {
+            transition: all 0.3s ease;
+        }
+        
+        #job-specific-input {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border: 2px solid #e9ecef;
+            transition: all 0.2s ease;
+        }
+        
+        #job-specific-input:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+            background: #ffffff;
+        }
+        
+        #job-specific-input::placeholder {
+            color: #6c757d;
+            font-style: italic;
+        }
+        
         /* Summary row styling */
         .summary-row td {
             text-align: center !important;
@@ -545,7 +570,27 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 </div>
             </div>
             
-            <!-- Row 4: Display Options -->
+            <!-- Row 4: Job/Work Filter -->
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="job-filter" class="filter-label">
+                        <i class="fa fa-briefcase"></i> ئیش/کار:
+                    </label>
+                    <select id="job-filter" class="filter-select">
+                        <option value="all">هەموو ئیشەکان</option>
+                        <option value="specific">ئیشی دیاریکراو</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group" id="job-specific-group" style="display: none;">
+                    <label for="job-specific-input" class="filter-label">
+                        <i class="fa fa-search"></i> ناوی ئیش:
+                    </label>
+                    <input type="text" id="job-specific-input" class="filter-input" placeholder="ناوی ئیش بنووسە...">
+                </div>
+            </div>
+            
+            <!-- Row 5: Display Options -->
             <div class="filter-row">
                 <div class="filter-group checkbox-group">
                     <label for="show-invoice-number" class="filter-checkbox-label">
@@ -681,6 +726,9 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 var showInvoiceCheckbox = document.getElementById('show-invoice-number');
                 var showOpeningDebtCheckbox = document.getElementById('show-opening-debt');
                 var forceDebtPaginationCheckbox = document.getElementById('force-debt-pagination');
+                var jobFilter = document.getElementById('job-filter');
+                var jobSpecificInput = document.getElementById('job-specific-input');
+                var jobSpecificGroup = document.getElementById('job-specific-group');
                 
                 if (type) type.value = 'all';
                 if (month) month.value = 'all';
@@ -688,6 +736,11 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 if (dateTo) dateTo.value = '';
                 if (paidDateFrom) paidDateFrom.value = '';
                 if (paidDateTo) paidDateTo.value = '';
+                
+                // Reset job filter
+                if (jobFilter) jobFilter.value = 'all';
+                if (jobSpecificInput) jobSpecificInput.value = '';
+                if (jobSpecificGroup) jobSpecificGroup.style.display = 'none';
                 
                 // Reset location multi-select
                 resetLocationMultiSelect();
@@ -816,6 +869,40 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 if (typeof loadReturnDebt === 'function') {
                     loadReturnDebt();
                 }
+            });
+        }
+        
+        // Job filter functionality
+        var jobFilter = document.getElementById('job-filter');
+        var jobSpecificGroup = document.getElementById('job-specific-group');
+        var jobSpecificInput = document.getElementById('job-specific-input');
+        
+        if (jobFilter) {
+            jobFilter.addEventListener('change', function() {
+                if (this.value === 'specific') {
+                    jobSpecificGroup.style.display = 'block';
+                } else {
+                    jobSpecificGroup.style.display = 'none';
+                    jobSpecificInput.value = '';
+                }
+                // Reload paid table data when job filter changes
+                if (typeof loadReturnDebt === 'function') {
+                    loadReturnDebt();
+                }
+            });
+        }
+        
+        if (jobSpecificInput) {
+            // Add debounced input for better performance
+            let jobInputTimeout;
+            jobSpecificInput.addEventListener('input', function() {
+                clearTimeout(jobInputTimeout);
+                jobInputTimeout = setTimeout(() => {
+                    // Reload paid table data when job input changes
+                    if (typeof loadReturnDebt === 'function') {
+                        loadReturnDebt();
+                    }
+                }, 500); // 500ms delay
             });
         }
         

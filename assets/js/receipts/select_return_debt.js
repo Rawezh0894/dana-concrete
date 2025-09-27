@@ -24,13 +24,34 @@ function getPaidDateTo() {
     return paidDateToElem ? paidDateToElem.value : '';
 }
 
+function getJobFilter() {
+    const jobFilterElem = document.getElementById('job-filter');
+    return jobFilterElem ? jobFilterElem.value : 'all';
+}
+
+function getJobSpecificInput() {
+    const jobSpecificInputElem = document.getElementById('job-specific-input');
+    return jobSpecificInputElem ? jobSpecificInputElem.value.trim() : '';
+}
+
 // Listen for filter changes and reload paid-table
-['month-filter', 'date-from-filter', 'date-to-filter', 'paid-date-from-filter', 'paid-date-to-filter'].forEach(function(id) {
+['month-filter', 'date-from-filter', 'date-to-filter', 'paid-date-from-filter', 'paid-date-to-filter', 'job-filter', 'job-specific-input'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) {
-        el.addEventListener('change', function() {
-            loadReturnDebt();
-        });
+        if (id === 'job-specific-input') {
+            // Use input event for text input with debouncing
+            let timeout;
+            el.addEventListener('input', function() {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    loadReturnDebt();
+                }, 500);
+            });
+        } else {
+            el.addEventListener('change', function() {
+                loadReturnDebt();
+            });
+        }
     }
 });
 
@@ -42,11 +63,15 @@ function loadReturnDebt() {
     const month = getSelectedMonth();
     const date_from = getPaidDateFrom();
     const date_to = getPaidDateTo();
+    const job_filter = getJobFilter();
+    const job_specific = getJobSpecificInput();
     const params = new URLSearchParams({
         customer_id: CUSTOMER_ID,
         month,
         date_from,
-        date_to
+        date_to,
+        job_filter,
+        job_specific
     });
     return fetch('../process/receipts/select_return_debt.php?' + params.toString())
         .then(res => {
