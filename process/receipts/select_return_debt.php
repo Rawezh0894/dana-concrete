@@ -8,40 +8,54 @@ if (!$customer_id) { echo json_encode([]); exit; }
 $month = isset($_GET['month']) ? $_GET['month'] : 'all';
 $date_from = isset($_GET['date_from']) ? $_GET['date_from'] : '';
 $date_to = isset($_GET['date_to']) ? $_GET['date_to'] : '';
-$work_project = isset($_GET['work_project']) ? trim($_GET['work_project']) : '';
-$work_project_type = isset($_GET['work_project_type']) ? $_GET['work_project_type'] : 'all';
+$invoice_number = isset($_GET['invoice_number']) ? trim($_GET['invoice_number']) : '';
 
-$sql = "SELECT paid_usd, paid_iqd, date, discount, note, dolar_rate FROM customer_debt_payments WHERE customer_id = :customer_id";
-$params = ['customer_id' => $customer_id];
+// Base query - if invoice number filter is provided, join with allocations and sales tables
+if ($invoice_number) {
+    $sql = "SELECT DISTINCT cdp.paid_usd, cdp.paid_iqd, cdp.date, cdp.discount, cdp.note, cdp.dolar_rate 
+            FROM customer_debt_payments cdp
+            INNER JOIN customer_payment_allocations cpa ON cdp.id = cpa.debt_payment_id
+            INNER JOIN sales s ON cpa.sale_id = s.id
+            WHERE cdp.customer_id = :customer_id 
+            AND s.invoice_number LIKE :invoice_number";
+    $params = [
+        'customer_id' => $customer_id,
+        'invoice_number' => '%' . $invoice_number . '%'
+    ];
+} else {
+    $sql = "SELECT paid_usd, paid_iqd, date, discount, note, dolar_rate FROM customer_debt_payments WHERE customer_id = :customer_id";
+    $params = ['customer_id' => $customer_id];
+}
+
 if ($month !== 'all') {
-    $sql .= " AND MONTH(date) = :month";
+    if ($invoice_number) {
+        $sql .= " AND MONTH(cdp.date) = :month";
+    } else {
+        $sql .= " AND MONTH(date) = :month";
+    }
     $params['month'] = $month;
 }
 if ($date_from) {
-    $sql .= " AND date >= :date_from";
+    if ($invoice_number) {
+        $sql .= " AND cdp.date >= :date_from";
+    } else {
+        $sql .= " AND date >= :date_from";
+    }
     $params['date_from'] = $date_from;
 }
 if ($date_to) {
-    $sql .= " AND date <= :date_to";
+    if ($invoice_number) {
+        $sql .= " AND cdp.date <= :date_to";
+    } else {
+        $sql .= " AND date <= :date_to";
+    }
     $params['date_to'] = $date_to;
 }
-
-// Work/Project filtering
-if ($work_project_type === 'with_work') {
-    // Only show payments that have work/project notes (non-empty notes)
-    $sql .= " AND note IS NOT NULL AND note != '' AND note != ' '";
-} elseif ($work_project_type === 'without_work') {
-    // Only show payments that don't have work/project notes (empty or null notes)
-    $sql .= " AND (note IS NULL OR note = '' OR note = ' ')";
+if ($invoice_number) {
+    $sql .= " ORDER BY cdp.date ASC";
+} else {
+    $sql .= " ORDER BY date ASC";
 }
-
-if ($work_project) {
-    // Search for specific work/project in the note field
-    $sql .= " AND note LIKE :work_project";
-    $params['work_project'] = '%' . $work_project . '%';
-}
-
-$sql .= " ORDER BY date ASC";
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $data = [];

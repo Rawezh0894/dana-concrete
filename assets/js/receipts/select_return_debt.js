@@ -24,18 +24,13 @@ function getPaidDateTo() {
     return paidDateToElem ? paidDateToElem.value : '';
 }
 
-function getWorkProject() {
-    const workProjectElem = document.getElementById('work-project-filter');
-    return workProjectElem ? workProjectElem.value : '';
-}
-
-function getWorkProjectType() {
-    const workProjectTypeElem = document.getElementById('work-project-type-filter');
-    return workProjectTypeElem ? workProjectTypeElem.value : 'all';
+function getInvoiceNumberFilter() {
+    const invoiceNumberElem = document.getElementById('invoice-number-filter');
+    return invoiceNumberElem ? invoiceNumberElem.value.trim() : '';
 }
 
 // Listen for filter changes and reload paid-table
-['month-filter', 'date-from-filter', 'date-to-filter', 'paid-date-from-filter', 'paid-date-to-filter', 'work-project-filter', 'work-project-type-filter'].forEach(function(id) {
+['month-filter', 'date-from-filter', 'date-to-filter', 'paid-date-from-filter', 'paid-date-to-filter'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) {
         el.addEventListener('change', function() {
@@ -43,14 +38,6 @@ function getWorkProjectType() {
         });
     }
 });
-
-// Add input event listener for work-project-filter (for real-time search)
-var workProjectFilter = document.getElementById('work-project-filter');
-if (workProjectFilter) {
-    workProjectFilter.addEventListener('input', function() {
-        loadReturnDebt();
-    });
-}
 
 function loadReturnDebt() {
     if (typeof CUSTOMER_ID === 'undefined' || !CUSTOMER_ID) {
@@ -60,16 +47,18 @@ function loadReturnDebt() {
     const month = getSelectedMonth();
     const date_from = getPaidDateFrom();
     const date_to = getPaidDateTo();
-    const work_project = getWorkProject();
-    const work_project_type = getWorkProjectType();
+    const invoice_number = getInvoiceNumberFilter();
     const params = new URLSearchParams({
         customer_id: CUSTOMER_ID,
         month,
         date_from,
-        date_to,
-        work_project,
-        work_project_type
+        date_to
     });
+    
+    // Add invoice number filter if provided
+    if (invoice_number) {
+        params.append('invoice_number', invoice_number);
+    }
     return fetch('../process/receipts/select_return_debt.php?' + params.toString())
         .then(res => {
             if (!res.ok) {

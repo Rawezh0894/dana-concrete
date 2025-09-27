@@ -33,8 +33,7 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             #date-from-filter, label[for="date-from-filter"],
             #date-to-filter, label[for="date-to-filter"],
             #location-filter, label[for="location-filter"],
-            #work-project-filter, label[for="work-project-filter"],
-            #work-project-type-filter, label[for="work-project-type-filter"],
+            #invoice-number-filter, label[for="invoice-number-filter"],
             #show-invoice-number, label[for="show-invoice-number"],
             #show-opening-debt, label[for="show-opening-debt"],
             #force-debt-pagination, label[for="force-debt-pagination"],
@@ -398,19 +397,6 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             }
         }
         
-        /* Work/Project Filter Styles */
-        #work-project-filter {
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>');
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-            background-size: 16px;
-            padding-right: 40px;
-        }
-        
-        #work-project-filter:focus {
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23007bff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>');
-        }
-        
         /* Summary row styling */
         .summary-row td {
             text-align: center !important;
@@ -560,26 +546,13 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 </div>
             </div>
             
-            <!-- Row 4: Work/Project Filter -->
-            <!-- This filter allows users to filter debt payments by specific work/project descriptions -->
-            <!-- The work/project information is stored in the 'note' field of customer_debt_payments table -->
+            <!-- Row 4: Invoice Number Filter for Paid Amounts -->
             <div class="filter-row">
                 <div class="filter-group">
-                    <label for="work-project-filter" class="filter-label">
-                        <i class="fa fa-hammer"></i> ئیش/پڕۆژە:
+                    <label for="invoice-number-filter" class="filter-label">
+                        <i class="fa fa-search"></i> گەڕان بە ژمارەی پسووڵە (پارەی واسڵ کراو):
                     </label>
-                    <input type="text" id="work-project-filter" class="filter-input" placeholder="گەڕان بە ناوی ئیش یان پڕۆژە...">
-                </div>
-                
-                <div class="filter-group">
-                    <label for="work-project-type-filter" class="filter-label">
-                        <i class="fa fa-filter"></i> جۆری فلتەر:
-                    </label>
-                    <select id="work-project-type-filter" class="filter-select">
-                        <option value="all">هەموو پارەدانەکان</option>
-                        <option value="with_work">تەنها پارەدانەکانی ئیش/پڕۆژە</option>
-                        <option value="without_work">تەنها پارەدانەکانی گشتی</option>
-                    </select>
+                    <input type="text" id="invoice-number-filter" class="filter-input" placeholder="ژمارەی پسووڵە بنووسە...">
                 </div>
             </div>
             
@@ -716,8 +689,7 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 var dateTo = document.getElementById('date-to-filter');
                 var paidDateFrom = document.getElementById('paid-date-from-filter');
                 var paidDateTo = document.getElementById('paid-date-to-filter');
-                var workProjectFilter = document.getElementById('work-project-filter');
-                var workProjectTypeFilter = document.getElementById('work-project-type-filter');
+                var invoiceNumberFilter = document.getElementById('invoice-number-filter');
                 var showInvoiceCheckbox = document.getElementById('show-invoice-number');
                 var showOpeningDebtCheckbox = document.getElementById('show-opening-debt');
                 var forceDebtPaginationCheckbox = document.getElementById('force-debt-pagination');
@@ -728,8 +700,7 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 if (dateTo) dateTo.value = '';
                 if (paidDateFrom) paidDateFrom.value = '';
                 if (paidDateTo) paidDateTo.value = '';
-                if (workProjectFilter) workProjectFilter.value = '';
-                if (workProjectTypeFilter) workProjectTypeFilter.value = 'all';
+                if (invoiceNumberFilter) invoiceNumberFilter.value = '';
                 
                 // Reset location multi-select
                 resetLocationMultiSelect();
@@ -861,25 +832,19 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             });
         }
         
-        // Work/Project filters
-        var workProjectFilter = document.getElementById('work-project-filter');
-        var workProjectTypeFilter = document.getElementById('work-project-type-filter');
-        
-        if (workProjectFilter) {
-            workProjectFilter.addEventListener('input', function() {
-                // Reload paid table data when work/project filter changes
-                if (typeof loadReturnDebt === 'function') {
-                    loadReturnDebt();
-                }
-            });
-        }
-        
-        if (workProjectTypeFilter) {
-            workProjectTypeFilter.addEventListener('change', function() {
-                // Reload paid table data when work/project type filter changes
-                if (typeof loadReturnDebt === 'function') {
-                    loadReturnDebt();
-                }
+        // Invoice number filter for paid amounts
+        var invoiceNumberFilter = document.getElementById('invoice-number-filter');
+        if (invoiceNumberFilter) {
+            // Add debounced input event listener
+            let invoiceFilterTimeout;
+            invoiceNumberFilter.addEventListener('input', function() {
+                clearTimeout(invoiceFilterTimeout);
+                invoiceFilterTimeout = setTimeout(() => {
+                    // Reload paid table data when invoice filter changes
+                    if (typeof loadReturnDebt === 'function') {
+                        loadReturnDebt();
+                    }
+                }, 500); // 500ms delay to avoid too many requests
             });
         }
         
