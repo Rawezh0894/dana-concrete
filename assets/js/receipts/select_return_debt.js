@@ -122,12 +122,25 @@ function loadReturnDebt() {
                     totalPaidUsd += amountUsd;
                     totalPaidIqd += amountIqd;
                     totalIqdToUsd += iqdToUsd;
+                    // Build enhanced note with related information
+                    let enhancedNote = row.note && row.note.trim() ? row.note : '';
+                    if (row.related_locations || row.related_invoices) {
+                        if (enhancedNote) enhancedNote += '<br>';
+                        if (row.related_locations) {
+                            enhancedNote += '<small style="color: #6c757d;"><i class="fa fa-map-marker-alt"></i> ' + row.related_locations + '</small>';
+                        }
+                        if (row.related_invoices) {
+                            if (row.related_locations) enhancedNote += '<br>';
+                            enhancedNote += '<small style="color: #6c757d;"><i class="fa fa-file-invoice"></i> ' + row.related_invoices + '</small>';
+                        }
+                    }
+                    
                     paidTableBody.innerHTML += `
                         <tr>
                             <td>${'$' + (amountUsd ? amountUsd.toLocaleString() : '0')}</td>
                             <td>${amountIqd ? amountIqd.toLocaleString() + ' د.ع' : '0 د.ع'}</td>
                             <td>${row.date}</td>
-                            <td>${row.note && row.note.trim() ? row.note : '–'}</td>
+                            <td>${enhancedNote || '–'}</td>
                         </tr>
                     `;
                 });

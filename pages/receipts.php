@@ -421,6 +421,22 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             font-style: italic;
         }
         
+        /* Enhanced note styling in paid table */
+        #paid-table-body td:last-child {
+            white-space: pre-line;
+            line-height: 1.6;
+        }
+        
+        #paid-table-body td:last-child small {
+            display: block;
+            margin-top: 4px;
+        }
+        
+        #paid-table-body td:last-child small i {
+            margin-left: 4px;
+            width: 12px;
+        }
+        
         /* Summary row styling */
         .summary-row td {
             text-align: center !important;
@@ -584,9 +600,12 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 
                 <div class="filter-group" id="job-specific-group" style="display: none;">
                     <label for="job-specific-input" class="filter-label">
-                        <i class="fa fa-search"></i> ناوی ئیش:
+                        <i class="fa fa-search"></i> گەڕان بەپێی:
                     </label>
-                    <input type="text" id="job-specific-input" class="filter-input" placeholder="ناوی ئیش بنووسە...">
+                    <input type="text" id="job-specific-input" class="filter-input" placeholder="ناوی ئیش، شوێن، یان ژمارەی پسووڵە بنووسە...">
+                    <small style="color: #6c757d; font-size: 12px; margin-top: 5px; display: block;">
+                        <i class="fa fa-info-circle"></i> دەتوانیت بە ناوی ئیش، شوێن، یان ژمارەی پسووڵە بگەڕێیت
+                    </small>
                 </div>
             </div>
             
