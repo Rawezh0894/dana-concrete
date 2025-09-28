@@ -153,6 +153,105 @@ document.addEventListener('click', async function(e) {
                 
                 // Wait for select2 to be fully initialized, then populate fields
                 setTimeout(() => {
+                    // Check if there's a selected driver from add modal and use it if no driver_id in data
+                    if (!data.driver_id && $('#driver_id').val()) {
+                        data.driver_id = $('#driver_id').val();
+                        data.driver_name = $('#driver_id option:selected').text();
+                    }
+                    
+                    // Check if there's a selected company from add modal and use it if no company_id in data
+                    if (!data.company_id && $('#company_id').val()) {
+                        data.company_id = $('#company_id').val();
+                        data.company_name = $('#company_id option:selected').text();
+                    }
+                    
+                    // Check if there's a selected location from add modal and use it if no location_id in data
+                    if (!data.location_id && $('#location_id').val()) {
+                        data.location_id = $('#location_id').val();
+                        data.location_name = $('#location_id option:selected').text();
+                    }
+                    
+                    // Check if there's a selected material from add modal and use it if no material_id in data
+                    if (!data.material_id && $('#material_id').val()) {
+                        data.material_id = $('#material_id').val();
+                        data.material_name = $('#material_id option:selected').text();
+                    }
+                    
+                    // Check if there's a selected bin from add modal and use it if no bin_id in data
+                    if (!data.bin_id && $('#bin_id').val()) {
+                        data.bin_id = $('#bin_id').val();
+                        data.bin_name = $('#bin_id option:selected').text();
+                    }
+                    
+                    // Check if there's a filled invoice number from add modal and use it if no invoice_number in data
+                    if (!data.invoice_number && $('#invoice_number').val()) {
+                        data.invoice_number = $('#invoice_number').val();
+                    }
+                    
+                    // Check if there's a selected date from add modal and use it if no date in data
+                    if (!data.date && $('#date').val()) {
+                        data.date = $('#date').val();
+                    }
+                    
+                    // Check if there's a selected type from add modal and use it if no type in data
+                    if (!data.type && $('#type').val()) {
+                        data.type = $('#type').val();
+                    }
+                    
+                    // Check if there's a selected payment_type from add modal and use it if no payment_type in data
+                    if (!data.payment_type && $('#payment_type').val()) {
+                        data.payment_type = $('#payment_type').val();
+                    }
+                    
+                    // Check if there's a filled kg from add modal and use it if no kg in data
+                    if (!data.kg && $('#kg').val()) {
+                        data.kg = $('#kg').val();
+                    }
+                    
+                    // Check if there's a filled price from add modal and use it if no price in data
+                    if (!data.price && $('#price').val()) {
+                        data.price = $('#price').val();
+                    }
+                    
+                    // Check if there's a filled exchange_rate from add modal and use it if no exchange_rate in data
+                    if (!data.exchange_rate && $('#exchange_rate').val()) {
+                        data.exchange_rate = $('#exchange_rate').val();
+                    }
+                    
+                    // Check if there's a filled amount_iqd from add modal and use it if no amount_iqd in data
+                    if (!data.amount_iqd && $('#amount_iqd').val()) {
+                        data.amount_iqd = $('#amount_iqd').val();
+                    }
+                    
+                    // Check if there's a filled paid_usd from add modal and use it if no paid_usd in data
+                    if (!data.paid_usd && $('#paid_usd').val()) {
+                        data.paid_usd = $('#paid_usd').val();
+                    }
+                    
+                    // Check if there's a filled paid_iqd from add modal and use it if no paid_iqd in data
+                    if (!data.paid_iqd && $('#paid_iqd').val()) {
+                        data.paid_iqd = $('#paid_iqd').val();
+                    }
+                    
+                    // Check if there's a filled remaining_usd from add modal and use it if no remaining_usd in data
+                    if (!data.remaining_usd && $('#remaining_usd').val()) {
+                        data.remaining_usd = $('#remaining_usd').val();
+                    }
+                    
+                    // Check if there's a filled remaining_iqd from add modal and use it if no remaining_iqd in data
+                    if (!data.remaining_iqd && $('#remaining_iqd').val()) {
+                        data.remaining_iqd = $('#remaining_iqd').val();
+                    }
+                    
+                    // Check if there's a filled price_per_kg_iqd from add modal and use it if no price_per_kg_iqd in data
+                    if (!data.price_per_kg_iqd && $('#price_per_kg_iqd').val()) {
+                        data.price_per_kg_iqd = $('#price_per_kg_iqd').val();
+                    }
+                    
+                    // Check if there's a filled price_per_kg_usd from add modal and use it if no price_per_kg_usd in data
+                    if (!data.price_per_kg_usd && $('#price_per_kg_usd').val()) {
+                        data.price_per_kg_usd = $('#price_per_kg_usd').val();
+                    }
                     // پڕکردنەوەی خانەکان
                     const fieldMappings = {
                         'id': 'edit_id',
