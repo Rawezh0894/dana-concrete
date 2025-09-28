@@ -63,31 +63,32 @@ document.getElementById('editPurchaseForm').onsubmit = async function(e) {
     // Validate required fields
     const requiredFields = [
         'id', 'company_id', 'driver_id', 'location_id', 'invoice_number', 
-        'material_id', 'date', 'type', 'kg', 'exchange_rate', 'price', 'payment_type'
+        'material_id', 'date', 'type', 'kg', 'exchange_rate', 'payment_type'
     ];
     
     const missingFields = [];
     for (const fieldName of requiredFields) {
         const field = form.querySelector(`[name="${fieldName}"]`);
         console.log(`Checking field: ${fieldName}, value: "${field ? field.value : 'field not found'}"`);
-        
-        // Special handling for price field - allow 0 as valid value
-        if (fieldName === 'price') {
-            if (!field || field.value === '' || field.value === null || field.value === undefined) {
-                missingFields.push(fieldName);
-                if (field) field.classList.add('is-invalid');
-                console.log(`Price field is missing or empty: "${field ? field.value : 'field not found'}"`);
-            } else {
-                if (field) field.classList.remove('is-invalid');
-                console.log(`Price field is valid: "${field.value}"`);
-            }
+        if (!field || !field.value.trim()) {
+            missingFields.push(fieldName);
+            if (field) field.classList.add('is-invalid');
         } else {
-            if (!field || !field.value.trim()) {
-                missingFields.push(fieldName);
-                if (field) field.classList.add('is-invalid');
-            } else {
-                if (field) field.classList.remove('is-invalid');
-            }
+            if (field) field.classList.remove('is-invalid');
+        }
+    }
+    
+    // Validate price field separately - allow 0 as valid value
+    const priceField = form.querySelector('[name="price"]');
+    if (priceField) {
+        console.log(`Checking price field separately: "${priceField.value}"`);
+        if (priceField.value === '' || priceField.value === null || priceField.value === undefined) {
+            missingFields.push('price');
+            priceField.classList.add('is-invalid');
+            console.log('Price field is empty');
+        } else {
+            priceField.classList.remove('is-invalid');
+            console.log(`Price field is valid: "${priceField.value}"`);
         }
     }
     
