@@ -104,6 +104,9 @@ document.getElementById('editPurchaseForm').onsubmit = async function(e) {
         missingFields.push('price_per_kg_iqd');
         form.querySelector('[name="price_per_kg_iqd"]').classList.add('is-invalid');
         console.log('Added price_per_kg_iqd to missing fields');
+    } else if (type === 'دینار') {
+        console.log('price_per_kg_iqd is valid for دینار type');
+        form.querySelector('[name="price_per_kg_iqd"]').classList.remove('is-invalid');
     }
     if (type === 'دۆلار' && pricePerKgUsd <= 0) {
         missingFields.push('price_per_kg_usd');
