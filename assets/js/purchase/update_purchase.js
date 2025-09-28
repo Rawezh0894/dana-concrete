@@ -70,11 +70,22 @@ document.getElementById('editPurchaseForm').onsubmit = async function(e) {
     for (const fieldName of requiredFields) {
         const field = form.querySelector(`[name="${fieldName}"]`);
         console.log(`Checking field: ${fieldName}, value: "${field ? field.value : 'field not found'}"`);
-        if (!field || !field.value.trim()) {
-            missingFields.push(fieldName);
-            if (field) field.classList.add('is-invalid');
+        
+        // Special handling for price field - allow 0 as valid value
+        if (fieldName === 'price') {
+            if (!field || field.value === '' || field.value === null || field.value === undefined) {
+                missingFields.push(fieldName);
+                if (field) field.classList.add('is-invalid');
+            } else {
+                if (field) field.classList.remove('is-invalid');
+            }
         } else {
-            if (field) field.classList.remove('is-invalid');
+            if (!field || !field.value.trim()) {
+                missingFields.push(fieldName);
+                if (field) field.classList.add('is-invalid');
+            } else {
+                if (field) field.classList.remove('is-invalid');
+            }
         }
     }
     
