@@ -69,6 +69,7 @@ document.getElementById('editPurchaseForm').onsubmit = async function(e) {
     const missingFields = [];
     for (const fieldName of requiredFields) {
         const field = form.querySelector(`[name="${fieldName}"]`);
+        console.log(`Checking field: ${fieldName}, value: "${field ? field.value : 'field not found'}"`);
         if (!field || !field.value.trim()) {
             missingFields.push(fieldName);
             if (field) field.classList.add('is-invalid');
