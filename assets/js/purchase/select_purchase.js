@@ -83,6 +83,13 @@ function handleEditTypeChange() {
 
 // Function to initialize select2 for edit modal
 function initializeEditModalSelect2() {
+    // Destroy existing select2 instances first
+    $('#edit_driver_id, #edit_location_id, #edit_company_id, #edit_material_id, #edit_bin_id').each(function() {
+        if ($(this).hasClass('select2-hidden-accessible')) {
+            $(this).select2('destroy');
+        }
+    });
+    
     // Initialize select2 for driver and location in edit modal
     if (typeof enableSelect2 === 'function') {
         enableSelect2('#edit_driver_id', '#editPurchaseModal');
@@ -102,6 +109,15 @@ function setSelect2Value(selectElement, value) {
         // Force select2 to update its display
         setTimeout(() => {
             $(selectElement).trigger('change.select2');
+            // Additional refresh to ensure display is updated
+            $(selectElement).select2('destroy');
+            $(selectElement).select2({
+                dropdownParent: $('#editPurchaseModal'),
+                width: '100%',
+                placeholder: "هەڵبژێرە",
+                dir: "rtl"
+            });
+            $(selectElement).val(value).trigger('change');
         }, 50);
     } else {
         // Regular select element
@@ -321,6 +337,22 @@ document.addEventListener('click', async function(e) {
                                 }
                                 
                                 setSelect2Value(input, value);
+                                
+                                // Force select2 to refresh its display for dropdowns
+                                setTimeout(() => {
+                                    if ($(input).hasClass('select2-hidden-accessible')) {
+                                        $(input).trigger('change.select2');
+                                        // Force dropdown to refresh
+                                        $(input).select2('destroy');
+                                        $(input).select2({
+                                            dropdownParent: $('#editPurchaseModal'),
+                                            width: '100%',
+                                            placeholder: "هەڵبژێرە",
+                                            dir: "rtl"
+                                        });
+                                        $(input).val(value).trigger('change');
+                                    }
+                                }, 100);
                             } else {
                                 input.value = value ?? '';
                             }
