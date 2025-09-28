@@ -96,13 +96,17 @@ document.getElementById('editPurchaseForm').onsubmit = async function(e) {
     const pricePerKgIqd = parseFloat(form.querySelector('[name="price_per_kg_iqd"]').value) || 0;
     const pricePerKgUsd = parseFloat(form.querySelector('[name="price_per_kg_usd"]').value) || 0;
     
+    console.log(`Type: ${type}, pricePerKgIqd: ${pricePerKgIqd}, pricePerKgUsd: ${pricePerKgUsd}`);
+    
     if (type === 'دینار' && pricePerKgIqd <= 0) {
         missingFields.push('price_per_kg_iqd');
         form.querySelector('[name="price_per_kg_iqd"]').classList.add('is-invalid');
+        console.log('Added price_per_kg_iqd to missing fields');
     }
     if (type === 'دۆلار' && pricePerKgUsd <= 0) {
         missingFields.push('price_per_kg_usd');
         form.querySelector('[name="price_per_kg_usd"]').classList.add('is-invalid');
+        console.log('Added price_per_kg_usd to missing fields');
     }
     
     if (missingFields.length > 0) {
