@@ -551,8 +551,11 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 <div class="filter-group">
                     <label for="invoice-number-filter" class="filter-label">
                         <i class="fa fa-search"></i> گەڕان بە ژمارەی پسووڵە (پارەی واسڵ کراو):
+                        <small style="color: #6c757d; font-size: 12px; display: block; margin-top: 2px;">
+                            دەتوانیت چەندین ژمارەی پسووڵە بنووسیت بە کۆما جیاکردنەوە
+                        </small>
                     </label>
-                    <input type="text" id="invoice-number-filter" class="filter-input" placeholder="ژمارەی پسووڵە بنووسە...">
+                    <input type="text" id="invoice-number-filter" class="filter-input" placeholder="ژمارەی پسووڵە بنووسە (A-0001, A-0002, A-0003...)">
                 </div>
             </div>
             

@@ -29,6 +29,19 @@ function getInvoiceNumberFilter() {
     return invoiceNumberElem ? invoiceNumberElem.value.trim() : '';
 }
 
+// Function to validate and format invoice numbers
+function formatInvoiceNumbers(input) {
+    if (!input) return '';
+    
+    // Split by comma and clean each invoice number
+    const invoiceNumbers = input.split(',')
+        .map(inv => inv.trim())
+        .filter(inv => inv.length > 0)
+        .map(inv => inv.toUpperCase()); // Convert to uppercase for consistency
+    
+    return invoiceNumbers.join(', ');
+}
+
 // Listen for filter changes and reload paid-table
 ['month-filter', 'date-from-filter', 'date-to-filter', 'paid-date-from-filter', 'paid-date-to-filter'].forEach(function(id) {
     var el = document.getElementById(id);
@@ -38,6 +51,25 @@ function getInvoiceNumberFilter() {
         });
     }
 });
+
+// Invoice number filter with formatting
+var invoiceNumberFilter = document.getElementById('invoice-number-filter');
+if (invoiceNumberFilter) {
+    let invoiceFilterTimeout;
+    invoiceNumberFilter.addEventListener('input', function() {
+        clearTimeout(invoiceFilterTimeout);
+        invoiceFilterTimeout = setTimeout(() => {
+            // Format the input (convert to uppercase, clean spaces)
+            const formatted = formatInvoiceNumbers(this.value);
+            if (formatted !== this.value) {
+                this.value = formatted;
+            }
+            
+            // Reload paid table data when invoice filter changes
+            loadReturnDebt();
+        }, 500); // 500ms delay to avoid too many requests
+    });
+}
 
 function loadReturnDebt() {
     if (typeof CUSTOMER_ID === 'undefined' || !CUSTOMER_ID) {
