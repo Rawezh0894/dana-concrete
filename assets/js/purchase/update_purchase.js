@@ -60,7 +60,7 @@ document.getElementById('editPurchaseForm').onsubmit = async function(e) {
     
     const form = e.target;
     
-    // Validate required fields (excluding price for now)
+    // Validate required fields
     const requiredFields = [
         'id', 'company_id', 'driver_id', 'location_id', 'invoice_number', 
         'material_id', 'date', 'type', 'kg', 'exchange_rate', 'payment_type'
@@ -69,8 +69,6 @@ document.getElementById('editPurchaseForm').onsubmit = async function(e) {
     const missingFields = [];
     for (const fieldName of requiredFields) {
         const field = form.querySelector(`[name="${fieldName}"]`);
-        console.log(`Checking field: ${fieldName}, value: "${field ? field.value : 'field not found'}"`);
-        
         if (!field || !field.value.trim()) {
             missingFields.push(fieldName);
             if (field) field.classList.add('is-invalid');
@@ -79,43 +77,25 @@ document.getElementById('editPurchaseForm').onsubmit = async function(e) {
         }
     }
     
-    // Validate price field separately - allow 0 as valid value
-    const priceField = form.querySelector('[name="price"]');
-    if (priceField) {
-        console.log(`Checking price field separately: "${priceField.value}"`);
-        if (priceField.value === '' || priceField.value === null || priceField.value === undefined) {
-            missingFields.push('price');
-            priceField.classList.add('is-invalid');
-            console.log('Price field is empty');
-        } else {
-            priceField.classList.remove('is-invalid');
-            console.log(`Price field is valid: "${priceField.value}"`);
-        }
-    }
+    // Price field is optional - no validation needed
     
     // Validate price_per_kg based on type
     const type = form.querySelector('[name="type"]').value;
     const pricePerKgIqd = parseFloat(form.querySelector('[name="price_per_kg_iqd"]').value) || 0;
     const pricePerKgUsd = parseFloat(form.querySelector('[name="price_per_kg_usd"]').value) || 0;
     
-    console.log(`Type: ${type}, pricePerKgIqd: ${pricePerKgIqd}, pricePerKgUsd: ${pricePerKgUsd}`);
-    
     if (type === 'دینار' && pricePerKgIqd <= 0) {
         missingFields.push('price_per_kg_iqd');
         form.querySelector('[name="price_per_kg_iqd"]').classList.add('is-invalid');
-        console.log('Added price_per_kg_iqd to missing fields');
     } else if (type === 'دینار') {
-        console.log('price_per_kg_iqd is valid for دینار type');
         form.querySelector('[name="price_per_kg_iqd"]').classList.remove('is-invalid');
     }
     if (type === 'دۆلار' && pricePerKgUsd <= 0) {
         missingFields.push('price_per_kg_usd');
         form.querySelector('[name="price_per_kg_usd"]').classList.add('is-invalid');
-        console.log('Added price_per_kg_usd to missing fields');
     }
     
     if (missingFields.length > 0) {
-        console.log('Missing fields:', missingFields);
         Swal.fire('هەڵە!', `تکایە خانەکانی خوارەوە پڕ بکە: ${missingFields.join(', ')}`, 'error');
         isUpdating = false;
         if (submitBtn) {
