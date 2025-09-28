@@ -76,8 +76,10 @@ document.getElementById('editPurchaseForm').onsubmit = async function(e) {
             if (!field || field.value === '' || field.value === null || field.value === undefined) {
                 missingFields.push(fieldName);
                 if (field) field.classList.add('is-invalid');
+                console.log(`Price field is missing or empty: "${field ? field.value : 'field not found'}"`);
             } else {
                 if (field) field.classList.remove('is-invalid');
+                console.log(`Price field is valid: "${field.value}"`);
             }
         } else {
             if (!field || !field.value.trim()) {
@@ -104,6 +106,7 @@ document.getElementById('editPurchaseForm').onsubmit = async function(e) {
     }
     
     if (missingFields.length > 0) {
+        console.log('Missing fields:', missingFields);
         Swal.fire('هەڵە!', `تکایە خانەکانی خوارەوە پڕ بکە: ${missingFields.join(', ')}`, 'error');
         isUpdating = false;
         if (submitBtn) {
