@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$type) $missing_fields[] = 'type';
     if (!$kg) $missing_fields[] = 'kg';
     if (!$exchange_rate) $missing_fields[] = 'exchange_rate';
-    if (!$price) $missing_fields[] = 'price';
+    if ($price === null || $price === '') $missing_fields[] = 'price';
     if (!$payment_type) $missing_fields[] = 'payment_type';
     
     // Validate price_per_kg based on type
@@ -89,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    if (!is_numeric($price) || $price <= 0) {
+    if (!is_numeric($price) || $price < 0) {
         error_log('Invalid price value: ' . $price);
         echo json_encode(['success' => false, 'msg' => 'نرخ نابێت منفی بێت']);
         exit;

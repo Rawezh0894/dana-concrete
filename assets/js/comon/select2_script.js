@@ -8,23 +8,19 @@ function enableSelect2(selector, modalSelector) {
             console.log('Error destroying select2:', e);
         }
     }
-    
-    // Wait a bit before reinitializing to ensure cleanup is complete
-    setTimeout(() => {
-        // Initialize select2 (no theme for max compatibility)
-        try {
-            $(selector).select2({
-                dropdownParent: $(modalSelector),
-                width: '100%',
-                placeholder: $(selector).attr('data-placeholder') || "هەڵبژێرە",
-                dir: "rtl",
-                matcher: customMatcher
-            });
-        } catch (e) {
-            console.log('Error initializing select2:', e);
-            return;
-        }
-    }, 50);
+    // Initialize select2 (no theme for max compatibility)
+    try {
+        $(selector).select2({
+            dropdownParent: $(modalSelector),
+            width: '100%',
+            placeholder: $(selector).attr('data-placeholder') || "هەڵبژێرە",
+            dir: "rtl",
+            matcher: customMatcher
+        });
+    } catch (e) {
+        console.log('Error initializing select2:', e);
+        return;
+    }
     // Fix: Only initialize once per modal show
     $(modalSelector).off('shown.bs.modal.select2').on('shown.bs.modal.select2', function () {
         try {

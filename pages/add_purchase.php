@@ -135,6 +135,20 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
             transform: translateY(-2px) !important;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
         }
+        
+        .btn-group .btn {
+            border-radius: 0 !important;
+        }
+        
+        .btn-group .btn:first-child {
+            border-top-left-radius: 6px !important;
+            border-bottom-left-radius: 6px !important;
+        }
+        
+        .btn-group .btn:last-child {
+            border-top-right-radius: 6px !important;
+            border-bottom-right-radius: 6px !important;
+        }
     </style>
     <!-- jQuery (پێش هەموو شت) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -154,12 +168,22 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
             <button class="btn" data-bs-toggle="modal" data-bs-target="#driversManagementModal" style="background: var(--kelly-green); color:white; font-weight: bold;">
                 <i class="fas fa-users me-1"></i> شۆفێرەکان
             </button>
-            <button class="btn export-btn" onclick="exportPurchaseToExcel()" title="ئیکسپۆرتی هەموو زانیارییەکانی کڕین بۆ Excel">
-                <i class="fas fa-file-excel me-1"></i>ئیکسپۆرتی Excel
-            </button>
-            <button class="btn" onclick="exportPurchaseMonthlyReport()" style="background: var(--seafoam-green); color: white; font-weight: bold;" title="ڕاپۆرتی مانگانەی کڕینەکان بۆ Excel">
-                <i class="fas fa-chart-line me-1"></i>ڕاپۆرتی مانگانە
-            </button>
+            <div class="btn-group" role="group">
+                <button class="btn export-btn" onclick="exportPurchaseToExcel()" title="ئیکسپۆرتی هەموو زانیارییەکانی کڕین بۆ Excel">
+                    <i class="fas fa-file-excel me-1"></i>Excel
+                </button>
+                <button class="btn export-btn" onclick="exportPurchaseToCSV()" title="ئیکسپۆرتی هەموو زانیارییەکانی کڕین بۆ CSV">
+                    <i class="fas fa-file-csv me-1"></i>CSV
+                </button>
+            </div>
+            <div class="btn-group" role="group">
+                <button class="btn" onclick="exportPurchaseMonthlyReport()" style="background: var(--seafoam-green); color: white; font-weight: bold;" title="ڕاپۆرتی مانگانەی کڕینەکان بۆ Excel">
+                    <i class="fas fa-chart-line me-1"></i>Excel
+                </button>
+                <button class="btn" onclick="exportPurchaseMonthlyReportToCSV()" style="background: var(--seafoam-green); color: white; font-weight: bold;" title="ڕاپۆرتی مانگانەی کڕینەکان بۆ CSV">
+                    <i class="fas fa-file-csv me-1"></i>CSV
+                </button>
+            </div>
             <?php if (hasPermission('add_purchase')): ?>
             <button class="btn" data-bs-toggle="modal" data-bs-target="#addPurchaseModal" style="background: var(--seafoam-green); color:white; font-weight: bold;">+ زیادکردنی کڕین</button>
             <?php endif; ?>
@@ -324,12 +348,15 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
             </div>
             <div class="col-md-6 mb-3">
               <label for="driver_id" class="form-label">شۆفێر</label>
-              <select class="form-select select2" id="driver_id" name="driver_id" required>
-                <option value="">شۆفێرەکان</option>
-                <?php foreach ($drivers as $drv): ?>
-                  <option value="<?= $drv['id'] ?>"><?= htmlspecialchars($drv['name']) ?></option>
-                <?php endforeach; ?>
-              </select>
+              <div class="input-group">
+                <!-- <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#addDriverModal" style="background: var(--seafoam-green); color: white; font-weight: bold;">+</button> -->
+                <select class="form-select select2" id="driver_id" name="driver_id" required>
+                  <option value="">شۆفێرەکان</option>
+                  <?php foreach ($drivers as $drv): ?>
+                    <option value="<?= $drv['id'] ?>"><?= htmlspecialchars($drv['name']) ?></option>
+                  <?php endforeach; ?>
+                </select>
+              </div>
             </div>
       
           </div>

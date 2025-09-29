@@ -21,6 +21,7 @@ $material_id = $_POST['material_id'] ?? '';
 $from_date = $_POST['from_date'] ?? '';
 $to_date = $_POST['to_date'] ?? '';
 $export_type = $_POST['export_type'] ?? 'detailed';
+$export_format = $_POST['export_format'] ?? 'excel'; // 'excel' or 'csv'
 
 // Build WHERE clause
 $where = [];
@@ -106,12 +107,22 @@ try {
     $stmt->execute($params);
     $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    // Set headers for Excel download
-    header('Content-Type: application/vnd.ms-excel; charset=utf-8');
+    // Set headers based on export format
+    if ($export_format === 'csv') {
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Transfer-Encoding: binary');
+    } else {
+        header('Content-Type: application/vnd.ms-excel; charset=utf-8');
+        header('Content-Transfer-Encoding: binary');
+    }
     
     if ($export_type === 'summary') {
         // Export summary data
-        header('Content-Disposition: attachment; filename="کورتەی_کڕینەکان_' . date('Y-m-d') . '.xls"');
+        if ($export_format === 'csv') {
+            header('Content-Disposition: attachment; filename*=UTF-8\'\'کورتەی_کڕینەکان_' . date('Y-m-d') . '.csv');
+        } else {
+            header('Content-Disposition: attachment; filename*=UTF-8\'\'کورتەی_کڕینەکان_' . date('Y-m-d') . '.xls');
+        }
         
         // Get summary data
         $summary_sql = "SELECT 
@@ -130,13 +141,24 @@ try {
         $summary_stmt->execute($params);
         $summary_data = $summary_stmt->fetch(PDO::FETCH_ASSOC);
         
-        // Start Excel content for summary
+        if ($export_format === 'csv') {
+            // CSV export for summary
+            echo "\xEF\xBB\xBF"; // UTF-8 BOM
+            echo "کورتەی کڕینەکان\n";
+            echo "بەروار," . date('Y-m-d') . "\n";
+            echo "کۆی قەرزی ئێمە,$" . number_format($summary_data['total_debt'] ?? 0, 2) . "\n";
+            echo "کۆی ژمارەی کۆمپانیاکان," . number_format($summary_data['total_companies'] ?? 0, 0) . "\n";
+            echo "کۆمپانیاکانی قەرزدار," . number_format($summary_data['indebted_companies'] ?? 0, 0) . "\n";
+        } else {
+            // Start Excel content for summary with UTF-8 BOM
+            echo "\xEF\xBB\xBF"; // UTF-8 BOM
         echo '<!DOCTYPE html>';
         echo '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
         echo '<head>';
+        echo '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">';
         echo '<meta charset="UTF-8">';
         echo '<style>';
-        echo 'table { border-collapse: collapse; width: 100%; }';
+        echo 'table { border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; }';
         echo 'th, td { border: 1px solid #000; padding: 8px; text-align: center; }';
         echo 'th { background-color: #4CAF50; color: white; font-weight: bold; }';
         echo '.number { text-align: right; }';
@@ -156,10 +178,15 @@ try {
         echo '</table>';
         echo '</body>';
         echo '</html>';
+        }
         
     } elseif ($export_type === 'monthly_report') {
         // Export monthly company report
-        header('Content-Disposition: attachment; filename="ڕاپۆرتی_مانگانەی_کڕینەکان_و_شۆفێرەکان_' . date('Y-m-d') . '.xls"');
+        if ($export_format === 'csv') {
+            header('Content-Disposition: attachment; filename*=UTF-8\'\'ڕاپۆرتی_مانگانەی_کڕینەکان_و_شۆفێرەکان_' . date('Y-m-d') . '.csv');
+        } else {
+            header('Content-Disposition: attachment; filename*=UTF-8\'\'ڕاپۆرتی_مانگانەی_کڕینەکان_و_شۆفێرەکان_' . date('Y-m-d') . '.xls');
+        }
         
         // Get monthly company and driver report data
         $monthly_sql = "SELECT 
@@ -191,13 +218,33 @@ try {
         $monthly_stmt->execute($params);
         $monthly_data = $monthly_stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        // Start Excel content for monthly report
+        if ($export_format === 'csv') {
+            // CSV export for monthly report
+            echo "\xEF\xBB\xBF"; // UTF-8 BOM
+            echo "ڕاپۆرتی مانگانەی کڕینەکان\n";
+            echo "بەروار," . date('Y-m-d') . "\n";
+            echo "کۆمپانیا,شۆفێر,مانگ,کۆی ژمارەی کاروانەکان,کۆی کیلۆ,کۆی طەن,پارەی ماوە (دۆلار),پارەی ماوە (دینار)\n";
+            
+            foreach ($monthly_data as $row) {
+                echo '"' . ($row['company_name'] ?? '') . '",';
+                echo '"' . ($row['driver_name'] ?? '') . '",';
+                echo '"' . ($row['month_year'] ?? '') . '",';
+                echo number_format($row['convoy_count'] ?? 0, 0) . ',';
+                echo number_format($row['total_kg'] ?? 0, 0) . ',';
+                echo number_format($row['total_tons'] ?? 0, 2) . ',';
+                echo '$' . number_format($row['total_remaining_usd'] ?? 0, 2) . ',';
+                echo number_format($row['total_remaining_iqd'] ?? 0, 0) . ' د.ع' . "\n";
+            }
+        } else {
+            // Start Excel content for monthly report with UTF-8 BOM
+            echo "\xEF\xBB\xBF"; // UTF-8 BOM
         echo '<!DOCTYPE html>';
         echo '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
         echo '<head>';
+        echo '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">';
         echo '<meta charset="UTF-8">';
         echo '<style>';
-        echo 'table { border-collapse: collapse; width: 100%; }';
+        echo 'table { border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; }';
         echo 'th, td { border: 1px solid #000; padding: 8px; text-align: center; }';
         echo 'th { background-color: #4CAF50; color: white; font-weight: bold; }';
         echo '.number { text-align: right; }';
@@ -240,18 +287,41 @@ try {
         echo '</table>';
         echo '</body>';
         echo '</html>';
+        }
         
     } else {
         // Export detailed data
-        header('Content-Disposition: attachment; filename="کڕینەکان_' . date('Y-m-d') . '.xls"');
+        if ($export_format === 'csv') {
+            header('Content-Disposition: attachment; filename*=UTF-8\'\'کڕینەکان_' . date('Y-m-d') . '.csv');
+        } else {
+            header('Content-Disposition: attachment; filename*=UTF-8\'\'کڕینەکان_' . date('Y-m-d') . '.xls');
+        }
         
-        // Start Excel content for detailed export
+        if ($export_format === 'csv') {
+            // CSV export for detailed data
+            echo "\xEF\xBB\xBF"; // UTF-8 BOM
+            echo "شوێن,بەروار,ژ. پسوله,شؤفير,بڕی مەواد,مکان مشتريات,نوع مشتريات,پارەی ماوە\n";
+            
+            foreach ($data as $index => $row) {
+                echo '"' . ($row['location_name'] ?? '') . '",';
+                echo '"' . ($row['date'] ?? '') . '",';
+                echo '"' . ($row['invoice_number'] ?? '') . '",';
+                echo '"' . ($row['driver_name'] ?? '') . '",';
+                echo number_format($row['kg'] ?? 0, 0) . ',';
+                echo '"' . ($row['company_name'] ?? '') . '",';
+                echo '"' . ($row['material_name'] ?? '') . '",';
+                echo '"' . formatRemainingAmount($row) . '"' . "\n";
+            }
+        } else {
+            // Start Excel content for detailed export with UTF-8 BOM
+            echo "\xEF\xBB\xBF"; // UTF-8 BOM
         echo '<!DOCTYPE html>';
         echo '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
         echo '<head>';
+        echo '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">';
         echo '<meta charset="UTF-8">';
         echo '<style>';
-        echo 'table { border-collapse: collapse; width: 100%; }';
+        echo 'table { border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; }';
         echo 'th, td { border: 1px solid #000; padding: 8px; text-align: center; }';
         echo 'th { background-color: #4CAF50; color: white; font-weight: bold; }';
         echo '.number { text-align: right; }';
@@ -290,6 +360,7 @@ try {
         echo '</table>';
         echo '</body>';
         echo '</html>';
+        }
     }
     
 } catch (Exception $e) {

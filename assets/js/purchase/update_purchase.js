@@ -63,21 +63,19 @@ document.getElementById('editPurchaseForm').onsubmit = async function(e) {
     // Validate required fields
     const requiredFields = [
         'id', 'company_id', 'driver_id', 'location_id', 'invoice_number', 
-        'material_id', 'date', 'type', 'kg', 'exchange_rate', 'payment_type'
+        'material_id', 'date', 'type', 'kg', 'exchange_rate', 'price', 'payment_type'
     ];
     
     const missingFields = [];
     for (const fieldName of requiredFields) {
         const field = form.querySelector(`[name="${fieldName}"]`);
-        if (!field || !field.value.trim()) {
+        if (!field || field.value.trim() === '') {
             missingFields.push(fieldName);
             if (field) field.classList.add('is-invalid');
         } else {
             if (field) field.classList.remove('is-invalid');
         }
     }
-    
-    // Price field is optional - no validation needed
     
     // Validate price_per_kg based on type
     const type = form.querySelector('[name="type"]').value;
@@ -87,8 +85,6 @@ document.getElementById('editPurchaseForm').onsubmit = async function(e) {
     if (type === 'دینار' && pricePerKgIqd <= 0) {
         missingFields.push('price_per_kg_iqd');
         form.querySelector('[name="price_per_kg_iqd"]').classList.add('is-invalid');
-    } else if (type === 'دینار') {
-        form.querySelector('[name="price_per_kg_iqd"]').classList.remove('is-invalid');
     }
     if (type === 'دۆلار' && pricePerKgUsd <= 0) {
         missingFields.push('price_per_kg_usd');
