@@ -1,8 +1,15 @@
 // Load dropdown data via AJAX for better performance
 async function loadDropdownData() {
     try {
+        console.log('Loading dropdown data...');
         const response = await fetch('../process/purchase/get_dropdown_data.php');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const result = await response.json();
+        console.log('Dropdown data response:', result);
         
         if (result.success) {
             const data = result.data;
@@ -13,7 +20,12 @@ async function loadDropdownData() {
                 const select = document.querySelector(selector);
                 if (select) {
                     // Clear existing options except the first one
-                    select.innerHTML = select.querySelector('option[value=""]').outerHTML;
+                    const firstOption = select.querySelector('option[value=""]');
+                    if (firstOption) {
+                        select.innerHTML = firstOption.outerHTML;
+                    } else {
+                        select.innerHTML = '<option value="">کۆمپانیا</option>';
+                    }
                     
                     // Add new options
                     data.companies.forEach(company => {
@@ -31,7 +43,12 @@ async function loadDropdownData() {
                 const select = document.querySelector(selector);
                 if (select) {
                     // Clear existing options except the first one
-                    select.innerHTML = select.querySelector('option[value=""]').outerHTML;
+                    const firstOption = select.querySelector('option[value=""]');
+                    if (firstOption) {
+                        select.innerHTML = firstOption.outerHTML;
+                    } else {
+                        select.innerHTML = '<option value="">شۆفێرەکان</option>';
+                    }
                     
                     // Add new options
                     data.drivers.forEach(driver => {
@@ -49,7 +66,12 @@ async function loadDropdownData() {
                 const select = document.querySelector(selector);
                 if (select) {
                     // Clear existing options except the first one
-                    select.innerHTML = select.querySelector('option[value=""]').outerHTML;
+                    const firstOption = select.querySelector('option[value=""]');
+                    if (firstOption) {
+                        select.innerHTML = firstOption.outerHTML;
+                    } else {
+                        select.innerHTML = '<option value="">شوێن</option>';
+                    }
                     
                     // Add new options
                     data.locations.forEach(location => {
@@ -67,7 +89,12 @@ async function loadDropdownData() {
                 const select = document.querySelector(selector);
                 if (select) {
                     // Clear existing options except the first one
-                    select.innerHTML = select.querySelector('option[value=""]').outerHTML;
+                    const firstOption = select.querySelector('option[value=""]');
+                    if (firstOption) {
+                        select.innerHTML = firstOption.outerHTML;
+                    } else {
+                        select.innerHTML = '<option value="">هەڵبژێرە</option>';
+                    }
                     
                     // Add new options
                     data.materials.forEach(material => {
@@ -85,7 +112,12 @@ async function loadDropdownData() {
                 const select = document.querySelector(selector);
                 if (select) {
                     // Clear existing options except the first one
-                    select.innerHTML = select.querySelector('option[value=""]').outerHTML;
+                    const firstOption = select.querySelector('option[value=""]');
+                    if (firstOption) {
+                        select.innerHTML = firstOption.outerHTML;
+                    } else {
+                        select.innerHTML = '<option value="">هەڵبژێرە</option>';
+                    }
                     
                     // Add new options
                     data.bins.forEach(bin => {
@@ -98,11 +130,13 @@ async function loadDropdownData() {
             });
             
             // Reinitialize Select2 for select2 elements
-            $('.select2').select2({
-                theme: 'bootstrap-5',
-                dir: 'rtl',
-                language: 'ar'
-            });
+            if (typeof $ !== 'undefined' && $.fn.select2) {
+                $('.select2').select2({
+                    theme: 'bootstrap-5',
+                    dir: 'rtl',
+                    language: 'ar'
+                });
+            }
             
             console.log('Dropdown data loaded successfully');
         } else {
@@ -115,5 +149,11 @@ async function loadDropdownData() {
 
 // Load dropdown data when page loads
 document.addEventListener('DOMContentLoaded', function() {
-    loadDropdownData();
+    // Wait a bit for all elements to be ready
+    setTimeout(loadDropdownData, 100);
+});
+
+// Also try to load when window is fully loaded
+window.addEventListener('load', function() {
+    setTimeout(loadDropdownData, 200);
 });
