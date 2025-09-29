@@ -1,18 +1,41 @@
-async function loadPurchases(filterParams = '') {
-    // Build URL with filters
+async function loadPurchases(filterParams = '', page = 1) {
+    // Build URL with filters and pagination
     let url = '../process/purchase/select_purchase.php';
+    const params = new URLSearchParams();
     if (filterParams) {
-        url += '?' + filterParams;
+        params.append('filter', filterParams);
+    }
+    params.append('page', page);
+    params.append('limit', 50); // Load 50 records per page
+    
+    if (params.toString()) {
+        url += '?' + params.toString();
     }
     
     let res = await fetch(url);
     let text = await res.text();
-    let data;
+    let response;
     try {
-        data = JSON.parse(text);
+        response = JSON.parse(text);
     } catch (e) {
         console.error('Raw response from select_purchase.php:', text);
         alert('هەڵەیەک لە وەڵامەکەی سێرڤەر هەیە. زانیاری زیاتر لە console.');
+        return;
+    }
+    
+    // Handle both old format (array) and new format (object with pagination)
+    let data;
+    let pagination = null;
+    
+    if (Array.isArray(response)) {
+        // Old format - backward compatibility
+        data = response;
+    } else if (response.data && response.pagination) {
+        // New format with pagination
+        data = response.data;
+        pagination = response.pagination;
+    } else {
+        console.error('Unexpected response format:', response);
         return;
     }
     const columns = [
@@ -55,7 +78,20 @@ async function loadPurchases(filterParams = '') {
         bin_name: row.bin_name || row.bin_id || '',
         actions: `${window.userPermissions && window.userPermissions.canEdit ? `<button class='btn btn-primary btn-sm edit-purchase' data-id='${row.id}' title='دەستکاری'><i class='fa fa-edit'></i></button>` : ''} ${window.userPermissions && window.userPermissions.canDelete ? `<button class='btn btn-danger btn-sm delete-purchase' data-id='${row.id}' title='سڕینەوە'><i class='fa fa-trash'></i></button>` : ''}`
     }));
-    TableController.renderWithPagination('#purchaseTable', mapped, columns, { pageSize: 10 });
+    
+    // Use pagination if available, otherwise use default pagination
+    if (pagination) {
+        TableController.renderWithPagination('#purchaseTable', mapped, columns, { 
+            pageSize: pagination.per_page,
+            currentPage: pagination.current_page,
+            totalPages: pagination.total_pages,
+            totalRecords: pagination.total_records,
+            hasNext: pagination.has_next,
+            hasPrev: pagination.has_prev
+        });
+    } else {
+        TableController.renderWithPagination('#purchaseTable', mapped, columns, { pageSize: 10 });
+    }
 }
 document.addEventListener('DOMContentLoaded', loadPurchases);
 

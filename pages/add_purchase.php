@@ -15,11 +15,7 @@ if (!hasPermission('view_purchase')) {
 }
 // Note: add_purchase permission is checked in the UI, not here
 // Users with only view_purchase permission can still access the page
-$bins = $pdo->query("SELECT id, name FROM bins_silos")->fetchAll(PDO::FETCH_ASSOC);
-$materials = $pdo->query("SELECT id, name FROM materials")->fetchAll(PDO::FETCH_ASSOC);
-$locations = $pdo->query("SELECT id, name FROM locations")->fetchAll(PDO::FETCH_ASSOC);
-$drivers = $pdo->query("SELECT id, name FROM drivers")->fetchAll(PDO::FETCH_ASSOC);
-$companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_ASSOC);
+// Dropdown data will be loaded via AJAX for better performance
 ?>
 <!DOCTYPE html>
 <html lang="ku">
@@ -259,36 +255,28 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
           <label for="filter_company">کۆمپانیا:</label>
           <select class="form-select" id="filter_company">
             <option value="">هەموو کۆمپانیاکان</option>
-            <?php foreach ($companies as $comp): ?>
-              <option value="<?= $comp['id'] ?>"><?= htmlspecialchars($comp['name']) ?></option>
-            <?php endforeach; ?>
+            <!-- Options will be loaded via AJAX -->
           </select>
         </div>
         <div class="col-md-3">
           <label for="filter_location">شوێن:</label>
           <select class="form-select" id="filter_location">
             <option value="">هەموو شوێنەکان</option>
-            <?php foreach ($locations as $loc): ?>
-              <option value="<?= $loc['id'] ?>"><?= htmlspecialchars($loc['name']) ?></option>
-            <?php endforeach; ?>
+            <!-- Options will be loaded via AJAX -->
           </select>
         </div>
         <div class="col-md-3">
           <label for="filter_driver">شۆفێر:</label>
           <select class="form-select" id="filter_driver">
             <option value="">هەموو شۆفێرەکان</option>
-            <?php foreach ($drivers as $drv): ?>
-              <option value="<?= $drv['id'] ?>"><?= htmlspecialchars($drv['name']) ?></option>
-            <?php endforeach; ?>
+            <!-- Options will be loaded via AJAX -->
           </select>
         </div>
         <div class="col-md-3">
           <label for="filter_material">مەواد:</label>
           <select class="form-select" id="filter_material">
             <option value="">هەموو مەوادەکان</option>
-            <?php foreach ($materials as $mat): ?>
-              <option value="<?= $mat['id'] ?>"><?= htmlspecialchars($mat['name']) ?></option>
-            <?php endforeach; ?>
+            <!-- Options will be loaded via AJAX -->
           </select>
         </div>
       </div>
@@ -341,9 +329,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
               <label for="company_id" class="form-label">کۆمپانیا</label>
               <select class="form-select" id="company_id" name="company_id" required>
                 <option value="">کۆمپانیا</option>
-                <?php foreach ($companies as $comp): ?>
-                  <option value="<?= $comp['id'] ?>"><?= htmlspecialchars($comp['name']) ?></option>
-                <?php endforeach; ?>
+                <!-- Options will be loaded via AJAX -->
               </select>
             </div>
             <div class="col-md-6 mb-3">
@@ -352,9 +338,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
                 <!-- <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#addDriverModal" style="background: var(--seafoam-green); color: white; font-weight: bold;">+</button> -->
                 <select class="form-select select2" id="driver_id" name="driver_id" required>
                   <option value="">شۆفێرەکان</option>
-                  <?php foreach ($drivers as $drv): ?>
-                    <option value="<?= $drv['id'] ?>"><?= htmlspecialchars($drv['name']) ?></option>
-                  <?php endforeach; ?>
+                  <!-- Options will be loaded via AJAX -->
                 </select>
               </div>
             </div>
@@ -367,9 +351,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
                 <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#addLocationModal" style="background: var(--seafoam-green); color: white; font-weight: bold;">+</button>
                 <select class="form-select select2" id="location_id" name="location_id" required>
                   <option value="">شوێن</option>
-                  <?php foreach ($locations as $loc): ?>
-                    <option value="<?= $loc['id'] ?>"><?= htmlspecialchars($loc['name']) ?></option>
-                  <?php endforeach; ?>
+                  <!-- Options will be loaded via AJAX -->
                 </select>
               </div>
             </div>
@@ -385,18 +367,14 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
               <label for="material_id" class="form-label">مەواد</label>
               <select class="form-select" id="material_id" name="material_id" required>
                 <option value="">هەڵبژێرە</option>
-                <?php foreach ($materials as $mat): ?>
-                  <option value="<?= $mat['id'] ?>"><?= htmlspecialchars($mat['name']) ?></option>
-                <?php endforeach; ?>
+                <!-- Options will be loaded via AJAX -->
               </select>
             </div>
             <div class="col-md-6 mb-3">
               <label for="bin_id" class="form-label">چاۆ/سایلۆ</label>
               <select class="form-select" id="bin_id" name="bin_id">
                 <option value="">هەڵبژێرە</option>
-                <?php foreach ($bins as $bin): ?>
-                  <option value="<?= $bin['id'] ?>"><?= htmlspecialchars($bin['name']) ?></option>
-                <?php endforeach; ?>
+                <!-- Options will be loaded via AJAX -->
               </select>
             </div>
           </div>
@@ -650,18 +628,14 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
               <label for="edit_company_id" class="form-label">کۆمپانیا</label>
               <select class="form-select" id="edit_company_id" name="company_id" required>
                 <option value="">کۆمپانیا</option>
-                <?php foreach ($companies as $comp): ?>
-                  <option value="<?= $comp['id'] ?>"><?= htmlspecialchars($comp['name']) ?></option>
-                <?php endforeach; ?>
+                <!-- Options will be loaded via AJAX -->
               </select>
             </div>
             <div class="col-md-6 mb-3">
               <label for="edit_driver_id" class="form-label">شۆفێر</label>
               <select class="form-select select2" id="edit_driver_id" name="driver_id" required>
                 <option value="">شۆفێرەکان</option>
-                <?php foreach ($drivers as $drv): ?>
-                  <option value="<?= $drv['id'] ?>"><?= htmlspecialchars($drv['name']) ?></option>
-                <?php endforeach; ?>
+                <!-- Options will be loaded via AJAX -->
               </select>
             </div>
           </div>
@@ -670,9 +644,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
               <label for="edit_location_id" class="form-label">شوێن</label>
               <select class="form-select select2" id="edit_location_id" name="location_id" required>
                 <option value="">شوێن</option>
-                <?php foreach ($locations as $loc): ?>
-                  <option value="<?= $loc['id'] ?>"><?= htmlspecialchars($loc['name']) ?></option>
-                <?php endforeach; ?>
+                <!-- Options will be loaded via AJAX -->
               </select>
             </div>
             <div class="col-md-6 mb-3">
@@ -685,18 +657,14 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
               <label for="edit_material_id" class="form-label">مەواد</label>
               <select class="form-select" id="edit_material_id" name="material_id" required>
                 <option value="">هەڵبژێرە</option>
-                <?php foreach ($materials as $mat): ?>
-                  <option value="<?= $mat['id'] ?>"><?= htmlspecialchars($mat['name']) ?></option>
-                <?php endforeach; ?>
+                <!-- Options will be loaded via AJAX -->
               </select>
             </div>
             <div class="col-md-6 mb-3">
               <label for="edit_bin_id" class="form-label">چاۆ/سایلۆ</label>
               <select class="form-select" id="edit_bin_id" name="bin_id" required>
                 <option value="">هەڵبژێرە</option>
-                <?php foreach ($bins as $bin): ?>
-                  <option value="<?= $bin['id'] ?>"><?= htmlspecialchars($bin['name']) ?></option>
-                <?php endforeach; ?>
+                <!-- Options will be loaded via AJAX -->
               </select>
             </div>
           </div>
@@ -796,6 +764,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
       canDelete: <?php echo hasPermission('delete_purchase') ? 'true' : 'false'; ?>
     };
 </script>
+<script src="../assets/js/purchase/load_dropdown_data.js"></script>
 <script src="../assets/js/purchase/add_purchase.js"></script>
 <script src="../assets/js/purchase/select_purchase.js"></script>
 <script src="../assets/js/purchase/summary.js"></script>
