@@ -59,16 +59,16 @@ if ($to_date) {
 
 $where_sql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
 
-// Helper function to format remaining amount based on currency type
+// Helper function to format remaining amount based on currency type (without currency symbols)
 function formatRemainingAmount($row) {
     if ($row['type'] === 'دۆلار') {
         // If currency type is USD, show remaining USD amount
         $remaining = $row['remaining_usd'] ?? 0;
-        return number_format($remaining, 2) . ' $';
+        return number_format($remaining, 2);
     } else {
         // If currency type is IQD, show remaining IQD amount
         $remaining = $row['remaining_iqd'] ?? 0;
-        return number_format($remaining, 0) . ' د.ع';
+        return number_format($remaining, 0);
     }
 }
 
@@ -146,7 +146,7 @@ try {
             echo "\xEF\xBB\xBF"; // UTF-8 BOM
             echo "کورتەی کڕینەکان\n";
             echo "بەروار," . date('Y-m-d') . "\n";
-            echo "کۆی قەرزی ئێمە,$" . number_format($summary_data['total_debt'] ?? 0, 2) . "\n";
+            echo "کۆی قەرزی ئێمە," . number_format($summary_data['total_debt'] ?? 0, 2) . "\n";
             echo "کۆی ژمارەی کۆمپانیاکان," . number_format($summary_data['total_companies'] ?? 0, 0) . "\n";
             echo "کۆمپانیاکانی قەرزدار," . number_format($summary_data['indebted_companies'] ?? 0, 0) . "\n";
         } else {
@@ -171,7 +171,7 @@ try {
         // Summary header
         echo '<tr><th colspan="2" style="background-color: #2196F3; color: white; font-size: 16px;">کورتەی کڕینەکان</th></tr>';
         echo '<tr><th>بەروار</th><th>' . date('Y-m-d') . '</th></tr>';
-        echo '<tr><th>کۆی قەرزی ئێمە</th><td class="number">$' . number_format($summary_data['total_debt'] ?? 0, 2) . '</td></tr>';
+        echo '<tr><th>کۆی قەرزی ئێمە</th><td class="number">' . number_format($summary_data['total_debt'] ?? 0, 2) . '</td></tr>';
         echo '<tr><th>کۆی ژمارەی کۆمپانیاکان</th><td class="number">' . number_format($summary_data['total_companies'] ?? 0, 0) . '</td></tr>';
         echo '<tr><th>کۆمپانیاکانی قەرزدار</th><td class="number">' . number_format($summary_data['indebted_companies'] ?? 0, 0) . '</td></tr>';
         
@@ -232,8 +232,8 @@ try {
                 echo number_format($row['convoy_count'] ?? 0, 0) . ',';
                 echo number_format($row['total_kg'] ?? 0, 0) . ',';
                 echo number_format($row['total_tons'] ?? 0, 2) . ',';
-                echo '$' . number_format($row['total_remaining_usd'] ?? 0, 2) . ',';
-                echo number_format($row['total_remaining_iqd'] ?? 0, 0) . ' د.ع' . "\n";
+                echo number_format($row['total_remaining_usd'] ?? 0, 2) . ',';
+                echo number_format($row['total_remaining_iqd'] ?? 0, 0) . "\n";
             }
         } else {
             // Start Excel content for monthly report with UTF-8 BOM
@@ -279,8 +279,8 @@ try {
             echo '<td class="number">' . number_format($row['convoy_count'] ?? 0, 0) . '</td>';
             echo '<td class="number">' . number_format($row['total_kg'] ?? 0, 0) . '</td>';
             echo '<td class="number">' . number_format($row['total_tons'] ?? 0, 2) . '</td>';
-            echo '<td class="number">$' . number_format($row['total_remaining_usd'] ?? 0, 2) . '</td>';
-            echo '<td class="number">' . number_format($row['total_remaining_iqd'] ?? 0, 0) . ' د.ع</td>';
+            echo '<td class="number">' . number_format($row['total_remaining_usd'] ?? 0, 2) . '</td>';
+            echo '<td class="number">' . number_format($row['total_remaining_iqd'] ?? 0, 0) . '</td>';
             echo '</tr>';
         }
         
@@ -310,7 +310,7 @@ try {
                 echo number_format($row['kg'] ?? 0, 0) . ',';
                 echo '"' . ($row['company_name'] ?? '') . '",';
                 echo '"' . ($row['material_name'] ?? '') . '",';
-                echo '"' . formatRemainingAmount($row) . '"' . "\n";
+                echo formatRemainingAmount($row) . "\n";
             }
         } else {
             // Start Excel content for detailed export with UTF-8 BOM
