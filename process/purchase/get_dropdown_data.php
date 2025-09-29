@@ -1,23 +1,31 @@
 <?php
+// Simple dropdown data loader
 session_start();
-require_once '../config/db_conected.php';
-require_once '../config/permissions.php';
 
+// Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
     http_response_code(403);
     echo json_encode(['success' => false, 'msg' => 'Unauthorized']);
     exit;
 }
 
-if (!hasPermission('view_purchase')) {
-    http_response_code(403);
-    echo json_encode(['success' => false, 'msg' => 'ڕێگەپێدراوە بۆ بینینی کڕینەکان']);
-    exit;
-}
+// Database connection
+$host = 'localhost';
+$db   = 'dana_concrete_db';
+$user = 'dana_user';
+$pass = 'Rawezh.Jaza@0894';
+$charset = 'utf8mb4';
 
-header('Content-Type: application/json');
+$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+$options = [
+    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    PDO::ATTR_EMULATE_PREPARES   => false,
+];
 
 try {
+    $pdo = new PDO($dsn, $user, $pass, $options);
+    
     $data = [];
     
     // Get companies
@@ -40,9 +48,16 @@ try {
     $stmt = $pdo->query("SELECT id, name FROM bins_silos ORDER BY name ASC");
     $data['bins'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
+    header('Content-Type: application/json');
     echo json_encode(['success' => true, 'data' => $data]);
     
+} catch (PDOException $e) {
+    http_response_code(500);
+    header('Content-Type: application/json');
+    echo json_encode(['success' => false, 'msg' => 'Database error: ' . $e->getMessage()]);
 } catch (Exception $e) {
-    echo json_encode(['success' => false, 'msg' => 'هەڵە: ' . $e->getMessage()]);
+    http_response_code(500);
+    header('Content-Type: application/json');
+    echo json_encode(['success' => false, 'msg' => 'Error: ' . $e->getMessage()]);
 }
 ?>
