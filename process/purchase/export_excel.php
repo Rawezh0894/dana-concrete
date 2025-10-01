@@ -190,6 +190,7 @@ try {
         
         // Get monthly company and driver report data
         $monthly_sql = "SELECT 
+            p.company_id AS company_id,
             c.name AS company_name,
             d.name AS driver_name,
             DATE_FORMAT(p.date, '%Y-%m') AS month_year,
@@ -211,19 +212,71 @@ try {
         LEFT JOIN materials m ON p.material_id = m.id
         LEFT JOIN bins_silos b ON p.bin_id = b.id
         $where_sql
-        GROUP BY c.id, c.name, d.id, d.name, DATE_FORMAT(p.date, '%Y-%m')
+        GROUP BY p.company_id, c.id, c.name, d.id, d.name, DATE_FORMAT(p.date, '%Y-%m')
         ORDER BY c.name, driver_name, month_year DESC";
         
         $monthly_stmt = $pdo->prepare($monthly_sql);
         $monthly_stmt->execute($params);
         $monthly_data = $monthly_stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Compute per-location counts for each (company, driver, month)
+        foreach ($monthly_data as &$row) {
+            $companyId = $row['company_id'] ?? null;
+            $driverName = $row['driver_name'] ?? null;
+            $monthYear = $row['month_year'] ?? null; // format YYYY-MM
+            if (!$companyId || !$driverName || !$monthYear) {
+                $row['location_breakdown'] = '';
+                continue;
+            }
+
+            // Calculate first day of month and first day of next month
+            $startDate = $monthYear . '-01';
+            $start = new DateTime($startDate);
+            $end = (clone $start)->modify('+1 month');
+            $startDateStr = $start->format('Y-m-d');
+            $endDateStr = $end->format('Y-m-d');
+
+            // Build subquery with same filters where applicable
+            $subSql = "SELECT l.name AS location_name, COUNT(*) AS cnt
+                       FROM purchases p2
+                       LEFT JOIN locations l ON p2.location = l.name
+                       WHERE p2.company_id = ?
+                         AND p2.driver = ?
+                         AND p2.date >= ? AND p2.date < ?";
+            $subParams = [$companyId, $driverName, $startDateStr, $endDateStr];
+
+            // Apply optional filters that affect the dataset
+            if ($material_id) {
+                $subSql .= " AND p2.material_id = ?";
+                $subParams[] = $material_id;
+            }
+            if ($location_id) {
+                // If user filtered by a specific location, keep it
+                $subSql .= " AND l.id = ?";
+                $subParams[] = $location_id;
+            }
+
+            $subSql .= " GROUP BY l.name ORDER BY l.name";
+            $locStmt = $pdo->prepare($subSql);
+            $locStmt->execute($subParams);
+            $locRows = $locStmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $parts = [];
+            foreach ($locRows as $lr) {
+                $locName = $lr['location_name'] ?? 'ناونیشان نەزانراوە';
+                $cnt = (int)($lr['cnt'] ?? 0);
+                $parts[] = $locName . ' = ' . $cnt;
+            }
+            $row['location_breakdown'] = implode(' ، ', $parts);
+        }
+        unset($row);
         
         if ($export_format === 'csv') {
             // CSV export for monthly report
             echo "\xEF\xBB\xBF"; // UTF-8 BOM
             echo "ڕاپۆرتی مانگانەی کڕینەکان\n";
             echo "بەروار," . date('Y-m-d') . "\n";
-            echo "کۆمپانیا,شۆفێر,مانگ,کۆی ژمارەی کاروانەکان,کۆی کیلۆ,کۆی طەن,پارەی ماوە (دۆلار),پارەی ماوە (دینار)\n";
+            echo "کۆمپانیا,شۆفێر,مانگ,کۆی ژمارەی کاروانەکان,کۆی کیلۆ,کۆی طەن,پارەی ماوە (دۆلار),پارەی ماوە (دینار),ژمارەیەکانی شوێن\n";
             
             foreach ($monthly_data as $row) {
                 echo '"' . ($row['company_name'] ?? '') . '",';
@@ -233,7 +286,8 @@ try {
                 echo number_format($row['total_kg'] ?? 0, 0) . ',';
                 echo number_format($row['total_tons'] ?? 0, 2) . ',';
                 echo number_format($row['total_remaining_usd'] ?? 0, 2) . ',';
-                echo number_format($row['total_remaining_iqd'] ?? 0, 0) . "\n";
+                echo number_format($row['total_remaining_iqd'] ?? 0, 0) . ',';
+                echo '"' . ($row['location_breakdown'] ?? '') . '"' . "\n";
             }
         } else {
             // Start Excel content for monthly report with UTF-8 BOM
@@ -255,8 +309,8 @@ try {
         echo '<table border="1">';
         
         // Monthly report header
-        echo '<tr><th colspan="8" style="background-color: #2196F3; color: white; font-size: 16px;">ڕاپۆرتی مانگانەی کڕینەکان</th></tr>';
-        echo '<tr><th colspan="8" style="background-color: #FF9800; color: white; font-size: 14px;">بەروار: ' . date('Y-m-d') . '</th></tr>';
+        echo '<tr><th colspan="9" style="background-color: #2196F3; color: white; font-size: 16px;">ڕاپۆرتی مانگانەی کڕینەکان</th></tr>';
+        echo '<tr><th colspan="9" style="background-color: #FF9800; color: white; font-size: 14px;">بەروار: ' . date('Y-m-d') . '</th></tr>';
         
         // Column headers
         echo '<tr>';
@@ -268,6 +322,7 @@ try {
         echo '<th>کۆی طەن</th>';
         echo '<th>پارەی ماوە (دۆلار)</th>';
         echo '<th>پارەی ماوە (دینار)</th>';
+        echo '<th>ژمارەیەکانی شوێن</th>';
         echo '</tr>';
         
         // Data rows
@@ -281,6 +336,7 @@ try {
             echo '<td class="number">' . number_format($row['total_tons'] ?? 0, 2) . '</td>';
             echo '<td class="number">' . number_format($row['total_remaining_usd'] ?? 0, 2) . '</td>';
             echo '<td class="number">' . number_format($row['total_remaining_iqd'] ?? 0, 0) . '</td>';
+            echo '<td>' . htmlspecialchars($row['location_breakdown'] ?? '') . '</td>';
             echo '</tr>';
         }
         
