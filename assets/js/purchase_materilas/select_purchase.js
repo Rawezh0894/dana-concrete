@@ -310,23 +310,27 @@ function renderPurchaseMaterialsTable(data) {
 }
 
 function attachActionHandlers() {
-    // View details button
-    $('.view-purchase').off('click').on('click', function() {
-        const purchaseId = $(this).data('id');
-        loadPurchaseForView(purchaseId);
-    });
-    
-    // Edit button
-    $('.edit-purchase').off('click').on('click', function() {
-        const purchaseId = $(this).data('id');
-        loadPurchaseForEdit(purchaseId);
-    });
-    
-    // Delete button
-    $('.delete-purchase').off('click').on('click', function() {
-        const purchaseId = $(this).data('id');
-        deletePurchase(purchaseId);
-    });
+    // Use delegated events so handlers work across pagination/render cycles
+    $(document)
+        .off('click', '#purchaseMaterialsTable .view-purchase')
+        .on('click', '#purchaseMaterialsTable .view-purchase', function() {
+            const purchaseId = $(this).data('id');
+            loadPurchaseForView(purchaseId);
+        });
+
+    $(document)
+        .off('click', '#purchaseMaterialsTable .edit-purchase')
+        .on('click', '#purchaseMaterialsTable .edit-purchase', function() {
+            const purchaseId = $(this).data('id');
+            loadPurchaseForEdit(purchaseId);
+        });
+
+    $(document)
+        .off('click', '#purchaseMaterialsTable .delete-purchase')
+        .on('click', '#purchaseMaterialsTable .delete-purchase', function() {
+            const purchaseId = $(this).data('id');
+            deletePurchase(purchaseId);
+        });
 }
 
 function loadPurchaseForView(purchaseId) {
