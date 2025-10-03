@@ -131,6 +131,7 @@ try {
     $use_range = ($from_date || $to_date);
     // Date conditions for different tables
     $date_condition_sales = "";
+    // For employee payments, filter by salary month, not payment creation date
     $date_condition_employee_payments = "";
     $date_condition_date = "";
     
@@ -138,24 +139,27 @@ try {
         $from = $from_date ? $from_date : '1000-01-01';
         $to = $to_date ? $to_date : '9999-12-31';
         $date_condition_sales = " AND order_date >= '$from' AND order_date <= '$to'";
-        $date_condition_employee_payments = " AND DATE(created_at) >= '$from' AND DATE(created_at) <= '$to'";
+        // Filter employee payments by the selected salary month range
+        $date_condition_employee_payments = " AND DATE(CONCAT(pay_month, '-01')) >= '$from' AND DATE(CONCAT(pay_month, '-01')) <= '$to'";
         $date_condition_date = " AND date >= '$from' AND date <= '$to'";
     } else {
         if ($filter === 'today') {
             $date_condition_sales = " AND order_date = CURDATE()";
-            $date_condition_employee_payments = " AND DATE(created_at) = CURDATE()";
+            // Map 'today' to current month for salary-month-based filtering
+            $date_condition_employee_payments = " AND YEAR(DATE(CONCAT(pay_month, '-01'))) = YEAR(CURDATE()) AND MONTH(DATE(CONCAT(pay_month, '-01'))) = MONTH(CURDATE())";
             $date_condition_date = " AND date = CURDATE()";
         } elseif ($filter === 'week') {
             $date_condition_sales = " AND YEARWEEK(order_date, 1) = YEARWEEK(CURDATE(), 1)";
-            $date_condition_employee_payments = " AND YEARWEEK(DATE(created_at), 1) = YEARWEEK(CURDATE(), 1)";
+            // Map 'week' to current month for salary-month-based filtering
+            $date_condition_employee_payments = " AND YEAR(DATE(CONCAT(pay_month, '-01'))) = YEAR(CURDATE()) AND MONTH(DATE(CONCAT(pay_month, '-01'))) = MONTH(CURDATE())";
             $date_condition_date = " AND YEARWEEK(date, 1) = YEARWEEK(CURDATE(), 1)";
         } elseif ($filter === 'month') {
             $date_condition_sales = " AND YEAR(order_date) = YEAR(CURDATE()) AND MONTH(order_date) = MONTH(CURDATE())";
-            $date_condition_employee_payments = " AND YEAR(DATE(created_at)) = YEAR(CURDATE()) AND MONTH(DATE(created_at)) = MONTH(CURDATE())";
+            $date_condition_employee_payments = " AND YEAR(DATE(CONCAT(pay_month, '-01'))) = YEAR(CURDATE()) AND MONTH(DATE(CONCAT(pay_month, '-01'))) = MONTH(CURDATE())";
             $date_condition_date = " AND YEAR(date) = YEAR(CURDATE()) AND MONTH(date) = MONTH(CURDATE())";
         } elseif ($filter === 'year') {
             $date_condition_sales = " AND YEAR(order_date) = YEAR(CURDATE())";
-            $date_condition_employee_payments = " AND YEAR(DATE(created_at)) = YEAR(CURDATE())";
+            $date_condition_employee_payments = " AND YEAR(DATE(CONCAT(pay_month, '-01'))) = YEAR(CURDATE())";
             $date_condition_date = " AND YEAR(date) = YEAR(CURDATE())";
         }
     }
@@ -216,7 +220,7 @@ try {
     $other_expenses_iqd_converted = ($usd_iqd_rate > 0) ? ($other_expenses_iqd / ($usd_iqd_rate / 100)) : 0;
     $other_expenses_total_usd = $other_expenses_usd + $other_expenses_iqd_converted;
 
-    // Employee Expenses (خەرجی کارمەند)
+    // Employee Expenses (خەرجی کارمەند) - filter by salary month
     $employee_expenses_query = "SELECT SUM(total) as total_expenses FROM employee_payments WHERE 1=1 $date_condition_employee_payments";
     $stmt = $pdo->query($employee_expenses_query);
     $row = $stmt->fetch();
@@ -696,11 +700,11 @@ try {
         $stmt->execute([$date]);
         $monthly_expenses = $stmt->fetchColumn() ?: 0;
         
-        // Employee payments - using created_at instead of date
+    // Employee payments - use pay_month (salary month)
         $stmt = $pdo->prepare("
             SELECT SUM(total) as total_employee_payments 
             FROM employee_payments 
-            WHERE DATE_FORMAT(created_at, '%Y-%m') = ?
+            WHERE DATE_FORMAT(CONCAT(pay_month, '-01'), '%Y-%m') = ?
         ");
         $stmt->execute([$date]);
         $employee_payments = $stmt->fetchColumn() ?: 0;
