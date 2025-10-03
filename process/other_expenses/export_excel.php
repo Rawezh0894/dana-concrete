@@ -97,7 +97,7 @@ LEFT JOIN employees e ON oe.employee_id = e.id
 LEFT JOIN cars c ON oe.car_id = c.id
 LEFT JOIN materials m ON oe.material_id = m.id
 $where_sql
-ORDER BY oe.date DESC";
+ORDER BY oe.date ASC";
 
 try {
     $stmt = $pdo->prepare($sql);
