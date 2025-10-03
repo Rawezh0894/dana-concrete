@@ -104,12 +104,13 @@ try {
     $stmt->execute($params);
     $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    // Set headers for Excel download
+    // Set headers for Excel download with proper UTF-8 encoding
     header('Content-Type: application/vnd.ms-excel; charset=utf-8');
+    header('Content-Transfer-Encoding: binary');
     
     if ($export_type === 'summary') {
         // Export summary data
-        header('Content-Disposition: attachment; filename="کورتەی_خەرجی_تر_' . date('Y-m-d') . '.xls"');
+        header('Content-Disposition: attachment; filename*=UTF-8\'\'کورتەی_خەرجی_تر_' . date('Y-m-d') . '.xls');
         
         // Get summary data
         $summary_sql = "SELECT 
@@ -128,13 +129,15 @@ try {
         $summary_stmt->execute($params);
         $summary_data = $summary_stmt->fetch(PDO::FETCH_ASSOC);
         
-        // Start Excel content for summary
+        // Start Excel content for summary with UTF-8 BOM
+        echo "\xEF\xBB\xBF"; // UTF-8 BOM
         echo '<!DOCTYPE html>';
         echo '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
         echo '<head>';
+        echo '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">';
         echo '<meta charset="UTF-8">';
         echo '<style>';
-        echo 'table { border-collapse: collapse; width: 100%; }';
+        echo 'table { border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; }';
         echo 'th, td { border: 1px solid #000; padding: 8px; text-align: center; }';
         echo 'th { background-color: #4CAF50; color: white; font-weight: bold; }';
         echo '.number { text-align: right; }';
@@ -159,15 +162,17 @@ try {
         
     } else {
         // Export detailed data
-        header('Content-Disposition: attachment; filename="خەرجی_تر_' . date('Y-m-d') . '.xls"');
+        header('Content-Disposition: attachment; filename*=UTF-8\'\'خەرجی_تر_' . date('Y-m-d') . '.xls');
         
-        // Start Excel content for detailed export
+        // Start Excel content for detailed export with UTF-8 BOM
+        echo "\xEF\xBB\xBF"; // UTF-8 BOM
         echo '<!DOCTYPE html>';
         echo '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
         echo '<head>';
+        echo '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">';
         echo '<meta charset="UTF-8">';
         echo '<style>';
-        echo 'table { border-collapse: collapse; width: 100%; }';
+        echo 'table { border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; }';
         echo 'th, td { border: 1px solid #000; padding: 8px; text-align: center; }';
         echo 'th { background-color: #4CAF50; color: white; font-weight: bold; }';
         echo '.number { text-align: right; }';
