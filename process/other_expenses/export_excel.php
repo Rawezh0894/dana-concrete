@@ -150,10 +150,10 @@ try {
         // Summary header
         echo '<tr><th colspan="2" style="background-color: #2196F3; color: white; font-size: 16px;">کورتەی خەرجی تر</th></tr>';
         echo '<tr><th>بەروار</th><th>' . date('Y-m-d') . '</th></tr>';
-        echo '<tr><th>خەرجی سەیارەکان (کاڵا)</th><td class="number">$' . number_format($summary_data['total_car_material_cost'] ?? 0, 2) . '</td></tr>';
-        echo '<tr><th>خەرجی سەیارەکان (گاز)</th><td class="number">$' . number_format($summary_data['total_car_gas_cost'] ?? 0, 2) . '</td></tr>';
-        echo '<tr><th>خەرجی تر</th><td class="number">$' . number_format($summary_data['total_other_expenses'] ?? 0, 2) . '</td></tr>';
-        echo '<tr><th>کۆی گشتی</th><td class="number">$' . number_format(($summary_data['total_car_material_cost'] ?? 0) + ($summary_data['total_car_gas_cost'] ?? 0) + ($summary_data['total_other_expenses'] ?? 0), 2) . '</td></tr>';
+        echo '<tr><th>خەرجی سەیارەکان (کاڵا)</th><td class="number">' . number_format($summary_data['total_car_material_cost'] ?? 0, 2) . '</td></tr>';
+        echo '<tr><th>خەرجی سەیارەکان (گاز)</th><td class="number">' . number_format($summary_data['total_car_gas_cost'] ?? 0, 2) . '</td></tr>';
+        echo '<tr><th>خەرجی تر</th><td class="number">' . number_format($summary_data['total_other_expenses'] ?? 0, 2) . '</td></tr>';
+        echo '<tr><th>کۆی گشتی</th><td class="number">' . number_format(($summary_data['total_car_material_cost'] ?? 0) + ($summary_data['total_car_gas_cost'] ?? 0) + ($summary_data['total_other_expenses'] ?? 0), 2) . '</td></tr>';
         echo '<tr><th>کۆی خەرجی</th><td class="number">' . number_format($summary_data['total_expenses'] ?? 0, 0) . '</td></tr>';
         
         echo '</table>';
@@ -223,8 +223,8 @@ try {
             echo '<td>' . htmlspecialchars($row['expense_type'] ?? '') . '</td>';
             echo '<td>' . htmlspecialchars($row['material_name'] ?? '') . '</td>';
             echo '<td class="number">' . number_format($row['material_quantity'] ?? 0, 2) . '</td>';
-            echo '<td class="number">' . number_format($row['material_purchase_price_iqd'] ?? 0, 0) . ' د.ع</td>';
-            echo '<td class="number">' . number_format($row['material_purchase_price_usd'] ?? 0, 2) . ' $</td>';
+            echo '<td class="number">' . number_format($row['material_purchase_price_iqd'] ?? 0, 0) . '</td>';
+            echo '<td class="number">' . number_format($row['material_purchase_price_usd'] ?? 0, 2) . '</td>';
             echo '<td class="number">' . number_format($row['material_total_cost'] ?? 0, 2) . '</td>';
             echo '<td class="number">' . number_format($row['gas_purchase_price_input'] ?? 0, 2) . '</td>';
             echo '<td class="number">' . number_format($row['gas_total_cost'] ?? 0, 2) . '</td>';
@@ -233,11 +233,11 @@ try {
             echo '<td>' . htmlspecialchars($row['invoice_number'] ?? '') . '</td>';
             echo '<td class="number">' . number_format($row['amount_iqd'] ?? 0, 0) . '</td>';
             echo '<td class="number">' . number_format($row['amount_usd'] ?? 0, 2) . '</td>';
-            echo '<td class="number">' . number_format($row['paid_iqd'] ?? 0, 0) . ' د.ع</td>';
-            echo '<td class="number">' . number_format($row['paid_usd'] ?? 0, 2) . ' $</td>';
+            echo '<td class="number">' . number_format($row['paid_iqd'] ?? 0, 0) . '</td>';
+            echo '<td class="number">' . number_format($row['paid_usd'] ?? 0, 2) . '</td>';
             echo '<td class="number">' . number_format($row['exchange_rate'] ?? 0, 0) . '</td>';
-            echo '<td class="number">' . number_format($row['remaining_iqd'] ?? 0, 0) . ' د.ع</td>';
-            echo '<td class="number">' . number_format($row['remaining_usd'] ?? 0, 2) . ' $</td>';
+            echo '<td class="number">' . number_format($row['remaining_iqd'] ?? 0, 0) . '</td>';
+            echo '<td class="number">' . number_format($row['remaining_usd'] ?? 0, 2) . '</td>';
             echo '<td>' . htmlspecialchars($row['date'] ?? '') . '</td>';
             echo '</tr>';
         }
