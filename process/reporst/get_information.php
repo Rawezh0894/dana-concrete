@@ -174,8 +174,9 @@ try {
             $purchases['credit']['iqd_converted'] = $row['iqd_converted'] ?? 0;
         }
     }
-    // دۆلار
-    $stmt = $pdo->query("SELECT payment_type, SUM(price) as usd FROM purchases WHERE type='دۆلار' GROUP BY payment_type");
+    // دۆلار - Add date filter
+    $purchases_usd_query = "SELECT payment_type, SUM(price) as usd FROM purchases WHERE type='دۆلار' $date_condition_date GROUP BY payment_type";
+    $stmt = $pdo->query($purchases_usd_query);
     while ($row = $stmt->fetch()) {
         if ($row['payment_type'] === 'نەقد') {
             $purchases['cash']['usd'] = $row['usd'] ?? 0;
