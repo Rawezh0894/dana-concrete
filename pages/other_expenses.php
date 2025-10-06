@@ -24,12 +24,12 @@ if (!isset($_SESSION['user_id'])) {
     <link href="../assets/css/login.css" rel="stylesheet">
     <link href="../assets/css/variables.css" rel="stylesheet">
     <link href="../assets/css/nav.css" rel="stylesheet">
-    <link href="../assets/css/other_expenses.css" rel="stylesheet">
     <link href="../assets/css/comon/table.css" rel="stylesheet">
     <link href="../assets/css/comon/style.css" rel="stylesheet">
     <link href="../assets/css/comon/summary_cards.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="../assets/css/other_expenses.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     
     <style>
         .export-btn {
