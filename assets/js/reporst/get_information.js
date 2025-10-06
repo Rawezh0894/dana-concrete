@@ -105,6 +105,9 @@ function renderDashboardCards(data) {
     const purchases_cash_usd = Number(data.data?.purchases?.cash?.usd) || 0;
     const purchases_credit_usd = Number(data.data?.purchases?.credit?.usd) || 0;
     const purchases_usd = purchases_cash_usd + purchases_credit_usd;
+    const purchases_cash_iqd = Number(data.data?.purchases?.cash?.iqd) || 0;
+    const purchases_credit_iqd = Number(data.data?.purchases?.credit?.iqd) || 0;
+    const purchases_iqd_total = purchases_cash_iqd + purchases_credit_iqd;
     
     console.log('Extracted values:', {
         usd_iqd_rate,
@@ -112,7 +115,10 @@ function renderDashboardCards(data) {
         person_debt_usd,
         purchases_cash_usd,
         purchases_credit_usd,
-        purchases_usd
+        purchases_usd,
+        purchases_cash_iqd,
+        purchases_credit_iqd,
+        purchases_iqd_total
     });
     
     const cards = [
@@ -153,10 +159,7 @@ function renderDashboardCards(data) {
             label: 'کۆی نرخی کڕین بە دینار',
             icon: 'fa-cart-plus',
             cardClass: 'purchases-card',
-            value: formatCurrency(
-                (Number(data.data?.purchases?.cash?.iqd) || 0) + (Number(data.data?.purchases?.credit?.iqd) || 0),
-                'IQD'
-            ),
+            value: formatCurrency(purchases_iqd_total, 'IQD'),
             subtitle: 'کۆی کڕینەکان بە دینار'
         },
         {
