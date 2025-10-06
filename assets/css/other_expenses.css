@@ -254,6 +254,14 @@
 .select2-container .select2-dropdown {
     border-color: var(--border, #dee2e6);
 }
+.select2-container--open .select2-dropdown {
+    left: 0 !important;
+    right: auto !important;
+    width: 100% !important;
+}
+.select2-container .select2-selection--single {
+    box-sizing: border-box;
+}
 .select2-results__option {
     padding: 8px 10px;
 }
@@ -273,4 +281,8 @@
 [dir="rtl"] .select2-container .select2-selection--single .select2-selection__arrow {
     left: 8px;
     right: auto;
+}
+[dir="rtl"] .select2-container--open .select2-dropdown {
+    right: 0 !important;
+    left: auto !important;
 }
