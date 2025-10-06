@@ -149,6 +149,17 @@ function renderDashboardCards(data) {
             subtitle: 'کۆی کڕینەکان'
         },
         {
+            key: 'purchases_iqd',
+            label: 'کۆی نرخی کڕین بە دینار',
+            icon: 'fa-cart-plus',
+            cardClass: 'purchases-card',
+            value: formatCurrency(
+                (Number(data.data?.purchases?.cash?.iqd) || 0) + (Number(data.data?.purchases?.credit?.iqd) || 0),
+                'IQD'
+            ),
+            subtitle: 'کۆی کڕینەکان بە دینار'
+        },
+        {
             key: 'sales',
             label: 'کۆی نرخی فرۆشتن',
             icon: 'fa-cash-register',
