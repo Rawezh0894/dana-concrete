@@ -167,10 +167,10 @@ try {
     $stmt = $pdo->query($purchases_query);
     while ($row = $stmt->fetch()) {
         if ($row['payment_type'] === 'نەقد') {
-            $purchases['cash']['iqd'] = $row['iqd'] ?? 0;
+            $purchases['cash']['iqd'] = $row['amount_iqd'] ?? 0; // use total IQD amount
             $purchases['cash']['iqd_converted'] = $row['iqd_converted'] ?? 0;
         } elseif ($row['payment_type'] === 'قەرز') {
-            $purchases['credit']['iqd'] = $row['iqd'] ?? 0;
+            $purchases['credit']['iqd'] = $row['amount_iqd'] ?? 0; // use total IQD amount
             $purchases['credit']['iqd_converted'] = $row['iqd_converted'] ?? 0;
         }
     }
