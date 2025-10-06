@@ -219,3 +219,58 @@
 .form-check-input:checked {
     transform: scale(1.1);
 }
+
+/* Select2 styling for other expenses modals */
+.select2-container { width: 100% !important; }
+
+/* Single select */
+.select2-container .select2-selection--single {
+    height: 38px;
+    border: 1px solid var(--border, #dee2e6);
+    border-radius: 0.375rem;
+    display: flex;
+    align-items: center;
+    padding: 0 0.5rem;
+    background-color: #fff;
+}
+.select2-container .select2-selection--single .select2-selection__rendered {
+    line-height: 38px;
+    color: #495057;
+}
+.select2-container .select2-selection--single .select2-selection__arrow {
+    height: 36px;
+    right: auto; /* RTL fix */
+    left: 6px;
+}
+
+/* Focus state */
+.select2-container--default.select2-container--focus .select2-selection--single,
+.select2-container--default .select2-selection--single:focus {
+    border-color: var(--seafoam-green);
+    box-shadow: 0 0 0 0.2rem rgba(0, 151, 167, 0.15);
+}
+
+/* Dropdown */
+.select2-container .select2-dropdown {
+    border-color: var(--border, #dee2e6);
+}
+.select2-results__option {
+    padding: 8px 10px;
+}
+.select2-results__option--highlighted {
+    background-color: var(--seafoam-green);
+}
+
+/* Make sure dropdown appears above modal content */
+.modal.show .select2-container { z-index: 2050; }
+.select2-container .select2-dropdown { z-index: 2055; }
+
+/* RTL alignment tweaks */
+[dir="rtl"] .select2-container .select2-selection--single .select2-selection__rendered {
+    padding-left: 1.5rem;
+    padding-right: 0.25rem;
+}
+[dir="rtl"] .select2-container .select2-selection--single .select2-selection__arrow {
+    left: 8px;
+    right: auto;
+}
