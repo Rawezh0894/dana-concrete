@@ -323,6 +323,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 const usageUnitField = document.getElementById('usage_unit_type');
                 if (usageUnitField) {
                     usageUnitField.value = '';
+                    if (window.$ && $(usageUnitField).hasClass('select2-hidden-accessible')) {
+                        $(usageUnitField).trigger('change.select2');
+                    }
                 }
                 // Clear material unit info
                 clearMaterialUnitInfo('add');
@@ -335,6 +338,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (usageUnitField) {
                     usageUnitField.value = '';
                     usageUnitField.innerHTML = '<option value="">یەکەی بەکارهێنان هەڵبژێرە</option>';
+                    if (window.$ && $(usageUnitField).hasClass('select2-hidden-accessible')) {
+                        $(usageUnitField).trigger('change.select2');
+                    }
                 }
                 // Clear material unit info
                 clearMaterialUnitInfo('add');
@@ -372,6 +378,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 const usageUnitField = document.getElementById('edit_usage_unit_type');
                 if (usageUnitField) {
                     usageUnitField.value = '';
+                    if (window.$ && $(usageUnitField).hasClass('select2-hidden-accessible')) {
+                        $(usageUnitField).trigger('change.select2');
+                    }
                 }
                 // Clear material unit info
                 clearMaterialUnitInfo('edit');
@@ -384,6 +393,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (usageUnitField) {
                     usageUnitField.value = '';
                     usageUnitField.innerHTML = '<option value="">یەکەی بەکارهێنان هەڵبژێرە</option>';
+                    if (window.$ && $(usageUnitField).hasClass('select2-hidden-accessible')) {
+                        $(usageUnitField).trigger('change.select2');
+                    }
                 }
                 // Clear material unit info
                 clearMaterialUnitInfo('edit');
