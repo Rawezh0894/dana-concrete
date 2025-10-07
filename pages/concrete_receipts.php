@@ -29,7 +29,7 @@ $pump_cars = array_filter($cars, function ($car) {
   return preg_match('/^p/i', trim($car['name'])); });
 
 // Define allowed names for pump and mixer
-$pump_names = ['بەرزان', 'شاڵاو', 'سەربەست', 'بازیان'];
+$pump_names = ['بەرزان', 'شاڵاو', 'سەربەست', 'بازیان', 'پشتیوان'];
 $mixer_names = ['بەرزان', 'شاڵاو', 'سەربەست', 'بازیان', 'طارق', 'عماد', 'علاوی', 'ئامانج', 'احمد(ابو روەیدا)', 'وشیار', 'هۆژین', 'هاوکار', 'عادل', 'ڕزگار'];
 
 // Filter employees for pump and mixer
