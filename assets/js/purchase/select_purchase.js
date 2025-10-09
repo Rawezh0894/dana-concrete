@@ -9,7 +9,7 @@ async function loadPurchases(filterParams = '', page = 1) {
     let url = '../process/purchase/select_purchase.php';
     const params = new URLSearchParams(filterParams);
     params.set('page', page);
-    params.set('limit', 100);
+    params.set('limit', 10);
     url += '?' + params.toString();
     
     let res = await fetch(url);
@@ -53,7 +53,7 @@ async function loadPurchases(filterParams = '', page = 1) {
         return formatNumber(Number(n).toFixed(0)) + ' د.ع';
     }
     const mapped = data.map((row, idx) => ({
-        '#': ((page - 1) * 100) + idx + 1,
+        '#': ((page - 1) * 10) + idx + 1,
         company_name: row.company_name || '',
         location_name: row.location_name || row.location || '',
         driver_name: row.driver_name || row.driver || '',
