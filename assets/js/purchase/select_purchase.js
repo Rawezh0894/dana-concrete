@@ -145,13 +145,51 @@ function addExcelStyleFilters(tableSelector, data, columns) {
 }
 
 // Show filter dropdown menu
-function showFilterDropdown(column, columnIdx, data, iconElement) {
+async function showFilterDropdown(column, columnIdx, data, iconElement) {
     // Remove any existing dropdown
     document.querySelectorAll('.excel-filter-dropdown').forEach(d => d.remove());
     
-    // Get unique values for this column
-    const uniqueValues = [...new Set(data.map(row => row[column]))].filter(v => v !== '' && v !== null && v !== undefined);
-    uniqueValues.sort();
+    // Show loading dropdown
+    const loadingDropdown = document.createElement('div');
+    loadingDropdown.className = 'excel-filter-dropdown';
+    loadingDropdown.style.cssText = `
+        position: absolute;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 9999;
+        min-width: 200px;
+        padding: 20px;
+        text-align: center;
+    `;
+    const iconRect = iconElement.getBoundingClientRect();
+    loadingDropdown.style.top = (iconRect.bottom + window.scrollY) + 'px';
+    loadingDropdown.style.left = iconRect.left + 'px';
+    loadingDropdown.innerHTML = '<i class="fas fa-spinner fa-spin"></i> چاوەڕوان بە...';
+    document.body.appendChild(loadingDropdown);
+    
+    // Get unique values from server for the entire dataset
+    let uniqueValues = [];
+    try {
+        const response = await fetch(`../process/purchase/get_unique_values.php?column=${column}`);
+        const result = await response.json();
+        if (result.success) {
+            uniqueValues = result.values;
+        } else {
+            // Fallback to local data if server fails
+            uniqueValues = [...new Set(data.map(row => row[column]))].filter(v => v !== '' && v !== null && v !== undefined);
+            uniqueValues.sort();
+        }
+    } catch (e) {
+        console.error('Error fetching unique values:', e);
+        // Fallback to local data
+        uniqueValues = [...new Set(data.map(row => row[column]))].filter(v => v !== '' && v !== null && v !== undefined);
+        uniqueValues.sort();
+    }
+    
+    // Remove loading dropdown
+    loadingDropdown.remove();
     
     // Create dropdown
     const dropdown = document.createElement('div');
@@ -169,10 +207,17 @@ function showFilterDropdown(column, columnIdx, data, iconElement) {
         padding: 8px 0;
     `;
     
-    // Position dropdown
-    const rect = iconElement.getBoundingClientRect();
-    dropdown.style.top = (rect.bottom + window.scrollY) + 'px';
-    dropdown.style.left = rect.left + 'px';
+    // Position dropdown (reuse same position)
+    dropdown.style.top = (iconRect.bottom + window.scrollY) + 'px';
+    dropdown.style.left = iconRect.left + 'px';
+    
+    // Add search box
+    const searchDiv = document.createElement('div');
+    searchDiv.style.cssText = 'padding: 8px 12px; border-bottom: 1px solid #eee;';
+    searchDiv.innerHTML = `
+        <input type="text" class="form-control form-control-sm filter-search-input" placeholder="گەڕان..." style="margin: 0;">
+    `;
+    dropdown.appendChild(searchDiv);
     
     // Add "Select All" option
     const selectAllDiv = document.createElement('div');
@@ -185,10 +230,17 @@ function showFilterDropdown(column, columnIdx, data, iconElement) {
     `;
     dropdown.appendChild(selectAllDiv);
     
+    // Create container for value checkboxes
+    const valuesContainer = document.createElement('div');
+    valuesContainer.className = 'filter-values-container';
+    valuesContainer.style.cssText = 'max-height: 200px; overflow-y: auto;';
+    
     // Add value checkboxes
     uniqueValues.forEach(value => {
         const div = document.createElement('div');
+        div.className = 'filter-value-item';
         div.style.cssText = 'padding: 4px 12px; cursor: pointer;';
+        div.setAttribute('data-value', value.toString().toLowerCase());
         div.onmouseenter = function() { this.style.background = '#f8f9fa'; };
         div.onmouseleave = function() { this.style.background = 'white'; };
         
@@ -200,8 +252,10 @@ function showFilterDropdown(column, columnIdx, data, iconElement) {
                 <span>${value}</span>
             </label>
         `;
-        dropdown.appendChild(div);
+        valuesContainer.appendChild(div);
     });
+    
+    dropdown.appendChild(valuesContainer);
     
     // Add action buttons
     const actionsDiv = document.createElement('div');
@@ -214,17 +268,46 @@ function showFilterDropdown(column, columnIdx, data, iconElement) {
     
     document.body.appendChild(dropdown);
     
+    // Search functionality
+    const searchInput = dropdown.querySelector('.filter-search-input');
+    searchInput.oninput = function() {
+        const searchTerm = this.value.toLowerCase();
+        const items = valuesContainer.querySelectorAll('.filter-value-item');
+        
+        items.forEach(item => {
+            const value = item.getAttribute('data-value');
+            if (value.includes(searchTerm)) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    };
+    
+    // Focus search input
+    setTimeout(() => searchInput.focus(), 100);
+    
     // Select All logic
     const selectAllCheckbox = dropdown.querySelector('.filter-select-all');
     const valueCheckboxes = dropdown.querySelectorAll('.filter-value-checkbox');
     
     selectAllCheckbox.onchange = function() {
-        valueCheckboxes.forEach(cb => cb.checked = this.checked);
+        // Only select visible checkboxes
+        const visibleItems = Array.from(valuesContainer.querySelectorAll('.filter-value-item'))
+            .filter(item => item.style.display !== 'none');
+        visibleItems.forEach(item => {
+            const cb = item.querySelector('.filter-value-checkbox');
+            if (cb) cb.checked = this.checked;
+        });
     };
     
     valueCheckboxes.forEach(cb => {
         cb.onchange = function() {
-            const allChecked = Array.from(valueCheckboxes).every(c => c.checked);
+            // Update "Select All" based on visible checkboxes
+            const visibleCheckboxes = Array.from(valuesContainer.querySelectorAll('.filter-value-item'))
+                .filter(item => item.style.display !== 'none')
+                .map(item => item.querySelector('.filter-value-checkbox'));
+            const allChecked = visibleCheckboxes.every(c => c && c.checked);
             selectAllCheckbox.checked = allChecked;
         };
     });
