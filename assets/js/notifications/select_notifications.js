@@ -58,17 +58,17 @@ $(document).ready(function() {
                 return;
             }
 
+            const columns = [
+                'select', 'action', 'table_name', 'description', 'username', 'created_at', 'seen', 'actions'
+            ];
+
             if (!data.success) {
-                TableController.renderWithPagination('#notificationsTable', [], columns, { pageSize: pageSize });
+                TableController.renderWithPagination('#notificationsTable', [], columns, { pageSize: 10 });
                 return;
             }
 
             // Store notifications data globally
             notificationsData = data.notifications;
-
-            const columns = [
-                'select', 'action', 'table_name', 'description', 'username', 'created_at', 'seen', 'actions'
-            ];
 
             const mapped = data.notifications.map((row, idx) => ({
                 select: `<input type="checkbox" class="notification-checkbox" value="${row.id}">`,
@@ -88,8 +88,8 @@ $(document).ready(function() {
                 `
             }));
 
-            // Render table without internal pagination (since we're using server-side pagination)
-            TableController.renderTable('#notificationsTable', mapped, columns);
+            // Render table with all results on single page (pagination is handled server-side)
+            TableController.renderWithPagination('#notificationsTable', mapped, columns, { pageSize: mapped.length || 100 });
             
             // Update total count and pagination info
             if (data.pagination) {
@@ -104,7 +104,7 @@ $(document).ready(function() {
             $('#deleteSelectedNotifications').prop('disabled', true);
         } catch (error) {
             console.error('Error loading notifications:', error);
-            TableController.renderWithPagination('#notificationsTable', [], columns, { pageSize: pageSize });
+            TableController.renderWithPagination('#notificationsTable', [], columns, { pageSize: 10 });
         }
     }
 
@@ -153,9 +153,10 @@ $(document).ready(function() {
         
         paginationHtml += '</ul></nav>';
         
-        // Remove existing pagination
-        $('#notificationsTable').closest('.table-responsive').next('nav').remove();
-        // Add new pagination
+        // Remove ALL existing pagination (both TableController's and ours)
+        $('#notificationsTable').closest('.table-responsive').siblings('nav').remove();
+        $('#notificationsTable').closest('.table-responsive').next('.pagination-container').remove();
+        // Add new server-side pagination
         $('#notificationsTable').closest('.table-responsive').after(paginationHtml);
     }
 
