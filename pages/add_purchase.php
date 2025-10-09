@@ -881,9 +881,9 @@ $(document).ready(function() {
         if (fromDate) params.append('from', fromDate);
         if (toDate) params.append('to', toDate);
         
-        // Call the existing loadPurchases function with filters
+        // Call the existing loadPurchases function with filters and reset to page 1
         if (typeof loadPurchases === 'function') {
-            loadPurchases(params.toString());
+            loadPurchases(params.toString(), 1);
         }
         
         // Also update summary cards if the function exists

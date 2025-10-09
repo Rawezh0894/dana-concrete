@@ -81,6 +81,11 @@ $location_id = $_GET['location_id'] ?? null;
 $driver_id = $_GET['driver_id'] ?? null;
 $material_id = $_GET['material_id'] ?? null;
 
+// Pagination parameters
+$page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+$limit = isset($_GET['limit']) ? max(10, min(500, intval($_GET['limit']))) : 100;
+$offset = ($page - 1) * $limit;
+
 $where = [];
 $params = [];
 
@@ -109,6 +114,21 @@ if ($material_id) {
     $params[] = $material_id;
 }
 
+// Get total count
+$count_sql = "SELECT COUNT(*) as total FROM purchases p
+LEFT JOIN company c ON p.company_id = c.id
+LEFT JOIN locations l ON p.location = l.name
+LEFT JOIN drivers d ON p.driver = d.name
+LEFT JOIN materials m ON p.material_id = m.id
+LEFT JOIN bins_silos b ON p.bin_id = b.id";
+if ($where) {
+    $count_sql .= " WHERE " . implode(" AND ", $where);
+}
+$count_stmt = $pdo->prepare($count_sql);
+$count_stmt->execute($params);
+$total_records = $count_stmt->fetchColumn();
+
+// Get paginated data
 $sql = "SELECT p.id, c.name AS company_name, l.name AS location_name, d.name AS driver_name, p.invoice_number, m.name AS material_name, p.date, p.payment_type, p.type, p.kg, p.price_per_kg_usd, p.price_per_kg_iqd, p.price, p.amount_iqd, p.exchange_rate, p.paid_usd, p.paid_iqd, p.remaining_usd, p.remaining_iqd, b.name AS bin_name
 FROM purchases p
 LEFT JOIN company c ON p.company_id = c.id
@@ -119,8 +139,23 @@ LEFT JOIN bins_silos b ON p.bin_id = b.id";
 if ($where) {
     $sql .= " WHERE " . implode(" AND ", $where);
 }
-$sql .= " ORDER BY p.date ASC";
+$sql .= " ORDER BY p.date DESC LIMIT ? OFFSET ?";
 $stmt = $pdo->prepare($sql);
-$stmt->execute($params);
+$stmt->execute(array_merge($params, [$limit, $offset]));
 $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-echo json_encode($data);
+
+// Calculate pagination info
+$total_pages = ceil($total_records / $limit);
+
+echo json_encode([
+    'success' => true,
+    'data' => $data,
+    'pagination' => [
+        'current_page' => $page,
+        'total_pages' => $total_pages,
+        'total_records' => $total_records,
+        'per_page' => $limit,
+        'has_next' => $page < $total_pages,
+        'has_prev' => $page > 1
+    ]
+]);

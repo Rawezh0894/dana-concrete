@@ -1,20 +1,29 @@
-async function loadPurchases(filterParams = '') {
-    // Build URL with filters
+let currentPurchasePage = 1;
+let currentFilterParams = '';
+
+async function loadPurchases(filterParams = '', page = 1) {
+    currentPurchasePage = page;
+    currentFilterParams = filterParams;
+    
+    // Build URL with filters and pagination
     let url = '../process/purchase/select_purchase.php';
-    if (filterParams) {
-        url += '?' + filterParams;
-    }
+    const params = new URLSearchParams(filterParams);
+    params.set('page', page);
+    params.set('limit', 100);
+    url += '?' + params.toString();
     
     let res = await fetch(url);
     let text = await res.text();
-    let data;
+    let result;
     try {
-        data = JSON.parse(text);
+        result = JSON.parse(text);
     } catch (e) {
         console.error('Raw response from select_purchase.php:', text);
         alert('هەڵەیەک لە وەڵامەکەی سێرڤەر هەیە. زانیاری زیاتر لە console.');
         return;
     }
+    
+    const data = result.data || result; // Handle both old and new format
     const columns = [
         '#', 'company_name', 'location_name', 'driver_name', 'invoice_number', 'material_name', 'date',
         'payment_type', 'type', 'kg', 'price_per_kg_usd', 'price_per_kg_iqd', 'price', 'amount_iqd', 'exchange_rate',
@@ -33,7 +42,7 @@ async function loadPurchases(filterParams = '') {
         return formatNumber(Number(n).toFixed(0)) + ' د.ع';
     }
     const mapped = data.map((row, idx) => ({
-        '#': idx + 1,
+        '#': ((page - 1) * 100) + idx + 1,
         company_name: row.company_name || '',
         location_name: row.location_name || row.location || '',
         driver_name: row.driver_name || row.driver || '',
@@ -55,9 +64,78 @@ async function loadPurchases(filterParams = '') {
         bin_name: row.bin_name || row.bin_id || '',
         actions: `${window.userPermissions && window.userPermissions.canEdit ? `<button class='btn btn-primary btn-sm edit-purchase' data-id='${row.id}' title='دەستکاری'><i class='fa fa-edit'></i></button>` : ''} ${window.userPermissions && window.userPermissions.canDelete ? `<button class='btn btn-danger btn-sm delete-purchase' data-id='${row.id}' title='سڕینەوە'><i class='fa fa-trash'></i></button>` : ''}`
     }));
-    TableController.renderWithPagination('#purchaseTable', mapped, columns, { pageSize: 10 });
+    
+    // Render table without client-side pagination
+    TableController.render('#purchaseTable', mapped, columns);
+    
+    // Render server-side pagination if available
+    if (result.pagination) {
+        renderPurchasePagination(result.pagination);
+    }
 }
-document.addEventListener('DOMContentLoaded', loadPurchases);
+
+function renderPurchasePagination(pagination) {
+    let paginationHtml = '<nav class="mt-3"><ul class="pagination justify-content-center">';
+    
+    // Previous button
+    if (pagination.has_prev) {
+        paginationHtml += `<li class="page-item"><a class="page-link purchase-page-link" href="#" data-page="${pagination.current_page - 1}">پێشوو</a></li>`;
+    } else {
+        paginationHtml += `<li class="page-item disabled"><span class="page-link">پێشوو</span></li>`;
+    }
+    
+    // Page numbers (show max 5 pages around current)
+    let startPage = Math.max(1, pagination.current_page - 2);
+    let endPage = Math.min(pagination.total_pages, pagination.current_page + 2);
+    
+    if (startPage > 1) {
+        paginationHtml += `<li class="page-item"><a class="page-link purchase-page-link" href="#" data-page="1">1</a></li>`;
+        if (startPage > 2) {
+            paginationHtml += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+        }
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+        if (i === pagination.current_page) {
+            paginationHtml += `<li class="page-item active"><span class="page-link">${i}</span></li>`;
+        } else {
+            paginationHtml += `<li class="page-item"><a class="page-link purchase-page-link" href="#" data-page="${i}">${i}</a></li>`;
+        }
+    }
+    
+    if (endPage < pagination.total_pages) {
+        if (endPage < pagination.total_pages - 1) {
+            paginationHtml += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+        }
+        paginationHtml += `<li class="page-item"><a class="page-link purchase-page-link" href="#" data-page="${pagination.total_pages}">${pagination.total_pages}</a></li>`;
+    }
+    
+    // Next button
+    if (pagination.has_next) {
+        paginationHtml += `<li class="page-item"><a class="page-link purchase-page-link" href="#" data-page="${pagination.current_page + 1}">دواتر</a></li>`;
+    } else {
+        paginationHtml += `<li class="page-item disabled"><span class="page-link">دواتر</span></li>`;
+    }
+    
+    paginationHtml += `</ul><p class="text-center text-muted mt-2">پیشاندانی ${pagination.per_page} لە ${pagination.total_records} - پەڕە ${pagination.current_page} لە ${pagination.total_pages}</p></nav>`;
+    
+    // Remove existing pagination
+    $('#purchaseTable').closest('.table-responsive').next('nav').remove();
+    // Add new pagination
+    $('#purchaseTable').closest('.table-responsive').after(paginationHtml);
+}
+
+// Pagination click handler
+$(document).on('click', '.purchase-page-link', function(e) {
+    e.preventDefault();
+    const page = parseInt($(this).data('page'));
+    if (page) {
+        loadPurchases(currentFilterParams, page);
+        $('html, body').animate({ scrollTop: 0 }, 'fast');
+    }
+});
+
+document.addEventListener('DOMContentLoaded', () => loadPurchases('', 1));
 
 // Function to handle dynamic price per kg fields in edit modal
 function handleEditTypeChange() {
