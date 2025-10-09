@@ -16,6 +16,10 @@ async function loadPurchases(filterParams = '', page = 1, searchTerm = '') {
     if (searchTerm) {
         params.set('search', searchTerm);
     }
+    // Add column filters
+    if (Object.keys(activeColumnFilters).length > 0) {
+        params.set('column_filters', JSON.stringify(activeColumnFilters));
+    }
     url += '?' + params.toString();
     
     let res = await fetch(url);
@@ -82,6 +86,9 @@ async function loadPurchases(filterParams = '', page = 1, searchTerm = '') {
         actions: `${window.userPermissions && window.userPermissions.canEdit ? `<button class='btn btn-primary btn-sm edit-purchase' data-id='${row.id}' title='دەستکاری'><i class='fa fa-edit'></i></button>` : ''} ${window.userPermissions && window.userPermissions.canDelete ? `<button class='btn btn-danger btn-sm delete-purchase' data-id='${row.id}' title='سڕینەوە'><i class='fa fa-trash'></i></button>` : ''}`
     }));
     
+    // Store original data for filter dropdowns
+    originalPurchaseData = mapped;
+    
     // Render table without client-side pagination
     TableController.render('#purchaseTable', mapped, columns);
     
@@ -100,7 +107,7 @@ let activeColumnFilters = {};
 
 // Add Excel-style dropdown filters to table headers
 function addExcelStyleFilters(tableSelector, data, columns) {
-    originalPurchaseData = data;
+    // Don't override originalPurchaseData here, it's set in loadPurchases
     const table = document.querySelector(tableSelector);
     if (!table) return;
     
@@ -347,30 +354,10 @@ async function showFilterDropdown(column, columnIdx, data, iconElement) {
     }, 100);
 }
 
-// Apply column filters to table
+// Apply column filters to table (server-side)
 function applyColumnFilters() {
-    let filteredData = [...originalPurchaseData];
-    
-    // Apply each active filter
-    Object.keys(activeColumnFilters).forEach(column => {
-        const allowedValues = activeColumnFilters[column];
-        if (allowedValues && allowedValues.length > 0) {
-            filteredData = filteredData.filter(row => allowedValues.includes(row[column]));
-        }
-    });
-    
-    // Get columns
-    const columns = [
-        '#', 'company_name', 'location_name', 'driver_name', 'invoice_number', 'material_name', 'date',
-        'payment_type', 'type', 'kg', 'price_per_kg_usd', 'price_per_kg_iqd', 'price', 'amount_iqd', 'exchange_rate',
-        'paid_usd', 'paid_iqd', 'remaining_usd', 'remaining_iqd', 'bin_name', 'actions'
-    ];
-    
-    // Re-render table with filtered data
-    TableController.render('#purchaseTable', filteredData, columns);
-    
-    // Re-add filter icons with updated states
-    addExcelStyleFilters('#purchaseTable', originalPurchaseData, columns);
+    // Reload data from server with column filters
+    loadPurchases(currentFilterParams, 1, currentSearchTerm);
     
     // Update filter status badge
     updateFilterStatusBadge();

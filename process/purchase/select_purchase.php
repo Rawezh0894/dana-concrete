@@ -82,6 +82,9 @@ $driver_id = $_GET['driver_id'] ?? null;
 $material_id = $_GET['material_id'] ?? null;
 $search = $_GET['search'] ?? null;
 
+// Column filters (Excel-style filters)
+$column_filters = isset($_GET['column_filters']) ? json_decode($_GET['column_filters'], true) : null;
+
 // Pagination parameters
 $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
 $limit = isset($_GET['limit']) ? max(10, min(500, intval($_GET['limit']))) : 100;
@@ -118,6 +121,30 @@ if ($search) {
     $searchTerm = "%$search%";
     $where[] = "(c.name LIKE ? OR l.name LIKE ? OR d.name LIKE ? OR p.invoice_number LIKE ? OR m.name LIKE ? OR b.name LIKE ? OR p.date LIKE ? OR p.payment_type LIKE ? OR p.type LIKE ?)";
     $params = array_merge($params, [$searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm]);
+}
+
+// Apply column filters (Excel-style filters)
+if ($column_filters && is_array($column_filters)) {
+    $columnMap = [
+        'company_name' => 'c.name',
+        'location_name' => 'l.name',
+        'driver_name' => 'd.name',
+        'material_name' => 'm.name',
+        'bin_name' => 'b.name',
+        'invoice_number' => 'p.invoice_number',
+        'date' => 'p.date',
+        'payment_type' => 'p.payment_type',
+        'type' => 'p.type'
+    ];
+    
+    foreach ($column_filters as $column => $values) {
+        if (isset($columnMap[$column]) && is_array($values) && count($values) > 0) {
+            $dbColumn = $columnMap[$column];
+            $placeholders = str_repeat('?,', count($values) - 1) . '?';
+            $where[] = "$dbColumn IN ($placeholders)";
+            $params = array_merge($params, $values);
+        }
+    }
 }
 
 // Get total count
