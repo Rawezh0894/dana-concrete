@@ -85,9 +85,231 @@ async function loadPurchases(filterParams = '', page = 1, searchTerm = '') {
     // Render table without client-side pagination
     TableController.render('#purchaseTable', mapped, columns);
     
+    // Add Excel-style column filters
+    addExcelStyleFilters('#purchaseTable', mapped, columns);
+    
     // Render server-side pagination if available
     if (result.pagination) {
         renderPurchasePagination(result.pagination, data.length);
+    }
+}
+
+// Store original data and active filters
+let originalPurchaseData = [];
+let activeColumnFilters = {};
+
+// Add Excel-style dropdown filters to table headers
+function addExcelStyleFilters(tableSelector, data, columns) {
+    originalPurchaseData = data;
+    const table = document.querySelector(tableSelector);
+    if (!table) return;
+    
+    const thead = table.querySelector('thead');
+    if (!thead) return;
+    
+    let headerRow = thead.querySelector('tr');
+    if (!headerRow) return;
+    
+    // Remove any existing filter icons
+    headerRow.querySelectorAll('.excel-filter-icon').forEach(e => e.remove());
+    
+    // Add filter icon to each column (except # and actions)
+    columns.forEach((col, idx) => {
+        if (col === '#' || col === 'actions') return;
+        
+        const th = headerRow.children[idx];
+        if (!th) return;
+        
+        // Create filter icon
+        const filterIcon = document.createElement('i');
+        filterIcon.className = 'fas fa-filter excel-filter-icon ms-2';
+        filterIcon.style.cssText = 'cursor: pointer; font-size: 0.85rem; opacity: 0.6;';
+        filterIcon.setAttribute('data-col', col);
+        filterIcon.setAttribute('data-col-idx', idx);
+        filterIcon.title = 'فلتەرکردن';
+        
+        // Check if column already has active filter
+        if (activeColumnFilters[col] && activeColumnFilters[col].length > 0) {
+            filterIcon.style.opacity = '1';
+            filterIcon.style.color = '#28a745';
+        }
+        
+        th.appendChild(filterIcon);
+        
+        // Add click event
+        filterIcon.onclick = function(e) {
+            e.stopPropagation();
+            showFilterDropdown(col, idx, data, filterIcon);
+        };
+    });
+}
+
+// Show filter dropdown menu
+function showFilterDropdown(column, columnIdx, data, iconElement) {
+    // Remove any existing dropdown
+    document.querySelectorAll('.excel-filter-dropdown').forEach(d => d.remove());
+    
+    // Get unique values for this column
+    const uniqueValues = [...new Set(data.map(row => row[column]))].filter(v => v !== '' && v !== null && v !== undefined);
+    uniqueValues.sort();
+    
+    // Create dropdown
+    const dropdown = document.createElement('div');
+    dropdown.className = 'excel-filter-dropdown';
+    dropdown.style.cssText = `
+        position: absolute;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 9999;
+        min-width: 200px;
+        max-height: 300px;
+        overflow-y: auto;
+        padding: 8px 0;
+    `;
+    
+    // Position dropdown
+    const rect = iconElement.getBoundingClientRect();
+    dropdown.style.top = (rect.bottom + window.scrollY) + 'px';
+    dropdown.style.left = rect.left + 'px';
+    
+    // Add "Select All" option
+    const selectAllDiv = document.createElement('div');
+    selectAllDiv.style.cssText = 'padding: 6px 12px; border-bottom: 1px solid #eee; margin-bottom: 4px;';
+    selectAllDiv.innerHTML = `
+        <label style="cursor: pointer; display: block; margin: 0;">
+            <input type="checkbox" class="filter-select-all" ${!activeColumnFilters[column] || activeColumnFilters[column].length === 0 ? 'checked' : ''} style="margin-left: 8px;">
+            <span>هەڵبژاردنی هەموو</span>
+        </label>
+    `;
+    dropdown.appendChild(selectAllDiv);
+    
+    // Add value checkboxes
+    uniqueValues.forEach(value => {
+        const div = document.createElement('div');
+        div.style.cssText = 'padding: 4px 12px; cursor: pointer;';
+        div.onmouseenter = function() { this.style.background = '#f8f9fa'; };
+        div.onmouseleave = function() { this.style.background = 'white'; };
+        
+        const isChecked = !activeColumnFilters[column] || activeColumnFilters[column].length === 0 || activeColumnFilters[column].includes(value);
+        
+        div.innerHTML = `
+            <label style="cursor: pointer; display: block; margin: 0;">
+                <input type="checkbox" class="filter-value-checkbox" value="${value}" ${isChecked ? 'checked' : ''} style="margin-left: 8px;">
+                <span>${value}</span>
+            </label>
+        `;
+        dropdown.appendChild(div);
+    });
+    
+    // Add action buttons
+    const actionsDiv = document.createElement('div');
+    actionsDiv.style.cssText = 'padding: 8px 12px; border-top: 1px solid #eee; margin-top: 4px; display: flex; gap: 8px;';
+    actionsDiv.innerHTML = `
+        <button class="btn btn-sm btn-success filter-apply-btn" style="flex: 1;">جێبەجێکردن</button>
+        <button class="btn btn-sm btn-secondary filter-clear-btn" style="flex: 1;">پاککردنەوە</button>
+    `;
+    dropdown.appendChild(actionsDiv);
+    
+    document.body.appendChild(dropdown);
+    
+    // Select All logic
+    const selectAllCheckbox = dropdown.querySelector('.filter-select-all');
+    const valueCheckboxes = dropdown.querySelectorAll('.filter-value-checkbox');
+    
+    selectAllCheckbox.onchange = function() {
+        valueCheckboxes.forEach(cb => cb.checked = this.checked);
+    };
+    
+    valueCheckboxes.forEach(cb => {
+        cb.onchange = function() {
+            const allChecked = Array.from(valueCheckboxes).every(c => c.checked);
+            selectAllCheckbox.checked = allChecked;
+        };
+    });
+    
+    // Apply button
+    dropdown.querySelector('.filter-apply-btn').onclick = function() {
+        const selectedValues = Array.from(valueCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+        
+        if (selectedValues.length === uniqueValues.length) {
+            // All selected = no filter
+            delete activeColumnFilters[column];
+        } else {
+            activeColumnFilters[column] = selectedValues;
+        }
+        
+        applyColumnFilters();
+        dropdown.remove();
+    };
+    
+    // Clear button
+    dropdown.querySelector('.filter-clear-btn').onclick = function() {
+        delete activeColumnFilters[column];
+        applyColumnFilters();
+        dropdown.remove();
+    };
+    
+    // Close dropdown when clicking outside
+    setTimeout(() => {
+        document.addEventListener('click', function closeDropdown(e) {
+            if (!dropdown.contains(e.target)) {
+                dropdown.remove();
+                document.removeEventListener('click', closeDropdown);
+            }
+        });
+    }, 100);
+}
+
+// Apply column filters to table
+function applyColumnFilters() {
+    let filteredData = [...originalPurchaseData];
+    
+    // Apply each active filter
+    Object.keys(activeColumnFilters).forEach(column => {
+        const allowedValues = activeColumnFilters[column];
+        if (allowedValues && allowedValues.length > 0) {
+            filteredData = filteredData.filter(row => allowedValues.includes(row[column]));
+        }
+    });
+    
+    // Get columns
+    const columns = [
+        '#', 'company_name', 'location_name', 'driver_name', 'invoice_number', 'material_name', 'date',
+        'payment_type', 'type', 'kg', 'price_per_kg_usd', 'price_per_kg_iqd', 'price', 'amount_iqd', 'exchange_rate',
+        'paid_usd', 'paid_iqd', 'remaining_usd', 'remaining_iqd', 'bin_name', 'actions'
+    ];
+    
+    // Re-render table with filtered data
+    TableController.render('#purchaseTable', filteredData, columns);
+    
+    // Re-add filter icons with updated states
+    addExcelStyleFilters('#purchaseTable', originalPurchaseData, columns);
+    
+    // Update filter status badge
+    updateFilterStatusBadge();
+}
+
+// Clear all column filters
+function clearAllColumnFilters() {
+    activeColumnFilters = {};
+    applyColumnFilters();
+}
+
+// Update filter status badge
+function updateFilterStatusBadge() {
+    const activeFiltersCount = Object.keys(activeColumnFilters).length;
+    const btn = document.getElementById('clearColumnFiltersBtn');
+    
+    if (btn) {
+        if (activeFiltersCount > 0) {
+            btn.innerHTML = `<i class="fas fa-filter-circle-xmark me-1"></i>پاککردنەوەی فلتەرەکانی کۆڵۆم <span class="badge bg-danger ms-1">${activeFiltersCount}</span>`;
+        } else {
+            btn.innerHTML = `<i class="fas fa-filter-circle-xmark me-1"></i>پاککردنەوەی فلتەرەکانی کۆڵۆم`;
+        }
     }
 }
 

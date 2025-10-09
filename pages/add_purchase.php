@@ -254,11 +254,16 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
     
     <!-- Global Search Row -->
     <div class="filter-section">
-      <div class="row">
-        <div class="col-md-12">
+      <div class="row align-items-end">
+        <div class="col-md-10">
           <label for="purchase_global_search">گەڕان لە هەموو خانەکاندا:</label>
           <input type="text" class="form-control" id="purchase_global_search" placeholder="گەڕان بە کۆمپانیا، شوێن، شۆفێر، ژمارەی پسوڵە، مەواد، بەروار...">
           <small class="text-muted">گەڕان لە هەموو داتاکانی database</small>
+        </div>
+        <div class="col-md-2">
+          <button class="btn btn-warning w-100" id="clearColumnFiltersBtn" type="button">
+            <i class="fas fa-filter-circle-xmark me-1"></i>پاککردنەوەی فلتەرەکانی کۆڵۆم
+          </button>
         </div>
       </div>
     </div>
@@ -883,6 +888,13 @@ $(document).ready(function() {
         $('#filter_to').val('');
         $('#purchase_global_search').val('');
         applyFilters();
+    });
+    
+    // Clear column filters
+    $('#clearColumnFiltersBtn').on('click', function() {
+        if (typeof clearAllColumnFilters === 'function') {
+            clearAllColumnFilters();
+        }
     });
     
     // Function to apply all filters
