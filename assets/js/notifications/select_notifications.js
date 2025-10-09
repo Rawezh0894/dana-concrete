@@ -26,16 +26,20 @@ $(document).ready(function() {
 
     // Store notifications data globally
     let notificationsData = [];
+    let currentPage = 1;
+    let perPage = 100; // Default items per page
 
-    async function loadNotifications() {
+    async function loadNotifications(page = 1) {
+        currentPage = page;
         const search = $('#notificationSearch').val();
         const type = $('#notificationTypeFilter').val();
         const seen = $('#notificationSeenFilter').val();
         const date_filter = $('#notificationDateFilter').val();
-        const pageSize = 10; // Default page size
         
         let url = '../process/notifications/select_notifications.php';
         const params = [];
+        params.push('page=' + page);
+        params.push('limit=' + perPage);
         if (search) params.push('search=' + encodeURIComponent(search));
         if (type) params.push('type=' + encodeURIComponent(type));
         if (seen) params.push('seen=' + encodeURIComponent(seen));
@@ -84,10 +88,16 @@ $(document).ready(function() {
                 `
             }));
 
-            TableController.renderWithPagination('#notificationsTable', mapped, columns, { pageSize: pageSize });
+            // Render table without internal pagination (since we're using server-side pagination)
+            TableController.renderTable('#notificationsTable', mapped, columns);
             
-            // Update total count
-            $('#notificationsTotal').html(`گشتی: ${data.total}`);
+            // Update total count and pagination info
+            if (data.pagination) {
+                $('#notificationsTotal').html(`پیشاندانی ${data.notifications.length} لە ${data.pagination.total_records} - پەڕە ${data.pagination.current_page} لە ${data.pagination.total_pages}`);
+                renderPagination(data.pagination);
+            } else {
+                $('#notificationsTotal').html(`گشتی: ${data.total}`);
+            }
             
             // Reset select all
             $('#selectAllNotifications').prop('checked', false);
@@ -98,9 +108,70 @@ $(document).ready(function() {
         }
     }
 
-    // Search/filter events
+    function renderPagination(pagination) {
+        let paginationHtml = '<nav class="mt-3"><ul class="pagination justify-content-center">';
+        
+        // Previous button
+        if (pagination.has_prev) {
+            paginationHtml += `<li class="page-item"><a class="page-link" href="#" data-page="${pagination.current_page - 1}">پێشوو</a></li>`;
+        } else {
+            paginationHtml += `<li class="page-item disabled"><span class="page-link">پێشوو</span></li>`;
+        }
+        
+        // Page numbers (show max 5 pages around current)
+        let startPage = Math.max(1, pagination.current_page - 2);
+        let endPage = Math.min(pagination.total_pages, pagination.current_page + 2);
+        
+        if (startPage > 1) {
+            paginationHtml += `<li class="page-item"><a class="page-link" href="#" data-page="1">1</a></li>`;
+            if (startPage > 2) {
+                paginationHtml += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+            }
+        }
+        
+        for (let i = startPage; i <= endPage; i++) {
+            if (i === pagination.current_page) {
+                paginationHtml += `<li class="page-item active"><span class="page-link">${i}</span></li>`;
+            } else {
+                paginationHtml += `<li class="page-item"><a class="page-link" href="#" data-page="${i}">${i}</a></li>`;
+            }
+        }
+        
+        if (endPage < pagination.total_pages) {
+            if (endPage < pagination.total_pages - 1) {
+                paginationHtml += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+            }
+            paginationHtml += `<li class="page-item"><a class="page-link" href="#" data-page="${pagination.total_pages}">${pagination.total_pages}</a></li>`;
+        }
+        
+        // Next button
+        if (pagination.has_next) {
+            paginationHtml += `<li class="page-item"><a class="page-link" href="#" data-page="${pagination.current_page + 1}">دواتر</a></li>`;
+        } else {
+            paginationHtml += `<li class="page-item disabled"><span class="page-link">دواتر</span></li>`;
+        }
+        
+        paginationHtml += '</ul></nav>';
+        
+        // Remove existing pagination
+        $('#notificationsTable').closest('.table-responsive').next('nav').remove();
+        // Add new pagination
+        $('#notificationsTable').closest('.table-responsive').after(paginationHtml);
+    }
+
+    // Pagination click handler
+    $(document).on('click', '.pagination a.page-link', function(e) {
+        e.preventDefault();
+        const page = parseInt($(this).data('page'));
+        if (page) {
+            loadNotifications(page);
+            $('html, body').animate({ scrollTop: 0 }, 'fast');
+        }
+    });
+
+    // Search/filter events - reset to page 1
     $('#notificationSearch, #notificationTypeFilter, #notificationSeenFilter, #notificationDateFilter').on('input change', function() {
-        loadNotifications();
+        loadNotifications(1);
     });
 
     // View details

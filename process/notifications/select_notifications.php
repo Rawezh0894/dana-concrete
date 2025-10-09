@@ -11,6 +11,11 @@ $type = $_GET['type'] ?? '';
 $seen = $_GET['seen'] ?? '';
 $date_filter = $_GET['date_filter'] ?? '';
 
+// Pagination parameters
+$page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+$limit = isset($_GET['limit']) ? max(10, min(500, intval($_GET['limit']))) : 100;
+$offset = ($page - 1) * $limit;
+
 // Get notifications
 $where = [];
 $params = [];
@@ -37,10 +42,16 @@ if ($date_filter === 'yesterday') {
 }
 $where_sql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
 
-// Get all notifications
-$sql = "SELECT n.*, u.username FROM notifications n LEFT JOIN users u ON n.user_id = u.id $where_sql ORDER BY n.created_at DESC";
+// Get total count of notifications
+$count_sql = "SELECT COUNT(*) as total FROM notifications n LEFT JOIN users u ON n.user_id = u.id $where_sql";
+$count_stmt = $pdo->prepare($count_sql);
+$count_stmt->execute($params);
+$notifications_total = $count_stmt->fetchColumn();
+
+// Get paginated notifications
+$sql = "SELECT n.*, u.username FROM notifications n LEFT JOIN users u ON n.user_id = u.id $where_sql ORDER BY n.created_at DESC LIMIT ? OFFSET ?";
 $stmt = $pdo->prepare($sql);
-$stmt->execute($params);
+$stmt->execute(array_merge($params, [$limit, $offset]));
 $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Get notes - Show all notes by default unless specifically filtered
@@ -69,6 +80,15 @@ if ($date_filter === 'yesterday') {
 
 $notes_where_sql = $notes_where ? ('WHERE ' . implode(' AND ', $notes_where)) : '';
 
+// Get total count of notes
+$notes_count_sql = "SELECT COUNT(*) as total FROM notes n 
+LEFT JOIN customers c ON n.customer_id = c.id
+$notes_where_sql";
+$notes_count_stmt = $pdo->prepare($notes_count_sql);
+$notes_count_stmt->execute($notes_params);
+$notes_total = $notes_count_stmt->fetchColumn();
+
+// Get paginated notes
 $notes_sql = "SELECT 
     n.*,
     c.name AS customer_name,
@@ -85,10 +105,10 @@ LEFT JOIN employees md ON n.mixer_driver_id = md.id
 LEFT JOIN cars pc ON n.pump_car_id = pc.id
 LEFT JOIN employees pd ON n.pump_driver_id = pd.id
 $notes_where_sql
-ORDER BY n.date DESC, n.time DESC";
+ORDER BY n.date DESC, n.time DESC LIMIT ? OFFSET ?";
 
 $stmt = $pdo->prepare($notes_sql);
-$stmt->execute($notes_params);
+$stmt->execute(array_merge($notes_params, [$limit, $offset]));
 $notes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Convert notes to notification format
@@ -146,8 +166,20 @@ $all_notifications = array_map(function($row) use ($action_ku) {
     return $row;
 }, $all_notifications);
 
+// Calculate pagination info
+$total_records = $notifications_total + $notes_total;
+$total_pages = ceil($total_records / $limit);
+
 echo json_encode([
     'success' => true,
     'notifications' => $all_notifications,
-    'total' => count($all_notifications)
+    'total' => count($all_notifications),
+    'pagination' => [
+        'current_page' => $page,
+        'total_pages' => $total_pages,
+        'total_records' => $total_records,
+        'per_page' => $limit,
+        'has_next' => $page < $total_pages,
+        'has_prev' => $page > 1
+    ]
 ]); 
