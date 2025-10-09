@@ -80,6 +80,7 @@ $company_id = $_GET['company_id'] ?? null;
 $location_id = $_GET['location_id'] ?? null;
 $driver_id = $_GET['driver_id'] ?? null;
 $material_id = $_GET['material_id'] ?? null;
+$search = $_GET['search'] ?? null;
 
 // Pagination parameters
 $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
@@ -112,6 +113,11 @@ if ($driver_id) {
 if ($material_id) {
     $where[] = "p.material_id = ?";
     $params[] = $material_id;
+}
+if ($search) {
+    $searchTerm = "%$search%";
+    $where[] = "(c.name LIKE ? OR l.name LIKE ? OR d.name LIKE ? OR p.invoice_number LIKE ? OR m.name LIKE ? OR b.name LIKE ? OR p.date LIKE ? OR p.payment_type LIKE ? OR p.type LIKE ?)";
+    $params = array_merge($params, [$searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm]);
 }
 
 // Get total count

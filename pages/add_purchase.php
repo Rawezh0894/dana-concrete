@@ -252,6 +252,17 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
       </div>
     </div>
     
+    <!-- Global Search Row -->
+    <div class="filter-section">
+      <div class="row">
+        <div class="col-md-12">
+          <label for="purchase_global_search">گەڕان لە هەموو خانەکاندا:</label>
+          <input type="text" class="form-control" id="purchase_global_search" placeholder="گەڕان بە کۆمپانیا، شوێن، شۆفێر، ژمارەی پسوڵە، مەواد، بەروار...">
+          <small class="text-muted">گەڕان لە هەموو داتاکانی database</small>
+        </div>
+      </div>
+    </div>
+    
     <!-- Additional Filters Row -->
     <div class="filter-section">
       <div class="row">
@@ -847,6 +858,16 @@ $('#editPurchaseModal').on('shown.bs.modal', function() {
 
 // Filter functionality for company, location, driver, and material
 $(document).ready(function() {
+    let searchTimeout = null;
+    
+    // Global search with debounce
+    $('#purchase_global_search').on('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(function() {
+            applyFilters();
+        }, 500); // Wait 500ms after user stops typing
+    });
+    
     // Add event listeners for all filters
     $('#filter_company, #filter_location, #filter_driver, #filter_material, #filter_from, #filter_to').on('change', function() {
         applyFilters();
@@ -860,6 +881,7 @@ $(document).ready(function() {
         $('#filter_material').val('');
         $('#filter_from').val('');
         $('#filter_to').val('');
+        $('#purchase_global_search').val('');
         applyFilters();
     });
     
@@ -871,6 +893,7 @@ $(document).ready(function() {
         const materialId = $('#filter_material').val();
         const fromDate = $('#filter_from').val();
         const toDate = $('#filter_to').val();
+        const searchTerm = $('#purchase_global_search').val();
         
         // Build filter parameters
         const params = new URLSearchParams();
@@ -881,9 +904,9 @@ $(document).ready(function() {
         if (fromDate) params.append('from', fromDate);
         if (toDate) params.append('to', toDate);
         
-        // Call the existing loadPurchases function with filters and reset to page 1
+        // Call the existing loadPurchases function with filters, page 1, and search term
         if (typeof loadPurchases === 'function') {
-            loadPurchases(params.toString(), 1);
+            loadPurchases(params.toString(), 1, searchTerm);
         }
         
         // Also update summary cards if the function exists

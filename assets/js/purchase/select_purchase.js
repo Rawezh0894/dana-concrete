@@ -1,15 +1,21 @@
 let currentPurchasePage = 1;
 let currentFilterParams = '';
+let currentSearchTerm = '';
+let purchaseSearchTimeout = null;
 
-async function loadPurchases(filterParams = '', page = 1) {
+async function loadPurchases(filterParams = '', page = 1, searchTerm = '') {
     currentPurchasePage = page;
     currentFilterParams = filterParams;
+    currentSearchTerm = searchTerm;
     
     // Build URL with filters and pagination
     let url = '../process/purchase/select_purchase.php';
     const params = new URLSearchParams(filterParams);
     params.set('page', page);
     params.set('limit', 10);
+    if (searchTerm) {
+        params.set('search', searchTerm);
+    }
     url += '?' + params.toString();
     
     let res = await fetch(url);
@@ -79,81 +85,10 @@ async function loadPurchases(filterParams = '', page = 1) {
     // Render table without client-side pagination
     TableController.render('#purchaseTable', mapped, columns);
     
-    // Add column search functionality
-    addColumnSearchFilters('#purchaseTable', columns);
-    
     // Render server-side pagination if available
     if (result.pagination) {
         renderPurchasePagination(result.pagination, data.length);
     }
-}
-
-// Add search inputs to table headers
-function addColumnSearchFilters(tableSelector, columns) {
-    const table = document.querySelector(tableSelector);
-    if (!table) return;
-    
-    const thead = table.querySelector('thead');
-    const tbody = table.querySelector('tbody');
-    if (!thead || !tbody) return;
-    
-    let headerRow = thead.querySelector('tr');
-    if (!headerRow) return;
-    
-    // Remove any existing search inputs first
-    headerRow.querySelectorAll('.table-search-input, br.search-break').forEach(e => e.remove());
-    
-    // Add search inputs to each column
-    columns.forEach((col, idx) => {
-        const th = headerRow.children[idx];
-        if (!th) return;
-        
-        // Don't add search to action columns, # column, or already has input
-        if (col !== 'actions' && col !== '#' && !th.querySelector('.table-search-input')) {
-            const br = document.createElement('br');
-            br.className = 'search-break';
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.className = 'form-control form-control-sm table-search-input';
-            input.placeholder = 'گەڕان...';
-            input.setAttribute('data-col', col);
-            th.appendChild(br);
-            th.appendChild(input);
-        }
-    });
-    
-    // Add event listeners for filtering
-    thead.querySelectorAll('.table-search-input').forEach(input => {
-        input.oninput = function() {
-            filterTableRows(tbody, columns, thead);
-        };
-    });
-}
-
-// Filter table rows based on search inputs
-function filterTableRows(tbody, columns, thead) {
-    const filters = {};
-    thead.querySelectorAll('.table-search-input').forEach(input => {
-        filters[input.getAttribute('data-col')] = input.value.trim().toLowerCase();
-    });
-    
-    const rows = tbody.querySelectorAll('tr');
-    rows.forEach(row => {
-        let show = true;
-        columns.forEach((col, idx) => {
-            const filter = filters[col];
-            if (filter) {
-                const cell = row.children[idx];
-                if (cell) {
-                    const text = cell.textContent.toLowerCase();
-                    if (!text.includes(filter)) {
-                        show = false;
-                    }
-                }
-            }
-        });
-        row.style.display = show ? '' : 'none';
-    });
 }
 
 function renderPurchasePagination(pagination, currentRecordsCount) {
@@ -212,7 +147,7 @@ $(document).on('click', '.purchase-page-link', function(e) {
     e.preventDefault();
     const page = parseInt($(this).data('page'));
     if (page) {
-        loadPurchases(currentFilterParams, page);
+        loadPurchases(currentFilterParams, page, currentSearchTerm);
         $('html, body').animate({ scrollTop: 0 }, 'fast');
     }
 });
