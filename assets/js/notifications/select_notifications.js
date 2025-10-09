@@ -63,7 +63,7 @@ $(document).ready(function() {
             ];
 
             if (!data.success) {
-                TableController.renderWithPagination('#notificationsTable', [], columns, { pageSize: 10 });
+                TableController.render('#notificationsTable', [], columns);
                 return;
             }
 
@@ -88,8 +88,8 @@ $(document).ready(function() {
                 `
             }));
 
-            // Render table with all results on single page (pagination is handled server-side)
-            TableController.renderWithPagination('#notificationsTable', mapped, columns, { pageSize: mapped.length || 100 });
+            // Render table without internal pagination (since we're using server-side pagination)
+            TableController.render('#notificationsTable', mapped, columns);
             
             // Update total count and pagination info
             if (data.pagination) {
@@ -104,7 +104,8 @@ $(document).ready(function() {
             $('#deleteSelectedNotifications').prop('disabled', true);
         } catch (error) {
             console.error('Error loading notifications:', error);
-            TableController.renderWithPagination('#notificationsTable', [], columns, { pageSize: 10 });
+            const columns = ['select', 'action', 'table_name', 'description', 'username', 'created_at', 'seen', 'actions'];
+            TableController.render('#notificationsTable', [], columns);
         }
     }
 
@@ -153,10 +154,9 @@ $(document).ready(function() {
         
         paginationHtml += '</ul></nav>';
         
-        // Remove ALL existing pagination (both TableController's and ours)
-        $('#notificationsTable').closest('.table-responsive').siblings('nav').remove();
-        $('#notificationsTable').closest('.table-responsive').next('.pagination-container').remove();
-        // Add new server-side pagination
+        // Remove existing pagination
+        $('#notificationsTable').closest('.table-responsive').next('nav').remove();
+        // Add new pagination
         $('#notificationsTable').closest('.table-responsive').after(paginationHtml);
     }
 
