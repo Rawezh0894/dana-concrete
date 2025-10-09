@@ -172,7 +172,21 @@ async function showFilterDropdown(column, columnIdx, data, iconElement) {
     `;
     const iconRect = iconElement.getBoundingClientRect();
     loadingDropdown.style.top = (iconRect.bottom + window.scrollY) + 'px';
-    loadingDropdown.style.left = iconRect.left + 'px';
+    
+    // Smart positioning: check if there's enough space on the right
+    const dropdownWidth = 200; // min width
+    const spaceOnRight = window.innerWidth - iconRect.right;
+    const spaceOnLeft = iconRect.left;
+    
+    if (spaceOnRight < dropdownWidth && spaceOnLeft > dropdownWidth) {
+        // Not enough space on right, but enough on left - align to right edge
+        loadingDropdown.style.right = (window.innerWidth - iconRect.right) + 'px';
+        loadingDropdown.style.left = 'auto';
+    } else {
+        // Use default left alignment
+        loadingDropdown.style.left = Math.max(10, iconRect.left) + 'px';
+    }
+    
     loadingDropdown.innerHTML = '<i class="fas fa-spinner fa-spin"></i> چاوەڕوان بە...';
     document.body.appendChild(loadingDropdown);
     
@@ -214,9 +228,24 @@ async function showFilterDropdown(column, columnIdx, data, iconElement) {
         padding: 8px 0;
     `;
     
-    // Position dropdown (reuse same position)
+    // Position dropdown with smart positioning
     dropdown.style.top = (iconRect.bottom + window.scrollY) + 'px';
-    dropdown.style.left = iconRect.left + 'px';
+    
+    // Check available space and position accordingly
+    const minDropdownWidth = 250;
+    const availableSpaceRight = window.innerWidth - iconRect.right;
+    const availableSpaceLeft = iconRect.left;
+    
+    if (availableSpaceRight < minDropdownWidth && availableSpaceLeft > minDropdownWidth) {
+        // Not enough space on right, position to the left of the icon
+        dropdown.style.right = (window.innerWidth - iconRect.right) + 'px';
+        dropdown.style.left = 'auto';
+    } else {
+        // Default: position to the right, but ensure minimum 10px from edge
+        const leftPosition = Math.max(10, Math.min(iconRect.left, window.innerWidth - minDropdownWidth - 10));
+        dropdown.style.left = leftPosition + 'px';
+        dropdown.style.right = 'auto';
+    }
     
     // Add search box
     const searchDiv = document.createElement('div');
