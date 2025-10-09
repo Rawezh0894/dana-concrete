@@ -23,7 +23,18 @@ async function loadPurchases(filterParams = '', page = 1) {
         return;
     }
     
-    const data = result.data || result; // Handle both old and new format
+    // Handle both old and new response formats
+    let data;
+    if (result.success && Array.isArray(result.data)) {
+        data = result.data;
+    } else if (Array.isArray(result)) {
+        data = result;
+        result = { data: result }; // Wrap for consistency
+    } else {
+        console.error('Unexpected response format:', result);
+        data = [];
+    }
+    
     const columns = [
         '#', 'company_name', 'location_name', 'driver_name', 'invoice_number', 'material_name', 'date',
         'payment_type', 'type', 'kg', 'price_per_kg_usd', 'price_per_kg_iqd', 'price', 'amount_iqd', 'exchange_rate',
@@ -70,11 +81,11 @@ async function loadPurchases(filterParams = '', page = 1) {
     
     // Render server-side pagination if available
     if (result.pagination) {
-        renderPurchasePagination(result.pagination);
+        renderPurchasePagination(result.pagination, data.length);
     }
 }
 
-function renderPurchasePagination(pagination) {
+function renderPurchasePagination(pagination, currentRecordsCount) {
     let paginationHtml = '<nav class="mt-3"><ul class="pagination justify-content-center">';
     
     // Previous button
@@ -117,7 +128,7 @@ function renderPurchasePagination(pagination) {
         paginationHtml += `<li class="page-item disabled"><span class="page-link">دواتر</span></li>`;
     }
     
-    paginationHtml += `</ul><p class="text-center text-muted mt-2">پیشاندانی ${pagination.per_page} لە ${pagination.total_records} - پەڕە ${pagination.current_page} لە ${pagination.total_pages}</p></nav>`;
+    paginationHtml += `</ul><p class="text-center text-muted mt-2">پیشاندانی ${currentRecordsCount} لە ${pagination.total_records} - پەڕە ${pagination.current_page} لە ${pagination.total_pages}</p></nav>`;
     
     // Remove existing pagination
     $('#purchaseTable').closest('.table-responsive').next('nav').remove();
