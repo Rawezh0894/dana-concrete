@@ -18,6 +18,7 @@ $month = isset($_GET['month']) ? $_GET['month'] : 'all';
 $date_from = isset($_GET['date_from']) ? $_GET['date_from'] : '';
 $date_to = isset($_GET['date_to']) ? $_GET['date_to'] : '';
 $location = isset($_GET['location']) ? $_GET['location'] : 'all';
+$customers = isset($_GET['customers']) ? $_GET['customers'] : 'all';
 
 try {
     // Get customer information including opening debt, name, and mobile
@@ -90,6 +91,23 @@ if ($location !== 'all' && $location !== 'none') {
         // Single location
         $sql .= " AND s.location = :location";
         $params['location'] = $location;
+    }
+}
+if ($customers !== 'all' && $customers !== 'none') {
+    // Handle multiple customers (comma-separated)
+    if (strpos($customers, ',') !== false) {
+        $customerIds = explode(',', $customers);
+        $customerPlaceholders = [];
+        foreach ($customerIds as $index => $custId) {
+            $paramName = 'customer_' . $index;
+            $customerPlaceholders[] = ':' . $paramName;
+            $params[$paramName] = intval(trim($custId));
+        }
+        $sql .= " AND s.customer_id IN (" . implode(',', $customerPlaceholders) . ")";
+    } else {
+        // Single customer (override the customer_id from GET)
+        $sql .= " AND s.customer_id = :customer_filter";
+        $params['customer_filter'] = intval($customers);
     }
 }
 $sql .= " GROUP BY s.order_date, s.location, f.strength_mpa, f.strength_kg, s.price_per_unit";

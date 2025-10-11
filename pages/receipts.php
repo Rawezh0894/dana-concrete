@@ -510,6 +510,27 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                         </div>
                     </div>
                 </div>
+                
+                <div class="filter-group">
+                    <label for="customer-filter" class="filter-label">
+                        <i class="fa fa-user"></i> وەرگر:
+                    </label>
+                    <div class="location-multiselect" id="customer-multiselect">
+                        <div class="location-select-header" onclick="toggleCustomerDropdown()">
+                            <span id="customer-select-text">هەموو وەرگرەکان</span>
+                            <i class="fa fa-chevron-down" id="customer-dropdown-icon"></i>
+                        </div>
+                        <div class="location-dropdown" id="customer-dropdown" style="display: none;">
+                            <div class="location-option">
+                                <input type="checkbox" id="customer-all" class="customer-checkbox" checked>
+                                <label for="customer-all">هەموو وەرگرەکان</label>
+                            </div>
+                            <div id="customer-options-container">
+                                <!-- Customer options will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <!-- Row 2: Date Range Filters -->
@@ -707,6 +728,8 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 
                 // Reset location multi-select
                 resetLocationMultiSelect();
+                // Reset customer multi-select
+                resetCustomerMultiSelect();
                 if (showInvoiceCheckbox) {
                     showInvoiceCheckbox.checked = false;
                     toggleInvoiceNumberColumn(false);
@@ -1131,13 +1154,96 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         return selectedLocations.length > 0 ? selectedLocations.join(',') : 'none';
     }
     
+    // Customer Multi-Select Functions
+    function toggleCustomerDropdown() {
+        const dropdown = document.getElementById('customer-dropdown');
+        const header = document.querySelector('#customer-multiselect .location-select-header');
+        const icon = document.getElementById('customer-dropdown-icon');
+        
+        if (dropdown.style.display === 'none' || dropdown.style.display === '') {
+            dropdown.style.display = 'block';
+            header.classList.add('active');
+            icon.style.transform = 'rotate(180deg)';
+        } else {
+            dropdown.style.display = 'none';
+            header.classList.remove('active');
+            icon.style.transform = 'rotate(0deg)';
+        }
+    }
+    
+    function resetCustomerMultiSelect() {
+        const allCheckbox = document.getElementById('customer-all');
+        const customerCheckboxes = document.querySelectorAll('.customer-checkbox:not(#customer-all)');
+        
+        if (allCheckbox) {
+            allCheckbox.checked = true;
+        }
+        
+        customerCheckboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        
+        updateCustomerSelectText();
+    }
+    
+    function updateCustomerSelectText() {
+        const allCheckbox = document.getElementById('customer-all');
+        const customerCheckboxes = document.querySelectorAll('.customer-checkbox:not(#customer-all)');
+        const selectText = document.getElementById('customer-select-text');
+        
+        if (allCheckbox && allCheckbox.checked) {
+            selectText.textContent = 'هەموو وەرگرەکان';
+            return;
+        }
+        
+        const selectedCustomers = Array.from(customerCheckboxes)
+            .filter(checkbox => checkbox.checked)
+            .map(checkbox => checkbox.nextElementSibling.textContent);
+        
+        if (selectedCustomers.length === 0) {
+            selectText.textContent = 'هیچ وەرگرێک هەڵنەبژارد';
+        } else if (selectedCustomers.length === 1) {
+            selectText.textContent = selectedCustomers[0];
+        } else if (selectedCustomers.length <= 3) {
+            selectText.textContent = selectedCustomers.join(', ');
+        } else {
+            selectText.textContent = `${selectedCustomers.length} وەرگر هەڵبژارد`;
+        }
+    }
+    
+    function getSelectedCustomers() {
+        const allCheckbox = document.getElementById('customer-all');
+        const customerCheckboxes = document.querySelectorAll('.customer-checkbox:not(#customer-all)');
+        
+        if (allCheckbox && allCheckbox.checked) {
+            return 'all';
+        }
+        
+        const selectedCustomers = Array.from(customerCheckboxes)
+            .filter(checkbox => checkbox.checked)
+            .map(checkbox => checkbox.value);
+        
+        return selectedCustomers.length > 0 ? selectedCustomers.join(',') : 'none';
+    }
+    
     // Close dropdown when clicking outside
     document.addEventListener('click', function(event) {
-        const multiselect = document.getElementById('location-multiselect');
-        if (multiselect && !multiselect.contains(event.target)) {
+        const locationMultiselect = document.getElementById('location-multiselect');
+        if (locationMultiselect && !locationMultiselect.contains(event.target)) {
             const dropdown = document.getElementById('location-dropdown');
-            const header = document.querySelector('.location-select-header');
+            const header = document.querySelector('#location-multiselect .location-select-header');
             const icon = document.getElementById('location-dropdown-icon');
+            
+            if (dropdown) dropdown.style.display = 'none';
+            if (header) header.classList.remove('active');
+            if (icon) icon.style.transform = 'rotate(0deg)';
+        }
+        
+        const customerMultiselect = document.getElementById('customer-multiselect');
+        if (customerMultiselect && !customerMultiselect.contains(event.target)) {
+            const dropdown = document.getElementById('customer-dropdown');
+            const header = document.querySelector('#customer-multiselect .location-select-header');
+            const icon = document.getElementById('customer-dropdown-icon');
             
             if (dropdown) dropdown.style.display = 'none';
             if (header) header.classList.remove('active');
@@ -1149,5 +1255,6 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 <script src="../assets/js/receipts/select_sale.js"></script>
 <script src="../assets/js/receipts/select_return_debt.js"></script>
 <script src="../assets/js/receipts/load_locations.js"></script>
+<script src="../assets/js/receipts/load_customers.js"></script>
 </body>
 </html>
