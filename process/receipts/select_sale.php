@@ -93,23 +93,26 @@ if ($location !== 'all' && $location !== 'none') {
         $params['location'] = $location;
     }
 }
+
+// Add customer filter
 if ($customers !== 'all' && $customers !== 'none') {
     // Handle multiple customers (comma-separated)
     if (strpos($customers, ',') !== false) {
-        $customerIds = explode(',', $customers);
+        $customerArray = explode(',', $customers);
         $customerPlaceholders = [];
-        foreach ($customerIds as $index => $custId) {
+        foreach ($customerArray as $index => $cust) {
             $paramName = 'customer_' . $index;
             $customerPlaceholders[] = ':' . $paramName;
-            $params[$paramName] = intval(trim($custId));
+            $params[$paramName] = intval(trim($cust));
         }
         $sql .= " AND s.customer_id IN (" . implode(',', $customerPlaceholders) . ")";
     } else {
-        // Single customer (override the customer_id from GET)
+        // Single customer
         $sql .= " AND s.customer_id = :customer_filter";
         $params['customer_filter'] = intval($customers);
     }
 }
+
 $sql .= " GROUP BY s.order_date, s.location, f.strength_mpa, f.strength_kg, s.price_per_unit";
 $sql .= " ORDER BY s.order_date ASC";
 

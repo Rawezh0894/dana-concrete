@@ -6,8 +6,15 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
-// TODO: Fetch customer, sales, and debt data using $customer_id
-// For now, use placeholders
+
+// Fetch all customers for the filter dropdown
+$customers = [];
+try {
+    $customersStmt = $pdo->query("SELECT id, name FROM customers ORDER BY name ASC");
+    $customers = $customersStmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+    // Handle error silently
+}
 ?>
 <!DOCTYPE html>
 <html lang="ku" dir="rtl">
@@ -526,7 +533,12 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                                 <label for="customer-all">هەموو وەرگرەکان</label>
                             </div>
                             <div id="customer-options-container">
-                                <!-- Customer options will be loaded here -->
+                                <?php foreach ($customers as $customer): ?>
+                                <div class="location-option">
+                                    <input type="checkbox" id="customer-<?= $customer['id'] ?>" class="customer-checkbox" value="<?= $customer['id'] ?>">
+                                    <label for="customer-<?= $customer['id'] ?>"><?= htmlspecialchars($customer['name']) ?></label>
+                                </div>
+                                <?php endforeach; ?>
                             </div>
                         </div>
                     </div>
@@ -1226,9 +1238,48 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         return selectedCustomers.length > 0 ? selectedCustomers.join(',') : 'none';
     }
     
+    // Setup customer checkbox listeners
+    document.addEventListener('DOMContentLoaded', function() {
+        // Customer "all" checkbox handler
+        const customerAllCheckbox = document.getElementById('customer-all');
+        if (customerAllCheckbox) {
+            customerAllCheckbox.addEventListener('change', function() {
+                const customerCheckboxes = document.querySelectorAll('.customer-checkbox:not(#customer-all)');
+                customerCheckboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                updateCustomerSelectText();
+                if (typeof loadSalesData === 'function') loadSalesData();
+            });
+        }
+        
+        // Individual customer checkboxes handler
+        const customerCheckboxes = document.querySelectorAll('.customer-checkbox:not(#customer-all)');
+        customerCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const allCheckbox = document.getElementById('customer-all');
+                if (this.checked && allCheckbox) {
+                    allCheckbox.checked = false;
+                }
+                
+                // Check if all are unchecked, then check "all"
+                const anyChecked = Array.from(customerCheckboxes).some(cb => cb.checked);
+                if (!anyChecked && allCheckbox) {
+                    allCheckbox.checked = true;
+                }
+                
+                updateCustomerSelectText();
+                if (typeof loadSalesData === 'function') loadSalesData();
+            });
+        });
+    });
+    
     // Close dropdown when clicking outside
     document.addEventListener('click', function(event) {
         const locationMultiselect = document.getElementById('location-multiselect');
+        const customerMultiselect = document.getElementById('customer-multiselect');
+        
+        // Close location dropdown
         if (locationMultiselect && !locationMultiselect.contains(event.target)) {
             const dropdown = document.getElementById('location-dropdown');
             const header = document.querySelector('#location-multiselect .location-select-header');
@@ -1239,7 +1290,7 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             if (icon) icon.style.transform = 'rotate(0deg)';
         }
         
-        const customerMultiselect = document.getElementById('customer-multiselect');
+        // Close customer dropdown
         if (customerMultiselect && !customerMultiselect.contains(event.target)) {
             const dropdown = document.getElementById('customer-dropdown');
             const header = document.querySelector('#customer-multiselect .location-select-header');
@@ -1255,6 +1306,5 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 <script src="../assets/js/receipts/select_sale.js"></script>
 <script src="../assets/js/receipts/select_return_debt.js"></script>
 <script src="../assets/js/receipts/load_locations.js"></script>
-<script src="../assets/js/receipts/load_customers.js"></script>
 </body>
 </html>

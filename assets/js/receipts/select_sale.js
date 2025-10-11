@@ -660,7 +660,7 @@ class ReceiptManager {
     }
     
     getSelectedCustomers() {
-        // Use the customer multi-select function
+        // Use the new multi-select function
         return typeof getSelectedCustomers === 'function' ? getSelectedCustomers() : 'all';
     }
 }
