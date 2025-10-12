@@ -43,7 +43,7 @@ class ReceiptManager {
 
     bindEvents() {
         // Bind filter events
-        const filters = ['transaction-type-filter', 'month-filter', 'date-from-filter', 'date-to-filter', 'location-filter', 'recipient-filter'];
+        const filters = ['transaction-type-filter', 'month-filter', 'date-from-filter', 'date-to-filter', 'location-filter'];
         filters.forEach(filterId => {
             const element = document.getElementById(filterId);
             if (element) {
@@ -271,7 +271,7 @@ class ReceiptManager {
             const date_from = this.getDateFrom();
             const date_to = this.getDateTo();
             const location = this.getSelectedLocation();
-            const recipients = this.getSelectedRecipients();
+            const recipient = this.getSelectedRecipient();
             
             const params = new URLSearchParams({
                 customer_id: CUSTOMER_ID,
@@ -280,7 +280,7 @@ class ReceiptManager {
                 date_from,
                 date_to,
                 location,
-                recipients
+                recipient
             });
 
             const response = await fetch(`../process/receipts/select_sale.php?${params.toString()}`);
@@ -360,7 +360,6 @@ class ReceiptManager {
                 return `
                     <tr class="receipt-row" data-receipt-id="${row.invoice_number || ''}">
                         <td>${row.location || ''}</td>
-                        <td>${row.recipient || ''}</td>
                         <td>${row.quantity || ''}</td>
                         <td>${row.rezh || ''}</td>
                         <td>${this.formatCurrency(row.price_per_unit)}</td>
@@ -660,7 +659,7 @@ class ReceiptManager {
         return typeof getSelectedLocations === 'function' ? getSelectedLocations() : 'all';
     }
     
-    getSelectedRecipients() {
+    getSelectedRecipient() {
         // Use the new multi-select function
         return typeof getSelectedRecipients === 'function' ? getSelectedRecipients() : 'all';
     }

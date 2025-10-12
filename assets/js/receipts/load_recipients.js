@@ -10,7 +10,7 @@ function loadRecipientsForReceipts() {
         date_from: '',
         date_to: '',
         location: 'all',
-        recipients: 'all'
+        recipient: 'all'
     });
     
     fetch(`../process/receipts/select_sale.php?${params.toString()}`)
@@ -23,100 +23,66 @@ function loadRecipientsForReceipts() {
             if (data.recipients) {
                 const recipientContainer = document.getElementById('recipient-options-container');
                 if (recipientContainer) {
-                    // Clear existing options
                     recipientContainer.innerHTML = '';
                     
-                    // Add recipient options
                     data.recipients.forEach(recipient => {
-                        const optionDiv = document.createElement('div');
-                        optionDiv.className = 'recipient-option';
-                        
-                        const checkbox = document.createElement('input');
-                        checkbox.type = 'checkbox';
-                        checkbox.id = `recipient-${recipient.recipient.replace(/\s+/g, '-')}`;
-                        checkbox.className = 'recipient-checkbox';
-                        checkbox.value = recipient.recipient;
-                        
-                        const label = document.createElement('label');
-                        label.htmlFor = checkbox.id;
-                        label.textContent = recipient.recipient;
-                        
-                        optionDiv.appendChild(checkbox);
-                        optionDiv.appendChild(label);
-                        recipientContainer.appendChild(optionDiv);
-                        
-                        // Add event listener for checkbox change
-                        checkbox.addEventListener('change', function() {
-                            handleRecipientCheckboxChange();
-                        });
+                        if (recipient.recipient && recipient.recipient.trim() !== '') {
+                            const optionDiv = document.createElement('div');
+                            optionDiv.className = 'location-option';
+                            
+                            const checkbox = document.createElement('input');
+                            checkbox.type = 'checkbox';
+                            checkbox.className = 'location-checkbox';
+                            checkbox.id = `recipient-${recipient.recipient.replace(/\s+/g, '-')}`;
+                            checkbox.value = recipient.recipient;
+                            
+                            const label = document.createElement('label');
+                            label.htmlFor = checkbox.id;
+                            label.textContent = recipient.recipient;
+                            
+                            optionDiv.appendChild(checkbox);
+                            optionDiv.appendChild(label);
+                            
+                            // Add event listener to handle checkbox changes
+                            checkbox.addEventListener('change', function() {
+                                const allCheckbox = document.getElementById('recipient-all');
+                                const recipientCheckboxes = document.querySelectorAll('#recipient-multiselect .location-checkbox:not(#recipient-all)');
+                                
+                                if (this.checked) {
+                                    // If this checkbox is checked, uncheck "all"
+                                    if (allCheckbox) {
+                                        allCheckbox.checked = false;
+                                    }
+                                } else {
+                                    // If this checkbox is unchecked, check if all others are unchecked
+                                    const checkedCount = Array.from(recipientCheckboxes).filter(cb => cb.checked).length;
+                                    if (checkedCount === 0 && allCheckbox) {
+                                        allCheckbox.checked = true;
+                                    }
+                                }
+                                
+                                updateRecipientSelectText();
+                                
+                                // Reload data when recipient selection changes
+                                if (typeof loadSalesData === 'function') {
+                                    loadSalesData();
+                                }
+                            });
+                            
+                            recipientContainer.appendChild(optionDiv);
+                        }
                     });
-                    
-                    // Add event listener for "all" checkbox
-                    const allCheckbox = document.getElementById('recipient-all');
-                    if (allCheckbox) {
-                        allCheckbox.addEventListener('change', function() {
-                            handleAllRecipientCheckboxChange();
-                        });
-                    }
-                    
-                    console.log('Recipients loaded successfully:', data.recipients.length, 'recipients');
-                } else {
-                    console.error('Recipient options container not found');
                 }
-            } else {
-                console.error('No recipients found in sales data');
             }
         })
         .catch(error => {
-            console.error('Error loading recipients for receipts:', error);
+            console.error('Error loading recipients:', error);
         });
 }
 
-// Handle individual recipient checkbox changes
-function handleRecipientCheckboxChange() {
-    const allCheckbox = document.getElementById('recipient-all');
-    const recipientCheckboxes = document.querySelectorAll('.recipient-checkbox:not(#recipient-all)');
-    const checkedCount = Array.from(recipientCheckboxes).filter(cb => cb.checked).length;
-    
-    // If any individual recipient is checked, uncheck "all"
-    if (checkedCount > 0 && allCheckbox.checked) {
-        allCheckbox.checked = false;
-    }
-    
-    // If all individual recipients are unchecked, check "all"
-    if (checkedCount === 0 && !allCheckbox.checked) {
-        allCheckbox.checked = true;
-    }
-    
-    updateRecipientSelectText();
-    
-    // Reload data if receiptManager exists
-    if (window.receiptManager && typeof window.receiptManager.loadSalesData === 'function') {
-        window.receiptManager.loadSalesData();
-    }
-}
-
-// Handle "all" recipient checkbox change
-function handleAllRecipientCheckboxChange() {
-    const allCheckbox = document.getElementById('recipient-all');
-    const recipientCheckboxes = document.querySelectorAll('.recipient-checkbox:not(#recipient-all)');
-    
-    if (allCheckbox.checked) {
-        // Uncheck all individual recipients
-        recipientCheckboxes.forEach(checkbox => {
-            checkbox.checked = false;
-        });
-    }
-    
-    updateRecipientSelectText();
-    
-    // Reload data if receiptManager exists
-    if (window.receiptManager && typeof window.receiptManager.loadSalesData === 'function') {
-        window.receiptManager.loadSalesData();
-    }
-}
-
-// Load recipients when page loads
+// Load recipients when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
-    loadRecipientsForReceipts();
+    if (typeof CUSTOMER_ID !== 'undefined' && CUSTOMER_ID) {
+        loadRecipientsForReceipts();
+    }
 });

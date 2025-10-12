@@ -18,7 +18,7 @@ $month = isset($_GET['month']) ? $_GET['month'] : 'all';
 $date_from = isset($_GET['date_from']) ? $_GET['date_from'] : '';
 $date_to = isset($_GET['date_to']) ? $_GET['date_to'] : '';
 $location = isset($_GET['location']) ? $_GET['location'] : 'all';
-$recipients = isset($_GET['recipients']) ? $_GET['recipients'] : 'all';
+$recipient = isset($_GET['recipient']) ? $_GET['recipient'] : 'all';
 
 try {
     // Get customer information including opening debt, name, and mobile
@@ -40,7 +40,7 @@ try {
     $recipients_sql = "SELECT DISTINCT recipient FROM sales WHERE customer_id = :customer_id AND recipient IS NOT NULL AND recipient != '' ORDER BY recipient ASC";
     $recipients_stmt = $pdo->prepare($recipients_sql);
     $recipients_stmt->execute(['customer_id' => $customer_id]);
-    $recipients_data = $recipients_stmt->fetchAll(PDO::FETCH_ASSOC);
+    $recipients = $recipients_stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
     error_log("Database error in select_sale.php: " . $e->getMessage());
     echo json_encode(['error' => 'Database error occurred', 'sales_data' => []]);
@@ -50,7 +50,6 @@ try {
 $sql = "SELECT 
         s.order_date,
         s.location,
-        s.recipient,
         f.strength_mpa, 
         f.strength_kg,
         SUM(s.quantity) as total_quantity,
@@ -86,9 +85,9 @@ if ($date_to) {
 if ($location !== 'all' && $location !== 'none') {
     // Handle multiple locations (comma-separated)
     if (strpos($location, ',') !== false) {
-        $locationArray = explode(',', $location);
+        $locations = explode(',', $location);
         $locationPlaceholders = [];
-        foreach ($locationArray as $index => $loc) {
+        foreach ($locations as $index => $loc) {
             $paramName = 'location_' . $index;
             $locationPlaceholders[] = ':' . $paramName;
             $params[$paramName] = trim($loc);
@@ -102,10 +101,10 @@ if ($location !== 'all' && $location !== 'none') {
 }
 
 // Add recipient filter
-if ($recipients !== 'all' && $recipients !== 'none') {
+if ($recipient !== 'all' && $recipient !== 'none') {
     // Handle multiple recipients (comma-separated)
-    if (strpos($recipients, ',') !== false) {
-        $recipientArray = explode(',', $recipients);
+    if (strpos($recipient, ',') !== false) {
+        $recipientArray = explode(',', $recipient);
         $recipientPlaceholders = [];
         foreach ($recipientArray as $index => $recv) {
             $paramName = 'recipient_' . $index;
@@ -116,11 +115,11 @@ if ($recipients !== 'all' && $recipients !== 'none') {
     } else {
         // Single recipient
         $sql .= " AND s.recipient = :recipient_filter";
-        $params['recipient_filter'] = $recipients;
+        $params['recipient_filter'] = $recipient;
     }
 }
 
-$sql .= " GROUP BY s.order_date, s.location, s.recipient, f.strength_mpa, f.strength_kg, s.price_per_unit";
+$sql .= " GROUP BY s.order_date, s.location, f.strength_mpa, f.strength_kg, s.price_per_unit";
 $sql .= " ORDER BY s.order_date ASC";
 
 // Debug: Log the SQL query
@@ -152,7 +151,6 @@ try {
     
     $data[] = [
         'location' => $row['location'] ?? '',
-        'recipient' => $row['recipient'] ?? '',
         'quantity' => $quantity,
         'rezh' => $rezh,
         'price_per_unit' => $ppu,
@@ -175,7 +173,7 @@ try {
             'mobile' => $mobile
         ],
         'locations' => $locations,
-        'recipients' => $recipients_data
+        'recipients' => $recipients
     ];
 
     echo json_encode($response, JSON_UNESCAPED_UNICODE);
