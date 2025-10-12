@@ -271,7 +271,7 @@ class ReceiptManager {
             const date_from = this.getDateFrom();
             const date_to = this.getDateTo();
             const location = this.getSelectedLocation();
-            const customers = this.getSelectedCustomers();
+            const receivers = this.getSelectedReceivers();
             
             const params = new URLSearchParams({
                 customer_id: CUSTOMER_ID,
@@ -280,7 +280,7 @@ class ReceiptManager {
                 date_from,
                 date_to,
                 location,
-                customers
+                receivers
             });
 
             const response = await fetch(`../process/receipts/select_sale.php?${params.toString()}`);
@@ -659,9 +659,9 @@ class ReceiptManager {
         return typeof getSelectedLocations === 'function' ? getSelectedLocations() : 'all';
     }
     
-    getSelectedCustomers() {
+    getSelectedReceivers() {
         // Use the new multi-select function
-        return typeof getSelectedCustomers === 'function' ? getSelectedCustomers() : 'all';
+        return typeof getSelectedReceivers === 'function' ? getSelectedReceivers() : 'all';
     }
 }
 

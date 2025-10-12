@@ -7,11 +7,11 @@ if (!isset($_SESSION['user_id'])) {
 }
 $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
-// Fetch all customers for the filter dropdown
-$customers = [];
+// Fetch all unique receivers from sales table for the filter dropdown
+$receivers = [];
 try {
-    $customersStmt = $pdo->query("SELECT id, name FROM customers ORDER BY name ASC");
-    $customers = $customersStmt->fetchAll(PDO::FETCH_ASSOC);
+    $receiversStmt = $pdo->query("SELECT DISTINCT receiver FROM sales WHERE receiver IS NOT NULL AND receiver != '' ORDER BY receiver ASC");
+    $receivers = $receiversStmt->fetchAll(PDO::FETCH_COLUMN);
 } catch (Exception $e) {
     // Handle error silently
 }
@@ -519,24 +519,24 @@ try {
                 </div>
                 
                 <div class="filter-group">
-                    <label for="customer-filter" class="filter-label">
+                    <label for="receiver-filter" class="filter-label">
                         <i class="fa fa-user"></i> وەرگر:
                     </label>
-                    <div class="location-multiselect" id="customer-multiselect">
-                        <div class="location-select-header" onclick="toggleCustomerDropdown()">
-                            <span id="customer-select-text">هەموو وەرگرەکان</span>
-                            <i class="fa fa-chevron-down" id="customer-dropdown-icon"></i>
+                    <div class="location-multiselect" id="receiver-multiselect">
+                        <div class="location-select-header" onclick="toggleReceiverDropdown()">
+                            <span id="receiver-select-text">هەموو وەرگرەکان</span>
+                            <i class="fa fa-chevron-down" id="receiver-dropdown-icon"></i>
                         </div>
-                        <div class="location-dropdown" id="customer-dropdown" style="display: none;">
+                        <div class="location-dropdown" id="receiver-dropdown" style="display: none;">
                             <div class="location-option">
-                                <input type="checkbox" id="customer-all" class="customer-checkbox" checked>
-                                <label for="customer-all">هەموو وەرگرەکان</label>
+                                <input type="checkbox" id="receiver-all" class="receiver-checkbox" checked>
+                                <label for="receiver-all">هەموو وەرگرەکان</label>
                             </div>
-                            <div id="customer-options-container">
-                                <?php foreach ($customers as $customer): ?>
+                            <div id="receiver-options-container">
+                                <?php foreach ($receivers as $index => $receiver): ?>
                                 <div class="location-option">
-                                    <input type="checkbox" id="customer-<?= $customer['id'] ?>" class="customer-checkbox" value="<?= $customer['id'] ?>">
-                                    <label for="customer-<?= $customer['id'] ?>"><?= htmlspecialchars($customer['name']) ?></label>
+                                    <input type="checkbox" id="receiver-<?= $index ?>" class="receiver-checkbox" value="<?= htmlspecialchars($receiver) ?>">
+                                    <label for="receiver-<?= $index ?>"><?= htmlspecialchars($receiver) ?></label>
                                 </div>
                                 <?php endforeach; ?>
                             </div>
@@ -740,8 +740,8 @@ try {
                 
                 // Reset location multi-select
                 resetLocationMultiSelect();
-                // Reset customer multi-select
-                resetCustomerMultiSelect();
+                // Reset receiver multi-select
+                resetReceiverMultiSelect();
                 if (showInvoiceCheckbox) {
                     showInvoiceCheckbox.checked = false;
                     toggleInvoiceNumberColumn(false);
@@ -1166,11 +1166,11 @@ try {
         return selectedLocations.length > 0 ? selectedLocations.join(',') : 'none';
     }
     
-    // Customer Multi-Select Functions
-    function toggleCustomerDropdown() {
-        const dropdown = document.getElementById('customer-dropdown');
-        const header = document.querySelector('#customer-multiselect .location-select-header');
-        const icon = document.getElementById('customer-dropdown-icon');
+    // Receiver Multi-Select Functions
+    function toggleReceiverDropdown() {
+        const dropdown = document.getElementById('receiver-dropdown');
+        const header = document.querySelector('#receiver-multiselect .location-select-header');
+        const icon = document.getElementById('receiver-dropdown-icon');
         
         if (dropdown.style.display === 'none' || dropdown.style.display === '') {
             dropdown.style.display = 'block';
@@ -1183,92 +1183,92 @@ try {
         }
     }
     
-    function resetCustomerMultiSelect() {
-        const allCheckbox = document.getElementById('customer-all');
-        const customerCheckboxes = document.querySelectorAll('.customer-checkbox:not(#customer-all)');
+    function resetReceiverMultiSelect() {
+        const allCheckbox = document.getElementById('receiver-all');
+        const receiverCheckboxes = document.querySelectorAll('.receiver-checkbox:not(#receiver-all)');
         
         if (allCheckbox) {
             allCheckbox.checked = true;
         }
         
-        customerCheckboxes.forEach(checkbox => {
+        receiverCheckboxes.forEach(checkbox => {
             checkbox.checked = false;
         });
         
-        updateCustomerSelectText();
+        updateReceiverSelectText();
     }
     
-    function updateCustomerSelectText() {
-        const allCheckbox = document.getElementById('customer-all');
-        const customerCheckboxes = document.querySelectorAll('.customer-checkbox:not(#customer-all)');
-        const selectText = document.getElementById('customer-select-text');
+    function updateReceiverSelectText() {
+        const allCheckbox = document.getElementById('receiver-all');
+        const receiverCheckboxes = document.querySelectorAll('.receiver-checkbox:not(#receiver-all)');
+        const selectText = document.getElementById('receiver-select-text');
         
         if (allCheckbox && allCheckbox.checked) {
             selectText.textContent = 'هەموو وەرگرەکان';
             return;
         }
         
-        const selectedCustomers = Array.from(customerCheckboxes)
+        const selectedReceivers = Array.from(receiverCheckboxes)
             .filter(checkbox => checkbox.checked)
             .map(checkbox => checkbox.nextElementSibling.textContent);
         
-        if (selectedCustomers.length === 0) {
+        if (selectedReceivers.length === 0) {
             selectText.textContent = 'هیچ وەرگرێک هەڵنەبژارد';
-        } else if (selectedCustomers.length === 1) {
-            selectText.textContent = selectedCustomers[0];
-        } else if (selectedCustomers.length <= 3) {
-            selectText.textContent = selectedCustomers.join(', ');
+        } else if (selectedReceivers.length === 1) {
+            selectText.textContent = selectedReceivers[0];
+        } else if (selectedReceivers.length <= 3) {
+            selectText.textContent = selectedReceivers.join(', ');
         } else {
-            selectText.textContent = `${selectedCustomers.length} وەرگر هەڵبژارد`;
+            selectText.textContent = `${selectedReceivers.length} وەرگر هەڵبژارد`;
         }
     }
     
-    function getSelectedCustomers() {
-        const allCheckbox = document.getElementById('customer-all');
-        const customerCheckboxes = document.querySelectorAll('.customer-checkbox:not(#customer-all)');
+    function getSelectedReceivers() {
+        const allCheckbox = document.getElementById('receiver-all');
+        const receiverCheckboxes = document.querySelectorAll('.receiver-checkbox:not(#receiver-all)');
         
         if (allCheckbox && allCheckbox.checked) {
             return 'all';
         }
         
-        const selectedCustomers = Array.from(customerCheckboxes)
+        const selectedReceivers = Array.from(receiverCheckboxes)
             .filter(checkbox => checkbox.checked)
             .map(checkbox => checkbox.value);
         
-        return selectedCustomers.length > 0 ? selectedCustomers.join(',') : 'none';
+        return selectedReceivers.length > 0 ? selectedReceivers.join(',') : 'none';
     }
     
-    // Setup customer checkbox listeners
+    // Setup receiver checkbox listeners
     document.addEventListener('DOMContentLoaded', function() {
-        // Customer "all" checkbox handler
-        const customerAllCheckbox = document.getElementById('customer-all');
-        if (customerAllCheckbox) {
-            customerAllCheckbox.addEventListener('change', function() {
-                const customerCheckboxes = document.querySelectorAll('.customer-checkbox:not(#customer-all)');
-                customerCheckboxes.forEach(checkbox => {
+        // Receiver "all" checkbox handler
+        const receiverAllCheckbox = document.getElementById('receiver-all');
+        if (receiverAllCheckbox) {
+            receiverAllCheckbox.addEventListener('change', function() {
+                const receiverCheckboxes = document.querySelectorAll('.receiver-checkbox:not(#receiver-all)');
+                receiverCheckboxes.forEach(checkbox => {
                     checkbox.checked = false;
                 });
-                updateCustomerSelectText();
+                updateReceiverSelectText();
                 if (typeof loadSalesData === 'function') loadSalesData();
             });
         }
         
-        // Individual customer checkboxes handler
-        const customerCheckboxes = document.querySelectorAll('.customer-checkbox:not(#customer-all)');
-        customerCheckboxes.forEach(checkbox => {
+        // Individual receiver checkboxes handler
+        const receiverCheckboxes = document.querySelectorAll('.receiver-checkbox:not(#receiver-all)');
+        receiverCheckboxes.forEach(checkbox => {
             checkbox.addEventListener('change', function() {
-                const allCheckbox = document.getElementById('customer-all');
+                const allCheckbox = document.getElementById('receiver-all');
                 if (this.checked && allCheckbox) {
                     allCheckbox.checked = false;
                 }
                 
                 // Check if all are unchecked, then check "all"
-                const anyChecked = Array.from(customerCheckboxes).some(cb => cb.checked);
+                const anyChecked = Array.from(receiverCheckboxes).some(cb => cb.checked);
                 if (!anyChecked && allCheckbox) {
                     allCheckbox.checked = true;
                 }
                 
-                updateCustomerSelectText();
+                updateReceiverSelectText();
                 if (typeof loadSalesData === 'function') loadSalesData();
             });
         });
@@ -1277,7 +1277,7 @@ try {
     // Close dropdown when clicking outside
     document.addEventListener('click', function(event) {
         const locationMultiselect = document.getElementById('location-multiselect');
-        const customerMultiselect = document.getElementById('customer-multiselect');
+        const receiverMultiselect = document.getElementById('receiver-multiselect');
         
         // Close location dropdown
         if (locationMultiselect && !locationMultiselect.contains(event.target)) {
@@ -1290,11 +1290,11 @@ try {
             if (icon) icon.style.transform = 'rotate(0deg)';
         }
         
-        // Close customer dropdown
-        if (customerMultiselect && !customerMultiselect.contains(event.target)) {
-            const dropdown = document.getElementById('customer-dropdown');
-            const header = document.querySelector('#customer-multiselect .location-select-header');
-            const icon = document.getElementById('customer-dropdown-icon');
+        // Close receiver dropdown
+        if (receiverMultiselect && !receiverMultiselect.contains(event.target)) {
+            const dropdown = document.getElementById('receiver-dropdown');
+            const header = document.querySelector('#receiver-multiselect .location-select-header');
+            const icon = document.getElementById('receiver-dropdown-icon');
             
             if (dropdown) dropdown.style.display = 'none';
             if (header) header.classList.remove('active');

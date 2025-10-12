@@ -18,7 +18,7 @@ $month = isset($_GET['month']) ? $_GET['month'] : 'all';
 $date_from = isset($_GET['date_from']) ? $_GET['date_from'] : '';
 $date_to = isset($_GET['date_to']) ? $_GET['date_to'] : '';
 $location = isset($_GET['location']) ? $_GET['location'] : 'all';
-$customers = isset($_GET['customers']) ? $_GET['customers'] : 'all';
+$receivers = isset($_GET['receivers']) ? $_GET['receivers'] : 'all';
 
 try {
     // Get customer information including opening debt, name, and mobile
@@ -94,22 +94,22 @@ if ($location !== 'all' && $location !== 'none') {
     }
 }
 
-// Add customer filter
-if ($customers !== 'all' && $customers !== 'none') {
-    // Handle multiple customers (comma-separated)
-    if (strpos($customers, ',') !== false) {
-        $customerArray = explode(',', $customers);
-        $customerPlaceholders = [];
-        foreach ($customerArray as $index => $cust) {
-            $paramName = 'customer_' . $index;
-            $customerPlaceholders[] = ':' . $paramName;
-            $params[$paramName] = intval(trim($cust));
+// Add receiver filter
+if ($receivers !== 'all' && $receivers !== 'none') {
+    // Handle multiple receivers (comma-separated)
+    if (strpos($receivers, ',') !== false) {
+        $receiverArray = explode(',', $receivers);
+        $receiverPlaceholders = [];
+        foreach ($receiverArray as $index => $recv) {
+            $paramName = 'receiver_' . $index;
+            $receiverPlaceholders[] = ':' . $paramName;
+            $params[$paramName] = trim($recv);
         }
-        $sql .= " AND s.customer_id IN (" . implode(',', $customerPlaceholders) . ")";
+        $sql .= " AND s.receiver IN (" . implode(',', $receiverPlaceholders) . ")";
     } else {
-        // Single customer
-        $sql .= " AND s.customer_id = :customer_filter";
-        $params['customer_filter'] = intval($customers);
+        // Single receiver
+        $sql .= " AND s.receiver = :receiver_filter";
+        $params['receiver_filter'] = $receivers;
     }
 }
 
