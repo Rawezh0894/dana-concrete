@@ -6,15 +6,8 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
-
-// Fetch all unique receivers from sales table for the filter dropdown
-$receivers = [];
-try {
-    $receiversStmt = $pdo->query("SELECT DISTINCT receiver FROM sales WHERE receiver IS NOT NULL AND receiver != '' ORDER BY receiver ASC");
-    $receivers = $receiversStmt->fetchAll(PDO::FETCH_COLUMN);
-} catch (Exception $e) {
-    // Handle error silently
-}
+// TODO: Fetch customer, sales, and debt data using $customer_id
+// For now, use placeholders
 ?>
 <!DOCTYPE html>
 <html lang="ku" dir="rtl">
@@ -404,6 +397,109 @@ try {
             }
         }
         
+        /* Recipient Multi-Select Styles */
+        .recipient-multiselect {
+            position: relative;
+            width: 100%;
+        }
+        
+        .recipient-select-header {
+            padding: 8px 12px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            font-family: 'Rabar', sans-serif;
+            transition: all 0.2s ease;
+            min-height: 38px;
+        }
+        
+        .recipient-select-header:hover {
+            border-color: #007bff;
+        }
+        
+        .recipient-select-header.active {
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+        
+        .recipient-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #ced4da;
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .recipient-option {
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .recipient-option:hover {
+            background-color: rgba(0, 123, 255, 0.05);
+        }
+        
+        .recipient-option:first-child {
+            border-bottom: 1px solid #dee2e6;
+            font-weight: 600;
+        }
+        
+        .recipient-checkbox {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: #007bff;
+        }
+        
+        .recipient-option label {
+            cursor: pointer;
+            font-size: 14px;
+            font-family: 'Rabar', sans-serif;
+            margin: 0;
+            flex: 1;
+        }
+        
+        #recipient-dropdown-icon {
+            transition: transform 0.2s ease;
+            font-size: 12px;
+            color: #6c757d;
+        }
+        
+        .recipient-select-header.active #recipient-dropdown-icon {
+            transform: rotate(180deg);
+        }
+        
+        /* Mobile responsiveness for recipient multi-select */
+        @media (max-width: 768px) {
+            .recipient-dropdown {
+                max-height: 150px;
+            }
+            
+            .recipient-option {
+                padding: 10px 12px;
+            }
+            
+            .recipient-option label {
+                font-size: 13px;
+            }
+        }
+        
         /* Summary row styling */
         .summary-row td {
             text-align: center !important;
@@ -519,26 +615,21 @@ try {
                 </div>
                 
                 <div class="filter-group">
-                    <label for="receiver-filter" class="filter-label">
+                    <label for="recipient-filter" class="filter-label">
                         <i class="fa fa-user"></i> وەرگر:
                     </label>
-                    <div class="location-multiselect" id="receiver-multiselect">
-                        <div class="location-select-header" onclick="toggleReceiverDropdown()">
-                            <span id="receiver-select-text">هەموو وەرگرەکان</span>
-                            <i class="fa fa-chevron-down" id="receiver-dropdown-icon"></i>
+                    <div class="recipient-multiselect" id="recipient-multiselect">
+                        <div class="recipient-select-header" onclick="toggleRecipientDropdown()">
+                            <span id="recipient-select-text">هەموو وەرگرەکان</span>
+                            <i class="fa fa-chevron-down" id="recipient-dropdown-icon"></i>
                         </div>
-                        <div class="location-dropdown" id="receiver-dropdown" style="display: none;">
-                            <div class="location-option">
-                                <input type="checkbox" id="receiver-all" class="receiver-checkbox" checked>
-                                <label for="receiver-all">هەموو وەرگرەکان</label>
+                        <div class="recipient-dropdown" id="recipient-dropdown" style="display: none;">
+                            <div class="recipient-option">
+                                <input type="checkbox" id="recipient-all" class="recipient-checkbox" checked>
+                                <label for="recipient-all">هەموو وەرگرەکان</label>
                             </div>
-                            <div id="receiver-options-container">
-                                <?php foreach ($receivers as $index => $receiver): ?>
-                                <div class="location-option">
-                                    <input type="checkbox" id="receiver-<?= $index ?>" class="receiver-checkbox" value="<?= htmlspecialchars($receiver) ?>">
-                                    <label for="receiver-<?= $index ?>"><?= htmlspecialchars($receiver) ?></label>
-                                </div>
-                                <?php endforeach; ?>
+                            <div id="recipient-options-container">
+                                <!-- Recipient options will be loaded here -->
                             </div>
                         </div>
                     </div>
@@ -626,6 +717,7 @@ try {
         <thead>
             <tr>
                 <th>شوێن</th>
+                <th>وەرگر</th>
                 <th>پێوانە</th>
                 <th>ڕێژە</th>
                 <th>نرخی 1 م 3</th>
@@ -740,8 +832,9 @@ try {
                 
                 // Reset location multi-select
                 resetLocationMultiSelect();
-                // Reset receiver multi-select
-                resetReceiverMultiSelect();
+                
+                // Reset recipient multi-select
+                resetRecipientMultiSelect();
                 if (showInvoiceCheckbox) {
                     showInvoiceCheckbox.checked = false;
                     toggleInvoiceNumberColumn(false);
@@ -1027,17 +1120,18 @@ try {
             const cells = summaryRow.querySelectorAll('td');
             
             if (cells.length >= 3) {
-                // New layout: 2 + 2 + 4 = 8 columns
-                cells[0].setAttribute('colspan', '2'); // Location + Quantity
-                cells[1].setAttribute('colspan', '2'); // Ratio + Price per unit
-                cells[2].setAttribute('colspan', '4'); // Total + Remaining + Invoice + Date
+                // New layout: 2 + 1 + 2 + 4 = 9 columns
+                cells[0].setAttribute('colspan', '2'); // Location + Recipient
+                cells[1].setAttribute('colspan', '1'); // Quantity
+                cells[2].setAttribute('colspan', '2'); // Ratio + Price per unit
+                cells[3].setAttribute('colspan', '4'); // Total + Remaining + Invoice + Date
             } else if (cells.length === 2) {
                 // Fallback for old layout
                 if (showInvoiceColumn) {
-                    cells[0].setAttribute('colspan', '3');
+                    cells[0].setAttribute('colspan', '4');
                     cells[1].setAttribute('colspan', '5');
                 } else {
-                    cells[0].setAttribute('colspan', '2');
+                    cells[0].setAttribute('colspan', '3');
                     cells[1].setAttribute('colspan', '6');
                 }
             }
@@ -1166,11 +1260,36 @@ try {
         return selectedLocations.length > 0 ? selectedLocations.join(',') : 'none';
     }
     
-    // Receiver Multi-Select Functions
-    function toggleReceiverDropdown() {
-        const dropdown = document.getElementById('receiver-dropdown');
-        const header = document.querySelector('#receiver-multiselect .location-select-header');
-        const icon = document.getElementById('receiver-dropdown-icon');
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+        const multiselect = document.getElementById('location-multiselect');
+        if (multiselect && !multiselect.contains(event.target)) {
+            const dropdown = document.getElementById('location-dropdown');
+            const header = document.querySelector('.location-select-header');
+            const icon = document.getElementById('location-dropdown-icon');
+            
+            if (dropdown) dropdown.style.display = 'none';
+            if (header) header.classList.remove('active');
+            if (icon) icon.style.transform = 'rotate(0deg)';
+        }
+        
+        const recipientMultiselect = document.getElementById('recipient-multiselect');
+        if (recipientMultiselect && !recipientMultiselect.contains(event.target)) {
+            const dropdown = document.getElementById('recipient-dropdown');
+            const header = document.querySelector('.recipient-select-header');
+            const icon = document.getElementById('recipient-dropdown-icon');
+            
+            if (dropdown) dropdown.style.display = 'none';
+            if (header) header.classList.remove('active');
+            if (icon) icon.style.transform = 'rotate(0deg)';
+        }
+    });
+    
+    // Recipient Multi-Select Functions
+    function toggleRecipientDropdown() {
+        const dropdown = document.getElementById('recipient-dropdown');
+        const header = document.querySelector('.recipient-select-header');
+        const icon = document.getElementById('recipient-dropdown-icon');
         
         if (dropdown.style.display === 'none' || dropdown.style.display === '') {
             dropdown.style.display = 'block';
@@ -1183,128 +1302,66 @@ try {
         }
     }
     
-    function resetReceiverMultiSelect() {
-        const allCheckbox = document.getElementById('receiver-all');
-        const receiverCheckboxes = document.querySelectorAll('.receiver-checkbox:not(#receiver-all)');
+    function resetRecipientMultiSelect() {
+        // Check the "all" option and uncheck others
+        const allCheckbox = document.getElementById('recipient-all');
+        const recipientCheckboxes = document.querySelectorAll('.recipient-checkbox:not(#recipient-all)');
         
         if (allCheckbox) {
             allCheckbox.checked = true;
         }
         
-        receiverCheckboxes.forEach(checkbox => {
+        recipientCheckboxes.forEach(checkbox => {
             checkbox.checked = false;
         });
         
-        updateReceiverSelectText();
+        updateRecipientSelectText();
     }
     
-    function updateReceiverSelectText() {
-        const allCheckbox = document.getElementById('receiver-all');
-        const receiverCheckboxes = document.querySelectorAll('.receiver-checkbox:not(#receiver-all)');
-        const selectText = document.getElementById('receiver-select-text');
+    function updateRecipientSelectText() {
+        const allCheckbox = document.getElementById('recipient-all');
+        const recipientCheckboxes = document.querySelectorAll('.recipient-checkbox:not(#recipient-all)');
+        const selectText = document.getElementById('recipient-select-text');
         
         if (allCheckbox && allCheckbox.checked) {
             selectText.textContent = 'هەموو وەرگرەکان';
             return;
         }
         
-        const selectedReceivers = Array.from(receiverCheckboxes)
+        const selectedRecipients = Array.from(recipientCheckboxes)
             .filter(checkbox => checkbox.checked)
             .map(checkbox => checkbox.nextElementSibling.textContent);
         
-        if (selectedReceivers.length === 0) {
+        if (selectedRecipients.length === 0) {
             selectText.textContent = 'هیچ وەرگرێک هەڵنەبژارد';
-        } else if (selectedReceivers.length === 1) {
-            selectText.textContent = selectedReceivers[0];
-        } else if (selectedReceivers.length <= 3) {
-            selectText.textContent = selectedReceivers.join(', ');
+        } else if (selectedRecipients.length === 1) {
+            selectText.textContent = selectedRecipients[0];
+        } else if (selectedRecipients.length <= 3) {
+            selectText.textContent = selectedRecipients.join(', ');
         } else {
-            selectText.textContent = `${selectedReceivers.length} وەرگر هەڵبژارد`;
+            selectText.textContent = `${selectedRecipients.length} وەرگر هەڵبژارد`;
         }
     }
     
-    function getSelectedReceivers() {
-        const allCheckbox = document.getElementById('receiver-all');
-        const receiverCheckboxes = document.querySelectorAll('.receiver-checkbox:not(#receiver-all)');
+    function getSelectedRecipients() {
+        const allCheckbox = document.getElementById('recipient-all');
+        const recipientCheckboxes = document.querySelectorAll('.recipient-checkbox:not(#recipient-all)');
         
         if (allCheckbox && allCheckbox.checked) {
             return 'all';
         }
         
-        const selectedReceivers = Array.from(receiverCheckboxes)
+        const selectedRecipients = Array.from(recipientCheckboxes)
             .filter(checkbox => checkbox.checked)
             .map(checkbox => checkbox.value);
         
-        return selectedReceivers.length > 0 ? selectedReceivers.join(',') : 'none';
+        return selectedRecipients.length > 0 ? selectedRecipients.join(',') : 'none';
     }
-    
-    // Setup receiver checkbox listeners
-    document.addEventListener('DOMContentLoaded', function() {
-        // Receiver "all" checkbox handler
-        const receiverAllCheckbox = document.getElementById('receiver-all');
-        if (receiverAllCheckbox) {
-            receiverAllCheckbox.addEventListener('change', function() {
-                const receiverCheckboxes = document.querySelectorAll('.receiver-checkbox:not(#receiver-all)');
-                receiverCheckboxes.forEach(checkbox => {
-                    checkbox.checked = false;
-                });
-                updateReceiverSelectText();
-                if (typeof loadSalesData === 'function') loadSalesData();
-            });
-        }
-        
-        // Individual receiver checkboxes handler
-        const receiverCheckboxes = document.querySelectorAll('.receiver-checkbox:not(#receiver-all)');
-        receiverCheckboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                const allCheckbox = document.getElementById('receiver-all');
-                if (this.checked && allCheckbox) {
-                    allCheckbox.checked = false;
-                }
-                
-                // Check if all are unchecked, then check "all"
-                const anyChecked = Array.from(receiverCheckboxes).some(cb => cb.checked);
-                if (!anyChecked && allCheckbox) {
-                    allCheckbox.checked = true;
-                }
-                
-                updateReceiverSelectText();
-                if (typeof loadSalesData === 'function') loadSalesData();
-            });
-        });
-    });
-    
-    // Close dropdown when clicking outside
-    document.addEventListener('click', function(event) {
-        const locationMultiselect = document.getElementById('location-multiselect');
-        const receiverMultiselect = document.getElementById('receiver-multiselect');
-        
-        // Close location dropdown
-        if (locationMultiselect && !locationMultiselect.contains(event.target)) {
-            const dropdown = document.getElementById('location-dropdown');
-            const header = document.querySelector('#location-multiselect .location-select-header');
-            const icon = document.getElementById('location-dropdown-icon');
-            
-            if (dropdown) dropdown.style.display = 'none';
-            if (header) header.classList.remove('active');
-            if (icon) icon.style.transform = 'rotate(0deg)';
-        }
-        
-        // Close receiver dropdown
-        if (receiverMultiselect && !receiverMultiselect.contains(event.target)) {
-            const dropdown = document.getElementById('receiver-dropdown');
-            const header = document.querySelector('#receiver-multiselect .location-select-header');
-            const icon = document.getElementById('receiver-dropdown-icon');
-            
-            if (dropdown) dropdown.style.display = 'none';
-            if (header) header.classList.remove('active');
-            if (icon) icon.style.transform = 'rotate(0deg)';
-        }
-    });
 </script>
 <script src="../assets/js/receipts/receipts.js"></script>
 <script src="../assets/js/receipts/select_sale.js"></script>
 <script src="../assets/js/receipts/select_return_debt.js"></script>
 <script src="../assets/js/receipts/load_locations.js"></script>
+<script src="../assets/js/receipts/load_recipients.js"></script>
 </body>
 </html>

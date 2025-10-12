@@ -18,7 +18,7 @@ $month = isset($_GET['month']) ? $_GET['month'] : 'all';
 $date_from = isset($_GET['date_from']) ? $_GET['date_from'] : '';
 $date_to = isset($_GET['date_to']) ? $_GET['date_to'] : '';
 $location = isset($_GET['location']) ? $_GET['location'] : 'all';
-$receivers = isset($_GET['receivers']) ? $_GET['receivers'] : 'all';
+$recipients = isset($_GET['recipients']) ? $_GET['recipients'] : 'all';
 
 try {
     // Get customer information including opening debt, name, and mobile
@@ -35,6 +35,12 @@ try {
     $locations_stmt = $pdo->prepare($locations_sql);
     $locations_stmt->execute(['customer_id' => $customer_id]);
     $locations = $locations_stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Get unique recipients from sales table for this customer
+    $recipients_sql = "SELECT DISTINCT recipient FROM sales WHERE customer_id = :customer_id AND recipient IS NOT NULL AND recipient != '' ORDER BY recipient ASC";
+    $recipients_stmt = $pdo->prepare($recipients_sql);
+    $recipients_stmt->execute(['customer_id' => $customer_id]);
+    $recipients_data = $recipients_stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
     error_log("Database error in select_sale.php: " . $e->getMessage());
     echo json_encode(['error' => 'Database error occurred', 'sales_data' => []]);
@@ -44,6 +50,7 @@ try {
 $sql = "SELECT 
         s.order_date,
         s.location,
+        s.recipient,
         f.strength_mpa, 
         f.strength_kg,
         SUM(s.quantity) as total_quantity,
@@ -79,9 +86,9 @@ if ($date_to) {
 if ($location !== 'all' && $location !== 'none') {
     // Handle multiple locations (comma-separated)
     if (strpos($location, ',') !== false) {
-        $locations = explode(',', $location);
+        $locationArray = explode(',', $location);
         $locationPlaceholders = [];
-        foreach ($locations as $index => $loc) {
+        foreach ($locationArray as $index => $loc) {
             $paramName = 'location_' . $index;
             $locationPlaceholders[] = ':' . $paramName;
             $params[$paramName] = trim($loc);
@@ -94,26 +101,26 @@ if ($location !== 'all' && $location !== 'none') {
     }
 }
 
-// Add receiver filter
-if ($receivers !== 'all' && $receivers !== 'none') {
-    // Handle multiple receivers (comma-separated)
-    if (strpos($receivers, ',') !== false) {
-        $receiverArray = explode(',', $receivers);
-        $receiverPlaceholders = [];
-        foreach ($receiverArray as $index => $recv) {
-            $paramName = 'receiver_' . $index;
-            $receiverPlaceholders[] = ':' . $paramName;
+// Add recipient filter
+if ($recipients !== 'all' && $recipients !== 'none') {
+    // Handle multiple recipients (comma-separated)
+    if (strpos($recipients, ',') !== false) {
+        $recipientArray = explode(',', $recipients);
+        $recipientPlaceholders = [];
+        foreach ($recipientArray as $index => $recv) {
+            $paramName = 'recipient_' . $index;
+            $recipientPlaceholders[] = ':' . $paramName;
             $params[$paramName] = trim($recv);
         }
-        $sql .= " AND s.receiver IN (" . implode(',', $receiverPlaceholders) . ")";
+        $sql .= " AND s.recipient IN (" . implode(',', $recipientPlaceholders) . ")";
     } else {
-        // Single receiver
-        $sql .= " AND s.receiver = :receiver_filter";
-        $params['receiver_filter'] = $receivers;
+        // Single recipient
+        $sql .= " AND s.recipient = :recipient_filter";
+        $params['recipient_filter'] = $recipients;
     }
 }
 
-$sql .= " GROUP BY s.order_date, s.location, f.strength_mpa, f.strength_kg, s.price_per_unit";
+$sql .= " GROUP BY s.order_date, s.location, s.recipient, f.strength_mpa, f.strength_kg, s.price_per_unit";
 $sql .= " ORDER BY s.order_date ASC";
 
 // Debug: Log the SQL query
@@ -145,6 +152,7 @@ try {
     
     $data[] = [
         'location' => $row['location'] ?? '',
+        'recipient' => $row['recipient'] ?? '',
         'quantity' => $quantity,
         'rezh' => $rezh,
         'price_per_unit' => $ppu,
@@ -166,7 +174,8 @@ try {
             'company_name' => $company_name,
             'mobile' => $mobile
         ],
-        'locations' => $locations
+        'locations' => $locations,
+        'recipients' => $recipients_data
     ];
 
     echo json_encode($response, JSON_UNESCAPED_UNICODE);
