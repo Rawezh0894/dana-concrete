@@ -182,6 +182,17 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
         <button class="btn btn-secondary" id="clearFilterBtn" type="button">پاککردنەوە</button>
       </div>
     </div>
+
+    <!-- Optional: Column filters clear (prevents heavy re-rendering by keeping data client-side) -->
+    <div class="filter-section">
+      <div class="row align-items-end">
+        <div class="col-md-3">
+          <button class="btn btn-warning w-100" id="clearColumnFiltersBtn" type="button">
+            <i class="fas fa-filter-circle-xmark me-1"></i>پاککردنەوەی فلتەرەکانی کۆڵۆم
+          </button>
+        </div>
+      </div>
+    </div>
     
     <!-- Duplicate invoice number information -->
     <div class="alert alert-info mb-3" role="alert">

@@ -14,7 +14,15 @@ async function loadSalesTable() {
     if (fromInput && !fromInput.value) fromInput.value = fromDate;
     if (toInput && !toInput.value) toInput.value = toDate;
     
-    let res = await fetch('../process/sale/select_sale.php');
+    // Fetch limited range by default to avoid heavy initial load
+    let url = '../process/sale/select_sale.php';
+    const params = [];
+    const fromVal = fromInput ? fromInput.value : '';
+    const toVal = toInput ? toInput.value : '';
+    if (fromVal) params.push('from=' + encodeURIComponent(fromVal));
+    if (toVal) params.push('to=' + encodeURIComponent(toVal));
+    if (params.length) url += '?' + params.join('&');
+    let res = await fetch(url);
     let text = await res.text();
     let data;
     try {
@@ -168,16 +176,45 @@ async function loadSalesFiltered() {
 
 const fromInput = document.getElementById('filter_from');
 const toInput = document.getElementById('filter_to');
-if (fromInput && toInput) {
-    fromInput.addEventListener('input', loadSalesFiltered);
-    toInput.addEventListener('input', loadSalesFiltered);
+
+// Debounced reload to avoid excessive requests
+let _salesFilterDebounceTimer;
+function debouncedLoadSalesFiltered() {
+    if (_salesFilterDebounceTimer) clearTimeout(_salesFilterDebounceTimer);
+    _salesFilterDebounceTimer = setTimeout(() => {
+        loadSalesFiltered();
+    }, 500);
 }
+
+if (fromInput) {
+    fromInput.addEventListener('input', debouncedLoadSalesFiltered);
+    fromInput.addEventListener('change', debouncedLoadSalesFiltered);
+}
+if (toInput) {
+    toInput.addEventListener('input', debouncedLoadSalesFiltered);
+    toInput.addEventListener('change', debouncedLoadSalesFiltered);
+}
+
 const clearBtn = document.getElementById('clearFilterBtn');
 if (clearBtn) {
     clearBtn.addEventListener('click', function() {
         if (fromInput) fromInput.value = '';
         if (toInput) toInput.value = '';
         loadSalesFiltered();
+    });
+}
+
+// Clear column filters button (optional, mirrors purchase page UX)
+const clearColumnFiltersBtn = document.getElementById('clearColumnFiltersBtn');
+if (clearColumnFiltersBtn) {
+    clearColumnFiltersBtn.addEventListener('click', function() {
+        const inputs = document.querySelectorAll('#saleTable thead .table-search-input');
+        inputs.forEach(inp => {
+            inp.value = '';
+            // Trigger input handlers attached by TableController
+            const event = new Event('input', { bubbles: true });
+            inp.dispatchEvent(event);
+        });
     });
 }
 
