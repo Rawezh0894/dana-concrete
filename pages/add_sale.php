@@ -39,6 +39,57 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     
     <style>
+        /* Filter styling */
+        .filter-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .filter-section label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+        
+        .filter-section .form-select {
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+        
+        .filter-section .form-select:focus {
+            border-color: var(--seafoam-green);
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+        
+        .filter-section .form-control {
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+        
+        .filter-section .form-control:focus {
+            border-color: var(--seafoam-green);
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+        
+        .clear-filter-btn {
+            background: var(--kelly-green) !important;
+            border-color: var(--kelly-green) !important;
+            color: white !important;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .clear-filter-btn:hover {
+            background: #1e7e34 !important;
+            border-color: #1e7e34 !important;
+            transform: translateY(-1px);
+        }
+        
         .export-btn {
             background: var(--warning) !important;
             border-color: var(--warning) !important;
@@ -160,33 +211,41 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
             </div>
         </div>
     </div>
-    <div class="row mb-3">
-      <div class="col-md-3">
-        <label>لە بەروار:</label>
-        <input type="date" id="filter_from" class="form-control">
-      </div>
-      <div class="col-md-3">
-        <label>بۆ بەروار:</label>
-        <input type="date" id="filter_to" class="form-control">
-      </div>
-      <div class="col-md-3">
-        <label for="filter_customer">کڕیار:</label>
-        <select class="form-select" id="filter_customer">
-          <option value="">هەموو کڕیارەکان</option>
-          <?php foreach ($customers as $c): ?>
-            <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['name']) ?></option>
-          <?php endforeach; ?>
-        </select>
-      </div>
-      <div class="col-md-3 d-flex align-items-end">
-        <button class="btn btn-secondary" id="clearFilterBtn" type="button">پاککردنەوە</button>
+    <!-- Date Filters Row -->
+    <div class="filter-section">
+      <div class="row">
+        <div class="col-md-3">
+          <label>لە بەروار:</label>
+          <input type="date" id="filter_from" class="form-control">
+        </div>
+        <div class="col-md-3">
+          <label>بۆ بەروار:</label>
+          <input type="date" id="filter_to" class="form-control">
+        </div>
+        <div class="col-md-3">
+          <label for="filter_customer">کڕیار:</label>
+          <select class="form-select" id="filter_customer">
+            <option value="">هەموو کڕیارەکان</option>
+            <?php foreach ($customers as $c): ?>
+              <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['name']) ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+          <button class="btn clear-filter-btn" id="clearFilterBtn" type="button">پاککردنەوەی هەموو فلتەرەکان</button>
+        </div>
       </div>
     </div>
-
-    <!-- Optional: Column filters clear (prevents heavy re-rendering by keeping data client-side) -->
+    
+    <!-- Global Search Row -->
     <div class="filter-section">
       <div class="row align-items-end">
-        <div class="col-md-3">
+        <div class="col-md-10">
+          <label for="sale_global_search">گەڕان لە هەموو خانەکاندا:</label>
+          <input type="text" class="form-control" id="sale_global_search" placeholder="گەڕان بە کڕیار، وەرگر، شوێن، ژمارەی پسوڵە، فۆرمۆلا، بەروار...">
+          <small class="text-muted">گەڕان لە هەموو داتاکانی database</small>
+        </div>
+        <div class="col-md-2">
           <button class="btn btn-warning w-100" id="clearColumnFiltersBtn" type="button">
             <i class="fas fa-filter-circle-xmark me-1"></i>پاککردنەوەی فلتەرەکانی کۆڵۆم
           </button>
@@ -479,6 +538,16 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
 <script>
 // Filter functionality for customer and date
 $(document).ready(function() {
+    let searchTimeout = null;
+    
+    // Global search with debounce
+    $('#sale_global_search').on('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(function() {
+            applyFilters();
+        }, 500); // Wait 500ms after user stops typing
+    });
+    
     // Add event listeners for all filters
     $('#filter_customer, #filter_from, #filter_to').on('change', function() {
         applyFilters();
@@ -489,7 +558,15 @@ $(document).ready(function() {
         $('#filter_customer').val('');
         $('#filter_from').val('');
         $('#filter_to').val('');
+        $('#sale_global_search').val('');
         applyFilters();
+    });
+    
+    // Clear column filters
+    $('#clearColumnFiltersBtn').on('click', function() {
+        if (typeof clearAllColumnFilters === 'function') {
+            clearAllColumnFilters();
+        }
     });
     
     // Function to apply all filters
@@ -497,6 +574,7 @@ $(document).ready(function() {
         const customerId = $('#filter_customer').val();
         const fromDate = $('#filter_from').val();
         const toDate = $('#filter_to').val();
+        const searchTerm = $('#sale_global_search').val();
         
         // Build filter parameters
         const params = new URLSearchParams();
@@ -504,9 +582,9 @@ $(document).ready(function() {
         if (fromDate) params.append('from', fromDate);
         if (toDate) params.append('to', toDate);
         
-        // Call the existing loadSales function with filters
+        // Call the existing loadSales function with filters, page 1, and search term
         if (typeof loadSales === 'function') {
-            loadSales(params.toString());
+            loadSales(params.toString(), 1, searchTerm);
         }
         
         // Also update summary cards if the function exists

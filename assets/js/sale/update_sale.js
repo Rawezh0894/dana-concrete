@@ -83,37 +83,63 @@ function loadCustomersAndFormulas(selectedCustomerId, selectedFormulaId) {
     });
 }
 
-$(document).on('click', '.edit-sale', function() {
+$(document).on('click', '.edit-sale', async function() {
     var saleId = $(this).data('id');
-    $.ajax({
-        url: '../process/sale/select_sale.php',
-        type: 'GET',
-        dataType: 'json',
-        success: function(response) {
-            if (response.success) {
-                var sale = response.data.find(s => s.id == saleId);
-                if (sale) {
-                    loadCustomersAndFormulas(sale.customer_id, sale.formula_id);
-                    $('#edit_sale_id').val(sale.id);
-                    $('#edit_recipient').val(sale.recipient);
-                    $('#edit_location').val(sale.location);
-                    $('#edit_quantity').val(sale.quantity);
-                    $('#edit_price_per_unit').val(sale.price_per_unit);
-                    $('#edit_total_price').val(sale.total_price);
-                    $('#edit_payment_type').val(sale.payment_type);
-                    $('#edit_amount_paid_usd').val(sale.amount_paid_usd);
-                    $('#edit_amount_paid_iq').val(sale.amount_paid_iq);
-                    $('#edit_dolar_rate').val(sale.dolar_rate);
-                    $('#edit_remaining_amount').val(sale.remaining_amount);
-                    $('#edit_invoice_number').val(sale.invoice_number);
-                    $('#edit_order_date').val(sale.order_date);
-                    $('#edit_notes').val(sale.notes);
-                    $('#edit_discount').val(sale.discount);
-                    $('#editSaleModal').modal('show');
-                }
-            }
+    
+    try {
+        // Fetch single sale data by ID
+        const res = await fetch(`../process/sale/select_sale.php?id=${saleId}`);
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
         }
-    });
+        
+        const text = await res.text();
+        console.log('Raw response for edit:', text);
+        
+        let sale;
+        try {
+            sale = JSON.parse(text);
+        } catch (parseError) {
+            console.error('Failed to parse JSON:', parseError);
+            console.error('Raw response:', text);
+            Swal.fire('هەڵە!', 'هەڵەیەک لە وەڵامەکەی سێرڤەر هەیە', 'error');
+            return;
+        }
+        
+        if (!sale || Object.keys(sale).length === 0) {
+            Swal.fire('هەڵە!', 'هیچ داتایەک نەدۆزرایەوە', 'error');
+            return;
+        }
+        
+        console.log('Sale data for edit:', sale);
+        
+        // Load customers and formulas
+        loadCustomersAndFormulas(sale.customer_id, sale.formula_id);
+        
+        // Populate form fields
+        $('#edit_sale_id').val(sale.id);
+        $('#edit_recipient').val(sale.recipient || '');
+        $('#edit_location').val(sale.location || '');
+        $('#edit_quantity').val(sale.quantity || 0);
+        $('#edit_price_per_unit').val(sale.price_per_unit || 0);
+        $('#edit_total_price').val(sale.total_price || 0);
+        $('#edit_payment_type').val(sale.payment_type || '');
+        $('#edit_amount_paid_usd').val(sale.amount_paid_usd || 0);
+        $('#edit_amount_paid_iq').val(sale.amount_paid_iq || 0);
+        $('#edit_dolar_rate').val(sale.dolar_rate || 0);
+        $('#edit_remaining_amount').val(sale.remaining_amount || 0);
+        $('#edit_invoice_number').val(sale.invoice_number || '');
+        $('#edit_order_date').val(sale.order_date || '');
+        $('#edit_notes').val(sale.notes || '');
+        $('#edit_discount').val(sale.discount || 0);
+        
+        // Show modal
+        $('#editSaleModal').modal('show');
+        
+    } catch (error) {
+        console.error('Error loading sale data for edit:', error);
+        Swal.fire('هەڵە!', 'هەڵەیەک لە هێنانەوەی زانیارییەکان', 'error');
+    }
 });
 
 // Fetch dollar rate when edit modal is shown
