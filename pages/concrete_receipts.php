@@ -17,7 +17,7 @@ if (!hasPermission('view_concrete_receipts')) {
     . '</div>';
   exit;
 }
-$customers = $pdo->query("SELECT id, name, mobile1 FROM customers")->fetchAll(PDO::FETCH_ASSOC);
+$customers = $pdo->query("SELECT id, name, mobile1, mobile2 FROM customers")->fetchAll(PDO::FETCH_ASSOC);
 $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO::FETCH_ASSOC);
 $cars = $pdo->query("SELECT id, name FROM cars")->fetchAll(PDO::FETCH_ASSOC);
 $employees = $pdo->query("SELECT id, name, role FROM employees")->fetchAll(PDO::FETCH_ASSOC);
@@ -130,7 +130,10 @@ $mixer_drivers = array_filter($employees, function ($emp) {
         <select class="form-select" id="filter_customer_id" data-placeholder="کڕیار: هەموو">
           <option value=""></option>
           <?php foreach ($customers as $c): ?>
-            <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['name']) ?><?php if (!empty($c['mobile1'])): ?> (<?= htmlspecialchars($c['mobile1']) ?>)<?php endif; ?></option>
+            <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['name']) ?><?php 
+              $phones = array_filter([!empty($c['mobile1']) ? $c['mobile1'] : '', !empty($c['mobile2']) ? $c['mobile2'] : '']);
+              if (!empty($phones)): ?> (<?= htmlspecialchars(implode(' / ', $phones)) ?>)<?php endif; 
+            ?></option>
           <?php endforeach; ?>
         </select>
       </div>
@@ -211,7 +214,10 @@ $mixer_drivers = array_filter($employees, function ($emp) {
                 <select class="form-select" id="customer_id" name="customer_id" required style="max-height:220px; overflow-y:auto;">
                   <option value="">هەڵبژێرە</option>
                   <?php foreach ($customers as $c): ?>
-                    <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['name']) ?><?php if (!empty($c['mobile1'])): ?> (<?= htmlspecialchars($c['mobile1']) ?>)<?php endif; ?></option>
+                    <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['name']) ?><?php 
+                      $phones = array_filter([!empty($c['mobile1']) ? $c['mobile1'] : '', !empty($c['mobile2']) ? $c['mobile2'] : '']);
+                      if (!empty($phones)): ?> (<?= htmlspecialchars(implode(' / ', $phones)) ?>)<?php endif; 
+                    ?></option>
                   <?php endforeach; ?>
                 </select>
               </div>
@@ -325,7 +331,10 @@ $mixer_drivers = array_filter($employees, function ($emp) {
                 <select class="form-select" id="edit_customer_id" name="customer_id" required>
                   <option value="">هەڵبژێرە</option>
                   <?php foreach ($customers as $c): ?>
-                    <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['name']) ?></option>
+                    <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['name']) ?><?php 
+                      $phones = array_filter([!empty($c['mobile1']) ? $c['mobile1'] : '', !empty($c['mobile2']) ? $c['mobile2'] : '']);
+                      if (!empty($phones)): ?> (<?= htmlspecialchars(implode(' / ', $phones)) ?>)<?php endif; 
+                    ?></option>
                   <?php endforeach; ?>
                 </select>
               </div>
