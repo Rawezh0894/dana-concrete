@@ -19,7 +19,7 @@ if (!hasPermission('view_notes')) {
 }
 
 // Get data for dropdowns
-$customers = $pdo->query("SELECT id, name, mobile1 FROM customers ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
+$customers = $pdo->query("SELECT id, name, mobile1, mobile2 FROM customers ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 $formulas = $pdo->query("SELECT id, name FROM concrete_formulas ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 $mixer_cars = $pdo->query("SELECT id, name FROM cars WHERE name LIKE 'M%' ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 $pump_cars = $pdo->query("SELECT id, name FROM cars WHERE name LIKE 'P%' ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
@@ -135,7 +135,10 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
             <select id="filter_customer" class="form-select">
                 <option value="">هەموو کڕیارەکان</option>
                 <?php foreach ($customers as $customer): ?>
-                    <option value="<?= $customer['id'] ?>"><?= htmlspecialchars($customer['name']) ?> - <?= htmlspecialchars($customer['mobile1']) ?></option>
+                    <option value="<?= $customer['id'] ?>"><?= htmlspecialchars($customer['name']) ?><?php 
+                      $phones = array_filter([!empty($customer['mobile1']) ? $customer['mobile1'] : '', !empty($customer['mobile2']) ? $customer['mobile2'] : '']);
+                      if (!empty($phones)): ?> - <?= htmlspecialchars(implode(' / ', $phones)) ?><?php endif; 
+                    ?></option>
                 <?php endforeach; ?>
             </select>
         </div>
@@ -195,7 +198,10 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
                             <select class="form-select" id="customer_id" name="customer_id" required>
                                 <option value="">هەڵبژێرە</option>
                                 <?php foreach ($customers as $customer): ?>
-                                    <option value="<?= $customer['id'] ?>"><?= htmlspecialchars($customer['name']) ?> - <?= htmlspecialchars($customer['mobile1']) ?></option>
+                                    <option value="<?= $customer['id'] ?>"><?= htmlspecialchars($customer['name']) ?><?php 
+                                      $phones = array_filter([!empty($customer['mobile1']) ? $customer['mobile1'] : '', !empty($customer['mobile2']) ? $customer['mobile2'] : '']);
+                                      if (!empty($phones)): ?> - <?= htmlspecialchars(implode(' / ', $phones)) ?><?php endif; 
+                                    ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
@@ -315,7 +321,10 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
                             <select class="form-select" id="edit_customer_id" name="edit_customer_id" required>
                                 <option value="">هەڵبژێرە</option>
                                 <?php foreach ($customers as $customer): ?>
-                                    <option value="<?= $customer['id'] ?>"><?= htmlspecialchars($customer['name']) ?> - <?= htmlspecialchars($customer['mobile1']) ?></option>
+                                    <option value="<?= $customer['id'] ?>"><?= htmlspecialchars($customer['name']) ?><?php 
+                                      $phones = array_filter([!empty($customer['mobile1']) ? $customer['mobile1'] : '', !empty($customer['mobile2']) ? $customer['mobile2'] : '']);
+                                      if (!empty($phones)): ?> - <?= htmlspecialchars(implode(' / ', $phones)) ?><?php endif; 
+                                    ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
