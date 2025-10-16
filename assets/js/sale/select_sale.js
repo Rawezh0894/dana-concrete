@@ -55,6 +55,18 @@ async function loadSalesTable(page = 1, limit = 50) {
             return;
         }
         if (!data.success) {
+            console.log('API returned success: false', data);
+            TableController.renderWithPagination('#saleTable', [], columns, { pageSize: 10 });
+            return;
+        }
+        
+        console.log('Data received:', data);
+        console.log('Sales count:', data.data ? data.data.length : 0);
+        console.log('Pagination info:', data.pagination);
+        
+        // Check if data.data exists and is an array
+        if (!data.data || !Array.isArray(data.data)) {
+            console.error('Invalid data structure:', data);
             TableController.renderWithPagination('#saleTable', [], columns, { pageSize: 10 });
             return;
         }
@@ -102,17 +114,33 @@ async function loadSalesTable(page = 1, limit = 50) {
         _rowClass: (row.invoice_number && invoiceCounts[row.invoice_number] > 1) ? 'duplicate-invoice-row' : ''
     }));
     
+        console.log('About to render table with mapped data:', mapped.length, 'rows');
+        console.log('TableController available:', typeof TableController);
+        console.log('TableController.renderWithPagination available:', typeof TableController.renderWithPagination);
+        
+        // Ensure pagination data exists
+        const pagination = data.pagination || {
+            current_page: page,
+            total_records: data.data.length,
+            total_pages: 1,
+            limit: limit
+        };
+        
+        console.log('Using pagination:', pagination);
+        
         // Render table with server-side pagination
         TableController.renderWithPagination('#saleTable', mapped, columns, { 
             pageSize: limit,
-            currentPage: page,
-            totalPages: data.pagination.total_pages,
-            totalRecords: data.pagination.total_records,
+            currentPage: pagination.current_page,
+            totalPages: pagination.total_pages,
+            totalRecords: pagination.total_records,
             rowClass: (row) => row._rowClass || '',
             onPageChange: (newPage) => {
                 loadSalesTable(newPage, limit);
             }
         });
+        
+        console.log('Table rendering completed');
     } catch (error) {
         console.error('Error loading sales:', error);
         // Show error message

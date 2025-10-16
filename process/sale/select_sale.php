@@ -39,12 +39,33 @@ $params[] = $offset;
 
 // Get total count for pagination
 $count_sql = "SELECT COUNT(*) as total FROM sales s";
-if ($where) {
-    $count_sql .= " WHERE " . implode(" AND ", array_slice($where, 0, -2)); // Remove customer_id condition for count
+$count_where = [];
+$count_params = [];
+
+if ($from) {
+    $count_where[] = "s.order_date >= ?";
+    $count_params[] = $from;
 }
-$count_params = array_slice($params, 0, -2); // Remove limit and offset params
+if ($to) {
+    $count_where[] = "s.order_date <= ?";
+    $count_params[] = $to;
+}
+if ($customer_id) {
+    $count_where[] = "s.customer_id = ?";
+    $count_params[] = $customer_id;
+}
+
+if ($count_where) {
+    $count_sql .= " WHERE " . implode(" AND ", $count_where);
+}
 
 try {
+    // Debug: Log the queries
+    error_log("Count SQL: " . $count_sql);
+    error_log("Count Params: " . json_encode($count_params));
+    error_log("Data SQL: " . $sql);
+    error_log("Data Params: " . json_encode($params));
+    
     // Get total count
     $count_stmt = $pdo->prepare($count_sql);
     $count_stmt->execute($count_params);
@@ -54,6 +75,9 @@ try {
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
     $sales = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    error_log("Total records: " . $total_records);
+    error_log("Sales count: " . count($sales));
     
     echo json_encode([
         'success' => true, 
