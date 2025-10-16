@@ -1,4 +1,11 @@
 async function loadSalesTable(page = 1, limit = 50) {
+    // Define columns at the beginning
+    const columns = [
+        '#', 'customer_name', 'recipient', 'location', 'invoice_number', 'formula_name', 'order_date',
+        'payment_type', 'quantity', 'price_per_unit', 'total_price', 'amount_paid_iq', 'amount_paid_usd',
+        'remaining_amount', 'dolar_rate', 'notes', 'discount', 'actions'
+    ];
+    
     // Show loading state
     const tableContainer = document.querySelector('.table-responsive');
     if (tableContainer) {
@@ -60,11 +67,6 @@ async function loadSalesTable(page = 1, limit = 50) {
         }
     });
     
-    const columns = [
-        '#', 'customer_name', 'recipient', 'location', 'invoice_number', 'formula_name', 'order_date',
-        'payment_type', 'quantity', 'price_per_unit', 'total_price', 'amount_paid_iq', 'amount_paid_usd',
-        'remaining_amount', 'dolar_rate', 'notes', 'discount', 'actions'
-    ];
     function formatNumber(n) {
         if (n === null || n === undefined || n === '') return '';
         return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
