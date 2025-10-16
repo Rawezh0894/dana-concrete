@@ -280,10 +280,14 @@ function renderCustomerReceiptsTable(receipts) {
 // Global variables for price setting
 let currentCustomerId = null;
 let currentCustomerName = null;
+let savedPriceData = null; // Store previous price data
 
 function showCustomerDetails(customerId, customerName) {
     currentCustomerId = customerId;
     currentCustomerName = customerName;
+    
+    // Clear saved price data when switching customers
+    savedPriceData = null;
     
     // Show loading in modal
     $('#customerDetailsContent').html(`
@@ -341,6 +345,8 @@ function selectAllReceipts() {
 function deselectAllReceipts() {
     $('.receipt-checkbox').prop('checked', false);
     $('#select_all_receipts').prop('checked', false);
+    // Clear saved price data when deselecting all
+    savedPriceData = null;
 }
 
 function openPriceSettingModal() {
@@ -369,14 +375,40 @@ function openPriceSettingModal() {
     
     // Show selected receipts in the modal
     let receiptsList = '';
+    let commonPrice = null;
+    let commonNotes = '';
+    let commonPaymentStatus = false;
+    
     selectedReceipts.each(function() {
         const receiptNumber = $(this).data('receipt-number');
+        const receiptData = $(this).data('receipt-data');
         receiptsList += `<div class="mb-1"><i class="fas fa-receipt me-2"></i>${receiptNumber}</div>`;
+        
+        // Get common values from selected receipts
+        if (receiptData.price_per_meter && !commonPrice) {
+            commonPrice = receiptData.price_per_meter;
+        }
+        if (receiptData.notes && !commonNotes) {
+            commonNotes = receiptData.notes;
+        }
+        if (receiptData.payment_status === 'paid') {
+            commonPaymentStatus = true;
+        }
     });
     
     $('#selected_receipts_list').html(receiptsList);
-    $('#price_per_meter').val('');
-    $('#notes').val('');
+    
+    // Restore previous data if available, otherwise use common values from selected receipts
+    if (savedPriceData) {
+        $('#price_per_meter').val(savedPriceData.price_per_meter || '');
+        $('#notes').val(savedPriceData.notes || '');
+        $('#payment_status').prop('checked', savedPriceData.payment_status || false);
+    } else {
+        $('#price_per_meter').val(commonPrice || '');
+        $('#notes').val(commonNotes || '');
+        $('#payment_status').prop('checked', commonPaymentStatus);
+    }
+    
     $('#priceSettingModal').modal('show');
 }
 
@@ -466,6 +498,13 @@ function savePricePerMeter() {
                     text: message,
                     confirmButtonText: 'باشە'
                 });
+                
+                // Save current form data for next time
+                savedPriceData = {
+                    price_per_meter: price || '',
+                    notes: notes,
+                    payment_status: paymentStatus === 'paid'
+                };
                 
                 // Close price setting modal
                 $('#priceSettingModal').modal('hide');

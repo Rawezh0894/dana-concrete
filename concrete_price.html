@@ -164,7 +164,7 @@
         }
 
         .logo {
-            
+            position: relative;
         }
 
         .logo::before {
@@ -541,7 +541,7 @@
             }
 
             .logo {
-          
+                position: relative;
             }
 
             .logo::before {
@@ -627,6 +627,19 @@
 
             .price-table tr:nth-child(even) td {
                 background: #f8fafc;
+            }
+
+            .price-table .total-row {
+                background: #1e3a8a !important;
+                color: white !important;
+                font-weight: bold !important;
+            }
+
+            .price-table .total-row td {
+                background: #1e3a8a !important;
+                color: white !important;
+                font-weight: bold !important;
+                border: 1px solid #1e3a8a !important;
             }
 
             .price-table .price-cell {
@@ -747,7 +760,7 @@
                     </div>
                     <div>
                         
-                        <span class="value">2025/____/____</span>
+                        <span class="value">15/10/2025</span>
                         <span>:Date</span>
                     </div>
                 </div>
@@ -777,39 +790,50 @@
             <!-- Introduction Section -->
             <div class="intro-section">
                 <div class="intro-header">
-                    <div class="intro-recipient" style="font-size: 16px; font-weight: bold;">بۆ/ زێراب سندوقی کەنەکەوە</div>
-                    <div class="intro-title">بابەت: دەرخستە</div>
+                    <div class="intro-recipient" style="font-size: 16px; font-weight: bold;">بۆ: کۆمپانیای زەریا/پڕۆژەکانی گاسن</div>
+                    <div class="intro-title">بابەت: خەرجکردنی شایستەی دارایی</div>
 
                 </div>
                 <div class="intro-text">
-                  ئاگاداری بەڕێزتان دەکەین کە لیستی خوارەوە بریتییە لە نرخی دابینکردنی کۆنکرێتی ئامادەکراوی کارگەکەمان بۆ پڕۆژەکەتان.
+                  ئێمە وەک کارگەی کۆنکرێتی دانا بۆ کۆنکرێتی ئامادەکراو داواکارین لە بەڕێزتان ڕەزامەندی بفەرموون بە خەرجکردنی بڕی (8,716,500) هەشت ملیۆن و حەوسەد و شانزە هەزار و پێنسەد دینار، لە بری ناردنی کۆنکرێتی پێویستی پڕۆژەکەتان لە بەرواری 17/09/2025 تا بەرواری 06/10/2025 بە پێی ئەم شێوازەی کە لە خوارەوەدا ڕوونکراوەتەوە:
             </div>
 
             <!-- Price Section -->
             <div class="price-section">
                
 
-                <table class="price-table" style="direction: ltr;">
+                <table class="price-table" style="direction: rtl;">
                     <thead>
                         <tr>
-                            <th>نرخ (دینار)</th>
-                            <th>Mpa/ڕێژە</th>
+                            <th>ژمارە</th>
+                            <th>جۆری کۆنکرێت</th>
+                            <th>بڕ(م)</th>
+                            <th>نرخی جۆر</th>
+                            <th>کۆی نرخ</th>
                            
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td class="price-cell" style="color:#1e40af ;">$40</td>
-                            <td class="grade-cell">15 MPa</td>
-                           
+                            <td class="price-cell" style="color:#1e40af ;">1</td>
+                            <td class="price-cell" style="color:#1e40af ;">کۆنکرێتی 21 مێگاپاسکاڵ</td>
+                            <td class="grade-cell">17</td>
+                            <td class="grade-cell">64,000</td>
+                            <td class="price-cell" style="color:#1e40af ;">1,088,000</td>
                         </tr>
                      
                         <tr>
-                            <td class="price-cell" style="color:#1e40af ;">$43</td>
-                            <td class="grade-cell">21 MPa</td>
-                          
+                            <td class="price-cell" style="color:#1e40af ;">2</td>
+                            <td class="price-cell" style="color:#1e40af ;">کۆنکرێتی 35 مێگاپاسکاڵ</td>
+                            <td class="grade-cell">104.5</td>
+                            <td class="grade-cell">73,000</td>
+                            <td class="price-cell" style="color:#1e40af ;">7,628,500</td>
                         </tr>
-                        <tr>
+                        <tr class="total-row" style="background: linear-gradient(135deg, #1e3a8a, #1e40af); color: white; font-weight: bold;">
+                            <td colspan="4" style="text-align: center; font-size: 16px;">کۆی گشتی</td>
+                            <td style="color: white; font-size: 18px;">8,716,500</td>
+                        </tr>
+                        <!-- <tr>
                             <td class="price-cell" style="color:#1e40af ;">$45</td>
                             <td class="grade-cell">25 MPa</td>
                           
@@ -819,7 +843,7 @@
                             <td class="price-cell" style="color:#1e40af ;">$51</td>
                             <td class="grade-cell">35 MPa</td>
                            
-                        </tr>
+                        </tr> -->
                         
                     </tbody>
                 </table>
