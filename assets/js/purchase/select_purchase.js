@@ -8,22 +8,38 @@ async function loadPurchases(filterParams = '', page = 1, searchTerm = '') {
     currentFilterParams = filterParams;
     currentSearchTerm = searchTerm;
     
-    // Build URL with filters and pagination
-    let url = '../process/purchase/select_purchase.php';
-    const params = new URLSearchParams(filterParams);
-    params.set('page', page);
-    params.set('limit', 10);
-    if (searchTerm) {
-        params.set('search', searchTerm);
-    }
-    // Add column filters
-    if (Object.keys(activeColumnFilters).length > 0) {
-        params.set('column_filters', JSON.stringify(activeColumnFilters));
-    }
-    url += '?' + params.toString();
+    // Build request data
+    const requestData = new FormData();
     
-    let res = await fetch(url);
-    let text = await res.text();
+    // Add basic filters from URL params
+    const params = new URLSearchParams(filterParams);
+    for (const [key, value] of params) {
+        if (value) {
+            requestData.append(key, value);
+        }
+    }
+    
+    // Add pagination
+    requestData.append('page', page);
+    requestData.append('limit', 10);
+    
+    // Add search term
+    if (searchTerm) {
+        requestData.append('search', searchTerm);
+    }
+    
+    // Add column filters (this is the main fix for URL length issue)
+    if (Object.keys(activeColumnFilters).length > 0) {
+        requestData.append('column_filters', JSON.stringify(activeColumnFilters));
+    }
+    
+    // Use POST method to avoid URL length issues
+    const response = await fetch('../process/purchase/select_purchase.php', {
+        method: 'POST',
+        body: requestData
+    });
+    
+    const text = await response.text();
     let result;
     try {
         result = JSON.parse(text);
@@ -668,16 +684,23 @@ document.addEventListener('click', async function(e) {
 async function loadPurchasesFiltered() {
     const from = document.getElementById('filter_from').value;
     const to = document.getElementById('filter_to').value;
-    let url = '../process/purchase/select_purchase.php';
-    const params = [];
-    if (from) params.push('from=' + encodeURIComponent(from));
-    if (to) params.push('to=' + encodeURIComponent(to));
-    if (params.length) url += '?' + params.join('&');
-    let res = await fetch(url);
-    let text = await res.text();
+    
+    // Build request data
+    const requestData = new FormData();
+    if (from) requestData.append('from', from);
+    if (to) requestData.append('to', to);
+    
+    // Use POST method
+    const response = await fetch('../process/purchase/select_purchase.php', {
+        method: 'POST',
+        body: requestData
+    });
+    
+    const text = await response.text();
     let data;
     try {
-        data = JSON.parse(text);
+        const result = JSON.parse(text);
+        data = result.success ? result.data : result;
     } catch (e) {
         console.error('Raw response from select_purchase.php:', text);
         alert('هەڵەیەک لە وەڵامەکەی سێرڤەر هەیە. زانیاری زیاتر لە console.');

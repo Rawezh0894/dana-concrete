@@ -74,20 +74,26 @@ if (isset($_GET['id'])) {
     exit;
 }
 
-$from = $_GET['from'] ?? null;
-$to = $_GET['to'] ?? null;
-$company_id = $_GET['company_id'] ?? null;
-$location_id = $_GET['location_id'] ?? null;
-$driver_id = $_GET['driver_id'] ?? null;
-$material_id = $_GET['material_id'] ?? null;
-$search = $_GET['search'] ?? null;
+// Handle both GET and POST requests
+$request_data = $_SERVER['REQUEST_METHOD'] === 'POST' ? $_POST : $_GET;
 
-// Column filters (Excel-style filters)
-$column_filters = isset($_GET['column_filters']) ? json_decode($_GET['column_filters'], true) : null;
+$from = $request_data['from'] ?? null;
+$to = $request_data['to'] ?? null;
+$company_id = $request_data['company_id'] ?? null;
+$location_id = $request_data['location_id'] ?? null;
+$driver_id = $request_data['driver_id'] ?? null;
+$material_id = $request_data['material_id'] ?? null;
+$search = $request_data['search'] ?? null;
+
+// Column filters (Excel-style filters) - handle both GET and POST
+$column_filters = null;
+if (isset($request_data['column_filters'])) {
+    $column_filters = json_decode($request_data['column_filters'], true);
+}
 
 // Pagination parameters
-$page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-$limit = isset($_GET['limit']) ? max(10, min(500, intval($_GET['limit']))) : 100;
+$page = isset($request_data['page']) ? max(1, intval($request_data['page'])) : 1;
+$limit = isset($request_data['limit']) ? max(10, min(500, intval($request_data['limit']))) : 100;
 $offset = ($page - 1) * $limit;
 
 $where = [];
