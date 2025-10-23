@@ -65,12 +65,7 @@ if ($to_date) {
 
 $where_sql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
 
-// Get pagination parameters
-$page = max(1, intval($_GET['page'] ?? 1));
-$limit = min(100, max(10, intval($_GET['limit'] ?? 50))); // Limit between 10-100
-$offset = ($page - 1) * $limit;
-
-// Get detailed data with pagination
+// Get detailed data
 $sql = "SELECT 
     cr.*,
     c.name AS customer_name,
@@ -87,102 +82,101 @@ LEFT JOIN cars pc ON cr.pump_car_id = pc.id
 LEFT JOIN employees pd ON cr.pump_driver_id = pd.id
 LEFT JOIN concrete_formulas f ON cr.formulas_id = f.id
 $where_sql
-ORDER BY cr.created_at DESC
-LIMIT $limit OFFSET $offset";
+ORDER BY cr.created_at DESC";
 
 try {
-    // Get total count for pagination
-    $countSql = "SELECT COUNT(*) as total FROM concrete_receipts cr $where_sql";
-    $countStmt = $pdo->prepare($countSql);
-    $countStmt->execute($params);
-    $totalRecords = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
-    
-    // Get paginated data
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
     $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    // Get summary statistics efficiently with separate queries
-    $summarySql = "SELECT 
-        COUNT(DISTINCT CASE WHEN cr.mixer_car_id IS NOT NULL THEN cr.mixer_car_id END) + 
-        COUNT(DISTINCT CASE WHEN cr.pump_car_id IS NOT NULL THEN cr.pump_car_id END) as total_cars,
-        COUNT(DISTINCT CASE WHEN cr.mixer_driver_id IS NOT NULL THEN cr.mixer_driver_id END) + 
-        COUNT(DISTINCT CASE WHEN cr.pump_driver_id IS NOT NULL THEN cr.pump_driver_id END) as total_drivers,
-        COALESCE(SUM(cr.meter_amount), 0) as total_meters,
-        COUNT(*) as total_receipts
-        FROM concrete_receipts cr $where_sql";
+    // Calculate summary statistics
+    $totalMeters = 0;
+    $totalReceipts = count($data);
+    $uniqueCars = [];
+    $uniqueDrivers = [];
     
-    $summaryStmt = $pdo->prepare($summarySql);
-    $summaryStmt->execute($params);
-    $summary = $summaryStmt->fetch(PDO::FETCH_ASSOC);
+    foreach ($data as $row) {
+        $totalMeters += floatval($row['meter_amount']);
+        
+        if ($row['mixer_car_id']) {
+            $uniqueCars[$row['mixer_car_id']] = $row['mixer_car_name'];
+        }
+        if ($row['pump_car_id']) {
+            $uniqueCars[$row['pump_car_id']] = $row['pump_car_name'];
+        }
+        if ($row['mixer_driver_id']) {
+            $uniqueDrivers[$row['mixer_driver_id']] = $row['mixer_driver_name'];
+        }
+        if ($row['pump_driver_id']) {
+            $uniqueDrivers[$row['pump_driver_id']] = $row['pump_driver_name'];
+        }
+    }
     
-    // Get chart data efficiently with SQL aggregation
-    $carsChartSql = "SELECT 
-        COALESCE(mc.id, pc.id) as car_id,
-        COALESCE(mc.name, pc.name) as car_name,
-        SUM(cr.meter_amount) as total_meters
-        FROM concrete_receipts cr
-        LEFT JOIN cars mc ON cr.mixer_car_id = mc.id
-        LEFT JOIN cars pc ON cr.pump_car_id = pc.id
-        $where_sql
-        AND (cr.mixer_car_id IS NOT NULL OR cr.pump_car_id IS NOT NULL)
-        GROUP BY COALESCE(mc.id, pc.id), COALESCE(mc.name, pc.name)
-        ORDER BY total_meters DESC
-        LIMIT 10";
-    
-    $driversChartSql = "SELECT 
-        COALESCE(md.id, pd.id) as driver_id,
-        COALESCE(md.name, pd.name) as driver_name,
-        SUM(cr.meter_amount) as total_meters
-        FROM concrete_receipts cr
-        LEFT JOIN employees md ON cr.mixer_driver_id = md.id
-        LEFT JOIN employees pd ON cr.pump_driver_id = pd.id
-        $where_sql
-        AND (cr.mixer_driver_id IS NOT NULL OR cr.pump_driver_id IS NOT NULL)
-        GROUP BY COALESCE(md.id, pd.id), COALESCE(md.name, pd.name)
-        ORDER BY total_meters DESC
-        LIMIT 10";
-    
-    $carsChartStmt = $pdo->prepare($carsChartSql);
-    $carsChartStmt->execute($params);
-    $carsChartData = $carsChartStmt->fetchAll(PDO::FETCH_ASSOC);
-    
-    $driversChartStmt = $pdo->prepare($driversChartSql);
-    $driversChartStmt->execute($params);
-    $driversChartData = $driversChartStmt->fetchAll(PDO::FETCH_ASSOC);
-    
-    // Format chart data
+    // Prepare chart data
     $carsData = [];
     $driversData = [];
     
-    foreach ($carsChartData as $row) {
-        $carsData[$row['car_id']] = [
-            'name' => $row['car_name'],
-            'meters' => floatval($row['total_meters'])
-        ];
+    // Group by cars
+    $carMeters = [];
+    foreach ($data as $row) {
+        if ($row['mixer_car_id']) {
+            $carId = $row['mixer_car_id'];
+            $carName = $row['mixer_car_name'];
+            if (!isset($carMeters[$carId])) {
+                $carMeters[$carId] = ['name' => $carName, 'meters' => 0];
+            }
+            $carMeters[$carId]['meters'] += floatval($row['meter_amount']);
+        }
+        if ($row['pump_car_id']) {
+            $carId = $row['pump_car_id'];
+            $carName = $row['pump_car_name'];
+            if (!isset($carMeters[$carId])) {
+                $carMeters[$carId] = ['name' => $carName, 'meters' => 0];
+            }
+            $carMeters[$carId]['meters'] += floatval($row['meter_amount']);
+        }
     }
     
-    foreach ($driversChartData as $row) {
-        $driversData[$row['driver_id']] = [
-            'name' => $row['driver_name'],
-            'meters' => floatval($row['total_meters'])
-        ];
+    // Group by drivers
+    $driverMeters = [];
+    foreach ($data as $row) {
+        if ($row['mixer_driver_id']) {
+            $driverId = $row['mixer_driver_id'];
+            $driverName = $row['mixer_driver_name'];
+            if (!isset($driverMeters[$driverId])) {
+                $driverMeters[$driverId] = ['name' => $driverName, 'meters' => 0];
+            }
+            $driverMeters[$driverId]['meters'] += floatval($row['meter_amount']);
+        }
+        if ($row['pump_driver_id']) {
+            $driverId = $row['pump_driver_id'];
+            $driverName = $row['pump_driver_name'];
+            if (!isset($driverMeters[$driverId])) {
+                $driverMeters[$driverId] = ['name' => $driverName, 'meters' => 0];
+            }
+            $driverMeters[$driverId]['meters'] += floatval($row['meter_amount']);
+        }
     }
+    
+    // Sort by meters (descending) and take top 10
+    uasort($carMeters, function($a, $b) {
+        return $b['meters'] <=> $a['meters'];
+    });
+    uasort($driverMeters, function($a, $b) {
+        return $b['meters'] <=> $a['meters'];
+    });
+    
+    $carsData = array_slice($carMeters, 0, 10, true);
+    $driversData = array_slice($driverMeters, 0, 10, true);
     
     echo json_encode([
         'success' => true,
         'data' => $data,
-        'pagination' => [
-            'current_page' => $page,
-            'per_page' => $limit,
-            'total_records' => intval($totalRecords),
-            'total_pages' => ceil($totalRecords / $limit)
-        ],
         'summary' => [
-            'totalCars' => intval($summary['total_cars']),
-            'totalDrivers' => intval($summary['total_drivers']),
-            'totalMeters' => round(floatval($summary['total_meters']), 2),
-            'totalReceipts' => intval($summary['total_receipts'])
+            'totalCars' => count($uniqueCars),
+            'totalDrivers' => count($uniqueDrivers),
+            'totalMeters' => round($totalMeters, 2),
+            'totalReceipts' => $totalReceipts
         ],
         'charts' => [
             'cars' => $carsData,

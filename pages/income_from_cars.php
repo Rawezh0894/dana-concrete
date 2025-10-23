@@ -64,53 +64,6 @@ if (!hasPermission('view_income_from_cars')) {
                 height: 300px;
             }
         }
-        
-        /* Skeleton Loading Styles */
-        .skeleton-loader {
-            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-            background-size: 200% 100%;
-            animation: loading 1.5s infinite;
-            height: 20px;
-            border-radius: 4px;
-            margin: 10px 0;
-        }
-        
-        .chart-skeleton {
-            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-            background-size: 200% 100%;
-            animation: loading 1.5s infinite;
-            height: 400px;
-            border-radius: 8px;
-            margin: 10px 0;
-        }
-        
-        @keyframes loading {
-            0% {
-                background-position: 200% 0;
-            }
-            100% {
-                background-position: -200% 0;
-            }
-        }
-        
-        .select2-container.loading .select2-selection {
-            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-            background-size: 200% 100%;
-            animation: loading 1.5s infinite;
-        }
-        
-        .select2-container.loading .select2-selection__rendered {
-            color: transparent;
-        }
-        
-        /* Performance optimizations */
-        .chart-container canvas {
-            will-change: transform;
-        }
-        
-        .table-container {
-            contain: layout style paint;
-        }
     </style>
     <link href="../assets/css/kurdish-font.css" rel="stylesheet">
 </head>
