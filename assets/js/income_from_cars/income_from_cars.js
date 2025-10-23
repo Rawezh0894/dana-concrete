@@ -5,15 +5,28 @@ $(document).ready(function() {
         dir: 'rtl'
     });
 
-    // Load initial data
-    loadData();
-    loadFilters();
-
     // Charts
     let carsChart = null;
     let driversChart = null;
+    
+    // Cache for filter data
+    const filterCache = {
+        cars: null,
+        drivers: null,
+        customers: null,
+        lastUpdated: null
+    };
+    
+    // Loading states
+    let isLoadingData = false;
+    let isLoadingFilters = false;
 
-    async function loadData() {
+    async function loadData(page = 1, limit = 50) {
+        if (isLoadingData) return;
+        
+        isLoadingData = true;
+        showLoadingStates();
+        
         const filters = {
             mixer_car_id: $('#mixerCarFilter').val(),
             mixer_driver_id: $('#mixerDriverFilter').val(),
@@ -21,7 +34,9 @@ $(document).ready(function() {
             pump_driver_id: $('#pumpDriverFilter').val(),
             customer_id: $('#customerFilter').val(),
             from_date: $('#fromDate').val(),
-            to_date: $('#toDate').val()
+            to_date: $('#toDate').val(),
+            page: page,
+            limit: limit
         };
 
         try {
@@ -29,9 +44,13 @@ $(document).ready(function() {
             const result = await response.json();
 
             if (result.success) {
-                displayData(result.data);
+                displayData(result.data, result.pagination);
                 updateSummary(result.summary);
-                updateCharts(result.charts);
+                
+                // Load charts only on first page load or when filters change
+                if (page === 1) {
+                    updateCharts(result.charts);
+                }
             } else {
                 Swal.fire({
                     icon: 'error',
@@ -46,58 +65,99 @@ $(document).ready(function() {
                 title: 'هەڵە',
                 text: 'هەڵەیەک لە وەرگرتنی زانیاریەکان ڕویدا!'
             });
+        } finally {
+            isLoadingData = false;
+            hideLoadingStates();
         }
     }
 
     async function loadFilters() {
+        if (isLoadingFilters) return;
+        
+        // Check cache first (valid for 5 minutes)
+        const cacheValid = filterCache.lastUpdated && 
+            (Date.now() - filterCache.lastUpdated) < 300000; // 5 minutes
+        
+        if (cacheValid && filterCache.cars && filterCache.drivers && filterCache.customers) {
+            populateFiltersFromCache();
+            return;
+        }
+        
+        isLoadingFilters = true;
+        showFilterLoadingStates();
+        
         try {
-            // Load cars
-            const carsResponse = await fetch('../process/car/select_car.php');
-            const cars = await carsResponse.json();
-            if (cars && cars.length > 0) {
-                $('#mixerCarFilter, #pumpCarFilter').each(function() {
-                    $(this).empty().append('<option value="">هەموو سەیارەکان</option>');
-                    cars.forEach(car => {
-                        $(this).append(`<option value="${car.id}">${car.name}</option>`);
-                    });
-                });
-            }
-
-            // Load drivers (employees)
-            const driversResponse = await fetch('../process/employee/select_employee.php');
-            const driversResult = await driversResponse.json();
-            if (driversResult && driversResult.employees && driversResult.employees.length > 0) {
-                const drivers = driversResult.employees;
-                $('#mixerDriverFilter, #pumpDriverFilter').each(function() {
-                    $(this).empty().append('<option value="">هەموو شۆفێران</option>');
-                    drivers.forEach(driver => {
-                        $(this).append(`<option value="${driver.id}">${driver.name}</option>`);
-                    });
-                });
-            }
-
-            // Load customers
-            const customersResponse = await fetch('../process/customer/select_customer.php');
-            const customers = await customersResponse.json();
-            if (customers && customers.length > 0) {
-                $('#customerFilter').empty().append('<option value="">هەموو کڕیارەکان</option>');
-                customers.forEach(customer => {
-                    $('#customerFilter').append(`<option value="${customer.id}">${customer.name}</option>`);
-                });
-            }
-
-            // Reinitialize Select2
-            $('.select2').select2({
-                theme: 'bootstrap-5',
-                dir: 'rtl'
-            });
-
+            // Load all filters in parallel
+            const [carsResponse, driversResponse, customersResponse] = await Promise.all([
+                fetch('../process/car/select_car.php'),
+                fetch('../process/employee/select_employee.php'),
+                fetch('../process/customer/select_customer.php')
+            ]);
+            
+            const [cars, driversResult, customers] = await Promise.all([
+                carsResponse.json(),
+                driversResponse.json(),
+                customersResponse.json()
+            ]);
+            
+            // Cache the results
+            filterCache.cars = cars;
+            filterCache.drivers = driversResult.employees || [];
+            filterCache.customers = customers;
+            filterCache.lastUpdated = Date.now();
+            
+            populateFiltersFromCache();
+            
         } catch (error) {
             console.error('Error loading filters:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'هەڵە',
+                text: 'هەڵەیەک لە وەرگرتنی فلتەرەکان ڕویدا!'
+            });
+        } finally {
+            isLoadingFilters = false;
+            hideFilterLoadingStates();
         }
     }
+    
+    function populateFiltersFromCache() {
+        // Populate cars
+        if (filterCache.cars && filterCache.cars.length > 0) {
+            $('#mixerCarFilter, #pumpCarFilter').each(function() {
+                $(this).empty().append('<option value="">هەموو سەیارەکان</option>');
+                filterCache.cars.forEach(car => {
+                    $(this).append(`<option value="${car.id}">${car.name}</option>`);
+                });
+            });
+        }
+        
+        // Populate drivers
+        if (filterCache.drivers && filterCache.drivers.length > 0) {
+            $('#mixerDriverFilter, #pumpDriverFilter').each(function() {
+                $(this).empty().append('<option value="">هەموو شۆفێران</option>');
+                filterCache.drivers.forEach(driver => {
+                    $(this).append(`<option value="${driver.id}">${driver.name}</option>`);
+                });
+            });
+        }
+        
+        // Populate customers
+        if (filterCache.customers && filterCache.customers.length > 0) {
+            $('#customerFilter').empty().append('<option value="">هەموو کڕیارەکان</option>');
+            filterCache.customers.forEach(customer => {
+                $('#customerFilter').append(`<option value="${customer.id}">${customer.name}</option>`);
+            });
+        }
+        
+        // Reinitialize Select2
+        $('.select2').select2({
+            theme: 'bootstrap-5',
+            dir: 'rtl'
+        });
+    }
 
-    function displayData(data) {
+    function displayData(data, pagination) {
         const columns = [
             'receipt_number', 'customer_name', 'location', 'meter_amount', 
             'mixer_car_name', 'mixer_driver_name', 'pump_car_name', 
@@ -117,10 +177,48 @@ $(document).ready(function() {
             receiver_name: row.receiver_name || '-'
         }));
 
-        TableController.renderWithPagination('#incomeTable', mappedData, columns, { pageSize: 10 });
+        TableController.renderWithPagination('#incomeTable', mappedData, columns, { 
+            pageSize: pagination.per_page,
+            currentPage: pagination.current_page,
+            onRenderComplete: () => {
+                // Update table info with pagination data
+                $('#tableInfo').text(`کۆی: ${pagination.total_records} تۆمار`);
+            }
+        });
+    }
+    
+    function showLoadingStates() {
+        // Show skeleton for summary cards
+        $('#summary-cards .card-body').each(function() {
+            $(this).html('<div class="skeleton-loader"></div>');
+        });
         
-        // Update table info
-        $('#tableInfo').text(`کۆی: ${data.length} تۆمار`);
+        // Show skeleton for charts
+        $('#carsChart, #driversChart').each(function() {
+            $(this).parent().html('<div class="chart-skeleton"></div>');
+        });
+        
+        // Show loading for table
+        TableController.showLoading('#incomeTable', [
+            'receipt_number', 'customer_name', 'location', 'meter_amount', 
+            'mixer_car_name', 'mixer_driver_name', 'pump_car_name', 
+            'pump_driver_name', 'created_at', 'receiver_name'
+        ]);
+    }
+    
+    function hideLoadingStates() {
+        // Remove skeleton loaders
+        $('.skeleton-loader, .chart-skeleton').remove();
+    }
+    
+    function showFilterLoadingStates() {
+        $('.select2').each(function() {
+            $(this).next('.select2-container').addClass('loading');
+        });
+    }
+    
+    function hideFilterLoadingStates() {
+        $('.select2-container').removeClass('loading');
     }
 
     function updateSummary(summary) {
@@ -286,6 +384,22 @@ $(document).ready(function() {
         document.body.removeChild(form);
     };
 
+    // Initialize page
+    async function initializePage() {
+        try {
+            // Load filters first (cached)
+            await loadFilters();
+            
+            // Then load initial data
+            await loadData(1, 50);
+        } catch (error) {
+            console.error('Error initializing page:', error);
+        }
+    }
+    
+    // Initialize page on load
+    initializePage();
+    
     // Make loadData available globally
-    window.loadData = loadData;
+    window.loadData = () => loadData(1, 50);
 });

@@ -139,6 +139,9 @@ const TableController = {
 
         let currentPage = options.currentPage || 1;
         let pageSize = options.pageSize || 10;
+        
+        // Performance optimization: Use document fragment for batch DOM updates
+        const fragment = document.createDocumentFragment();
 
         // Create page size selector if not exists
         let sizeSelect = table.parentElement.querySelector('.page-size-selector');
@@ -225,16 +228,19 @@ const TableController = {
                 return;
             }
             
-            TableController.render(tableSelector, pageData, columns, { 
-                rowOffset: start,
-                rowClass: options.rowClass 
+            // Performance optimization: Use requestAnimationFrame for smooth rendering
+            requestAnimationFrame(() => {
+                TableController.render(tableSelector, pageData, columns, { 
+                    rowOffset: start,
+                    rowClass: options.rowClass 
+                });
+                renderPaginationControls(totalPages);
+                
+                // Call onRenderComplete callback if provided
+                if (options.onRenderComplete && typeof options.onRenderComplete === 'function') {
+                    options.onRenderComplete();
+                }
             });
-            renderPaginationControls(totalPages);
-            
-            // Call onRenderComplete callback if provided
-            if (options.onRenderComplete && typeof options.onRenderComplete === 'function') {
-                options.onRenderComplete();
-            }
         }
 
         function renderPaginationControls(totalPages) {
