@@ -1,19 +1,37 @@
 $(document).ready(function() {
-    // Initialize Select2
+    // Performance optimization: Initialize components
+    let isInitialized = false;
+    let cachedData = null;
+    let lastLoadTime = 0;
+    const CACHE_DURATION = 30000; // 30 seconds cache
+    
+    // Initialize Select2 with performance optimizations
     $('.select2').select2({
         theme: 'bootstrap-5',
-        dir: 'rtl'
+        dir: 'rtl',
+        minimumInputLength: 0,
+        cache: true
     });
-
-    // Load initial data
-    loadData();
-    loadFilters();
 
     // Charts
     let carsChart = null;
     let driversChart = null;
+    
+    // Performance monitoring
+    const performanceMonitor = {
+        startTime: 0,
+        endTime: 0,
+        logPerformance: function(operation) {
+            console.log(`${operation} took: ${this.endTime - this.startTime}ms`);
+        }
+    };
 
-    async function loadData() {
+    // Optimized data loading with caching and performance monitoring
+    async function loadData(forceRefresh = false) {
+        performanceMonitor.startTime = performance.now();
+        
+        // Check cache first
+        const currentTime = Date.now();
         const filters = {
             mixer_car_id: $('#mixerCarFilter').val(),
             mixer_driver_id: $('#mixerDriverFilter').val(),
@@ -23,16 +41,46 @@ $(document).ready(function() {
             from_date: $('#fromDate').val(),
             to_date: $('#toDate').val()
         };
+        
+        const filterKey = JSON.stringify(filters);
+        
+        // Use cache if available and not expired
+        if (!forceRefresh && cachedData && cachedData.filterKey === filterKey && 
+            (currentTime - lastLoadTime) < CACHE_DURATION) {
+            console.log('Using cached data');
+            displayData(cachedData.data);
+            updateSummary(cachedData.summary);
+            updateCharts(cachedData.charts);
+            performanceMonitor.endTime = performance.now();
+            performanceMonitor.logPerformance('Cached data load');
+            return;
+        }
 
         try {
+            // Show loading state
+            showLoadingState();
+            
             const response = await fetch(`../process/income_from_cars/get_informations.php?${new URLSearchParams(filters)}`);
             const result = await response.json();
 
             if (result.success) {
+                // Cache the result
+                cachedData = {
+                    data: result.data,
+                    summary: result.summary,
+                    charts: result.charts,
+                    filterKey: filterKey
+                };
+                lastLoadTime = currentTime;
+                
                 displayData(result.data);
                 updateSummary(result.summary);
                 updateCharts(result.charts);
+                
+                performanceMonitor.endTime = performance.now();
+                performanceMonitor.logPerformance('Fresh data load');
             } else {
+                hideLoadingState();
                 Swal.fire({
                     icon: 'error',
                     title: 'هەڵە',
@@ -40,6 +88,7 @@ $(document).ready(function() {
                 });
             }
         } catch (error) {
+            hideLoadingState();
             console.error('Error loading data:', error);
             Swal.fire({
                 icon: 'error',
@@ -49,66 +98,81 @@ $(document).ready(function() {
         }
     }
 
+    // Optimized filter loading with parallel requests
     async function loadFilters() {
+        performanceMonitor.startTime = performance.now();
+        
         try {
-            // Load cars
-            const carsResponse = await fetch('../process/car/select_car.php');
+            // Load all filters in parallel for better performance
+            const [carsResponse, driversResponse, customersResponse] = await Promise.all([
+                fetch('../process/car/select_car.php'),
+                fetch('../process/employee/select_employee.php'),
+                fetch('../process/customer/select_customer.php')
+            ]);
+
+            // Process cars
             const cars = await carsResponse.json();
             if (cars && cars.length > 0) {
+                const carOptions = cars.map(car => `<option value="${car.id}">${car.name}</option>`).join('');
                 $('#mixerCarFilter, #pumpCarFilter').each(function() {
-                    $(this).empty().append('<option value="">هەموو سەیارەکان</option>');
-                    cars.forEach(car => {
-                        $(this).append(`<option value="${car.id}">${car.name}</option>`);
-                    });
+                    $(this).empty().append('<option value="">هەموو سەیارەکان</option>' + carOptions);
                 });
             }
 
-            // Load drivers (employees)
-            const driversResponse = await fetch('../process/employee/select_employee.php');
+            // Process drivers
             const driversResult = await driversResponse.json();
             if (driversResult && driversResult.employees && driversResult.employees.length > 0) {
-                const drivers = driversResult.employees;
+                const driverOptions = driversResult.employees.map(driver => 
+                    `<option value="${driver.id}">${driver.name}</option>`
+                ).join('');
                 $('#mixerDriverFilter, #pumpDriverFilter').each(function() {
-                    $(this).empty().append('<option value="">هەموو شۆفێران</option>');
-                    drivers.forEach(driver => {
-                        $(this).append(`<option value="${driver.id}">${driver.name}</option>`);
-                    });
+                    $(this).empty().append('<option value="">هەموو شۆفێران</option>' + driverOptions);
                 });
             }
 
-            // Load customers
-            const customersResponse = await fetch('../process/customer/select_customer.php');
-            const customers = await customersResponse.json();
-            if (customers && customers.length > 0) {
-                $('#customerFilter').empty().append('<option value="">هەموو کڕیارەکان</option>');
-                customers.forEach(customer => {
-                    $('#customerFilter').append(`<option value="${customer.id}">${customer.name}</option>`);
-                });
+            // Process customers
+            const customersResult = await customersResponse.json();
+            if (customersResult && customersResult.success && customersResult.data && customersResult.data.length > 0) {
+                const customerOptions = customersResult.data.map(customer => 
+                    `<option value="${customer.id}">${customer.name}</option>`
+                ).join('');
+                $('#customerFilter').empty().append('<option value="">هەموو کڕیارەکان</option>' + customerOptions);
             }
 
-            // Reinitialize Select2
+            // Reinitialize Select2 with performance optimizations
             $('.select2').select2({
                 theme: 'bootstrap-5',
-                dir: 'rtl'
+                dir: 'rtl',
+                minimumInputLength: 0,
+                cache: true
             });
+
+            performanceMonitor.endTime = performance.now();
+            performanceMonitor.logPerformance('Filters load');
 
         } catch (error) {
             console.error('Error loading filters:', error);
+            performanceMonitor.endTime = performance.now();
+            performanceMonitor.logPerformance('Filters load (error)');
         }
     }
 
+    // Optimized data display with enhanced table controller
     function displayData(data) {
+        performanceMonitor.startTime = performance.now();
+        
         const columns = [
             'receipt_number', 'customer_name', 'location', 'meter_amount', 
             'mixer_car_name', 'mixer_driver_name', 'pump_car_name', 
             'pump_driver_name', 'created_at', 'receiver_name'
         ];
 
+        // Optimize data mapping
         const mappedData = data.map(row => ({
             receipt_number: row.receipt_number,
             customer_name: row.customer_name || '-',
-            location: row.location,
-            meter_amount: `${row.meter_amount} م³`,
+            location: row.location || '-',
+            meter_amount: `${parseFloat(row.meter_amount || 0).toFixed(2)} م³`,
             mixer_car_name: row.mixer_car_name || '-',
             mixer_driver_name: row.mixer_driver_name || '-',
             pump_car_name: row.pump_car_name || '-',
@@ -117,7 +181,15 @@ $(document).ready(function() {
             receiver_name: row.receiver_name || '-'
         }));
 
-        TableController.renderWithPagination('#incomeTable', mappedData, columns, { pageSize: 10 });
+        // Use enhanced table controller with performance optimizations
+        TableController.renderWithPagination('#incomeTable', mappedData, columns, { 
+            pageSize: 25, // Increased page size for better performance
+            onRenderComplete: function() {
+                hideLoadingState();
+                performanceMonitor.endTime = performance.now();
+                performanceMonitor.logPerformance('Table render');
+            }
+        });
         
         // Update table info
         $('#tableInfo').text(`کۆی: ${data.length} تۆمار`);
@@ -130,9 +202,36 @@ $(document).ready(function() {
         $('#totalReceipts').text(summary.totalReceipts);
     }
 
+    // Optimized chart updates with performance monitoring
     function updateCharts(charts) {
-        updateCarsChart(charts.cars);
-        updateDriversChart(charts.drivers);
+        performanceMonitor.startTime = performance.now();
+        
+        // Use requestAnimationFrame for smooth chart updates
+        requestAnimationFrame(() => {
+            updateCarsChart(charts.cars);
+            updateDriversChart(charts.drivers);
+            
+            performanceMonitor.endTime = performance.now();
+            performanceMonitor.logPerformance('Charts update');
+        });
+    }
+    
+    // Loading state management
+    function showLoadingState() {
+        $('#incomeTable tbody').html(`
+            <tr>
+                <td colspan="10" class="text-center text-muted">
+                    <div class="d-flex justify-content-center align-items-center">
+                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                        چاوەڕوان بە...
+                    </div>
+                </td>
+            </tr>
+        `);
+    }
+    
+    function hideLoadingState() {
+        // Loading state will be replaced by table data
     }
 
     function updateCarsChart(carsData) {
@@ -252,7 +351,7 @@ $(document).ready(function() {
         return date.toLocaleDateString('ku-IQ');
     }
 
-    // Export to Excel function
+    // Optimized export function with loading state
     window.exportToExcel = function() {
         const filters = {
             mixer_car_id: $('#mixerCarFilter').val(),
@@ -263,6 +362,17 @@ $(document).ready(function() {
             from_date: $('#fromDate').val(),
             to_date: $('#toDate').val()
         };
+
+        // Show loading state for export
+        Swal.fire({
+            title: 'چاوەڕوان بە...',
+            text: 'فایلەکە دانەدەرێت',
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
 
         // Create a temporary form to submit the export request
         const form = document.createElement('form');
@@ -284,8 +394,37 @@ $(document).ready(function() {
         document.body.appendChild(form);
         form.submit();
         document.body.removeChild(form);
+        
+        // Close loading after a short delay
+        setTimeout(() => {
+            Swal.close();
+        }, 2000);
     };
 
-    // Make loadData available globally
+    // Initialize page with optimized loading
+    async function initializePage() {
+        if (isInitialized) return;
+        
+        performanceMonitor.startTime = performance.now();
+        
+        try {
+            // Load filters first, then data
+            await loadFilters();
+            await loadData();
+            
+            isInitialized = true;
+            performanceMonitor.endTime = performance.now();
+            performanceMonitor.logPerformance('Page initialization');
+            
+        } catch (error) {
+            console.error('Error initializing page:', error);
+        }
+    }
+
+    // Initialize page
+    initializePage();
+
+    // Make functions available globally
     window.loadData = loadData;
+    window.refreshData = () => loadData(true); // Force refresh
 });

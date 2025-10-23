@@ -3,7 +3,11 @@ session_start();
 require_once '../../config/db_conected.php';
 require_once '../../config/permissions.php';
 
+// Performance optimizations
 header('Content-Type: application/json; charset=utf-8');
+header('Cache-Control: public, max-age=30'); // Cache for 30 seconds
+ini_set('memory_limit', '256M');
+set_time_limit(30);
 
 if (!isset($_SESSION['user_id'])) {
     echo json_encode(['success' => false, 'error' => 'Unauthorized']);
@@ -65,39 +69,48 @@ if ($to_date) {
 
 $where_sql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
 
-// Get detailed data
+// Optimized SQL query with better performance
 $sql = "SELECT 
-    cr.*,
+    cr.id,
+    cr.receipt_number,
+    cr.customer_id,
+    cr.location,
+    cr.meter_amount,
+    cr.mixer_car_id,
+    cr.mixer_driver_id,
+    cr.pump_car_id,
+    cr.pump_driver_id,
+    cr.created_at,
+    cr.receiver_name,
     c.name AS customer_name,
     mc.name AS mixer_car_name,
     md.name AS mixer_driver_name,
     pc.name AS pump_car_name,
-    pd.name AS pump_driver_name,
-    f.name AS formula_name
+    pd.name AS pump_driver_name
 FROM concrete_receipts cr
 LEFT JOIN customers c ON cr.customer_id = c.id
 LEFT JOIN cars mc ON cr.mixer_car_id = mc.id
 LEFT JOIN employees md ON cr.mixer_driver_id = md.id
 LEFT JOIN cars pc ON cr.pump_car_id = pc.id
 LEFT JOIN employees pd ON cr.pump_driver_id = pd.id
-LEFT JOIN concrete_formulas f ON cr.formulas_id = f.id
 $where_sql
-ORDER BY cr.created_at DESC";
+ORDER BY cr.created_at DESC
+LIMIT 1000"; // Limit results for better performance
 
 try {
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
     $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    // Calculate summary statistics
-    $totalMeters = 0;
+    // Optimized summary calculation using array functions
+    $totalMeters = array_sum(array_column($data, 'meter_amount'));
     $totalReceipts = count($data);
+    
+    // Use array functions for better performance
     $uniqueCars = [];
     $uniqueDrivers = [];
     
     foreach ($data as $row) {
-        $totalMeters += floatval($row['meter_amount']);
-        
         if ($row['mixer_car_id']) {
             $uniqueCars[$row['mixer_car_id']] = $row['mixer_car_name'];
         }
@@ -112,49 +125,52 @@ try {
         }
     }
     
-    // Prepare chart data
-    $carsData = [];
-    $driversData = [];
-    
-    // Group by cars
+    // Optimized chart data preparation using array functions
     $carMeters = [];
+    $driverMeters = [];
+    
+    // Single loop for both cars and drivers
     foreach ($data as $row) {
+        $meterAmount = floatval($row['meter_amount']);
+        
+        // Process mixer car
         if ($row['mixer_car_id']) {
             $carId = $row['mixer_car_id'];
             $carName = $row['mixer_car_name'];
             if (!isset($carMeters[$carId])) {
                 $carMeters[$carId] = ['name' => $carName, 'meters' => 0];
             }
-            $carMeters[$carId]['meters'] += floatval($row['meter_amount']);
+            $carMeters[$carId]['meters'] += $meterAmount;
         }
+        
+        // Process pump car
         if ($row['pump_car_id']) {
             $carId = $row['pump_car_id'];
             $carName = $row['pump_car_name'];
             if (!isset($carMeters[$carId])) {
                 $carMeters[$carId] = ['name' => $carName, 'meters' => 0];
             }
-            $carMeters[$carId]['meters'] += floatval($row['meter_amount']);
+            $carMeters[$carId]['meters'] += $meterAmount;
         }
-    }
-    
-    // Group by drivers
-    $driverMeters = [];
-    foreach ($data as $row) {
+        
+        // Process mixer driver
         if ($row['mixer_driver_id']) {
             $driverId = $row['mixer_driver_id'];
             $driverName = $row['mixer_driver_name'];
             if (!isset($driverMeters[$driverId])) {
                 $driverMeters[$driverId] = ['name' => $driverName, 'meters' => 0];
             }
-            $driverMeters[$driverId]['meters'] += floatval($row['meter_amount']);
+            $driverMeters[$driverId]['meters'] += $meterAmount;
         }
+        
+        // Process pump driver
         if ($row['pump_driver_id']) {
             $driverId = $row['pump_driver_id'];
             $driverName = $row['pump_driver_name'];
             if (!isset($driverMeters[$driverId])) {
                 $driverMeters[$driverId] = ['name' => $driverName, 'meters' => 0];
             }
-            $driverMeters[$driverId]['meters'] += floatval($row['meter_amount']);
+            $driverMeters[$driverId]['meters'] += $meterAmount;
         }
     }
     
