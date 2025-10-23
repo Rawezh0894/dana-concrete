@@ -5,7 +5,7 @@ require_once '../../config/permissions.php';
 
 // Performance optimizations
 header('Content-Type: application/json; charset=utf-8');
-header('Cache-Control: public, max-age=30'); // Cache for 30 seconds
+header('Cache-Control: public, max-age=60'); // Cache for 60 seconds
 ini_set('memory_limit', '256M');
 set_time_limit(30);
 

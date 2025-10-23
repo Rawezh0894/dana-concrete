@@ -3,7 +3,7 @@ $(document).ready(function() {
     let isInitialized = false;
     let cachedData = null;
     let lastLoadTime = 0;
-    const CACHE_DURATION = 30000; // 30 seconds cache
+    const CACHE_DURATION = 60000; // 60 seconds cache for better performance
     
     // Initialize Select2 with performance optimizations
     $('.select2').select2({
