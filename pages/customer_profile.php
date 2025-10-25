@@ -408,23 +408,29 @@ if ($customer_id) {
             }
             const s = data.stats;
             let debtText = '';
+            // تەنها ئەگەر هەردووکەیان گەورەتر بن لە سفر نیشانیان بدە
             if (s.total_debt_usd > 0 && s.total_debt_iqd > 0) {
                 debtText = s.total_debt_usd.toLocaleString('en-US') + ' $ / ' + s.total_debt_iqd.toLocaleString('en-US') + ' د.ع';
             } else if (s.total_debt_usd > 0) {
                 debtText = s.total_debt_usd.toLocaleString('en-US') + ' $';
-            } else {
+            } else if (s.total_debt_iqd > 0) {
                 debtText = s.total_debt_iqd.toLocaleString('en-US') + ' د.ع';
+            } else {
+                debtText = '0 $'; // ئەگەر هیچ قەرزێک نییە
             }
             $('#total-debt').text(debtText);
             $('#sales-count').text(s.sales_count);
             // Opening debt card
             let openingDebtText = '';
+            // تەنها ئەگەر هەردووکەیان گەورەتر بن لە سفر نیشانیان بدە
             if (s.opening_debt_usd > 0 && s.opening_debt_iqd > 0) {
                 openingDebtText = s.opening_debt_usd.toLocaleString('en-US') + ' $ / ' + s.opening_debt_iqd.toLocaleString('en-US') + ' د.ع';
             } else if (s.opening_debt_usd > 0) {
                 openingDebtText = s.opening_debt_usd.toLocaleString('en-US') + ' $';
-            } else {
+            } else if (s.opening_debt_iqd > 0) {
                 openingDebtText = s.opening_debt_iqd.toLocaleString('en-US') + ' د.ع';
+            } else {
+                openingDebtText = '0 $'; // ئەگەر هیچ قەرزی سەرەتایی نییە
             }
             $('#opening-debt').text(openingDebtText);
         }, 'json').fail(function(jqXHR, textStatus, errorThrown) {

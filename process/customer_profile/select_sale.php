@@ -39,13 +39,23 @@ try {
             exit;
         }
         
-        // Sum of remaining amounts from sales (USD)
-        $sales_usd = $pdo->prepare("SELECT COALESCE(SUM(remaining_amount), 0) FROM sales WHERE customer_id = ? AND payment_type = 'قەرز' AND (dolar_rate IS NOT NULL AND dolar_rate > 0)");
+        // Sum of remaining amounts from sales (USD) - تەنها فرۆشتنەکانی دۆلار
+        $sales_usd = $pdo->prepare("SELECT COALESCE(SUM(remaining_amount), 0) 
+                                   FROM sales 
+                                   WHERE customer_id = ? 
+                                   AND payment_type = 'قەرز' 
+                                   AND dolar_rate IS NOT NULL 
+                                   AND dolar_rate > 0");
         $sales_usd->execute([$customer_id]);
         $total_remaining_usd = $sales_usd->fetchColumn();
         
-        // Sum of remaining amounts from sales (IQD)
-        $sales_iqd = $pdo->prepare("SELECT COALESCE(SUM(remaining_amount), 0) FROM sales WHERE customer_id = ? AND payment_type = 'قەرز' AND (dolar_rate IS NULL OR dolar_rate = 0)");
+        // Sum of remaining amounts from sales (IQD) - تەنها فرۆشتنەکانی دینار
+        // ئەگەر currency_type خانە نییە، ئەوا تەنها ئەوانەی dolar_rate = 0 یان NULL
+        $sales_iqd = $pdo->prepare("SELECT COALESCE(SUM(remaining_amount), 0) 
+                                   FROM sales 
+                                   WHERE customer_id = ? 
+                                   AND payment_type = 'قەرز' 
+                                   AND (dolar_rate IS NULL OR dolar_rate = 0)");
         $sales_iqd->execute([$customer_id]);
         $total_remaining_iqd = $sales_iqd->fetchColumn();
         
