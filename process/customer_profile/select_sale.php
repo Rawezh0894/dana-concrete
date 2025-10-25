@@ -39,13 +39,12 @@ try {
             exit;
         }
         
-        // Sum of remaining amounts from sales (USD) - تەنها فرۆشتنەکانی دۆلار
+        // Sum of remaining amounts from sales (USD) - هەموو فرۆشتنەکانی قەرز (جگە لە دینار)
         $sales_usd = $pdo->prepare("SELECT COALESCE(SUM(remaining_amount), 0) 
                                    FROM sales 
                                    WHERE customer_id = ? 
                                    AND payment_type = 'قەرز' 
-                                   AND dolar_rate IS NOT NULL 
-                                   AND dolar_rate > 0");
+                                   AND amount_paid_iq = 0");
         $sales_usd->execute([$customer_id]);
         $total_remaining_usd = $sales_usd->fetchColumn();
         
