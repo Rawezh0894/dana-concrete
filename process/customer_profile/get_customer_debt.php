@@ -27,8 +27,13 @@ try {
         exit;
     }
 
-    // Get total remaining amount from sales
-    $stmt = $pdo->prepare('SELECT COALESCE(SUM(remaining_amount), 0) as total_remaining FROM sales WHERE customer_id = ? AND payment_type = "قەرز"');
+    // Get total remaining amount from sales (USD only - same logic as select_sale.php)
+    $stmt = $pdo->prepare('SELECT COALESCE(SUM(remaining_amount), 0) as total_remaining 
+                          FROM sales 
+                          WHERE customer_id = ? 
+                          AND payment_type = "قەرز" 
+                          AND dolar_rate IS NOT NULL 
+                          AND dolar_rate > 0');
     $stmt->execute([$customer_id]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
     
