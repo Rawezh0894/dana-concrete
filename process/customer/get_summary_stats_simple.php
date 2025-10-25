@@ -73,10 +73,11 @@ try {
         $openingDebtIQD_USD = $usdRate > 0 ? ($openingDebtIQD / ($usdRate / 100)) : 0;
         
         // 5. کۆکردنەوەی هەموو قەرزەکان بە دۆلار
-        $totalDebtUSD = floatval($openingDebtUSD) + 
-                       floatval($salesRemainingUSD) + 
-                       floatval($openingDebtIQD_USD) +
-                       (floatval($salesRemainingIQD) / ($usdRate / 100));
+        // فۆرمۆلا: کۆی قەرز = پارەی ماوەی فرۆشتنەکان + قەرزی سەرەتایی
+        $totalDebtUSD = floatval($openingDebtUSD) +           // قەرزی سەرەتایی (USD)
+                       floatval($openingDebtIQD_USD) +        // قەرزی سەرەتایی (IQD → USD)
+                       floatval($salesRemainingUSD) +         // پارەی ماوەی فرۆشتنەکان (USD)
+                       (floatval($salesRemainingIQD) / ($usdRate / 100)); // پارەی ماوەی فرۆشتنەکان (IQD → USD)
         
     } catch (Exception $e) {
         error_log('Total debt query failed: ' . $e->getMessage());
