@@ -44,8 +44,9 @@ try {
         $sales_usd->execute([$customer_id]);
         $total_remaining_usd = $sales_usd->fetchColumn();
         
-        // Sum of remaining amounts from sales (IQD)
-        $sales_iqd = $pdo->prepare("SELECT COALESCE(SUM(remaining_amount), 0) FROM sales WHERE customer_id = ? AND payment_type = 'قەرز' AND (dolar_rate IS NULL OR dolar_rate = 0)");
+        // Sum of remaining amounts from sales (IQD) - Only actual IQD sales
+        // Check if there's a currency_type column, otherwise use price_iqd > 0
+        $sales_iqd = $pdo->prepare("SELECT COALESCE(SUM(remaining_amount), 0) FROM sales WHERE customer_id = ? AND payment_type = 'قەرز' AND price_iqd > 0 AND (price_usd IS NULL OR price_usd = 0)");
         $sales_iqd->execute([$customer_id]);
         $total_remaining_iqd = $sales_iqd->fetchColumn();
         
