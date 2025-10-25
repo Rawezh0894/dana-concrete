@@ -50,12 +50,12 @@ try {
         $total_remaining_usd = $sales_usd->fetchColumn();
         
         // Sum of remaining amounts from sales (IQD) - تەنها فرۆشتنەکانی دینار
-        // ئەگەر currency_type خانە نییە، ئەوا تەنها ئەوانەی dolar_rate = 0 یان NULL
+        // تەنها ئەوانەی amount_paid_iq > 0 (یەکێک لە پارەدانەکان دینار بووە)
         $sales_iqd = $pdo->prepare("SELECT COALESCE(SUM(remaining_amount), 0) 
                                    FROM sales 
                                    WHERE customer_id = ? 
                                    AND payment_type = 'قەرز' 
-                                   AND (dolar_rate IS NULL OR dolar_rate = 0)");
+                                   AND amount_paid_iq > 0");
         $sales_iqd->execute([$customer_id]);
         $total_remaining_iqd = $sales_iqd->fetchColumn();
         
