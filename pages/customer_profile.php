@@ -408,29 +408,23 @@ if ($customer_id) {
             }
             const s = data.stats;
             let debtText = '';
-            // Only show IQD if it's significantly greater than 0 (avoid floating point issues)
-            if (s.total_debt_usd > 0 && s.total_debt_iqd > 0.01) {
+            if (s.total_debt_usd > 0 && s.total_debt_iqd > 0) {
                 debtText = s.total_debt_usd.toLocaleString('en-US') + ' $ / ' + s.total_debt_iqd.toLocaleString('en-US') + ' د.ع';
             } else if (s.total_debt_usd > 0) {
                 debtText = s.total_debt_usd.toLocaleString('en-US') + ' $';
-            } else if (s.total_debt_iqd > 0.01) {
-                debtText = s.total_debt_iqd.toLocaleString('en-US') + ' د.ع';
             } else {
-                debtText = '0 $';
+                debtText = s.total_debt_iqd.toLocaleString('en-US') + ' د.ع';
             }
             $('#total-debt').text(debtText);
             $('#sales-count').text(s.sales_count);
             // Opening debt card
             let openingDebtText = '';
-            // Only show IQD if it's significantly greater than 0 (avoid floating point issues)
-            if (s.opening_debt_usd > 0 && s.opening_debt_iqd > 0.01) {
+            if (s.opening_debt_usd > 0 && s.opening_debt_iqd > 0) {
                 openingDebtText = s.opening_debt_usd.toLocaleString('en-US') + ' $ / ' + s.opening_debt_iqd.toLocaleString('en-US') + ' د.ع';
             } else if (s.opening_debt_usd > 0) {
                 openingDebtText = s.opening_debt_usd.toLocaleString('en-US') + ' $';
-            } else if (s.opening_debt_iqd > 0.01) {
-                openingDebtText = s.opening_debt_iqd.toLocaleString('en-US') + ' د.ع';
             } else {
-                openingDebtText = '0 $';
+                openingDebtText = s.opening_debt_iqd.toLocaleString('en-US') + ' د.ع';
             }
             $('#opening-debt').text(openingDebtText);
         }, 'json').fail(function(jqXHR, textStatus, errorThrown) {
