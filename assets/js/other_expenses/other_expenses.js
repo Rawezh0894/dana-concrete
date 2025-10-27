@@ -581,16 +581,30 @@ document.addEventListener('DOMContentLoaded', function() {
     // Function to populate usage unit type options
     window.populateUsageUnitOptions = function(material, formType) {
         try {
+            console.log('=== populateUsageUnitOptions START ===');
+            console.log('Material:', material);
+            console.log('Form type:', formType);
+            
             const prefix = formType === 'edit' ? 'edit_' : '';
             const usageUnitSelect = document.getElementById(prefix + 'usage_unit_type');
+            
+            console.log('Usage unit select element:', usageUnitSelect);
             
             if (!usageUnitSelect) {
                 console.warn('Usage unit type select not found:', prefix + 'usage_unit_type');
                 return;
             }
             
+            // Destroy Select2 if it exists
+            if ($(usageUnitSelect).hasClass('select2-hidden-accessible')) {
+                console.log('Destroying existing Select2 instance');
+                $(usageUnitSelect).select2('destroy');
+            }
+            
             // Clear existing options and reset prices
             usageUnitSelect.innerHTML = '<option value="">یەکەی بەکارهێنان هەڵبژێرە</option>';
+            
+            console.log('Cleared existing options');
             
             // Reset material prices to base prices when usage unit is cleared
             const materialIdField = document.getElementById(prefix + 'material_id');
@@ -622,32 +636,55 @@ document.addEventListener('DOMContentLoaded', function() {
             const litersPerBarrel = material.liters_per_barrel;
             const litersPerBucket = material.liters_per_bucket;
             
+            console.log('Material unit type:', materialUnitType);
+            console.log('Pieces per carton:', piecesPerCarton);
+            console.log('Liters per barrel:', litersPerBarrel);
+            console.log('Liters per bucket:', litersPerBucket);
+            
+            let optionsCount = 0;
+            
             // Add options based on material unit type
             if (materialUnitType === 'کارتۆن') {
                 usageUnitSelect.innerHTML += '<option value="کارتۆن">کارتۆن</option>';
+                optionsCount++;
                 if (piecesPerCarton && piecesPerCarton > 0) {
                     usageUnitSelect.innerHTML += '<option value="دانە">دانە</option>';
+                    optionsCount++;
                 }
             } else if (materialUnitType === 'بەرمیل') {
                 usageUnitSelect.innerHTML += '<option value="بەرمیل">بەرمیل</option>';
+                optionsCount++;
                 if (litersPerBarrel && litersPerBarrel > 0) {
                     usageUnitSelect.innerHTML += '<option value="لیتر">لیتر</option>';
+                    optionsCount++;
                 }
                 if (litersPerBucket && litersPerBucket > 0) {
                     usageUnitSelect.innerHTML += '<option value="دەبە">دەبە</option>';
+                    optionsCount++;
                 }
             } else if (materialUnitType === 'دەبە') {
                 usageUnitSelect.innerHTML += '<option value="دەبە">دەبە</option>';
+                optionsCount++;
                 if (litersPerBucket && litersPerBucket > 0) {
                     usageUnitSelect.innerHTML += '<option value="لیتر">لیتر</option>';
+                    optionsCount++;
                 }
             } else if (materialUnitType === 'لیتر') {
                 usageUnitSelect.innerHTML += '<option value="لیتر">لیتر</option>';
+                optionsCount++;
             } else if (materialUnitType === 'دانە') {
                 usageUnitSelect.innerHTML += '<option value="دانە">دانە</option>';
+                optionsCount++;
             }
             
-            console.log('Populated usage unit options for material unit type:', materialUnitType);
+            console.log('Total options added:', optionsCount);
+            console.log('Inner HTML after adding options:', usageUnitSelect.innerHTML);
+            
+            // Reinitialize Select2
+            $(usageUnitSelect).select2();
+            
+            console.log('Reinitialized Select2');
+            console.log('=== populateUsageUnitOptions END ===');
             
         } catch (error) {
             console.error('Error in populateUsageUnitOptions:', error);
