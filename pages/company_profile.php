@@ -43,6 +43,8 @@ if ($company_id) {
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link href="../assets/css/kurdish-font.css" rel="stylesheet">
+    <!-- DataTables CSS -->
+    <link href="https://cdn.datatables.net/2.3.4/css/dataTables.dataTables.min.css" rel="stylesheet">
 </head>
 <body dir="rtl">
 <?php include '../includes/navbar.php'; ?>
@@ -373,7 +375,8 @@ if ($company_id) {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="../assets/js/swalAlert.js"></script>
-<script src="../assets/js/comon/table-controler.js"></script>
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
 <script src="../assets/js/company_profile/company_profile.js"></script>
 <script src="../assets/js/company_profile/select_purchases.js"></script>
 <script src="../assets/js/company_profile/add_debt.js"></script>
@@ -388,6 +391,59 @@ if ($company_id) {
     background: var(--seafoam-green) !important;
     color: #fff !important;
     border-color: var(--seafoam-green) var(--seafoam-green) #fff !important;
+}
+
+/* DataTables Custom Styling */
+.dataTables_wrapper {
+    margin-top: 1rem;
+}
+
+.dataTables_wrapper .dataTables_length select {
+    padding: 0.375rem 1.75rem 0.375rem 0.5rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    background-color: #fff;
+}
+
+.dataTables_wrapper .dataTables_filter input {
+    padding: 0.375rem 0.75rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    margin-right: 0.5rem;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    padding: 0.375rem 0.75rem;
+    margin-left: 2px;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    background-color: #fff;
+    color: #495057 !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: var(--seafoam-green) !important;
+    border-color: var(--seafoam-green) !important;
+    color: #fff !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: var(--seafoam-green) !important;
+    border-color: var(--seafoam-green) !important;
+    color: #fff !important;
+}
+
+.dataTables_wrapper .dataTables_info {
+    color: #6c757d;
+}
+
+.table thead {
+    background: var(--kelly-green);
+}
+
+.table thead th {
+    background-color: var(--kelly-green) !important;
+    color: var(--seafoam-green) !important;
 }
 </style>
 </body>
