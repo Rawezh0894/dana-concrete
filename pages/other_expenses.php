@@ -29,6 +29,8 @@ if (!isset($_SESSION['user_id'])) {
     <link href="../assets/css/comon/style.css" rel="stylesheet">
     <link href="../assets/css/comon/summary_cards.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <!-- DataTables CSS -->
     <link href="https://cdn.datatables.net/2.3.4/css/dataTables.dataTables.min.css" rel="stylesheet">
     <!-- DataTables Buttons CSS -->
@@ -644,6 +646,7 @@ if (!isset($_SESSION['user_id'])) {
   </div>
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <!-- DataTables JS -->
@@ -654,6 +657,7 @@ if (!isset($_SESSION['user_id'])) {
 <script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.html5.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.print.min.js"></script>
 <script src="../assets/js/swalAlert.js"></script>
+<script src="../assets/js/comon/select2_script.js"></script>
 <script src="../assets/js/other_expenses/error_logger.js"></script>
 <script src="../assets/js/other_expenses/debug_panel.js"></script>
 <script src="../assets/js/other_expenses/advanced_filters.js"></script>
