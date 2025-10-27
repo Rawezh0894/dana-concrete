@@ -405,6 +405,35 @@ if ($company_id) {
 .table thead th {
     background-color: var(--kelly-green) !important;
     color: var(--seafoam-green) !important;
+    position: relative;
+}
+
+/* Column-specific search inputs styling */
+.table thead th .column-search {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #495057;
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+    width: 100%;
+    border-radius: 0.25rem;
+}
+
+.table thead th .column-search:focus {
+    background: #fff;
+    border-color: var(--seafoam-green);
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(32, 178, 170, 0.25);
+}
+
+.table thead th .column-search::placeholder {
+    color: #999;
+}
+
+/* Header title styling */
+.table thead th > div:first-child {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
 }
 </style>
 </body>

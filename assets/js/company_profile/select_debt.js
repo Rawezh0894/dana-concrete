@@ -92,7 +92,22 @@ function loadDebts() {
                 responsive: true,
                 pageLength: 10,
                 lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
-                order: [[0, 'desc']] // Sort by date descending
+                order: [[0, 'desc']], // Sort by date descending
+                initComplete: function() {
+                    // Add column-specific search inputs
+                    this.api().columns().every(function() {
+                        const column = this;
+                        const header = $(column.header());
+                        const title = header.text();
+                        header.html('<div>' + title + '</div><input type="text" class="form-control form-control-sm mt-1 column-search" placeholder="گەڕان..." />');
+                        
+                        $('.column-search', header).on('keyup change', function() {
+                            if (column.search() !== this.value) {
+                                column.search(this.value).draw();
+                            }
+                        });
+                    });
+                }
             });
         })
         .catch(error => {
