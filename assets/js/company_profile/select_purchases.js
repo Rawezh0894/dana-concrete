@@ -1,5 +1,12 @@
-document.addEventListener('DOMContentLoaded', function() {
-    fetch(`../process/company_profile/select_purchases.php?id=${COMPANY_ID}`)
+function loadPurchases() {
+    const url = new URL('../process/company_profile/select_purchases.php', window.location.href);
+    url.searchParams.append('id', COMPANY_ID);
+    if (typeof currentFilters !== 'undefined') {
+        if (currentFilters.from_date) url.searchParams.append('from_date', currentFilters.from_date);
+        if (currentFilters.to_date) url.searchParams.append('to_date', currentFilters.to_date);
+    }
+    
+    fetch(url)
         .then(res => res.json())
         .then(purchases => {
             if (purchases.error) {
@@ -46,4 +53,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }));
             TableController.renderWithPagination('#purchasesTable', data, columns, { pageSize: 10 });
         });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadPurchases();
 });

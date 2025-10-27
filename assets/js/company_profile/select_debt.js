@@ -8,7 +8,13 @@ function formatDebtAmount(val, currency) {
 
 function loadDebts() {
     TableController.showLoading('#debtTable', ['#', 'date', 'amount_usd', 'amount_iqd', 'discount_usd', 'dollar_rate', 'note', 'actions']);
-    fetch(`../process/company_profile/select_debt.php?company_id=${COMPANY_ID}`)
+    const url = new URL('../process/company_profile/select_debt.php', window.location.href);
+    url.searchParams.append('company_id', COMPANY_ID);
+    if (typeof currentFilters !== 'undefined') {
+        if (currentFilters.from_date) url.searchParams.append('from_date', currentFilters.from_date);
+        if (currentFilters.to_date) url.searchParams.append('to_date', currentFilters.to_date);
+    }
+    fetch(url)
         .then(res => res.json())
         .then(debts => {
             const data = debts.map((debt, idx) => ({

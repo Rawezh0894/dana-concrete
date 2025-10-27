@@ -56,10 +56,26 @@ if ($company_id) {
             <i class="fa fa-print"></i> پرینت
         </a>
     </div>
-    <div class="mb-3">
+    <div class="mb-3 d-flex justify-content-between align-items-center">
         <a href="add_company.php" class="btn" style="background: var(--seafoam-green); color: #fff; border: none; font-weight: bold;">
             <i class="fa fa-arrow-right"></i> گەڕانەوە بۆ لیستی کۆمپانیاکان
         </a>
+        <div class="d-flex align-items-center gap-3" id="date-filter-container" style="flex-wrap: wrap;">
+            <div class="d-flex align-items-center gap-2">
+                <label for="from_date" class="form-label mb-0" style="font-weight: bold;">لە:</label>
+                <input type="date" class="form-control" id="from_date" style="width: 180px;">
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <label for="to_date" class="form-label mb-0" style="font-weight: bold;">بۆ:</label>
+                <input type="date" class="form-control" id="to_date" style="width: 180px;">
+            </div>
+            <button class="btn" style="background: var(--seafoam-green); color: #fff; border: none; font-weight: bold;" onclick="applyFilters()">
+                <i class="fa fa-filter"></i> فلتەر
+            </button>
+            <button class="btn btn-secondary" onclick="resetFilters()">
+                <i class="fa fa-redo"></i> پاککردنەوە
+            </button>
+        </div>
     </div>
 
     <div class="row mb-3" id="company-info-cards">
@@ -277,8 +293,14 @@ if ($company_id) {
 </div>
 <script>
     const COMPANY_ID = <?php echo $company_id; ?>;
+    let currentFilters = { from_date: '', to_date: '' };
+    
     function loadCompanyInfoCards() {
-        $.get('../process/company_profile/select_debt.php', { company_id: COMPANY_ID, stats: 1 }, function(data) {
+        const params = { company_id: COMPANY_ID, stats: 1 };
+        if (currentFilters.from_date) params.from_date = currentFilters.from_date;
+        if (currentFilters.to_date) params.to_date = currentFilters.to_date;
+        
+        $.get('../process/company_profile/select_debt.php', params, function(data) {
             if (!data || !data.stats) return;
             const s = data.stats;
             let debtText = '';
@@ -302,7 +324,51 @@ if ($company_id) {
             $('#opening-debt').text(openingDebtText);
         }, 'json');
     }
-    $(function() { loadCompanyInfoCards(); });
+    
+    function applyFilters() {
+        currentFilters.from_date = $('#from_date').val() || '';
+        currentFilters.to_date = $('#to_date').val() || '';
+        
+        // Validate dates
+        if (currentFilters.from_date && currentFilters.to_date && currentFilters.from_date > currentFilters.to_date) {
+            Swal.fire({
+                icon: 'error',
+                title: 'هەڵە',
+                text: 'بەرواری سەرەتاکە نابێت گەورەتر بێت لە بەرواری کۆتایی',
+                confirmButtonColor: '#20b2aa'
+            });
+            return;
+        }
+        
+        loadCompanyInfoCards();
+        if (typeof loadPurchases === 'function') loadPurchases();
+        if (typeof loadDebts === 'function') loadDebts();
+    }
+    
+    function resetFilters() {
+        $('#from_date').val('');
+        $('#to_date').val('');
+        currentFilters.from_date = '';
+        currentFilters.to_date = '';
+        
+        loadCompanyInfoCards();
+        if (typeof loadPurchases === 'function') loadPurchases();
+        if (typeof loadDebts === 'function') loadDebts();
+    }
+    
+    $(function() { 
+        // Set default dates to current month
+        const now = new Date();
+        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+        const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        $('#from_date').val(firstDay.toISOString().split('T')[0]);
+        $('#to_date').val(lastDay.toISOString().split('T')[0]);
+        
+        currentFilters.from_date = $('#from_date').val();
+        currentFilters.to_date = $('#to_date').val();
+        
+        loadCompanyInfoCards(); 
+    });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
