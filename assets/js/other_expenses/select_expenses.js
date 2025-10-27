@@ -44,7 +44,13 @@ async function loadOtherExpenses() {
 
         const monthFilter = document.getElementById('monthFilter');
         
-        const res = await fetch('../process/other_expenses/select_expenses.php');
+        // Use current filters from advanced filters if available
+        let url = '../process/other_expenses/select_expenses.php';
+        if (window.currentFilters && window.currentFilters.length > 0) {
+            url += '?' + window.currentFilters;
+        }
+        
+        const res = await fetch(url);
         
         if (!res.ok) {
             throw new Error(`HTTP error! status: ${res.status}`);
@@ -69,11 +75,8 @@ async function loadOtherExpenses() {
             return usdRate && iqd ? (parseFloat(iqd) / (usdRate / 100)) : 0;
         }
         
+        // Use data directly (server already filtered it)
         let filtered = data;
-        if (monthFilter && monthFilter.value) {
-            const [year, month] = monthFilter.value.split('-');
-            filtered = data.filter(row => row.date && row.date.startsWith(`${year}-${month}`));
-        }
         
         // Calculate totals
         let totalCarMaterialCostIQD = 0, totalCarMaterialCostUSD = 0, totalCarGasCost = 0;

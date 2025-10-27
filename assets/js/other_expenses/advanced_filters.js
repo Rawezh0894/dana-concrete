@@ -218,15 +218,11 @@ class AdvancedFilters {
         try {
             console.log('Applying filters:', this.filters);
             
-            // Show loading
-            this.showLoading();
-            
             // Build query string
             const queryParams = new URLSearchParams();
             Object.entries(this.filters).forEach(([key, value]) => {
                 if (value) {
                     if (key === 'expenseTypes' && Array.isArray(value) && value.length > 0) {
-                        // Handle array of expense types
                         value.forEach(type => {
                             queryParams.append('expenseTypes[]', type);
                         });
@@ -236,93 +232,21 @@ class AdvancedFilters {
                 }
             });
 
-            // Fetch filtered data
-            const response = await fetch(`../process/other_expenses/select_expenses.php?${queryParams}`);
-            const data = await response.json();
-
-            if (data.success) {
-                this.displayFilteredData(data.expenses);
-                await this.updateSummaryCards(data.summary);
-                // No success message for auto-apply
-            } else {
-                this.showError(data.msg || 'هەڵەیەک ڕویدا لە جێبەجێکردنی فلتەرەکان');
+            // Reload DataTables with filtered data
+            if (typeof loadOtherExpenses === 'function') {
+                // Call loadOtherExpenses which will fetch data with filters
+                // We need to modify loadOtherExpenses to accept filter params
+                window.currentFilters = queryParams.toString();
+                await loadOtherExpenses();
             }
 
         } catch (error) {
             console.error('Error applying filters:', error);
             this.showError('هەڵەیەک ڕویدا لە جێبەجێکردنی فلتەرەکان');
-        } finally {
-            this.hideLoading();
         }
     }
 
-    displayFilteredData(expenses) {
-        const tbody = document.querySelector('#otherExpensesTable tbody');
-        if (!tbody) return;
-
-        tbody.innerHTML = '';
-
-        if (expenses.length === 0) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="25" class="text-center text-muted py-4">
-                        <div class="d-flex align-items-center justify-content-center">
-                            <i class="fas fa-search me-3" style="color: #ccc; font-size: 1.2rem;"></i>
-                            <span style="color: #888; font-weight: 500;">هیچ داتایەک نەدۆزرایەوە</span>
-                        </div>
-                    </td>
-                </tr>
-            `;
-            return;
-        }
-
-        expenses.forEach((expense, index) => {
-            const row = this.createExpenseRow(expense, index + 1);
-            tbody.appendChild(row);
-        });
-    }
-
-    createExpenseRow(expense, index) {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${index}</td>
-            <td>${expense.purpose || '-'}</td>
-            <td>${expense.person_name || '-'}</td>
-            <td>${expense.employee_name || '-'}</td>
-            <td>${expense.car_name || '-'}</td>
-            <td>${expense.gas_liters || '-'}</td>
-            <td>${expense.expense_type || '-'}</td>
-            <td>${expense.material_name || '-'}</td>
-            <td>${expense.material_quantity || '-'}</td>
-            <td>${expense.material_purchase_price_iqd || '-'}</td>
-            <td>${expense.material_purchase_price_usd || '-'}</td>
-            <td>${expense.material_total_cost || '-'}</td>
-            <td>${expense.gas_purchase_price_input || '-'}</td>
-            <td>${expense.gas_total_cost || '-'}</td>
-            <td>${expense.payment_type || '-'}</td>
-            <td>${expense.currency_type || '-'}</td>
-            <td>${expense.invoice_number || '-'}</td>
-            <td>${expense.amount_iqd || '-'}</td>
-            <td>${expense.amount_usd || '-'}</td>
-            <td>${expense.paid_iqd || '-'}</td>
-            <td>${expense.paid_usd || '-'}</td>
-            <td>${expense.exchange_rate || '-'}</td>
-            <td>${expense.remaining_iqd || '-'}</td>
-            <td>${expense.remaining_usd || '-'}</td>
-            <td>${expense.date || '-'}</td>
-            <td>
-                <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="editExpense(${expense.id})">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteExpense(${expense.id})">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            </td>
-        `;
-        return row;
-    }
+    // displayFilteredData and createExpenseRow removed - DataTables handles this now
 
     async updateSummaryCards(summary) {
         if (summary) {
@@ -397,7 +321,7 @@ class AdvancedFilters {
         // Reset all filter values
         Object.keys(this.filters).forEach(key => {
             if (key === 'expenseTypes') {
-                this.filters[key] = []; // Reset to empty array
+                this.filters[key] = [];
             } else {
                 this.filters[key] = '';
             }
@@ -430,7 +354,8 @@ class AdvancedFilters {
         // Set default dates
         this.setDefaultDates();
 
-        // Reload original data
+        // Clear current filters and reload
+        window.currentFilters = '';
         if (typeof loadOtherExpenses === 'function') {
             loadOtherExpenses();
         }
