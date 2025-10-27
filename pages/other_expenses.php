@@ -28,10 +28,7 @@ if (!isset($_SESSION['user_id'])) {
     <link href="../assets/css/comon/table.css" rel="stylesheet">
     <link href="../assets/css/comon/style.css" rel="stylesheet">
     <link href="../assets/css/comon/summary_cards.css" rel="stylesheet" />
-    <link href="../assets/css/comon/select2_design.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <!-- Select2 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <!-- DataTables CSS -->
     <link href="https://cdn.datatables.net/2.3.4/css/dataTables.dataTables.min.css" rel="stylesheet">
     <!-- DataTables Buttons CSS -->
@@ -81,71 +78,6 @@ if (!isset($_SESSION['user_id'])) {
             background: white !important;
             transform: translateY(-2px) !important;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
-        }
-        
-        /* Select2 Custom Styling to Match Form Controls */
-        .select2-container--default {
-            width: 100% !important;
-        }
-        
-        .select2-container--default .select2-selection--single {
-            background-color: #fff;
-            border: 1px solid #ced4da;
-            border-radius: 0.375rem;
-            height: 38px;
-            display: flex;
-            align-items: center;
-            font-size: 1rem;
-            font-family: inherit;
-            transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
-        }
-        
-        .select2-container--default .select2-selection--single .select2-selection__rendered {
-            color: #212529;
-            line-height: 1.5;
-            padding-right: 0.75rem;
-            padding-left: 0.75rem;
-        }
-        
-        .select2-container--default .select2-selection--single .select2-selection__arrow {
-            height: 36px;
-            right: 8px;
-        }
-        
-        .select2-container--default .select2-selection--single:focus,
-        .select2-container--default.select2-container--focus .select2-selection--single {
-            border-color: #86b7fe;
-            outline: 0;
-            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, .25);
-        }
-        
-        .select2-dropdown {
-            border: 1px solid #ced4da;
-            border-radius: 0.375rem;
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-        }
-        
-        .select2-results__option {
-            padding: 0.375rem 0.75rem;
-            font-size: 1rem;
-        }
-        
-        .select2-results__option--highlighted[aria-selected] {
-            background-color: #0d6efd;
-            color: #fff;
-        }
-        
-        .select2-container--default .select2-search--dropdown .select2-search__field {
-            border: 1px solid #ced4da;
-            border-radius: 0.375rem;
-            padding: 0.375rem 0.75rem;
-            font-size: 1rem;
-        }
-        
-        .select2-search__field:focus {
-            outline: 0;
-            border-color: #86b7fe;
-            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, .25);
         }
     </style>
   
@@ -712,7 +644,6 @@ if (!isset($_SESSION['user_id'])) {
   </div>
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <!-- DataTables JS -->
@@ -723,7 +654,6 @@ if (!isset($_SESSION['user_id'])) {
 <script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.html5.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.print.min.js"></script>
 <script src="../assets/js/swalAlert.js"></script>
-<script src="../assets/js/comon/select2_script.js"></script>
 <script src="../assets/js/other_expenses/error_logger.js"></script>
 <script src="../assets/js/other_expenses/debug_panel.js"></script>
 <script src="../assets/js/other_expenses/advanced_filters.js"></script>

@@ -286,15 +286,21 @@ document.addEventListener('DOMContentLoaded', function() {
         handleCurrencyChange();
     }
 
-    // Handle expense type change for add form (works with Select2)
-    $(document).on('change', '#expense_type', function() {
-        toggleGasMaterialFields(this.value, 'add');
-    });
+    // Handle expense type change for add form
+    const expenseType = document.getElementById('expense_type');
+    if (expenseType) {
+        expenseType.addEventListener('change', function() {
+            toggleGasMaterialFields(this.value, 'add');
+        });
+    }
 
-    // Handle expense type change for edit form (works with Select2)
-    $(document).on('change', '#edit_expense_type', function() {
-        toggleGasMaterialFields(this.value, 'edit');
-    });
+    // Handle expense type change for edit form
+    const editExpenseType = document.getElementById('edit_expense_type');
+    if (editExpenseType) {
+        editExpenseType.addEventListener('change', function() {
+            toggleGasMaterialFields(this.value, 'edit');
+        });
+    }
 
     // Add event listeners for material selection
     const addMaterialSelect = document.getElementById('material_id');
@@ -302,13 +308,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (addMaterialSelect) {
         addMaterialSelect.addEventListener('change', function() {
-            console.log('🎯 material_id CHANGE EVENT TRIGGERED');
             const materialId = this.value;
-            console.log('📌 Selected Material ID:', materialId);
             if (materialId) {
-                console.log('✅ Material ID is valid, calling populateMaterialPrices...');
                 populateMaterialPrices(materialId, 'add');
-                
                 // Clear any existing quantity and recalculate
                 const quantityField = document.getElementById('material_quantity');
                 if (quantityField) {
@@ -325,7 +327,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Clear material unit info
                 clearMaterialUnitInfo('add');
             } else {
-                console.log('❌ No material ID selected');
                 clearMaterialAvailabilityMessage('add');
                 clearMaterialUnitInfo('add');
                 clearBaseQuantityDisplay('add');
@@ -486,11 +487,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Function to populate material purchase prices
     window.populateMaterialPrices = function(materialId, formType) {
         try {
-            console.log('====================================');
-            console.log('🔵 populateMaterialPrices CALLED!');
-            console.log('Material ID:', materialId);
-            console.log('Form Type:', formType);
-            console.log('====================================');
+            console.log('populateMaterialPrices called with:', { materialId, formType });
             
             if (!materialId) {
                 console.log('No material ID provided, returning early');
@@ -518,9 +515,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         displayMaterialUnitInfo(material, formType);
                         
                         // Populate usage unit type options
-                        console.log('🟢 ABOUT TO CALL populateUsageUnitOptions');
                         populateUsageUnitOptions(material, formType);
-                        console.log('🟢 CALLED populateUsageUnitOptions');
                         
                         // Populate price fields based on currency type
                         if (material.currency_type === 'دۆلار') {
@@ -591,46 +586,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Function to populate usage unit type options
     window.populateUsageUnitOptions = function(material, formType) {
-        console.log('\n\n🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀');
-        console.log('🌟 populateUsageUnitOptions FUNCTION CALLED');
-        console.log('🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀\n');
-        
         try {
-            console.log('📦 Material object:', JSON.stringify(material, null, 2));
-            console.log('📝 Form type:', formType);
-            
             const prefix = formType === 'edit' ? 'edit_' : '';
-            console.log('🏷️  Prefix:', prefix);
-            
-            const selectorId = prefix + 'usage_unit_type';
-            console.log('🔍 Looking for element with ID:', selectorId);
-            
-            const usageUnitSelect = document.getElementById(selectorId);
-            console.log('🎯 Element found:', usageUnitSelect);
-            console.log('📋 Element type:', typeof usageUnitSelect);
+            const usageUnitSelect = document.getElementById(prefix + 'usage_unit_type');
             
             if (!usageUnitSelect) {
-                console.error('❌❌❌ ELEMENT NOT FOUND! ID:', selectorId);
-                console.log('Available elements with "usage" in ID:');
-                document.querySelectorAll('[id*="usage"]').forEach(el => {
-                    console.log('  -', el.id, el);
-                });
+                console.warn('Usage unit type select not found:', prefix + 'usage_unit_type');
                 return;
             }
             
-            console.log('✅ Element found successfully!');
-            
-            // Destroy Select2 if it exists
-            if ($(usageUnitSelect).hasClass('select2-hidden-accessible')) {
-                console.log('Destroying existing Select2 instance');
-                $(usageUnitSelect).select2('destroy');
-            }
-            
-            // Clear existing options using jQuery (works better with Select2)
-            $(usageUnitSelect).empty();
-            $(usageUnitSelect).append('<option value="">یەکەی بەکارهێنان هەڵبژێرە</option>');
-            
-            console.log('Cleared existing options');
+            // Clear existing options and reset prices
+            usageUnitSelect.innerHTML = '<option value="">یەکەی بەکارهێنان هەڵبژێرە</option>';
             
             // Reset material prices to base prices when usage unit is cleared
             const materialIdField = document.getElementById(prefix + 'material_id');
@@ -662,72 +628,35 @@ document.addEventListener('DOMContentLoaded', function() {
             const litersPerBarrel = material.liters_per_barrel;
             const litersPerBucket = material.liters_per_bucket;
             
-            console.log('Material unit type:', materialUnitType);
-            console.log('Pieces per carton:', piecesPerCarton);
-            console.log('Liters per barrel:', litersPerBarrel);
-            console.log('Liters per bucket:', litersPerBucket);
-            
-            let optionsCount = 0;
-            
-            // Add options based on material unit type using jQuery
+            // Add options based on material unit type
             if (materialUnitType === 'کارتۆن') {
-                $(usageUnitSelect).append('<option value="کارتۆن">کارتۆن</option>');
-                optionsCount++;
+                usageUnitSelect.innerHTML += '<option value="کارتۆن">کارتۆن</option>';
                 if (piecesPerCarton && piecesPerCarton > 0) {
-                    $(usageUnitSelect).append('<option value="دانە">دانە</option>');
-                    optionsCount++;
+                    usageUnitSelect.innerHTML += '<option value="دانە">دانە</option>';
                 }
             } else if (materialUnitType === 'بەرمیل') {
-                $(usageUnitSelect).append('<option value="بەرمیل">بەرمیل</option>');
-                optionsCount++;
+                usageUnitSelect.innerHTML += '<option value="بەرمیل">بەرمیل</option>';
                 if (litersPerBarrel && litersPerBarrel > 0) {
-                    $(usageUnitSelect).append('<option value="لیتر">لیتر</option>');
-                    optionsCount++;
+                    usageUnitSelect.innerHTML += '<option value="لیتر">لیتر</option>';
                 }
                 if (litersPerBucket && litersPerBucket > 0) {
-                    $(usageUnitSelect).append('<option value="دەبە">دەبە</option>');
-                    optionsCount++;
+                    usageUnitSelect.innerHTML += '<option value="دەبە">دەبە</option>';
                 }
             } else if (materialUnitType === 'دەبە') {
-                $(usageUnitSelect).append('<option value="دەبە">دەبە</option>');
-                optionsCount++;
+                usageUnitSelect.innerHTML += '<option value="دەبە">دەبە</option>';
                 if (litersPerBucket && litersPerBucket > 0) {
-                    $(usageUnitSelect).append('<option value="لیتر">لیتر</option>');
-                    optionsCount++;
+                    usageUnitSelect.innerHTML += '<option value="لیتر">لیتر</option>';
                 }
             } else if (materialUnitType === 'لیتر') {
-                $(usageUnitSelect).append('<option value="لیتر">لیتر</option>');
-                optionsCount++;
+                usageUnitSelect.innerHTML += '<option value="لیتر">لیتر</option>';
             } else if (materialUnitType === 'دانە') {
-                $(usageUnitSelect).append('<option value="دانە">دانە</option>');
-                optionsCount++;
+                usageUnitSelect.innerHTML += '<option value="دانە">دانە</option>';
             }
             
-            console.log('📊 Total options added:', optionsCount);
-            console.log('📄 Inner HTML after adding options:', usageUnitSelect.innerHTML);
-            console.log('📋 Number of <option> elements:', $(usageUnitSelect).find('option').length);
-            
-            // Check if Select2 is initialized
-            const isSelect2Initialized = $(usageUnitSelect).hasClass('select2-hidden-accessible');
-            console.log('🔧 Is Select2 initialized before?:', isSelect2Initialized);
-            
-            // Reinitialize Select2
-            console.log('🔄 Reinitializing Select2...');
-            $(usageUnitSelect).select2();
-            
-            // Check if Select2 is initialized after
-            const isSelect2InitializedAfter = $(usageUnitSelect).hasClass('select2-hidden-accessible');
-            console.log('🔧 Is Select2 initialized after?:', isSelect2InitializedAfter);
-            
-            console.log('\n✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨');
-            console.log('✅ populateUsageUnitOptions COMPLETED SUCCESSFULLY');
-            console.log('✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨\n\n');
+            console.log('Populated usage unit options for material unit type:', materialUnitType);
             
         } catch (error) {
-            console.error('\n❌❌❌ ERROR IN populateUsageUnitOptions ❌❌❌');
-            console.error('Error message:', error.message);
-            console.error('Error stack:', error.stack);
-            console.error('❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌\n');
+            console.error('Error in populateUsageUnitOptions:', error);
         }
     }
 
@@ -1565,97 +1494,108 @@ document.addEventListener('DOMContentLoaded', function() {
     // Update USD rate display every 5 minutes
     setInterval(updateUsdRateDisplay, 5 * 60 * 1000);
 
-    // Add event listeners for usage unit type changes (works with Select2)
-    $(document).on('change', '#usage_unit_type', function() {
-        // Recalculate base quantity when usage unit changes
-        calculateAndDisplayBaseQuantity('add');
-        // Check material availability with new unit
-        checkMaterialAvailability('add');
-        // Update material prices based on usage unit
-        updateMaterialPricesByUsageUnit('add');
-    });
+    // Add event listeners for usage unit type changes
+    const addUsageUnitSelect = document.getElementById('usage_unit_type');
+    const editUsageUnitSelect = document.getElementById('edit_usage_unit_type');
     
-    $(document).on('change', '#edit_usage_unit_type', function() {
-        // Recalculate base quantity when usage unit changes
-        calculateAndDisplayBaseQuantity('edit');
-        // Check material availability with new unit
-        checkMaterialAvailability('edit');
-        // Update material prices based on usage unit
-        updateMaterialPricesByUsageUnit('edit');
-    });
+    if (addUsageUnitSelect) {
+        addUsageUnitSelect.addEventListener('change', function() {
+            // Recalculate base quantity when usage unit changes
+            calculateAndDisplayBaseQuantity('add');
+            // Check material availability with new unit
+            checkMaterialAvailability('add');
+            // Update material prices based on usage unit
+            updateMaterialPricesByUsageUnit('add');
+        });
+    }
     
-    // Add event listeners for usage unit type clearing (works with Select2)
-    $(document).on('change', '#usage_unit_type', function() {
-        if (!this.value) {
-            // Reset prices to base material prices when usage unit is cleared
-            const materialIdField = document.getElementById('material_id');
-            if (materialIdField && materialIdField.value) {
-                // Fetch material details and reset prices
-                fetch(`../process/other_expenses/get_material_details.php?material_id=${materialIdField.value}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            const material = data.data;
-                            const iqdPriceField = document.getElementById('material_purchase_price_iqd');
-                            const usdPriceField = document.getElementById('material_purchase_price_usd');
-                            const totalCostField = document.getElementById('material_total_cost');
-                            
-                            if (material.currency_type === 'دۆلار') {
-                                if (usdPriceField) usdPriceField.value = material.purchase_price_usd || '';
-                                if (iqdPriceField) iqdPriceField.value = '';
-                            } else {
-                                if (iqdPriceField) iqdPriceField.value = material.purchase_price_iqd || '';
-                                if (usdPriceField) usdPriceField.value = '';
+    if (editUsageUnitSelect) {
+        editUsageUnitSelect.addEventListener('change', function() {
+            // Recalculate base quantity when usage unit changes
+            calculateAndDisplayBaseQuantity('edit');
+            // Check material availability with new unit
+            checkMaterialAvailability('edit');
+            // Update material prices based on usage unit
+            updateMaterialPricesByUsageUnit('edit');
+        });
+    }
+    
+    // Add event listeners for usage unit type clearing
+    if (addUsageUnitSelect) {
+        addUsageUnitSelect.addEventListener('input', function() {
+            if (!this.value) {
+                // Reset prices to base material prices when usage unit is cleared
+                const materialIdField = document.getElementById('material_id');
+                if (materialIdField && materialIdField.value) {
+                    // Fetch material details and reset prices
+                    fetch(`../process/other_expenses/get_material_details.php?material_id=${materialIdField.value}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                const material = data.data;
+                                const iqdPriceField = document.getElementById('material_purchase_price_iqd');
+                                const usdPriceField = document.getElementById('material_purchase_price_usd');
+                                const totalCostField = document.getElementById('material_total_cost');
+                                
+                                if (material.currency_type === 'دۆلار') {
+                                    if (usdPriceField) usdPriceField.value = material.purchase_price_usd || '';
+                                    if (iqdPriceField) iqdPriceField.value = '';
+                                } else {
+                                    if (iqdPriceField) iqdPriceField.value = material.purchase_price_iqd || '';
+                                    if (usdPriceField) usdPriceField.value = '';
+                                }
+                                
+                                // Reset total cost field placeholder
+                                if (totalCostField && totalCostField.hasAttribute('data-original-placeholder')) {
+                                    totalCostField.placeholder = totalCostField.getAttribute('data-original-placeholder');
+                                }
+                                
+                                // Recalculate total cost
+                                calculateMaterialTotalCost('add');
                             }
-                            
-                            // Reset total cost field placeholder
-                            if (totalCostField && totalCostField.hasAttribute('data-original-placeholder')) {
-                                totalCostField.placeholder = totalCostField.getAttribute('data-original-placeholder');
-                            }
-                            
-                            // Recalculate total cost
-                            calculateMaterialTotalCost('add');
-                        }
-                    });
+                        });
+                }
             }
-        }
-    });
+        });
+    }
     
-    $(document).on('change', '#edit_usage_unit_type', function() {
-        if (!this.value) {
-            // Reset prices to base material prices when usage unit is cleared
-            const materialIdField = document.getElementById('edit_material_id');
-            if (materialIdField && materialIdField.value) {
-                // Fetch material details and reset prices
-                fetch(`../process/other_expenses/get_material_details.php?material_id=${materialIdField.value}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            const material = data.data;
-                            const iqdPriceField = document.getElementById('edit_material_purchase_price_iqd');
-                            const usdPriceField = document.getElementById('edit_material_purchase_price_usd');
-                            const totalCostField = document.getElementById('edit_material_total_cost');
-                            
-                            if (material.currency_type === 'دۆلار') {
-                                if (usdPriceField) usdPriceField.value = material.purchase_price_usd || '';
-                                if (iqdPriceField) iqdPriceField.value = '';
-                            } else {
-                                if (iqdPriceField) iqdPriceField.value = material.purchase_price_iqd || '';
-                                if (usdPriceField) usdPriceField.value = '';
+    if (editUsageUnitSelect) {
+        editUsageUnitSelect.addEventListener('input', function() {
+            if (!this.value) {
+                // Reset prices to base material prices when usage unit is cleared
+                const materialIdField = document.getElementById('edit_material_id');
+                if (materialIdField && materialIdField.value) {
+                    // Fetch material details and reset prices
+                    fetch(`../process/other_expenses/get_material_details.php?material_id=${materialIdField.value}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                const material = data.data;
+                                const iqdPriceField = document.getElementById('edit_material_purchase_price_iqd');
+                                const usdPriceField = document.getElementById('edit_material_purchase_price_usd');
+                                const totalCostField = document.getElementById('edit_material_total_cost');
+                                
+                                if (material.currency_type === 'دۆلار') {
+                                    if (usdPriceField) usdPriceField.value = material.purchase_price_usd || '';
+                                    if (iqdPriceField) iqdPriceField.value = '';
+                                } else {
+                                    if (iqdPriceField) iqdPriceField.value = material.purchase_price_iqd || '';
+                                    if (usdPriceField) usdPriceField.value = '';
+                                }
+                                
+                                // Reset total cost field placeholder
+                                if (totalCostField && totalCostField.hasAttribute('data-original-placeholder')) {
+                                    totalCostField.placeholder = totalCostField.getAttribute('data-original-placeholder');
+                                }
+                                
+                                // Recalculate total cost
+                                calculateMaterialTotalCost('edit');
                             }
-                            
-                            // Reset total cost field placeholder
-                            if (totalCostField && totalCostField.hasAttribute('data-original-placeholder')) {
-                                totalCostField.placeholder = totalCostField.getAttribute('data-original-placeholder');
-                            }
-                            
-                            // Recalculate total cost
-                            calculateMaterialTotalCost('edit');
-                        }
-                    });
+                        });
+                }
             }
-        }
-    });
+        });
+    }
 });
 
 // Export functions are now in separate file: export_functions.js

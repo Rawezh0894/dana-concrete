@@ -71,51 +71,51 @@ async function loadOtherExpenses() {
         
         window.otherExpensesData = data;
         
-        function iqdToUsd(iqd) {
-            return usdRate && iqd ? (parseFloat(iqd) / (usdRate / 100)) : 0;
-        }
+    function iqdToUsd(iqd) {
+        return usdRate && iqd ? (parseFloat(iqd) / (usdRate / 100)) : 0;
+    }
         
         // Use data directly (server already filtered it)
-        let filtered = data;
+    let filtered = data;
         
         // Calculate totals
         let totalCarMaterialCostIQD = 0, totalCarMaterialCostUSD = 0, totalCarGasCost = 0;
-        let totalOtherExpensesIQD = 0, totalOtherExpensesUSD = 0;
+    let totalOtherExpensesIQD = 0, totalOtherExpensesUSD = 0;
+    
+    filtered.forEach(row => {
+        if (row.car_id && row.expense_type === 'بەکارهێنانی کاڵای کۆگا') {
+            totalCarMaterialCostIQD += parseFloat(row.material_purchase_price_iqd || 0) * parseFloat(row.material_quantity || 0);
+            totalCarMaterialCostUSD += parseFloat(row.material_purchase_price_usd || 0) * parseFloat(row.material_quantity || 0);
+        }
         
-        filtered.forEach(row => {
-            if (row.car_id && row.expense_type === 'بەکارهێنانی کاڵای کۆگا') {
-                totalCarMaterialCostIQD += parseFloat(row.material_purchase_price_iqd || 0) * parseFloat(row.material_quantity || 0);
-                totalCarMaterialCostUSD += parseFloat(row.material_purchase_price_usd || 0) * parseFloat(row.material_quantity || 0);
-            }
-            
-            if (row.car_id && row.expense_type === 'بەکارهێنانی گاز') {
-                totalCarGasCost += parseFloat(row.gas_total_cost || 0);
-            }
-            
-            if (!row.car_id || (row.expense_type !== 'بەکارهێنانی کاڵای کۆگا' && row.expense_type !== 'بەکارهێنانی گاز')) {
-                if (row.currency_type === 'دۆلار') {
-                    totalOtherExpensesUSD += parseFloat(row.amount_usd || 0);
-                } else {
-                    totalOtherExpensesIQD += parseFloat(row.amount_iqd || 0);
-                }
-            }
-        });
+        if (row.car_id && row.expense_type === 'بەکارهێنانی گاز') {
+            totalCarGasCost += parseFloat(row.gas_total_cost || 0);
+        }
         
-        const totalCarMaterialCostUSDConverted = totalCarMaterialCostIQD / (usdRate / 100) + totalCarMaterialCostUSD;
-        const totalCarGasCostUSD = totalCarGasCost / (usdRate / 100);
-        const totalOtherExpensesUSDConverted = totalOtherExpensesIQD / (usdRate / 100) + totalOtherExpensesUSD;
-        const totalCarExpensesUSD = totalCarMaterialCostUSDConverted + totalCarGasCostUSD;
-        const totalAllExpensesUSD = totalOtherExpensesUSDConverted + totalCarExpensesUSD;
-        
-        document.getElementById('totalCarMaterialCost').innerHTML = `${formatUSD(totalCarMaterialCostUSDConverted)}`;
-        document.getElementById('totalCarGasCost').innerHTML = `${formatUSD(totalCarGasCostUSD)}`;
-        document.getElementById('totalOtherExpenses').innerHTML = `${formatUSD(totalOtherExpensesUSDConverted)}`;
-        document.getElementById('totalCarExpenses').innerHTML = `${formatUSD(totalAllExpensesUSD)}`;
-        document.getElementById('usdExchangeRate').innerHTML = `${formatNumber(usdRate)} د.ع`;
+        if (!row.car_id || (row.expense_type !== 'بەکارهێنانی کاڵای کۆگا' && row.expense_type !== 'بەکارهێنانی گاز')) {
+            if (row.currency_type === 'دۆلار') {
+                totalOtherExpensesUSD += parseFloat(row.amount_usd || 0);
+            } else {
+                totalOtherExpensesIQD += parseFloat(row.amount_iqd || 0);
+            }
+        }
+    });
+    
+    const totalCarMaterialCostUSDConverted = totalCarMaterialCostIQD / (usdRate / 100) + totalCarMaterialCostUSD;
+    const totalCarGasCostUSD = totalCarGasCost / (usdRate / 100);
+    const totalOtherExpensesUSDConverted = totalOtherExpensesIQD / (usdRate / 100) + totalOtherExpensesUSD;
+    const totalCarExpensesUSD = totalCarMaterialCostUSDConverted + totalCarGasCostUSD;
+    const totalAllExpensesUSD = totalOtherExpensesUSDConverted + totalCarExpensesUSD;
+    
+    document.getElementById('totalCarMaterialCost').innerHTML = `${formatUSD(totalCarMaterialCostUSDConverted)}`;
+    document.getElementById('totalCarGasCost').innerHTML = `${formatUSD(totalCarGasCostUSD)}`;
+    document.getElementById('totalOtherExpenses').innerHTML = `${formatUSD(totalOtherExpensesUSDConverted)}`;
+    document.getElementById('totalCarExpenses').innerHTML = `${formatUSD(totalAllExpensesUSD)}`;
+    document.getElementById('usdExchangeRate').innerHTML = `${formatNumber(usdRate)} د.ع`;
         
         if (!filtered || filtered.length === 0) {
             $('#otherExpensesTable').html(`<tr><td colspan="26" class="text-muted text-center">هیچ زانیارییەک نەدۆزرایەوە</td></tr>`);
-            return;
+                return;
         }
         
         const tableData = filtered.map((row) => [

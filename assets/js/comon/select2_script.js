@@ -156,29 +156,6 @@ $(document).ready(function() {
     if ($('#filter_formulas_id').length > 0) {
         enableSelect2('#filter_formulas_id', 'body');
     }
-    
-    // بۆ other expenses - تەنها ئەگەر مۆداڵەکە هەبێت
-    if ($('#addExpenseModal').length > 0) {
-        enableSelect2('#employee_id', '#addExpenseModal');
-        enableSelect2('#car_id', '#addExpenseModal');
-        enableSelect2('#expense_type', '#addExpenseModal');
-        enableSelect2('#material_id', '#addExpenseModal');
-        enableSelect2('#usage_unit_type', '#addExpenseModal');
-        enableSelect2('#person_id', '#addExpenseModal');
-        enableSelect2('#payment_type', '#addExpenseModal');
-        enableSelect2('#currency_type', '#addExpenseModal');
-    }
-    
-    if ($('#editExpenseModal').length > 0) {
-        enableSelect2('#edit_employee_id', '#editExpenseModal');
-        enableSelect2('#edit_car_id', '#editExpenseModal');
-        enableSelect2('#edit_expense_type', '#editExpenseModal');
-        enableSelect2('#edit_material_id', '#editExpenseModal');
-        enableSelect2('#edit_usage_unit_type', '#editExpenseModal');
-        enableSelect2('#edit_person_id', '#editExpenseModal');
-        enableSelect2('#edit_payment_type', '#editExpenseModal');
-        enableSelect2('#edit_currency_type', '#editExpenseModal');
-    }
 });
 
 // Focus select2 search input when dropdown opens for customer select in addConcreteReceiptModal
