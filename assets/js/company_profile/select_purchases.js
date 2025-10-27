@@ -138,35 +138,141 @@ function loadPurchases() {
                     }
                 ],
                 initComplete: function() {
-                    // Add individual column search inputs
-                    this.api().columns().every(function() {
+                    const api = this.api();
+                    api.columns().every(function() {
                         const column = this;
                         const header = $(column.header());
                         
-                        // Skip adding search to actions column
+                        // Skip adding filter to actions column
                         if (header.text().includes('کردارەکان')) {
                             return;
                         }
                         
-                        // Create search input
-                        const searchInput = $('<input>')
-                            .attr('type', 'text')
-                            .attr('placeholder', 'فلتەر...')
-                            .addClass('form-control form-control-sm mt-1 column-filter')
+                        // Create Excel-style filter button
+                        const filterBtn = $('<button>')
+                            .html('<i class="fas fa-filter"></i>')
+                            .addClass('btn btn-sm btn-outline-secondary column-filter-btn')
                             .css({
-                                'width': '100%',
-                                'padding': '0.25rem 0.5rem',
-                                'border': '1px solid #ced4da',
-                                'border-radius': '0.25rem'
+                                'position': 'absolute',
+                                'left': '5px',
+                                'top': '5px',
+                                'padding': '2px 6px',
+                                'font-size': '0.7rem'
+                            })
+                            .attr('title', 'فلتەر')
+                            .attr('data-column-index', column.index());
+                        
+                        header.css('position', 'relative').append(filterBtn);
+                        
+                        // Create dropdown menu
+                        const dropdown = $('<div>')
+                            .addClass('dropdown-menu column-filter-menu')
+                            .css({
+                                'max-height': '300px',
+                                'overflow-y': 'auto',
+                                'min-width': '200px',
+                                'max-width': '400px',
+                                'display': 'none'
                             });
                         
-                        // Add search input to header
-                        header.append(searchInput);
+                        // Function to populate dropdown with unique values
+                        function populateDropdown() {
+                            dropdown.empty();
+                            
+                            // Search box inside dropdown
+                            const searchBox = $('<input>')
+                                .attr('type', 'text')
+                                .addClass('form-control form-control-sm m-2')
+                                .attr('placeholder', 'گەڕان...')
+                                .css('width', 'calc(100% - 1rem)');
+                            dropdown.append(searchBox);
+                            
+                            // Get unique values
+                            const uniqueValues = column.data().unique().sort();
+                            
+                            // Select All checkbox
+                            const selectAllItem = $('<div>')
+                                .addClass('dropdown-item checkbox-item p-2')
+                                .html('<label class="d-flex align-items-center m-0 w-100"><input type="checkbox" class="me-2 filter-checkbox select-all" checked> <strong>هەموو</strong></label>')
+                                .css('cursor', 'pointer');
+                            dropdown.append(selectAllItem);
+                            
+                            // Divider
+                            dropdown.append($('<div>').addClass('dropdown-divider'));
+                            
+                            // Unique values checkboxes
+                            uniqueValues.each(function() {
+                                const value = $.fn.dataTable.util.escapeHtml(this);
+                                if (value && value.toString().trim() !== '') {
+                                    const item = $('<div>')
+                                        .addClass('dropdown-item checkbox-item p-2')
+                                        .html('<label class="d-flex align-items-center m-0 w-100"><input type="checkbox" class="me-2 filter-checkbox" value="' + value + '" checked> ' + value + '</label>')
+                                        .css('cursor', 'pointer');
+                                    dropdown.append(item);
+                                }
+                            });
+                            
+                            // Search functionality in dropdown
+                            searchBox.on('keyup', function() {
+                                const filter = $(this).val().toLowerCase();
+                                dropdown.find('.checkbox-item').each(function() {
+                                    $(this).toggle($(this).text().toLowerCase().includes(filter));
+                                });
+                            });
+                        }
                         
-                        // Apply search on keyup (Excel-like contains filter)
-                        searchInput.on('keyup change', function() {
-                            column.search(this.value).draw();
+                        // Handle checkbox changes
+                        dropdown.on('click', '.filter-checkbox', function(e) {
+                            e.stopPropagation();
                         });
+                        
+                        dropdown.on('change', '.select-all', function() {
+                            const isChecked = $(this).is(':checked');
+                            dropdown.find('.filter-checkbox:not(.select-all)').prop('checked', isChecked);
+                            applyFilter();
+                        });
+                        
+                        dropdown.on('change', '.filter-checkbox:not(.select-all)', function() {
+                            const totalCheckboxes = dropdown.find('.filter-checkbox:not(.select-all)').length;
+                            const checkedCheckboxes = dropdown.find('.filter-checkbox:not(.select-all):checked').length;
+                            dropdown.find('.select-all').prop('checked', totalCheckboxes === checkedCheckboxes);
+                            applyFilter();
+                        });
+                        
+                        // Apply filter based on checked values
+                        function applyFilter() {
+                            const checkedValues = [];
+                            dropdown.find('.filter-checkbox:not(.select-all):checked').each(function() {
+                                checkedValues.push($(this).val());
+                            });
+                            
+                            const totalCheckboxes = dropdown.find('.filter-checkbox:not(.select-all)').length;
+                            const checkedCount = checkedValues.length;
+                            
+                            if (checkedCount === 0 || checkedCount === totalCheckboxes) {
+                                column.search('').draw();
+                                filterBtn.removeClass('active').css('background-color', '');
+                            } else {
+                                column.search(checkedValues.join('|'), true, false).draw();
+                                filterBtn.addClass('active').css('background-color', '#20b2aa');
+                            }
+                        }
+                        
+                        // Toggle dropdown on button click
+                        filterBtn.on('click', function(e) {
+                            e.stopPropagation();
+                            $('.column-filter-menu').not(dropdown).hide();
+                            dropdown.toggle();
+                            if (dropdown.is(':visible')) {
+                                populateDropdown();
+                                $(document).one('click', function() {
+                                    dropdown.hide();
+                                });
+                            }
+                        });
+                        
+                        // Append dropdown to body
+                        $('body').append(dropdown);
                     });
                 }
             });
