@@ -286,21 +286,15 @@ document.addEventListener('DOMContentLoaded', function() {
         handleCurrencyChange();
     }
 
-    // Handle expense type change for add form
-    const expenseType = document.getElementById('expense_type');
-    if (expenseType) {
-        expenseType.addEventListener('change', function() {
-            toggleGasMaterialFields(this.value, 'add');
-        });
-    }
+    // Handle expense type change for add form (works with Select2)
+    $(document).on('change', '#expense_type', function() {
+        toggleGasMaterialFields(this.value, 'add');
+    });
 
-    // Handle expense type change for edit form
-    const editExpenseType = document.getElementById('edit_expense_type');
-    if (editExpenseType) {
-        editExpenseType.addEventListener('change', function() {
-            toggleGasMaterialFields(this.value, 'edit');
-        });
-    }
+    // Handle expense type change for edit form (works with Select2)
+    $(document).on('change', '#edit_expense_type', function() {
+        toggleGasMaterialFields(this.value, 'edit');
+    });
 
     // Add event listeners for material selection
     const addMaterialSelect = document.getElementById('material_id');
