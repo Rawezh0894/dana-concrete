@@ -37,6 +37,10 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <!-- DataTables CSS -->
+    <link href="https://cdn.datatables.net/2.3.4/css/dataTables.dataTables.min.css" rel="stylesheet">
+    <!-- DataTables Buttons CSS -->
+    <link href="https://cdn.datatables.net/buttons/3.0.2/css/buttons.dataTables.min.css" rel="stylesheet">
     
     <style>
         .export-btn {
@@ -82,6 +86,133 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
             background: white !important;
             transform: translateY(-2px) !important;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+        }
+        
+        /* DataTables Custom Styling */
+        .dataTables_wrapper {
+            margin-top: 1rem;
+        }
+        
+        .dataTables_wrapper .dataTables_length select {
+            padding: 0.375rem 1.75rem 0.375rem 0.5rem;
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            background-color: #fff;
+        }
+        
+        .dataTables_wrapper .dataTables_filter input {
+            padding: 0.375rem 0.75rem;
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            margin-right: 0.5rem;
+        }
+        
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            padding: 0.375rem 0.75rem;
+            margin-left: 2px;
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            background-color: #fff;
+            color: #495057 !important;
+        }
+        
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+            background: var(--seafoam-green) !important;
+            border-color: var(--seafoam-green) !important;
+            color: #fff !important;
+        }
+        
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+            background: var(--seafoam-green) !important;
+            border-color: var(--seafoam-green) !important;
+            color: #fff !important;
+        }
+        
+        .dataTables_wrapper .dataTables_info {
+            color: #6c757d;
+        }
+        
+        .table thead {
+            background: var(--kelly-green);
+        }
+        
+        .table thead th {
+            background-color: var(--kelly-green) !important;
+            color: var(--seafoam-green) !important;
+        }
+        
+        /* Column filter inputs styling */
+        .column-filter {
+            background: rgba(255, 255, 255, 0.95) !important;
+            font-size: 0.8rem !important;
+        }
+        
+        .column-filter:focus {
+            background: #fff !important;
+            border-color: var(--seafoam-green) !important;
+            outline: none !important;
+            box-shadow: 0 0 0 0.2rem rgba(32, 178, 170, 0.25) !important;
+        }
+        
+        .column-filter::placeholder {
+            color: #999 !important;
+            font-size: 0.75rem !important;
+        }
+        
+        /* DataTables sort indicator */
+        table.dataTable thead .sorting,
+        table.dataTable thead .sorting_asc,
+        table.dataTable thead .sorting_desc,
+        table.dataTable thead .sorting_asc_disabled,
+        table.dataTable thead .sorting_desc_disabled {
+            cursor: pointer;
+            position: relative;
+            padding-right: 30px !important;
+        }
+        
+        table.dataTable thead .sorting:before,
+        table.dataTable thead .sorting_asc:before,
+        table.dataTable thead .sorting_desc:before {
+            content: "⇅";
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0.5;
+            font-size: 0.9rem;
+        }
+        
+        table.dataTable thead .sorting_asc:before {
+            content: "↑";
+            opacity: 1;
+            color: var(--seafoam-green);
+        }
+        
+        table.dataTable thead .sorting_desc:before {
+            content: "↓";
+            opacity: 1;
+            color: var(--seafoam-green);
+        }
+        
+        /* DataTables buttons styling */
+        .dt-buttons {
+            margin-bottom: 1rem;
+        }
+        
+        .dt-buttons .btn {
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+        
+        /* Ensure table headers are not too tall */
+        .table thead th {
+            white-space: nowrap;
+            vertical-align: top !important;
+        }
+        
+        /* Wrap column filter inputs properly */
+        .table thead th > input {
+            margin-top: 5px !important;
         }
     </style>
 
@@ -190,33 +321,8 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
     </div>
     
     <div class="table-responsive">
-        <table class="table table-bordered table-hover align-middle text-center " id="saleTable">
-            <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
-                <tr>
-                    <th>#</th>
-                    <th>کڕیار</th>
-                    <th>وەرگر</th>
-                    <th>شوێن</th>
-                    <th>ژمارەی پسوڵە</th>
-                    <th>فۆرمۆلا</th>
-                    <th>بەروار</th>
-                    <th>جۆری پارەدان</th>
-                    <th>بڕ</th>
-                    <th>نرخی یەکە</th>
-                    <th>کۆی نرخ</th>
-                 
-                    <th>پارەی دراو بە دینار</th>
-                    <th>پارەی دراو بە دۆلار</th>
-                    <th>پارەی ماوە</th>
-                    <th>نرخی ١٠٠ دۆلار</th>
-                    <th>تێبینی</th>
-                    <th>داشکاندن</th>
-                    <th>کردارەکان</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Sales will be loaded here by JS -->
-            </tbody>
+        <table class="table table-bordered table-hover align-middle text-center" id="saleTable">
+            <!-- DataTables will build the table structure -->
         </table>
     </div>
 </div>
@@ -448,7 +554,13 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="../assets/js/swalAlert.js"></script>
-<script src="../assets/js/comon/table-controler.js"></script>
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
+<!-- DataTables Buttons JS -->
+<script src="https://cdn.datatables.net/buttons/3.0.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.print.min.js"></script>
 <script src="../assets/js/comon/select2_script.js"></script>
 <script>
     // Pass permissions to JavaScript
