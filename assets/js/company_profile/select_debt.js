@@ -93,18 +93,59 @@ function loadDebts() {
                 pageLength: 10,
                 lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
                 order: [[0, 'desc']], // Sort by date descending
+                orderMulti: true, // Enable multi-column sorting (hold Shift while clicking headers)
+                dom: 'Bfrtip', // Buttons, filter, table, info, pagination
+                buttons: [
+                    {
+                        extend: 'copy',
+                        text: 'لەبەرگرتنەوە',
+                        className: 'btn btn-sm btn-outline-secondary'
+                    },
+                    {
+                        extend: 'csv',
+                        text: 'CSV',
+                        className: 'btn btn-sm btn-outline-secondary'
+                    },
+                    {
+                        extend: 'excel',
+                        text: 'Excel',
+                        className: 'btn btn-sm btn-outline-success'
+                    },
+                    {
+                        extend: 'print',
+                        text: 'پرینت',
+                        className: 'btn btn-sm btn-outline-primary'
+                    }
+                ],
                 initComplete: function() {
-                    // Add column-specific search inputs
+                    // Add individual column search inputs
                     this.api().columns().every(function() {
                         const column = this;
                         const header = $(column.header());
-                        const title = header.text();
-                        header.html('<div>' + title + '</div><input type="text" class="form-control form-control-sm mt-1 column-search" placeholder="گەڕان..." />');
                         
-                        $('.column-search', header).on('keyup change', function() {
-                            if (column.search() !== this.value) {
-                                column.search(this.value).draw();
-                            }
+                        // Skip adding search to actions column
+                        if (header.text().includes('کردارەکان')) {
+                            return;
+                        }
+                        
+                        // Create search input
+                        const searchInput = $('<input>')
+                            .attr('type', 'text')
+                            .attr('placeholder', 'فلتەر...')
+                            .addClass('form-control form-control-sm mt-1 column-filter')
+                            .css({
+                                'width': '100%',
+                                'padding': '0.25rem 0.5rem',
+                                'border': '1px solid #ced4da',
+                                'border-radius': '0.25rem'
+                            });
+                        
+                        // Add search input to header
+                        header.append(searchInput);
+                        
+                        // Apply search on keyup (Excel-like contains filter)
+                        searchInput.on('keyup change', function() {
+                            column.search(this.value).draw();
                         });
                     });
                 }

@@ -45,6 +45,8 @@ if ($company_id) {
     <link href="../assets/css/kurdish-font.css" rel="stylesheet">
     <!-- DataTables CSS -->
     <link href="https://cdn.datatables.net/2.3.4/css/dataTables.dataTables.min.css" rel="stylesheet">
+    <!-- DataTables Buttons CSS -->
+    <link href="https://cdn.datatables.net/buttons/3.0.2/css/buttons.dataTables.min.css" rel="stylesheet">
 </head>
 <body dir="rtl">
 <?php include '../includes/navbar.php'; ?>
@@ -338,6 +340,11 @@ if ($company_id) {
 <script src="../assets/js/swalAlert.js"></script>
 <!-- DataTables JS -->
 <script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
+<!-- DataTables Buttons JS -->
+<script src="https://cdn.datatables.net/buttons/3.0.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.print.min.js"></script>
 <script src="../assets/js/company_profile/company_profile.js"></script>
 <script src="../assets/js/company_profile/select_purchases.js"></script>
 <script src="../assets/js/company_profile/add_debt.js"></script>
@@ -405,35 +412,80 @@ if ($company_id) {
 .table thead th {
     background-color: var(--kelly-green) !important;
     color: var(--seafoam-green) !important;
+}
+
+/* Column filter inputs styling */
+.column-filter {
+    background: rgba(255, 255, 255, 0.95) !important;
+    font-size: 0.8rem !important;
+}
+
+.column-filter:focus {
+    background: #fff !important;
+    border-color: var(--seafoam-green) !important;
+    outline: none !important;
+    box-shadow: 0 0 0 0.2rem rgba(32, 178, 170, 0.25) !important;
+}
+
+.column-filter::placeholder {
+    color: #999 !important;
+    font-size: 0.75rem !important;
+}
+
+/* DataTables sort indicator */
+table.dataTable thead .sorting,
+table.dataTable thead .sorting_asc,
+table.dataTable thead .sorting_desc,
+table.dataTable thead .sorting_asc_disabled,
+table.dataTable thead .sorting_desc_disabled {
+    cursor: pointer;
     position: relative;
+    padding-right: 30px !important;
 }
 
-/* Column-specific search inputs styling */
-.table thead th .column-search {
-    background: rgba(255, 255, 255, 0.9);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: #495057;
-    font-size: 0.8rem;
-    padding: 0.25rem 0.5rem;
-    width: 100%;
-    border-radius: 0.25rem;
+table.dataTable thead .sorting:before,
+table.dataTable thead .sorting_asc:before,
+table.dataTable thead .sorting_desc:before {
+    content: "⇅";
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.5;
+    font-size: 0.9rem;
 }
 
-.table thead th .column-search:focus {
-    background: #fff;
-    border-color: var(--seafoam-green);
-    outline: none;
-    box-shadow: 0 0 0 0.2rem rgba(32, 178, 170, 0.25);
+table.dataTable thead .sorting_asc:before {
+    content: "↑";
+    opacity: 1;
+    color: var(--seafoam-green);
 }
 
-.table thead th .column-search::placeholder {
-    color: #999;
+table.dataTable thead .sorting_desc:before {
+    content: "↓";
+    opacity: 1;
+    color: var(--seafoam-green);
 }
 
-/* Header title styling */
-.table thead th > div:first-child {
-    font-weight: 600;
-    margin-bottom: 0.25rem;
+/* DataTables buttons styling */
+.dt-buttons {
+    margin-bottom: 1rem;
+}
+
+.dt-buttons .btn {
+    margin-right: 5px;
+    margin-bottom: 5px;
+}
+
+/* Ensure table headers are not too tall */
+.table thead th {
+    white-space: nowrap;
+    vertical-align: top !important;
+}
+
+/* Wrap column filter inputs properly */
+.table thead th > input {
+    margin-top: 5px !important;
 }
 </style>
 </body>
