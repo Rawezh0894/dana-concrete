@@ -157,7 +157,7 @@ $(document).ready(function() {
         enableSelect2('#filter_formulas_id', 'body');
     }
     
-    // بۆ other expenses - تەنها ئەگە市场主体 مۆداڵەکە هەبێت
+    // بۆ other expenses - تەنها ئەگەر مۆداڵەکە هەبێت
     if ($('#addExpenseModal').length > 0) {
         enableSelect2('#employee_id', '#addExpenseModal');
         enableSelect2('#car_id', '#addExpenseModal');
@@ -169,7 +169,6 @@ $(document).ready(function() {
         enableSelect2('#currency_type', '#addExpenseModal');
     }
     
-    // بۆ other expenses edit modal
     if ($('#editExpenseModal').length > 0) {
         enableSelect2('#edit_employee_id', '#editExpenseModal');
         enableSelect2('#edit_car_id', '#editExpenseModal');
@@ -179,17 +178,6 @@ $(document).ready(function() {
         enableSelect2('#edit_person_id', '#editExpenseModal');
         enableSelect2('#edit_payment_type', '#editExpenseModal');
         enableSelect2('#edit_currency_type', '#editExpenseModal');
-    }
-    
-    // بۆ other expenses filters
-    if ($('#carFilter').length > 0) {
-        enableSelect2('#carFilter', 'body');
-    }
-    if ($('#employeeFilter').length > 0) {
-        enableSelect2('#employeeFilter', 'body');
-    }
-    if ($('#personFilter').length > 0) {
-        enableSelect2('#personFilter', 'body');
     }
 });
 
