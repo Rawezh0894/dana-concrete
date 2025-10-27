@@ -481,7 +481,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Function to populate material purchase prices
     window.populateMaterialPrices = function(materialId, formType) {
         try {
-            console.log('populateMaterialPrices called with:', { materialId, formType });
+            console.log('====================================');
+            console.log('🔵 populateMaterialPrices CALLED!');
+            console.log('Material ID:', materialId);
+            console.log('Form Type:', formType);
+            console.log('====================================');
             
             if (!materialId) {
                 console.log('No material ID provided, returning early');
@@ -509,7 +513,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         displayMaterialUnitInfo(material, formType);
                         
                         // Populate usage unit type options
+                        console.log('🟢 ABOUT TO CALL populateUsageUnitOptions');
                         populateUsageUnitOptions(material, formType);
+                        console.log('🟢 CALLED populateUsageUnitOptions');
                         
                         // Populate price fields based on currency type
                         if (material.currency_type === 'دۆلار') {
