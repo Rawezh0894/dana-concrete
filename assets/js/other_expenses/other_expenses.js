@@ -643,37 +643,37 @@ document.addEventListener('DOMContentLoaded', function() {
             
             let optionsCount = 0;
             
-            // Add options based on material unit type
+            // Add options based on material unit type using jQuery
             if (materialUnitType === 'کارتۆن') {
-                usageUnitSelect.innerHTML += '<option value="کارتۆن">کارتۆن</option>';
+                $(usageUnitSelect).append('<option value="کارتۆن">کارتۆن</option>');
                 optionsCount++;
                 if (piecesPerCarton && piecesPerCarton > 0) {
-                    usageUnitSelect.innerHTML += '<option value="دانە">دانە</option>';
+                    $(usageUnitSelect).append('<option value="دانە">دانە</option>');
                     optionsCount++;
                 }
             } else if (materialUnitType === 'بەرمیل') {
-                usageUnitSelect.innerHTML += '<option value="بەرمیل">بەرمیل</option>';
+                $(usageUnitSelect).append('<option value="بەرمیل">بەرمیل</option>');
                 optionsCount++;
                 if (litersPerBarrel && litersPerBarrel > 0) {
-                    usageUnitSelect.innerHTML += '<option value="لیتر">لیتر</option>';
+                    $(usageUnitSelect).append('<option value="لیتر">لیتر</option>');
                     optionsCount++;
                 }
                 if (litersPerBucket && litersPerBucket > 0) {
-                    usageUnitSelect.innerHTML += '<option value="دەبە">دەبە</option>';
+                    $(usageUnitSelect).append('<option value="دەبە">دەبە</option>');
                     optionsCount++;
                 }
             } else if (materialUnitType === 'دەبە') {
-                usageUnitSelect.innerHTML += '<option value="دەبە">دەبە</option>';
+                $(usageUnitSelect).append('<option value="دەبە">دەبە</option>');
                 optionsCount++;
                 if (litersPerBucket && litersPerBucket > 0) {
-                    usageUnitSelect.innerHTML += '<option value="لیتر">لیتر</option>';
+                    $(usageUnitSelect).append('<option value="لیتر">لیتر</option>');
                     optionsCount++;
                 }
             } else if (materialUnitType === 'لیتر') {
-                usageUnitSelect.innerHTML += '<option value="لیتر">لیتر</option>';
+                $(usageUnitSelect).append('<option value="لیتر">لیتر</option>');
                 optionsCount++;
             } else if (materialUnitType === 'دانە') {
-                usageUnitSelect.innerHTML += '<option value="دانە">دانە</option>';
+                $(usageUnitSelect).append('<option value="دانە">دانە</option>');
                 optionsCount++;
             }
             
