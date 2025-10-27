@@ -302,9 +302,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (addMaterialSelect) {
         addMaterialSelect.addEventListener('change', function() {
+            console.log('🎯 material_id CHANGE EVENT TRIGGERED');
             const materialId = this.value;
+            console.log('📌 Selected Material ID:', materialId);
             if (materialId) {
+                console.log('✅ Material ID is valid, calling populateMaterialPrices...');
                 populateMaterialPrices(materialId, 'add');
+                
                 // Clear any existing quantity and recalculate
                 const quantityField = document.getElementById('material_quantity');
                 if (quantityField) {
@@ -321,6 +325,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Clear material unit info
                 clearMaterialUnitInfo('add');
             } else {
+                console.log('❌ No material ID selected');
                 clearMaterialAvailabilityMessage('add');
                 clearMaterialUnitInfo('add');
                 clearBaseQuantityDisplay('add');
@@ -586,20 +591,34 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Function to populate usage unit type options
     window.populateUsageUnitOptions = function(material, formType) {
+        console.log('\n\n🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀');
+        console.log('🌟 populateUsageUnitOptions FUNCTION CALLED');
+        console.log('🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀\n');
+        
         try {
-            console.log('=== populateUsageUnitOptions START ===');
-            console.log('Material:', material);
-            console.log('Form type:', formType);
+            console.log('📦 Material object:', JSON.stringify(material, null, 2));
+            console.log('📝 Form type:', formType);
             
             const prefix = formType === 'edit' ? 'edit_' : '';
-            const usageUnitSelect = document.getElementById(prefix + 'usage_unit_type');
+            console.log('🏷️  Prefix:', prefix);
             
-            console.log('Usage unit select element:', usageUnitSelect);
+            const selectorId = prefix + 'usage_unit_type';
+            console.log('🔍 Looking for element with ID:', selectorId);
+            
+            const usageUnitSelect = document.getElementById(selectorId);
+            console.log('🎯 Element found:', usageUnitSelect);
+            console.log('📋 Element type:', typeof usageUnitSelect);
             
             if (!usageUnitSelect) {
-                console.warn('Usage unit type select not found:', prefix + 'usage_unit_type');
+                console.error('❌❌❌ ELEMENT NOT FOUND! ID:', selectorId);
+                console.log('Available elements with "usage" in ID:');
+                document.querySelectorAll('[id*="usage"]').forEach(el => {
+                    console.log('  -', el.id, el);
+                });
                 return;
             }
+            
+            console.log('✅ Element found successfully!');
             
             // Destroy Select2 if it exists
             if ($(usageUnitSelect).hasClass('select2-hidden-accessible')) {
@@ -684,17 +703,31 @@ document.addEventListener('DOMContentLoaded', function() {
                 optionsCount++;
             }
             
-            console.log('Total options added:', optionsCount);
-            console.log('Inner HTML after adding options:', usageUnitSelect.innerHTML);
+            console.log('📊 Total options added:', optionsCount);
+            console.log('📄 Inner HTML after adding options:', usageUnitSelect.innerHTML);
+            console.log('📋 Number of <option> elements:', $(usageUnitSelect).find('option').length);
+            
+            // Check if Select2 is initialized
+            const isSelect2Initialized = $(usageUnitSelect).hasClass('select2-hidden-accessible');
+            console.log('🔧 Is Select2 initialized before?:', isSelect2Initialized);
             
             // Reinitialize Select2
+            console.log('🔄 Reinitializing Select2...');
             $(usageUnitSelect).select2();
             
-            console.log('Reinitialized Select2');
-            console.log('=== populateUsageUnitOptions END ===');
+            // Check if Select2 is initialized after
+            const isSelect2InitializedAfter = $(usageUnitSelect).hasClass('select2-hidden-accessible');
+            console.log('🔧 Is Select2 initialized after?:', isSelect2InitializedAfter);
+            
+            console.log('\n✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨');
+            console.log('✅ populateUsageUnitOptions COMPLETED SUCCESSFULLY');
+            console.log('✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨\n\n');
             
         } catch (error) {
-            console.error('Error in populateUsageUnitOptions:', error);
+            console.error('\n❌❌❌ ERROR IN populateUsageUnitOptions ❌❌❌');
+            console.error('Error message:', error.message);
+            console.error('Error stack:', error.stack);
+            console.error('❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌\n');
         }
     }
 
