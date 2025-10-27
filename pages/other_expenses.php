@@ -291,39 +291,7 @@ if (!isset($_SESSION['user_id'])) {
     </div>
     <div class="table-responsive">
         <table class="table table-bordered table-hover align-middle text-center" id="otherExpensesTable">
-            <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
-                <tr>
-                    <th>#</th>
-                    <th>مەبەست</th>
-                    <th>کەس</th>
-                    <th>کارمەند</th>
-                    <th>سەیارە</th>
-                    <th>بڕی گاز (لیتر)</th>
-                    <th>جۆری خەرجی</th>
-                    <th>کاڵا لە کۆگا</th>
-                    <th>بڕی عەدەدی کاڵا</th>
-                    <th>نرخی کڕینی کاڵا بە دینار</th>
-                    <th>نرخی کڕینی کاڵا بە دۆلار</th>
-                    <th>کۆی نرخی کاڵای بەکارهاتوو</th>
-                    <th>ئینپوتی نرخی کڕینی گاز</th>
-                    <th>کۆی نرخی گازی بەکارهاتوو</th>
-                    <th>جۆری مامەڵە</th>
-                    <th>جۆری پارە</th>
-                    <th>ژمارەی وەسڵ</th>
-                    <th>بڕی دینار</th>
-                    <th>بڕی دۆلار</th>
-                    <th>پارەی دراو دینار</th>
-                    <th>پارەی دراو دۆلار</th>
-                    <th>نرخی 100 دۆلار</th>
-                    <th>ماوە دینار</th>
-                    <th>ماوە دۆلار</th>
-                    <th>بەروار</th>
-                    <th>کردارەکان</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Expenses will be loaded here by JS -->
-            </tbody>
+            <!-- DataTables will build the table structure -->
         </table>
     </div>
 </div>
@@ -697,3 +665,4 @@ if (!isset($_SESSION['user_id'])) {
     <script src="../assets/js/other_expenses/export_functions.js?v=<?= time() ?>"></script>
 </body>
 </html>
+
