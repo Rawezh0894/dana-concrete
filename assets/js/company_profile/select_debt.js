@@ -1,15 +1,23 @@
-let purchasesTable = null;
+let debtTable = null;
 
-function loadPurchases() {
+function formatDebtAmount(val, currency) {
+    if (!val || isNaN(val)) return '-';
+    const n = Number(val).toLocaleString('en-US');
+    if (currency === 'usd') return n + ' $';
+    if (currency === 'iqd') return n + ' د.ع';
+    return n;
+}
+
+function loadDebts() {
     // Destroy existing table if it exists
-    if (purchasesTable) {
-        purchasesTable.destroy();
-        purchasesTable = null;
-        $('#purchasesTable').empty();
+    if (debtTable) {
+        debtTable.destroy();
+        debtTable = null;
+        $('#debtTable').empty();
     }
     
-    const url = new URL('../process/company_profile/select_purchases.php', window.location.href);
-    url.searchParams.append('id', COMPANY_ID);
+    const url = new URL('../process/company_profile/select_debt.php', window.location.href);
+    url.searchParams.append('company_id', COMPANY_ID);
     if (typeof currentFilters !== 'undefined') {
         if (currentFilters.from_date) url.searchParams.append('from_date', currentFilters.from_date);
         if (currentFilters.to_date) url.searchParams.append('to_date', currentFilters.to_date);
@@ -17,76 +25,48 @@ function loadPurchases() {
     
     fetch(url)
         .then(res => res.json())
-        .then(purchases => {
-            if (purchases.error) {
-                $('#purchasesTable').html(`<tr><td colspan="18" class="text-danger text-center">${purchases.error}</td></tr>`);
+        .then(debts => {
+            if (!debts || debts.length === 0) {
+                $('#debtTable').html(`<tr><td colspan="7" class="text-muted text-center">هیچ زانیارییەک نەدۆزرایەوە</td></tr>`);
                 return;
             }
-            
-            if (!purchases || purchases.length === 0) {
-                $('#purchasesTable').html(`<tr><td colspan="18" class="text-muted text-center">هیچ زانیارییەک نەدۆزرایەوە</td></tr>`);
-                return;
-            }
-            
-            function formatNumber(n) {
-                if (n === null || n === undefined || n === '') return '';
-                return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-            }
-            
-            function formatUSD(n) {
-                if (!n || isNaN(n)) return '';
-                return formatNumber(Number(n).toFixed(2)) + ' $';
-            }
-            
-            function formatIQD(n) {
-                if (!n || isNaN(n)) return '';
-                return formatNumber(Number(n).toFixed(0)) + ' د.ع';
-            }
-            
             // Prepare data for DataTables
-            const tableData = purchases.map((row) => [
-                row.company_name || '',
-                row.location_name || row.location || '',
-                row.driver_name || row.driver || '',
-                row.invoice_number || '',
-                row.material_name || '',
-                row.date || '',
-                row.payment_type || '',
-                row.type || '',
-                formatNumber(row.kg),
-                formatUSD(row.price_per_kg_usd),
-                formatIQD(row.price_per_kg_iqd),
-                row.type === 'دینار' ? formatIQD(row.price) : (row.type === 'دۆلار' ? formatUSD(row.price) : formatNumber(row.price)),
-                formatIQD(row.amount_iqd),
-                formatNumber(row.exchange_rate),
-                formatUSD(row.paid_usd),
-                formatIQD(row.paid_iqd),
-                formatUSD(row.remaining_usd),
-                formatIQD(row.remaining_iqd)
+            const tableData = debts.map((debt) => [
+                debt.date,
+                Number(debt.amount_usd).toLocaleString('en-US') + ' $',
+                Number(debt.amount_iqd).toLocaleString('en-US') + ' د.ع',
+                Number(debt.discount_usd || 0).toLocaleString('en-US') + ' $',
+                Number(debt.dollar_rate).toLocaleString('en-US') + ' د.ع',
+                debt.note || '',
+                `
+                    <button class="btn btn-sm btn-primary me-1 edit-debt-btn"
+                        data-id="${debt.id}"
+                        data-date="${debt.date}"
+                        data-amount_usd="${debt.amount_usd}"
+                        data-amount_iqd="${debt.amount_iqd}"
+                        data-discount_usd="${debt.discount_usd || 0}"
+                        data-dollar_rate="${debt.dollar_rate}"
+                        data-note="${debt.note || ''}"
+                        title="دەستکاری">
+                        <i class="fa fa-pen"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger delete-debt" data-id="${debt.id}" title="سڕینەوە">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                `
             ]);
             
             // Initialize DataTable
-            purchasesTable = new DataTable('#purchasesTable', {
+            debtTable = new DataTable('#debtTable', {
                 data: tableData,
                 columns: [
-                    { title: 'کۆمپانیا' },
-                    { title: 'شوێن' },
-                    { title: 'شۆفێر' },
-                    { title: 'ژمارەی پسوڵە' },
-                    { title: 'مەواد' },
                     { title: 'بەروار' },
-                    { title: 'جۆری پارەدان' },
-                    { title: 'جۆری دراو' },
-                    { title: 'کیلۆگرام' },
-                    { title: 'نرخی یەک کیلۆ بە دۆلار' },
-                    { title: 'نرخی یەک کیلۆ بە دینار' },
-                    { title: 'نرخ' },
-                    { title: 'بڕی پارە بە دینار' },
-                    { title: 'نرخی 100 دۆلار بە دینار' },
-                    { title: 'پارەی دراو بە دۆلار' },
-                    { title: 'پارەی دراو بە دینار' },
-                    { title: 'پارەی ماوە بە دۆلار' },
-                    { title: 'پارەی ماوە بە دینار' }
+                    { title: 'بڕی دۆلار' },
+                    { title: 'بڕی دینار' },
+                    { title: 'داشکاندن (دۆلار)' },
+                    { title: 'نرخی دۆلار' },
+                    { title: 'تێبینی' },
+                    { title: 'کردارەکان' }
                 ],
                 language: {
                     "processing": "چاوەڕوان بە...",
@@ -112,7 +92,7 @@ function loadPurchases() {
                 responsive: true,
                 pageLength: 10,
                 lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
-                order: [[5, 'desc']], // Sort by date descending
+                order: [[0, 'desc']], // Sort by date descending
                 orderMulti: true, // Enable multi-column sorting (hold Shift while clicking headers)
                 dom: 'Bfrtip', // Buttons, filter, table, info, pagination
                 buttons: [
@@ -172,21 +152,15 @@ function loadPurchases() {
             });
         })
         .catch(error => {
-            console.error('Error loading purchases:', error);
-            $('#purchasesTable').html(`<tr><td colspan="18" class="text-danger text-center">هەڵە لە بارکردنی زانیاریەکان</td></tr>`);
+            console.error('Error loading debts:', error);
+            $('#debtTable').html(`<tr><td colspan="7" class="text-danger text-center">هەڵە لە بارکردنی زانیاریەکان</td></tr>`);
         });
 }
 
-// Load purchases when tab is shown
-$(document).on('shown.bs.tab', 'button[data-bs-target="#purchases"]', function() {
-    if (!purchasesTable) {
-        loadPurchases();
-    }
-});
+// Auto-load on tab show
+$(document).on('shown.bs.tab', 'button[data-bs-target="#debt"]', loadDebts);
 
-// Also load on page ready if purchases tab is active
-$(document).ready(function() {
-    if ($('#purchases').hasClass('active')) {
-        loadPurchases();
-    }
+// Also load on page ready if debt tab is active
+$(function() {
+    if ($('#debt').hasClass('active')) loadDebts();
 });
