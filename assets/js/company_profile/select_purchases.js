@@ -83,7 +83,25 @@ function loadPurchases() {
                     { title: 'پارەی ماوە بە دینار' }
                 ],
                 language: {
-                    url: '//cdn.datatables.net/plug-ins/2.3.4/i18n/ckb.json'
+                    "processing": "چاوەڕوان بە...",
+                    "search": "گەڕان:",
+                    "lengthMenu": "نیشاندان _MENU_ ڕیکۆرد",
+                    "info": "نوێنراوە _START_ لە _END_ لە _TOTAL_ ڕیکۆرد",
+                    "infoEmpty": "نوێنراوە 0 لە 0 لە 0 ڕیکۆرد",
+                    "infoFiltered": "(فلتەرکراو لە _MAX_ کۆی ڕیکۆرد)",
+                    "loadingRecords": "لۆدینگ...",
+                    "zeroRecords": "هیچ ڕیکۆردێک نەدۆزرایەوە",
+                    "emptyTable": "هیچ زانیارییەک لە خشتەکەدا نییە",
+                    "paginate": {
+                        "first": "یەکەم",
+                        "previous": "پێشوو",
+                        "next": "دواتر",
+                        "last": "کۆتایی"
+                    },
+                    "aria": {
+                        "sortAscending": ": چالاککردن بۆ ڕیزکردنی ستون بەپێی زیادبوون",
+                        "sortDescending": ": چالاککردن بۆ ڕیزکردنی ستون بەپێی کەمبوون"
+                    }
                 },
                 responsive: true,
                 pageLength: 10,
