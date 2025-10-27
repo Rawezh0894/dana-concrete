@@ -1488,108 +1488,97 @@ document.addEventListener('DOMContentLoaded', function() {
     // Update USD rate display every 5 minutes
     setInterval(updateUsdRateDisplay, 5 * 60 * 1000);
 
-    // Add event listeners for usage unit type changes
-    const addUsageUnitSelect = document.getElementById('usage_unit_type');
-    const editUsageUnitSelect = document.getElementById('edit_usage_unit_type');
+    // Add event listeners for usage unit type changes (works with Select2)
+    $(document).on('change', '#usage_unit_type', function() {
+        // Recalculate base quantity when usage unit changes
+        calculateAndDisplayBaseQuantity('add');
+        // Check material availability with new unit
+        checkMaterialAvailability('add');
+        // Update material prices based on usage unit
+        updateMaterialPricesByUsageUnit('add');
+    });
     
-    if (addUsageUnitSelect) {
-        addUsageUnitSelect.addEventListener('change', function() {
-            // Recalculate base quantity when usage unit changes
-            calculateAndDisplayBaseQuantity('add');
-            // Check material availability with new unit
-            checkMaterialAvailability('add');
-            // Update material prices based on usage unit
-            updateMaterialPricesByUsageUnit('add');
-        });
-    }
+    $(document).on('change', '#edit_usage_unit_type', function() {
+        // Recalculate base quantity when usage unit changes
+        calculateAndDisplayBaseQuantity('edit');
+        // Check material availability with new unit
+        checkMaterialAvailability('edit');
+        // Update material prices based on usage unit
+        updateMaterialPricesByUsageUnit('edit');
+    });
     
-    if (editUsageUnitSelect) {
-        editUsageUnitSelect.addEventListener('change', function() {
-            // Recalculate base quantity when usage unit changes
-            calculateAndDisplayBaseQuantity('edit');
-            // Check material availability with new unit
-            checkMaterialAvailability('edit');
-            // Update material prices based on usage unit
-            updateMaterialPricesByUsageUnit('edit');
-        });
-    }
-    
-    // Add event listeners for usage unit type clearing
-    if (addUsageUnitSelect) {
-        addUsageUnitSelect.addEventListener('input', function() {
-            if (!this.value) {
-                // Reset prices to base material prices when usage unit is cleared
-                const materialIdField = document.getElementById('material_id');
-                if (materialIdField && materialIdField.value) {
-                    // Fetch material details and reset prices
-                    fetch(`../process/other_expenses/get_material_details.php?material_id=${materialIdField.value}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                const material = data.data;
-                                const iqdPriceField = document.getElementById('material_purchase_price_iqd');
-                                const usdPriceField = document.getElementById('material_purchase_price_usd');
-                                const totalCostField = document.getElementById('material_total_cost');
-                                
-                                if (material.currency_type === 'دۆلار') {
-                                    if (usdPriceField) usdPriceField.value = material.purchase_price_usd || '';
-                                    if (iqdPriceField) iqdPriceField.value = '';
-                                } else {
-                                    if (iqdPriceField) iqdPriceField.value = material.purchase_price_iqd || '';
-                                    if (usdPriceField) usdPriceField.value = '';
-                                }
-                                
-                                // Reset total cost field placeholder
-                                if (totalCostField && totalCostField.hasAttribute('data-original-placeholder')) {
-                                    totalCostField.placeholder = totalCostField.getAttribute('data-original-placeholder');
-                                }
-                                
-                                // Recalculate total cost
-                                calculateMaterialTotalCost('add');
+    // Add event listeners for usage unit type clearing (works with Select2)
+    $(document).on('change', '#usage_unit_type', function() {
+        if (!this.value) {
+            // Reset prices to base material prices when usage unit is cleared
+            const materialIdField = document.getElementById('material_id');
+            if (materialIdField && materialIdField.value) {
+                // Fetch material details and reset prices
+                fetch(`../process/other_expenses/get_material_details.php?material_id=${materialIdField.value}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            const material = data.data;
+                            const iqdPriceField = document.getElementById('material_purchase_price_iqd');
+                            const usdPriceField = document.getElementById('material_purchase_price_usd');
+                            const totalCostField = document.getElementById('material_total_cost');
+                            
+                            if (material.currency_type === 'دۆلار') {
+                                if (usdPriceField) usdPriceField.value = material.purchase_price_usd || '';
+                                if (iqdPriceField) iqdPriceField.value = '';
+                            } else {
+                                if (iqdPriceField) iqdPriceField.value = material.purchase_price_iqd || '';
+                                if (usdPriceField) usdPriceField.value = '';
                             }
-                        });
-                }
-            }
-        });
-    }
-    
-    if (editUsageUnitSelect) {
-        editUsageUnitSelect.addEventListener('input', function() {
-            if (!this.value) {
-                // Reset prices to base material prices when usage unit is cleared
-                const materialIdField = document.getElementById('edit_material_id');
-                if (materialIdField && materialIdField.value) {
-                    // Fetch material details and reset prices
-                    fetch(`../process/other_expenses/get_material_details.php?material_id=${materialIdField.value}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                const material = data.data;
-                                const iqdPriceField = document.getElementById('edit_material_purchase_price_iqd');
-                                const usdPriceField = document.getElementById('edit_material_purchase_price_usd');
-                                const totalCostField = document.getElementById('edit_material_total_cost');
-                                
-                                if (material.currency_type === 'دۆلار') {
-                                    if (usdPriceField) usdPriceField.value = material.purchase_price_usd || '';
-                                    if (iqdPriceField) iqdPriceField.value = '';
-                                } else {
-                                    if (iqdPriceField) iqdPriceField.value = material.purchase_price_iqd || '';
-                                    if (usdPriceField) usdPriceField.value = '';
-                                }
-                                
-                                // Reset total cost field placeholder
-                                if (totalCostField && totalCostField.hasAttribute('data-original-placeholder')) {
-                                    totalCostField.placeholder = totalCostField.getAttribute('data-original-placeholder');
-                                }
-                                
-                                // Recalculate total cost
-                                calculateMaterialTotalCost('edit');
+                            
+                            // Reset total cost field placeholder
+                            if (totalCostField && totalCostField.hasAttribute('data-original-placeholder')) {
+                                totalCostField.placeholder = totalCostField.getAttribute('data-original-placeholder');
                             }
-                        });
-                }
+                            
+                            // Recalculate total cost
+                            calculateMaterialTotalCost('add');
+                        }
+                    });
             }
-        });
-    }
+        }
+    });
+    
+    $(document).on('change', '#edit_usage_unit_type', function() {
+        if (!this.value) {
+            // Reset prices to base material prices when usage unit is cleared
+            const materialIdField = document.getElementById('edit_material_id');
+            if (materialIdField && materialIdField.value) {
+                // Fetch material details and reset prices
+                fetch(`../process/other_expenses/get_material_details.php?material_id=${materialIdField.value}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            const material = data.data;
+                            const iqdPriceField = document.getElementById('edit_material_purchase_price_iqd');
+                            const usdPriceField = document.getElementById('edit_material_purchase_price_usd');
+                            const totalCostField = document.getElementById('edit_material_total_cost');
+                            
+                            if (material.currency_type === 'دۆلار') {
+                                if (usdPriceField) usdPriceField.value = material.purchase_price_usd || '';
+                                if (iqdPriceField) iqdPriceField.value = '';
+                            } else {
+                                if (iqdPriceField) iqdPriceField.value = material.purchase_price_iqd || '';
+                                if (usdPriceField) usdPriceField.value = '';
+                            }
+                            
+                            // Reset total cost field placeholder
+                            if (totalCostField && totalCostField.hasAttribute('data-original-placeholder')) {
+                                totalCostField.placeholder = totalCostField.getAttribute('data-original-placeholder');
+                            }
+                            
+                            // Recalculate total cost
+                            calculateMaterialTotalCost('edit');
+                        }
+                    });
+            }
+        }
+    });
 });
 
 // Export functions are now in separate file: export_functions.js
