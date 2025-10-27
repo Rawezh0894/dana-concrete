@@ -487,62 +487,6 @@ table.dataTable thead .sorting_desc:before {
 .table thead th > input {
     margin-top: 5px !important;
 }
-
-/* Excel-style filter button */
-.column-filter-btn {
-    transition: all 0.2s ease;
-}
-
-.column-filter-btn:hover {
-    background-color: var(--seafoam-green) !important;
-    border-color: var(--seafoam-green) !important;
-    color: #fff !important;
-}
-
-.column-filter-btn.active {
-    background-color: #20b2aa !important;
-    border-color: #20b2aa !important;
-    color: #fff !important;
-}
-
-/* Excel-style filter dropdown menu */
-.column-filter-menu {
-    position: absolute;
-    z-index: 1000;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
-    border-radius: 0.375rem;
-    padding: 0;
-}
-
-.column-filter-menu.show {
-    display: block;
-}
-
-.column-filter-menu .dropdown-item {
-    padding: 0.5rem 1rem;
-}
-
-.column-filter-menu .dropdown-item:hover {
-    background-color: #f8f9fa;
-}
-
-.column-filter-menu .checkbox-item label {
-    cursor: pointer;
-    font-size: 0.9rem;
-}
-
-.column-filter-menu .checkbox-item input[type="checkbox"] {
-    cursor: pointer;
-}
-
-.column-filter-menu .dropdown-divider {
-    margin: 0;
-}
-
-/* Ensure filter dropdown is positioned correctly */
-.table thead th {
-    min-height: 60px;
-}
 </style>
 </body>
 </html>
