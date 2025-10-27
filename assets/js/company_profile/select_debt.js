@@ -9,9 +9,11 @@ function formatDebtAmount(val, currency) {
 }
 
 function loadDebts() {
-    // Show loading indicator
-    if ($('#debtTable tbody').length > 0) {
-        $('#debtTable tbody').html('<tr><td colspan="8" class="text-center text-muted"><span class="spinner-border spinner-border-sm"></span> چاوەڕوان بە...</td></tr>');
+    // Destroy existing table if it exists
+    if (debtTable) {
+        debtTable.destroy();
+        debtTable = null;
+        $('#debtTable').empty();
     }
     
     const url = new URL('../process/company_profile/select_debt.php', window.location.href);
@@ -24,6 +26,10 @@ function loadDebts() {
     fetch(url)
         .then(res => res.json())
         .then(debts => {
+            if (!debts || debts.length === 0) {
+                $('#debtTable').html(`<tr><td colspan="7" class="text-muted text-center">هیچ زانیارییەک نەدۆزرایەوە</td></tr>`);
+                return;
+            }
             // Prepare data for DataTables
             const tableData = debts.map((debt) => [
                 debt.date,
@@ -49,12 +55,6 @@ function loadDebts() {
                     </button>
                 `
             ]);
-            
-            // Destroy existing table if it exists
-            if (debtTable) {
-                debtTable.destroy();
-                $('#debtTable tbody').empty();
-            }
             
             // Initialize DataTable
             debtTable = new DataTable('#debtTable', {
@@ -94,6 +94,10 @@ function loadDebts() {
                 lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
                 order: [[0, 'desc']] // Sort by date descending
             });
+        })
+        .catch(error => {
+            console.error('Error loading debts:', error);
+            $('#debtTable').html(`<tr><td colspan="7" class="text-danger text-center">هەڵە لە بارکردنی زانیاریەکان</td></tr>`);
         });
 }
 

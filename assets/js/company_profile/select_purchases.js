@@ -1,6 +1,13 @@
 let purchasesTable = null;
 
 function loadPurchases() {
+    // Destroy existing table if it exists
+    if (purchasesTable) {
+        purchasesTable.destroy();
+        purchasesTable = null;
+        $('#purchasesTable').empty();
+    }
+    
     const url = new URL('../process/company_profile/select_purchases.php', window.location.href);
     url.searchParams.append('id', COMPANY_ID);
     if (typeof currentFilters !== 'undefined') {
@@ -12,7 +19,12 @@ function loadPurchases() {
         .then(res => res.json())
         .then(purchases => {
             if (purchases.error) {
-                $('#purchasesTable tbody').html(`<tr><td colspan="20" class="text-danger">${purchases.error}</td></tr>`);
+                $('#purchasesTable').html(`<tr><td colspan="18" class="text-danger text-center">${purchases.error}</td></tr>`);
+                return;
+            }
+            
+            if (!purchases || purchases.length === 0) {
+                $('#purchasesTable').html(`<tr><td colspan="18" class="text-muted text-center">هیچ زانیارییەک نەدۆزرایەوە</td></tr>`);
                 return;
             }
             
@@ -52,12 +64,6 @@ function loadPurchases() {
                 formatUSD(row.remaining_usd),
                 formatIQD(row.remaining_iqd)
             ]);
-            
-            // Destroy existing table if it exists
-            if (purchasesTable) {
-                purchasesTable.destroy();
-                $('#purchasesTable tbody').empty();
-            }
             
             // Initialize DataTable
             purchasesTable = new DataTable('#purchasesTable', {
@@ -108,9 +114,23 @@ function loadPurchases() {
                 lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
                 order: [[5, 'desc']] // Sort by date descending
             });
+        })
+        .catch(error => {
+            console.error('Error loading purchases:', error);
+            $('#purchasesTable').html(`<tr><td colspan="18" class="text-danger text-center">هەڵە لە بارکردنی زانیاریەکان</td></tr>`);
         });
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    loadPurchases();
+// Load purchases when tab is shown
+$(document).on('shown.bs.tab', 'button[data-bs-target="#purchases"]', function() {
+    if (!purchasesTable) {
+        loadPurchases();
+    }
+});
+
+// Also load on page ready if purchases tab is active
+$(document).ready(function() {
+    if ($('#purchases').hasClass('active')) {
+        loadPurchases();
+    }
 });
