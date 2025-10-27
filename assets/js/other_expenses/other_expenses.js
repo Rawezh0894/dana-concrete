@@ -601,8 +601,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 $(usageUnitSelect).select2('destroy');
             }
             
-            // Clear existing options and reset prices
-            usageUnitSelect.innerHTML = '<option value="">یەکەی بەکارهێنان هەڵبژێرە</option>';
+            // Clear existing options using jQuery (works better with Select2)
+            $(usageUnitSelect).empty();
+            $(usageUnitSelect).append('<option value="">یەکەی بەکارهێنان هەڵبژێرە</option>');
             
             console.log('Cleared existing options');
             
