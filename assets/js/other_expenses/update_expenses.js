@@ -237,3 +237,74 @@ if (editExpenseModal) {
         fetchAndSetUsdRateForEdit();
     });
 }
+
+// Submit handler for edit form
+let submittingEditExpense = false;
+const editExpenseForm = document.getElementById('editExpenseForm');
+if (editExpenseForm) {
+    editExpenseForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Prevent multiple submissions
+        if (submittingEditExpense) {
+            Swal.fire('warning', 'تکایە چاوەڕوان بە...');
+            return false;
+        }
+        
+        // Get the expense ID
+        const editId = document.getElementById('edit_id').value;
+        if (!editId) {
+            Swal.fire('هەڵە!', 'ناتوانرێت دەستکاری بکرێت - ID نەدۆزرایەوە', 'error');
+            return;
+        }
+        
+        // Set submitting flag and disable submit button
+        submittingEditExpense = true;
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn ? submitBtn.innerHTML : '';
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>چاوەڕوان بە...';
+        }
+        
+        // Collect form data
+        const formData = new FormData(editExpenseForm);
+        
+        // Call editExpense function
+        try {
+            await editExpense(editId, {
+                purpose: document.getElementById('edit_purpose').value,
+                employee_id: document.getElementById('edit_employee_id').value,
+                car_id: document.getElementById('edit_car_id').value,
+                person_id: document.getElementById('edit_person_id').value,
+                payment_type: document.getElementById('edit_payment_type').value,
+                currency_type: document.getElementById('edit_currency_type').value,
+                invoice_number: document.getElementById('edit_invoice_number').value,
+                amount_iqd: document.getElementById('edit_amount_iqd').value,
+                amount_usd: document.getElementById('edit_amount_usd').value,
+                paid_iqd: document.getElementById('edit_paid_iqd').value,
+                paid_usd: document.getElementById('edit_paid_usd').value,
+                exchange_rate: document.getElementById('edit_exchange_rate').value,
+                remaining_iqd: document.getElementById('edit_remaining_iqd').value,
+                remaining_usd: document.getElementById('edit_remaining_usd').value,
+                date: document.getElementById('edit_date').value
+            });
+            
+            // Close the modal after successful update
+            const modal = bootstrap.Modal.getInstance(document.getElementById('editExpenseModal'));
+            if (modal) {
+                modal.hide();
+            }
+        } catch (err) {
+            console.error('Error in edit form submission:', err);
+            Swal.fire('هەڵە!', 'هەڵەیەک ڕویدا', 'error');
+        } finally {
+            // Reset submitting flag and restore submit button
+            submittingEditExpense = false;
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+            }
+        }
+    });
+}
