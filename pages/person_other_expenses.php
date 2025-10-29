@@ -36,7 +36,26 @@ if (!isset($_SESSION['user_id'])) {
         /* RTL Support for AG Grid */
         #personGrid {
             direction: rtl;
+            font-family: 'Rabar', 'Arial', 'Tahoma', sans-serif !important;
         }
+        
+        /* Apply Rabar font to all AG Grid elements */
+        .ag-theme-alpine,
+        .ag-theme-alpine *,
+        .ag-theme-alpine .ag-header,
+        .ag-theme-alpine .ag-header-cell,
+        .ag-theme-alpine .ag-header-cell-text,
+        .ag-theme-alpine .ag-cell,
+        .ag-theme-alpine .ag-row,
+        .ag-theme-alpine .ag-paging-panel,
+        .ag-theme-alpine .ag-filter,
+        .ag-theme-alpine .ag-filter-body,
+        .ag-theme-alpine .ag-input-field-input,
+        .ag-theme-alpine .ag-select,
+        .ag-theme-alpine button {
+            font-family: 'Rabar', 'Arial', 'Tahoma', sans-serif !important;
+        }
+        
         .ag-theme-alpine {
             --ag-foreground-color: rgb(33, 37, 41);
             --ag-background-color: rgb(255, 255, 255);
@@ -44,23 +63,79 @@ if (!isset($_SESSION['user_id'])) {
             --ag-header-background-color: var(--kelly-green);
             --ag-odd-row-background-color: rgb(249, 249, 249);
             --ag-header-column-resize-handle-color: var(--seafoam-green);
+            --ag-font-family: 'Rabar', 'Arial', 'Tahoma', sans-serif;
+            --ag-font-size: 14px;
+            --ag-header-height: 50px;
+            --ag-row-height: 45px;
+            --ag-border-color: rgba(0, 0, 0, 0.1);
+            --ag-header-foreground-color: #fff;
         }
+        
         .ag-theme-alpine .ag-header-cell-label {
             justify-content: center;
             text-align: center;
             font-weight: bold;
+            font-size: 15px;
         }
+        
         .ag-theme-alpine .ag-cell {
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 8px 12px;
+            font-size: 14px;
         }
+        
         .ag-theme-alpine .ag-cell.text-end {
             justify-content: flex-end;
-            padding-right: 10px;
+            padding-right: 15px;
         }
+        
         .ag-theme-alpine .ag-cell.text-center {
             justify-content: center;
+        }
+        
+        .ag-theme-alpine .ag-row {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        }
+        
+        .ag-theme-alpine .ag-row:hover {
+            background-color: rgba(0, 0, 0, 0.03) !important;
+        }
+        
+        .ag-theme-alpine .ag-row-selected {
+            background-color: rgba(79, 172, 254, 0.15) !important;
+        }
+        
+        /* Button styling in cells */
+        .ag-theme-alpine .ag-cell button {
+            font-family: 'Rabar', 'Arial', 'Tahoma', sans-serif !important;
+            font-weight: bold;
+            padding: 5px 10px;
+            margin: 0 2px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .ag-theme-alpine .ag-cell button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        /* Filter styling */
+        .ag-theme-alpine .ag-filter-body {
+            font-family: 'Rabar', 'Arial', 'Tahoma', sans-serif !important;
+        }
+        
+        /* Pagination styling */
+        .ag-theme-alpine .ag-paging-panel {
+            font-family: 'Rabar', 'Arial', 'Tahoma', sans-serif !important;
+            padding: 10px;
+            background-color: #f8f9fa;
+        }
+        
+        .ag-theme-alpine .ag-paging-button {
+            font-family: 'Rabar', 'Arial', 'Tahoma', sans-serif !important;
         }
     </style>
 </head>

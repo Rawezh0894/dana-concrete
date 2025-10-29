@@ -14,33 +14,40 @@ function formatIQD(amount) {
     return `${formatNumber(amount)} د.ع`;
 }
 
-// AG Grid column definitions
+// AG Grid column definitions with consistent widths
 const columnDefs = [
     {
         headerName: '#',
         field: 'index',
-        width: 80,
+        width: 70,
         pinned: 'right',
         cellRenderer: (params) => params.node.rowIndex + 1,
         sortable: false,
-        filter: false
+        filter: false,
+        suppressSizeToFit: true,
+        lockPosition: true
     },
     {
         headerName: 'ناوی کەس',
         field: 'name',
-        flex: 1,
+        flex: 2,
         minWidth: 200,
+        maxWidth: 400,
         sortable: true,
         filter: 'agTextColumnFilter',
         filterParams: {
             buttons: ['reset', 'apply'],
             debounceMs: 200
+        },
+        cellStyle: {
+            justifyContent: 'flex-start',
+            paddingRight: '15px'
         }
     },
     {
         headerName: 'قەرزی سەرەتایی (دۆلار)',
         field: 'opening_debt_usd',
-        width: 180,
+        width: 200,
         sortable: true,
         filter: 'agNumberColumnFilter',
         filterParams: {
@@ -50,12 +57,18 @@ const columnDefs = [
         valueFormatter: (params) => {
             return params.value != null ? formatUSD(params.value) : formatUSD(0);
         },
-        cellClass: 'text-end'
+        cellClass: 'text-end',
+        suppressSizeToFit: true,
+        comparator: (valueA, valueB) => {
+            const numA = parseFloat(valueA) || 0;
+            const numB = parseFloat(valueB) || 0;
+            return numA - numB;
+        }
     },
     {
         headerName: 'قەرزی سەرەتایی (دینار)',
         field: 'opening_debt_iqd',
-        width: 180,
+        width: 200,
         sortable: true,
         filter: 'agNumberColumnFilter',
         filterParams: {
@@ -65,36 +78,46 @@ const columnDefs = [
         valueFormatter: (params) => {
             return params.value != null ? formatIQD(params.value) : formatIQD(0);
         },
-        cellClass: 'text-end'
+        cellClass: 'text-end',
+        suppressSizeToFit: true,
+        comparator: (valueA, valueB) => {
+            const numA = parseFloat(valueA) || 0;
+            const numB = parseFloat(valueB) || 0;
+            return numA - numB;
+        }
     },
     {
         headerName: 'کردارەکان',
         field: 'actions',
-        width: 180,
+        width: 160,
         pinned: 'left',
         sortable: false,
         filter: false,
+        suppressSizeToFit: true,
+        lockPosition: true,
         cellRenderer: (params) => {
             const person = params.data;
             return `
-                <button class="btn btn-sm btn-warning edit-person"
-                    data-id="${person.id}"
-                    data-name="${person.name}"
-                    data-opening_debt_usd="${person.opening_debt_usd || 0}"
-                    data-opening_debt_iqd="${person.opening_debt_iqd || 0}"
-                    style="margin: 2px;">
-                    <i class="fa fa-edit"></i>
-                </button>
-                <button class="btn btn-sm btn-danger delete-person" 
-                    data-id="${person.id}"
-                    style="margin: 2px;">
-                    <i class="fa fa-trash"></i>
-                </button>
-                <button class="btn btn-sm btn-info person-details" 
-                    data-id="${person.id}"
-                    style="margin: 2px;">
-                    <i class="fa fa-user"></i>
-                </button>
+                <div style="display: flex; gap: 5px; justify-content: center; align-items: center;">
+                    <button class="btn btn-sm btn-warning edit-person"
+                        data-id="${person.id}"
+                        data-name="${person.name}"
+                        data-opening_debt_usd="${person.opening_debt_usd || 0}"
+                        data-opening_debt_iqd="${person.opening_debt_iqd || 0}"
+                        title="دەستکاری">
+                        <i class="fa fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger delete-person" 
+                        data-id="${person.id}"
+                        title="سڕینەوە">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                    <button class="btn btn-sm btn-info person-details" 
+                        data-id="${person.id}"
+                        title="پڕۆفایل">
+                        <i class="fa fa-user"></i>
+                    </button>
+                </div>
             `;
         },
         cellClass: 'text-center'
@@ -107,14 +130,19 @@ const gridOptions = {
     defaultColDef: {
         sortable: true,
         filter: true,
-        resizable: true,
-        flex: 1,
+        resizable: false,
+        suppressSizeToFit: false,
         minWidth: 100
     },
     rowData: [],
     pagination: true,
     paginationPageSize: 20,
     paginationPageSizeSelector: [10, 20, 50, 100],
+    suppressColumnVirtualisation: true,
+    animateRows: true,
+    rowSelection: 'single',
+    enableCellTextSelection: true,
+    ensureDomOrder: true,
     localeText: {
         // Kurdish/RTL locale text overrides
         page: 'لاپەڕە',
@@ -139,13 +167,14 @@ const gridOptions = {
         searchOoo: 'گەڕان...',
         applyFilter: 'جێبەجێکردن',
         resetFilter: 'گەڕاندنەوە',
-        clearFilter: 'سڕینەوەی فلتەر'
+        clearFilter: 'سڕینەوەی فلتەر',
+        rows: 'ڕیزی',
+        selectedRows: 'ڕیزی هەڵبژێردراو'
     },
     enableRtl: true,
     suppressHorizontalScroll: false,
-    animateRows: true,
-    rowSelection: 'single',
     onFirstDataRendered: (params) => {
+        // Auto-size columns to fit, but respect min/max widths
         params.api.sizeColumnsToFit();
     },
     onGridReady: (params) => {
