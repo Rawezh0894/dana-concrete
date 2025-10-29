@@ -171,9 +171,12 @@ const gridOptions = {
     onGridReady: function(params) {
         gridApi = params.api;
         loadPersons();
+        setupGridControls();
     },
     domLayout: 'normal',
     suppressMenuHide: true,
+    enableCellTextSelection: true,
+    suppressCellFocus: false,
 };
 
 async function loadPersons() {
@@ -201,6 +204,8 @@ async function loadPersons() {
         // Set row data to grid
         if (gridApi) {
             gridApi.setRowData(rowData);
+            // Update stats after data is loaded
+            setTimeout(updateGridStats, 100);
         }
     } catch (error) {
         console.error('Error loading persons:', error);
@@ -235,10 +240,106 @@ function updateSummaryCards(summary) {
     document.getElementById('personsOpeningIQD').textContent = formatIQD(summary.persons_opening_debt.iqd);
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize AG Grid
-    const gridDiv = document.querySelector('#personTable');
-    if (gridDiv) {
-        new agGrid.Grid(gridDiv, gridOptions);
+// Setup grid controls (search, filters, export)
+function setupGridControls() {
+    // Search functionality
+    const searchInput = document.getElementById('gridSearchInput');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+    
+    if (searchInput) {
+        let searchTimeout;
+        searchInput.addEventListener('input', function(e) {
+            const searchValue = e.target.value;
+            
+            if (searchValue.trim()) {
+                clearSearchBtn.style.display = 'block';
+            } else {
+                clearSearchBtn.style.display = 'none';
+            }
+            
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                if (gridApi) {
+                    gridApi.setQuickFilter(searchValue);
+                    updateGridStats();
+                }
+            }, 300);
+        });
+        
+        clearSearchBtn.addEventListener('click', function() {
+            searchInput.value = '';
+            clearSearchBtn.style.display = 'none';
+            if (gridApi) {
+                gridApi.setQuickFilter('');
+                updateGridStats();
+            }
+        });
     }
-});
+    
+    // Reset filters button
+    const resetFiltersBtn = document.getElementById('resetFiltersBtn');
+    if (resetFiltersBtn) {
+        resetFiltersBtn.addEventListener('click', function() {
+            if (gridApi) {
+                gridApi.setFilterModel(null);
+                gridApi.setQuickFilter('');
+                if (searchInput) {
+                    searchInput.value = '';
+                    clearSearchBtn.style.display = 'none';
+                }
+                updateGridStats();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'سەرکەوتوو',
+                    text: 'هەموو فیلتەرەکان پاککرایەوە',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            }
+        });
+    }
+    
+    // Export data button
+    const exportDataBtn = document.getElementById('exportDataBtn');
+    if (exportDataBtn) {
+        exportDataBtn.addEventListener('click', function() {
+            if (gridApi) {
+                const params = {
+                    fileName: 'persons_list_' + new Date().toISOString().split('T')[0],
+                    allColumns: true
+                };
+                gridApi.exportDataAsCsv(params);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'دۆزرایەوە!',
+                    text: 'فایل CSV بە سەرکەوتوویی دۆزرایەوە',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            }
+        });
+    }
+    
+    // Update stats when filters change
+    if (gridApi) {
+        gridApi.addEventListener('filterChanged', updateGridStats);
+        gridApi.addEventListener('rowDataUpdated', updateGridStats);
+    }
+}
+
+// Update grid statistics
+function updateGridStats() {
+    if (!gridApi) return;
+    
+    const displayedRows = gridApi.getDisplayedRowCount();
+    const totalRows = gridApi.getModel().getRowCount();
+    
+    const statsElement = document.getElementById('gridStats');
+    if (statsElement) {
+        if (displayedRows < totalRows) {
+            statsElement.textContent = `${displayedRows} لە ${totalRows} کەس (فیلتەرکراو)`;
+        } else {
+            statsElement.textContent = `${displayedRows} کەس`;
+        }
+    }
+}
