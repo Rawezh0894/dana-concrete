@@ -29,115 +29,6 @@ if (!isset($_SESSION['user_id'])) {
     <link href="../assets/css/comon/cards.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="../assets/css/kurdish-font.css" rel="stylesheet">
-    <!-- AG Grid CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/styles/ag-grid.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/styles/ag-theme-alpine.css">
-    <style>
-        /* RTL Support for AG Grid */
-        #personGrid {
-            direction: rtl;
-            font-family: 'Rabar', 'Arial', 'Tahoma', sans-serif !important;
-        }
-        
-        /* Apply Rabar font to all AG Grid elements */
-        .ag-theme-alpine,
-        .ag-theme-alpine *,
-        .ag-theme-alpine .ag-header,
-        .ag-theme-alpine .ag-header-cell,
-        .ag-theme-alpine .ag-header-cell-text,
-        .ag-theme-alpine .ag-cell,
-        .ag-theme-alpine .ag-row,
-        .ag-theme-alpine .ag-paging-panel,
-        .ag-theme-alpine .ag-filter,
-        .ag-theme-alpine .ag-filter-body,
-        .ag-theme-alpine .ag-input-field-input,
-        .ag-theme-alpine .ag-select,
-        .ag-theme-alpine button {
-            font-family: 'Rabar', 'Arial', 'Tahoma', sans-serif !important;
-        }
-        
-        .ag-theme-alpine {
-            --ag-foreground-color: rgb(33, 37, 41);
-            --ag-background-color: rgb(255, 255, 255);
-            --ag-header-foreground-color: var(--seafoam-green);
-            --ag-header-background-color: var(--kelly-green);
-            --ag-odd-row-background-color: rgb(249, 249, 249);
-            --ag-header-column-resize-handle-color: var(--seafoam-green);
-            --ag-font-family: 'Rabar', 'Arial', 'Tahoma', sans-serif;
-            --ag-font-size: 14px;
-            --ag-header-height: 50px;
-            --ag-row-height: 45px;
-            --ag-border-color: rgba(0, 0, 0, 0.1);
-            --ag-header-foreground-color: #fff;
-        }
-        
-        .ag-theme-alpine .ag-header-cell-label {
-            justify-content: center;
-            text-align: center;
-            font-weight: bold;
-            font-size: 15px;
-        }
-        
-        .ag-theme-alpine .ag-cell {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 8px 12px;
-            font-size: 14px;
-        }
-        
-        .ag-theme-alpine .ag-cell.text-end {
-            justify-content: flex-end;
-            padding-right: 15px;
-        }
-        
-        .ag-theme-alpine .ag-cell.text-center {
-            justify-content: center;
-        }
-        
-        .ag-theme-alpine .ag-row {
-            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-        }
-        
-        .ag-theme-alpine .ag-row:hover {
-            background-color: rgba(0, 0, 0, 0.03) !important;
-        }
-        
-        .ag-theme-alpine .ag-row-selected {
-            background-color: rgba(79, 172, 254, 0.15) !important;
-        }
-        
-        /* Button styling in cells */
-        .ag-theme-alpine .ag-cell button {
-            font-family: 'Rabar', 'Arial', 'Tahoma', sans-serif !important;
-            font-weight: bold;
-            padding: 5px 10px;
-            margin: 0 2px;
-            border-radius: 4px;
-            transition: all 0.2s ease;
-        }
-        
-        .ag-theme-alpine .ag-cell button:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        /* Filter styling */
-        .ag-theme-alpine .ag-filter-body {
-            font-family: 'Rabar', 'Arial', 'Tahoma', sans-serif !important;
-        }
-        
-        /* Pagination styling */
-        .ag-theme-alpine .ag-paging-panel {
-            font-family: 'Rabar', 'Arial', 'Tahoma', sans-serif !important;
-            padding: 10px;
-            background-color: #f8f9fa;
-        }
-        
-        .ag-theme-alpine .ag-paging-button {
-            font-family: 'Rabar', 'Arial', 'Tahoma', sans-serif !important;
-        }
-    </style>
 </head>
 <body dir="rtl">
 <?php include '../includes/navbar.php'; ?>
@@ -185,7 +76,22 @@ if (!isset($_SESSION['user_id'])) {
     </div>
     
     <div class="table-responsive">
-        <div id="personGrid" class="ag-theme-alpine" style="height: 600px; width: 100%;"></div>
+        <table class="table table-bordered table-hover align-middle text-center" id="personTable">
+            <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
+                <tr>
+                    <th>#</th>
+                    <th>ناوی کەس</th>
+                    <!--<th>خەرجی بە دۆلار</th>-->
+                    <!--<th>خەرجی بە دینار</th>-->
+                    <th>قەرزی سەرەتایی (دۆلار)</th>
+                    <th>قەرزی سەرەتایی (دینار)</th>
+                    <th>کردارەکان</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Persons will be loaded here by JS -->
+            </tbody>
+        </table>
     </div>
 </div>
 <!-- Add Person Modal -->
@@ -230,9 +136,8 @@ if (!isset($_SESSION['user_id'])) {
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<!-- AG Grid JS -->
-<script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/dist/ag-grid-community.min.js"></script>
 <script src="../assets/js/swalAlert.js"></script>
+<script src="../assets/js/comon/table-controler.js"></script>
 <script src="../assets/js/person_other_expenses/select_person.js"></script>
 <script src="../assets/js/person_other_expenses/add_person.js"></script>
 <script src="../assets/js/person_other_expenses/update_person.js"></script>
