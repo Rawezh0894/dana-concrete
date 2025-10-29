@@ -29,6 +29,40 @@ if (!isset($_SESSION['user_id'])) {
     <link href="../assets/css/comon/cards.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="../assets/css/kurdish-font.css" rel="stylesheet">
+    <!-- AG Grid CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/styles/ag-grid.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/styles/ag-theme-alpine.css">
+    <style>
+        /* RTL Support for AG Grid */
+        #personGrid {
+            direction: rtl;
+        }
+        .ag-theme-alpine {
+            --ag-foreground-color: rgb(33, 37, 41);
+            --ag-background-color: rgb(255, 255, 255);
+            --ag-header-foreground-color: var(--seafoam-green);
+            --ag-header-background-color: var(--kelly-green);
+            --ag-odd-row-background-color: rgb(249, 249, 249);
+            --ag-header-column-resize-handle-color: var(--seafoam-green);
+        }
+        .ag-theme-alpine .ag-header-cell-label {
+            justify-content: center;
+            text-align: center;
+            font-weight: bold;
+        }
+        .ag-theme-alpine .ag-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .ag-theme-alpine .ag-cell.text-end {
+            justify-content: flex-end;
+            padding-right: 10px;
+        }
+        .ag-theme-alpine .ag-cell.text-center {
+            justify-content: center;
+        }
+    </style>
 </head>
 <body dir="rtl">
 <?php include '../includes/navbar.php'; ?>
@@ -76,22 +110,7 @@ if (!isset($_SESSION['user_id'])) {
     </div>
     
     <div class="table-responsive">
-        <table class="table table-bordered table-hover align-middle text-center" id="personTable">
-            <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
-                <tr>
-                    <th>#</th>
-                    <th>ناوی کەس</th>
-                    <!--<th>خەرجی بە دۆلار</th>-->
-                    <!--<th>خەرجی بە دینار</th>-->
-                    <th>قەرزی سەرەتایی (دۆلار)</th>
-                    <th>قەرزی سەرەتایی (دینار)</th>
-                    <th>کردارەکان</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Persons will be loaded here by JS -->
-            </tbody>
-        </table>
+        <div id="personGrid" class="ag-theme-alpine" style="height: 600px; width: 100%;"></div>
     </div>
 </div>
 <!-- Add Person Modal -->
@@ -136,8 +155,9 @@ if (!isset($_SESSION['user_id'])) {
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- AG Grid JS -->
+<script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/dist/ag-grid-community.min.js"></script>
 <script src="../assets/js/swalAlert.js"></script>
-<script src="../assets/js/comon/table-controler.js"></script>
 <script src="../assets/js/person_other_expenses/select_person.js"></script>
 <script src="../assets/js/person_other_expenses/add_person.js"></script>
 <script src="../assets/js/person_other_expenses/update_person.js"></script>
