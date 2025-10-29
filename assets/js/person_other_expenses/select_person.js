@@ -91,7 +91,7 @@ const columnDefs = [
         cellRenderer: actionCellRenderer,
         sortable: false,
         filter: false,
-        pinned: 'left', // Right side for RTL
+        pinned: 'right', // Right side for RTL
         cellStyle: { textAlign: 'center' }
     },
     {
