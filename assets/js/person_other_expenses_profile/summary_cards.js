@@ -1,9 +1,15 @@
 // Summary Cards Management for Person Other Expenses Profile
-function loadSummaryCards() {
+function loadSummaryCards(dateFrom = null, dateTo = null) {
+    const requestData = { person_id: PERSON_ID };
+    
+    // Add date filters if provided
+    if (dateFrom) requestData.date_from = dateFrom;
+    if (dateTo) requestData.date_to = dateTo;
+    
     $.ajax({
         url: '../process/person_other_expenses_profile/get_summary_stats.php',
         type: 'GET',
-        data: { person_id: PERSON_ID },
+        data: requestData,
         dataType: 'json',
         success: function(response) {
             if (response.success) {

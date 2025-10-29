@@ -27,6 +27,26 @@ try {
         exit;
     }
     
+    // Get date filters
+    $dateFrom = isset($_GET['date_from']) ? $_GET['date_from'] : null;
+    $dateTo = isset($_GET['date_to']) ? $_GET['date_to'] : null;
+    
+    // Build WHERE clause for date filtering
+    $dateWhere = "WHERE person_id = ?";
+    $params = [$person_id];
+    
+    if ($dateFrom && $dateTo) {
+        $dateWhere .= " AND date BETWEEN ? AND ?";
+        $params[] = $dateFrom;
+        $params[] = $dateTo;
+    } elseif ($dateFrom) {
+        $dateWhere .= " AND date >= ?";
+        $params[] = $dateFrom;
+    } elseif ($dateTo) {
+        $dateWhere .= " AND date <= ?";
+        $params[] = $dateTo;
+    }
+    
     // Get total expenses from other_expenses table
     $stmt = $pdo->prepare("
         SELECT 
@@ -34,9 +54,9 @@ try {
             SUM(amount_iqd) as total_expense_iqd,
             COUNT(*) as expense_count
         FROM other_expenses 
-        WHERE person_id = ?
+        $dateWhere
     ");
-    $stmt->execute([$person_id]);
+    $stmt->execute($params);
     $expenses = $stmt->fetch(PDO::FETCH_ASSOC);
     
     // Get remaining amounts from other_expenses table
@@ -45,10 +65,26 @@ try {
             SUM(remaining_usd) as total_remaining_usd,
             SUM(remaining_iqd) as total_remaining_iqd
         FROM other_expenses 
-        WHERE person_id = ?
+        $dateWhere
     ");
-    $stmt->execute([$person_id]);
+    $stmt->execute($params);
     $remaining_expenses = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    // Build WHERE clause for purchase materials date filtering
+    $purchaseDateWhere = "WHERE person_id = ?";
+    $purchaseParams = [$person_id];
+    
+    if ($dateFrom && $dateTo) {
+        $purchaseDateWhere .= " AND purchase_date BETWEEN ? AND ?";
+        $purchaseParams[] = $dateFrom;
+        $purchaseParams[] = $dateTo;
+    } elseif ($dateFrom) {
+        $purchaseDateWhere .= " AND purchase_date >= ?";
+        $purchaseParams[] = $dateFrom;
+    } elseif ($dateTo) {
+        $purchaseDateWhere .= " AND purchase_date <= ?";
+        $purchaseParams[] = $dateTo;
+    }
     
     // Get remaining amounts from purchase_materials table - FIXED: Use correct calculation
     $stmt = $pdo->prepare("
@@ -56,9 +92,9 @@ try {
             SUM(total_price_usd - paid_amount_usd) as total_remaining_usd_purchase,
             SUM(total_price_iqd - paid_amount_iqd) as total_remaining_iqd_purchase
         FROM purchase_materials 
-        WHERE person_id = ?
+        $purchaseDateWhere
     ");
-    $stmt->execute([$person_id]);
+    $stmt->execute($purchaseParams);
     $remaining_purchase = $stmt->fetch(PDO::FETCH_ASSOC);
     
     // Calculate our debt (opening debt + remaining amounts)

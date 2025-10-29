@@ -97,6 +97,9 @@ async function loadOtherExpenses() {
             row.date || ''
         ]);
         
+        // Store original data for calculations
+        window.expensesOriginalData = data;
+        
         expensesTable = new DataTable('#expensesTable', {
             data: tableData,
             columns: [
@@ -142,7 +145,11 @@ async function loadOtherExpenses() {
                 { extend: 'csv', text: 'CSV', className: 'btn btn-sm btn-outline-secondary' },
                 { extend: 'excel', text: 'Excel', className: 'btn btn-sm btn-outline-success' },
                 { extend: 'print', text: 'پرینت', className: 'btn btn-sm btn-outline-primary' }
-            ]
+            ],
+            drawCallback: function() {
+                // Update summary cards when table is redrawn
+                updateExpensesSummaryCards();
+            }
         });
         
         // Setup date filter
@@ -155,6 +162,23 @@ async function loadOtherExpenses() {
             expensesTable = null;
         }
         $('#expensesTable').html(`<tr><td colspan="14" class="text-danger text-center">هەڵە لە بارکردنی زانیاریەکان</td></tr>`);
+    }
+}
+
+// Update summary cards based on filtered expenses data
+function updateExpensesSummaryCards() {
+    if (!expensesTable) return;
+    
+    // Get date filter values
+    const dateFromInput = document.querySelector('#expensesDateFrom');
+    const dateToInput = document.querySelector('#expensesDateTo');
+    
+    const dateFrom = dateFromInput ? dateFromInput.value : null;
+    const dateTo = dateToInput ? dateToInput.value : null;
+    
+    // Reload summary cards with date filters
+    if (typeof loadSummaryCards === 'function') {
+        loadSummaryCards(dateFrom, dateTo);
     }
 }
 

@@ -329,11 +329,35 @@ function renderPurchaseMaterialsTable(purchases) {
             // Store receipt number for expandable rows functionality
             const receiptNumber = data[0];
             $(row).attr('data-receipt-number', receiptNumber);
+        },
+        drawCallback: function() {
+            // Update summary cards when table is redrawn
+            updatePurchasesSummaryCards();
         }
     });
     
     // Setup date filter (date column is index 1)
     setupPurchaseDateFilter('#purchasesDateFrom', '#purchasesDateTo', purchasesTable, 1, '#clearPurchasesFilter');
+    
+    // Store original data for summary calculations
+    window.purchasesOriginalData = purchases;
+}
+
+// Update summary cards based on filtered purchases data
+function updatePurchasesSummaryCards() {
+    if (!purchasesTable) return;
+    
+    // Get date filter values
+    const dateFromInput = document.querySelector('#purchasesDateFrom');
+    const dateToInput = document.querySelector('#purchasesDateTo');
+    
+    const dateFrom = dateFromInput ? dateFromInput.value : null;
+    const dateTo = dateToInput ? dateToInput.value : null;
+    
+    // Reload summary cards with date filters (includes purchases data)
+    if (typeof loadSummaryCards === 'function') {
+        loadSummaryCards(dateFrom, dateTo);
+    }
 }
 
 // Show purchase details in a modal

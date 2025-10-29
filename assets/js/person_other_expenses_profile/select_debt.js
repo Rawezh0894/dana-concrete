@@ -140,11 +140,18 @@ async function loadDebtPayments() {
                         deleteDebt($(this).data('id'));
                     }
                 });
+            },
+            drawCallback: function() {
+                // Update summary cards when debt table is redrawn
+                updateDebtSummaryCards();
             }
         });
         
         // Setup date filter
         setupDateFilter('#debtDateFrom', '#debtDateTo', debtTable, 0, '#clearDebtFilter');
+        
+        // Store original data
+        window.debtOriginalData = data;
         
     } catch (error) {
         console.error('Error loading debt payments:', error);
@@ -204,6 +211,22 @@ function setupDateFilter(fromId, toId, table, dateColumnIndex, clearBtnId) {
             toInput.value = '';
             table.draw();
         });
+    }
+}
+
+// Update summary cards based on filtered debt data
+function updateDebtSummaryCards() {
+    // Debt payments don't affect the main summary cards (our debt calculation)
+    // But we could update a debt-specific count if needed in the future
+    // For now, we'll just refresh the full summary cards
+    if (typeof loadSummaryCards === 'function') {
+        const dateFromInput = document.querySelector('#debtDateFrom');
+        const dateToInput = document.querySelector('#debtDateTo');
+        
+        const dateFrom = dateFromInput ? dateFromInput.value : null;
+        const dateTo = dateToInput ? dateToInput.value : null;
+        
+        loadSummaryCards(dateFrom, dateTo);
     }
 }
 
