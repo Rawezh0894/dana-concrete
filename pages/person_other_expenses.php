@@ -30,8 +30,8 @@ if (!isset($_SESSION['user_id'])) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="../assets/css/kurdish-font.css" rel="stylesheet">
     <!-- AG Grid CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.1.1/styles/ag-grid.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.1.1/styles/ag-theme-alpine.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@31/styles/ag-grid.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@31/styles/ag-theme-alpine.css">
     <style>
         /* Professional AG Grid Styling */
         :root {
@@ -568,7 +568,7 @@ if (!isset($_SESSION['user_id'])) {
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="../assets/js/swalAlert.js"></script>
 <!-- AG Grid JS -->
-<script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.1.1/dist/ag-grid-community.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31/dist/ag-grid-community.min.js"></script>
 <script src="../assets/js/person_other_expenses/select_person.js"></script>
 <script src="../assets/js/person_other_expenses/add_person.js"></script>
 <script src="../assets/js/person_other_expenses/update_person.js"></script>

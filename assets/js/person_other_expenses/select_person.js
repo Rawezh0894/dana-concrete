@@ -170,8 +170,13 @@ const gridOptions = {
     },
     onGridReady: function(params) {
         gridApi = params.api;
+        console.log('Grid ready, loading persons...');
+        // Load data first
         loadPersons();
-        setupGridControls();
+        // Setup controls after a short delay to ensure DOM elements are available
+        setTimeout(function() {
+            setupGridControls();
+        }, 200);
     },
     domLayout: 'normal',
     suppressMenuHide: true,
@@ -203,9 +208,21 @@ async function loadPersons() {
         
         // Set row data to grid
         if (gridApi) {
+            console.log('Setting row data to grid:', rowData.length, 'rows');
             gridApi.setRowData(rowData);
             // Update stats after data is loaded
             setTimeout(updateGridStats, 100);
+            
+            // Auto-size columns after data is set
+            if (rowData.length > 0) {
+                setTimeout(function() {
+                    if (gridApi) {
+                        gridApi.sizeColumnsToFit();
+                    }
+                }, 200);
+            }
+        } else {
+            console.error('Grid API not available when trying to set row data');
         }
     } catch (error) {
         console.error('Error loading persons:', error);
@@ -343,3 +360,47 @@ function updateGridStats() {
         }
     }
 }
+
+// Initialize AG Grid when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, checking for AG Grid...');
+    
+    // Wait for AG Grid library to be loaded
+    function initGrid() {
+        // Check if agGrid is available
+        if (typeof agGrid === 'undefined') {
+            console.warn('AG Grid library not loaded yet, retrying in 100ms...');
+            setTimeout(initGrid, 100);
+            return;
+        }
+        
+        console.log('AG Grid library found, initializing grid...');
+        
+        // Initialize AG Grid
+        const gridDiv = document.querySelector('#personTable');
+        if (!gridDiv) {
+            console.error('Grid container #personTable not found in DOM');
+            return;
+        }
+        
+        try {
+            new agGrid.Grid(gridDiv, gridOptions);
+            console.log('AG Grid initialized successfully');
+        } catch (error) {
+            console.error('Error initializing AG Grid:', error);
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'هەڵە!',
+                    text: 'هەڵەیەک لە دامەزراندنی تابلدا ڕویدا: ' + (error.message || error),
+                    confirmButtonText: 'باشە'
+                });
+            } else {
+                alert('هەڵە! هەڵەیەک لە دامەزراندنی تابلدا ڕویدا: ' + (error.message || error));
+            }
+        }
+    }
+    
+    // Start initialization with a small delay to ensure all scripts are loaded
+    setTimeout(initGrid, 50);
+});
