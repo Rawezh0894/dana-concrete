@@ -29,6 +29,40 @@ if (!isset($_SESSION['user_id'])) {
     <link href="../assets/css/comon/cards.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="../assets/css/kurdish-font.css" rel="stylesheet">
+    <!-- AG Grid CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.1.1/styles/ag-grid.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.1.1/styles/ag-theme-alpine.css" rel="stylesheet">
+    <style>
+        /* AG Grid RTL Support */
+        .ag-theme-alpine {
+            direction: rtl;
+            font-family: 'Rabar', Arial, sans-serif;
+        }
+        .ag-theme-alpine .ag-header-cell {
+            text-align: right;
+        }
+        .ag-theme-alpine .ag-header-cell-label {
+            justify-content: flex-start;
+        }
+        .ag-theme-alpine .ag-paging-panel {
+            direction: rtl;
+        }
+        .ag-theme-alpine .ag-cell {
+            display: flex;
+            align-items: center;
+        }
+        .ag-theme-alpine .ag-pinned-right-cols-container {
+            direction: ltr;
+        }
+        .ag-theme-alpine .ag-pinned-left-cols-container {
+            direction: ltr;
+        }
+        #personTable {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+    </style>
 </head>
 <body dir="rtl">
 <?php include '../includes/navbar.php'; ?>
@@ -75,24 +109,7 @@ if (!isset($_SESSION['user_id'])) {
         </div>
     </div>
     
-    <div class="table-responsive">
-        <table class="table table-bordered table-hover align-middle text-center" id="personTable">
-            <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
-                <tr>
-                    <th>#</th>
-                    <th>ناوی کەس</th>
-                    <!--<th>خەرجی بە دۆلار</th>-->
-                    <!--<th>خەرجی بە دینار</th>-->
-                    <th>قەرزی سەرەتایی (دۆلار)</th>
-                    <th>قەرزی سەرەتایی (دینار)</th>
-                    <th>کردارەکان</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Persons will be loaded here by JS -->
-            </tbody>
-        </table>
-    </div>
+    <div class="ag-theme-alpine" id="personTable" style="height: 600px; width: 100%;"></div>
 </div>
 <!-- Add Person Modal -->
 <div class="modal fade" id="addPersonModal" tabindex="-1" aria-labelledby="addPersonModalLabel" aria-hidden="true">
@@ -137,7 +154,8 @@ if (!isset($_SESSION['user_id'])) {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="../assets/js/swalAlert.js"></script>
-<script src="../assets/js/comon/table-controler.js"></script>
+<!-- AG Grid JS -->
+<script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.1.1/dist/ag-grid-community.min.js"></script>
 <script src="../assets/js/person_other_expenses/select_person.js"></script>
 <script src="../assets/js/person_other_expenses/add_person.js"></script>
 <script src="../assets/js/person_other_expenses/update_person.js"></script>

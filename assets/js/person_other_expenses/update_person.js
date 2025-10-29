@@ -43,26 +43,10 @@ if (!document.getElementById('editPersonModal')) {
     `;
     document.body.insertAdjacentHTML('beforeend', modalHtml);
 }
-// Attach edit button events
+// Attach edit button events (for backward compatibility, but mainly handled in AG Grid cell renderer now)
 function attachEditPersonEvents() {
-    document.querySelectorAll('.edit-person').forEach(btn => {
-        btn.onclick = function() {
-            const id = this.dataset.id;
-            const name = this.dataset.name;
-            const expenseUsd = this.dataset.expense_usd || 0;
-            const expenseIqd = this.dataset.expense_iqd || 0;
-            const opening_debt_usd = this.dataset.opening_debt_usd || 0;
-            const opening_debt_iqd = this.dataset.opening_debt_iqd || 0;
-            document.getElementById('edit_person_id').value = id;
-            document.getElementById('edit_person_name').value = name;
-            document.getElementById('edit_person_expense_usd').value = expenseUsd;
-            document.getElementById('edit_person_expense_iqd').value = expenseIqd;
-            document.getElementById('edit_opening_debt_usd').value = opening_debt_usd;
-            document.getElementById('edit_opening_debt_iqd').value = opening_debt_iqd;
-            const modal = new bootstrap.Modal(document.getElementById('editPersonModal'));
-            modal.show();
-        };
-    });
+    // This function is kept for backward compatibility
+    // The actual edit functionality is now handled in select_person.js actionCellRenderer
 }
 // Event listeners are now attached centrally in select_person.js after each pagination render
 // Handle edit form submit
