@@ -130,6 +130,23 @@ if ($person_id) {
         </ul>
         <div class="tab-content" id="profileTabsContent">
             <div class="tab-pane fade show active" id="expenses" role="tabpanel" aria-labelledby="expenses-tab">
+                <div class="mb-3">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="expensesDateFrom" class="form-label">لە بەروار:</label>
+                            <input type="date" id="expensesDateFrom" class="form-control">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="expensesDateTo" class="form-label">بۆ بەروار:</label>
+                            <input type="date" id="expensesDateTo" class="form-control">
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="button" id="clearExpensesFilter" class="btn btn-secondary">
+                                <i class="fas fa-times me-1"></i>سڕینەوەی فلتەر
+                            </button>
+                        </div>
+                    </div>
+                </div>
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover align-middle text-center" id="expensesTable">
                         <!-- DataTables will build the table structure -->
@@ -137,6 +154,23 @@ if ($person_id) {
                 </div>
             </div>
             <div class="tab-pane fade" id="purchases" role="tabpanel" aria-labelledby="purchases-tab">
+                <div class="mb-3">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="purchasesDateFrom" class="form-label">لە بەروار:</label>
+                            <input type="date" id="purchasesDateFrom" class="form-control">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="purchasesDateTo" class="form-label">بۆ بەروار:</label>
+                            <input type="date" id="purchasesDateTo" class="form-control">
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="button" id="clearPurchasesFilter" class="btn btn-secondary">
+                                <i class="fas fa-times me-1"></i>سڕینەوەی فلتەر
+                            </button>
+                        </div>
+                    </div>
+                </div>
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover align-middle text-center" id="purchasesTable">
                         <!-- DataTables will build the table structure -->
@@ -149,6 +183,23 @@ if ($person_id) {
                     <button class="btn"
                         style="background: var(--seafoam-green); color: #fff; border: none; font-weight: bold;"
                         data-bs-toggle="modal" data-bs-target="#addDebtModal"><i class="fa fa-plus"></i> دانەوە</button>
+                </div>
+                <div class="mb-3">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="debtDateFrom" class="form-label">لە بەروار:</label>
+                            <input type="date" id="debtDateFrom" class="form-control">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="debtDateTo" class="form-label">بۆ بەروار:</label>
+                            <input type="date" id="debtDateTo" class="form-control">
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="button" id="clearDebtFilter" class="btn btn-secondary">
+                                <i class="fas fa-times me-1"></i>سڕینەوەی فلتەر
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover align-middle text-center" id="debtTable">

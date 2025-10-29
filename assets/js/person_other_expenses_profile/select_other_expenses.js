@@ -145,6 +145,9 @@ async function loadOtherExpenses() {
             ]
         });
         
+        // Setup date filter
+        setupDateFilter('#expensesDateFrom', '#expensesDateTo', expensesTable, 13, '#clearExpensesFilter');
+        
     } catch (error) {
         console.error('Error loading other expenses:', error);
         if (expensesTable) {
@@ -152,6 +155,57 @@ async function loadOtherExpenses() {
             expensesTable = null;
         }
         $('#expensesTable').html(`<tr><td colspan="14" class="text-danger text-center">هەڵە لە بارکردنی زانیاریەکان</td></tr>`);
+    }
+}
+
+// Date filter function for DataTables
+function setupDateFilter(fromId, toId, table, dateColumnIndex, clearBtnId) {
+    const fromInput = document.querySelector(fromId);
+    const toInput = document.querySelector(toId);
+    const clearBtn = document.querySelector(clearBtnId);
+    
+    if (!fromInput || !toInput || !table) return;
+    
+    // Custom filter function
+    $.fn.dataTable.ext.search.push(
+        function(settings, data, dataIndex) {
+            // Only apply to the specific table
+            if (settings.nTable.id !== table.table().node().id) return true;
+            
+            const rowDate = data[dateColumnIndex] || '';
+            if (!rowDate) return true;
+            
+            const dateFrom = fromInput.value ? new Date(fromInput.value) : null;
+            const dateTo = toInput.value ? new Date(toInput.value) : null;
+            const rowDateObj = new Date(rowDate);
+            
+            // If both dates are empty, show all
+            if (!dateFrom && !dateTo) return true;
+            
+            // Check date range
+            if (dateFrom && rowDateObj < dateFrom) return false;
+            if (dateTo && rowDateObj > dateTo) return false;
+            
+            return true;
+        }
+    );
+    
+    // Add event listeners
+    fromInput.addEventListener('change', function() {
+        table.draw();
+    });
+    
+    toInput.addEventListener('change', function() {
+        table.draw();
+    });
+    
+    // Clear filter button
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function() {
+            fromInput.value = '';
+            toInput.value = '';
+            table.draw();
+        });
     }
 }
 

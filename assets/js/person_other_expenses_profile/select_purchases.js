@@ -17,6 +17,57 @@ function formatIQD(num) {
     return num ? `${formatNumber(num)} د.ع` : '0 د.ع';
 }
 
+// Date filter function for purchases table
+function setupPurchaseDateFilter(fromId, toId, table, dateColumnIndex, clearBtnId) {
+    const fromInput = document.querySelector(fromId);
+    const toInput = document.querySelector(toId);
+    const clearBtn = document.querySelector(clearBtnId);
+    
+    if (!fromInput || !toInput || !table) return;
+    
+    // Custom filter function
+    $.fn.dataTable.ext.search.push(
+        function(settings, data, dataIndex) {
+            // Only apply to the specific table
+            if (settings.nTable.id !== table.table().node().id) return true;
+            
+            const rowDate = data[dateColumnIndex] || '';
+            if (!rowDate) return true;
+            
+            const dateFrom = fromInput.value ? new Date(fromInput.value) : null;
+            const dateTo = toInput.value ? new Date(toInput.value) : null;
+            const rowDateObj = new Date(rowDate);
+            
+            // If both dates are empty, show all
+            if (!dateFrom && !dateTo) return true;
+            
+            // Check date range
+            if (dateFrom && rowDateObj < dateFrom) return false;
+            if (dateTo && rowDateObj > dateTo) return false;
+            
+            return true;
+        }
+    );
+    
+    // Add event listeners
+    fromInput.addEventListener('change', function() {
+        table.draw();
+    });
+    
+    toInput.addEventListener('change', function() {
+        table.draw();
+    });
+    
+    // Clear filter button
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function() {
+            fromInput.value = '';
+            toInput.value = '';
+            table.draw();
+        });
+    }
+}
+
 $(document).ready(function() {
     // Load purchases when the purchases tab is shown
     $('#purchases-tab').on('click', function() {
@@ -280,6 +331,9 @@ function renderPurchaseMaterialsTable(purchases) {
             $(row).attr('data-receipt-number', receiptNumber);
         }
     });
+    
+    // Setup date filter (date column is index 1)
+    setupPurchaseDateFilter('#purchasesDateFrom', '#purchasesDateTo', purchasesTable, 1, '#clearPurchasesFilter');
 }
 
 // Show purchase details in a modal
