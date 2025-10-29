@@ -1,4 +1,22 @@
 // Purchase Materials History for Person Profile
+let purchasesTable = null;
+
+function formatNumber(num) {
+    if (num === null || num === undefined) return '0';
+    return parseFloat(num).toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+}
+
+function formatUSD(num) {
+    return num ? `$${formatNumber(num)}` : '$0';
+}
+
+function formatIQD(num) {
+    return num ? `${formatNumber(num)} د.ع` : '0 د.ع';
+}
+
 $(document).ready(function() {
     // Load purchases when the purchases tab is shown
     $('#purchases-tab').on('click', function() {
@@ -12,9 +30,12 @@ $(document).ready(function() {
 });
 
 function loadPurchaseMaterialsHistory() {
-    // Show loading state using TableController
-    const columns = ['#', 'receipt_number', 'purchase_date', 'materials_count', 'total_price_usd', 'total_price_iqd', 'currency_type', 'payment_type', 'paid_amount_usd', 'paid_amount_iqd', 'remaining_amount_usd', 'remaining_amount_iqd', 'notes'];
-    TableController.showLoading('#purchasesTable', columns);
+    // Destroy existing table if it exists
+    if (purchasesTable) {
+        purchasesTable.destroy();
+        purchasesTable = null;
+        $('#purchasesTable').empty();
+    }
     
     $.ajax({
         url: '../process/person_other_expenses_profile/select_purchases.php',
@@ -26,54 +47,174 @@ function loadPurchaseMaterialsHistory() {
                 renderPurchaseMaterialsTable(response.data);
             } else {
                 console.error('Error loading purchases:', response.error);
-                // Show error state
-                const tbody = $('#purchasesTable tbody');
-                tbody.html('<tr><td colspan="13" class="text-center text-danger">هەڵە لە بارکردنی داتاکان</td></tr>');
+                // Create empty DataTable with error message
+                purchasesTable = new DataTable('#purchasesTable', {
+                    data: [],
+                    columns: [
+                        { title: 'ژمارەی پسووڵە' },
+                        { title: 'بەروار' },
+                        { title: 'کۆی کاڵاکان' },
+                        { title: 'کۆی نرخ بە دۆلار' },
+                        { title: 'کۆی نرخ بە دینار' },
+                        { title: 'جۆری دراو' },
+                        { title: 'جۆری مامەڵە' },
+                        { title: 'پارەی دراو بە دۆلار' },
+                        { title: 'پارەی دراو بە دینار' },
+                        { title: 'پارەی ماوە بە دۆلار' },
+                        { title: 'پارەی ماوە بە دینار' },
+                        { title: 'تێبینی' },
+                        { title: 'کردارەکان' }
+                    ],
+                    language: {
+                        "processing": "چاوەڕوان بە...",
+                        "search": "گەڕان:",
+                        "lengthMenu": "نیشاندان _MENU_ ڕیکۆرد",
+                        "info": "نوێنراوە _START_ لە _END_ لە _TOTAL_ ڕیکۆرد",
+                        "infoEmpty": "نوێنراوە 0 لە 0 لە 0 ڕیکۆرد",
+                        "infoFiltered": "(فلتەرکراو لە _MAX_ کۆی ڕیکۆرد)",
+                        "loadingRecords": "لۆدینگ...",
+                        "zeroRecords": "هیچ ڕیکۆردێک نەدۆزرایەوە",
+                        "emptyTable": "هیچ زانیارییەک لە خشتەکەدا نییە",
+                        "paginate": {
+                            "first": "یەکەم",
+                            "previous": "پێشوو",
+                            "next": "دواتر",
+                            "last": "کۆتایی"
+                        }
+                    },
+                    responsive: true,
+                    pageLength: 10,
+                    lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+                    order: [[1, 'desc']],
+                    dom: 'Bfrtip',
+                    buttons: [
+                        { extend: 'copy', text: 'لەبەرگرتنەوە', className: 'btn btn-sm btn-outline-secondary' },
+                        { extend: 'csv', text: 'CSV', className: 'btn btn-sm btn-outline-secondary' },
+                        { extend: 'excel', text: 'Excel', className: 'btn btn-sm btn-outline-success' },
+                        { extend: 'print', text: 'پرینت', className: 'btn btn-sm btn-outline-primary' }
+                    ]
+                });
             }
         },
         error: function(xhr, status, error) {
             console.error('AJAX Error:', error);
-            // Show error state
-            const tbody = $('#purchasesTable tbody');
-            tbody.html('<tr><td colspan="13" class="text-center text-danger">هەڵە لە پەیوەندی بە سێرڤەر</td></tr>');
+            // Create empty DataTable with error message
+            purchasesTable = new DataTable('#purchasesTable', {
+                data: [],
+                columns: [
+                    { title: 'ژمارەی پسووڵە' },
+                    { title: 'بەروار' },
+                    { title: 'کۆی کاڵاکان' },
+                    { title: 'کۆی نرخ بە دۆلار' },
+                    { title: 'کۆی نرخ بە دینار' },
+                    { title: 'جۆری دراو' },
+                    { title: 'جۆری مامەڵە' },
+                    { title: 'پارەی دراو بە دۆلار' },
+                    { title: 'پارەی دراو بە دینار' },
+                    { title: 'پارەی ماوە بە دۆلار' },
+                    { title: 'پارەی ماوە بە دینار' },
+                    { title: 'تێبینی' },
+                    { title: 'کردارەکان' }
+                ],
+                language: {
+                    "processing": "چاوەڕوان بە...",
+                    "search": "گەڕان:",
+                    "lengthMenu": "نیشاندان _MENU_ ڕیکۆرد",
+                    "info": "نوێنراوە _START_ لە _END_ لە _TOTAL_ ڕیکۆرد",
+                    "infoEmpty": "نوێنراوە 0 لە 0 لە 0 ڕیکۆرد",
+                    "infoFiltered": "(فلتەرکراو لە _MAX_ کۆی ڕیکۆرد)",
+                    "loadingRecords": "لۆدینگ...",
+                    "zeroRecords": "هیچ ڕیکۆردێک نەدۆزرایەوە",
+                    "emptyTable": "هیچ زانیارییەک لە خشتەکەدا نییە",
+                    "paginate": {
+                        "first": "یەکەم",
+                        "previous": "پێشوو",
+                        "next": "دواتر",
+                        "last": "کۆتایی"
+                    }
+                },
+                responsive: true,
+                pageLength: 10,
+                lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+                order: [[1, 'desc']],
+                dom: 'Bfrtip',
+                buttons: [
+                    { extend: 'copy', text: 'لەبەرگرتنەوە', className: 'btn btn-sm btn-outline-secondary' },
+                    { extend: 'csv', text: 'CSV', className: 'btn btn-sm btn-outline-secondary' },
+                    { extend: 'excel', text: 'Excel', className: 'btn btn-sm btn-outline-success' },
+                    { extend: 'print', text: 'پرینت', className: 'btn btn-sm btn-outline-primary' }
+                ]
+            });
         }
     });
 }
 
 function renderPurchaseMaterialsTable(purchases) {
-    // Define columns for the table
-    const columns = [
-        '#', 
-        'receipt_number', 
-        'purchase_date', 
-        'materials_count', 
-        'total_price_usd', 
-        'total_price_iqd', 
-        'currency_type', 
-        'payment_type', 
-        'paid_amount_usd', 
-        'paid_amount_iqd', 
-        'remaining_amount_usd', 
-        'remaining_amount_iqd', 
-        'notes',
-        'کردارەکان'
-    ];
+    if (!purchases || purchases.length === 0) {
+        purchasesTable = new DataTable('#purchasesTable', {
+            data: [],
+            columns: [
+                { title: 'ژمارەی پسووڵە' },
+                { title: 'بەروار' },
+                { title: 'کۆی کاڵاکان' },
+                { title: 'کۆی نرخ بە دۆلار' },
+                { title: 'کۆی نرخ بە دینار' },
+                { title: 'جۆری دراو' },
+                { title: 'جۆری مامەڵە' },
+                { title: 'پارەی دراو بە دۆلار' },
+                { title: 'پارەی دراو بە دینار' },
+                { title: 'پارەی ماوە بە دۆلار' },
+                { title: 'پارەی ماوە بە دینار' },
+                { title: 'تێبینی' },
+                { title: 'کردارەکان' }
+            ],
+            language: {
+                "processing": "چاوەڕوان بە...",
+                "search": "گەڕان:",
+                "lengthMenu": "نیشاندان _MENU_ ڕیکۆرد",
+                "info": "نوێنراوە _START_ لە _END_ لە _TOTAL_ ڕیکۆرد",
+                "infoEmpty": "نوێنراوە 0 لە 0 لە 0 ڕیکۆرد",
+                "infoFiltered": "(فلتەرکراو لە _MAX_ کۆی ڕیکۆرد)",
+                "loadingRecords": "لۆدینگ...",
+                "zeroRecords": "هیچ ڕیکۆردێک نەدۆزرایەوە",
+                "emptyTable": "هیچ زانیارییەک لە خشتەکەدا نییە",
+                "paginate": {
+                    "first": "یەکەم",
+                    "previous": "پێشوو",
+                    "next": "دواتر",
+                    "last": "کۆتایی"
+                }
+            },
+            responsive: true,
+            pageLength: 10,
+            lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+            order: [[1, 'desc']],
+            dom: 'Bfrtip',
+            buttons: [
+                { extend: 'copy', text: 'لەبەرگرتنەوە', className: 'btn btn-sm btn-outline-secondary' },
+                { extend: 'csv', text: 'CSV', className: 'btn btn-sm btn-outline-secondary' },
+                { extend: 'excel', text: 'Excel', className: 'btn btn-sm btn-outline-success' },
+                { extend: 'print', text: 'پرینت', className: 'btn btn-sm btn-outline-primary' }
+            ]
+        });
+        return;
+    }
     
-    // Format the data for TableController with expandable functionality
-    const formattedData = purchases.map((purchase, index) => ({
-        receipt_number: purchase.receipt_number || '-',
-        purchase_date: purchase.purchase_date || '-',
-        materials_count: purchase.materials_count || 0,
-        total_price_usd: purchase.total_price_usd,
-        total_price_iqd: purchase.total_price_iqd,
-        currency_type: purchase.currency_type || '-',
-        payment_type: purchase.payment_type || 'نەقد',
-        paid_amount_usd: purchase.paid_amount_usd,
-        paid_amount_iqd: purchase.paid_amount_iqd,
-        remaining_amount_usd: purchase.remaining_amount_usd,
-        remaining_amount_iqd: purchase.remaining_amount_iqd,
-        notes: purchase.notes || '-',
-        actions: `
+    // Format the data for DataTables
+    const tableData = purchases.map((purchase, index) => [
+        purchase.receipt_number || '-',
+        purchase.purchase_date || '-',
+        purchase.materials_count || 0,
+        formatUSD(purchase.total_price_usd || 0),
+        formatIQD(purchase.total_price_iqd || 0),
+        purchase.currency_type || '-',
+        purchase.payment_type || 'نەقد',
+        formatUSD(purchase.paid_amount_usd || 0),
+        formatIQD(purchase.paid_amount_iqd || 0),
+        formatUSD(purchase.remaining_amount_usd || 0),
+        formatIQD(purchase.remaining_amount_iqd || 0),
+        purchase.notes || '-',
+        `
             <div class="btn-group btn-group-sm">
                 <button class="btn btn-outline-info btn-sm" onclick="showPurchaseDetails('${purchase.receipt_number}')" title="پیشاندانی وردەکاری">
                     <i class="fas fa-eye"></i>
@@ -86,12 +227,58 @@ function renderPurchaseMaterialsTable(purchases) {
                 </button>
             </div>
         `
-    }));
+    ]);
     
-    // Use TableController to render with pagination and search
-    TableController.renderWithPagination('#purchasesTable', formattedData, columns, {
-        pageSize: 10,
-        currentPage: 1
+    purchasesTable = new DataTable('#purchasesTable', {
+        data: tableData,
+        columns: [
+            { title: 'ژمارەی پسووڵە' },
+            { title: 'بەروار' },
+            { title: 'کۆی کاڵاکان' },
+            { title: 'کۆی نرخ بە دۆلار' },
+            { title: 'کۆی نرخ بە دینار' },
+            { title: 'جۆری دراو' },
+            { title: 'جۆری مامەڵە' },
+            { title: 'پارەی دراو بە دۆلار' },
+            { title: 'پارەی دراو بە دینار' },
+            { title: 'پارەی ماوە بە دۆلار' },
+            { title: 'پارەی ماوە بە دینار' },
+            { title: 'تێبینی' },
+            { title: 'کردارەکان' }
+        ],
+        language: {
+            "processing": "چاوەڕوان بە...",
+            "search": "گەڕان:",
+            "lengthMenu": "نیشاندان _MENU_ ڕیکۆرد",
+            "info": "نوێنراوە _START_ لە _END_ لە _TOTAL_ ڕیکۆرد",
+            "infoEmpty": "نوێنراوە 0 لە 0 لە 0 ڕیکۆرد",
+            "infoFiltered": "(فلتەرکراو لە _MAX_ کۆی ڕیکۆرد)",
+            "loadingRecords": "لۆدینگ...",
+            "zeroRecords": "هیچ ڕیکۆردێک نەدۆزرایەوە",
+            "emptyTable": "هیچ زانیارییەک لە خشتەکەدا نییە",
+            "paginate": {
+                "first": "یەکەم",
+                "previous": "پێشوو",
+                "next": "دواتر",
+                "last": "کۆتایی"
+            }
+        },
+        responsive: true,
+        pageLength: 10,
+        lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+        order: [[1, 'desc']],
+        dom: 'Bfrtip',
+        buttons: [
+            { extend: 'copy', text: 'لەبەرگرتنەوە', className: 'btn btn-sm btn-outline-secondary' },
+            { extend: 'csv', text: 'CSV', className: 'btn btn-sm btn-outline-secondary' },
+            { extend: 'excel', text: 'Excel', className: 'btn btn-sm btn-outline-success' },
+            { extend: 'print', text: 'پرینت', className: 'btn btn-sm btn-outline-primary' }
+        ],
+        rowCallback: function(row, data) {
+            // Store receipt number for expandable rows functionality
+            const receiptNumber = data[0];
+            $(row).attr('data-receipt-number', receiptNumber);
+        }
     });
 }
 

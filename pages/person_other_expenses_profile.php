@@ -38,6 +38,10 @@ if ($person_id) {
     <link href="../assets/css/comon/cards.css" rel="stylesheet" />
     <link href="../assets/css/person_other_expenses_profile.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- DataTables CSS -->
+    <link href="https://cdn.datatables.net/2.3.4/css/dataTables.dataTables.min.css" rel="stylesheet">
+    <!-- DataTables Buttons CSS -->
+    <link href="https://cdn.datatables.net/buttons/3.0.2/css/buttons.dataTables.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -76,26 +80,6 @@ if ($person_id) {
             </a>
         </div>
         <div class="row mb-3" id="person-summary-cards">
-          <div class="col mb-2">
-            <div class="card text-center shadow card-gradient-success card-animate-hover">
-              <div class="card-body">
-                <i class="fas fa-dollar-sign card-icon"></i>
-                <h6 class="card-title">کۆی گشتی خەرجی بە دۆلار</h6>
-                <div class="fs-4 fw-bold" id="summary_total_usd">0</div>
-                <small class="text-light">کۆی خەرجی بە دۆلار</small>
-              </div>
-            </div>
-          </div>
-          <div class="col mb-2">
-            <div class="card text-center shadow card-gradient-warning card-animate-hover">
-              <div class="card-body">
-                <i class="fas fa-coins card-icon"></i>
-                <h6 class="card-title">کۆی گشتی خەرجی بە دینار</h6>
-                <div class="fs-4 fw-bold" id="summary_total_iqd">0</div>
-                <small class="text-light">کۆی خەرجی بە دینار</small>
-              </div>
-            </div>
-          </div>
           <div class="col mb-2">
             <div class="card text-center shadow card-gradient-danger card-animate-hover">
               <div class="card-body">
@@ -148,55 +132,14 @@ if ($person_id) {
             <div class="tab-pane fade show active" id="expenses" role="tabpanel" aria-labelledby="expenses-tab">
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover align-middle text-center" id="expensesTable">
-                        <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
-                            <tr>
-                                <th>#</th>
-                                <th>مەبەست</th>
-                                <th>کارمەند</th>
-                                <th>سەیارە</th>
-                                <th>جۆری مامەڵە</th>
-                                <th>جۆری پارە</th>
-                                <th>ژمارەی وەسڵ</th>
-                                <th>بڕی دینار</th>
-                                <th>بڕی دۆلار</th>
-                                <th>پارەی دراو دینار</th>
-                                <th>پارەی دراو دۆلار</th>
-                                <th>نرخی 100 دۆلار</th>
-                                <th>ماوە دینار</th>
-                                <th>ماوە دۆلار</th>
-                                <th>بەروار</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Expenses will be loaded here by JS -->
-                        </tbody>
+                        <!-- DataTables will build the table structure -->
                     </table>
                 </div>
             </div>
             <div class="tab-pane fade" id="purchases" role="tabpanel" aria-labelledby="purchases-tab">
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover align-middle text-center" id="purchasesTable">
-                        <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
-                            <tr>
-                                <th>#</th>
-                                <th>ژمارەی پسووڵە</th>
-                                <th>بەروار</th>
-                                <th>کۆی کاڵاکان</th>
-                                <th>کۆی نرخ بە دۆلار</th>
-                                <th>کۆی نرخ بە دینار</th>
-                                <th>جۆری دراو</th>
-                                <th>جۆری مامەڵە</th>
-                                <th>پارەی دراو بە دۆلار</th>
-                                <th>پارەی دراو بە دینار</th>
-                                <th>پارەی ماوە بە دۆلار</th>
-                                <th>پارەی ماوە بە دینار</th>
-                                <th>تێبینی</th>
-                                <th>کردارەکان</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Purchase materials will be loaded here by JS -->
-                        </tbody>
+                        <!-- DataTables will build the table structure -->
                     </table>
                 </div>
             </div>
@@ -209,19 +152,7 @@ if ($person_id) {
                 </div>
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover align-middle text-center" id="debtTable">
-                        <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
-                            <tr>
-                                <th>#</th>
-                                <th>بەروار</th>
-                                <th>بڕی دۆلار</th>
-                                <th>بڕی دینار</th>
-                                <th>تێبینی</th>
-                                <th>کردارەکان</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Debt payments will be loaded here by JS -->
-                        </tbody>
+                        <!-- DataTables will build the table structure -->
                     </table>
                 </div>
             </div>
@@ -312,7 +243,13 @@ if ($person_id) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="../assets/js/swalAlert.js"></script>
-    <script src="../assets/js/comon/table-controler.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
+    <!-- DataTables Buttons JS -->
+    <script src="https://cdn.datatables.net/buttons/3.0.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.print.min.js"></script>
     <script src="../assets/js/person_other_expenses_profile/select_other_expenses.js"></script>
     <script src="../assets/js/person_other_expenses_profile/select_purchases.js"></script>
     <script src="../assets/js/person_other_expenses_profile/select_debt.js"></script>

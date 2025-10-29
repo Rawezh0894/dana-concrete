@@ -19,9 +19,7 @@ function loadSummaryCards() {
 }
 
 function updateSummaryCards(data) {
-    // Update total expenses
-    $('#summary_total_usd').text(Number(data.total_expense_usd || 0).toLocaleString('en-US') + ' $');
-    $('#summary_total_iqd').text(Number(data.total_expense_iqd || 0).toLocaleString('en-US') + ' د.ع');
+    // Update expense count
     $('#summary_count').text(data.expense_count || 0);
     
     // Update our debt USD
