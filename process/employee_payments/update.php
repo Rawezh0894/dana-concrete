@@ -19,7 +19,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $id = intval($_POST['id'] ?? 0);
 $employee_id = intval($_POST['employee_id'] ?? 0);
 $salary = floatval($_POST['salary'] ?? 0);
-$karwanhisabi = floatval($_POST['karwanhisabi'] ?? 0);
+$karwanhisabi_str = str_replace(',', '', $_POST['karwanhisabi'] ?? '0');
+$karwanhisabi = floatval($karwanhisabi_str);
 $bonus = floatval($_POST['bonus'] ?? 0);
 $pay_month = trim($_POST['pay_month'] ?? '');
 $total = $salary + $karwanhisabi + $bonus;
