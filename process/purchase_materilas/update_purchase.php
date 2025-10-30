@@ -153,9 +153,10 @@ try {
     $stmt = $pdo->prepare("
         INSERT INTO purchase_materials 
         (receipt_number, material_id, person_id, unit_type, quantity, price_per_unit_usd, price_per_unit_iqd, 
-         total_price_usd, total_price_iqd, currency_type, purchase_date, notes, transfer_loss, other_loss, 
+         total_price_usd, total_price_iqd, currency_type, payment_type, paid_amount_usd, paid_amount_iqd, 
+         remaining_amount_usd, remaining_amount_iqd, purchase_date, notes, transfer_loss, other_loss, 
          usd_to_iqd_rate, base_quantity, base_price_per_unit_usd, base_price_per_unit_iqd, created_by) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
     
     $total_usd = 0;
@@ -255,6 +256,10 @@ try {
         
         $total_price_usd = $material['quantity'] * $material['price_per_unit_usd'];
         $total_price_iqd = $material['quantity'] * $material['price_per_unit_iqd'];
+        $paid_amount_usd = $material['paid_amount_usd'] ?? 0;
+        $paid_amount_iqd = $material['paid_amount_iqd'] ?? 0;
+        $item_remaining_amount_usd = max(0, $total_price_usd - $paid_amount_usd);
+        $item_remaining_amount_iqd = max(0, $total_price_iqd - $paid_amount_iqd);
         
         $stmt->execute([
             $_POST['receipt_number'],
@@ -267,6 +272,11 @@ try {
             $total_price_usd,
             $total_price_iqd,
             $_POST['currency_type'],
+            $_POST['payment_type'] ?? 'نەقد',
+            $paid_amount_usd,
+            $paid_amount_iqd,
+            $item_remaining_amount_usd,
+            $item_remaining_amount_iqd,
             $_POST['purchase_date'],
             $_POST['notes'] ?? '',
             $transfer_loss,
