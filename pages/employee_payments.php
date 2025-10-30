@@ -87,6 +87,28 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
             </div>
         </div>
     </div>
+
+    <!-- New: Employee-specific summary cards -->
+    <div class="row mb-4" id="employee-detail-summary" style="display:none;">
+      <div class="col-md-4 mb-2">
+        <div class="card p-2 text-center">
+            <div>مووچەی بنیاتەیی</div>
+            <div id="card-emp-salary" class="h4 text-success">0 د.ع</div>
+        </div>
+      </div>
+      <div class="col-md-4 mb-2">
+        <div class="card p-2 text-center">
+            <div>کۆی پارەی وەرگرتووە</div>
+            <div id="card-emp-paid" class="h4 text-primary">0 د.ع</div>
+        </div>
+      </div>
+      <div class="col-md-4 mb-2">
+        <div class="card p-2 text-center">
+            <div>ماوەی موچە</div>
+            <div id="card-emp-balance" class="h4 text-danger">0 د.ع</div>
+        </div>
+      </div>
+    </div>
     
     <!-- Filters -->
     <div class="row mb-4">
@@ -230,6 +252,7 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
 <script src="../assets/js/employee_payments/update.js"></script>
 <script src="../assets/js/employee_payments/delete.js"></script>
 <script src="../assets/js/employee_payments/summary.js"></script>
+<script src="../assets/js/employee_payments/summary_by_employee.js"></script>
 <script>
 $(function() {
     function calcTotalAdd() {
