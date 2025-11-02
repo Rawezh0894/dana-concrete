@@ -223,8 +223,9 @@ if (!isset($_SESSION['user_id'])) {
         </div>
       </div>
     </div>
+      <!-- First row: 4 main expense cards -->
       <div class="row w-100 mt-3 g-3">
-        <div class="col-md-2">
+        <div class="col-md-3">
           <div class="card gradient-card green-gradient">
             <div class="card-body">
               <h6 class="card-title">خەرجی سەیارەکان (کاڵا)</h6>
@@ -233,7 +234,7 @@ if (!isset($_SESSION['user_id'])) {
             </div>
           </div>
         </div>
-        <div class="col-md-2">
+        <div class="col-md-3">
           <div class="card gradient-card orange-gradient">
             <div class="card-body">
               <h6 class="card-title">خەرجی سەیارەکان (گاز)</h6>
@@ -242,7 +243,7 @@ if (!isset($_SESSION['user_id'])) {
             </div>
           </div>
         </div>
-        <div class="col-md-2">
+        <div class="col-md-3">
           <div class="card gradient-card teal-gradient">
             <div class="card-body">
               <h6 class="card-title">خەرجی تر</h6>
@@ -251,7 +252,7 @@ if (!isset($_SESSION['user_id'])) {
             </div>
           </div>
         </div>
-        <div class="col-md-2">
+        <div class="col-md-3">
           <div class="card gradient-card purple-gradient">
             <div class="card-body">
               <h6 class="card-title">کۆی گشتی</h6>
@@ -260,20 +261,9 @@ if (!isset($_SESSION['user_id'])) {
             </div>
           </div>
         </div>
-        <div class="col-md-2">
-          <div class="card gradient-card summary-export-card">
-            <div class="card-body">
-              <i class="fas fa-file-excel card-icon"></i>
-              <h6 class="card-title">ئیکسپۆرتی کورتە</h6>
-              <button class="btn btn-sm btn-light mt-2" onclick="exportOtherExpensesSummaryToExcel()" title="ئیکسپۆرتی کورتەی خەرجی تر بۆ Excel">
-                <i class="fas fa-download me-1"></i>داگرتن
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
       
-      <!-- Third row for IQD and USD totals -->
+      <!-- Second row: IQD and USD totals -->
       <div class="row w-100 mt-2 g-3">
         <div class="col-md-6">
           <div class="card gradient-card blue-gradient">
@@ -295,9 +285,20 @@ if (!isset($_SESSION['user_id'])) {
         </div>
       </div>
       
-      <!-- Second row for USD exchange rate -->
+      <!-- Third row: Export and USD exchange rate -->
       <div class="row w-100 mt-2 g-3">
-        <div class="col-md-4 mx-auto">
+        <div class="col-md-6">
+          <div class="card gradient-card summary-export-card">
+            <div class="card-body">
+              <i class="fas fa-file-excel card-icon"></i>
+              <h6 class="card-title">ئیکسپۆرتی کورتە</h6>
+              <button class="btn btn-sm btn-light mt-2" onclick="exportOtherExpensesSummaryToExcel()" title="ئیکسپۆرتی کورتەی خەرجی تر بۆ Excel">
+                <i class="fas fa-download me-1"></i>داگرتن
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
           <div class="card gradient-card red-gradient">
             <div class="card-body">
               <h6 class="card-title">نرخی دۆلار</h6>
