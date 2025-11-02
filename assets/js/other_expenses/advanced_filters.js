@@ -293,12 +293,22 @@ class AdvancedFilters {
             const totalCarExpensesUSD = totalCarMaterialCostUSDConverted + totalCarGasCostUSD;
             const totalAllExpensesUSD = totalOtherExpensesUSDConverted + totalCarExpensesUSD;
             
-            // Update car expense cards (only the 4 cards that exist)
+            // Calculate total IQD and USD expenses
+            const totalExpensesIQD = totalCarMaterialCostIQD + totalCarGasCost + totalOtherExpensesIQD;
+            const totalExpensesUSD = totalCarMaterialCostUSD + totalOtherExpensesUSD;
+            
+            function formatIQD(num) {
+                return num ? `${Number(num).toLocaleString('en-US')} د.ع` : '0 د.ع';
+            }
+            
+            // Update car expense cards (including new IQD and USD total cards)
             const elements = {
                 'totalCarMaterialCost': formatUSD(totalCarMaterialCostUSDConverted),
                 'totalCarGasCost': formatUSD(totalCarGasCostUSD),
                 'totalOtherExpenses': formatUSD(totalOtherExpensesUSDConverted),
-                'totalCarExpenses': formatUSD(totalAllExpensesUSD)
+                'totalCarExpenses': formatUSD(totalAllExpensesUSD),
+                'totalExpensesIQD': formatIQD(totalExpensesIQD),
+                'totalExpensesUSD': formatUSD(totalExpensesUSD)
             };
             
             // Safely update each element

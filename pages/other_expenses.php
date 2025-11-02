@@ -273,6 +273,28 @@ if (!isset($_SESSION['user_id'])) {
         </div>
       </div>
       
+      <!-- Third row for IQD and USD totals -->
+      <div class="row w-100 mt-2 g-3">
+        <div class="col-md-6">
+          <div class="card gradient-card blue-gradient">
+            <div class="card-body">
+              <h6 class="card-title">کۆی گشتی خەرجییەکان بە دینار</h6>
+              <div id="totalExpensesIQD" class="card-value">0 د.ع</div>
+              <small>کۆی هەموو خەرجییەکان بە دینار</small>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card gradient-card yellow-gradient">
+            <div class="card-body">
+              <h6 class="card-title">کۆی گشتی خەرجییەکان بە دۆلار</h6>
+              <div id="totalExpensesUSD" class="card-value">$0</div>
+              <small>کۆی هەموو خەرجییەکان بە دۆلار</small>
+            </div>
+          </div>
+        </div>
+      </div>
+      
       <!-- Second row for USD exchange rate -->
       <div class="row w-100 mt-2 g-3">
         <div class="col-md-4 mx-auto">

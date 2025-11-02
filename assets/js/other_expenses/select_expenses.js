@@ -107,10 +107,16 @@ async function loadOtherExpenses() {
     const totalCarExpensesUSD = totalCarMaterialCostUSDConverted + totalCarGasCostUSD;
     const totalAllExpensesUSD = totalOtherExpensesUSDConverted + totalCarExpensesUSD;
     
+    // Calculate total IQD and USD expenses
+    const totalExpensesIQD = totalCarMaterialCostIQD + totalCarGasCost + totalOtherExpensesIQD;
+    const totalExpensesUSD = totalCarMaterialCostUSD + totalOtherExpensesUSD;
+    
     document.getElementById('totalCarMaterialCost').innerHTML = `${formatUSD(totalCarMaterialCostUSDConverted)}`;
     document.getElementById('totalCarGasCost').innerHTML = `${formatUSD(totalCarGasCostUSD)}`;
     document.getElementById('totalOtherExpenses').innerHTML = `${formatUSD(totalOtherExpensesUSDConverted)}`;
     document.getElementById('totalCarExpenses').innerHTML = `${formatUSD(totalAllExpensesUSD)}`;
+    document.getElementById('totalExpensesIQD').innerHTML = `${formatIQD(totalExpensesIQD)}`;
+    document.getElementById('totalExpensesUSD').innerHTML = `${formatUSD(totalExpensesUSD)}`;
     document.getElementById('usdExchangeRate').innerHTML = `${formatNumber(usdRate)} د.ع`;
         
         if (!filtered || filtered.length === 0) {
