@@ -24,16 +24,16 @@ try {
             pm.id,
             pm.material_id,
             pm.quantity,
-            pm.unit_price_usd,
-            pm.unit_price_iqd,
+            pm.price_per_unit_usd AS unit_price_usd,
+            pm.price_per_unit_iqd AS unit_price_iqd,
             pm.total_price_usd,
             pm.total_price_iqd,
             pm.unit_type,
             lm.name AS material_name,
-            (pm.quantity * pm.unit_price_usd) as calculated_total_usd,
-            (pm.quantity * pm.unit_price_iqd) as calculated_total_iqd,
-            ABS((pm.quantity * pm.unit_price_usd) - pm.total_price_usd) as usd_difference,
-            ABS((pm.quantity * pm.unit_price_iqd) - pm.total_price_iqd) as iqd_difference
+            (pm.quantity * pm.price_per_unit_usd) as calculated_total_usd,
+            (pm.quantity * pm.price_per_unit_iqd) as calculated_total_iqd,
+            ABS((pm.quantity * pm.price_per_unit_usd) - pm.total_price_usd) as usd_difference,
+            ABS((pm.quantity * pm.price_per_unit_iqd) - pm.total_price_iqd) as iqd_difference
         FROM purchase_materials pm
         LEFT JOIN list_materials lm ON pm.material_id = lm.id
         WHERE pm.person_id = ? AND pm.receipt_number = ?

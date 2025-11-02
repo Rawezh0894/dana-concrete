@@ -26,8 +26,8 @@ try {
         SELECT 
             id,
             quantity,
-            unit_price_usd,
-            unit_price_iqd,
+            price_per_unit_usd,
+            price_per_unit_iqd,
             total_price_usd,
             total_price_iqd
         FROM purchase_materials 
@@ -48,8 +48,8 @@ try {
     
     // Fix each item
     foreach ($items as $item) {
-        $calculated_total_usd = $item['quantity'] * $item['unit_price_usd'];
-        $calculated_total_iqd = $item['quantity'] * $item['unit_price_iqd'];
+        $calculated_total_usd = $item['quantity'] * $item['price_per_unit_usd'];
+        $calculated_total_iqd = $item['quantity'] * $item['price_per_unit_iqd'];
         
         // Check if there's a significant difference
         $usd_difference = abs($calculated_total_usd - $item['total_price_usd']);

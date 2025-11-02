@@ -24,8 +24,8 @@ try {
         SELECT 
             pm.id,
             pm.quantity,
-            pm.unit_price_usd,
-            pm.unit_price_iqd,
+            pm.price_per_unit_usd,
+            pm.price_per_unit_iqd,
             pm.total_price_usd,
             pm.total_price_iqd,
             lm.name AS material_name,
@@ -49,8 +49,8 @@ try {
     $formattedItems = [];
     foreach ($items as $item) {
         // Ensure we're using the correct individual item prices
-        $unit_price_usd = (float)$item['unit_price_usd'];
-        $unit_price_iqd = (float)$item['unit_price_iqd'];
+        $unit_price_usd = (float)$item['price_per_unit_usd'];
+        $unit_price_iqd = (float)$item['price_per_unit_iqd'];
         $quantity = (float)$item['quantity'];
         
         // Calculate the correct total price for this specific item
