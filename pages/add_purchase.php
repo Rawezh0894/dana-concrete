@@ -91,12 +91,66 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
             transform: translateY(-1px);
         }
         
+        /* Button Styles */
+        .btn-drivers {
+            background: var(--kelly-green) !important;
+            border-color: var(--kelly-green) !important;
+            color: white !important;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            white-space: nowrap;
+        }
+        
+        .btn-drivers:hover {
+            background: #157347 !important;
+            border-color: #157347 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(21, 115, 71, 0.3);
+        }
+        
+        .btn-add-purchase {
+            background: var(--seafoam-green) !important;
+            border-color: var(--seafoam-green) !important;
+            color: white !important;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            white-space: nowrap;
+        }
+        
+        .btn-add-purchase:hover {
+            background: #1aa179 !important;
+            border-color: #1aa179 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(32, 201, 151, 0.3);
+        }
+        
+        .btn-monthly-report {
+            background: var(--seafoam-green) !important;
+            border-color: var(--seafoam-green) !important;
+            color: white !important;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        
+        .btn-monthly-report:hover {
+            background: #1aa179 !important;
+            border-color: #1aa179 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(32, 201, 151, 0.3);
+        }
+        
         .export-btn {
             background: var(--warning) !important;
             border-color: var(--warning) !important;
             color: #212529 !important;
             font-weight: 600;
             transition: all 0.3s ease;
+            white-space: nowrap;
         }
         
         .export-btn:hover {
@@ -104,6 +158,55 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
             border-color: #e0a800 !important;
             transform: translateY(-1px);
             color: #212529 !important;
+            box-shadow: 0 4px 8px rgba(224, 168, 0, 0.3);
+        }
+        
+        /* Responsive button group styling */
+        .btn-group {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 0.375rem;
+            overflow: hidden;
+        }
+        
+        .btn-group .btn {
+            border-radius: 0 !important;
+        }
+        
+        .btn-group .btn:first-child {
+            border-top-right-radius: 0.375rem !important;
+            border-bottom-right-radius: 0.375rem !important;
+        }
+        
+        .btn-group .btn:last-child {
+            border-top-left-radius: 0.375rem !important;
+            border-bottom-left-radius: 0.375rem !important;
+        }
+        
+        /* Mobile responsive adjustments */
+        @media (max-width: 767.98px) {
+            .d-flex.flex-wrap {
+                justify-content: center;
+            }
+            
+            .btn-group {
+                width: 100%;
+            }
+            
+            .btn-group .btn {
+                flex: 1;
+            }
+            
+            .btn-drivers,
+            .btn-add-purchase {
+                width: 100%;
+            }
+        }
+        
+        @media (min-width: 576px) and (max-width: 767.98px) {
+            .btn-drivers,
+            .btn-add-purchase {
+                width: auto;
+            }
         }
         
         .summary-export-card {
@@ -136,20 +239,6 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
             box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
         }
         
-        .btn-group .btn {
-            border-radius: 0 !important;
-        }
-        
-        .btn-group .btn:first-child {
-            border-top-left-radius: 6px !important;
-            border-bottom-left-radius: 6px !important;
-        }
-        
-        .btn-group .btn:last-child {
-            border-top-right-radius: 6px !important;
-            border-bottom-right-radius: 6px !important;
-        }
-        
         /* Fix for select2 in flexbox layout */
         .d-flex .select2-container {
             flex: 1 1 auto;
@@ -180,30 +269,31 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
 <?php include '../includes/navbar.php'; ?>
 <?php include '../includes/sidebar.php'; ?>
 <div class="container-fluid py-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-       
-        <div class="d-flex gap-2">
-            <button class="btn" data-bs-toggle="modal" data-bs-target="#driversManagementModal" style="background: var(--kelly-green); color:white; font-weight: bold;">
-                <i class="fas fa-users me-1"></i> شۆفێرەکان
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+        <div class="d-flex flex-wrap gap-2 w-100 w-md-auto">
+            <button class="btn btn-drivers" data-bs-toggle="modal" data-bs-target="#driversManagementModal">
+                <i class="fas fa-users me-1"></i> <span class="d-none d-sm-inline">شۆفێرەکان</span>
             </button>
             <div class="btn-group" role="group">
                 <button class="btn export-btn" onclick="exportPurchaseToExcel()" title="ئیکسپۆرتی هەموو زانیارییەکانی کڕین بۆ Excel">
-                    <i class="fas fa-file-excel me-1"></i>Excel
+                    <i class="fas fa-file-excel me-1"></i><span class="d-none d-sm-inline">Excel</span>
                 </button>
                 <button class="btn export-btn" onclick="exportPurchaseToCSV()" title="ئیکسپۆرتی هەموو زانیارییەکانی کڕین بۆ CSV">
-                    <i class="fas fa-file-csv me-1"></i>CSV
+                    <i class="fas fa-file-csv me-1"></i><span class="d-none d-sm-inline">CSV</span>
                 </button>
             </div>
             <div class="btn-group" role="group">
-                <button class="btn" onclick="exportPurchaseMonthlyReport()" style="background: var(--seafoam-green); color: white; font-weight: bold;" title="ڕاپۆرتی مانگانەی کڕینەکان بۆ Excel">
-                    <i class="fas fa-chart-line me-1"></i>Excel
+                <button class="btn btn-monthly-report" onclick="exportPurchaseMonthlyReport()" title="ڕاپۆرتی مانگانەی کڕینەکان بۆ Excel">
+                    <i class="fas fa-chart-line me-1"></i><span class="d-none d-sm-inline">Excel</span>
                 </button>
-                <button class="btn" onclick="exportPurchaseMonthlyReportToCSV()" style="background: var(--seafoam-green); color: white; font-weight: bold;" title="ڕاپۆرتی مانگانەی کڕینەکان بۆ CSV">
-                    <i class="fas fa-file-csv me-1"></i>CSV
+                <button class="btn btn-monthly-report" onclick="exportPurchaseMonthlyReportToCSV()" title="ڕاپۆرتی مانگانەی کڕینەکان بۆ CSV">
+                    <i class="fas fa-file-csv me-1"></i><span class="d-none d-sm-inline">CSV</span>
                 </button>
             </div>
             <?php if (hasPermission('add_purchase')): ?>
-            <button class="btn" data-bs-toggle="modal" data-bs-target="#addPurchaseModal" style="background: var(--seafoam-green); color:white; font-weight: bold;">+ زیادکردنی کڕین</button>
+            <button class="btn btn-add-purchase" data-bs-toggle="modal" data-bs-target="#addPurchaseModal">
+                <i class="fas fa-plus me-1"></i> <span class="d-none d-sm-inline">زیادکردنی کڕین</span>
+            </button>
             <?php endif; ?>
         </div>
     </div>
