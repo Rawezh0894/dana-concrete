@@ -38,10 +38,6 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
    
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.rtl.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <!-- DataTables CSS -->
-    <link href="https://cdn.datatables.net/2.3.4/css/dataTables.dataTables.min.css" rel="stylesheet">
-    <!-- DataTables Buttons CSS -->
-    <link href="https://cdn.datatables.net/buttons/3.0.2/css/buttons.dataTables.min.css" rel="stylesheet">
     
     <style>
         /* Filter styling */
@@ -260,133 +256,6 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
             justify-content: center;
             height: 38px;
         }
-        
-        /* DataTables Custom Styling */
-        .dataTables_wrapper {
-            margin-top: 1rem;
-        }
-        
-        .dataTables_wrapper .dataTables_length select {
-            padding: 0.375rem 1.75rem 0.375rem 0.5rem;
-            border: 1px solid #dee2e6;
-            border-radius: 0.375rem;
-            background-color: #fff;
-        }
-        
-        .dataTables_wrapper .dataTables_filter input {
-            padding: 0.375rem 0.75rem;
-            border: 1px solid #dee2e6;
-            border-radius: 0.375rem;
-            margin-right: 0.5rem;
-        }
-        
-        .dataTables_wrapper .dataTables_paginate .paginate_button {
-            padding: 0.375rem 0.75rem;
-            margin-left: 2px;
-            border: 1px solid #dee2e6;
-            border-radius: 0.375rem;
-            background-color: #fff;
-            color: #495057 !important;
-        }
-        
-        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-            background: var(--seafoam-green) !important;
-            border-color: var(--seafoam-green) !important;
-            color: #fff !important;
-        }
-        
-        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-            background: var(--seafoam-green) !important;
-            border-color: var(--seafoam-green) !important;
-            color: #fff !important;
-        }
-        
-        .dataTables_wrapper .dataTables_info {
-            color: #6c757d;
-        }
-        
-        .table thead {
-            background: var(--kelly-green);
-        }
-        
-        .table thead th {
-            background-color: var(--kelly-green) !important;
-            color: var(--seafoam-green) !important;
-        }
-        
-        /* Column filter inputs styling */
-        .column-filter {
-            background: rgba(255, 255, 255, 0.95) !important;
-            font-size: 0.8rem !important;
-        }
-        
-        .column-filter:focus {
-            background: #fff !important;
-            border-color: var(--seafoam-green) !important;
-            outline: none !important;
-            box-shadow: 0 0 0 0.2rem rgba(32, 178, 170, 0.25) !important;
-        }
-        
-        .column-filter::placeholder {
-            color: #999 !important;
-            font-size: 0.75rem !important;
-        }
-        
-        /* DataTables sort indicator */
-        table.dataTable thead .sorting,
-        table.dataTable thead .sorting_asc,
-        table.dataTable thead .sorting_desc,
-        table.dataTable thead .sorting_asc_disabled,
-        table.dataTable thead .sorting_desc_disabled {
-            cursor: pointer;
-            position: relative;
-            padding-right: 30px !important;
-        }
-        
-        table.dataTable thead .sorting:before,
-        table.dataTable thead .sorting_asc:before,
-        table.dataTable thead .sorting_desc:before {
-            content: "⇅";
-            position: absolute;
-            right: 8px;
-            top: 50%;
-            transform: translateY(-50%);
-            opacity: 0.5;
-            font-size: 0.9rem;
-        }
-        
-        table.dataTable thead .sorting_asc:before {
-            content: "↑";
-            opacity: 1;
-            color: var(--seafoam-green);
-        }
-        
-        table.dataTable thead .sorting_desc:before {
-            content: "↓";
-            opacity: 1;
-            color: var(--seafoam-green);
-        }
-        
-        /* DataTables buttons styling */
-        .dt-buttons {
-            margin-bottom: 1rem;
-        }
-        
-        .dt-buttons .btn {
-            margin-right: 5px;
-            margin-bottom: 5px;
-        }
-        
-        /* Ensure table headers are not too tall */
-        .table thead th {
-            white-space: nowrap;
-            vertical-align: top !important;
-        }
-        
-        /* Wrap column filter inputs properly */
-        .table thead th > input {
-            margin-top: 5px !important;
-        }
     </style>
     <!-- jQuery (پێش هەموو شت) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -550,7 +419,34 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
     </div>
     <div class="table-responsive">
         <table class="table table-bordered table-hover align-middle text-center" id="purchaseTable">
-            <!-- DataTables will build the table structure -->
+            <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
+                <tr>
+                    <th>#</th>
+                    <th>کۆمپانیا</th>
+                    <th>شوێن</th>
+                    <th>شۆفێر</th>
+                    <th>ژمارەی پسوڵە</th>
+                    <th>مەواد</th>
+                    <th>بەروار</th>
+                    <th>جۆری پارەدان</th>
+                    <th>جۆری دراو</th>
+                    <th>کیلۆگرام</th>
+                    <th>نرخی یەک کیلۆ بە دۆلار</th>
+                    <th>نرخی یەک کیلۆ بە دینار</th>
+                    <th>نرخ</th>
+                    <th>بڕی پارە بە دینار</th>
+                    <th>نرخی 100 دۆلار بە دینار</th>
+                    <th>پارەی دراو بە دۆلار</th>
+                    <th>پارەی دراو بە دینار</th>
+                    <th>پارەی ماوە بە دۆلار</th>
+                    <th>پارەی ماوە بە دینار</th>
+                    <th>چاو/سایلۆ</th>
+                    <th>کردارەکان</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Purchases will be loaded here by JS -->
+            </tbody>
         </table>
     </div>
 </div>
@@ -1023,13 +919,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="../assets/js/swalAlert.js"></script>
-<!-- DataTables JS -->
-<script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
-<!-- DataTables Buttons JS -->
-<script src="https://cdn.datatables.net/buttons/3.0.2/js/dataTables.buttons.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.html5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.print.min.js"></script>
+<script src="../assets/js/comon/table-controler.js"></script>
 <script src="../assets/js/comon/select2_script.js"></script>
 <script>
     // Pass permissions to JavaScript
@@ -1124,7 +1014,7 @@ $(document).ready(function() {
         }
     });
     
-    // Function to apply all filters - now uses DataTables
+    // Function to apply all filters
     function applyFilters() {
         const companyId = $('#filter_company').val();
         const locationId = $('#filter_location').val();
@@ -1143,10 +1033,8 @@ $(document).ready(function() {
         if (fromDate) params.append('from', fromDate);
         if (toDate) params.append('to', toDate);
         
-        // Call loadPurchasesTable with filters and search term
-        if (typeof loadPurchasesTable === 'function') {
-            loadPurchasesTable(params.toString(), searchTerm);
-        } else if (typeof loadPurchases === 'function') {
+        // Call the existing loadPurchases function with filters, page 1, and search term
+        if (typeof loadPurchases === 'function') {
             loadPurchases(params.toString(), 1, searchTerm);
         }
         

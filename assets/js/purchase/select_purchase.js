@@ -1,293 +1,770 @@
-let purchaseTable = null;
+let currentPurchasePage = 1;
+let currentFilterParams = '';
+let currentSearchTerm = '';
+let purchaseSearchTimeout = null;
 
-function formatNumber(n) {
-    if (n === null || n === undefined || n === '') return '';
-    return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
-
-function formatUSD(n) {
-    if (!n || isNaN(n)) return '';
-    return formatNumber(Number(n).toFixed(2)) + ' $';
-}
-
-function formatIQD(n) {
-    if (!n || isNaN(n)) return '';
-    return formatNumber(Number(n).toFixed(0)) + ' د.ع';
-}
-
-async function loadPurchasesTable(filterParams = '', searchTerm = '') {
-    // Destroy existing table if it exists - check if DataTable is already initialized
-    if (purchaseTable) {
-        try {
-            purchaseTable.destroy();
-        } catch (e) {
-            console.log('Error destroying table:', e);
-        }
-        purchaseTable = null;
-    }
+async function loadPurchases(filterParams = '', page = 1, searchTerm = '') {
+    currentPurchasePage = page;
+    currentFilterParams = filterParams;
+    currentSearchTerm = searchTerm;
     
-    // Also check if DataTable is already initialized on the element
-    if ($.fn.DataTable.isDataTable('#purchaseTable')) {
-        try {
-            $('#purchaseTable').DataTable().destroy();
-        } catch (e) {
-            console.log('Error destroying existing DataTable:', e);
+    // Build request data
+    const requestData = new FormData();
+    
+    // Add basic filters from URL params
+    const params = new URLSearchParams(filterParams);
+    for (const [key, value] of params) {
+        if (value) {
+            requestData.append(key, value);
         }
     }
     
-    // Clear and prepare table structure
-    $('#purchaseTable').empty();
+    // Add pagination
+    requestData.append('page', page);
+    requestData.append('limit', 10);
     
+    // Add search term
+    if (searchTerm) {
+        requestData.append('search', searchTerm);
+    }
+    
+    // Add column filters (this is the main fix for URL length issue)
+    if (Object.keys(activeColumnFilters).length > 0) {
+        requestData.append('column_filters', JSON.stringify(activeColumnFilters));
+    }
+    
+    // Use POST method to avoid URL length issues
+    const response = await fetch('../process/purchase/select_purchase.php', {
+        method: 'POST',
+        body: requestData
+    });
+    
+    const text = await response.text();
+    let result;
     try {
-        // Build request data
-        const requestData = new FormData();
+        result = JSON.parse(text);
+    } catch (e) {
+        console.error('Raw response from select_purchase.php:', text);
+        alert('هەڵەیەک لە وەڵامەکەی سێرڤەر هەیە. زانیاری زیاتر لە console.');
+        return;
+    }
+    
+    // Handle both old and new response formats
+    let data;
+    if (result.success && Array.isArray(result.data)) {
+        data = result.data;
+    } else if (Array.isArray(result)) {
+        data = result;
+        result = { data: result }; // Wrap for consistency
+    } else {
+        console.error('Unexpected response format:', result);
+        data = [];
+    }
+    
+    const columns = [
+        '#', 'company_name', 'location_name', 'driver_name', 'invoice_number', 'material_name', 'date',
+        'payment_type', 'type', 'kg', 'price_per_kg_usd', 'price_per_kg_iqd', 'price', 'amount_iqd', 'exchange_rate',
+        'paid_usd', 'paid_iqd', 'remaining_usd', 'remaining_iqd', 'bin_name', 'actions'
+    ];
+    function formatNumber(n) {
+        if (n === null || n === undefined || n === '') return '';
+        return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+    function formatUSD(n) {
+        if (!n || isNaN(n)) return '';
+        return formatNumber(Number(n).toFixed(2)) + ' $';
+    }
+    function formatIQD(n) {
+        if (!n || isNaN(n)) return '';
+        return formatNumber(Number(n).toFixed(0)) + ' د.ع';
+    }
+    const mapped = data.map((row, idx) => ({
+        '#': ((page - 1) * 10) + idx + 1,
+        company_name: row.company_name || '',
+        location_name: row.location_name || row.location || '',
+        driver_name: row.driver_name || row.driver || '',
+        invoice_number: row.invoice_number || '',
+        material_name: row.material_name || '',
+        date: row.date || '',
+        payment_type: row.payment_type || '',
+        type: row.type || '',
+        kg: formatNumber(row.kg),
+        price_per_kg_usd: formatUSD(row.price_per_kg_usd),
+        price_per_kg_iqd: formatIQD(row.price_per_kg_iqd),
+        price: row.type === 'دینار' ? formatIQD(row.price) : (row.type === 'دۆلار' ? formatUSD(row.price) : formatNumber(row.price)),
+        amount_iqd: formatIQD(row.amount_iqd),
+        exchange_rate: formatNumber(row.exchange_rate),
+        paid_usd: formatUSD(row.paid_usd),
+        paid_iqd: formatIQD(row.paid_iqd),
+        remaining_usd: formatUSD(row.remaining_usd),
+        remaining_iqd: formatIQD(row.remaining_iqd),
+        bin_name: row.bin_name || row.bin_id || '',
+        actions: `${window.userPermissions && window.userPermissions.canEdit ? `<button class='btn btn-primary btn-sm edit-purchase' data-id='${row.id}' title='دەستکاری'><i class='fa fa-edit'></i></button>` : ''} ${window.userPermissions && window.userPermissions.canDelete ? `<button class='btn btn-danger btn-sm delete-purchase' data-id='${row.id}' title='سڕینەوە'><i class='fa fa-trash'></i></button>` : ''}`
+    }));
+    
+    // Store original data for filter dropdowns
+    originalPurchaseData = mapped;
+    
+    // Render table without client-side pagination
+    TableController.render('#purchaseTable', mapped, columns);
+    
+    // Add Excel-style column filters
+    addExcelStyleFilters('#purchaseTable', mapped, columns);
+    
+    // Render server-side pagination if available
+    if (result.pagination) {
+        renderPurchasePagination(result.pagination, data.length);
+    }
+}
+
+// Store original data and active filters
+let originalPurchaseData = [];
+let activeColumnFilters = {};
+
+// Add Excel-style dropdown filters to table headers
+function addExcelStyleFilters(tableSelector, data, columns) {
+    // Don't override originalPurchaseData here, it's set in loadPurchases
+    const table = document.querySelector(tableSelector);
+    if (!table) return;
+    
+    const thead = table.querySelector('thead');
+    if (!thead) return;
+    
+    let headerRow = thead.querySelector('tr');
+    if (!headerRow) return;
+    
+    // Remove any existing filter icons
+    headerRow.querySelectorAll('.excel-filter-icon').forEach(e => e.remove());
+    
+    // Add filter icon to each column (except # and actions)
+    columns.forEach((col, idx) => {
+        if (col === '#' || col === 'actions') return;
         
-        // Add basic filters from URL params
-        const params = new URLSearchParams(filterParams);
-        for (const [key, value] of params) {
-            if (value) {
-                requestData.append(key, value);
-            }
+        const th = headerRow.children[idx];
+        if (!th) return;
+        
+        // Create filter icon
+        const filterIcon = document.createElement('i');
+        filterIcon.className = 'fas fa-filter excel-filter-icon ms-2';
+        filterIcon.style.cssText = 'cursor: pointer; font-size: 0.85rem; opacity: 0.6;';
+        filterIcon.setAttribute('data-col', col);
+        filterIcon.setAttribute('data-col-idx', idx);
+        filterIcon.title = 'فلتەرکردن';
+        
+        // Check if column already has active filter
+        if (activeColumnFilters[col] && activeColumnFilters[col].length > 0) {
+            filterIcon.style.opacity = '1';
+            filterIcon.style.color = '#28a745';
         }
         
-        // Add search term
-        if (searchTerm) {
-            requestData.append('search', searchTerm);
-        }
+        th.appendChild(filterIcon);
         
-        // Use POST method to avoid URL length issues
-        const response = await fetch('../process/purchase/select_purchase.php', {
-            method: 'POST',
-            body: requestData
-        });
-        
-        const text = await response.text();
-        let result;
-        try {
-            result = JSON.parse(text);
-        } catch (e) {
-            console.error('Raw response from select_purchase.php:', text);
-            console.error('Server response error. Check console for details.');
-            return;
-        }
-        
-        // Handle both old and new response formats
-        let data;
-        if (result.success && Array.isArray(result.data)) {
-            data = result.data;
-        } else if (Array.isArray(result)) {
-            data = result;
+        // Add click event
+        filterIcon.onclick = function(e) {
+            e.stopPropagation();
+            showFilterDropdown(col, idx, data, filterIcon);
+        };
+    });
+}
+
+// Show filter dropdown menu
+async function showFilterDropdown(column, columnIdx, data, iconElement) {
+    // Remove any existing dropdown
+    document.querySelectorAll('.excel-filter-dropdown').forEach(d => d.remove());
+    
+    // Show loading dropdown
+    const loadingDropdown = document.createElement('div');
+    loadingDropdown.className = 'excel-filter-dropdown';
+    loadingDropdown.style.cssText = `
+        position: absolute;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 9999;
+        min-width: 200px;
+        padding: 20px;
+        text-align: center;
+    `;
+    const iconRect = iconElement.getBoundingClientRect();
+    loadingDropdown.style.top = (iconRect.bottom + window.scrollY) + 'px';
+    
+    // Smart positioning: check if there's enough space on the right
+    const dropdownWidth = 200; // min width
+    const spaceOnRight = window.innerWidth - iconRect.right;
+    const spaceOnLeft = iconRect.left;
+    
+    if (spaceOnRight < dropdownWidth && spaceOnLeft > dropdownWidth) {
+        // Not enough space on right, but enough on left - align to right edge
+        loadingDropdown.style.right = (window.innerWidth - iconRect.right) + 'px';
+        loadingDropdown.style.left = 'auto';
+    } else {
+        // Use default left alignment
+        loadingDropdown.style.left = Math.max(10, iconRect.left) + 'px';
+    }
+    
+    loadingDropdown.innerHTML = '<i class="fas fa-spinner fa-spin"></i> چاوەڕوان بە...';
+    document.body.appendChild(loadingDropdown);
+    
+    // Get unique values from server for the entire dataset
+    let uniqueValues = [];
+    try {
+        const response = await fetch(`../process/purchase/get_unique_values.php?column=${column}`);
+        const result = await response.json();
+        if (result.success) {
+            uniqueValues = result.values;
         } else {
-            console.error('Unexpected response format:', result);
-            $('#purchaseTable').html(`<tr><td colspan="21" class="text-muted text-center">هیچ زانیارییەک نەدۆزرایەوە</td></tr>`);
-            return;
+            // Fallback to local data if server fails
+            uniqueValues = [...new Set(data.map(row => row[column]))].filter(v => v !== '' && v !== null && v !== undefined);
+            uniqueValues.sort();
+        }
+    } catch (e) {
+        console.error('Error fetching unique values:', e);
+        // Fallback to local data
+        uniqueValues = [...new Set(data.map(row => row[column]))].filter(v => v !== '' && v !== null && v !== undefined);
+        uniqueValues.sort();
+    }
+    
+    // Remove loading dropdown
+    loadingDropdown.remove();
+    
+    // Create dropdown
+    const dropdown = document.createElement('div');
+    dropdown.className = 'excel-filter-dropdown';
+    dropdown.style.cssText = `
+        position: absolute;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 9999;
+        min-width: 200px;
+        max-height: 300px;
+        overflow-y: auto;
+        padding: 8px 0;
+    `;
+    
+    // Position dropdown with smart positioning
+    dropdown.style.top = (iconRect.bottom + window.scrollY) + 'px';
+    
+    // Check available space and position accordingly
+    const minDropdownWidth = 250;
+    const availableSpaceRight = window.innerWidth - iconRect.right;
+    const availableSpaceLeft = iconRect.left;
+    
+    if (availableSpaceRight < minDropdownWidth && availableSpaceLeft > minDropdownWidth) {
+        // Not enough space on right, position to the left of the icon
+        dropdown.style.right = (window.innerWidth - iconRect.right) + 'px';
+        dropdown.style.left = 'auto';
+    } else {
+        // Default: position to the right, but ensure minimum 10px from edge
+        const leftPosition = Math.max(10, Math.min(iconRect.left, window.innerWidth - minDropdownWidth - 10));
+        dropdown.style.left = leftPosition + 'px';
+        dropdown.style.right = 'auto';
+    }
+    
+    // Add search box
+    const searchDiv = document.createElement('div');
+    searchDiv.style.cssText = 'padding: 8px 12px; border-bottom: 1px solid #eee;';
+    searchDiv.innerHTML = `
+        <input type="text" class="form-control form-control-sm filter-search-input" placeholder="گەڕان..." style="margin: 0;">
+    `;
+    dropdown.appendChild(searchDiv);
+    
+    // Add "Select All" option
+    const selectAllDiv = document.createElement('div');
+    selectAllDiv.style.cssText = 'padding: 6px 12px; border-bottom: 1px solid #eee; margin-bottom: 4px;';
+    selectAllDiv.innerHTML = `
+        <label style="cursor: pointer; display: block; margin: 0;">
+            <input type="checkbox" class="filter-select-all" ${!activeColumnFilters[column] || activeColumnFilters[column].length === 0 ? 'checked' : ''} style="margin-left: 8px;">
+            <span>هەڵبژاردنی هەموو</span>
+        </label>
+    `;
+    dropdown.appendChild(selectAllDiv);
+    
+    // Create container for value checkboxes
+    const valuesContainer = document.createElement('div');
+    valuesContainer.className = 'filter-values-container';
+    valuesContainer.style.cssText = 'max-height: 200px; overflow-y: auto;';
+    
+    // Add value checkboxes
+    uniqueValues.forEach(value => {
+        const div = document.createElement('div');
+        div.className = 'filter-value-item';
+        div.style.cssText = 'padding: 4px 12px; cursor: pointer;';
+        div.setAttribute('data-value', value.toString().toLowerCase());
+        div.onmouseenter = function() { this.style.background = '#f8f9fa'; };
+        div.onmouseleave = function() { this.style.background = 'white'; };
+        
+        const isChecked = !activeColumnFilters[column] || activeColumnFilters[column].length === 0 || activeColumnFilters[column].includes(value);
+        
+        div.innerHTML = `
+            <label style="cursor: pointer; display: block; margin: 0;">
+                <input type="checkbox" class="filter-value-checkbox" value="${value}" ${isChecked ? 'checked' : ''} style="margin-left: 8px;">
+                <span>${value}</span>
+            </label>
+        `;
+        valuesContainer.appendChild(div);
+    });
+    
+    dropdown.appendChild(valuesContainer);
+    
+    // Add action buttons
+    const actionsDiv = document.createElement('div');
+    actionsDiv.style.cssText = 'padding: 8px 12px; border-top: 1px solid #eee; margin-top: 4px; display: flex; gap: 8px;';
+    actionsDiv.innerHTML = `
+        <button class="btn btn-sm btn-success filter-apply-btn" style="flex: 1;">جێبەجێکردن</button>
+        <button class="btn btn-sm btn-secondary filter-clear-btn" style="flex: 1;">پاککردنەوە</button>
+    `;
+    dropdown.appendChild(actionsDiv);
+    
+    document.body.appendChild(dropdown);
+    
+    // Search functionality
+    const searchInput = dropdown.querySelector('.filter-search-input');
+    searchInput.oninput = function() {
+        const searchTerm = this.value.toLowerCase();
+        const items = valuesContainer.querySelectorAll('.filter-value-item');
+        
+        items.forEach(item => {
+            const value = item.getAttribute('data-value');
+            if (value.includes(searchTerm)) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    };
+    
+    // Focus search input
+    setTimeout(() => searchInput.focus(), 100);
+    
+    // Select All logic
+    const selectAllCheckbox = dropdown.querySelector('.filter-select-all');
+    const valueCheckboxes = dropdown.querySelectorAll('.filter-value-checkbox');
+    
+    selectAllCheckbox.onchange = function() {
+        // Only select visible checkboxes
+        const visibleItems = Array.from(valuesContainer.querySelectorAll('.filter-value-item'))
+            .filter(item => item.style.display !== 'none');
+        visibleItems.forEach(item => {
+            const cb = item.querySelector('.filter-value-checkbox');
+            if (cb) cb.checked = this.checked;
+        });
+    };
+    
+    valueCheckboxes.forEach(cb => {
+        cb.onchange = function() {
+            // Update "Select All" based on visible checkboxes
+            const visibleCheckboxes = Array.from(valuesContainer.querySelectorAll('.filter-value-item'))
+                .filter(item => item.style.display !== 'none')
+                .map(item => item.querySelector('.filter-value-checkbox'));
+            const allChecked = visibleCheckboxes.every(c => c && c.checked);
+            selectAllCheckbox.checked = allChecked;
+        };
+    });
+    
+    // Apply button
+    dropdown.querySelector('.filter-apply-btn').onclick = function() {
+        const selectedValues = Array.from(valueCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+        
+        if (selectedValues.length === uniqueValues.length) {
+            // All selected = no filter
+            delete activeColumnFilters[column];
+        } else {
+            activeColumnFilters[column] = selectedValues;
         }
         
-        if (!data || data.length === 0) {
-            $('#purchaseTable').html(`<tr><td colspan="21" class="text-muted text-center">هیچ زانیارییەک نەدۆزرایەوە</td></tr>`);
-            return;
+        applyColumnFilters();
+        dropdown.remove();
+    };
+    
+    // Clear button
+    dropdown.querySelector('.filter-clear-btn').onclick = function() {
+        delete activeColumnFilters[column];
+        applyColumnFilters();
+        dropdown.remove();
+    };
+    
+    // Close dropdown when clicking outside
+    setTimeout(() => {
+        document.addEventListener('click', function closeDropdown(e) {
+            if (!dropdown.contains(e.target)) {
+                dropdown.remove();
+                document.removeEventListener('click', closeDropdown);
+            }
+        });
+    }, 100);
+}
+
+// Apply column filters to table (server-side)
+function applyColumnFilters() {
+    // Reload data from server with column filters
+    loadPurchases(currentFilterParams, 1, currentSearchTerm);
+    
+    // Update filter status badge
+    updateFilterStatusBadge();
+}
+
+// Clear all column filters
+function clearAllColumnFilters() {
+    activeColumnFilters = {};
+    applyColumnFilters();
+}
+
+// Update filter status badge
+function updateFilterStatusBadge() {
+    const activeFiltersCount = Object.keys(activeColumnFilters).length;
+    const btn = document.getElementById('clearColumnFiltersBtn');
+    
+    if (btn) {
+        if (activeFiltersCount > 0) {
+            btn.innerHTML = `<i class="fas fa-filter-circle-xmark me-1"></i>پاککردنەوەی فلتەرەکانی کۆڵۆم <span class="badge bg-danger ms-1">${activeFiltersCount}</span>`;
+        } else {
+            btn.innerHTML = `<i class="fas fa-filter-circle-xmark me-1"></i>پاککردنەوەی فلتەرەکانی کۆڵۆم`;
         }
+    }
+}
+
+function renderPurchasePagination(pagination, currentRecordsCount) {
+    let paginationHtml = '<nav class="mt-3"><ul class="pagination justify-content-center">';
+    
+    // Previous button
+    if (pagination.has_prev) {
+        paginationHtml += `<li class="page-item"><a class="page-link purchase-page-link" href="#" data-page="${pagination.current_page - 1}">پێشوو</a></li>`;
+    } else {
+        paginationHtml += `<li class="page-item disabled"><span class="page-link">پێشوو</span></li>`;
+    }
+    
+    // Page numbers (show max 5 pages around current)
+    let startPage = Math.max(1, pagination.current_page - 2);
+    let endPage = Math.min(pagination.total_pages, pagination.current_page + 2);
+    
+    if (startPage > 1) {
+        paginationHtml += `<li class="page-item"><a class="page-link purchase-page-link" href="#" data-page="1">1</a></li>`;
+        if (startPage > 2) {
+            paginationHtml += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+        }
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+        if (i === pagination.current_page) {
+            paginationHtml += `<li class="page-item active"><span class="page-link">${i}</span></li>`;
+        } else {
+            paginationHtml += `<li class="page-item"><a class="page-link purchase-page-link" href="#" data-page="${i}">${i}</a></li>`;
+        }
+    }
+    
+    if (endPage < pagination.total_pages) {
+        if (endPage < pagination.total_pages - 1) {
+            paginationHtml += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+        }
+        paginationHtml += `<li class="page-item"><a class="page-link purchase-page-link" href="#" data-page="${pagination.total_pages}">${pagination.total_pages}</a></li>`;
+    }
+    
+    // Next button
+    if (pagination.has_next) {
+        paginationHtml += `<li class="page-item"><a class="page-link purchase-page-link" href="#" data-page="${pagination.current_page + 1}">دواتر</a></li>`;
+    } else {
+        paginationHtml += `<li class="page-item disabled"><span class="page-link">دواتر</span></li>`;
+    }
+    
+    paginationHtml += `</ul><p class="text-center text-muted mt-2">پیشاندانی ${currentRecordsCount} لە ${pagination.total_records} - پەڕە ${pagination.current_page} لە ${pagination.total_pages}</p></nav>`;
+    
+    // Remove existing pagination
+    $('#purchaseTable').closest('.table-responsive').next('nav').remove();
+    // Add new pagination
+    $('#purchaseTable').closest('.table-responsive').after(paginationHtml);
+}
+
+// Pagination click handler
+$(document).on('click', '.purchase-page-link', function(e) {
+    e.preventDefault();
+    const page = parseInt($(this).data('page'));
+    if (page) {
+        loadPurchases(currentFilterParams, page, currentSearchTerm);
+        $('html, body').animate({ scrollTop: 0 }, 'fast');
+    }
+});
+
+document.addEventListener('DOMContentLoaded', () => loadPurchases('', 1));
+
+// Function to handle dynamic price per kg fields in edit modal
+function handleEditTypeChange() {
+    const typeSelect = document.getElementById('edit_type');
+    const iqdGroup = document.getElementById('edit_pricePerKgIqdGroup');
+    const usdGroup = document.getElementById('edit_pricePerKgUsdGroup');
+    
+    if (typeSelect && iqdGroup && usdGroup) {
+        if (typeSelect.value === 'دینار') {
+            iqdGroup.style.display = 'block';
+            usdGroup.style.display = 'none';
+            document.getElementById('edit_price_per_kg_usd').value = '0';
+        } else if (typeSelect.value === 'دۆلار') {
+            iqdGroup.style.display = 'none';
+            usdGroup.style.display = 'block';
+            document.getElementById('edit_price_per_kg_iqd').value = '0';
+        } else {
+            iqdGroup.style.display = 'block';
+            usdGroup.style.display = 'block';
+        }
+    }
+}
+
+// Function to initialize select2 for edit modal
+function initializeEditModalSelect2() {
+    // Initialize select2 for driver and location in edit modal
+    if (typeof enableSelect2 === 'function') {
+        enableSelect2('#edit_driver_id', '#editPurchaseModal');
+        enableSelect2('#edit_location_id', '#editPurchaseModal');
+        enableSelect2('#edit_company_id', '#editPurchaseModal');
+        enableSelect2('#edit_material_id', '#editPurchaseModal');
+        enableSelect2('#edit_bin_id', '#editPurchaseModal');
+    }
+}
+
+// Function to properly set select2 values
+function setSelect2Value(selectElement, value) {
+    if ($(selectElement).hasClass('select2-hidden-accessible')) {
+        // This is a select2 element
+        $(selectElement).val(value).trigger('change');
         
-        // Prepare data for DataTables
-        const tableData = data.map((row) => [
-            row.company_name || '-',
-            row.location_name || row.location || '-',
-            row.driver_name || row.driver || '-',
-            row.invoice_number || '-',
-            row.material_name || '-',
-            row.date || '-',
-            row.payment_type || '-',
-            row.type || '-',
-            row.kg !== null && row.kg !== undefined && row.kg !== '' ? formatNumber(row.kg) : '-',
-            row.price_per_kg_usd !== null && row.price_per_kg_usd !== undefined && row.price_per_kg_usd !== '' ? formatUSD(row.price_per_kg_usd) : '-',
-            row.price_per_kg_iqd !== null && row.price_per_kg_iqd !== undefined && row.price_per_kg_iqd !== '' ? formatIQD(row.price_per_kg_iqd) : '-',
-            row.type === 'دینار' ? (row.price !== null && row.price !== undefined && row.price !== '' ? formatIQD(row.price) : '-') : (row.type === 'دۆلار' ? (row.price !== null && row.price !== undefined && row.price !== '' ? formatUSD(row.price) : '-') : (row.price !== null && row.price !== undefined && row.price !== '' ? formatNumber(row.price) : '-')),
-            row.amount_iqd !== null && row.amount_iqd !== undefined && row.amount_iqd !== '' ? formatIQD(row.amount_iqd) : '-',
-            row.exchange_rate !== null && row.exchange_rate !== undefined && row.exchange_rate !== '' ? formatNumber(row.exchange_rate) : '-',
-            row.paid_usd !== null && row.paid_usd !== undefined && row.paid_usd !== '' ? formatUSD(row.paid_usd) : '-',
-            row.paid_iqd !== null && row.paid_iqd !== undefined && row.paid_iqd !== '' ? formatIQD(row.paid_iqd) : '-',
-            row.remaining_usd !== null && row.remaining_usd !== undefined && row.remaining_usd !== '' ? formatUSD(row.remaining_usd) : '-',
-            row.remaining_iqd !== null && row.remaining_iqd !== undefined && row.remaining_iqd !== '' ? formatIQD(row.remaining_iqd) : '-',
-            row.bin_name || '-',
-            `${window.userPermissions && window.userPermissions.canEdit ? `<button class='btn btn-warning btn-sm edit-purchase' data-id='${row.id}' title='نوێکردنەوە'><i class='fa fa-edit'></i></button>` : ''} ${window.userPermissions && window.userPermissions.canDelete ? `<button class='btn btn-danger btn-sm delete-purchase' data-id='${row.id}' title='سڕینەوە'><i class='fa fa-trash'></i></button>` : ''}`
-        ]);
+        // Force select2 to update its display
+        setTimeout(() => {
+            $(selectElement).trigger('change.select2');
+        }, 50);
+    } else {
+        // Regular select element
+        selectElement.value = value || '';
+        $(selectElement).trigger('change');
+    }
+}
+
+document.addEventListener('click', async function(e) {
+    if (e.target.closest('.edit-purchase')) {
+        const btn = e.target.closest('.edit-purchase');
+        const id = btn.dataset.id;
         
-        // Initialize DataTable
-        purchaseTable = new DataTable('#purchaseTable', {
-            data: tableData,
-            columns: [
-                { title: 'کۆمپانیا' },
-                { title: 'شوێن' },
-                { title: 'شۆفێر' },
-                { title: 'ژمارەی پسوڵە' },
-                { title: 'مەواد' },
-                { title: 'بەروار' },
-                { title: 'جۆری پارەدان' },
-                { title: 'جۆری دراو' },
-                { title: 'کیلۆگرام' },
-                { title: 'نرخی یەک کیلۆ بە دۆلار' },
-                { title: 'نرخی یەک کیلۆ بە دینار' },
-                { title: 'نرخ' },
-                { title: 'بڕی پارە بە دینار' },
-                { title: 'نرخی 100 دۆلار بە دینار' },
-                { title: 'پارەی دراو بە دۆلار' },
-                { title: 'پارەی دراو بە دینار' },
-                { title: 'پارەی ماوە بە دۆلار' },
-                { title: 'پارەی ماوە بە دینار' },
-                { title: 'چاو/سایلۆ' },
-                { title: 'کردارەکان' }
-            ],
-            language: {
-                "processing": "چاوەڕوان بە...",
-                "search": "گەڕان:",
-                "lengthMenu": "نیشاندان _MENU_ ڕیکۆرد",
-                "info": "نوێنراوە _START_ لە _END_ لە _TOTAL_ ڕیکۆرد",
-                "infoEmpty": "نوێنراوە 0 لە 0 لە 0 ڕیکۆرد",
-                "infoFiltered": "(فلتەرکراو لە _MAX_ کۆی ڕیکۆرد)",
-                "loadingRecords": "لۆدینگ...",
-                "zeroRecords": "هیچ ڕیکۆردێک نەدۆزرایەوە",
-                "emptyTable": "هیچ زانیارییەک لە خشتەکەدا نییە",
-                "paginate": {
-                    "first": "یەکەم",
-                    "previous": "پێشوو",
-                    "next": "دواتر",
-                    "last": "کۆتایی"
-                },
-                "aria": {
-                    "sortAscending": ": چالاککردن بۆ ڕیزکردنی ستون بەپێی زیادبوون",
-                    "sortDescending": ": چالاککردن بۆ ڕیزکردنی ستون بەپێی کەمبوون"
-                }
-            },
-            responsive: true,
-            pageLength: 10,
-            lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "هەموو"]],
-            order: [[5, 'desc']], // Sort by date descending
-            orderMulti: true, // Enable multi-column sorting
-            dom: 'Blfrtip', // Buttons, length menu, filter, table, info, pagination
-            paging: true,
-            pagingType: "simple_numbers",
-            buttons: [
-                {
-                    extend: 'copy',
-                    text: 'لەبەرگرتنەوە',
-                    className: 'btn btn-sm btn-outline-secondary'
-                },
-                {
-                    extend: 'csv',
-                    text: 'CSV',
-                    className: 'btn btn-sm btn-outline-secondary'
-                },
-                {
-                    extend: 'excel',
-                    text: 'Excel',
-                    className: 'btn btn-sm btn-outline-success'
-                },
-                {
-                    extend: 'print',
-                    text: 'پرینت',
-                    className: 'btn btn-sm btn-outline-primary'
-                }
-            ],
-            initComplete: function() {
-                // Add individual column search inputs
-                this.api().columns().every(function() {
-                    const column = this;
-                    const header = $(column.header());
+        try {
+            // وەرگرتنی زانیاری رکۆرد
+            const res = await fetch(`../process/purchase/select_purchase.php?id=${id}`);
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
+            
+            const text = await res.text();
+            console.log('Raw response for edit:', text);
+            
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (parseError) {
+                console.error('Failed to parse JSON:', parseError);
+                console.error('Raw response:', text);
+                Swal.fire('هەڵە!', 'هەڵەیەک لە وەڵامەکەی سێرڤەر هەیە', 'error');
+                return;
+            }
+            
+            if (!data || Object.keys(data).length === 0) {
+                Swal.fire('هەڵە!', 'هیچ داتایەک نەدۆزرایەوە', 'error');
+                return;
+            }
+            
+            console.log('Purchase data for edit:', data);
+            
+            // Show modal first
+            const modal = new bootstrap.Modal(document.getElementById('editPurchaseModal'));
+            modal.show();
+            
+            // Wait for modal to be fully shown, then initialize select2 and populate fields
+            $('#editPurchaseModal').off('shown.bs.modal.edit').on('shown.bs.modal.edit', function() {
+                // Initialize select2 for edit modal first
+                initializeEditModalSelect2();
+                
+                // Wait for select2 to be fully initialized, then populate fields
+                setTimeout(() => {
+                    // پڕکردنەوەی خانەکان
+                    const fieldMappings = {
+                        'id': 'edit_id',
+                        'company_id': 'edit_company_id',
+                        'driver_id': 'edit_driver_id',
+                        'location_id': 'edit_location_id',
+                        'invoice_number': 'edit_invoice_number',
+                        'material_id': 'edit_material_id',
+                        'bin_id': 'edit_bin_id',
+                        'date': 'edit_date',
+                        'type': 'edit_type',
+                        'kg': 'edit_kg',
+                        'price_per_kg_iqd': 'edit_price_per_kg_iqd',
+                        'price_per_kg_usd': 'edit_price_per_kg_usd',
+                        'exchange_rate': 'edit_exchange_rate',
+                        'payment_type': 'edit_payment_type',
+                        'price': 'edit_price',
+                        'amount_iqd': 'edit_amount_iqd',
+                        'paid_usd': 'edit_paid_usd',
+                        'paid_iqd': 'edit_paid_iqd',
+                        'remaining_usd': 'edit_remaining_usd',
+                        'remaining_iqd': 'edit_remaining_iqd'
+                    };
                     
-                    // Skip adding search to actions column
-                    if (header.text().includes('کردارەکان')) {
-                        return;
+                    for (const [dataKey, inputId] of Object.entries(fieldMappings)) {
+                        const input = document.getElementById(inputId);
+                        if (input) {
+                            let value = data[dataKey];
+                            
+                            // For select2 elements, we need to set the option text, not just the value
+                            if (input.tagName === 'SELECT') {
+                                if (inputId === 'edit_driver_id' && data.driver_name) {
+                                    // For driver, set the option text to match the name
+                                    $(input).find('option').each(function() {
+                                        if ($(this).text().trim() === data.driver_name) {
+                                            value = $(this).val();
+                                        }
+                                    });
+                                } else if (inputId === 'edit_location_id' && data.location_name) {
+                                    // For location, set the option text to match the name
+                                    $(input).find('option').each(function() {
+                                        if ($(this).text().trim() === data.location_name) {
+                                            value = $(this).val();
+                                        }
+                                    });
+                                } else if (inputId === 'edit_company_id' && data.company_name) {
+                                    // For company, set the option text to match the name
+                                    $(input).find('option').each(function() {
+                                        if ($(this).text().trim() === data.company_name) {
+                                            value = $(this).val();
+                                        }
+                                    });
+                                } else if (inputId === 'edit_material_id' && data.material_name) {
+                                    // For material, set the option text to match the name
+                                    $(input).find('option').each(function() {
+                                        if ($(this).text().trim() === data.material_name) {
+                                            value = $(this).val();
+                                        }
+                                    });
+                                } else if (inputId === 'edit_bin_id' && data.bin_name) {
+                                    // For bin, set the option text to match the name
+                                    $(input).find('option').each(function() {
+                                        if ($(this).text().trim() === data.bin_name) {
+                                            value = $(this).val();
+                                        }
+                                    });
+                                }
+                                
+                                setSelect2Value(input, value);
+                            } else {
+                                input.value = value ?? '';
+                            }
+                            console.log(`Setting ${inputId} to:`, value);
+                        } else {
+                            console.warn(`Input element not found: ${inputId}`);
+                        }
                     }
                     
-                    // Create search input
-                    const searchInput = $('<input>')
-                        .attr('type', 'text')
-                        .attr('placeholder', 'فلتەر...')
-                        .addClass('form-control form-control-sm mt-1 column-filter')
-                        .css({
-                            'width': '100%',
-                            'padding': '0.25rem 0.5rem',
-                            'border': '1px solid #ced4da',
-                            'border-radius': '0.25rem'
-                        });
+                    // Handle dynamic price per kg fields
+                    handleEditTypeChange();
                     
-                    // Add search input to header
-                    header.append(searchInput);
-                    
-                    // Apply search on keyup (Excel-like contains filter)
-                    searchInput.on('keyup change', function() {
-                        column.search(this.value).draw();
-                    });
-                });
-            }
-        });
-    } catch (error) {
-        console.error('Error loading purchases:', error);
-        $('#purchaseTable').html(`<tr><td colspan="21" class="text-danger text-center">هەڵە لە بارکردنی زانیاریەکان</td></tr>`);
+                    // Trigger change events for dynamic fields
+                    const typeSelect = document.getElementById('edit_type');
+                    if (typeSelect) {
+                        typeSelect.dispatchEvent(new Event('change'));
+                    }
+                }, 300);
+            });
+            
+        } catch (error) {
+            console.error('Error loading purchase for edit:', error);
+            Swal.fire('هەڵە!', 'هەڵەیەک لە وەرگرتنی داتاکان هەیە', 'error');
+        }
     }
+});
+
+async function loadPurchasesFiltered() {
+    const from = document.getElementById('filter_from').value;
+    const to = document.getElementById('filter_to').value;
+    
+    // Build request data
+    const requestData = new FormData();
+    if (from) requestData.append('from', from);
+    if (to) requestData.append('to', to);
+    
+    // Use POST method
+    const response = await fetch('../process/purchase/select_purchase.php', {
+        method: 'POST',
+        body: requestData
+    });
+    
+    const text = await response.text();
+    let data;
+    try {
+        const result = JSON.parse(text);
+        data = result.success ? result.data : result;
+    } catch (e) {
+        console.error('Raw response from select_purchase.php:', text);
+        alert('هەڵەیەک لە وەڵامەکەی سێرڤەر هەیە. زانیاری زیاتر لە console.');
+        return;
+    }
+    const columns = [
+        '#', 'company_name', 'location_name', 'driver_name', 'invoice_number', 'material_name', 'date',
+        'payment_type', 'type', 'kg', 'price_per_kg_usd', 'price_per_kg_iqd', 'price', 'amount_iqd', 'exchange_rate',
+        'paid_usd', 'paid_iqd', 'remaining_usd', 'remaining_iqd', 'bin_name', 'actions'
+    ];
+    function formatNumber(n) {
+        if (n === null || n === undefined || n === '') return '';
+        return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+    function formatUSD(n) {
+        if (!n || isNaN(n)) return '';
+        return formatNumber(Number(n).toFixed(2)) + ' $';
+    }
+    function formatIQD(n) {
+        if (!n || isNaN(n)) return '';
+        return formatNumber(Number(n).toFixed(0)) + ' د.ع';
+    }
+    const mapped = data.map((row, idx) => ({
+        '#': idx + 1,
+        company_name: row.company_name || '',
+        location_name: row.location_name || row.location || '',
+        driver_name: row.driver_name || row.driver || '',
+        invoice_number: row.invoice_number || '',
+        material_name: row.material_name || '',
+        date: row.date || '',
+        payment_type: row.payment_type || '',
+        type: row.type || '',
+        kg: formatNumber(row.kg),
+        price_per_kg_usd: formatUSD(row.price_per_kg_usd),
+        price_per_kg_iqd: formatIQD(row.price_per_kg_iqd),
+        price: row.type === 'دینار' ? formatIQD(row.price) : (row.type === 'دۆلار' ? formatUSD(row.price) : formatNumber(row.price)),
+        amount_iqd: formatIQD(row.amount_iqd),
+        exchange_rate: formatNumber(row.exchange_rate),
+        paid_usd: formatUSD(row.paid_usd),
+        paid_iqd: formatIQD(row.paid_iqd),
+        remaining_usd: formatUSD(row.remaining_usd),
+        remaining_iqd: formatIQD(row.remaining_iqd),
+        bin_name: row.bin_name || row.bin_id || '',
+        actions: `${window.userPermissions && window.userPermissions.canEdit ? `<button class='btn btn-primary btn-sm edit-purchase' data-id='${row.id}' title='دەستکاری'><i class='fa fa-edit'></i></button>` : ''} ${window.userPermissions && window.userPermissions.canDelete ? `<button class='btn btn-danger btn-sm delete-purchase' data-id='${row.id}' title='سڕینەوە'><i class='fa fa-trash'></i></button>` : ''}`
+    }));
+    TableController.renderWithPagination('#purchaseTable', mapped, columns, { pageSize: 10 });
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    loadPurchasesTable();
-});
+// Remove filter and clear button event listeners
+// Instead, filter automatically on input change
+const fromInput = document.getElementById('filter_from');
+const toInput = document.getElementById('filter_to');
+if (fromInput && toInput) {
+    fromInput.addEventListener('input', loadPurchasesFiltered);
+    toInput.addEventListener('input', loadPurchasesFiltered);
+}
 
-// Make it globally accessible for reload
-window.loadPurchases = function(filterParams, page, searchTerm) {
-    loadPurchasesTable(filterParams, searchTerm);
-};
+document.addEventListener('DOMContentLoaded', loadPurchases);
 
-// Alias for compatibility
-window.reloadPurchases = function(filterParams) {
-    loadPurchasesTable(filterParams);
-};
-
-// Filter event listeners
-$(document).ready(function() {
-    // Global search with debounce
-    $('#purchase_global_search').on('input', function() {
-        clearTimeout(window.purchaseSearchTimeout);
-        window.purchaseSearchTimeout = setTimeout(function() {
-            const searchTerm = $('#purchase_global_search').val();
-            const filterParams = buildFilterParams();
-            loadPurchasesTable(filterParams, searchTerm);
-        }, 500);
+const clearBtn = document.getElementById('clearFilterBtn');
+if (clearBtn) {
+    clearBtn.addEventListener('click', function() {
+        document.getElementById('filter_from').value = '';
+        document.getElementById('filter_to').value = '';
+        loadPurchasesFiltered();
     });
-    
-    // Add event listeners for all filters
-    $('#filter_company, #filter_location, #filter_driver, #filter_material, #filter_from, #filter_to').on('change', function() {
-        const filterParams = buildFilterParams();
-        const searchTerm = $('#purchase_global_search').val();
-        loadPurchasesTable(filterParams, searchTerm);
-    });
-    
-    // Clear all filters
-    $('#clearFilterBtn').on('click', function() {
-        $('#filter_company').val('');
-        $('#filter_location').val('');
-        $('#filter_driver').val('');
-        $('#filter_material').val('');
-        $('#filter_from').val('');
-        $('#filter_to').val('');
-        $('#purchase_global_search').val('');
-        loadPurchasesTable();
-    });
-});
-
-function buildFilterParams() {
-    const params = new URLSearchParams();
-    const companyId = $('#filter_company').val();
-    const locationId = $('#filter_location').val();
-    const driverId = $('#filter_driver').val();
-    const materialId = $('#filter_material').val();
-    const fromDate = $('#filter_from').val();
-    const toDate = $('#filter_to').val();
-    
-    if (companyId) params.append('company_id', companyId);
-    if (locationId) params.append('location_id', locationId);
-    if (driverId) params.append('driver_id', driverId);
-    if (materialId) params.append('material_id', materialId);
-    if (fromDate) params.append('from', fromDate);
-    if (toDate) params.append('to', toDate);
-    
-    return params.toString();
 }
