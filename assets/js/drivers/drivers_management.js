@@ -1,20 +1,47 @@
 // Drivers Management JavaScript
 $(document).ready(function() {
+    // Flag to prevent double submission
+    let isSubmitting = false;
+    
     // Load drivers when modal opens
     $('#driversManagementModal').on('shown.bs.modal', function() {
         loadDrivers();
     });
 
-    // Add driver form submission
-    $('#addDriverForm').on('submit', function(e) {
+    // Add driver form submission - Remove existing listeners first to prevent duplicates
+    $('#addDriverForm').off('submit').on('submit', function(e) {
         e.preventDefault();
+        
+        // Prevent double submission
+        if (isSubmitting) {
+            return false;
+        }
+        
+        isSubmitting = true;
         addDriver();
+        
+        // Reset flag after a delay
+        setTimeout(function() {
+            isSubmitting = false;
+        }, 2000);
     });
 
-    // Edit driver form submission
-    $('#editDriverForm').on('submit', function(e) {
+    // Edit driver form submission - Remove existing listeners first to prevent duplicates
+    $('#editDriverForm').off('submit').on('submit', function(e) {
         e.preventDefault();
+        
+        // Prevent double submission
+        if (isSubmitting) {
+            return false;
+        }
+        
+        isSubmitting = true;
         updateDriver();
+        
+        // Reset flag after a delay
+        setTimeout(function() {
+            isSubmitting = false;
+        }, 2000);
     });
 
     // Load drivers function
@@ -76,6 +103,7 @@ $(document).ready(function() {
             data: formData,
             dataType: 'json',
             success: function(response) {
+                isSubmitting = false; // Reset flag on success
                 if (response.success) {
                     showSuccess('شۆفێر بە سەرکەوتوویی زیاد کرا');
                     $('#addDriverForm')[0].reset();
@@ -87,6 +115,7 @@ $(document).ready(function() {
                 }
             },
             error: function() {
+                isSubmitting = false; // Reset flag on error
                 showError('هەڵە لە زیادکردنی شۆفێر');
             }
         });
@@ -106,6 +135,7 @@ $(document).ready(function() {
             data: formData,
             dataType: 'json',
             success: function(response) {
+                isSubmitting = false; // Reset flag on success
                 if (response.success) {
                     showSuccess('شۆفێر بە سەرکەوتوویی نوێکرایەوە');
                     $('#editDriverModal').modal('hide');
@@ -117,6 +147,7 @@ $(document).ready(function() {
                 }
             },
             error: function() {
+                isSubmitting = false; // Reset flag on error
                 showError('هەڵە لە نوێکردنەوەی شۆفێر');
             }
         });
