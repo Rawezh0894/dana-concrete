@@ -432,10 +432,17 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
           </div>
           <div class="row">
             <div class="col-md-6 mb-3">
+              <label for="total_weight" class="form-label">کێشی گشتی (کگم)</label>
+              <input type="number" class="form-control" id="total_weight" min="0" step="0.01" placeholder="کێشی گشتی">
+      
+            </div>
+            <div class="col-md-6 mb-3">
               <label for="kg" class="form-label">چەند کیلۆ</label>
               <input type="number" class="form-control" id="kg" name="kg" min="0" step="0.01" required>
             </div>
-            <div class="col-md-6 mb-3">
+          </div>
+          <div class="row">
+            <div class="col-md-12 mb-3">
                 <div id="pricePerKgIqdGroup">
                     <label for="price_per_kg_iqd" class="form-label">نرخی یەک طەن بە دینار</label>
                     <input type="number" class="form-control" id="price_per_kg_iqd" name="price_per_kg_iqd" min="0" step="0.01" value="0">
@@ -929,6 +936,100 @@ $(document).ready(function() {
     
     // Apply filters on page load (shows all records by default)
     setTimeout(applyFilters, 100);
+});
+
+// Load drivers data with load_capacity for automatic kg calculation
+let driversData = {};
+
+function loadDriversData() {
+    $.ajax({
+        url: '../process/drivers/select_drivers.php',
+        method: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                // Store drivers data in an object for quick lookup
+                driversData = {};
+                response.data.forEach(driver => {
+                    driversData[driver.id] = {
+                        id: driver.id,
+                        name: driver.name,
+                        load_capacity: driver.load_capacity ? parseFloat(driver.load_capacity) : 0
+                    };
+                });
+            }
+        },
+        error: function() {
+            console.error('هەڵە لە وەرگرتنی زانیارییەکانی شۆفێرەکان');
+        }
+    });
+}
+
+// Calculate kg automatically when total_weight is entered
+function calculateKgFromTotalWeight() {
+    const driverId = $('#driver_id').val();
+    const totalWeight = parseFloat($('#total_weight').val()) || 0;
+    
+    if (!driverId) {
+        // If no driver selected, show a message
+        if (totalWeight > 0) {
+            $('#total_weight').addClass('is-invalid');
+            return;
+        } else {
+            $('#total_weight').removeClass('is-invalid');
+            return;
+        }
+    }
+    
+    $('#total_weight').removeClass('is-invalid');
+    
+    const driver = driversData[driverId];
+    if (!driver) {
+        console.error('شۆفێر نەدۆزرایەوە');
+        return;
+    }
+    
+    const loadCapacity = driver.load_capacity || 0;
+    
+    if (totalWeight > 0 && loadCapacity > 0) {
+        const calculatedKg = totalWeight - loadCapacity;
+        if (calculatedKg >= 0) {
+            $('#kg').val(calculatedKg.toFixed(2));
+            // Trigger the amount calculation
+            $('#kg').trigger('input');
+        } else {
+            // If calculated value is negative, show warning but still set it
+            $('#kg').val(calculatedKg.toFixed(2));
+            $('#kg').trigger('input');
+        }
+    } else if (totalWeight > 0 && loadCapacity === 0) {
+        // If driver has no load capacity, use total weight as kg
+        $('#kg').val(totalWeight.toFixed(2));
+        $('#kg').trigger('input');
+    }
+}
+
+// Load drivers data when modal opens
+$('#addPurchaseModal').on('shown.bs.modal', function() {
+    loadDriversData();
+});
+
+// Listen for driver selection change
+$(document).on('change', '#driver_id', function() {
+    // Recalculate kg if total_weight already has a value
+    if ($('#total_weight').val()) {
+        calculateKgFromTotalWeight();
+    }
+});
+
+// Listen for total_weight input
+$(document).on('input', '#total_weight', function() {
+    calculateKgFromTotalWeight();
+});
+
+// Load drivers data on page load
+$(document).ready(function() {
+    loadDriversData();
 });
 </script>
 </body>
