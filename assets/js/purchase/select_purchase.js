@@ -16,10 +16,23 @@ function formatIQD(n) {
 }
 
 async function loadPurchasesTable(filterParams = '', searchTerm = '') {
-    // Destroy existing table if it exists
+    // Destroy existing table if it exists - check if DataTable is already initialized
     if (purchaseTable) {
-        purchaseTable.destroy();
+        try {
+            purchaseTable.destroy();
+        } catch (e) {
+            console.log('Error destroying table:', e);
+        }
         purchaseTable = null;
+    }
+    
+    // Also check if DataTable is already initialized on the element
+    if ($.fn.DataTable.isDataTable('#purchaseTable')) {
+        try {
+            $('#purchaseTable').DataTable().destroy();
+        } catch (e) {
+            console.log('Error destroying existing DataTable:', e);
+        }
     }
     
     // Clear and prepare table structure
@@ -147,10 +160,12 @@ async function loadPurchasesTable(filterParams = '', searchTerm = '') {
             },
             responsive: true,
             pageLength: 10,
-            lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+            lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "هەموو"]],
             order: [[5, 'desc']], // Sort by date descending
             orderMulti: true, // Enable multi-column sorting
-            dom: 'Bfrtip', // Buttons, filter, table, info, pagination
+            dom: 'Blfrtip', // Buttons, length menu, filter, table, info, pagination
+            paging: true,
+            pagingType: "simple_numbers",
             buttons: [
                 {
                     extend: 'copy',

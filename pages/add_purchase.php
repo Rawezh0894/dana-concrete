@@ -1124,7 +1124,7 @@ $(document).ready(function() {
         }
     });
     
-    // Function to apply all filters
+    // Function to apply all filters - now uses DataTables
     function applyFilters() {
         const companyId = $('#filter_company').val();
         const locationId = $('#filter_location').val();
@@ -1143,8 +1143,10 @@ $(document).ready(function() {
         if (fromDate) params.append('from', fromDate);
         if (toDate) params.append('to', toDate);
         
-        // Call the existing loadPurchases function with filters, page 1, and search term
-        if (typeof loadPurchases === 'function') {
+        // Call loadPurchasesTable with filters and search term
+        if (typeof loadPurchasesTable === 'function') {
+            loadPurchasesTable(params.toString(), searchTerm);
+        } else if (typeof loadPurchases === 'function') {
             loadPurchases(params.toString(), 1, searchTerm);
         }
         
