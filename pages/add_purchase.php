@@ -919,7 +919,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="../assets/js/swalAlert.js"></script>
-
+<script src="../assets/js/comon/table-controler.js"></script>
 <script src="../assets/js/comon/select2_script.js"></script>
 <script>
     // Pass permissions to JavaScript
