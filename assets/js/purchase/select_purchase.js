@@ -20,8 +20,10 @@ async function loadPurchasesTable(filterParams = '', searchTerm = '') {
     if (purchaseTable) {
         purchaseTable.destroy();
         purchaseTable = null;
-        $('#purchaseTable').empty();
     }
+    
+    // Clear and prepare table structure
+    $('#purchaseTable').empty();
     
     try {
         // Build request data

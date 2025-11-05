@@ -550,34 +550,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
     </div>
     <div class="table-responsive">
         <table class="table table-bordered table-hover align-middle text-center" id="purchaseTable">
-            <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
-                <tr>
-                    <th>#</th>
-                    <th>کۆمپانیا</th>
-                    <th>شوێن</th>
-                    <th>شۆفێر</th>
-                    <th>ژمارەی پسوڵە</th>
-                    <th>مەواد</th>
-                    <th>بەروار</th>
-                    <th>جۆری پارەدان</th>
-                    <th>جۆری دراو</th>
-                    <th>کیلۆگرام</th>
-                    <th>نرخی یەک کیلۆ بە دۆلار</th>
-                    <th>نرخی یەک کیلۆ بە دینار</th>
-                    <th>نرخ</th>
-                    <th>بڕی پارە بە دینار</th>
-                    <th>نرخی 100 دۆلار بە دینار</th>
-                    <th>پارەی دراو بە دۆلار</th>
-                    <th>پارەی دراو بە دینار</th>
-                    <th>پارەی ماوە بە دۆلار</th>
-                    <th>پارەی ماوە بە دینار</th>
-                    <th>چاو/سایلۆ</th>
-                    <th>کردارەکان</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Purchases will be loaded here by JS -->
-            </tbody>
+            <!-- DataTables will build the table structure -->
         </table>
     </div>
 </div>
