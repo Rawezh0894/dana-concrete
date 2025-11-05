@@ -651,7 +651,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
             <h6 class="mb-0">زیادکردنی شۆفێری نوێ</h6>
           </div>
           <div class="card-body">
-            <form id="addDriverForm">
+            <form id="addDriverFormManagement">
               <div class="row">
                 <div class="col-md-6">
                   <label for="driver_name" class="form-label">ناوی شۆفێر</label>

@@ -9,7 +9,7 @@ $(document).ready(function() {
     });
 
     // Add driver form submission - Remove existing listeners first to prevent duplicates
-    $('#addDriverForm').off('submit').on('submit', function(e) {
+    $('#addDriverFormManagement').off('submit').on('submit', function(e) {
         e.preventDefault();
         
         // Prevent double submission
@@ -106,7 +106,7 @@ $(document).ready(function() {
                 isSubmitting = false; // Reset flag on success
                 if (response.success) {
                     showSuccess('شۆفێر بە سەرکەوتوویی زیاد کرا');
-                    $('#addDriverForm')[0].reset();
+                    $('#addDriverFormManagement')[0].reset();
                     loadDrivers();
                     // Refresh driver select in purchase form
                     refreshDriverSelects();
