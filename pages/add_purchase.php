@@ -149,6 +149,24 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
             border-top-right-radius: 6px !important;
             border-bottom-right-radius: 6px !important;
         }
+        
+        /* Fix for select2 in flexbox layout */
+        .d-flex .select2-container {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+        
+        .d-flex .select2-container--default {
+            width: 100% !important;
+        }
+        
+        /* Ensure button has fixed width and proper alignment */
+        .d-flex .btn.flex-shrink-0 {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 38px;
+        }
     </style>
     <!-- jQuery (پێش هەموو شت) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -379,14 +397,16 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
           <div class="row">
           <div class="col-md-6 mb-3">
               <label for="location_id" class="form-label">شوێن</label>
-              <div class="input-group">
-                <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#addLocationModal" style="background: var(--seafoam-green); color: white; font-weight: bold;">+</button>
-                <select class="form-select select2" id="location_id" name="location_id" required>
+              <div class="d-flex gap-2">
+                <select class="form-select select2 flex-grow-1" id="location_id" name="location_id" required>
                   <option value="">شوێن</option>
                   <?php foreach ($locations as $loc): ?>
                     <option value="<?= $loc['id'] ?>"><?= htmlspecialchars($loc['name']) ?></option>
                   <?php endforeach; ?>
                 </select>
+                <button type="button" class="btn flex-shrink-0" data-bs-toggle="modal" data-bs-target="#addLocationModal" style="background: var(--seafoam-green); color: white; font-weight: bold; width: 45px; padding: 0;">
+                  <i class="fas fa-plus"></i>
+                </button>
               </div>
             </div>
             <div class="col-md-6 mb-3">
