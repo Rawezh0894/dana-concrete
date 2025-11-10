@@ -55,36 +55,61 @@ try {
         $usd_iqd_rate = $api_rate;
     }
     
-    // USD - Fix SQL query to properly combine WHERE clauses
-    $usd_where = $whereSql;
-    if ($usd_where) {
-        $usd_where .= " AND currency='دۆلار'";
-    } else {
-        $usd_where = "WHERE currency='دۆلار'";
+    // Build WHERE clause for USD with currency filter
+    $usd_where = [];
+    $usd_params = [];
+    if ($from) {
+        $usd_where[] = 'date >= ?';
+        $usd_params[] = $from;
     }
-    $sql_usd = "SELECT SUM(CASE WHEN type='deposit' THEN amount_usd ELSE -amount_usd END) as total_usd FROM cash_box $usd_where";
+    if ($to) {
+        $usd_where[] = 'date <= ?';
+        $usd_params[] = $to;
+    }
+    $usd_where[] = "currency='دۆلار'";
+    $usd_whereSql = 'WHERE ' . implode(' AND ', $usd_where);
+    
+    // Build WHERE clause for IQD with currency filter
+    $iqd_where = [];
+    $iqd_params = [];
+    if ($from) {
+        $iqd_where[] = 'date >= ?';
+        $iqd_params[] = $from;
+    }
+    if ($to) {
+        $iqd_where[] = 'date <= ?';
+        $iqd_params[] = $to;
+    }
+    $iqd_where[] = "currency='دینار'";
+    $iqd_whereSql = 'WHERE ' . implode(' AND ', $iqd_where);
+    
+    // Calculate USD total
+    $sql_usd = "SELECT COALESCE(SUM(CASE WHEN type='deposit' THEN amount_usd ELSE -amount_usd END), 0) as total_usd FROM cash_box $usd_whereSql";
     $stmt_usd = $pdo->prepare($sql_usd);
-    $stmt_usd->execute($params);
-    $total_usd = $stmt_usd->fetchColumn() ?: 0;
+    $stmt_usd->execute($usd_params);
+    $total_usd = floatval($stmt_usd->fetchColumn() ?: 0);
     
-    // IQD - Fix SQL query to properly combine WHERE clauses
-    $iqd_where = $whereSql;
-    if ($iqd_where) {
-        $iqd_where .= " AND currency='دینار'";
-    } else {
-        $iqd_where = "WHERE currency='دینار'";
-    }
-    $sql_iqd = "SELECT SUM(CASE WHEN type='deposit' THEN amount_iqd ELSE -amount_iqd END) as total_iqd FROM cash_box $iqd_where";
+    // Calculate IQD total
+    $sql_iqd = "SELECT COALESCE(SUM(CASE WHEN type='deposit' THEN amount_iqd ELSE -amount_iqd END), 0) as total_iqd FROM cash_box $iqd_whereSql";
     $stmt_iqd = $pdo->prepare($sql_iqd);
-    $stmt_iqd->execute($params);
-    $total_iqd = $stmt_iqd->fetchColumn() ?: 0;
+    $stmt_iqd->execute($iqd_params);
+    $total_iqd = floatval($stmt_iqd->fetchColumn() ?: 0);
     
-    // Convert IQD to USD using API rate
-    $iqd_to_usd = $usd_iqd_rate > 0 ? ($total_iqd / ($usd_iqd_rate / 100)) : 0;
+    // Convert IQD to USD using API rate (100 USD = usd_iqd_rate IQD)
+    // So 1 USD = (usd_iqd_rate / 100) IQD
+    // Therefore: IQD amount in USD = total_iqd / (usd_iqd_rate / 100)
+    $iqd_to_usd = 0;
+    if ($usd_iqd_rate > 0 && $total_iqd > 0) {
+        $iqd_to_usd = $total_iqd / ($usd_iqd_rate / 100);
+    }
+    
     $total_usd_all = round($total_usd + $iqd_to_usd, 2);
     
     echo json_encode(['success' => true, 'data' => [
         'total_usd_all' => $total_usd_all,
+        'total_usd' => $total_usd,
+        'total_iqd' => $total_iqd,
+        'iqd_to_usd' => $iqd_to_usd,
         'usd_iqd_rate' => $usd_iqd_rate
     ]]);
 } catch (Exception $e) {
