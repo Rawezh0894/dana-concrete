@@ -133,14 +133,16 @@ try {
     $stmt->execute([$person_id]);
     $rem_purchases = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    $total_available_usd = floatval($person['opening_debt_usd']) + floatval($rem_expenses['rem_usd']) + floatval($rem_purchases['rem_usd']);
-    $total_available_iqd = floatval($person['opening_debt_iqd']) + floatval($rem_expenses['rem_iqd']) + floatval($rem_purchases['rem_iqd']);
+    $total_available_usd = round(floatval($person['opening_debt_usd']) + floatval($rem_expenses['rem_usd']) + floatval($rem_purchases['rem_usd']), 2);
+    $total_available_iqd = round(floatval($person['opening_debt_iqd']) + floatval($rem_expenses['rem_iqd']) + floatval($rem_purchases['rem_iqd']), 2);
 
-    $total_reduction_usd = $amount_usd + $discount_usd;
-    $total_reduction_iqd = $amount_iqd + $discount_iqd;
+    $total_reduction_usd = round($amount_usd + $discount_usd, 2);
+    $total_reduction_iqd = round($amount_iqd + $discount_iqd, 2);
 
-    if (($total_reduction_usd > 0 && $total_reduction_usd > $total_available_usd) ||
-        ($total_reduction_iqd > 0 && $total_reduction_iqd > $total_available_iqd)) {
+    if (
+        ($total_reduction_usd > 0 && $total_reduction_usd - $total_available_usd > 0.0001) ||
+        ($total_reduction_iqd > 0 && $total_reduction_iqd - $total_available_iqd > 0.0001)
+    ) {
         throw new Exception('نابێت بڕی پارە/داشکاندن زیاتر بێت لە بڕی قەرز!');
     }
 

@@ -34,11 +34,14 @@ try {
     $stmt->execute([$person_id]);
     $rem_purchases = $stmt->fetch(PDO::FETCH_ASSOC);
     
-    $total_usd_available = floatval($person['opening_debt_usd']) + floatval($rem_expenses['rem_usd']) + floatval($rem_purchases['rem_usd']);
-    $total_iqd_available = floatval($person['opening_debt_iqd']) + floatval($rem_expenses['rem_iqd']) + floatval($rem_purchases['rem_iqd']);
-    $total_usd_reduction = $amount_usd + $discount_usd;
-    $total_iqd_reduction = $amount_iqd + $discount_iqd;
-    if (($total_usd_reduction > 0 && $total_usd_reduction > $total_usd_available) || ($total_iqd_reduction > 0 && $total_iqd_reduction > $total_iqd_available)) {
+    $total_usd_available = round(floatval($person['opening_debt_usd']) + floatval($rem_expenses['rem_usd']) + floatval($rem_purchases['rem_usd']), 2);
+    $total_iqd_available = round(floatval($person['opening_debt_iqd']) + floatval($rem_expenses['rem_iqd']) + floatval($rem_purchases['rem_iqd']), 2);
+    $total_usd_reduction = round($amount_usd + $discount_usd, 2);
+    $total_iqd_reduction = round($amount_iqd + $discount_iqd, 2);
+    if (
+        ($total_usd_reduction > 0 && $total_usd_reduction - $total_usd_available > 0.0001) ||
+        ($total_iqd_reduction > 0 && $total_iqd_reduction - $total_iqd_available > 0.0001)
+    ) {
         echo json_encode(['success' => false, 'msg' => 'نابێت بڕی پارەی گەرەوا زیاتر بێت لە بڕی قەرز!']);
         $pdo->rollBack();
         exit;
