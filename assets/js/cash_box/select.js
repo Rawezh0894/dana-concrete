@@ -27,6 +27,8 @@ function mapCashBoxRow(row, idx) {
     };
 }
 
+let cashBoxTableInitialized = false;
+
 function loadCashBoxEntriesFiltered() {
     var from = $('#filter_from').val();
     var to = $('#filter_to').val();
@@ -35,6 +37,12 @@ function loadCashBoxEntriesFiltered() {
     if (from) params.push('from=' + encodeURIComponent(from));
     if (to) params.push('to=' + encodeURIComponent(to));
     if (params.length) url += '?' + params.join('&');
+    
+    // Clear previous pagination and page size selector
+    const tableContainer = $('#cashBoxTable').closest('.table-responsive').parent();
+    tableContainer.find('.page-size-selector').remove();
+    tableContainer.find('.table-pagination').remove();
+    
     $.ajax({
         url: url,
         method: 'GET',
@@ -45,6 +53,7 @@ function loadCashBoxEntriesFiltered() {
                 var mapped = data.map(mapCashBoxRow);
                 var columns = ['#', 'date', 'type', 'in_out', 'amount_iqd', 'amount_usd', 'currency', 'note', 'created_by_username', 'created_at', 'actions'];
                 TableController.renderWithPagination('#cashBoxTable', mapped, columns, { pageSize: 10 });
+                cashBoxTableInitialized = true;
             } else {
                 TableController.renderWithPagination('#cashBoxTable', [], ['#', 'date', 'type', 'in_out', 'amount_iqd', 'amount_usd', 'currency', 'note', 'created_by_username', 'created_at', 'actions'], { pageSize: 10 });
                 Swal.fire('هەڵە!', response.error || 'ناتوانرێت زانیاری بخوێنرێتەوە', 'error');

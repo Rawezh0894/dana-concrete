@@ -55,15 +55,27 @@ try {
         $usd_iqd_rate = $api_rate;
     }
     
-    // USD
-    $sql_usd = "SELECT SUM(CASE WHEN type='deposit' THEN amount_usd ELSE -amount_usd END) as total_usd FROM cash_box $whereSql WHERE currency='دۆلار'";
-    $stmt_usd = $pdo->prepare(str_replace('WHERE WHERE', 'WHERE', $sql_usd));
+    // USD - Fix SQL query to properly combine WHERE clauses
+    $usd_where = $whereSql;
+    if ($usd_where) {
+        $usd_where .= " AND currency='دۆلار'";
+    } else {
+        $usd_where = "WHERE currency='دۆلار'";
+    }
+    $sql_usd = "SELECT SUM(CASE WHEN type='deposit' THEN amount_usd ELSE -amount_usd END) as total_usd FROM cash_box $usd_where";
+    $stmt_usd = $pdo->prepare($sql_usd);
     $stmt_usd->execute($params);
     $total_usd = $stmt_usd->fetchColumn() ?: 0;
     
-    // IQD
-    $sql_iqd = "SELECT SUM(CASE WHEN type='deposit' THEN amount_iqd ELSE -amount_iqd END) as total_iqd FROM cash_box $whereSql WHERE currency='دینار'";
-    $stmt_iqd = $pdo->prepare(str_replace('WHERE WHERE', 'WHERE', $sql_iqd));
+    // IQD - Fix SQL query to properly combine WHERE clauses
+    $iqd_where = $whereSql;
+    if ($iqd_where) {
+        $iqd_where .= " AND currency='دینار'";
+    } else {
+        $iqd_where = "WHERE currency='دینار'";
+    }
+    $sql_iqd = "SELECT SUM(CASE WHEN type='deposit' THEN amount_iqd ELSE -amount_iqd END) as total_iqd FROM cash_box $iqd_where";
+    $stmt_iqd = $pdo->prepare($sql_iqd);
     $stmt_iqd->execute($params);
     $total_iqd = $stmt_iqd->fetchColumn() ?: 0;
     

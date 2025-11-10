@@ -140,20 +140,28 @@ const TableController = {
         let currentPage = options.currentPage || 1;
         let pageSize = options.pageSize || 10;
 
-        // Create page size selector if not exists
-        let sizeSelect = table.parentElement.querySelector('.page-size-selector');
-        if (!sizeSelect) {
-            sizeSelect = document.createElement('select');
-            sizeSelect.className = 'form-select form-select-sm page-size-selector d-inline-block w-auto ms-2';
-            sizeSelect.innerHTML = `
-                <option value="10">10</option>
-                <option value="25">25</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-            `;
-            sizeSelect.value = pageSize;
+        // Remove existing page size selector and pagination to prevent duplicates
+        const tableContainer = table.closest('.table-responsive') || table.parentElement;
+        const existingSizeSelect = tableContainer.querySelector('.page-size-selector');
+        const existingPagination = tableContainer.querySelector('.table-pagination');
+        if (existingSizeSelect) existingSizeSelect.remove();
+        if (existingPagination) existingPagination.remove();
 
-            // Insert before the table
+        // Create page size selector
+        let sizeSelect = document.createElement('select');
+        sizeSelect.className = 'form-select form-select-sm page-size-selector d-inline-block w-auto ms-2 mb-2';
+        sizeSelect.innerHTML = `
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+        `;
+        sizeSelect.value = pageSize;
+
+        // Insert before the table-responsive or table
+        if (table.closest('.table-responsive')) {
+            table.closest('.table-responsive').parentElement.insertBefore(sizeSelect, table.closest('.table-responsive'));
+        } else {
             table.parentElement.insertBefore(sizeSelect, table);
         }
 
@@ -238,11 +246,16 @@ const TableController = {
         }
 
         function renderPaginationControls(totalPages) {
-            let pagination = table.parentElement.querySelector('.table-pagination');
+            const tableContainer = table.closest('.table-responsive') || table.parentElement;
+            let pagination = tableContainer.querySelector('.table-pagination');
             if (!pagination) {
                 pagination = document.createElement('div');
                 pagination.className = 'table-pagination mt-3';
-                table.parentElement.appendChild(pagination);
+                if (table.closest('.table-responsive')) {
+                    table.closest('.table-responsive').parentElement.appendChild(pagination);
+                } else {
+                    table.parentElement.appendChild(pagination);
+                }
             }
             pagination.innerHTML = '';
             
