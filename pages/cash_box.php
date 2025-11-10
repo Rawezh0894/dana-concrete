@@ -56,6 +56,11 @@ if (!hasPermission('view_cash_box')) {
             <?php if (hasPermission('add_cash_box')): ?>
             <button class="btn" data-bs-toggle="modal" data-bs-target="#addCashBoxModal" style="background: var(--seafoam-green); color:white; font-weight: bold;">+ زیادکردن</button>
             <?php endif; ?>
+            <?php if (isset($_SESSION['role']) && ($_SESSION['role'] === 'admin' || hasPermission('delete_cash_box'))): ?>
+            <button class="btn btn-danger me-2" id="clearAllCashBoxBtn" style="font-weight: bold;" title="سڕینەوەی هەموو ریکۆردەکانی قاسە">
+                <i class="fas fa-trash-alt me-1"></i>سڕینەوەی هەموو ریکۆردەکان
+            </button>
+            <?php endif; ?>
         </div>
     </div>
     <!-- Summary Cards -->
