@@ -167,11 +167,6 @@ document.getElementById('addDebtForm').onsubmit = async function(e) {
             if (typeof loadDebts === 'function') loadDebts();
             if (typeof loadPurchases === 'function') loadPurchases();
             if (typeof loadCompanyInfoCards === 'function') loadCompanyInfoCards();
-            
-            // Also refresh the debt table if it's currently visible
-            if ($('#debt').hasClass('active')) {
-                loadDebts();
-            }
         } else {
             console.error('Server error:', data.msg);
             Swal.fire('هەڵە!', data.msg || 'هەڵەیەک ڕویدا', 'error');

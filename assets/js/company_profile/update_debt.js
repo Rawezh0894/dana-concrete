@@ -54,11 +54,6 @@ $('#editDebtForm').on('submit', function(e) {
             if (typeof loadDebts === 'function') loadDebts();
             if (typeof loadPurchases === 'function') loadPurchases();
             if (typeof loadCompanyInfoCards === 'function') loadCompanyInfoCards();
-            
-            // Also refresh the debt table if it's currently visible
-            if ($('#debt').hasClass('active')) {
-                loadDebts();
-            }
         } else {
             Swal.fire('هەڵە!', res.msg || 'هەڵەیەک ڕویدا', 'error');
         }
