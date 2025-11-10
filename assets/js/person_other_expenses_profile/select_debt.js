@@ -140,14 +140,28 @@ async function loadDebtPayments() {
                 // Attach edit and delete event handlers
                 $(row).find('button.edit-debt').off('click').on('click', function() {
         const btn = $(this);
+        const amountUsd = parseFloat(btn.data('amount_usd')) || 0;
+        const discountUsd = parseFloat(btn.data('discount_usd')) || 0;
+        const amountIqd = parseFloat(btn.data('amount_iqd')) || 0;
+        const discountIqd = parseFloat(btn.data('discount_iqd')) || 0;
+
         $('#edit_debt_id').val(btn.data('id'));
         $('#edit_debt_date').val(btn.data('date'));
-        $('#edit_debt_amount_usd').val(btn.data('amount_usd') ?? 0);
-        $('#edit_debt_discount_usd').val(btn.data('discount_usd') ?? 0);
-        $('#edit_debt_amount_iqd').val(btn.data('amount_iqd') ?? 0);
-        $('#edit_debt_discount_iqd').val(btn.data('discount_iqd') ?? 0);
+        $('#edit_debt_amount_usd').val(amountUsd);
+        $('#edit_debt_discount_usd').val(discountUsd);
+        $('#edit_debt_amount_iqd').val(amountIqd);
+        $('#edit_debt_discount_iqd').val(discountIqd);
         $('#edit_debt_note').val(btn.data('note'));
+
         $('#editDebtModal').modal('show');
+        if (typeof setupEditDebtModal === 'function') {
+            setupEditDebtModal({
+                amount_usd: amountUsd,
+                discount_usd: discountUsd,
+                amount_iqd: amountIqd,
+                discount_iqd: discountIqd
+            });
+        }
     });
                 
                 $(row).find('button.delete-debt').off('click').on('click', function() {

@@ -1,5 +1,57 @@
 // Multiple submission prevention flag
 let isUpdating = false;
+let editDebtBaseUSD = 0;
+let editDebtBaseIQD = 0;
+
+function formatNumber(value) {
+    return Number.isFinite(value) ? Number(value).toFixed(2) : '0.00';
+}
+
+function updateEditDebtSummaryFields() {
+    const amountUSD = parseFloat($('#edit_debt_amount_usd').val()) || 0;
+    const discountUSD = parseFloat($('#edit_debt_discount_usd').val()) || 0;
+    const amountIQD = parseFloat($('#edit_debt_amount_iqd').val()) || 0;
+    const discountIQD = parseFloat($('#edit_debt_discount_iqd').val()) || 0;
+
+    const remainingUSD = Math.max(editDebtBaseUSD - amountUSD - discountUSD, 0);
+    const remainingIQD = Math.max(editDebtBaseIQD - amountIQD - discountIQD, 0);
+
+    $('#edit_debt_remaining_usd').val(formatNumber(remainingUSD));
+    $('#edit_debt_remaining_iqd').val(formatNumber(remainingIQD));
+}
+
+function fetchDebtTotalsForEditModal(oldValues) {
+    if (typeof PERSON_ID === 'undefined' || !PERSON_ID) {
+        editDebtBaseUSD = (oldValues.amount_usd || 0) + (oldValues.discount_usd || 0);
+        editDebtBaseIQD = (oldValues.amount_iqd || 0) + (oldValues.discount_iqd || 0);
+        updateEditDebtSummaryFields();
+        return;
+    }
+
+    $.getJSON('../process/person_other_expenses_profile/get_debt_totals.php', { person_id: PERSON_ID })
+        .done(function(response) {
+            if (response && response.success && response.data) {
+                const currentUSD = parseFloat(response.data.total_debt_usd) || 0;
+                const currentIQD = parseFloat(response.data.total_debt_iqd) || 0;
+                editDebtBaseUSD = currentUSD + (oldValues.amount_usd || 0) + (oldValues.discount_usd || 0);
+                editDebtBaseIQD = currentIQD + (oldValues.amount_iqd || 0) + (oldValues.discount_iqd || 0);
+            } else {
+                editDebtBaseUSD = (oldValues.amount_usd || 0) + (oldValues.discount_usd || 0);
+                editDebtBaseIQD = (oldValues.amount_iqd || 0) + (oldValues.discount_iqd || 0);
+            }
+        })
+        .fail(function() {
+            editDebtBaseUSD = (oldValues.amount_usd || 0) + (oldValues.discount_usd || 0);
+            editDebtBaseIQD = (oldValues.amount_iqd || 0) + (oldValues.discount_iqd || 0);
+        })
+        .always(function() {
+            updateEditDebtSummaryFields();
+        });
+}
+
+window.setupEditDebtModal = function(oldValues) {
+    fetchDebtTotalsForEditModal(oldValues || {});
+};
 
 $('#editDebtForm').on('submit', function(e) {
     e.preventDefault();
@@ -33,4 +85,15 @@ $('#editDebtForm').on('submit', function(e) {
         submitBtn.prop('disabled', false);
         submitBtn.html(originalBtnText);
     });
+});
+
+$('#editDebtModal').on('hidden.bs.modal', function() {
+    editDebtBaseUSD = 0;
+    editDebtBaseIQD = 0;
+    $('#edit_debt_remaining_usd').val('0.00');
+    $('#edit_debt_remaining_iqd').val('0.00');
+});
+
+$('#edit_debt_amount_usd, #edit_debt_discount_usd, #edit_debt_amount_iqd, #edit_debt_discount_iqd').on('input', function() {
+    updateEditDebtSummaryFields();
 });

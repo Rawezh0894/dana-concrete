@@ -1,5 +1,51 @@
 // Multiple submission prevention flag
 let submitting = false;
+let totalDebtUSD = 0;
+let totalDebtIQD = 0;
+
+function formatNumber(value) {
+    return Number.isFinite(value) ? Number(value).toFixed(2) : '0.00';
+}
+
+function updateAddDebtSummaryFields() {
+    const amountUSD = parseFloat($('#debt_amount_usd').val()) || 0;
+    const discountUSD = parseFloat($('#debt_discount_usd').val()) || 0;
+    const amountIQD = parseFloat($('#debt_amount_iqd').val()) || 0;
+    const discountIQD = parseFloat($('#debt_discount_iqd').val()) || 0;
+
+    const remainingUSD = Math.max(totalDebtUSD - amountUSD - discountUSD, 0);
+    const remainingIQD = Math.max(totalDebtIQD - amountIQD - discountIQD, 0);
+
+    $('#debt_remaining_usd').val(formatNumber(remainingUSD));
+    $('#debt_remaining_iqd').val(formatNumber(remainingIQD));
+}
+
+function fetchDebtTotalsForAddModal() {
+    if (typeof PERSON_ID === 'undefined' || !PERSON_ID) {
+        totalDebtUSD = 0;
+        totalDebtIQD = 0;
+        updateAddDebtSummaryFields();
+        return;
+    }
+
+    $.getJSON('../process/person_other_expenses_profile/get_debt_totals.php', { person_id: PERSON_ID })
+        .done(function(response) {
+            if (response && response.success && response.data) {
+                totalDebtUSD = parseFloat(response.data.total_debt_usd) || 0;
+                totalDebtIQD = parseFloat(response.data.total_debt_iqd) || 0;
+            } else {
+                totalDebtUSD = 0;
+                totalDebtIQD = 0;
+            }
+        })
+        .fail(function() {
+            totalDebtUSD = 0;
+            totalDebtIQD = 0;
+        })
+        .always(function() {
+            updateAddDebtSummaryFields();
+        });
+}
 
 $('#addDebtForm').on('submit', function(e) {
     e.preventDefault();
@@ -35,4 +81,19 @@ $('#addDebtForm').on('submit', function(e) {
         submitBtn.prop('disabled', false);
         submitBtn.html(originalBtnText);
     });
+});
+
+$('#addDebtModal').on('shown.bs.modal', function() {
+    fetchDebtTotalsForAddModal();
+});
+
+$('#addDebtModal').on('hidden.bs.modal', function() {
+    totalDebtUSD = 0;
+    totalDebtIQD = 0;
+    $('#debt_remaining_usd').val('0.00');
+    $('#debt_remaining_iqd').val('0.00');
+});
+
+$('#debt_amount_usd, #debt_discount_usd, #debt_amount_iqd, #debt_discount_iqd').on('input', function() {
+    updateAddDebtSummaryFields();
 });

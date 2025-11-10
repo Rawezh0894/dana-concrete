@@ -247,6 +247,16 @@ if ($person_id) {
                                         step="0.01" value="0">
                                 </div>
                             </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="debt_remaining_usd" class="form-label">کۆی قەرزی ماوە بە دۆلار</label>
+                                    <input type="number" class="form-control" id="debt_remaining_usd" value="0" readonly>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="debt_remaining_iqd" class="form-label">کۆی قەرزی ماوە بە دینار</label>
+                                    <input type="number" class="form-control" id="debt_remaining_iqd" value="0" readonly>
+                                </div>
+                            </div>
                             <div class="mb-3">
                                 <label for="debt_note" class="form-label">تێبینی</label>
                                 <textarea class="form-control" id="debt_note" name="note" rows="2"></textarea>
@@ -299,6 +309,16 @@ if ($person_id) {
                                     <label for="edit_debt_discount_iqd" class="form-label">داشکاندن بە دینار</label>
                                     <input type="number" class="form-control" id="edit_debt_discount_iqd" name="discount_iqd"
                                         min="0" step="0.01" value="0">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="edit_debt_remaining_usd" class="form-label">کۆی قەرزی ماوە بە دۆلار</label>
+                                    <input type="number" class="form-control" id="edit_debt_remaining_usd" value="0" readonly>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="edit_debt_remaining_iqd" class="form-label">کۆی قەرزی ماوە بە دینار</label>
+                                    <input type="number" class="form-control" id="edit_debt_remaining_iqd" value="0" readonly>
                                 </div>
                             </div>
                             <div class="mb-3">
