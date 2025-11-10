@@ -103,10 +103,20 @@ try {
         $iqd_to_usd = $total_iqd / ($usd_iqd_rate / 100);
     }
     
-    $total_usd_all = round($total_usd + $iqd_to_usd, 2);
+    $calculated_total = round($total_usd + $iqd_to_usd, 2);
+    
+    // Check if there's a manually set total
+    $stmt_manual = $pdo->prepare("SELECT value FROM settings WHERE name = 'cash_box_total_usd_all' LIMIT 1");
+    $stmt_manual->execute();
+    $manual_total = $stmt_manual->fetchColumn();
+    
+    // Use manual total if exists, otherwise use calculated
+    $total_usd_all = $manual_total !== false ? floatval($manual_total) : $calculated_total;
     
     echo json_encode(['success' => true, 'data' => [
         'total_usd_all' => $total_usd_all,
+        'calculated_total' => $calculated_total,
+        'is_manual' => $manual_total !== false,
         'total_usd' => $total_usd,
         'total_iqd' => $total_iqd,
         'iqd_to_usd' => $iqd_to_usd,

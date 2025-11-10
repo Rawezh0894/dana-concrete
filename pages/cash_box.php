@@ -65,8 +65,20 @@ if (!hasPermission('view_cash_box')) {
                 <div class="card-body">
                     <i class="fas fa-money-bill-wave card-icon"></i>
                     <h6 class="card-title">کۆی پارەی قاسە</h6>
-                    <div class="fs-4 fw-bold" id="totalCashUsdAll">$0</div>
+                    <div class="fs-4 fw-bold" id="totalCashUsdAll" style="cursor: pointer;" title="دووبارە کلیک بکە بۆ دەستکاریکردن">$0</div>
+                    <input type="number" class="form-control form-control-lg text-center d-none" id="totalCashUsdAllInput" step="0.01" min="0" style="max-width: 200px; margin: 0 auto;">
                     <small class="text-light">دۆلار + دینار بە دۆلار</small>
+                    <div class="mt-2">
+                        <button class="btn btn-sm btn-warning d-none" id="saveCashTotalBtn" style="margin-right: 5px;">
+                            <i class="fas fa-save"></i> پاشەکەوتکردن
+                        </button>
+                        <button class="btn btn-sm btn-secondary d-none" id="cancelCashTotalBtn" style="margin-right: 5px;">
+                            <i class="fas fa-times"></i> هەڵوەشاندنەوە
+                        </button>
+                        <button class="btn btn-sm btn-danger" id="resetCashTotalBtn" title="سفرکردنەوەی کۆی پارە">
+                            <i class="fas fa-redo"></i> سفرکردنەوە
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
