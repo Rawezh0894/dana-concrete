@@ -227,9 +227,12 @@ const TableController = {
                 tr.appendChild(td);
                 tbody.appendChild(tr);
                 
-                // Clear pagination
-                let pagination = table.parentElement.querySelector('.table-pagination');
-                if (pagination) pagination.innerHTML = '';
+                // Clear pagination - سڕینەوەی تەواوی pagination
+                const tableContainer = table.closest('.table-responsive') || table.parentElement;
+                const existingPagination = tableContainer.querySelector('.table-pagination');
+                if (existingPagination) {
+                    existingPagination.remove();
+                }
                 return;
             }
             
@@ -247,17 +250,21 @@ const TableController = {
 
         function renderPaginationControls(totalPages) {
             const tableContainer = table.closest('.table-responsive') || table.parentElement;
-            let pagination = tableContainer.querySelector('.table-pagination');
-            if (!pagination) {
-                pagination = document.createElement('div');
-                pagination.className = 'table-pagination mt-3';
-                if (table.closest('.table-responsive')) {
-                    table.closest('.table-responsive').parentElement.appendChild(pagination);
-                } else {
-                    table.parentElement.appendChild(pagination);
-                }
+            
+            // سڕینەوەی هەموو pagination controls پێشووەکان
+            const existingPagination = tableContainer.querySelector('.table-pagination');
+            if (existingPagination) {
+                existingPagination.remove();
             }
-            pagination.innerHTML = '';
+            
+            // دروستکردنی pagination نوێ
+            const pagination = document.createElement('div');
+            pagination.className = 'table-pagination mt-3';
+            if (table.closest('.table-responsive')) {
+                table.closest('.table-responsive').parentElement.appendChild(pagination);
+            } else {
+                table.parentElement.appendChild(pagination);
+            }
             
             // Show total records info
             const filtered = getFilteredData();
