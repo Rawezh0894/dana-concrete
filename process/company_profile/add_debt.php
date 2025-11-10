@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     
     // Check not exceeding current debt (opening + purchases remaining)
-    $debt = $pdo->prepare('SELECT opening_debt_usd, opening_debt_iqd FROM company WHERE id = ?');
+    $debt = $pdo->prepare('SELECT opening_debt_usd, opening_debt_iqd, currency_type FROM company WHERE id = ?');
     $debt->execute([$company_id]);
     $row = $debt->fetch(PDO::FETCH_ASSOC);
     
@@ -47,15 +47,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $purchases_data = $pdo->prepare("
         SELECT 
             COALESCE(SUM(remaining_usd), 0) as remaining_usd,
-            COALESCE(SUM(remaining_iqd), 0) as remaining_iqd
+            COALESCE(SUM(remaining_iqd), 0) as remaining_iqd,
+            COALESCE(SUM(CASE WHEN exchange_rate IS NOT NULL AND exchange_rate > 0 THEN remaining_iqd / (exchange_rate / 100) ELSE 0 END), 0) AS remaining_iqd_converted,
+            COALESCE(SUM(CASE WHEN exchange_rate IS NOT NULL AND exchange_rate > 0 THEN remaining_usd * (exchange_rate / 100) ELSE 0 END), 0) AS remaining_usd_converted_iqd
         FROM purchases 
         WHERE company_id = ? AND payment_type = 'قەرز'
     ");
     $purchases_data->execute([$company_id]);
     $purchases_result = $purchases_data->fetch(PDO::FETCH_ASSOC);
     
-    $total_usd = floatval($row['opening_debt_usd']) + floatval($purchases_result['remaining_usd']);
-    $total_iqd = floatval($row['opening_debt_iqd']) + floatval($purchases_result['remaining_iqd']);
+    $opening_debt_usd = floatval($row['opening_debt_usd'] ?? 0);
+    $opening_debt_iqd = floatval($row['opening_debt_iqd'] ?? 0);
+    $currency_type = $row['currency_type'] ?? null;
+    
+    $remaining_usd = floatval($purchases_result['remaining_usd'] ?? 0);
+    $remaining_iqd = floatval($purchases_result['remaining_iqd'] ?? 0);
+    $remaining_iqd_converted = floatval($purchases_result['remaining_iqd_converted'] ?? 0);
+    $remaining_usd_converted_iqd = floatval($purchases_result['remaining_usd_converted_iqd'] ?? 0);
+    
+    $total_usd = $opening_debt_usd + $remaining_usd + $remaining_iqd_converted;
+    $total_iqd = $opening_debt_iqd + $remaining_iqd + $remaining_usd_converted_iqd;
+    
+    $rate_per_usd = $dollar_rate > 0 ? ($dollar_rate / 100) : 0;
+    if ($rate_per_usd > 0) {
+        // Convert opening opposite-currency debt using supplied rate
+        $total_usd += $opening_debt_iqd / $rate_per_usd;
+        $total_iqd += $opening_debt_usd * $rate_per_usd;
+    }
     
     // Debug logging
     error_log("Debt check - Opening USD: {$row['opening_debt_usd']}, Opening IQD: {$row['opening_debt_iqd']}");
@@ -63,9 +81,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     error_log("Debt check - Total USD: $total_usd, Total IQD: $total_iqd");
     error_log("Debt check - Payment USD: $amount_usd, Payment IQD: $amount_iqd");
     
-    if (($amount_usd > 0 && $amount_usd > $total_usd) || ($amount_iqd > 0 && $amount_iqd > $total_iqd) || ($discount_usd > 0 && $discount_usd > $total_usd)) {
+    $tolerance = 0.0001;
+    $effective_usd = $amount_usd;
+    $effective_iqd = $amount_iqd;
+    
+    if ($currency_type === 'دۆلار') {
+        if ($rate_per_usd > 0) {
+            $effective_usd += $amount_iqd / $rate_per_usd;
+            $effective_usd += $discount_usd;
+        } else {
+            $effective_usd += $discount_usd;
+        }
+        if ($effective_usd - $total_usd > $tolerance) {
+            echo json_encode(['success' => false, 'msg' => 'نابێت بڕی پارەی گەرەوا زیاتر بێت لە بڕی قەرز!']);
+            exit;
+        }
+    } elseif ($currency_type === 'دینار') {
+        if ($rate_per_usd > 0) {
+            $effective_iqd += ($amount_usd * $rate_per_usd) + ($discount_usd * $rate_per_usd);
+        }
+        if ($effective_iqd - $total_iqd > $tolerance) {
+            echo json_encode(['success' => false, 'msg' => 'نابێت بڕی پارەی گەرەوا زیاتر بێت لە بڕی قەرز!']);
+            exit;
+        }
+    } else {
+        if (($amount_usd > 0 && ($amount_usd - $total_usd) > $tolerance) ||
+            ($amount_iqd > 0 && ($amount_iqd - $total_iqd) > $tolerance) ||
+            ($discount_usd > 0 && ($discount_usd - $total_usd) > $tolerance)) {
         echo json_encode(['success' => false, 'msg' => 'نابێت بڕی پارەی گەرەوا زیاتر بێت لە بڕی قەرز!']);
         exit;
+    }
     }
     
     // Get company information for notification
