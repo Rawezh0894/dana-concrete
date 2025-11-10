@@ -20,7 +20,7 @@ function mapCashBoxRow(row, idx) {
         amount_iqd: formatIQD(row.amount_iqd),
         amount_usd: formatUSD(row.amount_usd),
         currency: row.currency || '',
-        note: row.note || '',
+        note: row.note ? `<div style="max-width: 400px; white-space: pre-wrap; word-wrap: break-word; text-align: right;">${row.note}</div>` : '',
         created_by_username: row.created_by_username || '',
         created_at: row.created_at || '',
         actions: `<button class='btn btn-primary btn-sm btn-edit-cashbox' data-id='${row.id}' data-row='${JSON.stringify(row)}'><i class='fa fa-edit'></i></button> <button class='btn btn-danger btn-sm btn-delete-cashbox' data-id='${row.id}'><i class='fa fa-trash'></i></button>`

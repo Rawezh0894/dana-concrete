@@ -160,9 +160,10 @@ if (!hasPermission('view_cash_box')) {
                 <option value="دۆلار">دۆلار</option>
               </select>
             </div>
-            <div class="col-md-6 mb-3">
-              <label for="note" class="form-label">تێبینی</label>
-              <input type="text" class="form-control" id="note" name="note">
+            <div class="col-md-12 mb-3">
+              <label for="note" class="form-label">تێبینی (وردەکاری تەواو)</label>
+              <textarea class="form-control" id="note" name="note" rows="4" placeholder="تێبینی وردەکاری تەواو لێرە بنووسە..."></textarea>
+              <small class="form-text text-muted">تێبینی وردەکاری تەواو بە شێوەی پڕۆفیشناڵ بنووسە</small>
             </div>
           </div>
         </div>
@@ -218,9 +219,10 @@ if (!hasPermission('view_cash_box')) {
                 <option value="دۆلار">دۆلار</option>
               </select>
             </div>
-            <div class="col-md-6 mb-3">
-              <label for="edit_note" class="form-label">تێبینی</label>
-              <input type="text" class="form-control" id="edit_note" name="note">
+            <div class="col-md-12 mb-3">
+              <label for="edit_note" class="form-label">تێبینی (وردەکاری تەواو)</label>
+              <textarea class="form-control" id="edit_note" name="note" rows="4" placeholder="تێبینی وردەکاری تەواو لێرە بنووسە..."></textarea>
+              <small class="form-text text-muted">تێبینی وردەکاری تەواو بە شێوەی پڕۆفیشناڵ بنووسە</small>
             </div>
           </div>
         </div>
