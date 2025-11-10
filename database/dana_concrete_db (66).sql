@@ -101,23 +101,6 @@ INSERT INTO `bins_silos` (`id`, `name`, `type`, `material_type`, `amount`, `tota
 --
 -- Triggers `bins_silos`
 --
-DELIMITER $$
-CREATE TRIGGER `bins_silos_no_negative_stock` BEFORE UPDATE ON `bins_silos` FOR EACH ROW BEGIN
-    IF NEW.amount < 0 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Stock cannot be negative!';
-    END IF;
-END
-$$
-DELIMITER ;
-DELIMITER $$
-CREATE TRIGGER `trg_bins_silos_no_negative_amount` BEFORE UPDATE ON `bins_silos` FOR EACH ROW BEGIN
-  IF NEW.amount < 0 THEN
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'بڕی ستۆک نابێت منفی بێت!';
-  END IF;
-END
-$$
-DELIMITER ;
-
 -- --------------------------------------------------------
 
 --
@@ -1348,6 +1331,8 @@ CREATE TABLE `person_other_expenses_debt_payments` (
   `date` date DEFAULT NULL,
   `amount_usd` decimal(15,2) DEFAULT 0.00,
   `amount_iqd` decimal(15,2) DEFAULT 0.00,
+  `discount_usd` decimal(15,2) DEFAULT 0.00,
+  `discount_iqd` decimal(15,2) DEFAULT 0.00,
   `note` varchar(255) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -2456,7 +2441,6 @@ CREATE TRIGGER `trg_after_insert_sale` AFTER INSERT ON `sales` FOR EACH ROW BEGI
     DECLARE v_current_cement DECIMAL(10,2);
     DECLARE v_current_cement2 DECIMAL(10,2);
     DECLARE v_current_additive DECIMAL(10,2);
-    DECLARE v_error_message VARCHAR(255);
 
     -- هەژمارکردنی مەتری سێجا
     SET v_total_volume = NEW.quantity;
@@ -2484,42 +2468,6 @@ CREATE TRIGGER `trg_after_insert_sale` AFTER INSERT ON `sales` FOR EACH ROW BEGI
     SELECT amount INTO v_current_cement FROM bins_silos WHERE id = 5;
     SELECT amount INTO v_current_cement2 FROM bins_silos WHERE id = 6;
     SELECT amount INTO v_current_additive FROM bins_silos WHERE id = 7;
-
-    -- چێککردنی بڕی پێویست لە هەموو ماتریاڵەکان (بە kg)
-    IF v_black_sand_kg > v_current_black_sand THEN
-        SET v_error_message = CONCAT('بڕی پێویست لە لمی ڕەش نییە. بڕی پێویست: ', ROUND(v_black_sand_kg, 2), ' kg، بڕی بەردەست: ', ROUND(v_current_black_sand, 2), ' kg');
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_error_message;
-    END IF;
-
-    IF v_brown_sand_kg > v_current_brown_sand THEN
-        SET v_error_message = CONCAT('بڕی پێویست لە لمی کەسارە نییە. بڕی پێویست: ', ROUND(v_brown_sand_kg, 2), ' kg، بڕی بەردەست: ', ROUND(v_current_brown_sand, 2), ' kg');
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_error_message;
-    END IF;
-
-    IF v_gravel_bin3_kg > v_current_gravel_bin3 THEN
-        SET v_error_message = CONCAT('بڕی پێویست لە چەوی بینی ٣ نییە. بڕی پێویست: ', ROUND(v_gravel_bin3_kg, 2), ' kg، بڕی بەردەست: ', ROUND(v_current_gravel_bin3, 2), ' kg');
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_error_message;
-    END IF;
-
-    IF v_gravel_bin4_kg > v_current_gravel_bin4 THEN
-        SET v_error_message = CONCAT('بڕی پێویست لە چەوی بینی ٤ نییە. بڕی پێویست: ', ROUND(v_gravel_bin4_kg, 2), ' kg، بڕی بەردەست: ', ROUND(v_current_gravel_bin4, 2), ' kg');
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_error_message;
-    END IF;
-
-    IF v_cement_kg > v_current_cement THEN
-        SET v_error_message = CONCAT('بڕی پێویست لە چیمەنتۆی سایلۆی ١ نییە. بڕی پێویست: ', ROUND(v_cement_kg, 2), ' kg، بڕی بەردەست: ', ROUND(v_current_cement, 2), ' kg');
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_error_message;
-    END IF;
-    
-    IF v_cement_cem2_kg > v_current_cement2 THEN
-        SET v_error_message = CONCAT('بڕی پێویست لە چیمەنتۆی سایلۆی ٢ نییە. بڕی پێویست: ', ROUND(v_cement_cem2_kg, 2), ' kg، بڕی بەردەست: ', ROUND(v_current_cement2, 2), ' kg');
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_error_message;
-    END IF;
-    
-    IF v_additive_kg > v_current_additive THEN
-        SET v_error_message = CONCAT('بڕی پێویست لە ماددەی زیادکراو نییە. بڕی پێویست: ', ROUND(v_additive_kg, 2), ' kg، بڕی بەردەست: ', ROUND(v_current_additive, 2), ' kg');
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_error_message;
-    END IF;
 
     -- کەمکردنەوەی ماتریاڵەکان (بە kg)
     IF v_black_sand_kg > 0 THEN

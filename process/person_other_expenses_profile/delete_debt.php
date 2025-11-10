@@ -11,7 +11,7 @@ try {
     $pdo->beginTransaction();
 
     // وەرگرتنی amount و person_id
-    $stmt = $pdo->prepare("SELECT person_id, amount_usd, amount_iqd FROM person_other_expenses_debt_payments WHERE id=? FOR UPDATE");
+    $stmt = $pdo->prepare("SELECT person_id, amount_usd, amount_iqd, discount_usd, discount_iqd FROM person_other_expenses_debt_payments WHERE id=? FOR UPDATE");
     $stmt->execute([$id]);
     $debt = $stmt->fetch(PDO::FETCH_ASSOC);
     if (!$debt) throw new Exception('Debt not found');
@@ -19,9 +19,16 @@ try {
     $person_id = $debt['person_id'];
     $amount_usd = floatval($debt['amount_usd']);
     $amount_iqd = floatval($debt['amount_iqd']);
+    $discount_usd = floatval($debt['discount_usd']);
+    $discount_iqd = floatval($debt['discount_iqd']);
 
-    $remain_usd = $amount_usd;
-    $remain_iqd = $amount_iqd;
+    $total_usd = $amount_usd + $discount_usd;
+    $total_iqd = $amount_iqd + $discount_iqd;
+
+    $remain_usd = $total_usd;
+    $remain_iqd = $total_iqd;
+    $restore_expenses_usd = 0;
+    $restore_expenses_iqd = 0;
 
     // 1. LIFO بۆ purchase_materials.remaining_amount_usd
     if ($remain_usd > 0) {
@@ -49,6 +56,7 @@ try {
             if ($to_add > 0) {
                 $pdo->prepare("UPDATE other_expenses SET remaining_usd = remaining_usd + ? WHERE id=?")->execute([$to_add, $row['id']]);
                 $remain_usd -= $to_add;
+                $restore_expenses_usd += $to_add;
             }
         }
     }
@@ -85,6 +93,7 @@ try {
             if ($to_add > 0) {
                 $pdo->prepare("UPDATE other_expenses SET remaining_iqd = remaining_iqd + ? WHERE id=?")->execute([$to_add, $row['id']]);
                 $remain_iqd -= $to_add;
+                $restore_expenses_iqd += $to_add;
             }
         }
     }
@@ -94,14 +103,12 @@ try {
         $pdo->prepare("UPDATE other_expense_persons SET opening_debt_iqd = opening_debt_iqd + ? WHERE id=?")->execute([$remain_iqd, $person_id]);
     }
 
-    // After restoring to other_expenses and opening_debt, also restore to expense_usd/iqd
-    $paid_from_expenses_usd = $amount_usd - $remain_usd;
-    $paid_from_expenses_iqd = $amount_iqd - $remain_iqd;
-    if ($paid_from_expenses_usd > 0) {
-        $pdo->prepare("UPDATE other_expense_persons SET expense_usd = expense_usd + ? WHERE id=?")->execute([$paid_from_expenses_usd, $person_id]);
+    // لەگەڵ داشکاندنەکان بگەڕێندرەوە
+    if ($restore_expenses_usd > 0) {
+        $pdo->prepare("UPDATE other_expense_persons SET expense_usd = expense_usd + ? WHERE id=?")->execute([$restore_expenses_usd, $person_id]);
     }
-    if ($paid_from_expenses_iqd > 0) {
-        $pdo->prepare("UPDATE other_expense_persons SET expense_iqd = expense_iqd + ? WHERE id=?")->execute([$paid_from_expenses_iqd, $person_id]);
+    if ($restore_expenses_iqd > 0) {
+        $pdo->prepare("UPDATE other_expense_persons SET expense_iqd = expense_iqd + ? WHERE id=?")->execute([$restore_expenses_iqd, $person_id]);
     }
 
     // سڕینەوەی تۆمارەکە

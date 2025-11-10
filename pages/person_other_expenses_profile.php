@@ -223,15 +223,29 @@ if ($person_id) {
                                 <input type="date" class="form-control" id="debt_date" name="date" required
                                     value="<?php echo date('Y-m-d'); ?>">
                             </div>
-                            <div class="mb-3">
-                                <label for="debt_amount_usd" class="form-label">بڕی دۆلار</label>
-                                <input type="number" class="form-control" id="debt_amount_usd" name="amount_usd" min="0"
-                                    step="0.01" value="0">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="debt_amount_usd" class="form-label">بڕی دۆلار</label>
+                                    <input type="number" class="form-control" id="debt_amount_usd" name="amount_usd" min="0"
+                                        step="0.01" value="0">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="debt_discount_usd" class="form-label">داشکاندن بە دۆلار</label>
+                                    <input type="number" class="form-control" id="debt_discount_usd" name="discount_usd" min="0"
+                                        step="0.01" value="0">
+                                </div>
                             </div>
-                            <div class="mb-3">
-                                <label for="debt_amount_iqd" class="form-label">بڕی دینار</label>
-                                <input type="number" class="form-control" id="debt_amount_iqd" name="amount_iqd" min="0"
-                                    step="0.01" value="0">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="debt_amount_iqd" class="form-label">بڕی دینار</label>
+                                    <input type="number" class="form-control" id="debt_amount_iqd" name="amount_iqd" min="0"
+                                        step="0.01" value="0">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="debt_discount_iqd" class="form-label">داشکاندن بە دینار</label>
+                                    <input type="number" class="form-control" id="debt_discount_iqd" name="discount_iqd" min="0"
+                                        step="0.01" value="0">
+                                </div>
                             </div>
                             <div class="mb-3">
                                 <label for="debt_note" class="form-label">تێبینی</label>
@@ -263,15 +277,29 @@ if ($person_id) {
                                 <label for="edit_debt_date" class="form-label">بەروار</label>
                                 <input type="date" class="form-control" id="edit_debt_date" name="date" required>
                             </div>
-                            <div class="mb-3">
-                                <label for="edit_debt_amount_usd" class="form-label">بڕی دۆلار</label>
-                                <input type="number" class="form-control" id="edit_debt_amount_usd" name="amount_usd"
-                                    min="0" step="0.01" value="0">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="edit_debt_amount_usd" class="form-label">بڕی دۆلار</label>
+                                    <input type="number" class="form-control" id="edit_debt_amount_usd" name="amount_usd"
+                                        min="0" step="0.01" value="0">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="edit_debt_discount_usd" class="form-label">داشکاندن بە دۆلار</label>
+                                    <input type="number" class="form-control" id="edit_debt_discount_usd" name="discount_usd"
+                                        min="0" step="0.01" value="0">
+                                </div>
                             </div>
-                            <div class="mb-3">
-                                <label for="edit_debt_amount_iqd" class="form-label">بڕی دینار</label>
-                                <input type="number" class="form-control" id="edit_debt_amount_iqd" name="amount_iqd"
-                                    min="0" step="0.01" value="0">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="edit_debt_amount_iqd" class="form-label">بڕی دینار</label>
+                                    <input type="number" class="form-control" id="edit_debt_amount_iqd" name="amount_iqd"
+                                        min="0" step="0.01" value="0">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="edit_debt_discount_iqd" class="form-label">داشکاندن بە دینار</label>
+                                    <input type="number" class="form-control" id="edit_debt_discount_iqd" name="discount_iqd"
+                                        min="0" step="0.01" value="0">
+                                </div>
                             </div>
                             <div class="mb-3">
                                 <label for="edit_debt_note" class="form-label">تێبینی</label>

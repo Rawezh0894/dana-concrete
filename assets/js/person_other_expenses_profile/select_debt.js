@@ -35,7 +35,9 @@ async function loadDebtPayments() {
                 columns: [
                     { title: 'بەروار' },
                     { title: 'بڕی دۆلار' },
+                    { title: 'داشکاندن بە دۆلار' },
                     { title: 'بڕی دینار' },
+                    { title: 'داشکاندن بە دینار' },
                     { title: 'تێبینی' },
                     { title: 'کردارەکان' }
                 ],
@@ -74,10 +76,19 @@ async function loadDebtPayments() {
         const tableData = data.map((row) => [
             row.date || '',
             formatUSD(row.amount_usd || 0),
+            formatUSD(row.discount_usd || 0),
             formatIQD(row.amount_iqd || 0),
+            formatIQD(row.discount_iqd || 0),
             row.note || '',
             `
-                <button class="btn btn-sm btn-warning edit-debt" data-id="${row.id}" data-date="${row.date}" data-amount_usd="${row.amount_usd}" data-amount_iqd="${row.amount_iqd}" data-note="${row.note || ''}">
+                <button class="btn btn-sm btn-warning edit-debt"
+                    data-id="${row.id}"
+                    data-date="${row.date}"
+                    data-amount_usd="${row.amount_usd}"
+                    data-amount_iqd="${row.amount_iqd}"
+                    data-discount_usd="${row.discount_usd}"
+                    data-discount_iqd="${row.discount_iqd}"
+                    data-note="${row.note || ''}">
                     <i class="fa fa-edit"></i>
                 </button>
                 <button class="btn btn-sm btn-danger delete-debt" data-id="${row.id}">
@@ -91,7 +102,9 @@ async function loadDebtPayments() {
             columns: [
                 { title: 'بەروار' },
                 { title: 'بڕی دۆلار' },
+                { title: 'داشکاندن بە دۆلار' },
                 { title: 'بڕی دینار' },
+                { title: 'داشکاندن بە دینار' },
                 { title: 'تێبینی' },
                 { title: 'کردارەکان' }
             ],
@@ -129,8 +142,10 @@ async function loadDebtPayments() {
         const btn = $(this);
         $('#edit_debt_id').val(btn.data('id'));
         $('#edit_debt_date').val(btn.data('date'));
-        $('#edit_debt_amount_usd').val(btn.data('amount_usd'));
-        $('#edit_debt_amount_iqd').val(btn.data('amount_iqd'));
+        $('#edit_debt_amount_usd').val(btn.data('amount_usd') ?? 0);
+        $('#edit_debt_discount_usd').val(btn.data('discount_usd') ?? 0);
+        $('#edit_debt_amount_iqd').val(btn.data('amount_iqd') ?? 0);
+        $('#edit_debt_discount_iqd').val(btn.data('discount_iqd') ?? 0);
         $('#edit_debt_note').val(btn.data('note'));
         $('#editDebtModal').modal('show');
     });
@@ -159,7 +174,7 @@ async function loadDebtPayments() {
             debtTable.destroy();
             debtTable = null;
         }
-        $('#debtTable').html(`<tr><td colspan="5" class="text-danger text-center">هەڵە لە بارکردنی زانیاریەکان</td></tr>`);
+        $('#debtTable').html(`<tr><td colspan="7" class="text-danger text-center">هەڵە لە بارکردنی زانیاریەکان</td></tr>`);
     }
 }
 

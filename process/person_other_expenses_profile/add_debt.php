@@ -3,11 +3,16 @@ require_once '../../config/db_conected.php';
 
 $person_id = intval($_POST['person_id'] ?? 0);
 $date = $_POST['date'] ?? date('Y-m-d');
-$amount_usd = floatval($_POST['amount_usd'] ?? 0);
-$amount_iqd = floatval($_POST['amount_iqd'] ?? 0);
+$amount_usd = max(0, floatval($_POST['amount_usd'] ?? 0));
+$amount_iqd = max(0, floatval($_POST['amount_iqd'] ?? 0));
+$discount_usd = max(0, floatval($_POST['discount_usd'] ?? 0));
+$discount_iqd = max(0, floatval($_POST['discount_iqd'] ?? 0));
 $note = $_POST['note'] ?? '';
 
-if (!$person_id || ($amount_usd <= 0 && $amount_iqd <= 0)) {
+if (
+    !$person_id ||
+    ($amount_usd <= 0 && $amount_iqd <= 0 && $discount_usd <= 0 && $discount_iqd <= 0)
+) {
     echo json_encode(['success' => false, 'msg' => 'زانیاری پێویست نەبوو']);
     exit;
 }
@@ -29,16 +34,23 @@ try {
     $stmt->execute([$person_id]);
     $rem_purchases = $stmt->fetch(PDO::FETCH_ASSOC);
     
-    $total_usd = floatval($person['opening_debt_usd']) + floatval($rem_expenses['rem_usd']) + floatval($rem_purchases['rem_usd']);
-    $total_iqd = floatval($person['opening_debt_iqd']) + floatval($rem_expenses['rem_iqd']) + floatval($rem_purchases['rem_iqd']);
-    if (($amount_usd > 0 && $amount_usd > $total_usd) || ($amount_iqd > 0 && $amount_iqd > $total_iqd)) {
+    $total_usd_available = floatval($person['opening_debt_usd']) + floatval($rem_expenses['rem_usd']) + floatval($rem_purchases['rem_usd']);
+    $total_iqd_available = floatval($person['opening_debt_iqd']) + floatval($rem_expenses['rem_iqd']) + floatval($rem_purchases['rem_iqd']);
+    $total_usd_reduction = $amount_usd + $discount_usd;
+    $total_iqd_reduction = $amount_iqd + $discount_iqd;
+    if (($total_usd_reduction > 0 && $total_usd_reduction > $total_usd_available) || ($total_iqd_reduction > 0 && $total_iqd_reduction > $total_iqd_available)) {
         echo json_encode(['success' => false, 'msg' => 'نابێت بڕی پارەی گەرەوا زیاتر بێت لە بڕی قەرز!']);
         $pdo->rollBack();
         exit;
     }
 
-    $remain_usd = $amount_usd;
-    $remain_iqd = $amount_iqd;
+    $remain_usd = $total_usd_reduction;
+    $remain_iqd = $total_iqd_reduction;
+
+    $deduct_opening_usd = 0;
+    $deduct_opening_iqd = 0;
+    $deduct_expenses_usd = 0;
+    $deduct_expenses_iqd = 0;
 
     // 1. سەرەتا opening_debt_usd کەم بکە
     $opening_usd = floatval($person['opening_debt_usd']);
@@ -56,6 +68,7 @@ try {
             $to_deduct = min($row['remaining_usd'], $remain_usd);
             $pdo->prepare("UPDATE other_expenses SET remaining_usd = remaining_usd - ? WHERE id=?")->execute([$to_deduct, $row['id']]);
             $remain_usd -= $to_deduct;
+            $deduct_expenses_usd += $to_deduct;
         }
     }
     
@@ -86,6 +99,7 @@ try {
             $to_deduct = min($row['remaining_iqd'], $remain_iqd);
             $pdo->prepare("UPDATE other_expenses SET remaining_iqd = remaining_iqd - ? WHERE id=?")->execute([$to_deduct, $row['id']]);
             $remain_iqd -= $to_deduct;
+            $deduct_expenses_iqd += $to_deduct;
         }
     }
     
@@ -102,18 +116,16 @@ try {
     }
 
     // Track how much was paid from other_expenses for summary update
-    $paid_from_expenses_usd = $amount_usd - $deduct_opening_usd;
-    $paid_from_expenses_iqd = $amount_iqd - $deduct_opening_iqd;
-    if ($paid_from_expenses_usd > 0) {
-        $pdo->prepare("UPDATE other_expense_persons SET expense_usd = GREATEST(expense_usd - ?, 0) WHERE id=?")->execute([$paid_from_expenses_usd, $person_id]);
+    if ($deduct_expenses_usd > 0) {
+        $pdo->prepare("UPDATE other_expense_persons SET expense_usd = GREATEST(expense_usd - ?, 0) WHERE id=?")->execute([$deduct_expenses_usd, $person_id]);
     }
-    if ($paid_from_expenses_iqd > 0) {
-        $pdo->prepare("UPDATE other_expense_persons SET expense_iqd = GREATEST(expense_iqd - ?, 0) WHERE id=?")->execute([$paid_from_expenses_iqd, $person_id]);
+    if ($deduct_expenses_iqd > 0) {
+        $pdo->prepare("UPDATE other_expense_persons SET expense_iqd = GREATEST(expense_iqd - ?, 0) WHERE id=?")->execute([$deduct_expenses_iqd, $person_id]);
     }
 
     // تۆمارکردنی مامەڵەکە
-    $stmt = $pdo->prepare("INSERT INTO person_other_expenses_debt_payments (person_id, date, amount_usd, amount_iqd, note) VALUES (?, ?, ?, ?, ?)");
-    $stmt->execute([$person_id, $date, $amount_usd, $amount_iqd, $note]);
+    $stmt = $pdo->prepare("INSERT INTO person_other_expenses_debt_payments (person_id, date, amount_usd, amount_iqd, discount_usd, discount_iqd, note) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt->execute([$person_id, $date, $amount_usd, $amount_iqd, $discount_usd, $discount_iqd, $note]);
     $inserted_id = $pdo->lastInsertId();
     require_once __DIR__ . '/../../includes/notify.php';
     notify('insert', 'person_other_expenses_debt_payments', $inserted_id, 'پارەدان بۆ قەرزی کەسانی تر زیادکرا (کەس: ' . $person_id . ')');
