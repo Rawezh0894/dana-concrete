@@ -73,21 +73,27 @@ async function loadDebtPayments() {
             return;
         }
         
-        const tableData = data.map((row) => [
-            row.date || '',
-            formatUSD(row.amount_usd || 0),
-            formatUSD(row.discount_usd || 0),
-            formatIQD(row.amount_iqd || 0),
-            formatIQD(row.discount_iqd || 0),
-            row.note || '',
-            `
+        const tableData = data.map((row) => {
+            const amountUsd = parseFloat(row.amount_usd ?? 0) || 0;
+            const discountUsd = parseFloat(row.discount_usd ?? 0) || 0;
+            const amountIqd = parseFloat(row.amount_iqd ?? 0) || 0;
+            const discountIqd = parseFloat(row.discount_iqd ?? 0) || 0;
+
+            return [
+                row.date || '',
+                formatUSD(amountUsd),
+                formatUSD(discountUsd),
+                formatIQD(amountIqd),
+                formatIQD(discountIqd),
+                row.note || '',
+                `
                 <button class="btn btn-sm btn-warning edit-debt"
                     data-id="${row.id}"
                     data-date="${row.date}"
-                    data-amount_usd="${row.amount_usd}"
-                    data-amount_iqd="${row.amount_iqd}"
-                    data-discount_usd="${row.discount_usd}"
-                    data-discount_iqd="${row.discount_iqd}"
+                    data-amount_usd="${amountUsd}"
+                    data-amount_iqd="${amountIqd}"
+                    data-discount_usd="${discountUsd}"
+                    data-discount_iqd="${discountIqd}"
                     data-note="${row.note || ''}">
                     <i class="fa fa-edit"></i>
                 </button>
@@ -95,7 +101,8 @@ async function loadDebtPayments() {
                     <i class="fa fa-trash"></i>
                 </button>
             `
-        ]);
+            ];
+        });
         
         debtTable = new DataTable('#debtTable', {
             data: tableData,
