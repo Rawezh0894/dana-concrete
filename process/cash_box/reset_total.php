@@ -18,7 +18,13 @@ try {
     $stmt = $pdo->prepare("DELETE FROM settings WHERE name = 'cash_box_total_usd_all'");
     $stmt->execute();
     
-    echo json_encode(['success' => true, 'message' => 'کۆی پارە بە سەرکەوتوویی سفر کرا']);
+    $deleted = $stmt->rowCount();
+    
+    echo json_encode([
+        'success' => true, 
+        'message' => 'کۆی پارە بە سەرکەوتوویی سفر کرا',
+        'deleted' => $deleted
+    ]);
 } catch (Exception $e) {
     echo json_encode(['success' => false, 'error' => $e->getMessage()]);
 }

@@ -110,13 +110,14 @@ try {
     $stmt_manual->execute();
     $manual_total = $stmt_manual->fetchColumn();
     
-    // Use manual total if exists, otherwise use calculated
-    $total_usd_all = $manual_total !== false ? floatval($manual_total) : $calculated_total;
+    // Use manual total if exists and is not null/false, otherwise use calculated
+    $is_manual = ($manual_total !== false && $manual_total !== null && $manual_total !== '');
+    $total_usd_all = $is_manual ? floatval($manual_total) : $calculated_total;
     
     echo json_encode(['success' => true, 'data' => [
         'total_usd_all' => $total_usd_all,
         'calculated_total' => $calculated_total,
-        'is_manual' => $manual_total !== false,
+        'is_manual' => $is_manual,
         'total_usd' => $total_usd,
         'total_iqd' => $total_iqd,
         'iqd_to_usd' => $iqd_to_usd,
