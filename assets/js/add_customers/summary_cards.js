@@ -15,10 +15,19 @@ function loadSummaryCardsData() {
         dataType: 'json',
         success: function(response) {
             if (response.success) {
-                // Update summary cards
-                $('#total_debt').text('$' + response.data.total_debt.toLocaleString());
-                $('#total_customers').text(response.data.total_customers);
-                $('#customers_with_debt').text(response.data.customers_with_debt);
+                const summary = response.data || response.summary || {};
+                const totalDebtValue = summary.total_debt !== undefined 
+                    ? summary.total_debt 
+                    : (summary.total_debt_usd !== undefined ? summary.total_debt_usd : 0);
+                const totalCustomersValue = summary.total_customers !== undefined ? summary.total_customers : 0;
+                const customersWithDebtValue = summary.customers_with_debt !== undefined ? summary.customers_with_debt : 0;
+
+                $('#total_debt').text('$' + Number(totalDebtValue || 0).toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }));
+                $('#total_customers').text(Number(totalCustomersValue || 0).toLocaleString('en-US'));
+                $('#customers_with_debt').text(Number(customersWithDebtValue || 0).toLocaleString('en-US'));
             } else {
                 console.error('Error loading summary data:', response.message);
                 // Set default values

@@ -86,8 +86,6 @@ const TableController = {
         const thead = table.querySelector('thead');
         const tbody = table.querySelector('tbody');
         if (!thead || !tbody) return;
-        const responsiveContainer = table.closest('.table-responsive');
-        const controlsContainer = responsiveContainer ? responsiveContainer.parentElement : table.parentElement;
 
         // Only render header with search inputs if not already present
         let headerRow = thead.querySelector('tr');
@@ -138,6 +136,9 @@ const TableController = {
         const thead = table.querySelector('thead');
         const tbody = table.querySelector('tbody');
         if (!thead || !tbody) return;
+
+        const responsiveContainer = table.closest('.table-responsive');
+        const controlsContainer = responsiveContainer ? responsiveContainer.parentElement : table.parentElement;
 
         let currentPage = options.currentPage || 1;
         let pageSize = options.pageSize || 10;
