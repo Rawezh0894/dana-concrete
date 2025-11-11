@@ -86,6 +86,8 @@ const TableController = {
         const thead = table.querySelector('thead');
         const tbody = table.querySelector('tbody');
         if (!thead || !tbody) return;
+        const responsiveContainer = table.closest('.table-responsive');
+        const controlsContainer = responsiveContainer ? responsiveContainer.parentElement : table.parentElement;
 
         // Only render header with search inputs if not already present
         let headerRow = thead.querySelector('tr');
@@ -141,9 +143,8 @@ const TableController = {
         let pageSize = options.pageSize || 10;
 
         // Remove existing page size selector and pagination to prevent duplicates
-        const tableContainer = table.closest('.table-responsive') || table.parentElement;
-        const existingSizeSelect = tableContainer.querySelector('.page-size-selector');
-        const existingPagination = tableContainer.querySelector('.table-pagination');
+        const existingSizeSelect = controlsContainer.querySelector('.page-size-selector');
+        const existingPagination = controlsContainer.querySelector('.table-pagination');
         if (existingSizeSelect) existingSizeSelect.remove();
         if (existingPagination) existingPagination.remove();
 
@@ -159,10 +160,10 @@ const TableController = {
         sizeSelect.value = pageSize;
 
         // Insert before the table-responsive or table
-        if (table.closest('.table-responsive')) {
-            table.closest('.table-responsive').parentElement.insertBefore(sizeSelect, table.closest('.table-responsive'));
+        if (responsiveContainer) {
+            controlsContainer.insertBefore(sizeSelect, responsiveContainer);
         } else {
-            table.parentElement.insertBefore(sizeSelect, table);
+            controlsContainer.insertBefore(sizeSelect, table);
         }
 
         // Handle page size change
@@ -228,8 +229,7 @@ const TableController = {
                 tbody.appendChild(tr);
                 
                 // Clear pagination - سڕینەوەی تەواوی pagination
-                const tableContainer = table.closest('.table-responsive') || table.parentElement;
-                const existingPagination = tableContainer.querySelector('.table-pagination');
+                const existingPagination = controlsContainer.querySelector('.table-pagination');
                 if (existingPagination) {
                     existingPagination.remove();
                 }
@@ -249,10 +249,7 @@ const TableController = {
         }
 
         function renderPaginationControls(totalPages) {
-            const tableContainer = table.closest('.table-responsive') || table.parentElement;
-            
-            // سڕینەوەی هەموو pagination controls پێشووەکان
-            const existingPagination = tableContainer.querySelector('.table-pagination');
+            const existingPagination = controlsContainer.querySelector('.table-pagination');
             if (existingPagination) {
                 existingPagination.remove();
             }
@@ -260,17 +257,17 @@ const TableController = {
             // دروستکردنی pagination نوێ
             const pagination = document.createElement('div');
             pagination.className = 'table-pagination mt-3';
-            if (table.closest('.table-responsive')) {
-                table.closest('.table-responsive').parentElement.appendChild(pagination);
-            } else {
-                table.parentElement.appendChild(pagination);
-            }
+            controlsContainer.appendChild(pagination);
             
             // Show total records info
             const filtered = getFilteredData();
             const infoDiv = document.createElement('div');
             infoDiv.className = 'text-muted mb-2';
-            // infoDiv.innerHTML = `نوێنراوە: ${((currentPage - 1) * pageSize) + 1}-${Math.min(currentPage * pageSize, filtered.length)} لە ${filtered.length} زانیاری`;
+            const startIdx = filtered.length === 0 ? 0 : ((currentPage - 1) * pageSize) + 1;
+            const endIdx = Math.min(currentPage * pageSize, filtered.length);
+            infoDiv.textContent = filtered.length === 0 
+                ? 'هیچ تۆمارێک بوونی نییە'
+                : `نیشاندراوە: ${startIdx}-${endIdx} لە ${filtered.length} تۆمار`;
             pagination.appendChild(infoDiv);
             
             // Prev button with SVG
