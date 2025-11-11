@@ -46,6 +46,9 @@ if (!hasPermission('view_customer')) {
     <div class="d-flex justify-content-between align-items-center mb-4">
 
         <div>
+            <button class="btn btn-success me-2" id="exportCustomersExcelBtn" style="background: var(--seafoam-green); font-weight: bold;">
+                <i class="fas fa-file-excel"></i> ئیکسپۆرت بۆ Excel
+            </button>
             <button class="btn btn-success me-2" style="background: var(--seafoam-green); font-weight: bold;" onclick="window.location.href='credit_of_all_customers.php'">
                 <i class="fa fa-print"></i> پرینتی قەرزی کڕیارەکان
             </button>
@@ -203,5 +206,6 @@ if (!hasPermission('view_customer')) {
 <script src="../assets/js/customer/delete_customer.js"></script>
 <script src="../assets/js/add_customers/summary_cards.js"></script>
 <script src="../assets/js/customer/customer.js"></script>
+<script src="../assets/js/customer/export_customers_excel.js"></script>
 </body>
 </html>
