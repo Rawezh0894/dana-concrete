@@ -38,101 +38,89 @@ $sales = $sales_stmt->fetchAll();
 // گرووپکردنی مامەڵەکان بە IDی کڕیار
 $sales_by_customer = [];
 foreach ($sales as $sale) {
-    $customerId = $sale['customer_id'];
-
-    $orderDate = '';
-    if (!empty($sale['order_date'])) {
-        $timestamp = strtotime($sale['order_date']);
-        $orderDate = $timestamp ? date('Y-m-d', $timestamp) : $sale['order_date'];
-    }
-
-    $strengthMpa = trim($sale['strength_mpa'] ?? '');
-    $strengthKg = trim($sale['strength_kg'] ?? '');
-    $formulaId = $sale['formula_id'] ?? null;
-    $formulaKey = $formulaId !== null
-        ? 'id:' . $formulaId
-        : 'manual:' . $strengthMpa . '|' . $strengthKg;
-
-    $groupKey = $orderDate . '|' . $formulaKey;
-
-    if (!isset($sales_by_customer[$customerId])) {
-        $sales_by_customer[$customerId] = [];
-    }
-
-    if (!isset($sales_by_customer[$customerId][$groupKey])) {
-        $sales_by_customer[$customerId][$groupKey] = [
-            'recipients' => [],
-            'locations' => [],
-            'invoice_numbers' => [],
-            'quantity' => 0,
-            'total_price' => 0,
-            'remaining_amount' => 0,
-            'order_date' => $orderDate,
-            'strength_mpa' => $strengthMpa,
-            'strength_kg' => $strengthKg,
-            'total_quantity_for_price' => 0,
-        ];
-    }
-
-    $group =& $sales_by_customer[$customerId][$groupKey];
-
-    if (!empty($sale['recipient'])) {
-        $group['recipients'][] = $sale['recipient'];
-    }
-
-    if (!empty($sale['location'])) {
-        $group['locations'][] = $sale['location'];
-    }
-
-    if (!empty($sale['invoice_number'])) {
-        $group['invoice_numbers'][] = $sale['invoice_number'];
-    }
-
-    $quantity = floatval($sale['quantity']);
-    $group['quantity'] += $quantity;
-    $group['total_quantity_for_price'] += $quantity;
-
-    $group['total_price'] += floatval($sale['total_price']);
-    $group['remaining_amount'] += floatval($sale['remaining_amount']);
-
-    // Preserve strength values if current sale has data while stored values are empty
-    if ($group['strength_mpa'] === '' && $strengthMpa !== '') {
-        $group['strength_mpa'] = $strengthMpa;
-    }
-    if ($group['strength_kg'] === '' && $strengthKg !== '') {
-        $group['strength_kg'] = $strengthKg;
-    }
+    $sales_by_customer[$sale['customer_id']][] = $sale;
 }
-
-foreach ($sales_by_customer as $customerId => $groupedSales) {
-    $normalizedSales = [];
-
-    foreach ($groupedSales as $group) {
-        $quantity = $group['quantity'];
-        $pricePerUnit = 0;
-        if ($quantity > 0) {
-            $pricePerUnit = $group['total_price'] / $quantity;
-        }
-
-        $normalizedSales[] = [
-            'recipient' => implode('، ', array_unique($group['recipients'])),
-            'location' => implode('، ', array_unique($group['locations'])),
-            'strength_mpa' => $group['strength_mpa'],
-            'strength_kg' => $group['strength_kg'],
-            'quantity' => $quantity,
-            'price_per_unit' => $pricePerUnit,
-            'total_price' => $group['total_price'],
-            'remaining_amount' => $group['remaining_amount'],
-            'invoice_number' => implode('، ', array_unique($group['invoice_numbers'])),
-            'order_date' => $group['order_date'],
-        ];
+function format_strength_label(?string $strength_mpa, ?string $strength_kg): string {
+    $strength_mpa = trim((string)$strength_mpa);
+    $strength_kg = trim((string)$strength_kg);
+    if ($strength_mpa !== '' && $strength_kg !== '') {
+        return $strength_mpa . ' MPA + ' . $strength_kg . ' Kg';
     }
-
-    usort($normalizedSales, function ($a, $b) {
-        return strcmp($a['order_date'], $b['order_date']);
+    if ($strength_mpa !== '') {
+        return $strength_mpa . ' MPA';
+    }
+    if ($strength_kg !== '') {
+        return $strength_kg . ' Kg';
+    }
+    return '-';
+}
+function group_sales_rows(array $sales): array {
+    $grouped = [];
+    foreach ($sales as $sale) {
+        $order_date = $sale['order_date'] ?? '';
+        $location = $sale['location'] ?? '';
+        $strength_mpa = $sale['strength_mpa'] ?? '';
+        $strength_kg = $sale['strength_kg'] ?? '';
+        $price_per_unit = isset($sale['price_per_unit']) ? (float)$sale['price_per_unit'] : null;
+        $key_parts = [
+            $order_date,
+            $location,
+            $strength_mpa,
+            $strength_kg,
+            $price_per_unit !== null ? number_format($price_per_unit, 4, '.', '') : 'null',
+        ];
+        $key = implode('|', $key_parts);
+        if (!isset($grouped[$key])) {
+            $grouped[$key] = [
+                'order_date' => $order_date,
+                'location' => $location,
+                'strength_mpa' => $strength_mpa,
+                'strength_kg' => $strength_kg,
+                'price_per_unit' => $price_per_unit,
+                'quantity' => 0,
+                'total_price' => 0,
+                'remaining_amount' => 0,
+                'invoice_numbers' => [],
+                'recipients' => [],
+            ];
+        }
+        $grouped[$key]['quantity'] += isset($sale['quantity']) ? (float)$sale['quantity'] : 0;
+        $grouped[$key]['total_price'] += isset($sale['total_price']) ? (float)$sale['total_price'] : 0;
+        $grouped[$key]['remaining_amount'] += isset($sale['remaining_amount']) ? (float)$sale['remaining_amount'] : 0;
+        if (!empty($sale['invoice_number'])) {
+            $grouped[$key]['invoice_numbers'][] = $sale['invoice_number'];
+        }
+        if (!empty($sale['recipient'])) {
+            $grouped[$key]['recipients'][] = $sale['recipient'];
+        }
+    }
+    foreach ($grouped as &$group) {
+        if (!empty($group['recipients'])) {
+            $group['recipients'] = array_values(array_unique($group['recipients']));
+        } else {
+            $group['recipients'] = [];
+        }
+        if (!empty($group['invoice_numbers'])) {
+            $group['invoice_numbers'] = array_values(array_unique($group['invoice_numbers']));
+        } else {
+            $group['invoice_numbers'] = [];
+        }
+    }
+    unset($group);
+    usort($grouped, function ($a, $b) {
+        $dateComparison = strcmp($a['order_date'] ?? '', $b['order_date'] ?? '');
+        if ($dateComparison !== 0) {
+            return $dateComparison;
+        }
+        $locationComparison = strcasecmp($a['location'] ?? '', $b['location'] ?? '');
+        if ($locationComparison !== 0) {
+            return $locationComparison;
+        }
+        $strengthA = format_strength_label($a['strength_mpa'] ?? '', $a['strength_kg'] ?? '');
+        $strengthB = format_strength_label($b['strength_mpa'] ?? '', $b['strength_kg'] ?? '');
+        return strcasecmp($strengthA, $strengthB);
     });
-
-    $sales_by_customer[$customerId] = $normalizedSales;
+    return $grouped;
 }
 // Sort customers: those with remaining invoice debt first, then by name
 usort($customers, function($a, $b) {
@@ -302,7 +290,11 @@ usort($customers, function($a, $b) {
                 </span>
             </div>
 
-            <?php if (!empty($sales_by_customer[$c['id']])): ?>
+            <?php
+                $customer_sales = $sales_by_customer[$c['id']] ?? [];
+                $grouped_sales = !empty($customer_sales) ? group_sales_rows($customer_sales) : [];
+            ?>
+            <?php if (!empty($grouped_sales)): ?>
             <div class="table-container">
                 <table class="credit-table">
                     <thead>
@@ -320,32 +312,44 @@ usort($customers, function($a, $b) {
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($sales_by_customer[$c['id']] as $i => $s): ?>
+                        <?php foreach ($grouped_sales as $i => $group): ?>
                         <tr>
                             <td><?= $i+1 ?></td>
-                            <td><?= htmlspecialchars($s['recipient']) ?></td>
-                            <td><?= htmlspecialchars($s['location']) ?></td>
                             <td>
-                                <?php 
-                                $strength_mpa = $s['strength_mpa'] ?? '';
-                                $strength_kg = $s['strength_kg'] ?? '';
-                                if ($strength_mpa && $strength_kg) {
-                                    echo htmlspecialchars($strength_mpa . ' MPA + ' . $strength_kg . ' Kg');
-                                } elseif ($strength_mpa) {
-                                    echo htmlspecialchars($strength_mpa . ' MPA');
-                                } elseif ($strength_kg) {
-                                    echo htmlspecialchars($strength_kg . ' Kg');
-                                } else {
-                                    echo '-';
-                                }
+                                <?php
+                                    if (!empty($group['recipients'])) {
+                                        echo htmlspecialchars(implode(', ', $group['recipients']));
+                                    } else {
+                                        echo '-';
+                                    }
                                 ?>
                             </td>
-                            <td><?= number_format($s['quantity'], 2) ?> م³</td>
-                            <td><?= number_format($s['price_per_unit'], 2) ?> $</td>
-                            <td><?= number_format($s['total_price'], 2) ?> $</td>
-                            <td><?= number_format($s['remaining_amount'], 2) ?> $</td>
-                            <td><?= htmlspecialchars($s['invoice_number']) ?></td>
-                            <td><?= htmlspecialchars($s['order_date']) ?></td>
+                            <td><?= htmlspecialchars($group['location'] ?? '-') ?></td>
+                            <td>
+                                <?= htmlspecialchars(format_strength_label($group['strength_mpa'] ?? '', $group['strength_kg'] ?? '')) ?>
+                            </td>
+                            <td><?= number_format($group['quantity'], 2) ?> م³</td>
+                            <td>
+                                <?php
+                                    if ($group['price_per_unit'] !== null) {
+                                        echo number_format($group['price_per_unit'], 2) . ' $';
+                                    } else {
+                                        echo '-';
+                                    }
+                                ?>
+                            </td>
+                            <td><?= number_format($group['total_price'], 2) ?> $</td>
+                            <td><?= number_format($group['remaining_amount'], 2) ?> $</td>
+                            <td>
+                                <?php
+                                    if (!empty($group['invoice_numbers'])) {
+                                        echo htmlspecialchars(implode(', ', $group['invoice_numbers']));
+                                    } else {
+                                        echo '-';
+                                    }
+                                ?>
+                            </td>
+                            <td><?= htmlspecialchars($group['order_date'] ?? '') ?></td>
                         </tr>
                         <?php endforeach; ?>
                     </tbody>
