@@ -1,5 +1,6 @@
 // Purchase Materials History for Person Profile
 let purchasesTable = null;
+let isPurchasesTableLoading = false;
 
 function formatNumber(num) {
     if (num === null || num === undefined) return '0';
@@ -69,24 +70,44 @@ function setupPurchaseDateFilter(fromId, toId, table, dateColumnIndex, clearBtnI
 }
 
 $(document).ready(function() {
-    // Load purchases when the purchases tab is shown
-    $('#purchases-tab').on('click', function() {
-        loadPurchaseMaterialsHistory();
-    });
-    
-    // Also load when the tab is shown via other means
-    $('button[data-bs-target="#purchases"]').on('click', function() {
-        loadPurchaseMaterialsHistory();
+    // Load purchases when the purchases tab is shown (use one event handler)
+    $('#purchases-tab').on('shown.bs.tab', function() {
+        if (!purchasesTable && !isPurchasesTableLoading) {
+            loadPurchaseMaterialsHistory();
+        }
     });
 });
 
 function loadPurchaseMaterialsHistory() {
+    // Prevent multiple simultaneous calls
+    if (isPurchasesTableLoading) {
+        return;
+    }
+    
+    isPurchasesTableLoading = true;
+    
     // Destroy existing table if it exists
     if (purchasesTable) {
-        purchasesTable.destroy();
+        try {
+            purchasesTable.destroy();
+        } catch (e) {
+            console.warn('Error destroying purchases table:', e);
+        }
         purchasesTable = null;
-        $('#purchasesTable').empty();
     }
+    
+    // Check if DataTable is already initialized on the element
+    const tableElement = $('#purchasesTable');
+    if ($.fn.DataTable.isDataTable(tableElement)) {
+        try {
+            tableElement.DataTable().destroy();
+        } catch (e) {
+            console.warn('Error destroying existing DataTable:', e);
+        }
+    }
+    
+    // Clear the table element completely
+    tableElement.empty();
     
     $.ajax({
         url: '../process/person_other_expenses_profile/select_purchases.php',
@@ -94,6 +115,7 @@ function loadPurchaseMaterialsHistory() {
         data: { person_id: PERSON_ID },
         dataType: 'json',
         success: function(response) {
+            isPurchasesTableLoading = false;
             if (response.success) {
                 renderPurchaseMaterialsTable(response.data);
             } else {
@@ -148,6 +170,7 @@ function loadPurchaseMaterialsHistory() {
             }
         },
         error: function(xhr, status, error) {
+            isPurchasesTableLoading = false;
             console.error('AJAX Error:', error);
             // Create empty DataTable with error message
             purchasesTable = new DataTable('#purchasesTable', {
@@ -201,6 +224,17 @@ function loadPurchaseMaterialsHistory() {
 }
 
 function renderPurchaseMaterialsTable(purchases) {
+    // Make sure table is cleared before rendering
+    const tableElement = $('#purchasesTable');
+    if ($.fn.DataTable.isDataTable(tableElement)) {
+        try {
+            tableElement.DataTable().destroy();
+        } catch (e) {
+            console.warn('Error destroying table before render:', e);
+        }
+    }
+    tableElement.empty();
+    
     if (!purchases || purchases.length === 0) {
         purchasesTable = new DataTable('#purchasesTable', {
             data: [],
@@ -248,6 +282,7 @@ function renderPurchaseMaterialsTable(purchases) {
                 { extend: 'print', text: 'پرینت', className: 'btn btn-sm btn-outline-primary' }
             ]
         });
+        isPurchasesTableLoading = false;
         return;
     }
     
@@ -341,6 +376,9 @@ function renderPurchaseMaterialsTable(purchases) {
     
     // Store original data for summary calculations
     window.purchasesOriginalData = purchases;
+    
+    // Mark loading as complete
+    isPurchasesTableLoading = false;
 }
 
 // Update summary cards based on filtered purchases data
