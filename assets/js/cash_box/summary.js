@@ -6,13 +6,13 @@ function formatNumber(amount) {
     return num.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 }
 
-function formatUsd(amount, fractionDigits = 2) {
+function formatUsd(amount) {
     if (amount === null || amount === undefined || isNaN(amount)) {
         amount = 0;
     }
     return '$' + Number(amount).toLocaleString('en-US', {
-        minimumFractionDigits: fractionDigits,
-        maximumFractionDigits: fractionDigits
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
     });
 }
 
@@ -33,33 +33,13 @@ function updateCashBoxSummary(from, to) {
         data: { from: from || '', to: to || '' },
         dataType: 'json',
         success: function(response) {
-            console.log('Summary response:', response);
             if (response.success) {
-                if (response.data.total_usd_all !== undefined) {
-                    const totalValue = Number(response.data.total_usd_all);
-                    $('#totalCashUsdAll').text(formatUsd(totalValue));
-                    
-                    // Add visual indicator if manual
-                    if (response.data.is_manual) {
-                        $('#totalCashUsdAll').attr('title', 'نرخی دەستکاریکراو (دووبارە کلیک بکە بۆ دەستکاریکردن)');
-                        $('#totalCashUsdAll').css('color', '#ffc107');
-                    } else {
-                        $('#totalCashUsdAll').attr('title', 'نرخی هەژمارکراو (دووبارە کلیک بکە بۆ دەستکاریکردن)');
-                        $('#totalCashUsdAll').css('color', '');
-                    }
-                } else {
-                    $('#totalCashUsdAll').text('$0');
-                }
-                
                 const totalUsdOnly = Number(response.data.total_usd || 0);
-                $('#totalCashUsdOnly').text(formatUsd(totalUsdOnly, 2));
-                $('#totalCashBreakdownUsd').text('دۆلار: ' + formatUsd(totalUsdOnly, 2));
+                $('#totalCashUsdOnly').text(formatUsd(totalUsdOnly));
                 
                 const totalIqdOnly = Number(response.data.total_iqd || 0);
                 $('#totalCashIqdOnly').text(formatIqd(totalIqdOnly));
-                $('#totalCashBreakdownIqd').text('دینار: ' + formatIqd(totalIqdOnly));
                 
-                // Update dollar rate card
                 if (response.data.usd_iqd_rate !== undefined) {
                     $('#dollarRate').text(formatNumber(response.data.usd_iqd_rate) + ' د.ع');
                 } else {
@@ -67,141 +47,19 @@ function updateCashBoxSummary(from, to) {
                 }
             } else {
                 console.error('Summary error:', response);
-                $('#totalCashUsdAll').text('$0');
                 $('#totalCashUsdOnly').text('$0');
                 $('#totalCashIqdOnly').text('0 د.ع');
-                $('#totalCashBreakdownUsd').text('دۆلار: $0');
-                $('#totalCashBreakdownIqd').text('دینار: 0 د.ع');
                 $('#dollarRate').text('0 د.ع');
             }
         },
         error: function(xhr, status, error) {
             console.error('Summary AJAX error:', xhr, status, error);
-            $('#totalCashUsdAll').text('$0');
             $('#totalCashUsdOnly').text('$0');
             $('#totalCashIqdOnly').text('0 د.ع');
-            $('#totalCashBreakdownUsd').text('دۆلار: $0');
-            $('#totalCashBreakdownIqd').text('دینار: 0 د.ع');
             $('#dollarRate').text('0 د.ع');
         }
     });
 }
-
-let originalCashTotal = 0;
-
-// Enable editing on double-click
-$(document).on('dblclick', '#totalCashUsdAll', function() {
-    const currentText = $(this).text().replace('$', '').replace(/,/g, '');
-    const currentValue = parseFloat(currentText) || 0;
-    originalCashTotal = currentValue;
-    
-    $(this).addClass('d-none');
-    $('#totalCashUsdAllInput').val(currentValue).removeClass('d-none').focus().select();
-    $('#saveCashTotalBtn, #cancelCashTotalBtn').removeClass('d-none');
-});
-
-// Save edited value
-$(document).on('click', '#saveCashTotalBtn', function() {
-    const newValue = parseFloat($('#totalCashUsdAllInput').val()) || 0;
-    
-    // Save to database
-    $.ajax({
-        url: '../process/cash_box/save_total.php',
-        method: 'POST',
-        data: { total_usd_all: newValue },
-        dataType: 'json',
-        success: function(response) {
-            if (response.success) {
-                $('#totalCashUsdAll').text('$' + Number(newValue).toLocaleString());
-                Swal.fire({
-                    icon: 'success',
-                    title: 'سەرکەوتوو!',
-                    text: 'کۆی پارە بە سەرکەوتوویی پاشەکەوت کرا',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-            } else {
-                Swal.fire('هەڵە!', response.error || 'هەڵەیەک ڕووی دا', 'error');
-            }
-        },
-        error: function() {
-            Swal.fire('هەڵە!', 'هەڵەیەک لە کۆنێکتکردن', 'error');
-        },
-        complete: function() {
-            // Reset UI
-            $('#totalCashUsdAllInput').addClass('d-none');
-            $('#totalCashUsdAll').removeClass('d-none');
-            $('#saveCashTotalBtn, #cancelCashTotalBtn').addClass('d-none');
-        }
-    });
-});
-
-// Cancel editing
-$(document).on('click', '#cancelCashTotalBtn', function() {
-    $('#totalCashUsdAllInput').addClass('d-none');
-    $('#totalCashUsdAll').removeClass('d-none');
-    $('#saveCashTotalBtn, #cancelCashTotalBtn').addClass('d-none');
-});
-
-// Reset to calculated value
-$(document).on('click', '#resetCashTotalBtn', function() {
-    Swal.fire({
-        title: 'دڵنیایت؟',
-        text: 'کۆی پارە بگەڕێتەوە بۆ بڕی هەژمارکراو؟',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'بەڵێ، سفر بکەوە',
-        cancelButtonText: 'نەخێر'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // Reset in database
-            $.ajax({
-                url: '../process/cash_box/reset_total.php',
-                method: 'POST',
-                dataType: 'json',
-                success: function(response) {
-                    console.log('Reset response:', response);
-                    if (response.success) {
-                        // Reload summary immediately
-                        var dates = {
-                            from: $('#filter_from').val() || '',
-                            to: $('#filter_to').val() || ''
-                        };
-                        
-                        // Force reload summary
-                        updateCashBoxSummary(dates.from, dates.to);
-                        
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'سەرکەوتوو!',
-                            text: 'کۆی پارە بە سەرکەوتوویی سفر کرا',
-                            timer: 2000,
-                            showConfirmButton: false
-                        });
-                    } else {
-                        console.error('Reset error:', response);
-                        Swal.fire('هەڵە!', response.error || 'هەڵەیەک ڕووی دا', 'error');
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('Reset AJAX error:', xhr, status, error);
-                    Swal.fire('هەڵە!', 'هەڵەیەک لە کۆنێکتکردن: ' + error, 'error');
-                }
-            });
-        }
-    });
-});
-
-// Allow Enter key to save
-$(document).on('keypress', '#totalCashUsdAllInput', function(e) {
-    if (e.which === 13) { // Enter key
-        $('#saveCashTotalBtn').click();
-    } else if (e.which === 27) { // Escape key
-        $('#cancelCashTotalBtn').click();
-    }
-});
 
 $(document).ready(function() {
     function getFilterDates() {
