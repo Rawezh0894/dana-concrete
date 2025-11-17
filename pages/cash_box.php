@@ -176,9 +176,9 @@ if (!hasPermission('view_cash_box')) {
               </select>
             </div>
             <div class="col-md-12 mb-3">
-              <label for="note" class="form-label">تێبینی (وردەکاری تەواو)</label>
-              <textarea class="form-control" id="note" name="note" rows="4" placeholder="تێبینی وردەکاری تەواو لێرە بنووسە..."></textarea>
-              <small class="form-text text-muted">تێبینی وردەکاری تەواو بە شێوەی پڕۆفیشناڵ بنووسە</small>
+              <label for="note" class="form-label">تێبینی (پێویستە بنوسرێت)</label>
+              <textarea class="form-control" id="note" name="note" rows="4" placeholder="نمونە: وەرگرتنی پارە لە کڕیار (ناو، پڕۆژە، مۆڵەت)" required minlength="10"></textarea>
+              <small class="form-text text-muted">تێبینی پێویستە بە کورتەی مانادار بنوسرێت (کەمترین ١٠ پیت)</small>
             </div>
           </div>
         </div>
@@ -235,9 +235,9 @@ if (!hasPermission('view_cash_box')) {
               </select>
             </div>
             <div class="col-md-12 mb-3">
-              <label for="edit_note" class="form-label">تێبینی (وردەکاری تەواو)</label>
-              <textarea class="form-control" id="edit_note" name="note" rows="4" placeholder="تێبینی وردەکاری تەواو لێرە بنووسە..."></textarea>
-              <small class="form-text text-muted">تێبینی وردەکاری تەواو بە شێوەی پڕۆفیشناڵ بنووسە</small>
+              <label for="edit_note" class="form-label">تێبینی (پێویستە بنوسرێت)</label>
+              <textarea class="form-control" id="edit_note" name="note" rows="4" placeholder="نمونە: ڕۆشتنی پارە بۆ کرێی ئامێر/خاوەنکار" required minlength="10"></textarea>
+              <small class="form-text text-muted">تێبینی پێویستە بە کورتەی مانادار بنوسرێت (کەمترین ١٠ پیت)</small>
             </div>
           </div>
         </div>

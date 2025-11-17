@@ -28,6 +28,11 @@ $(document).ready(function() {
     // Submit update
     $('#editCashBoxForm').on('submit', function(e) {
         e.preventDefault();
+        var noteValue = ($('#edit_note').val() || '').trim();
+        if (noteValue.length < 10) {
+            Swal.fire('ئاگادارکردنەوە', 'تێبینی پێویستە بە کورتەی مانادار بنوسرێت (کەمترین ١٠ پیت).', 'warning');
+            return;
+        }
         var formData = {
             id: $('#edit_id').val(),
             date: $('#edit_date').val(),
@@ -35,7 +40,7 @@ $(document).ready(function() {
             amount_iqd: $('#edit_amount_iqd').val(),
             amount_usd: $('#edit_amount_usd').val(),
             currency: $('#edit_currency').val(),
-            note: $('#edit_note').val()
+            note: noteValue
         };
         $.ajax({
             url: '../process/cash_box/update.php',

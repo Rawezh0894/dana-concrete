@@ -14,10 +14,15 @@ $type = $_POST['type'] ?? '';
 $amount_iqd = $_POST['amount_iqd'] ?? 0;
 $amount_usd = $_POST['amount_usd'] ?? 0;
 $currency = $_POST['currency'] ?? '';
-$note = $_POST['note'] ?? '';
+$note = isset($_POST['note']) ? trim($_POST['note']) : '';
 
 if (!$id || !is_numeric($id) || !$date || !$type || !$currency) {
     echo json_encode(['success' => false, 'error' => 'هەموو خانەکان پڕ بکە']);
+    exit;
+}
+$noteLength = function_exists('mb_strlen') ? mb_strlen($note, 'UTF-8') : strlen($note);
+if ($noteLength < 10) {
+    echo json_encode(['success' => false, 'error' => 'تێبینی پێویستە بە ماناداری بنوسرێت (کەمترین ١٠ پیت)']);
     exit;
 }
 if (!isset($_SESSION['user_id'])) {

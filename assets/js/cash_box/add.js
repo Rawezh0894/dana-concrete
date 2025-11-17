@@ -4,13 +4,19 @@ $(document).ready(function() {
         if (submitting) return false;
         submitting = true;
         e.preventDefault();
+        var noteValue = ($('#note').val() || '').trim();
+        if (noteValue.length < 10) {
+            Swal.fire('ئاگادارکردنەوە', 'تێبینی پێویستە بە کورتەی مانادار بنوسرێت (کەمترین ١٠ پیت).', 'warning');
+            submitting = false;
+            return;
+        }
         var formData = {
             date: $('#date').val(),
             type: $('#type').val(),
             amount_iqd: $('#amount_iqd').val(),
             amount_usd: $('#amount_usd').val(),
             currency: $('#currency').val(),
-            note: $('#note').val()
+            note: noteValue
         };
         $.ajax({
             url: '../process/cash_box/add.php',
@@ -23,6 +29,11 @@ $(document).ready(function() {
                     $('#addCashBoxModal').modal('hide');
                     $('#addCashBoxForm')[0].reset();
                     if (typeof loadCashBoxEntries === 'function') loadCashBoxEntries();
+                    if (typeof updateCashBoxSummary === 'function') {
+                        var from = $('#filter_from').val();
+                        var to = $('#filter_to').val();
+                        updateCashBoxSummary(from, to);
+                    }
                 } else {
                     Swal.fire('هەڵە!', response.error || 'ناتوانرێت مامەڵە زیاد بکرێت', 'error');
                 }
