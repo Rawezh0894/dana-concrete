@@ -65,7 +65,7 @@ if (!hasPermission('view_cash_box')) {
     </div>
     <!-- Summary Cards -->
     <div class="row mb-4" id="cashBoxSummaryCards">
-        <div class="col-lg-6 col-md-6 mb-3">
+        <div class="col-lg-3 col-md-6 mb-3">
             <div class="card text-center shadow  card-gradient-info card-animate-hover">
                 <div class="card-body">
                     <i class="fas fa-money-bill-wave card-icon"></i>
@@ -73,6 +73,10 @@ if (!hasPermission('view_cash_box')) {
                     <div class="fs-4 fw-bold" id="totalCashUsdAll" style="cursor: pointer;" title="دووبارە کلیک بکە بۆ دەستکاریکردن">$0</div>
                     <input type="number" class="form-control form-control-lg text-center d-none" id="totalCashUsdAllInput" step="0.01" min="0" style="max-width: 200px; margin: 0 auto;">
                     <small class="text-light">دۆلار + دینار بە دۆلار</small>
+                    <div class="mt-3">
+                        <div class="text-light small fw-semibold" id="totalCashBreakdownUsd">دۆلار: $0</div>
+                        <div class="text-light small fw-semibold" id="totalCashBreakdownIqd">دینار: 0 د.ع</div>
+                    </div>
                     <div class="mt-2">
                         <button class="btn btn-sm btn-warning d-none" id="saveCashTotalBtn" style="margin-right: 5px;">
                             <i class="fas fa-save"></i> پاشەکەوتکردن
@@ -87,7 +91,27 @@ if (!hasPermission('view_cash_box')) {
                 </div>
             </div>
         </div>
-        <div class="col-lg-6 col-md-6 mb-3">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-center shadow card-gradient-purple card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-sack-dollar card-icon"></i>
+                    <h6 class="card-title">پێویستی قاسە بە دۆلار</h6>
+                    <div class="fs-4 fw-bold" id="totalCashUsdOnly">$0</div>
+                    <small class="text-light">تەنیا مامەڵەکانی بە دۆلار</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-center shadow card-gradient-success card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-money-check-dollar card-icon"></i>
+                    <h6 class="card-title">پێویستی قاسە بە دینار</h6>
+                    <div class="fs-4 fw-bold" id="totalCashIqdOnly">0 د.ع</div>
+                    <small class="text-light">تەنیا مامەڵەکانی بە دینار</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
             <div class="card text-center shadow  card-gradient-success card-animate-hover">
                 <div class="card-body">
                     <i class="fas fa-dollar-sign card-icon"></i>

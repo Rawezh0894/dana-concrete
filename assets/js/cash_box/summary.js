@@ -6,6 +6,26 @@ function formatNumber(amount) {
     return num.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 }
 
+function formatUsd(amount, fractionDigits = 2) {
+    if (amount === null || amount === undefined || isNaN(amount)) {
+        amount = 0;
+    }
+    return '$' + Number(amount).toLocaleString('en-US', {
+        minimumFractionDigits: fractionDigits,
+        maximumFractionDigits: fractionDigits
+    });
+}
+
+function formatIqd(amount) {
+    if (amount === null || amount === undefined || isNaN(amount)) {
+        amount = 0;
+    }
+    return Number(amount).toLocaleString('en-US', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }) + ' د.ع';
+}
+
 function updateCashBoxSummary(from, to) {
     $.ajax({
         url: '../process/cash_box/summary.php',
@@ -17,10 +37,7 @@ function updateCashBoxSummary(from, to) {
             if (response.success) {
                 if (response.data.total_usd_all !== undefined) {
                     const totalValue = Number(response.data.total_usd_all);
-                    $('#totalCashUsdAll').text('$' + totalValue.toLocaleString('en-US', {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2
-                    }));
+                    $('#totalCashUsdAll').text(formatUsd(totalValue));
                     
                     // Add visual indicator if manual
                     if (response.data.is_manual) {
@@ -34,6 +51,14 @@ function updateCashBoxSummary(from, to) {
                     $('#totalCashUsdAll').text('$0');
                 }
                 
+                const totalUsdOnly = Number(response.data.total_usd || 0);
+                $('#totalCashUsdOnly').text(formatUsd(totalUsdOnly, 2));
+                $('#totalCashBreakdownUsd').text('دۆلار: ' + formatUsd(totalUsdOnly, 2));
+                
+                const totalIqdOnly = Number(response.data.total_iqd || 0);
+                $('#totalCashIqdOnly').text(formatIqd(totalIqdOnly));
+                $('#totalCashBreakdownIqd').text('دینار: ' + formatIqd(totalIqdOnly));
+                
                 // Update dollar rate card
                 if (response.data.usd_iqd_rate !== undefined) {
                     $('#dollarRate').text(formatNumber(response.data.usd_iqd_rate) + ' د.ع');
@@ -43,12 +68,20 @@ function updateCashBoxSummary(from, to) {
             } else {
                 console.error('Summary error:', response);
                 $('#totalCashUsdAll').text('$0');
+                $('#totalCashUsdOnly').text('$0');
+                $('#totalCashIqdOnly').text('0 د.ع');
+                $('#totalCashBreakdownUsd').text('دۆلار: $0');
+                $('#totalCashBreakdownIqd').text('دینار: 0 د.ع');
                 $('#dollarRate').text('0 د.ع');
             }
         },
         error: function(xhr, status, error) {
             console.error('Summary AJAX error:', xhr, status, error);
             $('#totalCashUsdAll').text('$0');
+            $('#totalCashUsdOnly').text('$0');
+            $('#totalCashIqdOnly').text('0 د.ع');
+            $('#totalCashBreakdownUsd').text('دۆلار: $0');
+            $('#totalCashBreakdownIqd').text('دینار: 0 د.ع');
             $('#dollarRate').text('0 د.ع');
         }
     });
