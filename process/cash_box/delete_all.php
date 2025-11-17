@@ -26,9 +26,17 @@ if (!hasPermission('add_cash_box') && !hasPermission('delete_cash_box')) {
 try {
     $pdo->beginTransaction();
 
-    $stmt = $pdo->prepare('DELETE FROM cash_box');
-    $stmt->execute();
-    $deletedCount = $stmt->rowCount();
+    // سڕینەوەی مامەڵەکانی withdraw لە پێش deposit بۆ ئەوەی trigger نەگیرێت
+    $stmtWithdraw = $pdo->prepare("DELETE FROM cash_box WHERE type = 'withdraw'");
+    $stmtWithdraw->execute();
+    $withdrawDeleted = $stmtWithdraw->rowCount();
+
+    // ئێستا مامەڵەکانی ماوە (گەورەکراوەکان/زیادکردن) بسڕەوە
+    $stmtRest = $pdo->prepare('DELETE FROM cash_box');
+    $stmtRest->execute();
+    $restDeleted = $stmtRest->rowCount();
+
+    $deletedCount = $withdrawDeleted + $restDeleted;
 
     // Remove manual override total so it can be recalculated cleanly
     $stmtSettings = $pdo->prepare("DELETE FROM settings WHERE name = 'cash_box_total_usd_all'");
