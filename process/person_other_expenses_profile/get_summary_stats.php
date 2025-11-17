@@ -86,15 +86,15 @@ try {
         $purchaseParams[] = $dateTo;
     }
     
-    // Get remaining amounts from purchase_materials table - FIXED: Use correct calculation
+    // Get remaining amounts from purchase_materials table - Use remaining_amount field (same as get_debt_totals.php)
     $stmt = $pdo->prepare("
         SELECT 
-            SUM(total_price_usd - paid_amount_usd) as total_remaining_usd_purchase,
-            SUM(total_price_iqd - paid_amount_iqd) as total_remaining_iqd_purchase
+            SUM(remaining_amount_usd) as total_remaining_usd_purchase,
+            SUM(remaining_amount_iqd) as total_remaining_iqd_purchase
         FROM purchase_materials 
-        $purchaseDateWhere
+        WHERE person_id = ? AND payment_type = 'قەرز'
     ");
-    $stmt->execute($purchaseParams);
+    $stmt->execute([$person_id]);
     $remaining_purchase = $stmt->fetch(PDO::FETCH_ASSOC);
     
     // Calculate our debt (opening debt + remaining amounts)

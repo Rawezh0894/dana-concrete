@@ -27,27 +27,11 @@ try {
         exit;
     }
 
-    // Get remaining amounts from other_expenses (same as get_summary_stats.php - no payment_type filter)
-    $stmt = $pdo->prepare("
-        SELECT 
-            IFNULL(SUM(remaining_usd), 0) AS rem_usd,
-            IFNULL(SUM(remaining_iqd), 0) AS rem_iqd
-        FROM other_expenses 
-        WHERE person_id=?
-    ");
+    $stmt = $pdo->prepare("SELECT IFNULL(SUM(remaining_usd), 0) AS rem_usd, IFNULL(SUM(remaining_iqd), 0) AS rem_iqd FROM other_expenses WHERE person_id=? AND payment_type='قەرز'");
     $stmt->execute([$person_id]);
     $rem_expenses = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // Get remaining amounts from purchase_materials (same calculation as get_summary_stats.php)
-    // Use total_price - paid_amount instead of remaining_amount to match summary stats
-    // No payment_type filter to match get_summary_stats.php
-    $stmt = $pdo->prepare("
-        SELECT 
-            IFNULL(SUM(GREATEST(total_price_usd - paid_amount_usd, 0)), 0) AS rem_usd,
-            IFNULL(SUM(GREATEST(total_price_iqd - paid_amount_iqd, 0)), 0) AS rem_iqd
-        FROM purchase_materials 
-        WHERE person_id=?
-    ");
+    $stmt = $pdo->prepare("SELECT IFNULL(SUM(remaining_amount_usd), 0) AS rem_usd, IFNULL(SUM(remaining_amount_iqd), 0) AS rem_iqd FROM purchase_materials WHERE person_id=? AND payment_type='قەرز'");
     $stmt->execute([$person_id]);
     $rem_purchases = $stmt->fetch(PDO::FETCH_ASSOC);
 
