@@ -49,7 +49,12 @@ if (!hasPermission('view_cash_box')) {
 <div class="container-fluid py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">قاسەکە</h2>
-        <div>
+        <div class="d-flex flex-wrap justify-content-end gap-2">
+            <?php if (hasPermission('add_cash_box') || hasPermission('delete_cash_box')): ?>
+            <button class="btn btn-danger" id="deleteAllCashBoxBtn" style="font-weight: bold;">
+                <i class="fas fa-trash-alt me-1"></i>سڕینەوەی هەموو مامەڵەکان
+            </button>
+            <?php endif; ?>
             <button class="btn btn-success me-2" id="exportExcelBtn" style="font-weight: bold;">
                 <i class="fas fa-file-excel me-1"></i>ئیکسپۆرت بۆ Excel
             </button>
