@@ -167,133 +167,8 @@ INSERT INTO `cash_box` (`id`, `date`, `type`, `amount_iqd`, `amount_usd`, `curre
 (73, '2025-08-07', 'deposit', 0.00, 10000.00, 'دۆلار', '', 1, '2025-08-09 07:39:40'),
 (77, '2025-08-10', 'withdraw', 0.00, 4000.00, 'دۆلار', 'گەڕاندنەوەی قەرزی کۆمپانیا: 30', 1, '2025-08-10 07:21:10');
 
---
--- Triggers `cash_box`
---
 DELIMITER $$
-CREATE TRIGGER `trg_before_delete_cash_box` BEFORE DELETE ON `cash_box` FOR EACH ROW BEGIN
-    DECLARE total_usd DECIMAL(20,2) DEFAULT 0;
-    DECLARE dollar_rate DECIMAL(20,2) DEFAULT 150000;
-    DECLARE usd_to_remove DECIMAL(20,2) DEFAULT 0;
-
-    -- وەرگرتنی نرخەکەی دۆلار لە settings
-    SELECT CAST(value AS DECIMAL(20,2)) INTO dollar_rate FROM settings WHERE name = 'usd_iqd_rate' LIMIT 1;
-
-    -- هەژمارکردنی قاسەی گشتی بە دۆلار (پێش سڕینەوە)
-    SELECT
-        IFNULL(SUM(
-            CASE
-                WHEN currency = 'دۆلار' AND type = 'deposit' THEN amount_usd
-                WHEN currency = 'دۆلار' AND type = 'withdraw' THEN -amount_usd
-                WHEN currency = 'دینار' AND type = 'deposit' THEN amount_iqd / dollar_rate
-                WHEN currency = 'دینار' AND type = 'withdraw' THEN -amount_iqd / dollar_rate
-                ELSE 0
-            END
-        ), 0)
-    INTO total_usd
-    FROM cash_box;
-
-    -- بڕی مامەڵەی سڕدرێنەوە بە دۆلار
-    IF OLD.currency = 'دۆلار' THEN
-        SET usd_to_remove = 
-            CASE WHEN OLD.type = 'deposit' THEN -OLD.amount_usd ELSE OLD.amount_usd END;
-    ELSE
-        SET usd_to_remove = 
-            CASE WHEN OLD.type = 'deposit' THEN -OLD.amount_iqd / dollar_rate ELSE OLD.amount_iqd / dollar_rate END;
-    END IF;
-
-    -- چێککردنی قاسەی گشتی بە دۆلار پاش سڕینەوە
-    IF (total_usd + usd_to_remove) < 0 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'سڕینەوەی ئەم مامەڵەیە قاسەی گشتی منفی دەکات!';
-    END IF;
-END
-$$
-DELIMITER ;
-DELIMITER $$
-CREATE TRIGGER `trg_before_update_cash_box` BEFORE UPDATE ON `cash_box` FOR EACH ROW BEGIN
-    DECLARE total_usd DECIMAL(20,2) DEFAULT 0;
-    DECLARE dollar_rate DECIMAL(20,2) DEFAULT 150000;
-    DECLARE usd_old DECIMAL(20,2) DEFAULT 0;
-    DECLARE usd_new DECIMAL(20,2) DEFAULT 0;
-
-    -- وەرگرتنی نرخەکەی دۆلار لە settings
-    SELECT CAST(value AS DECIMAL(20,2)) INTO dollar_rate FROM settings WHERE name = 'usd_iqd_rate' LIMIT 1;
-
-    -- هەژمارکردنی قاسەی گشتی بە دۆلار (پێش update)
-    SELECT
-        IFNULL(SUM(
-            CASE
-                WHEN currency = 'دۆلار' AND type = 'deposit' THEN amount_usd
-                WHEN currency = 'دۆلار' AND type = 'withdraw' THEN -amount_usd
-                WHEN currency = 'دینار' AND type = 'deposit' THEN amount_iqd / dollar_rate
-                WHEN currency = 'دینار' AND type = 'withdraw' THEN -amount_iqd / dollar_rate
-                ELSE 0
-            END
-        ), 0)
-    INTO total_usd
-    FROM cash_box;
-
-    -- بڕی مامەڵەی کۆن بە دۆلار
-    IF OLD.currency = 'دۆلار' THEN
-        SET usd_old = 
-            CASE WHEN OLD.type = 'deposit' THEN OLD.amount_usd ELSE -OLD.amount_usd END;
-    ELSE
-        SET usd_old = 
-            CASE WHEN OLD.type = 'deposit' THEN OLD.amount_iqd / dollar_rate ELSE -OLD.amount_iqd / dollar_rate END;
-    END IF;
-
-    -- بڕی مامەڵەی نوێ بە دۆلار
-    IF NEW.currency = 'دۆلار' THEN
-        SET usd_new = 
-            CASE WHEN NEW.type = 'deposit' THEN NEW.amount_usd ELSE -NEW.amount_usd END;
-    ELSE
-        SET usd_new = 
-            CASE WHEN NEW.type = 'deposit' THEN NEW.amount_iqd / dollar_rate ELSE -NEW.amount_iqd / dollar_rate END;
-    END IF;
-
-    -- چێککردنی قاسەی گشتی بە دۆلار پاش update
-    IF (total_usd - usd_old + usd_new) < 0 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'نوێکردنەوەی ئەم مامەڵەیە قاسەی گشتی منفی دەکات!';
-    END IF;
-END
-$$
-DELIMITER ;
-DELIMITER $$
-CREATE TRIGGER `trg_before_withdraw_cash_box` BEFORE INSERT ON `cash_box` FOR EACH ROW BEGIN
-    DECLARE total_usd DECIMAL(20,2) DEFAULT 0;
-    DECLARE dollar_rate DECIMAL(20,2) DEFAULT 150000;
-    DECLARE usd_to_check DECIMAL(20,2) DEFAULT 0;
-
-    -- وەرگرتنی نرخەکەی دۆلار لە settings
-    SELECT CAST(value AS DECIMAL(20,2)) INTO dollar_rate FROM settings WHERE name = 'usd_iqd_rate' LIMIT 1;
-
-    -- هەژمارکردنی قاسەی گشتی بە دۆلار (هەموو مامەڵەکان)
-    SELECT
-        IFNULL(SUM(
-            CASE
-                WHEN currency = 'دۆلار' AND type = 'deposit' THEN amount_usd
-                WHEN currency = 'دۆلار' AND type = 'withdraw' THEN -amount_usd
-                WHEN currency = 'دینار' AND type = 'deposit' THEN amount_iqd / (dollar_rate / 100)
-                WHEN currency = 'دینار' AND type = 'withdraw' THEN -amount_iqd / (dollar_rate / 100)
-                ELSE 0
-            END
-        ), 0)
-    INTO total_usd
-    FROM cash_box;
-
-    -- بڕی مامەڵەی نوێ بە دۆلار
-    IF NEW.currency = 'دۆلار' THEN
-        SET usd_to_check = NEW.amount_usd;
-    ELSE
-        SET usd_to_check = NEW.amount_iqd / (dollar_rate / 100);
-    END IF;
-
-    -- چێککردنی قاسەی گشتی بە دۆلار
-    IF NEW.type = 'withdraw' AND usd_to_check > total_usd THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'بڕی پێویست لە قاسەی گشتی (دۆلار) نییە!';
-    END IF;
-END
-$$
+-- ڤالیدەیشنی پێشووی قاسە لابرا تا چالاکیەکان دەتوانن بە ئاسانی تۆمار بکرێن
 DELIMITER ;
 
 -- --------------------------------------------------------
@@ -1674,6 +1549,7 @@ CREATE TRIGGER `trg_after_insert_purchase_cash_box` AFTER INSERT ON `purchases` 
     DECLARE v_company_name VARCHAR(255) DEFAULT '';
     DECLARE v_material_name VARCHAR(255) DEFAULT '';
     DECLARE v_note_text TEXT DEFAULT '';
+    DECLARE v_reference_tag VARCHAR(64) DEFAULT '';
     
     -- وەرگرتنی ناوی کۆمپانیا
     SELECT name INTO v_company_name FROM company WHERE id = NEW.company_id;
@@ -1683,6 +1559,7 @@ CREATE TRIGGER `trg_after_insert_purchase_cash_box` AFTER INSERT ON `purchases` 
     
     IF NEW.payment_type = 'نەقد' THEN
         IF NEW.type = 'دۆلار' THEN
+            SET v_reference_tag = CONCAT(' [REF:PURCHASE#', NEW.id, '#USD]');
             SET v_note_text = CONCAT(
                 'کڕین | ',
                 'ژمارەی پسووڵە: ', NEW.invoice_number, ' | ',
@@ -1695,10 +1572,12 @@ CREATE TRIGGER `trg_after_insert_purchase_cash_box` AFTER INSERT ON `purchases` 
                 'پارەی دراو: $', NEW.paid_usd, ' | ',
                 'پارەی ماوە: $', IFNULL(NEW.remaining_usd, 0)
             );
+            SET v_note_text = CONCAT(v_note_text, v_reference_tag);
             
             INSERT INTO cash_box (`date`, `type`, `amount_iqd`, `amount_usd`, `currency`, `note`, `created_by`)
             VALUES (NEW.date, 'withdraw', 0, NEW.paid_usd, 'دۆلار', v_note_text, NULL);
         ELSE
+            SET v_reference_tag = CONCAT(' [REF:PURCHASE#', NEW.id, '#IQD]');
             SET v_note_text = CONCAT(
                 'کڕین | ',
                 'ژمارەی پسووڵە: ', NEW.invoice_number, ' | ',
@@ -1711,6 +1590,7 @@ CREATE TRIGGER `trg_after_insert_purchase_cash_box` AFTER INSERT ON `purchases` 
                 'پارەی دراو: ', NEW.paid_iqd, ' د.ع | ',
                 'پارەی ماوە: ', IFNULL(NEW.remaining_iqd, 0), ' د.ع'
             );
+            SET v_note_text = CONCAT(v_note_text, v_reference_tag);
             
             INSERT INTO cash_box (`date`, `type`, `amount_iqd`, `amount_usd`, `currency`, `note`, `created_by`)
             VALUES (NEW.date, 'withdraw', NEW.paid_iqd, 0, 'دینار', v_note_text, NULL);
@@ -1724,10 +1604,22 @@ CREATE TRIGGER `trg_before_delete_purchase_cash_box` BEFORE DELETE ON `purchases
     IF OLD.payment_type = 'نەقد' THEN
         IF OLD.type = 'دۆلار' THEN
             DELETE FROM cash_box
-            WHERE `date` = OLD.date AND `type` = 'withdraw' AND amount_usd = OLD.paid_usd AND currency = 'دۆلار' AND note LIKE CONCAT('%کڕین%invoice ', OLD.invoice_number, '%');
+            WHERE `type` = 'withdraw'
+              AND currency = 'دۆلار'
+              AND (
+                    note LIKE CONCAT('%[REF:PURCHASE#', OLD.id, '#USD]%')
+                    OR note LIKE CONCAT('%ژمارەی پسووڵە: ', OLD.invoice_number, '%')
+                    OR note LIKE CONCAT('%invoice ', OLD.invoice_number, '%')
+                );
         ELSE
             DELETE FROM cash_box
-            WHERE `date` = OLD.date AND `type` = 'withdraw' AND amount_iqd = OLD.paid_iqd AND currency = 'دینار' AND note LIKE CONCAT('%کڕین%invoice ', OLD.invoice_number, '%');
+            WHERE `type` = 'withdraw'
+              AND currency = 'دینار'
+              AND (
+                    note LIKE CONCAT('%[REF:PURCHASE#', OLD.id, '#IQD]%')
+                    OR note LIKE CONCAT('%ژمارەی پسووڵە: ', OLD.invoice_number, '%')
+                    OR note LIKE CONCAT('%invoice ', OLD.invoice_number, '%')
+                );
         END IF;
     END IF;
 END
@@ -1738,14 +1630,27 @@ CREATE TRIGGER `trg_before_update_purchase_cash_box` BEFORE UPDATE ON `purchases
     DECLARE v_company_name VARCHAR(255) DEFAULT '';
     DECLARE v_material_name VARCHAR(255) DEFAULT '';
     DECLARE v_note_text TEXT DEFAULT '';
+    DECLARE v_reference_tag VARCHAR(64) DEFAULT '';
     
     IF OLD.payment_type = 'نەقد' THEN
         IF OLD.type = 'دۆلار' THEN
             DELETE FROM cash_box
-            WHERE `date` = OLD.date AND `type` = 'withdraw' AND amount_usd = OLD.paid_usd AND currency = 'دۆلار' AND note LIKE CONCAT('%کڕین%invoice ', OLD.invoice_number, '%');
+            WHERE `type` = 'withdraw'
+              AND currency = 'دۆلار'
+              AND (
+                    note LIKE CONCAT('%[REF:PURCHASE#', OLD.id, '#USD]%')
+                    OR note LIKE CONCAT('%ژمارەی پسووڵە: ', OLD.invoice_number, '%')
+                    OR note LIKE CONCAT('%invoice ', OLD.invoice_number, '%')
+                );
         ELSE
             DELETE FROM cash_box
-            WHERE `date` = OLD.date AND `type` = 'withdraw' AND amount_iqd = OLD.paid_iqd AND currency = 'دینار' AND note LIKE CONCAT('%کڕین%invoice ', OLD.invoice_number, '%');
+            WHERE `type` = 'withdraw'
+              AND currency = 'دینار'
+              AND (
+                    note LIKE CONCAT('%[REF:PURCHASE#', OLD.id, '#IQD]%')
+                    OR note LIKE CONCAT('%ژمارەی پسووڵە: ', OLD.invoice_number, '%')
+                    OR note LIKE CONCAT('%invoice ', OLD.invoice_number, '%')
+                );
         END IF;
     END IF;
     IF NEW.payment_type = 'نەقد' THEN
@@ -1756,6 +1661,7 @@ CREATE TRIGGER `trg_before_update_purchase_cash_box` BEFORE UPDATE ON `purchases
         SELECT name INTO v_material_name FROM list_materials WHERE id = NEW.material_id;
         
         IF NEW.type = 'دۆلار' THEN
+            SET v_reference_tag = CONCAT(' [REF:PURCHASE#', NEW.id, '#USD]');
             SET v_note_text = CONCAT(
                 'کڕین | ',
                 'ژمارەی پسووڵە: ', NEW.invoice_number, ' | ',
@@ -1768,10 +1674,12 @@ CREATE TRIGGER `trg_before_update_purchase_cash_box` BEFORE UPDATE ON `purchases
                 'پارەی دراو: $', NEW.paid_usd, ' | ',
                 'پارەی ماوە: $', IFNULL(NEW.remaining_usd, 0)
             );
+            SET v_note_text = CONCAT(v_note_text, v_reference_tag);
             
             INSERT INTO cash_box (`date`, `type`, `amount_iqd`, `amount_usd`, `currency`, `note`, `created_by`)
             VALUES (NEW.date, 'withdraw', 0, NEW.paid_usd, 'دۆلار', v_note_text, NULL);
         ELSE
+            SET v_reference_tag = CONCAT(' [REF:PURCHASE#', NEW.id, '#IQD]');
             SET v_note_text = CONCAT(
                 'کڕین | ',
                 'ژمارەی پسووڵە: ', NEW.invoice_number, ' | ',
@@ -1784,6 +1692,7 @@ CREATE TRIGGER `trg_before_update_purchase_cash_box` BEFORE UPDATE ON `purchases
                 'پارەی دراو: ', NEW.paid_iqd, ' د.ع | ',
                 'پارەی ماوە: ', IFNULL(NEW.remaining_iqd, 0), ' د.ع'
             );
+            SET v_note_text = CONCAT(v_note_text, v_reference_tag);
             
             INSERT INTO cash_box (`date`, `type`, `amount_iqd`, `amount_usd`, `currency`, `note`, `created_by`)
             VALUES (NEW.date, 'withdraw', NEW.paid_iqd, 0, 'دینار', v_note_text, NULL);
@@ -1893,11 +1802,6 @@ CREATE TRIGGER `after_purchase_materials_insert` AFTER INSERT ON `purchase_mater
             SET withdrawal_usd = NEW.total_price_iqd / dollar_rate;
         END IF;
         
-        -- Check if there's enough balance
-        IF (current_balance_usd - withdrawal_usd) < 0 THEN
-            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'قاسەی گشتی بەردەست نییە بۆ ئەم کڕینە!';
-        END IF;
-        
         -- Proceed with withdrawal (use total price, not paid amount)
         INSERT INTO cash_box (date, type, amount_usd, amount_iqd, currency, note, created_by)
         VALUES (
@@ -1968,11 +1872,6 @@ CREATE TRIGGER `after_purchase_materials_update` AFTER UPDATE ON `purchase_mater
             SET withdrawal_usd = NEW.total_price_iqd / dollar_rate;
         END IF;
         
-        -- Check if there's enough balance
-        IF (current_balance_usd - withdrawal_usd) < 0 THEN
-            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'قاسەی گشتی بەردەست نییە بۆ ئەم کڕینە!';
-        END IF;
-        
         -- Proceed with withdrawal (use total price, not paid amount)
         INSERT INTO cash_box (date, type, amount_usd, amount_iqd, currency, note, created_by)
         VALUES (
@@ -2012,11 +1911,6 @@ CREATE TRIGGER `after_purchase_materials_update` AFTER UPDATE ON `purchase_mater
                     SET withdrawal_usd = (NEW.paid_amount_usd - OLD.paid_amount_usd);
                 ELSE
                     SET withdrawal_usd = (NEW.paid_amount_iqd - OLD.paid_amount_iqd) / dollar_rate;
-                END IF;
-                
-                -- Check if there's enough balance
-                IF (current_balance_usd - withdrawal_usd) < 0 THEN
-                    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'قاسەی گشتی بەردەست نییە بۆ زیادکردنی پارەدانی!';
                 END IF;
                 
                 -- Proceed with withdrawal
@@ -2706,6 +2600,7 @@ CREATE TRIGGER `trg_after_insert_sale_cash_box` AFTER INSERT ON `sales` FOR EACH
     DECLARE v_customer_name VARCHAR(255) DEFAULT '';
     DECLARE v_formula_name VARCHAR(255) DEFAULT '';
     DECLARE v_note_text TEXT DEFAULT '';
+    DECLARE v_reference_tag VARCHAR(64) DEFAULT '';
     
     -- وەرگرتنی ناوی کڕیار
     SELECT name INTO v_customer_name FROM customers WHERE id = NEW.customer_id;
@@ -2715,6 +2610,7 @@ CREATE TRIGGER `trg_after_insert_sale_cash_box` AFTER INSERT ON `sales` FOR EACH
     
     IF NEW.payment_type = 'نەقد' THEN
         IF NEW.amount_paid_usd > 0 THEN
+            SET v_reference_tag = CONCAT(' [REF:SALE#', NEW.id, '#USD]');
             SET v_note_text = CONCAT(
                 'فرۆشتن | ',
                 'ژمارەی پسووڵە: ', NEW.invoice_number, ' | ',
@@ -2731,11 +2627,13 @@ CREATE TRIGGER `trg_after_insert_sale_cash_box` AFTER INSERT ON `sales` FOR EACH
             IF NEW.notes IS NOT NULL AND NEW.notes != '' THEN
                 SET v_note_text = CONCAT(v_note_text, ' | تێبینی: ', NEW.notes);
             END IF;
+            SET v_note_text = CONCAT(v_note_text, v_reference_tag);
             
             INSERT INTO cash_box (`date`, `type`, `amount_iqd`, `amount_usd`, `currency`, `note`, `created_by`)
             VALUES (NEW.order_date, 'deposit', 0, NEW.amount_paid_usd, 'دۆلار', v_note_text, NULL);
         END IF;
         IF NEW.amount_paid_iq > 0 THEN
+            SET v_reference_tag = CONCAT(' [REF:SALE#', NEW.id, '#IQD]');
             SET v_note_text = CONCAT(
                 'فرۆشتن | ',
                 'ژمارەی پسووڵە: ', NEW.invoice_number, ' | ',
@@ -2752,6 +2650,7 @@ CREATE TRIGGER `trg_after_insert_sale_cash_box` AFTER INSERT ON `sales` FOR EACH
             IF NEW.notes IS NOT NULL AND NEW.notes != '' THEN
                 SET v_note_text = CONCAT(v_note_text, ' | تێبینی: ', NEW.notes);
             END IF;
+            SET v_note_text = CONCAT(v_note_text, v_reference_tag);
             
             INSERT INTO cash_box (`date`, `type`, `amount_iqd`, `amount_usd`, `currency`, `note`, `created_by`)
             VALUES (NEW.order_date, 'deposit', NEW.amount_paid_iq, 0, 'دینار', v_note_text, NULL);
@@ -2865,11 +2764,23 @@ CREATE TRIGGER `trg_before_delete_sale_cash_box` BEFORE DELETE ON `sales` FOR EA
     IF OLD.payment_type = 'نەقد' THEN
         IF OLD.amount_paid_usd > 0 THEN
             DELETE FROM cash_box
-            WHERE `date` = OLD.order_date AND `type` = 'deposit' AND amount_usd = OLD.amount_paid_usd AND currency = 'دۆلار' AND note LIKE CONCAT('%فرۆشتن%invoice ', OLD.invoice_number, '%');
+            WHERE `type` = 'deposit'
+              AND currency = 'دۆلار'
+              AND (
+                    note LIKE CONCAT('%[REF:SALE#', OLD.id, '#USD]%')
+                    OR note LIKE CONCAT('%ژمارەی پسووڵە: ', OLD.invoice_number, '%')
+                    OR note LIKE CONCAT('%invoice ', OLD.invoice_number, '%')
+                );
         END IF;
         IF OLD.amount_paid_iq > 0 THEN
             DELETE FROM cash_box
-            WHERE `date` = OLD.order_date AND `type` = 'deposit' AND amount_iqd = OLD.amount_paid_iq AND currency = 'دینار' AND note LIKE CONCAT('%فرۆشتن%invoice ', OLD.invoice_number, '%');
+            WHERE `type` = 'deposit'
+              AND currency = 'دینار'
+              AND (
+                    note LIKE CONCAT('%[REF:SALE#', OLD.id, '#IQD]%')
+                    OR note LIKE CONCAT('%ژمارەی پسووڵە: ', OLD.invoice_number, '%')
+                    OR note LIKE CONCAT('%invoice ', OLD.invoice_number, '%')
+                );
         END IF;
     END IF;
 END
@@ -2880,16 +2791,29 @@ CREATE TRIGGER `trg_before_update_sale_cash_box` BEFORE UPDATE ON `sales` FOR EA
     DECLARE v_customer_name VARCHAR(255) DEFAULT '';
     DECLARE v_formula_name VARCHAR(255) DEFAULT '';
     DECLARE v_note_text TEXT DEFAULT '';
+    DECLARE v_reference_tag VARCHAR(64) DEFAULT '';
     
     -- سڕینەوەی مامەڵەی کۆن
     IF OLD.payment_type = 'نەقد' THEN
         IF OLD.amount_paid_usd > 0 THEN
             DELETE FROM cash_box
-            WHERE `date` = OLD.order_date AND `type` = 'deposit' AND amount_usd = OLD.amount_paid_usd AND currency = 'دۆلار' AND note LIKE CONCAT('%فرۆشتن%invoice ', OLD.invoice_number, '%');
+            WHERE `type` = 'deposit'
+              AND currency = 'دۆلار'
+              AND (
+                    note LIKE CONCAT('%[REF:SALE#', OLD.id, '#USD]%')
+                    OR note LIKE CONCAT('%ژمارەی پسووڵە: ', OLD.invoice_number, '%')
+                    OR note LIKE CONCAT('%invoice ', OLD.invoice_number, '%')
+                );
         END IF;
         IF OLD.amount_paid_iq > 0 THEN
             DELETE FROM cash_box
-            WHERE `date` = OLD.order_date AND `type` = 'deposit' AND amount_iqd = OLD.amount_paid_iq AND currency = 'دینار' AND note LIKE CONCAT('%فرۆشتن%invoice ', OLD.invoice_number, '%');
+            WHERE `type` = 'deposit'
+              AND currency = 'دینار'
+              AND (
+                    note LIKE CONCAT('%[REF:SALE#', OLD.id, '#IQD]%')
+                    OR note LIKE CONCAT('%ژمارەی پسووڵە: ', OLD.invoice_number, '%')
+                    OR note LIKE CONCAT('%invoice ', OLD.invoice_number, '%')
+                );
         END IF;
     END IF;
     -- زیادکردنی مامەڵەی نوێ
@@ -2901,6 +2825,7 @@ CREATE TRIGGER `trg_before_update_sale_cash_box` BEFORE UPDATE ON `sales` FOR EA
         SELECT name INTO v_formula_name FROM concrete_formulas WHERE id = NEW.formula_id;
         
         IF NEW.amount_paid_usd > 0 THEN
+            SET v_reference_tag = CONCAT(' [REF:SALE#', NEW.id, '#USD]');
             SET v_note_text = CONCAT(
                 'فرۆشتن | ',
                 'ژمارەی پسووڵە: ', NEW.invoice_number, ' | ',
@@ -2917,11 +2842,13 @@ CREATE TRIGGER `trg_before_update_sale_cash_box` BEFORE UPDATE ON `sales` FOR EA
             IF NEW.notes IS NOT NULL AND NEW.notes != '' THEN
                 SET v_note_text = CONCAT(v_note_text, ' | تێبینی: ', NEW.notes);
             END IF;
+            SET v_note_text = CONCAT(v_note_text, v_reference_tag);
             
             INSERT INTO cash_box (`date`, `type`, `amount_iqd`, `amount_usd`, `currency`, `note`, `created_by`)
             VALUES (NEW.order_date, 'deposit', 0, NEW.amount_paid_usd, 'دۆلار', v_note_text, NULL);
         END IF;
         IF NEW.amount_paid_iq > 0 THEN
+            SET v_reference_tag = CONCAT(' [REF:SALE#', NEW.id, '#IQD]');
             SET v_note_text = CONCAT(
                 'فرۆشتن | ',
                 'ژمارەی پسووڵە: ', NEW.invoice_number, ' | ',
@@ -2938,6 +2865,7 @@ CREATE TRIGGER `trg_before_update_sale_cash_box` BEFORE UPDATE ON `sales` FOR EA
             IF NEW.notes IS NOT NULL AND NEW.notes != '' THEN
                 SET v_note_text = CONCAT(v_note_text, ' | تێبینی: ', NEW.notes);
             END IF;
+            SET v_note_text = CONCAT(v_note_text, v_reference_tag);
             
             INSERT INTO cash_box (`date`, `type`, `amount_iqd`, `amount_usd`, `currency`, `note`, `created_by`)
             VALUES (NEW.order_date, 'deposit', NEW.amount_paid_iq, 0, 'دینار', v_note_text, NULL);

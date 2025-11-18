@@ -810,7 +810,11 @@ try {
             'person' => ['usd' => $person_debt_usd, 'iqd' => 0],
             'purchases' => $purchases,
             'sales' => $sales,
-            'discounts' => ['usd' => $total_discount],
+            'discounts' => [
+                'total_usd' => $total_discount,
+                'sales_usd' => $sales_discounts,
+                'customer_debt_usd' => $customer_debt_discounts
+            ],
             'gas_income' => [
                 'usd' => $gas_income_total_usd
             ],

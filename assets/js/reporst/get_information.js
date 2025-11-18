@@ -121,6 +121,10 @@ function renderDashboardCards(data) {
         purchases_iqd_total
     });
     
+    const discountsTotalUsd = Number(data.data?.discounts?.total_usd) || 0;
+    const salesDiscountUsd = Number(data.data?.discounts?.sales_usd) || 0;
+    const debtDiscountUsd = Number(data.data?.discounts?.customer_debt_usd) || 0;
+
     const cards = [
         {
             key: 'customer',
@@ -172,12 +176,20 @@ function renderDashboardCards(data) {
         },
 
         {
-            key: 'discounts',
-            label: 'کۆی داشکاندن',
+            key: 'sales_discounts',
+            label: 'داشکاندنی فرۆشتن',
             icon: 'fa-percent',
             cardClass: 'dark-card',
-            value: formatCurrency(Number(data.data?.discounts?.usd) || 0, 'USD'),
-            subtitle: 'داشکاندنەکان'
+            value: formatCurrency(salesDiscountUsd, 'USD'),
+            subtitle: 'کۆی داشکاندنی فرۆشتن'
+        },
+        {
+            key: 'customer_debt_discounts',
+            label: 'داشکاندنی گەڕاندنەوەی قەرز',
+            icon: 'fa-percent',
+            cardClass: 'dark-card',
+            value: formatCurrency(debtDiscountUsd, 'USD'),
+            subtitle: 'داشکاندنی پارەی قەرز'
         },
 
         {
