@@ -75,24 +75,39 @@ try {
         error_log('Customers with debt query failed: ' . $e->getMessage());
     }
 
-    // Get total debt (opening_debt + remaining from sales converted to USD)
+    // Get total debt - ڕاستکردنەوەی هەژمارکردنی قەرز
     $totalDebtUSD = 0;
     try {
-        $totalDebtQuery = "
-            SELECT 
-                SUM(c.opening_debt_usd) as total_opening_debt_usd,
-                SUM(c.opening_debt_iqd) as total_opening_debt_iqd,
-                COALESCE(SUM(s.remaining_amount), 0) as total_remaining_amount
-            FROM customers c
-            LEFT JOIN sales s ON c.id = s.customer_id AND s.payment_type = 'قەرز'
-        ";
-        $totalDebtStmt = $pdo->query($totalDebtQuery);
-        $totalDebtData = $totalDebtStmt->fetch(PDO::FETCH_ASSOC);
-
-        // Calculate total debt in USD
-        $totalDebtUSD = floatval($totalDebtData['total_opening_debt_usd'] ?? 0) + 
-                       floatval($totalDebtData['total_remaining_amount'] ?? 0) +
-                       (floatval($totalDebtData['total_opening_debt_iqd'] ?? 0) / ($usdRate / 100));
+        // 1. قەرزی سەرەتایی (USD)
+        $openingDebtUSD = $pdo->query("SELECT COALESCE(SUM(opening_debt_usd), 0) FROM customers")->fetchColumn();
+        
+        // 2. کۆی ماوەی قەرز لە فرۆشتنەکان (تەنها ئەوانەی amount_paid_iq = 0)
+        $salesRemainingUSD = $pdo->query("
+            SELECT COALESCE(SUM(remaining_amount), 0) 
+            FROM sales 
+            WHERE payment_type = 'قەرز' 
+            AND amount_paid_iq = 0
+        ")->fetchColumn();
+        
+        // 3. کۆی ماوەی قەرز لە فرۆشتنەکان (دینار - ئەوانەی amount_paid_iq > 0)
+        $salesRemainingIQD = $pdo->query("
+            SELECT COALESCE(SUM(remaining_amount), 0) 
+            FROM sales 
+            WHERE payment_type = 'قەرز' 
+            AND amount_paid_iq > 0
+        ")->fetchColumn();
+        
+        // 4. قەرزی سەرەتایی (IQD) - گۆڕینی بۆ دۆلار
+        $openingDebtIQD = $pdo->query("SELECT COALESCE(SUM(opening_debt_iqd), 0) FROM customers")->fetchColumn();
+        $openingDebtIQD_USD = $usdRate > 0 ? ($openingDebtIQD / ($usdRate / 100)) : 0;
+        
+        // 5. کۆکردنەوەی هەموو قەرزەکان بە دۆلار
+        // فۆرمۆلا: کۆی قەرز = پارەی ماوەی فرۆشتنەکان + قەرزی سەرەتایی
+        $totalDebtUSD = floatval($openingDebtUSD) +           // قەرزی سەرەتایی (USD)
+                       floatval($openingDebtIQD_USD) +        // قەرزی سەرەتایی (IQD → USD)
+                       floatval($salesRemainingUSD) +         // پارەی ماوەی فرۆشتنەکان (USD)
+                       (floatval($salesRemainingIQD) / ($usdRate / 100)); // پارەی ماوەی فرۆشتنەکان (IQD → USD)
+        
     } catch (Exception $e) {
         error_log('Total debt query failed: ' . $e->getMessage());
     }

@@ -199,7 +199,6 @@ if (!hasPermission('view_customer')) {
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="../assets/js/swalAlert.js"></script>
 <script src="../assets/js/comon/table-controler.js"></script>
-<script src="../assets/js/customer/summary_stats.js"></script>
 <script src="../assets/js/customer/add_customer.js"></script>
 <script src="../assets/js/customer/select_customer.js"></script>
 <script src="../assets/js/customer/update_customer.js"></script>
