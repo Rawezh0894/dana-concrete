@@ -43,20 +43,36 @@ try {
     error_log("Using USD/IQD rate: " . $usd_iqd_rate);
 
     // Customers - Calculate debt using new method (opening_debt + remaining from sales)
-    $customer_debt_query = "
-        SELECT 
-            SUM(c.opening_debt_usd) as opening_debt_usd,
-            SUM(c.opening_debt_iqd) as opening_debt_iqd,
-            COALESCE(SUM(s.remaining_amount), 0) as remaining_from_sales
-        FROM customers c
-        LEFT JOIN sales s ON c.id = s.customer_id AND s.payment_type = 'قەرز'
-    ";
-    $stmt = $pdo->query($customer_debt_query);
-    $row = $stmt->fetch();
-    $customer_debt_usd = floatval($row['opening_debt_usd'] ?? 0) + floatval($row['remaining_from_sales'] ?? 0);
-    $customer_debt_iqd = floatval($row['opening_debt_iqd'] ?? 0);
-    $customer_debt_iqd_converted = ($usd_iqd_rate > 0) ? ($customer_debt_iqd / ($usd_iqd_rate / 100)) : 0;
-    $customer_debt_total_usd = $customer_debt_usd + $customer_debt_iqd_converted;
+    // ڕاستکردنەوەی هەژمارکردنی قەرز
+    // 1. قەرزی سەرەتایی (USD)
+    $openingDebtUSD = $pdo->query("SELECT COALESCE(SUM(opening_debt_usd), 0) FROM customers")->fetchColumn();
+    
+    // 2. کۆی ماوەی قەرز لە فرۆشتنەکان (تەنها ئەوانەی amount_paid_iq = 0)
+    $salesRemainingUSD = $pdo->query("
+        SELECT COALESCE(SUM(remaining_amount), 0) 
+        FROM sales 
+        WHERE payment_type = 'قەرز' 
+        AND amount_paid_iq = 0
+    ")->fetchColumn();
+    
+    // 3. کۆی ماوەی قەرز لە فرۆشتنەکان (دینار - ئەوانەی amount_paid_iq > 0)
+    $salesRemainingIQD = $pdo->query("
+        SELECT COALESCE(SUM(remaining_amount), 0) 
+        FROM sales 
+        WHERE payment_type = 'قەرز' 
+        AND amount_paid_iq > 0
+    ")->fetchColumn();
+    
+    // 4. قەرزی سەرەتایی (IQD) - گۆڕینی بۆ دۆلار
+    $openingDebtIQD = $pdo->query("SELECT COALESCE(SUM(opening_debt_iqd), 0) FROM customers")->fetchColumn();
+    $openingDebtIQD_USD = $usd_iqd_rate > 0 ? ($openingDebtIQD / ($usd_iqd_rate / 100)) : 0;
+    
+    // 5. کۆکردنەوەی هەموو قەرزەکان بە دۆلار
+    // فۆرمۆلا: کۆی قەرز = پارەی ماوەی فرۆشتنەکان + قەرزی سەرەتایی
+    $customer_debt_total_usd = floatval($openingDebtUSD) +           // قەرزی سەرەتایی (USD)
+                               floatval($openingDebtIQD_USD) +        // قەرزی سەرەتایی (IQD → USD)
+                               floatval($salesRemainingUSD) +         // پارەی ماوەی فرۆشتنەکان (USD)
+                               (floatval($salesRemainingIQD) / ($usd_iqd_rate / 100)); // پارەی ماوەی فرۆشتنەکان (IQD → USD)
 
     // Companies - Calculate debt using same method as get_summary_stats.php
     // Get opening debt from companies
@@ -867,20 +883,36 @@ try {
         'persons' => 0
     ];
     
-    // Customers debt (opening_debt + remaining from sales)
-    $stmt = $pdo->query("
-        SELECT 
-            SUM(c.opening_debt_usd) as opening_debt_usd,
-            SUM(c.opening_debt_iqd) as opening_debt_iqd,
-            COALESCE(SUM(s.remaining_amount), 0) as remaining_from_sales
-        FROM customers c
-        LEFT JOIN sales s ON c.id = s.customer_id AND s.payment_type = 'قەرز'
-    ");
-    $row = $stmt->fetch();
-    $customer_total_debt = floatval($row['opening_debt_usd'] ?? 0) + floatval($row['remaining_from_sales'] ?? 0);
-    $customer_iqd_debt = floatval($row['opening_debt_iqd'] ?? 0);
-    $customer_iqd_converted = ($usd_iqd_rate > 0) ? ($customer_iqd_debt / ($usd_iqd_rate / 100)) : 0;
-    $debts_by_type['customers'] = $customer_total_debt + $customer_iqd_converted;
+    // Customers debt (opening_debt + remaining from sales) - ڕاستکردنەوەی هەژمارکردنی قەرز
+    // 1. قەرزی سەرەتایی (USD)
+    $openingDebtUSD = $pdo->query("SELECT COALESCE(SUM(opening_debt_usd), 0) FROM customers")->fetchColumn();
+    
+    // 2. کۆی ماوەی قەرز لە فرۆشتنەکان (تەنها ئەوانەی amount_paid_iq = 0)
+    $salesRemainingUSD = $pdo->query("
+        SELECT COALESCE(SUM(remaining_amount), 0) 
+        FROM sales 
+        WHERE payment_type = 'قەرز' 
+        AND amount_paid_iq = 0
+    ")->fetchColumn();
+    
+    // 3. کۆی ماوەی قەرز لە فرۆشتنەکان (دینار - ئەوانەی amount_paid_iq > 0)
+    $salesRemainingIQD = $pdo->query("
+        SELECT COALESCE(SUM(remaining_amount), 0) 
+        FROM sales 
+        WHERE payment_type = 'قەرز' 
+        AND amount_paid_iq > 0
+    ")->fetchColumn();
+    
+    // 4. قەرزی سەرەتایی (IQD) - گۆڕینی بۆ دۆلار
+    $openingDebtIQD = $pdo->query("SELECT COALESCE(SUM(opening_debt_iqd), 0) FROM customers")->fetchColumn();
+    $openingDebtIQD_USD = $usd_iqd_rate > 0 ? ($openingDebtIQD / ($usd_iqd_rate / 100)) : 0;
+    
+    // 5. کۆکردنەوەی هەموو قەرزەکان بە دۆلار
+    // فۆرمۆلا: کۆی قەرز = پارەی ماوەی فرۆشتنەکان + قەرزی سەرەتایی
+    $debts_by_type['customers'] = floatval($openingDebtUSD) +           // قەرزی سەرەتایی (USD)
+                                  floatval($openingDebtIQD_USD) +        // قەرزی سەرەتایی (IQD → USD)
+                                  floatval($salesRemainingUSD) +         // پارەی ماوەی فرۆشتنەکان (USD)
+                                  (floatval($salesRemainingIQD) / ($usd_iqd_rate / 100)); // پارەی ماوەی فرۆشتنەکان (IQD → USD)
     
     // Companies debt (opening_debt + remaining from purchases) - using same method as above
     $debts_by_type['companies'] = $company_debt_total_usd;
