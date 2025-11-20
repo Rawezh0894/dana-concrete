@@ -84,6 +84,11 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
             <i class="fas fa-plus me-2"></i>زیادکردنی تێبینی
         </button>
         <?php endif; ?>
+        <?php if (hasPermission('add_recipient')): ?>
+        <button class="btn" data-bs-toggle="modal" data-bs-target="#addRecipientModal" style="background: var(--seafoam-green); color:white; font-weight: bold;">
+            <i class="fas fa-user-plus me-1"></i>زیادکردنی وەرگر
+        </button>
+        <?php endif; ?>
         </div>
     </div>
 
@@ -450,6 +455,44 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
     </div>
 </div>
 
+<?php if (hasPermission('add_recipient')): ?>
+<!-- Quick Add Recipient Modal -->
+<div class="modal fade" id="addRecipientModal" tabindex="-1" aria-labelledby="addRecipientModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="addRecipientForm">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addRecipientModalLabel">زیادکردنی وەرگر</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="recipient_name" class="form-label">ناو *</label>
+                        <input type="text" class="form-control" id="recipient_name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="recipient_phone1" class="form-label">ژمارەی مۆبایلی یەکەم *</label>
+                        <input type="text" class="form-control" id="recipient_phone1" name="phone1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="recipient_phone2" class="form-label">ژمارەی مۆبایلی دووەم</label>
+                        <input type="text" class="form-control" id="recipient_phone2" name="phone2">
+                    </div>
+                    <div class="mb-3">
+                        <label for="recipient_opening_meter_total" class="form-label">کۆی بڕی مەتری گیراوی سەرەتایی (م³)</label>
+                        <input type="number" class="form-control" id="recipient_opening_meter_total" name="opening_meter_total" min="0" step="0.01">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
+                    <button type="submit" class="btn btn-success" style="background: var(--seafoam-green); font-weight: bold;">زیادکردن</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
 <!-- Add Customer Modal -->
 <div class="modal fade" id="addCustomerModal" tabindex="-1" aria-labelledby="addCustomerModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -502,6 +545,62 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
 <script src="../assets/js/notes/delete.js"></script>
 <script src="../assets/js/notes/update.js"></script>
 <script src="../assets/js/concrete_receipts/add_customer.js"></script>
+<?php if (hasPermission('add_recipient')): ?>
+<script src="../assets/js/recipients/add.js"></script>
+<script>
+(function() {
+    const recipientSelectIds = ['recipient', 'edit_recipient'];
+
+    function escapeHtml(str) {
+        return (str ?? '').replace(/[&<>'"]/g, function (c) {
+            return ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            })[c];
+        });
+    }
+
+    function buildRecipientOption(recipient) {
+        const name = recipient.name || '';
+        const phones = [recipient.phone1, recipient.phone2].filter(Boolean).join(' / ');
+        const searchMeta = (name + ' ' + phones).trim();
+        return `<option value="${escapeHtml(name)}" data-search="${escapeHtml(searchMeta)}">${escapeHtml(name)}</option>`;
+    }
+
+    function refreshRecipientDropdowns() {
+        $.get('../process/recipients/select.php', function(response) {
+            if (!(response && response.success && Array.isArray(response.data))) return;
+
+            const optionsHtml = ['<option value="">وەرگرێک هەڵبژێرە</option>']
+                .concat(response.data.map(buildRecipientOption))
+                .join('');
+
+            recipientSelectIds.forEach(function(id) {
+                const select = document.getElementById(id);
+                if (!select) return;
+                const currentValue = select.value;
+                select.innerHTML = optionsHtml;
+                if (currentValue) {
+                    select.value = currentValue;
+                } else {
+                    select.selectedIndex = 0;
+                }
+                $(select).trigger('change.select2');
+            });
+        }, 'json');
+    }
+
+    window.refreshRecipientDropdowns = refreshRecipientDropdowns;
+
+    $(document).on('recipientAdded', function() {
+        refreshRecipientDropdowns();
+    });
+})();
+</script>
+<?php endif; ?>
 
 </body>
 </html>

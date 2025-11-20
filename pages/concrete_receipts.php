@@ -19,6 +19,7 @@ if (!hasPermission('view_concrete_receipts')) {
 }
 $customers = $pdo->query("SELECT id, name, mobile1, mobile2 FROM customers")->fetchAll(PDO::FETCH_ASSOC);
 $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO::FETCH_ASSOC);
+$recipients = $pdo->query("SELECT id, name, phone1, phone2 FROM recipients ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 $cars = $pdo->query("SELECT id, name FROM cars")->fetchAll(PDO::FETCH_ASSOC);
 $employees = $pdo->query("SELECT id, name, role FROM employees")->fetchAll(PDO::FETCH_ASSOC);
 $drivers = array_filter($employees, function ($emp) {
@@ -83,6 +84,10 @@ $mixer_drivers = array_filter($employees, function ($emp) {
           <button class="btn" data-bs-toggle="modal" data-bs-target="#addCustomerModal"
             style="background: var(--seafoam-green); color:white; font-weight: bold;">+ زیادکردنی کڕیار</button>
         <?php endif; ?>
+        <?php if (hasPermission('add_recipient')): ?>
+          <button class="btn" data-bs-toggle="modal" data-bs-target="#addRecipientModal"
+            style="background: var(--seafoam-green); color:white; font-weight: bold;">+ زیادکردنی وەرگر</button>
+        <?php endif; ?>
         <?php if (hasPermission('add_concrete_receipts')): ?>
           <button class="btn" data-bs-toggle="modal" data-bs-target="#addConcreteReceiptModal"
             style="background: var(--seafoam-green); color:white; font-weight: bold;">+ زیادکردنی پسوڵە</button>
@@ -91,6 +96,17 @@ $mixer_drivers = array_filter($employees, function ($emp) {
 
       </div>
     </div>
+  <datalist id="recipientOptions">
+    <?php foreach ($recipients as $recipient): 
+        $phones = array_filter([
+            !empty($recipient['phone1']) ? $recipient['phone1'] : '',
+            !empty($recipient['phone2']) ? $recipient['phone2'] : ''
+        ]);
+        $label = !empty($phones) ? implode(' / ', $phones) : '';
+    ?>
+      <option value="<?= htmlspecialchars($recipient['name']) ?>" <?= $label ? 'label="' . htmlspecialchars($label) . '"' : '' ?>></option>
+    <?php endforeach; ?>
+  </datalist>
     <!-- Summary Cards Row -->
     <div class="row mb-3" id="concrete-receipts-summary">
       <div class="col-md-4 mb-2">
@@ -236,7 +252,7 @@ $mixer_drivers = array_filter($employees, function ($emp) {
 
               <div class="col-md-6">
               <label class="form-label" for="receiver_name">ناوی وەرگر</label>
-              <input type="text" class="form-control" name="receiver_name" id="receiver_name">
+              <input type="text" class="form-control" name="receiver_name" id="receiver_name" list="recipientOptions">
                   <label for="formulas_id" class="form-label">ڕێژە</label>
                 <select class="form-select" id="formulas_id" name="formulas_id" required>
                   <option value="">هەڵبژێرە</option>
@@ -344,7 +360,7 @@ $mixer_drivers = array_filter($employees, function ($emp) {
               </div>
               <div class="col-md-6">
                 <label for="edit_receiver_name" class="form-label">وەرگر</label>
-                <input type="text" class="form-control" id="edit_receiver_name" name="edit_receiver_name">
+                <input type="text" class="form-control" id="edit_receiver_name" name="edit_receiver_name" list="recipientOptions">
               </div>
               <div class="col-md-6">
                 <label for="edit_meter_amount" class="form-label">بڕی مەتر سێجا</label>
@@ -423,6 +439,45 @@ $mixer_drivers = array_filter($employees, function ($emp) {
       </div>
     </div>
   </div>
+
+  <?php if (hasPermission('add_recipient')): ?>
+  <!-- Quick Add Recipient Modal -->
+  <div class="modal fade" id="addRecipientModal" tabindex="-1" aria-labelledby="addRecipientModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form id="addRecipientForm">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addRecipientModalLabel">زیادکردنی وەرگر</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="recipient_name" class="form-label">ناو *</label>
+              <input type="text" class="form-control" id="recipient_name" name="name" required>
+            </div>
+            <div class="mb-3">
+              <label for="recipient_phone1" class="form-label">ژمارەی مۆبایلی یەکەم *</label>
+              <input type="text" class="form-control" id="recipient_phone1" name="phone1" required>
+            </div>
+            <div class="mb-3">
+              <label for="recipient_phone2" class="form-label">ژمارەی مۆبایلی دووەم</label>
+              <input type="text" class="form-control" id="recipient_phone2" name="phone2">
+            </div>
+            <div class="mb-3">
+              <label for="recipient_opening_meter_total" class="form-label">کۆی بڕی مەتری گیراوی سەرەتایی (م³)</label>
+              <input type="number" class="form-control" id="recipient_opening_meter_total" name="opening_meter_total" min="0" step="0.01">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
+            <button type="submit" class="btn btn-success" style="background: var(--seafoam-green); font-weight: bold;">زیادکردن</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <?php endif; ?>
+
   <!-- Add Customer Modal -->
   <div class="modal fade" id="addCustomerModal" tabindex="-1" aria-labelledby="addCustomerModalLabel"
     aria-hidden="true">
@@ -468,6 +523,48 @@ $mixer_drivers = array_filter($employees, function ($emp) {
   <script src="../assets/js/concrete_receipts/delete_concrete_receipts.js"></script>
   <script src="../assets/js/concrete_receipts/update_concrete_receipts.js"></script>
   <script src="../assets/js/concrete_receipts/concrete_receipts_custom.js"></script>
+  <?php if (hasPermission('add_recipient')): ?>
+  <script src="../assets/js/recipients/add.js"></script>
+  <script>
+  (function() {
+    const datalistId = 'recipientOptions';
+
+    function escapeHtml(str) {
+      return (str ?? '').replace(/[&<>'"]/g, function(c) {
+        return ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;'
+        })[c];
+      });
+    }
+
+    function buildRecipientOption(recipient) {
+      const name = recipient.name || '';
+      const phones = [recipient.phone1, recipient.phone2].filter(Boolean).join(' / ');
+      const labelAttr = phones ? ` label="${escapeHtml(phones)}"` : '';
+      return `<option value="${escapeHtml(name)}"${labelAttr}></option>`;
+    }
+
+    function refreshRecipientDatalist() {
+      $.get('../process/recipients/select.php', function(response) {
+        if (!(response && response.success && Array.isArray(response.data))) return;
+        const datalist = document.getElementById(datalistId);
+        if (!datalist) return;
+        datalist.innerHTML = response.data.map(buildRecipientOption).join('');
+      }, 'json');
+    }
+
+    window.refreshRecipientDatalist = refreshRecipientDatalist;
+
+    $(document).on('recipientAdded', function() {
+      refreshRecipientDatalist();
+    });
+  })();
+  </script>
+  <?php endif; ?>
 
   <script>
     // Pass permissions to JavaScript
