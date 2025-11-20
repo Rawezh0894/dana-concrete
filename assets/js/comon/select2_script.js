@@ -136,9 +136,11 @@ $(document).ready(function() {
     // بۆ notes - تەنها ئەگەر مۆداڵەکە هەبێت
     if ($('#addNoteModal').length > 0) {
         enableSelect2('#customer_id', '#addNoteModal');
+        enableSelect2('#recipient', '#addNoteModal');
     }
     if ($('#editNoteModal').length > 0) {
         enableSelect2('#edit_customer_id', '#editNoteModal');
+        enableSelect2('#edit_recipient', '#editNoteModal');
     }
     
     // بۆ notes filters - تەنها ئەگەر پەیجەکە هەبێت

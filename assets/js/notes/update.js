@@ -34,7 +34,21 @@ async function populateEditModal(noteId) {
         document.getElementById('edit_date').value = noteData.date;
         document.getElementById('edit_time').value = noteData.time;
         document.getElementById('edit_location').value = noteData.location;
-        document.getElementById('edit_recipient').value = noteData.recipient;
+        const editRecipientSelect = document.getElementById('edit_recipient');
+        if (editRecipientSelect) {
+            let recipientValueSet = false;
+            for (let option of editRecipientSelect.options) {
+                if (option.value.trim() === noteData.recipient.trim()) {
+                    option.selected = true;
+                    recipientValueSet = true;
+                    break;
+                }
+            }
+            if (!recipientValueSet) {
+                editRecipientSelect.value = '';
+            }
+            $('#edit_recipient').trigger('change');
+        }
         document.getElementById('edit_meter_amount').value = noteData.meter_amount;
         
         // Set customer dropdown with Select2
@@ -118,9 +132,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Flag to prevent multiple submissions
     let isSubmitting = false;
     
-    // Initialize Select2 for customer dropdown only in the edit modal
+    // Initialize Select2 for customer & recipient dropdowns only in the edit modal
     if ($('#editNoteModal').length > 0) {
         enableSelect2('#edit_customer_id', '#editNoteModal');
+        enableSelect2('#edit_recipient', '#editNoteModal');
         
         // Helper function to safely destroy Select2
         function safeDestroySelect2(selector) {

@@ -21,6 +21,7 @@ if (!hasPermission('view_notes')) {
 // Get data for dropdowns
 $customers = $pdo->query("SELECT id, name, mobile1, mobile2 FROM customers ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 $formulas = $pdo->query("SELECT id, name FROM concrete_formulas ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
+$recipients = $pdo->query("SELECT id, name, phone1, phone2 FROM recipients ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 $mixer_cars = $pdo->query("SELECT id, name FROM cars WHERE name LIKE 'M%' ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 $pump_cars = $pdo->query("SELECT id, name FROM cars WHERE name LIKE 'P%' ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 $all_drivers = $pdo->query("SELECT id, name FROM employees WHERE role = 'شۆفێر' ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
@@ -213,7 +214,18 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="recipient" class="form-label">وەرگر</label>
-                            <input type="text" class="form-control" id="recipient" name="recipient">
+                            <select class="form-select" id="recipient" name="recipient" data-placeholder="وەرگرێک هەڵبژێرە">
+                                <option value="">وەرگرێک هەڵبژێرە</option>
+                                <?php foreach ($recipients as $recipient): ?>
+                                    <option value="<?= htmlspecialchars($recipient['name']) ?>">
+                                        <?= htmlspecialchars($recipient['name']) ?>
+                                        <?php 
+                                            $phones = array_filter([!empty($recipient['phone1']) ? $recipient['phone1'] : '', !empty($recipient['phone2']) ? $recipient['phone2'] : '']);
+                                            if (!empty($phones)): ?> - <?= htmlspecialchars(implode(' / ', $phones)) ?><?php endif; 
+                                        ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="meter_amount" class="form-label">بڕ (م³) *</label>
@@ -336,7 +348,18 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="edit_recipient" class="form-label">وەرگر</label>
-                            <input type="text" class="form-control" id="edit_recipient" name="edit_recipient">
+                            <select class="form-select" id="edit_recipient" name="edit_recipient" data-placeholder="وەرگرێک هەڵبژێرە">
+                                <option value="">وەرگرێک هەڵبژێرە</option>
+                                <?php foreach ($recipients as $recipient): ?>
+                                    <option value="<?= htmlspecialchars($recipient['name']) ?>">
+                                        <?= htmlspecialchars($recipient['name']) ?>
+                                        <?php 
+                                            $phones = array_filter([!empty($recipient['phone1']) ? $recipient['phone1'] : '', !empty($recipient['phone2']) ? $recipient['phone2'] : '']);
+                                            if (!empty($phones)): ?> - <?= htmlspecialchars(implode(' / ', $phones)) ?><?php endif; 
+                                        ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="edit_meter_amount" class="form-label">بڕ (م³) *</label>

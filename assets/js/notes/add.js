@@ -11,9 +11,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Flag to prevent multiple submissions
     let isSubmitting = false;
 
-    // Initialize Select2 for customer dropdown only in the add modal
+    // Initialize Select2 for customer & recipient dropdowns only in the add modal
     if ($('#addNoteModal').length > 0) {
         enableSelect2('#customer_id', '#addNoteModal');
+        enableSelect2('#recipient', '#addNoteModal');
         
         // Helper function to safely destroy Select2
         function safeDestroySelect2(selector) {
@@ -109,6 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Reset Select2 dropdowns
                 $('#customer_id').val('').trigger('change');
+                $('#recipient').val('').trigger('change');
                 
                 // Close modal
                 const modal = bootstrap.Modal.getInstance(document.getElementById('addNoteModal'));
