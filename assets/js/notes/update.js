@@ -16,6 +16,7 @@ async function populateEditModal(noteId) {
             customer_name: note.customer_name || '',
             location: note.location || '',
             recipient: note.recipient || '',
+            recipient_id: note.recipient_id || '',
             meter_amount: note.meter_amount || '',
             formula_name: note.formula_name || '',
             mixer_car_name: note.mixer_car_name || '',
@@ -37,11 +38,23 @@ async function populateEditModal(noteId) {
         const editRecipientSelect = document.getElementById('edit_recipient');
         if (editRecipientSelect) {
             let recipientValueSet = false;
-            for (let option of editRecipientSelect.options) {
-                if (option.value.trim() === noteData.recipient.trim()) {
-                    option.selected = true;
-                    recipientValueSet = true;
-                    break;
+            if (noteData.recipient_id) {
+                for (let option of editRecipientSelect.options) {
+                    if (option.value === String(noteData.recipient_id)) {
+                        option.selected = true;
+                        recipientValueSet = true;
+                        break;
+                    }
+                }
+            }
+            if (!recipientValueSet && noteData.recipient) {
+                for (let option of editRecipientSelect.options) {
+                    const optionName = option.dataset && option.dataset.name ? option.dataset.name.trim() : option.textContent.trim();
+                    if (optionName === noteData.recipient.trim()) {
+                        option.selected = true;
+                        recipientValueSet = true;
+                        break;
+                    }
                 }
             }
             if (!recipientValueSet) {

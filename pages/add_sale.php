@@ -17,6 +17,7 @@ if (!hasPermission('view_sale')) {
 // Users with only view_sale permission can still access the page
 $customers = $pdo->query("SELECT id, name FROM customers")->fetchAll(PDO::FETCH_ASSOC);
 $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO::FETCH_ASSOC);
+$recipients = $pdo->query("SELECT id, name, phone1, phone2 FROM recipients ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="ku">
@@ -347,8 +348,21 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
               </select>
             </div>
             <div class="col-md-4 mb-3">
-              <label for="recipient" class="form-label">وەرگر</label>
-              <input type="text" class="form-control" id="recipient" name="recipient">
+              <label for="recipient" class="form-label select2-filter">وەرگر</label>
+              <select class="form-select" id="recipient" name="recipient" data-placeholder="وەرگرێک هەڵبژێرە">
+                <option value="">وەرگرێک هەڵبژێرە</option>
+                <?php foreach ($recipients as $recipient): 
+                  $phones = array_filter([
+                    !empty($recipient['phone1']) ? $recipient['phone1'] : '',
+                    !empty($recipient['phone2']) ? $recipient['phone2'] : ''
+                  ]);
+                  $searchMeta = trim($recipient['name'] . ' ' . implode(' ', $phones));
+                ?>
+                  <option value="<?= (int)$recipient['id'] ?>" data-name="<?= htmlspecialchars($recipient['name']) ?>" data-search="<?= htmlspecialchars($searchMeta) ?>">
+                    <?= htmlspecialchars($recipient['name']) ?>
+                  </option>
+                <?php endforeach; ?>
+              </select>
             </div>
             <div class="col-md-4 mb-3">
               <label for="location" class="form-label">شوێن</label>
@@ -461,7 +475,20 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
             </div>
             <div class="col-md-4 mb-3">
               <label for="edit_recipient" class="form-label">وەرگر</label>
-              <input type="text" class="form-control" id="edit_recipient" name="edit_recipient">
+              <select class="form-select" id="edit_recipient" name="edit_recipient" data-placeholder="وەرگرێک هەڵبژێرە">
+                <option value="">وەرگرێک هەڵبژێرە</option>
+                <?php foreach ($recipients as $recipient): 
+                  $phones = array_filter([
+                    !empty($recipient['phone1']) ? $recipient['phone1'] : '',
+                    !empty($recipient['phone2']) ? $recipient['phone2'] : ''
+                  ]);
+                  $searchMeta = trim($recipient['name'] . ' ' . implode(' ', $phones));
+                ?>
+                  <option value="<?= (int)$recipient['id'] ?>" data-name="<?= htmlspecialchars($recipient['name']) ?>" data-search="<?= htmlspecialchars($searchMeta) ?>">
+                    <?= htmlspecialchars($recipient['name']) ?>
+                  </option>
+                <?php endforeach; ?>
+              </select>
             </div>
             <div class="col-md-4 mb-3">
               <label for="edit_location" class="form-label">شوێن</label>

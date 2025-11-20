@@ -102,9 +102,11 @@ $(document).ready(function() {
     // بۆ sale - تەنها ئەگەر مۆداڵەکە هەبێت
     if ($('#addSaleModal').length > 0) {
         enableSelect2('#customer_id', '#addSaleModal');
+        enableSelect2('#recipient', '#addSaleModal');
     }
     if ($('#editSaleModal').length > 0) {
         enableSelect2('#edit_customer_id', '#editSaleModal');
+        enableSelect2('#edit_recipient', '#editSaleModal');
     }
     
     // بۆ purchase - تەنها ئەگەر مۆداڵەکە هەبێت

@@ -56,7 +56,8 @@ $sql = "SELECT
             mc.name AS mixer_car_name,
             md.name AS mixer_driver_name,
             pc.name AS pump_car_name,
-            pd.name AS pump_driver_name
+            pd.name AS pump_driver_name,
+            r.id AS recipient_id
         FROM notes n
         LEFT JOIN customers c ON n.customer_id = c.id
         LEFT JOIN concrete_formulas f ON n.formula_id = f.id
@@ -64,6 +65,7 @@ $sql = "SELECT
         LEFT JOIN employees md ON n.mixer_driver_id = md.id
         LEFT JOIN cars pc ON n.pump_car_id = pc.id
         LEFT JOIN employees pd ON n.pump_driver_id = pd.id
+        LEFT JOIN recipients r ON r.name = n.recipient
         $where_sql
         ORDER BY n.date DESC, n.time DESC";
 

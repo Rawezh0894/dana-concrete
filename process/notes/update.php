@@ -28,7 +28,8 @@ $date = $_POST['edit_date'] ?? '';
 $time = $_POST['edit_time'] ?? '';
 $customer_id = $_POST['edit_customer_id'] ?? '';
 $location = $_POST['edit_location'] ?? '';
-$recipient = $_POST['edit_recipient'] ?? '';
+$recipient_id = isset($_POST['edit_recipient']) && $_POST['edit_recipient'] !== '' ? intval($_POST['edit_recipient']) : null;
+$recipient_name = '';
 $meter_amount = $_POST['edit_meter_amount'] ?? '';
 $formula_id = $_POST['edit_formula_id'] ?? '';
 $mixer_car_id = $_POST['edit_mixer_car_id'] ?? null;
@@ -65,6 +66,17 @@ try {
         exit;
     }
     
+    if ($recipient_id) {
+        $recipientStmt = $pdo->prepare("SELECT name FROM recipients WHERE id = ?");
+        $recipientStmt->execute([$recipient_id]);
+        $recipientRow = $recipientStmt->fetch(PDO::FETCH_ASSOC);
+        if ($recipientRow) {
+            $recipient_name = $recipientRow['name'];
+        }
+    } else {
+        $recipient_name = $old_note['recipient'] ?? '';
+    }
+
     // Update note
     $sql = "UPDATE notes SET 
             date = ?, time = ?, customer_id = ?, location = ?, recipient = ?, 
@@ -78,7 +90,7 @@ try {
         $time,
         $customer_id,
         $location,
-        $recipient,
+        $recipient_name,
         $meter_amount,
         $formula_id,
         $mixer_car_id,

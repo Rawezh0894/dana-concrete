@@ -229,7 +229,8 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
                                     $searchMeta = trim($recipient['name'] . ' ' . implode(' ', $phoneList));
                                 ?>
                                     <option 
-                                        value="<?= htmlspecialchars($recipient['name']) ?>"
+                                        value="<?= (int)$recipient['id'] ?>"
+                                        data-name="<?= htmlspecialchars($recipient['name']) ?>"
                                         data-search="<?= htmlspecialchars($searchMeta) ?>"
                                     >
                                         <?= htmlspecialchars($recipient['name']) ?>
@@ -368,7 +369,8 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
                                     $searchMeta = trim($recipient['name'] . ' ' . implode(' ', $phoneList));
                                 ?>
                                     <option 
-                                        value="<?= htmlspecialchars($recipient['name']) ?>"
+                                        value="<?= (int)$recipient['id'] ?>"
+                                        data-name="<?= htmlspecialchars($recipient['name']) ?>"
                                         data-search="<?= htmlspecialchars($searchMeta) ?>"
                                     >
                                         <?= htmlspecialchars($recipient['name']) ?>
@@ -567,7 +569,7 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
         const name = recipient.name || '';
         const phones = [recipient.phone1, recipient.phone2].filter(Boolean).join(' / ');
         const searchMeta = (name + ' ' + phones).trim();
-        return `<option value="${escapeHtml(name)}" data-search="${escapeHtml(searchMeta)}">${escapeHtml(name)}</option>`;
+        return `<option value="${recipient.id}" data-name="${escapeHtml(name)}" data-search="${escapeHtml(searchMeta)}">${escapeHtml(name)}</option>`;
     }
 
     function refreshRecipientDropdowns() {

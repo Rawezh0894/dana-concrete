@@ -27,7 +27,8 @@ $date = $_POST['date'] ?? '';
 $time = $_POST['time'] ?? '';
 $customer_id = $_POST['customer_id'] ?? '';
 $location = $_POST['location'] ?? '';
-$recipient = $_POST['recipient'] ?? '';
+$recipient_id = isset($_POST['recipient']) && $_POST['recipient'] !== '' ? intval($_POST['recipient']) : null;
+$recipient_name = '';
 $meter_amount = $_POST['meter_amount'] ?? '';
 $formula_id = $_POST['formula_id'] ?? '';
 $mixer_car_id = $_POST['mixer_car_id'] ?? null;
@@ -54,6 +55,17 @@ if (!is_numeric($meter_amount) || $meter_amount <= 0) {
 }
 
 try {
+    if ($recipient_id) {
+        $recipientStmt = $pdo->prepare("SELECT name FROM recipients WHERE id = ?");
+        $recipientStmt->execute([$recipient_id]);
+        $recipientRow = $recipientStmt->fetch(PDO::FETCH_ASSOC);
+        if ($recipientRow) {
+            $recipient_name = $recipientRow['name'];
+        } else {
+            $recipient_name = '';
+        }
+    }
+
     // Insert new note
     $sql = "INSERT INTO notes (date, time, customer_id, location, recipient, meter_amount, formula_id, mixer_car_id, mixer_driver_id, pump_car_id, pump_driver_id) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -64,7 +76,7 @@ try {
         $time,
         $customer_id,
         $location,
-        $recipient,
+        $recipient_name,
         $meter_amount,
         $formula_id,
         $mixer_car_id,
