@@ -10,6 +10,12 @@ function loadRecipients() {
             const rows = response.data.map((recipient, index) => {
                 const actionButtons = [];
 
+                actionButtons.push(`
+                    <a class="btn btn-sm btn-info" href="recipient_profile.php?id=${recipient.id}" title="پرۆفایل">
+                        <i class="fas fa-id-card"></i>
+                    </a>
+                `);
+
                 if (canEdit) {
                     actionButtons.push(`
                         <button class="btn btn-sm btn-primary edit-recipient-btn" data-id="${recipient.id}" title="دەستکاری">
