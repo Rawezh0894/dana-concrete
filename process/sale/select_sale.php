@@ -14,12 +14,12 @@ try {
     $filterParams = [];
     
     if ($from) {
-        $where[] = "s.order_date >= ?";
-        $filterParams[] = $from;
+        $where[] = "s.order_date >= :from_date";
+        $filterParams['from_date'] = $from;
     }
     if ($to) {
-        $where[] = "s.order_date <= ?";
-        $filterParams[] = $to;
+        $where[] = "s.order_date <= :to_date";
+        $filterParams['to_date'] = $to;
     }
     
     $isDataTable = isset($_GET['draw']);
@@ -61,8 +61,11 @@ try {
         $params = $filterParams;
         
         if ($searchValue !== '') {
-            $where[] = "(c.name LIKE ? OR s.recipient LIKE ? OR s.location LIKE ? OR s.invoice_number LIKE ?)";
-            $params = array_merge($params, array_fill(0, 4, '%' . $searchValue . '%'));
+            $where[] = "(c.name LIKE :search_customer OR s.recipient LIKE :search_recipient OR s.location LIKE :search_location OR s.invoice_number LIKE :search_invoice)";
+            $params['search_customer'] = '%' . $searchValue . '%';
+            $params['search_recipient'] = '%' . $searchValue . '%';
+            $params['search_location'] = '%' . $searchValue . '%';
+            $params['search_invoice'] = '%' . $searchValue . '%';
         }
         
         if ($where) {
@@ -72,7 +75,10 @@ try {
         $totalRecords = $pdo->query("SELECT COUNT(*) FROM sales")->fetchColumn();
         
         $filteredStmt = $pdo->prepare("SELECT COUNT(*) $baseSql $whereSql");
-        $filteredStmt->execute($params);
+        foreach ($params as $name => $value) {
+            $filteredStmt->bindValue(':' . $name, $value);
+        }
+        $filteredStmt->execute();
         $filteredRecords = $filteredStmt->fetchColumn();
         
         $dataSql = "SELECT s.*, 
@@ -89,8 +95,8 @@ try {
         }
         
         $dataStmt = $pdo->prepare($dataSql);
-        foreach ($params as $index => $value) {
-            $dataStmt->bindValue($index + 1, $value);
+        foreach ($params as $name => $value) {
+            $dataStmt->bindValue(':' . $name, $value);
         }
         if ($length > -1) {
             $dataStmt->bindValue(':start', $start, PDO::PARAM_INT);
@@ -119,8 +125,11 @@ try {
     }
     $sql .= " ORDER BY s.order_date ASC";
     
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute($filterParams);
+        $stmt = $pdo->prepare($sql);
+        foreach ($filterParams as $name => $value) {
+            $stmt->bindValue(':' . $name, $value);
+        }
+        $stmt->execute();
     $sales = $stmt->fetchAll(PDO::FETCH_ASSOC);
     echo json_encode(['success' => true, 'data' => $sales]);
 } catch (Exception $e) {
