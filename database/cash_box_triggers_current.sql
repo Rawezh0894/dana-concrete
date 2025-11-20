@@ -457,73 +457,57 @@ CREATE TRIGGER `trg_before_update_debt_payments` BEFORE UPDATE ON `debt_payments
     END IF;
 END$$
 
-CREATE TRIGGER `trg_after_insert_employee_payment_cash_box`
-AFTER INSERT ON `employee_payments`
-FOR EACH ROW
-BEGIN
-    DECLARE v_employee_name VARCHAR(255) DEFAULT '';
-    DECLARE v_reference_tag VARCHAR(64) DEFAULT '';
-    DECLARE v_note_text TEXT DEFAULT '';
-    DECLARE v_effective_date DATETIME;
+-- Employee payment triggers
+CREATE TRIGGER `trg_after_insert_employee_payment_cash_box` AFTER INSERT ON `employee_payments` FOR EACH ROW BEGIN
+    INSERT INTO cash_box (`date`, `type`, `amount_iqd`, `amount_usd`, `currency`, `note`, `created_by`)
+    VALUES (NEW.created_at, 'withdraw', NEW.total, 0, 'دینار', CONCAT('پارەدان بۆ کارمەند: ', NEW.employee_id), NULL);
+END$$
 
-    IF NEW.total > 0 THEN
-        SET v_employee_name = (
-            SELECT name FROM employees WHERE id = NEW.employee_id LIMIT 1
-        );
-        SET v_reference_tag = CONCAT('[REF:EMP_PAY#', NEW.id, '#IQD]');
-        SET v_effective_date = IFNULL(NEW.created_at, NOW());
+CREATE TRIGGER `trg_after_insert_employee_payments` AFTER INSERT ON `employee_payments` FOR EACH ROW BEGIN
+    INSERT INTO cash_box (`date`, `type`, `amount_iqd`, `amount_usd`, `currency`, `note`, `created_by`)
+    VALUES (NEW.created_at, 'withdraw', NEW.total, 0, 'دینار', CONCAT('پارەدان بە کارمەند: ', NEW.employee_id), NULL);
+END$$
 
-        SET v_note_text = CONCAT(
-            'پارەدان بە کارمەند | ',
-            'ناو: ', IFNULL(v_employee_name, 'نەناسراو'), ' | ',
-            'مانگی مووچە: ', IFNULL(NEW.pay_month, '-'), ' | ',
-            'بڕ: ', NEW.total, ' د.ع | ',
-            v_reference_tag
-        );
+CREATE TRIGGER `trg_before_delete_employee_payment_cash_box` BEFORE DELETE ON `employee_payments` FOR EACH ROW BEGIN
+    DELETE FROM cash_box
+    WHERE `date` = OLD.created_at
+      AND `type` = 'withdraw'
+      AND amount_iqd = OLD.total
+      AND currency = 'دینار'
+      AND note = CONCAT('پارەدان بۆ کارمەند: ', OLD.employee_id);
+END$$
 
-        INSERT INTO cash_box (`date`, `type`, `amount_iqd`, `amount_usd`, `currency`, `note`, `created_by`)
-        VALUES (v_effective_date, 'withdraw', NEW.total, 0, 'دینار', v_note_text, NULL);
+CREATE TRIGGER `trg_before_delete_employee_payments` BEFORE DELETE ON `employee_payments` FOR EACH ROW BEGIN
+    INSERT INTO cash_box (`date`, `type`, `amount_iqd`, `amount_usd`, `currency`, `note`, `created_by`)
+    VALUES (NOW(), 'deposit', OLD.total, 0, 'دینار', CONCAT('گەڕانەوەی پارەدان بە کارمەند: ', OLD.employee_id), NULL);
+END$$
+
+CREATE TRIGGER `trg_before_update_employee_payment_cash_box` BEFORE UPDATE ON `employee_payments` FOR EACH ROW BEGIN
+    DECLARE difference DECIMAL(15,2);
+    SET difference = NEW.total - OLD.total;
+    IF difference != 0 THEN
+        IF difference > 0 THEN
+            INSERT INTO cash_box (`date`, `type`, `amount_iqd`, `amount_usd`, `currency`, `note`, `created_by`)
+            VALUES (NOW(), 'withdraw', difference, 0, 'دینار', CONCAT('زیادکردنی پارەدان بە کارمەند: ', NEW.employee_id), NULL);
+        ELSE
+            INSERT INTO cash_box (`date`, `type`, `amount_iqd`, `amount_usd`, `currency`, `note`, `created_by`)
+            VALUES (NOW(), 'deposit', ABS(difference), 0, 'دینار', CONCAT('کەمکردنی پارەدان بە کارمەند: ', NEW.employee_id), NULL);
+        END IF;
     END IF;
 END$$
 
-CREATE TRIGGER `trg_before_update_employee_payment_cash_box`
-BEFORE UPDATE ON `employee_payments`
-FOR EACH ROW
-BEGIN
-    DECLARE v_employee_name VARCHAR(255) DEFAULT '';
-    DECLARE v_reference_tag VARCHAR(64) DEFAULT '';
-    DECLARE v_note_text TEXT DEFAULT '';
-    DECLARE v_effective_date DATETIME;
-
-    DELETE FROM cash_box
-    WHERE note LIKE CONCAT('%[REF:EMP_PAY#', OLD.id, '#IQD]%');
-
-    IF NEW.total > 0 THEN
-        SET v_employee_name = (
-            SELECT name FROM employees WHERE id = NEW.employee_id LIMIT 1
-        );
-        SET v_reference_tag = CONCAT('[REF:EMP_PAY#', NEW.id, '#IQD]');
-        SET v_effective_date = IFNULL(NEW.created_at, NOW());
-
-        SET v_note_text = CONCAT(
-            'پارەدان بە کارمەند | ',
-            'ناو: ', IFNULL(v_employee_name, 'نەناسراو'), ' | ',
-            'مانگی مووچە: ', IFNULL(NEW.pay_month, '-'), ' | ',
-            'بڕ: ', NEW.total, ' د.ع | ',
-            v_reference_tag
-        );
-
-        INSERT INTO cash_box (`date`, `type`, `amount_iqd`, `amount_usd`, `currency`, `note`, `created_by`)
-        VALUES (v_effective_date, 'withdraw', NEW.total, 0, 'دینار', v_note_text, NULL);
+CREATE TRIGGER `trg_before_update_employee_payments` BEFORE UPDATE ON `employee_payments` FOR EACH ROW BEGIN
+    DECLARE difference DECIMAL(15,2);
+    SET difference = NEW.total - OLD.total;
+    IF difference != 0 THEN
+        IF difference > 0 THEN
+            INSERT INTO cash_box (`date`, `type`, `amount_iqd`, `amount_usd`, `currency`, `note`, `created_by`)
+            VALUES (NOW(), 'withdraw', difference, 0, 'دینار', CONCAT('زیادکردنی پارەدان بە کارمەند: ', NEW.employee_id), NULL);
+        ELSE
+            INSERT INTO cash_box (`date`, `type`, `amount_iqd`, `amount_usd`, `currency`, `note`, `created_by`)
+            VALUES (NOW(), 'deposit', ABS(difference), 0, 'دینار', CONCAT('کەمکردنی پارەدان بە کارمەند: ', NEW.employee_id), NULL);
+        END IF;
     END IF;
-END$$
-
-CREATE TRIGGER `trg_before_delete_employee_payment_cash_box`
-BEFORE DELETE ON `employee_payments`
-FOR EACH ROW
-BEGIN
-    DELETE FROM cash_box
-    WHERE note LIKE CONCAT('%[REF:EMP_PAY#', OLD.id, '#IQD]%');
 END$$
 
 -- Other expenses triggers

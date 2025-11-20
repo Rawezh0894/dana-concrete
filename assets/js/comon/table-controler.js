@@ -2,6 +2,20 @@
 // Usage: TableController.render(tableSelector, data, columns)
 
 const TableController = {
+    showError: function(tableSelector, message) {
+        const table = document.querySelector(tableSelector);
+        const tbody = table ? table.querySelector('tbody') : null;
+        const columnCount = table ? table.querySelectorAll('thead th').length || 1 : 1;
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = columnCount;
+        td.className = 'table-error-state text-center text-danger';
+        td.innerHTML = `<i class="bi bi-exclamation-triangle"></i><br>${message || 'هەڵەیەک ڕوویدا'}`;
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+    },
     render: function(tableSelector, data, columns, options = {}) {
         const tbody = document.querySelector(tableSelector + ' tbody');
         if (!tbody) return;

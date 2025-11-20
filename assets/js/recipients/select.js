@@ -1,0 +1,59 @@
+function loadRecipients() {
+    const columns = ['#', 'name', 'phone1', 'phone2', 'opening_meter_total', 'actions'];
+    TableController.showLoading('#recipientsTable', columns);
+
+    const canEdit = !!(window.recipientPermissions && window.recipientPermissions.canEdit);
+    const canDelete = !!(window.recipientPermissions && window.recipientPermissions.canDelete);
+
+    $.get('../process/recipients/select.php', function(response) {
+        if (response.success && Array.isArray(response.data)) {
+            const rows = response.data.map((recipient, index) => {
+                const actionButtons = [];
+
+                if (canEdit) {
+                    actionButtons.push(`
+                        <button class="btn btn-sm btn-primary edit-recipient-btn" data-id="${recipient.id}" title="دەستکاری">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    `);
+                }
+
+                if (canDelete) {
+                    actionButtons.push(`
+                        <button class="btn btn-sm btn-danger delete-recipient-btn" data-id="${recipient.id}" title="سڕینەوە">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    `);
+                }
+
+                return {
+                    '#': index + 1,
+                    name: recipient.name || '-',
+                    phone1: recipient.phone1 || '-',
+                    phone2: recipient.phone2 || '-',
+                    opening_meter_total: `${Number(recipient.opening_meter_total || 0).toLocaleString('en-US', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    })} م³`,
+                    actions: actionButtons.length ? actionButtons.join(' ') : '<span class="text-muted">-</span>'
+                };
+            });
+
+            TableController.renderWithPagination(
+                '#recipientsTable',
+                rows,
+                columns,
+                { pageSize: 10 }
+            );
+        } else {
+            TableController.showError('#recipientsTable', 'هەڵە لە وەرگرتنی داتای وەرگرەکان.');
+        }
+    }, 'json').fail(function() {
+        TableController.showError('#recipientsTable', 'نەتوانرا پەیوەندی بەنێررێت.');
+    });
+}
+
+$(document).ready(function() {
+    loadRecipients();
+});
+

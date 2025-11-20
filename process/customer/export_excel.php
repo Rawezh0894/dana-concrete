@@ -31,7 +31,6 @@ echo "<thead>";
 echo "<tr>";
 echo "<th>ناو</th>";
 echo "<th>بڕی قەرز (USD)</th>";
-echo "<th>کۆی داشکاندن (USD)</th>";
 echo "</tr>";
 echo "</thead>";
 echo "<tbody>";
@@ -55,12 +54,7 @@ try {
             c.name,
             IFNULL(c.opening_debt_usd, 0) AS opening_debt_usd,
             IFNULL(c.opening_debt_iqd, 0) AS opening_debt_iqd,
-            COALESCE(SUM(CASE WHEN s.payment_type = 'قەرز' THEN s.remaining_amount ELSE 0 END), 0) AS remaining_amount,
-            COALESCE((
-                SELECT SUM(discount) 
-                FROM sales 
-                WHERE customer_id = c.id
-            ), 0) AS total_discount
+            COALESCE(SUM(CASE WHEN s.payment_type = 'قەرز' THEN s.remaining_amount ELSE 0 END), 0) AS remaining_amount
         FROM customers c
         LEFT JOIN sales s 
             ON c.id = s.customer_id 
@@ -81,7 +75,6 @@ try {
         $iqdToUsdRate = ($usdRate > 0) ? ($usdRate / 100) : 0;
         $openingDebtIqdUsd = ($iqdToUsdRate > 0) ? ($openingDebtIqd / $iqdToUsdRate) : 0;
 
-        $totalDiscountUsd = (float)($row['total_discount'] ?? 0);
         $totalDebtUsd = $openingDebtUsd + $remainingAmount + $openingDebtIqdUsd;
 
         if ($totalDebtUsd <= 0) {
@@ -96,16 +89,15 @@ try {
         echo "<tr>";
         echo "<td>{$safeName}</td>";
         echo "<td>{$formattedDebt}</td>";
-        echo "<td>" . number_format($totalDiscountUsd, 2, '.', '') . "</td>";
         echo "</tr>";
     }
 
     if (!$hasRows) {
-        echo "<tr><td colspan=\"3\">هیچ داتایەک نەدۆزرایەوە</td></tr>";
+        echo "<tr><td colspan=\"2\">هیچ داتایەک نەدۆزرایەوە</td></tr>";
     }
 } catch (Exception $e) {
     error_log('Customer Excel export failed: ' . $e->getMessage());
-    echo "<tr><td colspan=\"3\">هەڵە ڕوویدا لە دروستکردنی فایلەکە</td></tr>";
+    echo "<tr><td colspan=\"2\">هەڵە ڕوویدا لە دروستکردنی فایلەکە</td></tr>";
 }
 
 echo "</tbody>";
