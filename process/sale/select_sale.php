@@ -19,7 +19,11 @@ if ($to) {
     $where[] = "s.order_date <= ?";
     $params[] = $to;
 }
-$sql = "SELECT s.*, c.name AS customer_name, f.name AS formula_name FROM sales s LEFT JOIN customers c ON s.customer_id = c.id LEFT JOIN concrete_formulas f ON s.formula_id = f.id";
+$sql = "SELECT s.*, c.name AS customer_name, f.name AS formula_name, r.id AS recipient_id 
+        FROM sales s 
+        LEFT JOIN customers c ON s.customer_id = c.id 
+        LEFT JOIN concrete_formulas f ON s.formula_id = f.id
+        LEFT JOIN recipients r ON r.name = s.recipient";
 if ($where) {
     $sql .= " WHERE " . implode(" AND ", $where);
 }

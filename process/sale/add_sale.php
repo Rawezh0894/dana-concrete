@@ -27,7 +27,8 @@ try {
     // Get form data
     $customer_id = $_POST['customer_id'] ?? null;
     $formula_id = $_POST['formula_id'] ?? null;
-    $recipient = $_POST['recipient'] ?? '';
+    $recipient_id = isset($_POST['recipient_id']) && $_POST['recipient_id'] !== '' ? intval($_POST['recipient_id']) : null;
+    $recipient = '';
     $location = $_POST['location'] ?? '';
     $quantity = $_POST['quantity'] ?? 0;
     $price_per_unit = $_POST['price_per_unit'] ?? 0;
@@ -56,6 +57,17 @@ try {
             echo json_encode(['success' => false, 'message' => 'ئەم ژمارەی پسوڵە پێشتر تۆمارکراوە!']);
             exit;
         }
+    }
+
+    if ($recipient_id) {
+        $recipientStmt = $pdo->prepare("SELECT name FROM recipients WHERE id = ?");
+        $recipientStmt->execute([$recipient_id]);
+        $recipientRow = $recipientStmt->fetch(PDO::FETCH_ASSOC);
+        if ($recipientRow) {
+            $recipient = $recipientRow['name'];
+        }
+    } else {
+        $recipient = trim($_POST['recipient'] ?? '');
     }
 
     // Get customer name for notification

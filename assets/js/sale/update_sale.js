@@ -58,6 +58,33 @@ function fetchDollarRateForEdit() {
     });
 }
 
+function setEditRecipientSelect(recipientId, recipientName) {
+    const $select = $('#edit_recipient');
+    if (!$select.length) return;
+
+    if (recipientId) {
+        $select.val(String(recipientId)).trigger('change');
+        if ($select.val()) return;
+    }
+
+    if (recipientName) {
+        const normalizedName = recipientName.trim();
+        if (!normalizedName) return;
+        const options = $select[0].options;
+        for (let i = 0; i < options.length; i++) {
+            const option = options[i];
+            const optionName = option.dataset && option.dataset.name ? option.dataset.name.trim() : option.textContent.trim();
+            if (optionName === normalizedName) {
+                $select.val(option.value).trigger('change');
+                return;
+            }
+        }
+        $select.val('').trigger('change');
+    } else {
+        $select.val('').trigger('change');
+    }
+}
+
 function loadCustomersAndFormulas(selectedCustomerId, selectedFormulaId) {
     // Load customers
     $.getJSON('../process/sale/select_customers.php', function(customers) {
@@ -95,7 +122,7 @@ $(document).on('click', '.edit-sale', function() {
                 if (sale) {
                     loadCustomersAndFormulas(sale.customer_id, sale.formula_id);
                     $('#edit_sale_id').val(sale.id);
-                    $('#edit_recipient').val(sale.recipient);
+                    setEditRecipientSelect(sale.recipient_id, sale.recipient);
                     $('#edit_location').val(sale.location);
                     $('#edit_quantity').val(sale.quantity);
                     $('#edit_price_per_unit').val(sale.price_per_unit);

@@ -396,6 +396,9 @@ function convertToReceipt(noteId) {
     params.append('open_add', '1');
     params.append('customer_id', note.customer_id);
     params.append('location', note.location);
+    if (note.recipient_id) {
+        params.append('recipient_id', note.recipient_id);
+    }
     params.append('receiver_name', note.recipient || '');
     // Note: meter_amount is intentionally not sent to allow manual entry
     // params.append('meter_amount', note.meter_amount);

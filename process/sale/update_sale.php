@@ -24,7 +24,8 @@ try {
     if ($customer_id === '' || $customer_id === '0' || $customer_id === null) {
         $customer_id = null;
     }
-    $recipient = $_POST['edit_recipient'] ?? null;
+    $recipient_id = isset($_POST['edit_recipient_id']) && $_POST['edit_recipient_id'] !== '' ? intval($_POST['edit_recipient_id']) : null;
+    $recipient = null;
     $location = $_POST['edit_location'] ?? null;
     $quantity = $_POST['edit_quantity'] ?? null;
     $price_per_unit = $_POST['edit_price_per_unit'] ?? null;
@@ -121,6 +122,18 @@ try {
         'formula_name' => $old_formula_name,
         'discount' => $old_record['discount']
     ];
+
+    if ($recipient_id) {
+        $recipientStmt = $pdo->prepare("SELECT name FROM recipients WHERE id = ?");
+        $recipientStmt->execute([$recipient_id]);
+        $recipientRow = $recipientStmt->fetch(PDO::FETCH_ASSOC);
+        if ($recipientRow) {
+            $recipient = $recipientRow['name'];
+        }
+    }
+    if ($recipient === null || $recipient === '') {
+        $recipient = $_POST['edit_recipient'] ?? $old_record['recipient'];
+    }
 
     // Now perform the update
     $stmt = $pdo->prepare("UPDATE sales SET customer_id=?, recipient=?, location=?, quantity=?, price_per_unit=?, total_price=?, payment_type=?, amount_paid_usd=?, amount_paid_iq=?, dolar_rate=?, remaining_amount=?, invoice_number=?, order_date=?, notes=?, formula_id=?, discount=? WHERE id=?");

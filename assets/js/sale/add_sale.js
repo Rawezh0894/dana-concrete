@@ -1,6 +1,32 @@
 // Multiple submission prevention flag
 let submitting = false;
 
+function setRecipientSelectValue(selector, recipientId, recipientName) {
+    const $select = $(selector);
+    if (!$select.length) return;
+
+    if (recipientId) {
+        $select.val(String(recipientId)).trigger('change');
+        if ($select.val()) {
+            return;
+        }
+    }
+
+    if (recipientName) {
+        const normalizedName = recipientName.trim();
+        if (!normalizedName) return;
+        const options = $select[0].options;
+        for (let i = 0; i < options.length; i++) {
+            const option = options[i];
+            const optionName = option.dataset && option.dataset.name ? option.dataset.name.trim() : option.textContent.trim();
+            if (optionName === normalizedName) {
+                $select.val(option.value).trigger('change');
+                return;
+            }
+        }
+    }
+}
+
 // Function to populate form from localStorage (from receipt selection)
 function populateFormFromLocalStorage() {
     const saleData = localStorage.getItem('saleFromReceipts');
@@ -32,8 +58,10 @@ function populateFormFromLocalStorage() {
                 }
             }
             
-            if (data.recipient) {
-                $('#recipient').val(data.recipient);
+            if (data.recipient_id) {
+                setRecipientSelectValue('#recipient', data.recipient_id, data.recipient || data.recipient_name);
+            } else if (data.recipient || data.recipient_name) {
+                setRecipientSelectValue('#recipient', null, data.recipient || data.recipient_name);
             }
             
             if (data.location) {
@@ -133,10 +161,11 @@ function populateFormFromURL() {
             }
         }
         
-        if (urlParams.has('recipient')) {
-            const recipient = urlParams.get('recipient');
-            console.log('Setting recipient:', recipient);
-            $('#recipient').val(recipient);
+        const recipientParam = urlParams.get('recipient') || urlParams.get('receiver_name') || '';
+        const recipientIdParam = urlParams.get('recipient_id');
+        if (recipientIdParam || recipientParam) {
+            console.log('Setting recipient (id/name):', recipientIdParam, recipientParam);
+            setRecipientSelectValue('#recipient', recipientIdParam, recipientParam);
         }
         
         if (urlParams.has('location')) {
@@ -400,6 +429,7 @@ $(document).ready(function() {
                     });
                     $('#addSaleForm')[0].reset();
                     $('#customer_id').val('').trigger('change');
+                    $('#recipient').val('').trigger('change');
                     $('#formula_id').val('').trigger('change');
                     $('#addSaleModal').modal('hide');
                     if (window.reloadSales) window.reloadSales();
