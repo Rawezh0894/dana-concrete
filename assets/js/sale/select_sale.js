@@ -1,4 +1,5 @@
 let saleTable = null;
+let salesTableInitialized = false;
 
 function formatNumber(n) {
     if (n === null || n === undefined || n === '') return '';
@@ -6,235 +7,182 @@ function formatNumber(n) {
 }
 
 function formatUSD(n) {
-    if (!n || isNaN(n)) return '';
+    if (n === null || n === undefined || n === '' || isNaN(n)) return '-';
     return formatNumber(Number(n).toFixed(2)) + ' $';
 }
 
 function formatIQD(n) {
-    if (!n || isNaN(n)) return '';
+    if (n === null || n === undefined || n === '' || isNaN(n)) return '-';
     return formatNumber(Number(n).toFixed(0)) + ' د.ع';
 }
 
-async function loadSalesTable(filterParams = '') {
-    // Destroy existing table if it exists
-    if (saleTable) {
-        saleTable.destroy();
-        saleTable = null;
-        $('#saleTable').empty();
-    }
-    
-    // Get current month and year
-    const now = new Date();
-    const currentMonth = now.getMonth() + 1;
-    const currentYear = now.getFullYear();
-    
-    // Set default filter to current month
-    const fromDate = `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`;
-    const toDate = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${new Date(currentYear, currentMonth, 0).getDate()}`;
-    
-    // Update filter inputs if they exist
+function ensureDefaultDates() {
     const fromInput = document.getElementById('filter_from');
     const toInput = document.getElementById('filter_to');
-    if (fromInput && !fromInput.value) fromInput.value = fromDate;
-    if (toInput && !toInput.value) toInput.value = toDate;
+    if (fromInput && toInput && !salesTableInitialized) {
+        const now = new Date();
+        const currentMonth = now.getMonth() + 1;
+        const currentYear = now.getFullYear();
+        const fromDate = `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`;
+        const toDate = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${new Date(currentYear, currentMonth, 0).getDate()}`;
+        if (!fromInput.value) fromInput.value = fromDate;
+        if (!toInput.value) toInput.value = toDate;
+    }
+}
+
+function loadSalesTable() {
+    ensureDefaultDates();
     
-    try {
-        let url = '../process/sale/select_sale.php';
-        if (filterParams) url += '?' + filterParams;
-        
-        let res = await fetch(url);
-        let text = await res.text();
-        let data;
-        try {
-            data = JSON.parse(text);
-        } catch (e) {
-            console.error('Raw response from select_sale.php:', text);
-            console.error('Server response error. Check console for details.');
-            return;
-        }
-        
-        if (!data.success || !data.data) {
-            $('#saleTable').html(`<tr><td colspan="18" class="text-muted text-center">هیچ زانیارییەک نەدۆزرایەوە</td></tr>`);
-            return;
-        }
-        
-        // Check for duplicate invoice numbers
-        const invoiceCounts = {};
-        data.data.forEach(row => {
-            if (row.invoice_number) {
-                invoiceCounts[row.invoice_number] = (invoiceCounts[row.invoice_number] || 0) + 1;
-            }
-        });
-        
-        // Prepare data for DataTables
-        const tableData = data.data.map((row) => [
-            row.customer_name || '-',
-            row.recipient || '-',
-            row.location || '-',
-            row.invoice_number || '-',
-            row.formula_name || '-',
-            row.order_date || '-',
-            row.payment_type || '-',
-            'M³ ' + (row.quantity !== null && row.quantity !== undefined && row.quantity !== '' ? formatNumber(row.quantity) : '-'),
-            row.price_per_unit !== null && row.price_per_unit !== undefined && row.price_per_unit !== '' ? formatUSD(row.price_per_unit) : '-',
-            row.total_price !== null && row.total_price !== undefined && row.total_price !== '' ? formatUSD(row.total_price) : '-',
-            row.amount_paid_iq !== null && row.amount_paid_iq !== undefined && row.amount_paid_iq !== '' ? formatIQD(row.amount_paid_iq) : '-',
-            row.amount_paid_usd !== null && row.amount_paid_usd !== undefined && row.amount_paid_usd !== '' ? formatUSD(row.amount_paid_usd) : '-',
-            row.remaining_amount !== null && row.remaining_amount !== undefined && row.remaining_amount !== '' ? formatUSD(row.remaining_amount) : '-',
-            row.dolar_rate !== null && row.dolar_rate !== undefined && row.dolar_rate !== '' ? formatNumber(row.dolar_rate) : '-',
-            row.notes || '-',
-            row.discount !== null && row.discount !== undefined && row.discount !== '' ? formatUSD(row.discount) : '-',
-            `${window.userPermissions && window.userPermissions.canEdit ? `<button class='btn btn-warning btn-sm edit-sale' data-id='${row.id}' title='نوێکردنەوە'><i class='fa fa-edit'></i></button>` : ''} ${window.userPermissions && window.userPermissions.canDelete ? `<button class='btn btn-danger btn-sm delete-sale' data-id='${row.id}' title='سڕینەوە'><i class='fa fa-trash'></i></button>` : ''}`,
-            (row.invoice_number && invoiceCounts[row.invoice_number] > 1) ? 'duplicate-invoice-row' : '' // store row class
-        ]);
-        
-        // Initialize DataTable
-        saleTable = new DataTable('#saleTable', {
-            data: tableData,
-            columns: [
-                { title: 'کڕیار' },
-                { title: 'وەرگر' },
-                { title: 'شوێن' },
-                { title: 'ژمارەی پسوڵە' },
-                { title: 'فۆرمۆلا' },
-                { title: 'بەروار' },
-                { title: 'جۆری پارەدان' },
-                { title: 'بڕ' },
-                { title: 'نرخی یەکە' },
-                { title: 'کۆی نرخ' },
-                { title: 'پارەی دراو بە دینار' },
-                { title: 'پارەی دراو بە دۆلار' },
-                { title: 'پارەی ماوە' },
-                { title: 'نرخی ١٠٠ دۆلار' },
-                { title: 'تێبینی' },
-                { title: 'داشکاندن' },
-                { title: 'کردارەکان' }
-            ],
-            language: {
-                "processing": "چاوەڕوان بە...",
-                "search": "گەڕان:",
-                "lengthMenu": "نیشاندان _MENU_ ڕیکۆرد",
-                "info": "نوێنراوە _START_ لە _END_ لە _TOTAL_ ڕیکۆرد",
-                "infoEmpty": "نوێنراوە 0 لە 0 لە 0 ڕیکۆرد",
-                "infoFiltered": "(فلتەرکراو لە _MAX_ کۆی ڕیکۆرد)",
-                "loadingRecords": "لۆدینگ...",
-                "zeroRecords": "هیچ ڕیکۆردێک نەدۆزرایەوە",
-                "emptyTable": "هیچ زانیارییەک لە خشتەکەدا نییە",
-                "paginate": {
-                    "first": "یەکەم",
-                    "previous": "پێشوو",
-                    "next": "دواتر",
-                    "last": "کۆتایی"
-                },
-                "aria": {
-                    "sortAscending": ": چالاککردن بۆ ڕیزکردنی ستون بەپێی زیادبوون",
-                    "sortDescending": ": چالاککردن بۆ ڕیزکردنی ستون بەپێی کەمبوون"
-                }
+    if (saleTable) {
+        saleTable.ajax.reload(null, false);
+        return;
+    }
+    
+    saleTable = $('#saleTable').DataTable({
+        processing: true,
+        serverSide: true,
+        responsive: true,
+        ajax: {
+            url: '../process/sale/select_sale.php',
+            type: 'GET',
+            data: function(d) {
+                d.from = document.getElementById('filter_from')?.value || '';
+                d.to = document.getElementById('filter_to')?.value || '';
             },
-            responsive: true,
-            pageLength: 10,
-            lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
-            order: [[5, 'desc']], // Sort by date descending
-            orderMulti: true, // Enable multi-column sorting
-            dom: 'Bfrtip', // Buttons, filter, table, info, pagination
-            buttons: [
-                {
-                    extend: 'copy',
-                    text: 'لەبەرگرتنەوە',
-                    className: 'btn btn-sm btn-outline-secondary'
-                },
-                {
-                    extend: 'csv',
-                    text: 'CSV',
-                    className: 'btn btn-sm btn-outline-secondary'
-                },
-                {
-                    extend: 'excel',
-                    text: 'Excel',
-                    className: 'btn btn-sm btn-outline-success'
-                },
-                {
-                    extend: 'print',
-                    text: 'پرینت',
-                    className: 'btn btn-sm btn-outline-primary'
-                }
-            ],
-            rowCallback: function(row, data) {
-                // Apply duplicate row class
-                const rowClass = data[18]; // Last column contains the row class
-                if (rowClass === 'duplicate-invoice-row') {
-                    $(row).addClass('duplicate-invoice-row');
-                }
-            },
-            initComplete: function() {
-                // Add individual column search inputs
-                this.api().columns().every(function() {
-                    const column = this;
-                    const header = $(column.header());
-                    
-                    // Skip adding search to actions column
-                    if (header.text().includes('کردارەکان')) {
-                        return;
-                    }
-                    
-                    // Create search input
-                    const searchInput = $('<input>')
-                        .attr('type', 'text')
-                        .attr('placeholder', 'فلتەر...')
-                        .addClass('form-control form-control-sm mt-1 column-filter')
-                        .css({
-                            'width': '100%',
-                            'padding': '0.25rem 0.5rem',
-                            'border': '1px solid #ced4da',
-                            'border-radius': '0.25rem'
-                        });
-                    
-                    // Add search input to header
-                    header.append(searchInput);
-                    
-                    // Apply search on keyup (Excel-like contains filter)
-                    searchInput.on('keyup change', function() {
-                        column.search(this.value).draw();
-                    });
+            error: function(xhr) {
+                console.error('Error loading sales:', xhr?.responseText || xhr);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'هەڵە',
+                    text: 'نەتوانرا زانیارییەکان بخوێندرێنوە. تکایە دووبارە هەوڵ بدەوە'
                 });
             }
-        });
-    } catch (error) {
-        console.error('Error loading sales:', error);
-        $('#saleTable').html(`<tr><td colspan="18" class="text-danger text-center">هەڵە لە بارکردنی زانیاریەکان</td></tr>`);
-    }
+        },
+        order: [[5, 'desc']],
+        columns: [
+            { data: 'customer_name', defaultContent: '-' },
+            { data: 'recipient', defaultContent: '-' },
+            { data: 'location', defaultContent: '-' },
+            { data: 'invoice_number', defaultContent: '-' },
+            { data: 'formula_name', defaultContent: '-' },
+            { data: 'order_date', defaultContent: '-' },
+            { data: 'payment_type', defaultContent: '-' },
+            { 
+                data: 'quantity', 
+                render: function(data) {
+                    return data && data !== '' ? `M³ ${formatNumber(data)}` : '-';
+                }
+            },
+            { 
+                data: 'price_per_unit', 
+                render: function(data) {
+                    return formatUSD(data);
+                }
+            },
+            { 
+                data: 'total_price', 
+                render: function(data) {
+                    return formatUSD(data);
+                }
+            },
+            { 
+                data: 'amount_paid_iq', 
+                render: function(data) {
+                    return formatIQD(data);
+                }
+            },
+            { 
+                data: 'amount_paid_usd', 
+                render: function(data) {
+                    return formatUSD(data);
+                }
+            },
+            { 
+                data: 'remaining_amount', 
+                render: function(data) {
+                    return formatUSD(data);
+                }
+            },
+            { 
+                data: 'dolar_rate', 
+                render: function(data) {
+                    return data && data !== '' ? formatNumber(data) : '-';
+                }
+            },
+            { data: 'notes', defaultContent: '-' },
+            { 
+                data: 'discount', 
+                render: function(data) {
+                    return formatUSD(data);
+                }
+            },
+            { 
+                data: null,
+                orderable: false,
+                searchable: false,
+                render: function(data) {
+                    const editBtn = window.userPermissions && window.userPermissions.canEdit
+                        ? `<button class='btn btn-warning btn-sm edit-sale' data-id='${data.id}' title='نوێکردنەوە'><i class='fa fa-edit'></i></button>`
+                        : '';
+                    const deleteBtn = window.userPermissions && window.userPermissions.canDelete
+                        ? `<button class='btn btn-danger btn-sm delete-sale' data-id='${data.id}' title='سڕینەوە'><i class='fa fa-trash'></i></button>`
+                        : '';
+                    return `${editBtn} ${deleteBtn}`.trim() || '-';
+                }
+            }
+        ],
+        language: {
+            "processing": "چاوەڕوان بە...",
+            "search": "گەڕان:",
+            "lengthMenu": "نیشاندان _MENU_ ڕیکۆرد",
+            "info": "نوێنراوە _START_ لە _END_ لە _TOTAL_ ڕیکۆرد",
+            "infoEmpty": "نوێنراوە 0 لە 0 لە 0 ڕیکۆرد",
+            "infoFiltered": "(فلتەرکراو لە _MAX_ کۆی ڕیکۆرد)",
+            "loadingRecords": "لۆدینگ...",
+            "zeroRecords": "هیچ ڕیکۆردێک نەدۆزرایەوە",
+            "emptyTable": "هیچ زانیارییەک لە خشتەکەدا نییە",
+            "paginate": {
+                "first": "یەکەم",
+                "previous": "پێشوو",
+                "next": "دواتر",
+                "last": "کۆتایی"
+            },
+            "aria": {
+                "sortAscending": ": چالاککردن بۆ ڕیزکردنی ستون بەپێی زیادبوون",
+                "sortDescending": ": چالاککردن بۆ ڕیزکردنی ستون بەپێی کەمبوون"
+            }
+        },
+        lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+        dom: 'Bfrtip',
+        buttons: [
+            { extend: 'copy', text: 'لەبەرگرتنەوە', className: 'btn btn-sm btn-outline-secondary' },
+            { extend: 'csv', text: 'CSV', className: 'btn btn-sm btn-outline-secondary' },
+            { extend: 'excel', text: 'Excel', className: 'btn btn-sm btn-outline-success' },
+            { extend: 'print', text: 'پرینت', className: 'btn btn-sm btn-outline-primary' }
+        ],
+        createdRow: function(row, data) {
+            if (data.duplicate_count && data.duplicate_count > 1) {
+                $(row).addClass('duplicate-invoice-row');
+            }
+        }
+    });
+    
+    salesTableInitialized = true;
 }
 
 document.addEventListener('DOMContentLoaded', function() {
     loadSalesTable();
 });
 
-// Make it globally accessible for reload
-window.reloadSales = function(filterParams) {
-    loadSalesTable(filterParams);
+window.reloadSales = function() {
+    loadSalesTable();
 };
 
-// Filter event listeners
 const fromInput = document.getElementById('filter_from');
 const toInput = document.getElementById('filter_to');
 if (fromInput && toInput) {
-    fromInput.addEventListener('input', function() {
-        const from = fromInput.value;
-        const to = toInput.value;
-        const params = [];
-        if (from) params.push('from=' + encodeURIComponent(from));
-        if (to) params.push('to=' + encodeURIComponent(to));
-        loadSalesTable(params.join('&'));
-    });
-    
-    toInput.addEventListener('input', function() {
-        const from = fromInput.value;
-        const to = toInput.value;
-        const params = [];
-        if (from) params.push('from=' + encodeURIComponent(from));
-        if (to) params.push('to=' + encodeURIComponent(to));
-        loadSalesTable(params.join('&'));
-    });
+    fromInput.addEventListener('change', loadSalesTable);
+    toInput.addEventListener('change', loadSalesTable);
 }
 
 const clearBtn = document.getElementById('clearFilterBtn');
