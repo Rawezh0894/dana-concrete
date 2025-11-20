@@ -465,7 +465,7 @@ $mixer_drivers = array_filter($employees, function ($emp) {
             </div>
             <div class="mb-3">
               <label for="recipient_opening_meter_total" class="form-label">کۆی بڕی مەتری گیراوی سەرەتایی (م³)</label>
-              <input type="number" class="form-control" id="recipient_opening_meter_total" name="opening_meter_total" min="0" step="0.01">
+              <input type="number" class="form-control" id="recipient_opening_meter_total" name="opening_meter_total" min="0" step="0.01" value="0">
             </div>
           </div>
           <div class="modal-footer">
