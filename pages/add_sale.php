@@ -323,7 +323,32 @@ $recipients = $pdo->query("SELECT id, name, phone1, phone2 FROM recipients ORDER
     
     <div class="table-responsive">
         <table class="table table-bordered table-hover align-middle text-center" id="saleTable">
-            <!-- DataTables will build the table structure -->
+            <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
+                <tr>
+                    <th>کڕیار</th>
+                    <th>وەرگر</th>
+                    <th>شوێن</th>
+                    <th>ژمارەی پسوڵە</th>
+                    <th>فۆرمۆلا</th>
+                    <th>بەروار</th>
+                    <th>جۆری پارەدان</th>
+                    <th>بڕ (م³)</th>
+                    <th>نرخی یەکە</th>
+                    <th>کۆی نرخ</th>
+                    <th>پارەی دراو بە دینار</th>
+                    <th>پارەی دراو بە دۆلار</th>
+                    <th>پارەی ماوە</th>
+                    <th>نرخی ١٠٠ دۆلار</th>
+                    <th>تێبینی</th>
+                    <th>داشکاندن</th>
+                    <th>کردارەکان</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="17" class="text-muted">چاوەڕوان بە...</td>
+                </tr>
+            </tbody>
         </table>
     </div>
 </div>
