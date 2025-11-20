@@ -91,13 +91,9 @@ $(document).on('click', '.restore-btn', function() {
                     loadRecycleBinSales();
                     Swal.fire({icon:'success',title:'سەرکەوتوو',text:'گەڕاندنەوە سەرکەوتوو بوو'});
                 } else {
-                    console.error('Restore sale failed:', res);
                     Swal.fire({icon:'error',title:'هەڵە',text:res.msg || 'هەڵەیەک هەیە'});
                 }
-            }, 'json').fail(function(xhr, status, error) {
-                console.error('Restore sale request failed:', {status, error, response: xhr?.responseText});
-                Swal.fire({icon:'error',title:'هەڵە',text:'هەڵەیەک لە پەیوەندی هەیە'});
-            });
+            }, 'json');
         }
     });
 });

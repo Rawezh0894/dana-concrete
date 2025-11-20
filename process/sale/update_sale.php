@@ -24,8 +24,7 @@ try {
     if ($customer_id === '' || $customer_id === '0' || $customer_id === null) {
         $customer_id = null;
     }
-    $recipient_input = isset($_POST['edit_recipient']) ? trim($_POST['edit_recipient']) : '';
-    $recipient_name = '';
+    $recipient = $_POST['edit_recipient'] ?? null;
     $location = $_POST['edit_location'] ?? null;
     $quantity = $_POST['edit_quantity'] ?? null;
     $price_per_unit = $_POST['edit_price_per_unit'] ?? null;
@@ -42,7 +41,7 @@ try {
     $discount = $_POST['edit_discount'] ?? 0;
 
     // Log parsed variables for debugging
-    error_log("Parsed vars: id='$id', customer_id='$customer_id', recipient='$recipient_input', location='$location', quantity='$quantity', price_per_unit='$price_per_unit', total_price='$total_price', payment_type='$payment_type', amount_paid_usd='$amount_paid_usd', amount_paid_iq='$amount_paid_iq', dolar_rate='$dolar_rate', remaining_amount='$remaining_amount', invoice_number='$invoice_number', order_date='$order_date', notes='$notes', formula_id='$formula_id', discount='$discount'");
+    error_log("Parsed vars: id='$id', customer_id='$customer_id', recipient='$recipient', location='$location', quantity='$quantity', price_per_unit='$price_per_unit', total_price='$total_price', payment_type='$payment_type', amount_paid_usd='$amount_paid_usd', amount_paid_iq='$amount_paid_iq', dolar_rate='$dolar_rate', remaining_amount='$remaining_amount', invoice_number='$invoice_number', order_date='$order_date', notes='$notes', formula_id='$formula_id', discount='$discount'");
 
     if (!$id || !$location || !$quantity || !$price_per_unit || !$total_price || !$payment_type || !$invoice_number || !$order_date || !$formula_id) {
         error_log('Missing required fields for sale update');
@@ -70,18 +69,6 @@ try {
         error_log('Duplicate invoice number: ' . $invoice_number);
         echo json_encode(['success' => false, 'message' => 'ئەم ژمارەی پسوڵە پێشتر تۆمارکراوە!']);
         exit;
-    }
-
-    // Resolve recipient name if ID provided
-    if ($recipient_input !== '') {
-        if (ctype_digit($recipient_input)) {
-            $recipientStmt = $pdo->prepare("SELECT name FROM recipients WHERE id = ?");
-            $recipientStmt->execute([$recipient_input]);
-            $recipientRow = $recipientStmt->fetch(PDO::FETCH_ASSOC);
-            $recipient_name = $recipientRow['name'] ?? '';
-        } else {
-            $recipient_name = $recipient_input;
-        }
     }
 
     // Update customer debt logic (simplified)
@@ -139,7 +126,7 @@ try {
     $stmt = $pdo->prepare("UPDATE sales SET customer_id=?, recipient=?, location=?, quantity=?, price_per_unit=?, total_price=?, payment_type=?, amount_paid_usd=?, amount_paid_iq=?, dolar_rate=?, remaining_amount=?, invoice_number=?, order_date=?, notes=?, formula_id=?, discount=? WHERE id=?");
     $result = $stmt->execute([
         $customer_id,
-        $recipient_name,
+        $recipient,
         $location,
         $quantity,
         $price_per_unit,
@@ -172,7 +159,7 @@ try {
         $new_values = [
             'customer_id' => $customer_id,
             'customer_name' => $customer_name,
-            'recipient' => $recipient_name,
+            'recipient' => $recipient,
             'location' => $location,
             'quantity' => $quantity,
             'price_per_unit' => $price_per_unit,

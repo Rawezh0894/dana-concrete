@@ -1,43 +1,3 @@
-function setRecipientSelectValue(selector, recipientValue) {
-    const $select = $(selector);
-    if (!$select.length) return;
-
-    if (!recipientValue) {
-        $select.val('').trigger('change');
-        return;
-    }
-
-    let valueToMatch = String(recipientValue).trim();
-    if (valueToMatch.includes(',')) {
-        valueToMatch = valueToMatch.split(',')[0].trim();
-    }
-
-    let matched = false;
-    $select.find('option').each(function() {
-        if ($(this).val() === valueToMatch) {
-            matched = true;
-            $select.val(valueToMatch);
-            return false;
-        }
-    });
-
-    if (!matched) {
-        $select.find('option').each(function() {
-            const optionName = ($(this).data('name') || $(this).text()).trim();
-            if (optionName === valueToMatch) {
-                matched = true;
-                $select.val($(this).val());
-                return false;
-            }
-        });
-    }
-
-    if (!matched) {
-        $select.val('');
-    }
-
-    $select.trigger('change');
-}
 // Function to fetch dollar rate from API
 function fetchDollarRateForEdit() {
     const apiUrl = 'https://dinarapi.hediworks.site/api/get-price';
@@ -135,7 +95,7 @@ $(document).on('click', '.edit-sale', function() {
                 if (sale) {
                     loadCustomersAndFormulas(sale.customer_id, sale.formula_id);
                     $('#edit_sale_id').val(sale.id);
-                    setRecipientSelectValue('#edit_recipient', sale.recipient_id || sale.recipient);
+                    $('#edit_recipient').val(sale.recipient);
                     $('#edit_location').val(sale.location);
                     $('#edit_quantity').val(sale.quantity);
                     $('#edit_price_per_unit').val(sale.price_per_unit);

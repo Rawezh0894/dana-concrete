@@ -27,8 +27,7 @@ try {
     // Get form data
     $customer_id = $_POST['customer_id'] ?? null;
     $formula_id = $_POST['formula_id'] ?? null;
-    $recipient_input = trim($_POST['recipient'] ?? '');
-    $recipient_name = '';
+    $recipient = $_POST['recipient'] ?? '';
     $location = $_POST['location'] ?? '';
     $quantity = $_POST['quantity'] ?? 0;
     $price_per_unit = $_POST['price_per_unit'] ?? 0;
@@ -59,18 +58,6 @@ try {
         }
     }
 
-    // Resolve recipient name if ID provided
-    if ($recipient_input !== '') {
-        if (ctype_digit($recipient_input)) {
-            $recipientStmt = $pdo->prepare("SELECT name FROM recipients WHERE id = ?");
-            $recipientStmt->execute([$recipient_input]);
-            $recipientRow = $recipientStmt->fetch(PDO::FETCH_ASSOC);
-            $recipient_name = $recipientRow['name'] ?? '';
-        } else {
-            $recipient_name = $recipient_input;
-        }
-    }
-
     // Get customer name for notification
     $stmt = $pdo->prepare("SELECT name FROM customers WHERE id = ?");
     $stmt->execute([$customer_id]);
@@ -86,7 +73,7 @@ try {
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([
-        $customer_id, $formula_id, $recipient_name, $location, $quantity, $price_per_unit, $total_price,
+        $customer_id, $formula_id, $recipient, $location, $quantity, $price_per_unit, $total_price,
         $payment_type, $amount_paid_usd, $amount_paid_iq, $remaining_amount, $dolar_rate, $discount,
         $order_date, $invoice_number, $notes
     ]);
@@ -99,7 +86,7 @@ try {
         'customer_name' => $customer['name'] ?? 'Unknown',
         'formula_id' => $formula_id,
         'formula_name' => $formula['name'] ?? 'Unknown',
-        'recipient' => $recipient_name,
+        'recipient' => $recipient,
         'location' => $location,
         'quantity' => $quantity,
         'price_per_unit' => $price_per_unit,

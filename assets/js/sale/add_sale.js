@@ -1,47 +1,6 @@
 // Multiple submission prevention flag
 let submitting = false;
 
-function setRecipientSelectValue(selector, recipientValue) {
-    const $select = $(selector);
-    if (!$select.length) return;
-
-    if (!recipientValue) {
-        $select.val('').trigger('change');
-        return;
-    }
-
-    let valueToMatch = String(recipientValue).trim();
-    if (valueToMatch.includes(',')) {
-        valueToMatch = valueToMatch.split(',')[0].trim();
-    }
-
-    let matched = false;
-    $select.find('option').each(function() {
-        if ($(this).val() === valueToMatch) {
-            matched = true;
-            $select.val(valueToMatch);
-            return false;
-        }
-    });
-
-    if (!matched) {
-        $select.find('option').each(function() {
-            const optionName = ($(this).data('name') || $(this).text()).trim();
-            if (optionName === valueToMatch) {
-                matched = true;
-                $select.val($(this).val());
-                return false;
-            }
-        });
-    }
-
-    if (!matched) {
-        $select.val('');
-    }
-
-    $select.trigger('change');
-}
-
 // Function to populate form from localStorage (from receipt selection)
 function populateFormFromLocalStorage() {
     const saleData = localStorage.getItem('saleFromReceipts');
@@ -73,8 +32,8 @@ function populateFormFromLocalStorage() {
                 }
             }
             
-            if (data.recipient_id || data.recipient) {
-                setRecipientSelectValue('#recipient', data.recipient_id || data.recipient);
+            if (data.recipient) {
+                $('#recipient').val(data.recipient);
             }
             
             if (data.location) {
@@ -177,7 +136,7 @@ function populateFormFromURL() {
         if (urlParams.has('recipient')) {
             const recipient = urlParams.get('recipient');
             console.log('Setting recipient:', recipient);
-            setRecipientSelectValue('#recipient', recipient);
+            $('#recipient').val(recipient);
         }
         
         if (urlParams.has('location')) {
@@ -441,7 +400,6 @@ $(document).ready(function() {
                     });
                     $('#addSaleForm')[0].reset();
                     $('#customer_id').val('').trigger('change');
-                    $('#recipient').val('').trigger('change');
                     $('#formula_id').val('').trigger('change');
                     $('#addSaleModal').modal('hide');
                     if (window.reloadSales) window.reloadSales();
