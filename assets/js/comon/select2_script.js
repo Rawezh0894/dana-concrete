@@ -87,7 +87,11 @@ function customMatcher(params, data) {
     }
     var term = normalizeArabicKurdish(params.term);
     var text = normalizeArabicKurdish(data.text);
-    if (text.indexOf(term) > -1) {
+    var extra = '';
+    if (data.element && data.element.dataset && data.element.dataset.search) {
+        extra = normalizeArabicKurdish(data.element.dataset.search);
+    }
+    if (text.indexOf(term) > -1 || extra.indexOf(term) > -1) {
         return data;
     }
     return null;

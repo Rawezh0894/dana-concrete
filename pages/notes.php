@@ -216,13 +216,18 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
                             <label for="recipient" class="form-label">وەرگر</label>
                             <select class="form-select" id="recipient" name="recipient" data-placeholder="وەرگرێک هەڵبژێرە">
                                 <option value="">وەرگرێک هەڵبژێرە</option>
-                                <?php foreach ($recipients as $recipient): ?>
-                                    <option value="<?= htmlspecialchars($recipient['name']) ?>">
+                                <?php foreach ($recipients as $recipient): 
+                                    $phoneList = array_filter([
+                                        !empty($recipient['phone1']) ? $recipient['phone1'] : '',
+                                        !empty($recipient['phone2']) ? $recipient['phone2'] : ''
+                                    ]);
+                                    $searchMeta = trim($recipient['name'] . ' ' . implode(' ', $phoneList));
+                                ?>
+                                    <option 
+                                        value="<?= htmlspecialchars($recipient['name']) ?>"
+                                        data-search="<?= htmlspecialchars($searchMeta) ?>"
+                                    >
                                         <?= htmlspecialchars($recipient['name']) ?>
-                                        <?php 
-                                            $phones = array_filter([!empty($recipient['phone1']) ? $recipient['phone1'] : '', !empty($recipient['phone2']) ? $recipient['phone2'] : '']);
-                                            if (!empty($phones)): ?> - <?= htmlspecialchars(implode(' / ', $phones)) ?><?php endif; 
-                                        ?>
                                     </option>
                                 <?php endforeach; ?>
                             </select>
@@ -350,13 +355,18 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
                             <label for="edit_recipient" class="form-label">وەرگر</label>
                             <select class="form-select" id="edit_recipient" name="edit_recipient" data-placeholder="وەرگرێک هەڵبژێرە">
                                 <option value="">وەرگرێک هەڵبژێرە</option>
-                                <?php foreach ($recipients as $recipient): ?>
-                                    <option value="<?= htmlspecialchars($recipient['name']) ?>">
+                                <?php foreach ($recipients as $recipient): 
+                                    $phoneList = array_filter([
+                                        !empty($recipient['phone1']) ? $recipient['phone1'] : '',
+                                        !empty($recipient['phone2']) ? $recipient['phone2'] : ''
+                                    ]);
+                                    $searchMeta = trim($recipient['name'] . ' ' . implode(' ', $phoneList));
+                                ?>
+                                    <option 
+                                        value="<?= htmlspecialchars($recipient['name']) ?>"
+                                        data-search="<?= htmlspecialchars($searchMeta) ?>"
+                                    >
                                         <?= htmlspecialchars($recipient['name']) ?>
-                                        <?php 
-                                            $phones = array_filter([!empty($recipient['phone1']) ? $recipient['phone1'] : '', !empty($recipient['phone2']) ? $recipient['phone2'] : '']);
-                                            if (!empty($phones)): ?> - <?= htmlspecialchars(implode(' / ', $phones)) ?><?php endif; 
-                                        ?>
                                     </option>
                                 <?php endforeach; ?>
                             </select>
