@@ -35,22 +35,18 @@ function populateReceiptData(data) {
     
     // Populate basic info
     setElementText('receipt_number', receipt.receipt_number || 'W-0001');
-    setElementText('customer_name', receipt.customer_name || '-');
     setElementText('location', receipt.location || '-');
     setElementText('created_date', data.formatted_date || '-');
-    // Receiver name and dash logic
-    var receiver = (receipt.receiver_name || '').trim();
-    var sep = '';
-    if (receiver) sep = ' - ';
-    setElementText('customer_receiver_sep', sep);
-    setElementText('receiver_name', receiver || '');
     
-    // Populate customer phone
-    let phoneText = receipt.customer_phone || '-';
-    if (receipt.customer_phone2) {
-        phoneText += ' - ' + receipt.customer_phone2;
-    }
-    setElementText('customer_phone', phoneText);
+    const customerLine = buildContactLine('کڕیار', receipt.customer_name, [
+        receipt.customer_phone,
+        receipt.customer_phone2
+    ]);
+    const recipientLine = buildContactLine('وەرگر', receipt.receiver_name, [
+        receipt.recipient_phone1,
+        receipt.recipient_phone2
+    ]);
+    setElementText('customer_recipient_line', `${customerLine} , ${recipientLine}`);
     
     // Populate table data
     setElementText('mixer_car_name', receipt.mixer_car_name || '-');
@@ -73,6 +69,21 @@ function setElementText(elementId, text) {
     } else {
         console.warn(`Element with ID '${elementId}' not found`);
     }
+}
+
+function buildContactLine(label, name, phones = []) {
+    const cleanedName = (name || '').trim();
+    const phoneList = (phones || []).filter(Boolean).map(phone => phone.trim()).filter(Boolean);
+    let line = `${label}:`;
+    if (cleanedName) {
+        line += cleanedName;
+        if (phoneList.length) {
+            line += '-' + phoneList.join('/');
+        }
+    } else {
+        line += '-';
+    }
+    return line;
 }
 
 // Initialize when DOM is loaded

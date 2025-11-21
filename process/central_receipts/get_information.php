@@ -18,6 +18,8 @@ try {
                c.name AS customer_name, 
                c.mobile1 AS customer_phone, 
                c.mobile2 AS customer_phone2,
+               r.phone1 AS recipient_phone1,
+               r.phone2 AS recipient_phone2,
                f.name AS formula_name, 
                f.type AS formula_type, 
                f.strength_type, 
@@ -31,6 +33,7 @@ try {
                mixer_driver.mobile AS mixer_driver_mobile
         FROM concrete_receipts cr
         LEFT JOIN customers c ON cr.customer_id = c.id
+        LEFT JOIN recipients r ON r.name COLLATE utf8mb4_general_ci = cr.receiver_name COLLATE utf8mb4_general_ci
         LEFT JOIN concrete_formulas f ON cr.formulas_id = f.id
         LEFT JOIN cars pump_car ON cr.pump_car_id = pump_car.id
         LEFT JOIN employees pump_driver ON cr.pump_driver_id = pump_driver.id
