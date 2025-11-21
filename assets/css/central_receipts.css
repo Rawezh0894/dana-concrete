@@ -210,8 +210,8 @@ body {
 }
 
 .contact-row {
-    display: flex;
-    flex-wrap: nowrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 8px;
     width: 100%;
     margin-bottom: 6px;
@@ -220,12 +220,11 @@ body {
 .contact-pill {
     background-color: #fff;
     border: 1px dashed var(--primary-green);
-    padding: 4px 10px;
+    padding: 6px 12px;
     border-radius: 999px;
     font-weight: 500;
     color: #1c5c3a;
     min-width: 0;
-    flex: 1;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
