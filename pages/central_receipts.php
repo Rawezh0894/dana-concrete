@@ -99,8 +99,8 @@ $receipt_id = isset($_GET['id']) ? $_GET['id'] : null;
         <!-- Date, Location, Customer info -->
         <div class="customer-info" style="margin-top:5px;margin-buttom:5px;">
             <div class="contact-row">
-                <span class="contact-pill" id="customer_contact_line">کڕیار: -</span>
-                <span class="contact-pill" id="recipient_contact_line">وەرگر: -</span>
+                <span class="contact-pill" id="customer_contact_line">-</span>
+                <span class="contact-pill" id="recipient_contact_line">-</span>
             </div>
             <div>
                 <strong>ناونیشان:</strong> <span id="location">-</span>
