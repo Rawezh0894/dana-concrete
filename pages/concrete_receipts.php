@@ -72,9 +72,8 @@ $mixer_drivers = array_filter($employees, function ($emp) {
   
 
   <div class="container-fluid py-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-
-      <div class="d-flex gap-2">
+    <div class="page-actions-wrapper">
+      <div class="page-action-buttons">
         <?php if (hasPermission('view_summery_concrete_receipts')): ?>
           <a href="summery_concrete_receipts.php" class="btn" style="background: var(--seafoam-green); color:white; font-weight: bold;">
             <i class="fas fa-chart-bar me-1"></i>پوختە

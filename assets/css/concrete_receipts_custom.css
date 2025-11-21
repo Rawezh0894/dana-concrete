@@ -103,6 +103,39 @@
     outline: none;
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
 }
+
+.page-actions-wrapper {
+    width: 100%;
+    margin-bottom: 1.5rem;
+}
+
+.page-action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.page-action-buttons .btn {
+    min-width: 160px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+    .page-action-buttons {
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 576px) {
+    .page-action-buttons {
+        width: 100%;
+    }
+    .page-action-buttons .btn {
+        flex: 1 1 calc(50% - 0.75rem);
+        min-width: 130px;
+    }
+}
 @media (max-width: 768px) {
     .col-md-2.d-flex.gap-2 {
         flex-direction: column;
