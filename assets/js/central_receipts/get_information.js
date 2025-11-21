@@ -46,7 +46,8 @@ function populateReceiptData(data) {
         receipt.recipient_phone1,
         receipt.recipient_phone2
     ]);
-    setElementText('customer_recipient_line', `${customerLine} | ${recipientLine}`);
+    setElementText('customer_contact_line', customerLine);
+    setElementText('recipient_contact_line', recipientLine);
     
     // Populate table data
     setElementText('mixer_car_name', receipt.mixer_car_name || '-');
