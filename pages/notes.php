@@ -571,6 +571,16 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
         return `<option value="${recipient.id}" data-name="${escapeHtml(name)}" data-search="${escapeHtml(searchMeta)}">${escapeHtml(name)}</option>`;
     }
 
+    function addRecipientOption(select, optionHtml, recipientId) {
+        if (!select) return;
+        const exists = Array.from(select.options).some(opt => String(opt.value) === String(recipientId));
+        if (!exists) {
+            select.insertAdjacentHTML('beforeend', optionHtml);
+        }
+        select.value = recipientId;
+        $(select).trigger('change.select2');
+    }
+
     function refreshRecipientDropdowns() {
         $.get('../process/recipients/select.php', function(response) {
             if (!(response && response.success && Array.isArray(response.data))) return;
@@ -596,8 +606,17 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
 
     window.refreshRecipientDropdowns = refreshRecipientDropdowns;
 
-    $(document).on('recipientAdded', function() {
-        refreshRecipientDropdowns();
+    $(document).on('recipientAdded', function(event, payload) {
+        const recipient = payload && payload.recipient ? payload.recipient : null;
+        if (recipient) {
+            const optionHtml = buildRecipientOption(recipient);
+            recipientSelectIds.forEach(function(id) {
+                const select = document.getElementById(id);
+                addRecipientOption(select, optionHtml, recipient.id);
+            });
+        } else {
+            refreshRecipientDropdowns();
+        }
     });
 })();
 </script>

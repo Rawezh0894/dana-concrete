@@ -36,7 +36,10 @@ $(document).ready(function () {
                     modal?.hide();
                     const handledReload = typeof loadRecipients === 'function';
                     if (handledReload) loadRecipients();
-                    $(document).trigger('recipientAdded', [{ skipReload: handledReload }]);
+                    $(document).trigger('recipientAdded', [{
+                        skipReload: handledReload,
+                        recipient: data.recipient || null
+                    }]);
                     swalAlert('سەرکەوتوو', data.message || 'وەرگر زیادکرا.', 'success');
                 } else {
                     swalAlert('هەڵە', data.message || 'نەتوانرا وەرگر زیادبکرێت.', 'error');

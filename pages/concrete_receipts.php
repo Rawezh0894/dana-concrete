@@ -562,23 +562,19 @@ $mixer_drivers = array_filter($employees, function ($emp) {
       });
     }
 
-    function buildRecipientOptions(data) {
-      const options = ['<option value="">وەرگرێک هەڵبژێرە</option>'];
-      data.forEach(recipient => {
-        const name = recipient.name || '';
-        const phoneList = [recipient.phone1, recipient.phone2].filter(Boolean).join(' ');
-        const searchMeta = `${name} ${phoneList}`.trim();
-        options.push(
-          `<option value="${escapeHtml(name)}" data-search="${escapeHtml(searchMeta)}">${escapeHtml(name)}</option>`
-        );
-      });
-      return options.join('');
+    function buildRecipientOption(recipient) {
+      const name = recipient.name || '';
+      const phoneList = [recipient.phone1, recipient.phone2].filter(Boolean).join(' ');
+      const searchMeta = `${name} ${phoneList}`.trim();
+      return `<option value="${escapeHtml(name)}" data-search="${escapeHtml(searchMeta)}">${escapeHtml(name)}</option>`;
     }
 
     function refreshRecipientSelects() {
       $.get('../process/recipients/select.php', function(response) {
         if (!(response && response.success && Array.isArray(response.data))) return;
-        const optionsHtml = buildRecipientOptions(response.data);
+        const optionsHtml = ['<option value="">وەرگرێک هەڵبژێرە</option>']
+          .concat(response.data.map(buildRecipientOption))
+          .join('');
         selectSelectors.forEach(selector => {
           const selectEl = document.querySelector(selector);
           if (!selectEl) return;
@@ -593,8 +589,28 @@ $mixer_drivers = array_filter($employees, function ($emp) {
       }, 'json');
     }
 
+    function addRecipientOption(recipient) {
+      if (!recipient) return;
+      const optionHtml = buildRecipientOption(recipient);
+      selectSelectors.forEach(selector => {
+        const selectEl = document.querySelector(selector);
+        if (!selectEl) return;
+        const exists = Array.from(selectEl.options).some(opt => opt.value === recipient.name);
+        if (!exists) {
+          selectEl.insertAdjacentHTML('beforeend', optionHtml);
+        }
+        $(selectEl).val(recipient.name).trigger('change');
+      });
+    }
+
     window.refreshRecipientSelects = refreshRecipientSelects;
-    $(document).on('recipientAdded', refreshRecipientSelects);
+    $(document).on('recipientAdded', function(event, payload) {
+      if (payload && payload.recipient) {
+        addRecipientOption(payload.recipient);
+      } else {
+        refreshRecipientSelects();
+      }
+    });
   })();
   </script>
   <?php endif; ?>

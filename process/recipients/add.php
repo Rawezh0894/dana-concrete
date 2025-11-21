@@ -48,7 +48,16 @@ try {
     ]);
 
     if ($result) {
-        echo json_encode(['success' => true, 'message' => 'وەرگر زیادکرا.']);
+        $newId = $pdo->lastInsertId();
+        $stmt = $pdo->prepare("SELECT id, name, phone1, phone2 FROM recipients WHERE id = ?");
+        $stmt->execute([$newId]);
+        $recipient = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'وەرگر زیادکرا.',
+            'recipient' => $recipient
+        ]);
     } else {
         echo json_encode(['success' => false, 'message' => 'نەتوانرا وەرگر زیادبکرێت.']);
     }
