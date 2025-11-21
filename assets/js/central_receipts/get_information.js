@@ -74,11 +74,12 @@ function setElementText(elementId, text) {
 function buildContactLine(label, name, phones = []) {
     const cleanedName = (name || '').trim();
     const phoneList = (phones || []).filter(Boolean).map(phone => phone.trim()).filter(Boolean);
+    const primaryPhone = phoneList.length ? phoneList[0] : '';
     let line = `${label}:`;
     if (cleanedName) {
         line += cleanedName;
-        if (phoneList.length) {
-            line += '-' + phoneList.join('/');
+        if (primaryPhone) {
+            line += '-' + primaryPhone;
         }
     } else {
         line += '-';
