@@ -66,29 +66,28 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
 <?php include '../includes/sidebar.php'; ?>
 
 <div class="container-fluid py-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-
-        <div class="d-flex gap-2">
+    <div class="notes-action-wrapper mb-4">
+        <div class="notes-action-buttons">
             <?php if (hasPermission('view_concrete_receipts')): ?>
-            <a href="concrete_receipts.php" class="btn" style="background: var(--seafoam-green); color:white; font-weight: bold;">
+            <a href="concrete_receipts.php" class="btn btn-action">
                 <i class="fas fa-file-alt me-1"></i>پسووڵەی کۆنکرێت
             </a>
             <?php endif; ?>
             <?php if (hasPermission('add_customer')): ?>
-            <button class="btn" data-bs-toggle="modal" data-bs-target="#addCustomerModal" style="background: var(--seafoam-green); color:white; font-weight: bold;">
+            <button class="btn btn-action" data-bs-toggle="modal" data-bs-target="#addCustomerModal">
                 <i class="fas fa-user-plus me-1"></i>زیادکردنی کڕیار
             </button>
             <?php endif; ?>
-        <?php if (hasPermission('add_notes')): ?>
-        <button class="btn" data-bs-toggle="modal" data-bs-target="#addNoteModal" style="background: var(--seafoam-green); color:white; font-weight: bold;">
-            <i class="fas fa-plus me-2"></i>زیادکردنی تێبینی
-        </button>
-        <?php endif; ?>
-        <?php if (hasPermission('add_recipient')): ?>
-        <button class="btn" data-bs-toggle="modal" data-bs-target="#addRecipientModal" style="background: var(--seafoam-green); color:white; font-weight: bold;">
-            <i class="fas fa-user-plus me-1"></i>زیادکردنی وەرگر
-        </button>
-        <?php endif; ?>
+            <?php if (hasPermission('add_recipient')): ?>
+            <button class="btn btn-action" data-bs-toggle="modal" data-bs-target="#addRecipientModal">
+                <i class="fas fa-user-plus me-1"></i>زیادکردنی وەرگر
+            </button>
+            <?php endif; ?>
+            <?php if (hasPermission('add_notes')): ?>
+            <button class="btn btn-action" data-bs-toggle="modal" data-bs-target="#addNoteModal">
+                <i class="fas fa-plus me-2"></i>زیادکردنی تێبینی
+            </button>
+            <?php endif; ?>
         </div>
     </div>
 
