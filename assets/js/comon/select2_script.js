@@ -124,9 +124,11 @@ $(document).ready(function() {
     // بۆ concrete receipts - تەنها ئەگەر مۆداڵەکە هەبێت
     if ($('#addConcreteReceiptModal').length > 0) {
         enableSelect2('#customer_id', '#addConcreteReceiptModal');
+        enableSelect2('#receiver_name', '#addConcreteReceiptModal');
     }
     if ($('#editConcreteReceiptModal').length > 0) {
         enableSelect2('#edit_customer_id', '#editConcreteReceiptModal');
+        enableSelect2('#edit_receiver_name', '#editConcreteReceiptModal');
     }
     
     // بۆ purchase materials - تەنها ئەگەر مۆداڵەکە هەبێت

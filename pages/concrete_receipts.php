@@ -96,17 +96,6 @@ $mixer_drivers = array_filter($employees, function ($emp) {
 
       </div>
     </div>
-  <datalist id="recipientOptions">
-    <?php foreach ($recipients as $recipient): 
-        $phones = array_filter([
-            !empty($recipient['phone1']) ? $recipient['phone1'] : '',
-            !empty($recipient['phone2']) ? $recipient['phone2'] : ''
-        ]);
-        $label = !empty($phones) ? implode(' / ', $phones) : '';
-    ?>
-      <option value="<?= htmlspecialchars($recipient['name']) ?>" <?= $label ? 'label="' . htmlspecialchars($label) . '"' : '' ?>></option>
-    <?php endforeach; ?>
-  </datalist>
     <!-- Summary Cards Row -->
     <div class="row mb-3" id="concrete-receipts-summary">
       <div class="col-md-4 mb-2">
@@ -252,7 +241,23 @@ $mixer_drivers = array_filter($employees, function ($emp) {
 
               <div class="col-md-6">
               <label class="form-label" for="receiver_name">ناوی وەرگر</label>
-              <input type="text" class="form-control" name="receiver_name" id="receiver_name" list="recipientOptions">
+              <select class="form-select" name="receiver_name" id="receiver_name" data-placeholder="وەرگرێک هەڵبژێرە">
+                <option value="">وەرگرێک هەڵبژێرە</option>
+                <?php foreach ($recipients as $recipient): 
+                    $phoneList = array_filter([
+                        !empty($recipient['phone1']) ? $recipient['phone1'] : '',
+                        !empty($recipient['phone2']) ? $recipient['phone2'] : ''
+                    ]);
+                    $searchMeta = trim($recipient['name'] . ' ' . implode(' ', $phoneList));
+                ?>
+                    <option 
+                      value="<?= htmlspecialchars($recipient['name']) ?>"
+                      data-search="<?= htmlspecialchars($searchMeta) ?>"
+                    >
+                      <?= htmlspecialchars($recipient['name']) ?>
+                    </option>
+                <?php endforeach; ?>
+              </select>
                   <label for="formulas_id" class="form-label">ڕێژە</label>
                 <select class="form-select" id="formulas_id" name="formulas_id" required>
                   <option value="">هەڵبژێرە</option>
@@ -360,7 +365,23 @@ $mixer_drivers = array_filter($employees, function ($emp) {
               </div>
               <div class="col-md-6">
                 <label for="edit_receiver_name" class="form-label">وەرگر</label>
-                <input type="text" class="form-control" id="edit_receiver_name" name="edit_receiver_name" list="recipientOptions">
+                <select class="form-select" id="edit_receiver_name" name="edit_receiver_name" data-placeholder="وەرگرێک هەڵبژێرە">
+                  <option value="">وەرگرێک هەڵبژێرە</option>
+                  <?php foreach ($recipients as $recipient): 
+                      $phoneList = array_filter([
+                          !empty($recipient['phone1']) ? $recipient['phone1'] : '',
+                          !empty($recipient['phone2']) ? $recipient['phone2'] : ''
+                      ]);
+                      $searchMeta = trim($recipient['name'] . ' ' . implode(' ', $phoneList));
+                  ?>
+                      <option 
+                        value="<?= htmlspecialchars($recipient['name']) ?>"
+                        data-search="<?= htmlspecialchars($searchMeta) ?>"
+                      >
+                        <?= htmlspecialchars($recipient['name']) ?>
+                      </option>
+                  <?php endforeach; ?>
+                </select>
               </div>
               <div class="col-md-6">
                 <label for="edit_meter_amount" class="form-label">بڕی مەتر سێجا</label>
@@ -527,7 +548,7 @@ $mixer_drivers = array_filter($employees, function ($emp) {
   <script src="../assets/js/recipients/add.js"></script>
   <script>
   (function() {
-    const datalistId = 'recipientOptions';
+    const selectSelectors = ['#receiver_name', '#edit_receiver_name'];
 
     function escapeHtml(str) {
       return (str ?? '').replace(/[&<>'"]/g, function(c) {
@@ -541,27 +562,39 @@ $mixer_drivers = array_filter($employees, function ($emp) {
       });
     }
 
-    function buildRecipientOption(recipient) {
-      const name = recipient.name || '';
-      const phones = [recipient.phone1, recipient.phone2].filter(Boolean).join(' / ');
-      const labelAttr = phones ? ` label="${escapeHtml(phones)}"` : '';
-      return `<option value="${escapeHtml(name)}"${labelAttr}></option>`;
+    function buildRecipientOptions(data) {
+      const options = ['<option value="">وەرگرێک هەڵبژێرە</option>'];
+      data.forEach(recipient => {
+        const name = recipient.name || '';
+        const phoneList = [recipient.phone1, recipient.phone2].filter(Boolean).join(' ');
+        const searchMeta = `${name} ${phoneList}`.trim();
+        options.push(
+          `<option value="${escapeHtml(name)}" data-search="${escapeHtml(searchMeta)}">${escapeHtml(name)}</option>`
+        );
+      });
+      return options.join('');
     }
 
-    function refreshRecipientDatalist() {
+    function refreshRecipientSelects() {
       $.get('../process/recipients/select.php', function(response) {
         if (!(response && response.success && Array.isArray(response.data))) return;
-        const datalist = document.getElementById(datalistId);
-        if (!datalist) return;
-        datalist.innerHTML = response.data.map(buildRecipientOption).join('');
+        const optionsHtml = buildRecipientOptions(response.data);
+        selectSelectors.forEach(selector => {
+          const selectEl = document.querySelector(selector);
+          if (!selectEl) return;
+          const currentValue = selectEl.value;
+          selectEl.innerHTML = optionsHtml;
+          if (currentValue) {
+            $(selectEl).val(currentValue).trigger('change');
+          } else {
+            $(selectEl).val('').trigger('change');
+          }
+        });
       }, 'json');
     }
 
-    window.refreshRecipientDatalist = refreshRecipientDatalist;
-
-    $(document).on('recipientAdded', function() {
-      refreshRecipientDatalist();
-    });
+    window.refreshRecipientSelects = refreshRecipientSelects;
+    $(document).on('recipientAdded', refreshRecipientSelects);
   })();
   </script>
   <?php endif; ?>
@@ -650,7 +683,7 @@ $mixer_drivers = array_filter($employees, function ($emp) {
               document.getElementById('location').value = params.get('location');
             }
             if (params.get('receiver_name')) {
-              document.getElementById('receiver_name').value = params.get('receiver_name');
+              $('#receiver_name').val(params.get('receiver_name')).trigger('change');
             }
             // Note: meter_amount is intentionally not filled from notes to allow manual entry
             // if (params.get('meter_amount')) {
