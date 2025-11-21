@@ -190,7 +190,6 @@ body {
 
 .customer-info {
     display: flex;
-    flex-wrap: wrap;
     background-color: var(--light-green);
     padding: 5px 8px;
     border-radius: var(--border-radius);
@@ -202,32 +201,10 @@ body {
 
 .customer-info div {
     margin-left: 10px;
-    flex: 1;
 }
 
 .customer-info strong {
     color: var(--primary-green);
-}
-
-.contact-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 8px;
-    width: 100%;
-    margin-bottom: 6px;
-}
-
-.contact-pill {
-    background-color: #fff;
-    border: 1px dashed var(--primary-green);
-    padding: 6px 12px;
-    border-radius: 999px;
-    font-weight: 500;
-    color: #1c5c3a;
-    min-width: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 .receipt-table {

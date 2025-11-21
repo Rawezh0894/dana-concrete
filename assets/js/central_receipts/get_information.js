@@ -38,16 +38,15 @@ function populateReceiptData(data) {
     setElementText('location', receipt.location || '-');
     setElementText('created_date', data.formatted_date || '-');
     
-    const customerLine = buildContactLine(receipt.customer_name, [
+    const customerLine = buildContactLine('کڕیار', receipt.customer_name, [
         receipt.customer_phone,
         receipt.customer_phone2
     ]);
-    const recipientLine = buildContactLine(receipt.receiver_name, [
+    const recipientLine = buildContactLine('وەرگر', receipt.receiver_name, [
         receipt.recipient_phone1,
         receipt.recipient_phone2
     ]);
-    setElementText('customer_contact_line', customerLine);
-    setElementText('recipient_contact_line', recipientLine);
+    setElementText('customer_recipient_line', `${customerLine}  |  ${recipientLine}`);
     
     // Populate table data
     setElementText('mixer_car_name', receipt.mixer_car_name || '-');
@@ -72,20 +71,20 @@ function setElementText(elementId, text) {
     }
 }
 
-function buildContactLine(name, phones = []) {
+function buildContactLine(label, name, phones = []) {
     const cleanedName = (name || '').trim();
     const phoneList = (phones || []).filter(Boolean).map(phone => phone.trim()).filter(Boolean);
     const primaryPhone = phoneList.length ? phoneList[0] : '';
-    if (cleanedName && primaryPhone) {
-        return `${cleanedName}-${primaryPhone}`;
-    }
+    let line = `${label}:`;
     if (cleanedName) {
-        return cleanedName;
+        line += cleanedName;
+        if (primaryPhone) {
+            line += '-' + primaryPhone;
+        }
+    } else {
+        line += '-';
     }
-    if (primaryPhone) {
-        return primaryPhone;
-    }
-    return '-';
+    return line;
 }
 
 // Initialize when DOM is loaded
