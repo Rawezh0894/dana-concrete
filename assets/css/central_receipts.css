@@ -226,8 +226,9 @@ body {
     color: #1c5c3a;
     min-width: 0;
     flex: 1;
-    white-space: normal;
-    word-break: break-word;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .receipt-table {
