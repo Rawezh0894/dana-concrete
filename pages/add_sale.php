@@ -215,6 +215,39 @@ $recipients = $pdo->query("SELECT id, name, phone1, phone2 FROM recipients ORDER
         .table thead th > input {
             margin-top: 5px !important;
         }
+        
+        .page-actions-wrapper {
+            width: 100%;
+            margin-bottom: 1.5rem;
+        }
+        
+        .page-action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        
+        .page-action-buttons .btn {
+            min-width: 160px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        
+        @media (max-width: 768px) {
+            .page-action-buttons {
+                justify-content: flex-start;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .page-action-buttons {
+                width: 100%;
+            }
+            .page-action-buttons .btn {
+                flex: 1 1 calc(50% - 0.75rem);
+                min-width: 130px;
+            }
+        }
     </style>
 
     <link href="../assets/css/kurdish-font.css" rel="stylesheet">
@@ -223,13 +256,12 @@ $recipients = $pdo->query("SELECT id, name, phone1, phone2 FROM recipients ORDER
 <?php include '../includes/navbar.php'; ?>
 <?php include '../includes/sidebar.php'; ?>
 <div class="container-fluid py-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">فرۆشتن</h2>
-        <div>
+    <div class="page-actions-wrapper">
+        <div class="page-action-buttons">
             <button class="btn export-btn" onclick="exportSaleToExcel()" title="ئیکسپۆرتی هەموو زانیارییەکانی فرۆشتن بۆ Excel">
                 <i class="fas fa-file-excel me-1"></i>ئیکسپۆرتی Excel
             </button>
-            <a href="summery_concrete_receipts.php" class="btn btn-warning me-2" style="color: white; font-weight: bold;">
+            <a href="summery_concrete_receipts.php" class="btn btn-warning" style="color: white; font-weight: bold;">
                 <i class="fas fa-chart-bar me-1"></i>پوختەی پسووڵەکان
             </a>
             <?php if (hasPermission('add_sale')): ?>
