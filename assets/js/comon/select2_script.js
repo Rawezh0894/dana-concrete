@@ -1,33 +1,62 @@
 // گشتی: چالاککردنی select2 بۆ هەر select ـێک
 function enableSelect2(selector, modalSelector) {
+    const $element = $(selector);
+    if ($element.length === 0) {
+        return;
+    }
     // Destroy previous select2 instance if exists
-    if ($(selector).hasClass('select2-hidden-accessible')) {
+    if ($element.hasClass('select2-hidden-accessible')) {
         try {
-            $(selector).select2('destroy');
+            $element.select2('destroy');
         } catch (e) {
             console.log('Error destroying select2:', e);
         }
     }
+    const allowNewRecipient = String($element.data('allowNewRecipient')).toLowerCase() === 'true';
+    const select2Options = {
+        dropdownParent: $(modalSelector),
+        width: '100%',
+        placeholder: $element.attr('data-placeholder') || "هەڵبژێرە",
+        dir: "rtl",
+        matcher: customMatcher
+    };
+
+    if (allowNewRecipient) {
+        select2Options.tags = true;
+        select2Options.createTag = function(params) {
+            const term = $.trim(params.term || '');
+            if (!term) return null;
+            return {
+                id: '__new__' + Date.now() + Math.floor(Math.random() * 1000),
+                text: term,
+                newTag: true
+            };
+        };
+        select2Options.templateResult = function(data) {
+            if (data.newTag) {
+                return $('<span class="text-success"><i class="fas fa-plus-circle me-2"></i>زیادکردنی وەرگر: ' + data.text + '</span>');
+            }
+            return data.text;
+        };
+    }
+
     // Initialize select2 (no theme for max compatibility)
     try {
-        $(selector).select2({
-            dropdownParent: $(modalSelector),
-            width: '100%',
-            placeholder: $(selector).attr('data-placeholder') || "هەڵبژێرە",
-            dir: "rtl",
-            matcher: customMatcher
-        });
+        $element.select2(select2Options);
     } catch (e) {
         console.log('Error initializing select2:', e);
         return;
     }
+    if (allowNewRecipient) {
+        setupRecipientQuickAdd($element);
+    }
     // Fix: Only initialize once per modal show
     $(modalSelector).off('shown.bs.modal.select2').on('shown.bs.modal.select2', function () {
         try {
-            if ($(selector).length > 0 && $(selector).hasClass('select2-hidden-accessible')) {
+            if ($element.length > 0 && $element.hasClass('select2-hidden-accessible')) {
                 setTimeout(function() {
-                    $(selector).select2('open');
-                    $(selector).select2('close');
+                    $element.select2('open');
+                    $element.select2('close');
                 }, 100);
             }
         } catch (e) {
@@ -95,6 +124,46 @@ function customMatcher(params, data) {
         return data;
     }
     return null;
+}
+
+function setupRecipientQuickAdd($select) {
+    if (!$select.length) return;
+    const selector = '#' + $select.attr('id');
+    $select.off('select2:select.recipientQuickAdd').on('select2:select.recipientQuickAdd', function(e) {
+        const data = e.params && e.params.data;
+        if (data && data.newTag) {
+            const option = $select.find('option[value="' + data.id + '"]');
+            if (option.length) {
+                option.remove();
+            }
+            $select.val('').trigger('change.select2');
+            openRecipientModal((data.text || '').trim(), selector);
+        }
+    });
+}
+
+function openRecipientModal(initialName, selector) {
+    if (typeof bootstrap === 'undefined') return;
+    const modalEl = document.getElementById('addRecipientModal');
+    if (!modalEl) return;
+    window.pendingRecipientSelectId = selector;
+    window.pendingRecipientInitialName = initialName || '';
+
+    const nameInput = modalEl.querySelector('#recipient_name');
+    if (nameInput) {
+        nameInput.value = initialName || '';
+        setTimeout(() => nameInput.focus(), 150);
+    }
+    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    modal.show();
+
+    if (!modalEl.dataset.quickAddHooked) {
+        modalEl.addEventListener('hidden.bs.modal', function() {
+            window.pendingRecipientSelectId = null;
+            window.pendingRecipientInitialName = null;
+        });
+        modalEl.dataset.quickAddHooked = '1';
+    }
 }
 
 // چالاککردنی select2 بۆ کڕیار لە مۆداڵی زیادکردن

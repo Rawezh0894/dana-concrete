@@ -240,7 +240,7 @@ $mixer_drivers = array_filter($employees, function ($emp) {
 
               <div class="col-md-6">
               <label class="form-label" for="receiver_name">ناوی وەرگر</label>
-              <select class="form-select" name="receiver_name" id="receiver_name" data-placeholder="وەرگرێک هەڵبژێرە">
+              <select class="form-select" name="receiver_name" id="receiver_name" data-placeholder="وەرگرێک هەڵبژێرە" data-allow-new-recipient="true">
                 <option value="">وەرگرێک هەڵبژێرە</option>
                 <?php foreach ($recipients as $recipient): 
                     $phoneList = array_filter([
@@ -364,7 +364,7 @@ $mixer_drivers = array_filter($employees, function ($emp) {
               </div>
               <div class="col-md-6">
                 <label for="edit_receiver_name" class="form-label">وەرگر</label>
-                <select class="form-select" id="edit_receiver_name" name="edit_receiver_name" data-placeholder="وەرگرێک هەڵبژێرە">
+                <select class="form-select" id="edit_receiver_name" name="edit_receiver_name" data-placeholder="وەرگرێک هەڵبژێرە" data-allow-new-recipient="true">
                   <option value="">وەرگرێک هەڵبژێرە</option>
                   <?php foreach ($recipients as $recipient): 
                       $phoneList = array_filter([
@@ -588,7 +588,7 @@ $mixer_drivers = array_filter($employees, function ($emp) {
       }, 'json');
     }
 
-    function addRecipientOption(recipient) {
+    function addRecipientOption(recipient, targetSelector) {
       if (!recipient) return;
       const optionHtml = buildRecipientOption(recipient);
       selectSelectors.forEach(selector => {
@@ -598,14 +598,21 @@ $mixer_drivers = array_filter($employees, function ($emp) {
         if (!exists) {
           selectEl.insertAdjacentHTML('beforeend', optionHtml);
         }
-        $(selectEl).val(recipient.name).trigger('change');
+        if (selector === targetSelector) {
+          $(selectEl).val(recipient.name).trigger('change');
+        }
       });
     }
 
     window.refreshRecipientSelects = refreshRecipientSelects;
     $(document).on('recipientAdded', function(event, payload) {
       if (payload && payload.recipient) {
-        addRecipientOption(payload.recipient);
+        const pendingSelector = window.pendingRecipientSelectId || '';
+        addRecipientOption(payload.recipient, pendingSelector);
+        if (pendingSelector) {
+          window.pendingRecipientSelectId = null;
+          window.pendingRecipientInitialName = null;
+        }
       } else {
         refreshRecipientSelects();
       }

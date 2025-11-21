@@ -218,7 +218,7 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="recipient" class="form-label">وەرگر</label>
-                            <select class="form-select" id="recipient" name="recipient" data-placeholder="وەرگرێک هەڵبژێرە">
+                            <select class="form-select" id="recipient" name="recipient" data-placeholder="وەرگرێک هەڵبژێرە" data-allow-new-recipient="true">
                                 <option value="">وەرگرێک هەڵبژێرە</option>
                                 <?php foreach ($recipients as $recipient): 
                                     $phoneList = array_filter([
@@ -358,7 +358,7 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="edit_recipient" class="form-label">وەرگر</label>
-                            <select class="form-select" id="edit_recipient" name="edit_recipient" data-placeholder="وەرگرێک هەڵبژێرە">
+                            <select class="form-select" id="edit_recipient" name="edit_recipient" data-placeholder="وەرگرێک هەڵبژێرە" data-allow-new-recipient="true">
                                 <option value="">وەرگرێک هەڵبژێرە</option>
                                 <?php foreach ($recipients as $recipient): 
                                     $phoneList = array_filter([
@@ -571,14 +571,34 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
         return `<option value="${recipient.id}" data-name="${escapeHtml(name)}" data-search="${escapeHtml(searchMeta)}">${escapeHtml(name)}</option>`;
     }
 
-    function addRecipientOption(select, optionHtml, recipientId) {
+    function addRecipientOption(select, optionHtml, recipientId, shouldSelect) {
         if (!select) return;
         const exists = Array.from(select.options).some(opt => String(opt.value) === String(recipientId));
         if (!exists) {
             select.insertAdjacentHTML('beforeend', optionHtml);
         }
-        select.value = recipientId;
-        $(select).trigger('change.select2');
+        if (shouldSelect) {
+            select.value = recipientId;
+            $(select).trigger('change.select2');
+        }
+    }
+
+    function clearPendingSelection() {
+        window.pendingRecipientSelectId = null;
+        window.pendingRecipientInitialName = null;
+    }
+
+    function handleRecipientAdded(recipient) {
+        const optionHtml = buildRecipientOption(recipient);
+        const pendingSelector = window.pendingRecipientSelectId || '';
+        recipientSelectIds.forEach(function(id) {
+            const select = document.getElementById(id);
+            const shouldSelect = pendingSelector === `#${id}`;
+            addRecipientOption(select, optionHtml, recipient.id, shouldSelect);
+        });
+        if (pendingSelector) {
+            clearPendingSelection();
+        }
     }
 
     function refreshRecipientDropdowns() {
@@ -609,11 +629,7 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
     $(document).on('recipientAdded', function(event, payload) {
         const recipient = payload && payload.recipient ? payload.recipient : null;
         if (recipient) {
-            const optionHtml = buildRecipientOption(recipient);
-            recipientSelectIds.forEach(function(id) {
-                const select = document.getElementById(id);
-                addRecipientOption(select, optionHtml, recipient.id);
-            });
+            handleRecipientAdded(recipient);
         } else {
             refreshRecipientDropdowns();
         }
