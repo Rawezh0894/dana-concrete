@@ -169,6 +169,7 @@ $recipient_name = $recipient['name'];
                 <tr>
                     <th>#</th>
                     <th>کڕیار</th>
+                    <th>وەرگر</th>
                     <th>شوێن</th>
                     <th>ژمارەی پسوڵە</th>
                     <th>فۆرمۆلا</th>

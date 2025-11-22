@@ -5,7 +5,7 @@ function loadRecipientSales() {
     }
 
     const columns = [
-        '#', 'customer_name', 'location', 'invoice_number', 'formula_name', 'order_date', 'payment_type',
+        '#', 'customer_name', 'recipient', 'location', 'invoice_number', 'formula_name', 'order_date', 'payment_type',
         'quantity', 'price_per_unit', 'total_price', 'amount_paid_usd', 'amount_paid_iqd',
         'remaining_amount', 'dolar_rate', 'discount', 'notes'
     ];
@@ -21,6 +21,7 @@ function loadRecipientSales() {
         const rows = response.data.map((sale, index) => ({
             '#': index + 1,
             customer_name: sale.customer_name || '-',
+            recipient: sale.recipient || '-',
             location: sale.location || '-',
             invoice_number: sale.invoice_number || '-',
             formula_name: sale.formula_name || '-',
