@@ -50,6 +50,7 @@ try {
 $sql = "SELECT 
         s.order_date,
         s.location,
+        GROUP_CONCAT(DISTINCT s.recipient ORDER BY s.recipient SEPARATOR ', ') as recipients,
         f.strength_mpa, 
         f.strength_kg,
         SUM(s.quantity) as total_quantity,
@@ -151,6 +152,7 @@ try {
     
     $data[] = [
         'location' => $row['location'] ?? '',
+        'recipient' => $row['recipients'] ?? '',
         'quantity' => $quantity,
         'rezh' => $rezh,
         'price_per_unit' => $ppu,
