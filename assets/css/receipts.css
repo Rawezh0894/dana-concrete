@@ -297,14 +297,14 @@ body {
     }
     
     .receipt-title {
-        flex: 1 1 45%;
-        min-width: 150px;
-        font-size: 1.5rem;
-        padding: 0.6rem 1rem;
+        flex: 1 1 35%;
+        min-width: 180px;
+        font-size: 1.3rem;
+        padding: 0.5rem 0.8rem;
         margin: 0;
         border-width: 2px;
         word-break: break-word;
-        line-height: 1.05;
+        line-height: 1.1;
     }
     
     .logo-circle {
