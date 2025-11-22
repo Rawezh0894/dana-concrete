@@ -253,35 +253,67 @@ body {
     background: transparent;
     border-radius: 0;
 }
+/* Professional Print Styles - Matches Screen Layout Exactly */
 @media print {
+    /* Reset body for print */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
     body { 
         background: #fff !important; 
         margin: 0 !important;
         padding: 0 !important;
+        font-size: 1rem !important;
+        line-height: 1.5 !important;
     }
     
+    /* Container - Keep same as screen */
     .receipt-container { 
         box-shadow: none !important; 
         border: none !important; 
-        max-width: none !important;
+        max-width: 900px !important;
         width: 100% !important;
-        margin: 0 !important;
+        margin: 2rem auto !important;
         padding: 1rem !important;
+        background: #fff !important;
+        border-radius: 8px !important;
     }
     
+    /* Header - Exact match to screen */
     .receipt-header { 
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: flex-start !important;
         border-bottom: 6px solid var(--seafoam-green) !important; 
         padding-bottom: 1rem !important;
         margin-bottom: 1rem !important;
+        flex-wrap: wrap !important;
+        gap: 1rem !important;
+    }
+    
+    .logo-circle {
+        width: 100px !important;
+        height: 100px !important;
+        margin-left: 1rem !important;
     }
     
     .receipt-title {
         font-size: 2rem !important;
         padding: 1rem 1.5rem !important;
         margin-top: 1rem !important;
+        background: #f4f8fc !important;
+        border: 2px solid var(--seafoam-green) !important;
+        border-radius: 8px !important;
+        box-shadow: 0 3px 10px #003b7320 !important;
     }
     
     .receipt-meta {
+        text-align: left !important;
+        font-size: 1rem !important;
+        display: flex !important;
+        flex-direction: column !important;
         gap: 0.5rem !important;
     }
     
@@ -289,76 +321,167 @@ body {
     .phone-number-row {
         padding: 0.6rem 1rem !important;
         font-size: 1rem !important;
+        background: #f4f8fc !important;
+        border: 1px solid var(--seafoam-green) !important;
+        border-radius: 6px !important;
+        box-shadow: 0 2px 6px #003b7315 !important;
     }
     
+    /* Company Info - Exact match */
     .company-info-row {
+        display: flex !important;
         gap: 0.7rem !important;
         margin-bottom: 1.5rem !important;
+        justify-content: flex-start !important;
+        flex-wrap: wrap !important;
     }
     
     .company-info-box {
         padding: 0.7rem 1.2rem !important;
         font-size: 1.1rem !important;
         min-width: 150px !important;
+        background: #f4f8fc !important;
+        border: 1.5px solid var(--seafoam-green) !important;
+        border-radius: 8px !important;
+        box-shadow: 0 2px 8px #003b7320 !important;
     }
     
+    /* Tables - Exact match to screen */
     .receipt-table-custom {
         font-size: 1rem !important;
         margin-bottom: 1rem !important;
+        width: 100% !important;
+        table-layout: auto !important;
     }
     
     .receipt-table-custom th,
     .receipt-table-custom td {
         padding: 0.5rem 0.7rem !important;
         font-size: 1rem !important;
+        word-break: break-word !important;
+        white-space: normal !important;
+        text-align: center !important;
+        vertical-align: middle !important;
+        border: 1px solid var(--seafoam-green) !important;
     }
     
     .receipt-table-custom th {
         max-width: 110px !important;
+        background: var(--seafoam-green) !important;
+        color: #fff !important;
+        font-weight: bold !important;
     }
     
+    .receipt-table-custom tbody tr:nth-child(even) td {
+        background: #f4f8fc !important;
+    }
+    
+    /* Paid Table - Exact match */
     #paid-table {
         margin-top: 1.5rem !important;
         width: 85% !important;
+        margin-right: auto !important;
+        margin-left: auto !important;
+        border: 2px solid var(--seafoam-green) !important;
+        border-radius: 8px !important;
+        box-shadow: 0 2px 8px #003b7320 !important;
     }
     
     #paid-table th,
     #paid-table td {
         padding: 0.5rem 0.7rem !important;
         font-size: 1rem !important;
+        border: 1px solid var(--seafoam-green) !important;
     }
     
+    #paid-table th {
+        background: var(--seafoam-green) !important;
+        color: #fff !important;
+        font-weight: bold !important;
+    }
+    
+    /* Debt Summary - Exact match */
     .debt-summary {
         margin: 1.5rem 0 !important;
         padding: 1rem !important;
+        background: #f4f8fc !important;
+        border: 1.5px solid var(--seafoam-green) !important;
+        border-radius: 8px !important;
+        box-shadow: 0 2px 8px #003b7320 !important;
     }
     
     .debt-summary-row {
+        display: flex !important;
         gap: 1rem !important;
+        justify-content: space-between !important;
+        flex-wrap: wrap !important;
     }
     
     .debt-summary-box {
         padding: 0.8rem 1rem !important;
         min-width: 200px !important;
         font-size: 1rem !important;
+        background: #fff !important;
+        border: 1px solid var(--seafoam-green) !important;
+        border-radius: 6px !important;
+        box-shadow: 0 1px 4px #003b7310 !important;
     }
     
+    .debt-summary-box.total-box {
+        background: var(--seafoam-green) !important;
+        color: #fff !important;
+    }
+    
+    /* Receipt Notes - Exact match */
     .receipt-notes {
         margin-top: 1.5rem !important;
         padding: 0.8rem 1.2rem !important;
         font-size: 1.05rem !important;
+        background: #f4f8fc !important;
+        border: 1.5px solid var(--seafoam-green) !important;
+        border-radius: 8px !important;
+        box-shadow: 0 2px 8px #003b7320 !important;
     }
     
+    /* Contact Info - Exact match */
     .contact-info {
         margin-top: 2rem !important;
         padding: 1rem !important;
         font-size: 12px !important;
+        background: linear-gradient(135deg, #f1f5f9, #e2e8f0) !important;
+        border-radius: 12px !important;
+        border: 1px solid #cbd5e1 !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08) !important;
     }
     
-    /* Remove any page margins */
+    /* Summary Row - Exact match */
+    .summary-row td {
+        font-weight: bold !important;
+        background: #f4f8fc !important;
+        color: var(--seafoam-green) !important;
+        border-top: 2px solid var(--seafoam-green) !important;
+        text-align: right !important;
+        font-size: 1.08rem !important;
+    }
+    
+    /* Page settings */
     @page {
         margin: 0.5cm !important;
         size: A4 !important;
+    }
+    
+    /* Hide pagination controls in print */
+    .debt-pagination {
+        display: none !important;
+    }
+    
+    /* Show all debt summary pages in print */
+    .debt-summary-page {
+        display: block !important;
+    }
+    
+    .debt-summary-page:not(:first-child) {
+        margin-top: 2rem !important;
     }
 }
 .receipt-table-custom {
