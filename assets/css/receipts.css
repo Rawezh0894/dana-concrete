@@ -588,98 +588,263 @@ body {
    Print Styles
    ====================================== */
 @media print {
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
     body { 
-        background: #ffffff; 
-        margin: 0;
-        padding: 0;
+        background: #ffffff !important; 
+        margin: 0 !important;
+        padding: 0 !important;
+        font-size: 11pt !important;
     }
     
     .receipt-container { 
-        box-shadow: none; 
-        border: none; 
-        max-width: none;
-        width: 100%;
-        padding: 1.5rem;
-        margin: 0;
+        box-shadow: none !important; 
+        border: 1px solid #ddd !important; 
+        max-width: none !important;
+        width: 100% !important;
+        padding: 15px !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        background: #ffffff !important;
     }
     
     .receipt-container::before {
-        display: none;
+        display: none !important;
     }
     
     .receipt-header { 
-        border-bottom: 3px solid var(--seafoam-green); 
-        padding-bottom: 1rem;
-        margin-bottom: 1rem;
+        border-bottom: 3px solid #003b73 !important; 
+        padding-bottom: 10px !important;
+        margin-bottom: 15px !important;
+        page-break-after: avoid !important;
     }
     
     .receipt-header::after {
-        display: none;
+        display: none !important;
     }
     
     .logo-circle {
-        width: 100px;
-        height: 100px;
+        width: 90px !important;
+        height: 90px !important;
+        background: #003b73 !important;
+        box-shadow: none !important;
+        border: 2px solid #003b73 !important;
+        page-break-inside: avoid !important;
+    }
+    
+    .receipt-logo {
+        max-width: 100% !important;
+        max-height: 100% !important;
     }
     
     .receipt-title {
-        font-size: 1.75rem;
-        padding: 0.75rem 1.5rem;
+        font-size: 18pt !important;
+        padding: 8px 15px !important;
+        background: #f4f8fc !important;
+        border: 2px solid #003b73 !important;
+        border-radius: 6px !important;
+        box-shadow: none !important;
+        margin-top: 5px !important;
+    }
+    
+    .receipt-title::before {
+        display: none !important;
     }
     
     .receipt-meta {
-        gap: 0.5rem;
+        gap: 5px !important;
     }
     
     .payment-date-row,
     .phone-number-row {
-        padding: 0.5rem 1rem;
-        font-size: 0.95rem;
+        padding: 6px 12px !important;
+        font-size: 10pt !important;
+        background: #f4f8fc !important;
+        border: 1px solid #003b73 !important;
+        border-radius: 4px !important;
+        box-shadow: none !important;
+    }
+    
+    .payment-date-row i,
+    .phone-number-row i {
+        font-size: 11pt !important;
     }
     
     .company-info-row {
-        gap: 0.75rem;
-        margin-bottom: 1.25rem;
+        gap: 10px !important;
+        margin-bottom: 15px !important;
+        page-break-after: avoid !important;
     }
     
     .company-info-box {
-        padding: 0.75rem 1.25rem;
-        font-size: 1rem;
-        min-width: 150px;
+        padding: 8px 12px !important;
+        font-size: 10pt !important;
+        min-width: 140px !important;
+        background: #f4f8fc !important;
+        border: 1px solid #003b73 !important;
+        border-radius: 4px !important;
+        box-shadow: none !important;
     }
     
+    .company-info-box i {
+        font-size: 12pt !important;
+    }
+    
+    .receipt-table,
     .receipt-table-custom {
-        font-size: 0.9rem;
-        margin-bottom: 1rem;
+        font-size: 9pt !important;
+        margin-bottom: 15px !important;
+        page-break-inside: auto !important;
+        border-collapse: collapse !important;
     }
     
-    .receipt-table-custom th,
+    .receipt-table th,
+    .receipt-table-custom th {
+        background: #003b73 !important;
+        color: #ffffff !important;
+        padding: 6px 8px !important;
+        font-size: 9pt !important;
+        border: 1px solid #003b73 !important;
+        page-break-after: avoid !important;
+        page-break-inside: avoid !important;
+    }
+    
+    .receipt-table td,
     .receipt-table-custom td {
-        padding: 0.5rem;
-        font-size: 0.85rem;
+        padding: 5px 8px !important;
+        font-size: 9pt !important;
+        border: 1px solid #ddd !important;
+        page-break-inside: avoid !important;
+    }
+    
+    .receipt-table tbody tr,
+    .receipt-table-custom tbody tr {
+        page-break-inside: avoid !important;
+        page-break-after: auto !important;
+    }
+    
+    .receipt-table tbody tr:nth-child(even),
+    .receipt-table-custom tbody tr:nth-child(even) {
+        background: #f8fafc !important;
+    }
+    
+    .receipt-table-custom .summary-row td {
+        font-weight: bold !important;
+        background: #e8f2ff !important;
+        color: #003b73 !important;
+        border: 1px solid #003b73 !important;
+        border-top: 2px solid #003b73 !important;
+        font-size: 10pt !important;
+        padding: 8px !important;
+        page-break-inside: avoid !important;
+    }
+    
+    #paid-table {
+        margin-top: 15px !important;
+        width: 85% !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        border: 2px solid #003b73 !important;
+        border-radius: 6px !important;
+        page-break-inside: auto !important;
+        box-shadow: none !important;
+    }
+    
+    #paid-table th {
+        background: #003b73 !important;
+        color: #ffffff !important;
+        padding: 6px 8px !important;
+        font-size: 9pt !important;
+    }
+    
+    #paid-table td {
+        padding: 5px 8px !important;
+        font-size: 9pt !important;
+    }
+    
+    #paid-table tbody tr:nth-child(even) {
+        background: #f8fafc !important;
     }
     
     .debt-summary {
-        margin: 1.5rem 0;
-        padding: 1rem;
-        page-break-inside: avoid;
+        margin: 15px 0 !important;
+        padding: 12px !important;
+        background: #f4f8fc !important;
+        border: 2px solid #003b73 !important;
+        border-radius: 8px !important;
+        box-shadow: none !important;
+        page-break-inside: avoid !important;
     }
     
     .debt-summary-row {
-        gap: 1rem;
+        gap: 10px !important;
     }
     
     .debt-summary-box {
-        padding: 0.75rem 1rem;
-        min-width: 180px;
-        font-size: 0.95rem;
+        padding: 8px 12px !important;
+        min-width: 160px !important;
+        font-size: 9pt !important;
+        background: #ffffff !important;
+        border: 1px solid #003b73 !important;
+        border-radius: 4px !important;
+        box-shadow: none !important;
+        page-break-inside: avoid !important;
+    }
+    
+    .debt-summary-box.total-box {
+        background: #003b73 !important;
+        color: #ffffff !important;
+        border: 1px solid #003b73 !important;
+    }
+    
+    .debt-summary-box.total-box .debt-label,
+    .debt-summary-box.total-box .debt-value {
+        color: #ffffff !important;
+    }
+    
+    .debt-label {
+        font-size: 9pt !important;
+    }
+    
+    .debt-value {
+        font-size: 11pt !important;
     }
     
     .receipt-notes {
-        margin-top: 1.5rem;
-        padding: 1rem;
-        font-size: 0.95rem;
-        page-break-inside: avoid;
+        margin-top: 15px !important;
+        padding: 10px 12px !important;
+        font-size: 9pt !important;
+        background: #f4f8fc !important;
+        border: 1px solid #003b73 !important;
+        border-radius: 4px !important;
+        box-shadow: none !important;
+        page-break-inside: avoid !important;
+    }
+    
+    .receipt-notes i {
+        font-size: 12pt !important;
+    }
+    
+    .contact-info {
+        margin-top: 15px !important;
+        padding: 10px !important;
+        font-size: 9pt !important;
+        background: #f4f8fc !important;
+        border: 1px solid #ddd !important;
+        border-radius: 4px !important;
+        box-shadow: none !important;
+        page-break-inside: avoid !important;
+    }
+    
+    .contact-info::before {
+        display: none !important;
+    }
+    
+    .contact-info p {
+        font-size: 9pt !important;
     }
     
     .debt-pagination {
@@ -691,13 +856,49 @@ body {
     }
     
     .debt-summary-page:not(:first-child) {
-        margin-top: 2rem;
-        page-break-before: always;
+        margin-top: 20px !important;
+        page-break-before: always !important;
     }
     
+    /* Hide filter section and buttons */
+    .filter-section,
+    #print-btn,
+    #refresh-btn,
+    button:not(.receipt-notes button) {
+        display: none !important;
+    }
+    
+    /* Force background colors to print */
+    thead,
+    th,
+    .receipt-table th,
+    .receipt-table-custom th,
+    #paid-table th {
+        background-color: #003b73 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    .debt-summary-box.total-box {
+        background-color: #003b73 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    /* Page settings */
     @page {
-        margin: 1cm;
-        size: A4;
+        margin: 1.5cm 1cm !important;
+        size: A4 portrait !important;
+    }
+    
+    /* Avoid breaks inside important elements */
+    tr, img, .logo-circle, .company-info-box, .debt-summary-box {
+        page-break-inside: avoid !important;
+    }
+    
+    /* Allow breaks between rows */
+    tbody tr {
+        page-break-after: auto !important;
     }
 }
 
