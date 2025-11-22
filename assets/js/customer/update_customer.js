@@ -19,6 +19,10 @@ $(document).on('click', '.edit-customer-btn', function() {
             $('#editCustomerOpeningDebtUsd').val(usdValue > 0 ? usdValue : '');
             $('#editCustomerOpeningDebtIqd').val(iqdValue > 0 ? iqdValue : '');
             
+            // Set is_recipient checkbox
+            const isRecipient = parseInt(customer.is_recipient || 0);
+            $('#editCustomerIsRecipient').prop('checked', isRecipient === 1);
+            
             // Enable/disable fields based on values
             if (usdValue > 0) {
                 $('#editCustomerOpeningDebtIqd').prop('disabled', true);

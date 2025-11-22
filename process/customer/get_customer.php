@@ -23,7 +23,7 @@ try {
         exit;
     }
     
-    $sql = "SELECT id, name, mobile1, mobile2, opening_debt_usd, opening_debt_iqd FROM customers WHERE id = ?";
+    $sql = "SELECT id, name, mobile1, mobile2, opening_debt_usd, opening_debt_iqd, is_recipient FROM customers WHERE id = ?";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$id]);
     $customer = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -32,6 +32,7 @@ try {
         // Convert numeric fields to proper types
         $customer['opening_debt_usd'] = floatval($customer['opening_debt_usd'] ?? 0);
         $customer['opening_debt_iqd'] = floatval($customer['opening_debt_iqd'] ?? 0);
+        $customer['is_recipient'] = intval($customer['is_recipient'] ?? 0);
         $customer['id'] = intval($customer['id']);
         
         echo json_encode(['success' => true, 'data' => $customer]);

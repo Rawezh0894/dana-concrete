@@ -521,6 +521,14 @@ $mixer_drivers = array_filter($employees, function ($emp) {
               <label for="customer_phone2" class="form-label">ژمارە تەلەفۆنی دووەم (ئیختیاری)</label>
               <input type="text" class="form-control" id="customer_phone2" name="mobile2">
             </div>
+            <div class="mb-3">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="customer_is_recipient" name="is_recipient" value="1">
+                <label class="form-check-label" for="customer_is_recipient">
+                  ئەم کڕیارە هەم کڕیارە و هەم وەرگریشە
+                </label>
+              </div>
+            </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>

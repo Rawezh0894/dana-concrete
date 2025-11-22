@@ -13,6 +13,7 @@ $(document).ready(function() {
         $('#customer_id').append(newOption).trigger('change');
         $('#edit_customer_id').append(new Option(res.name, res.id, false, false));
         $('#addCustomerForm')[0].reset();
+        $('#customer_is_recipient').prop('checked', false);
       } else {
         console.error('Add customer error:', res);
         Swal.fire('هەڵە!', res.message || res.msg || 'هەڵەیەک ڕویدا', 'error');

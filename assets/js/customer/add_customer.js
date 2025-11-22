@@ -33,6 +33,7 @@ $(document).ready(function () {
                     const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('addCustomerModal'));
                     if (data.success) {
                         addCustomerForm[0].reset();
+                        $('#customer_is_recipient').prop('checked', false);
                         modal.hide();
                         loadCustomers();
                         // Refresh summary stats
@@ -117,6 +118,7 @@ $(document).ready(function() {
     $('#addCustomerModal').on('show.bs.modal', function() {
         $('#addCustomerForm')[0].reset();
         $('#customer_opening_debt_usd, #customer_opening_debt_iqd').prop('disabled', false);
+        $('#customer_is_recipient').prop('checked', false);
     });
     
     // Reset edit form when modal is shown

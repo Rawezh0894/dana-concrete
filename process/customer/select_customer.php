@@ -16,7 +16,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 try {
-    $sql = "SELECT id, name, mobile1, mobile2, opening_debt_usd, opening_debt_iqd FROM customers ORDER BY id DESC";
+    $sql = "SELECT id, name, mobile1, mobile2, opening_debt_usd, opening_debt_iqd, is_recipient FROM customers ORDER BY id DESC";
     $stmt = $pdo->query($sql);
     $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
