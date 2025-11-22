@@ -124,9 +124,18 @@ try {
     ];
 
     if ($recipient_id) {
+        // First try to get from recipients table
         $recipientStmt = $pdo->prepare("SELECT name FROM recipients WHERE id = ?");
         $recipientStmt->execute([$recipient_id]);
         $recipientRow = $recipientStmt->fetch(PDO::FETCH_ASSOC);
+        
+        // If not found in recipients table, try customers table (is_recipient = 1)
+        if (!$recipientRow) {
+            $recipientStmt = $pdo->prepare("SELECT name FROM customers WHERE id = ? AND is_recipient = 1");
+            $recipientStmt->execute([$recipient_id]);
+            $recipientRow = $recipientStmt->fetch(PDO::FETCH_ASSOC);
+        }
+        
         if ($recipientRow) {
             $recipient = $recipientRow['name'];
         }
