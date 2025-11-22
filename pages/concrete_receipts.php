@@ -19,7 +19,28 @@ if (!hasPermission('view_concrete_receipts')) {
 }
 $customers = $pdo->query("SELECT id, name, mobile1, mobile2 FROM customers")->fetchAll(PDO::FETCH_ASSOC);
 $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO::FETCH_ASSOC);
-$recipients = $pdo->query("SELECT id, name, phone1, phone2 FROM recipients ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
+
+// Get recipients: both from recipients table and customers with is_recipient = 1
+$recipients_from_table = $pdo->query("SELECT id, name, phone1, phone2 FROM recipients ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
+$recipients_from_customers = $pdo->query("SELECT id, name, mobile1 AS phone1, mobile2 AS phone2 FROM customers WHERE is_recipient = 1 ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
+
+// Combine both and remove duplicates by name
+$recipients = [];
+$recipient_names = [];
+foreach ($recipients_from_table as $r) {
+    $recipients[] = $r;
+    $recipient_names[] = strtolower(trim($r['name']));
+}
+foreach ($recipients_from_customers as $r) {
+    if (!in_array(strtolower(trim($r['name'])), $recipient_names)) {
+        $recipients[] = $r;
+        $recipient_names[] = strtolower(trim($r['name']));
+    }
+}
+// Sort by name
+usort($recipients, function($a, $b) {
+    return strcmp($a['name'], $b['name']);
+});
 $cars = $pdo->query("SELECT id, name FROM cars")->fetchAll(PDO::FETCH_ASSOC);
 $employees = $pdo->query("SELECT id, name, role FROM employees")->fetchAll(PDO::FETCH_ASSOC);
 $drivers = array_filter($employees, function ($emp) {
