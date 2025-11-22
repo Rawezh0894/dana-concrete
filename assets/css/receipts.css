@@ -292,28 +292,31 @@ body {
         padding-bottom: 0.75rem;
         margin-bottom: 0.75rem;
         align-items: center;
-        flex-wrap: nowrap;
+        flex-wrap: wrap;
         gap: 1.2rem;
     }
     
     .receipt-title {
-        flex: 2;
+        flex: 1 1 55%;
+        min-width: 260px;
         font-size: 1.8rem;
         padding: 0.75rem 1.25rem;
         margin: 0;
         border-width: 2px;
+        word-break: break-word;
+        line-height: 1.1;
     }
     
     .logo-circle {
-        flex: 0 0 95px;
-        width: 95px;
-        height: 95px;
+        flex: 0 0 90px;
+        width: 90px;
+        height: 90px;
         margin-left: 0;
         box-shadow: none;
     }
     
     .receipt-meta {
-        flex: 1;
+        flex: 1 1 200px;
         gap: 0.4rem;
         text-align: right;
         align-items: flex-start;
