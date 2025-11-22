@@ -32,6 +32,12 @@ if ($hasConcreteReceipts->fetchColumn() > 0) {
     echo json_encode(['success' => false, 'message' => 'ناتوانرێت کڕیار بسڕدرێت چونکە پسوڵەی کۆنکرێت بۆ تۆمارکراوە']);
     exit;
 }
+$hasNotes = $pdo->prepare('SELECT COUNT(*) FROM notes WHERE customer_id = ?');
+$hasNotes->execute([$id]);
+if ($hasNotes->fetchColumn() > 0) {
+    echo json_encode(['success' => false, 'message' => 'ناتوانرێت کڕیار بسڕدرێت چونکە تێبینی بۆ تۆمارکراوە']);
+    exit;
+}
 
 try {
     $stmt = $pdo->prepare('DELETE FROM customers WHERE id = ?');
