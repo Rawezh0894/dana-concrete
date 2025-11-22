@@ -30,26 +30,34 @@ if ($id <= 0 || $name === '' || $phone1 === '') {
 }
 
 try {
-    $stmt = $pdo->prepare("SELECT id FROM recipients WHERE phone1 = :phone1 AND id != :id");
-    $stmt->execute([':phone1' => $phone1, ':id' => $id]);
-    if ($stmt->fetch()) {
-        echo json_encode(['success' => false, 'message' => 'ئەم ژمارەیە بە وەرگرێکی دیکە تۆمارکراوە.']);
+    // Check if customer exists and is a recipient
+    $checkStmt = $pdo->prepare("SELECT id FROM customers WHERE id = :id AND is_recipient = 1");
+    $checkStmt->execute([':id' => $id]);
+    if (!$checkStmt->fetch()) {
+        echo json_encode(['success' => false, 'message' => 'وەرگر نەدۆزرایەوە.']);
         exit;
     }
 
+    // Check for duplicate mobile number (excluding current customer)
+    $stmt = $pdo->prepare("SELECT id FROM customers WHERE mobile1 = :phone1 AND id != :id");
+    $stmt->execute([':phone1' => $phone1, ':id' => $id]);
+    if ($stmt->fetch()) {
+        echo json_encode(['success' => false, 'message' => 'ئەم ژمارەیە بە کڕیارێکی دیکە تۆمارکراوە.']);
+        exit;
+    }
+
+    // Update customer (recipient data - note: opening_meter_total is not in customers table)
     $update = $pdo->prepare("
-        UPDATE recipients
+        UPDATE customers
         SET name = :name,
-            phone1 = :phone1,
-            phone2 = :phone2,
-            opening_meter_total = :opening_meter_total
-        WHERE id = :id
+            mobile1 = :phone1,
+            mobile2 = :phone2
+        WHERE id = :id AND is_recipient = 1
     ");
     $result = $update->execute([
         ':name' => $name,
         ':phone1' => $phone1,
         ':phone2' => $phone2 !== '' ? $phone2 : null,
-        ':opening_meter_total' => max(0, $opening_meter_total),
         ':id' => $id
     ]);
 

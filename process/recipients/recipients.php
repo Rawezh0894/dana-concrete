@@ -19,12 +19,14 @@ if (!hasPermission('view_recipient')) {
 }
 
 try {
+    // Get summary from customers who are also recipients
     $summaryStmt = $pdo->query("
         SELECT 
             COUNT(*) AS total_recipients,
-            COALESCE(SUM(opening_meter_total), 0) AS total_opening_meter,
-            SUM(CASE WHEN opening_meter_total > 0 THEN 1 ELSE 0 END) AS recipients_with_meter
-        FROM recipients
+            0.00 AS total_opening_meter,
+            0 AS recipients_with_meter
+        FROM customers
+        WHERE is_recipient = 1
     ");
     $summary = $summaryStmt->fetch(PDO::FETCH_ASSOC);
 

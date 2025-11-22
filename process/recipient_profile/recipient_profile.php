@@ -24,7 +24,8 @@ if ($recipient_id <= 0) {
 }
 
 try {
-    $stmt = $pdo->prepare('SELECT name FROM recipients WHERE id = :id');
+    // Get customer who is also a recipient
+    $stmt = $pdo->prepare('SELECT id, name FROM customers WHERE id = :id AND is_recipient = 1');
     $stmt->execute([':id' => $recipient_id]);
     $recipient = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -33,15 +34,19 @@ try {
         exit;
     }
 
+    // Get summary of sales where this person is either the customer OR the recipient
     $summaryStmt = $pdo->prepare("
         SELECT 
             COUNT(*) AS sales_count,
             COALESCE(SUM(quantity), 0) AS total_quantity,
             COALESCE(SUM(remaining_amount), 0) AS total_remaining
         FROM sales
-        WHERE recipient = :recipient_name
+        WHERE (customer_id = :customer_id OR recipient = :recipient_name)
     ");
-    $summaryStmt->execute([':recipient_name' => $recipient['name']]);
+    $summaryStmt->execute([
+        ':customer_id' => $recipient['id'],
+        ':recipient_name' => $recipient['name']
+    ]);
     $summary = $summaryStmt->fetch(PDO::FETCH_ASSOC);
 
     echo json_encode([

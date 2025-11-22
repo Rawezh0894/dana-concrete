@@ -24,7 +24,8 @@ if ($recipient_id <= 0) {
 }
 
 try {
-    $stmt = $pdo->prepare('SELECT name FROM recipients WHERE id = :id');
+    // Get customer who is also a recipient
+    $stmt = $pdo->prepare('SELECT id, name FROM customers WHERE id = :id AND is_recipient = 1');
     $stmt->execute([':id' => $recipient_id]);
     $recipient = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -33,6 +34,7 @@ try {
         exit;
     }
 
+    // Get sales where this person is either the customer OR the recipient
     $salesStmt = $pdo->prepare('
         SELECT 
             s.*, 
@@ -41,10 +43,13 @@ try {
         FROM sales s
         LEFT JOIN customers c ON s.customer_id = c.id
         LEFT JOIN concrete_formulas f ON s.formula_id = f.id
-        WHERE s.recipient = :recipient_name
+        WHERE (s.customer_id = :customer_id OR s.recipient = :recipient_name)
         ORDER BY s.id DESC
     ');
-    $salesStmt->execute([':recipient_name' => $recipient['name']]);
+    $salesStmt->execute([
+        ':customer_id' => $recipient['id'],
+        ':recipient_name' => $recipient['name']
+    ]);
     $sales = $salesStmt->fetchAll(PDO::FETCH_ASSOC);
 
     echo json_encode(['success' => true, 'data' => $sales]);

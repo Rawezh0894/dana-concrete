@@ -22,7 +22,19 @@ $recipientId = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
 try {
     if ($recipientId > 0) {
-        $stmt = $pdo->prepare("SELECT * FROM recipients WHERE id = :id");
+        // Get customer who is also a recipient
+        $stmt = $pdo->prepare("
+            SELECT 
+                id, 
+                name, 
+                mobile1 AS phone1, 
+                mobile2 AS phone2, 
+                0.00 AS opening_meter_total,
+                NULL AS created_at,
+                NULL AS updated_at
+            FROM customers 
+            WHERE id = :id AND is_recipient = 1
+        ");
         $stmt->execute([':id' => $recipientId]);
         $recipient = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -34,9 +46,18 @@ try {
         exit;
     }
 
+    // Get customers who are also recipients (is_recipient = 1)
     $query = $pdo->query("
-        SELECT id, name, phone1, phone2, opening_meter_total, created_at, updated_at
-        FROM recipients
+        SELECT 
+            id, 
+            name, 
+            mobile1 AS phone1, 
+            mobile2 AS phone2, 
+            0.00 AS opening_meter_total,
+            NULL AS created_at,
+            NULL AS updated_at
+        FROM customers
+        WHERE is_recipient = 1
         ORDER BY id DESC
     ");
     $recipients = $query->fetchAll(PDO::FETCH_ASSOC);

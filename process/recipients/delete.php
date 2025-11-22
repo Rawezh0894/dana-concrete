@@ -26,10 +26,19 @@ if ($id <= 0) {
 }
 
 try {
-    $delete = $pdo->prepare("DELETE FROM recipients WHERE id = :id");
-    $result = $delete->execute([':id' => $id]);
+    // Check if customer exists and is a recipient
+    $checkStmt = $pdo->prepare("SELECT id FROM customers WHERE id = :id AND is_recipient = 1");
+    $checkStmt->execute([':id' => $id]);
+    if (!$checkStmt->fetch()) {
+        echo json_encode(['success' => false, 'message' => 'وەرگر نەدۆزرایەوە.']);
+        exit;
+    }
 
-    if ($result && $delete->rowCount() > 0) {
+    // Set is_recipient to 0 instead of deleting (to keep customer data)
+    $update = $pdo->prepare("UPDATE customers SET is_recipient = 0 WHERE id = :id");
+    $result = $update->execute([':id' => $id]);
+
+    if ($result && $update->rowCount() > 0) {
         echo json_encode(['success' => true, 'message' => 'وەرگر سڕایەوە.']);
     } else {
         echo json_encode(['success' => false, 'message' => 'نەتوانرا وەرگر بسڕدرێتەوە.']);

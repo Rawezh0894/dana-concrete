@@ -44,7 +44,8 @@ if ($recipient_id <= 0) {
     exit;
 }
 
-$stmt = $pdo->prepare('SELECT * FROM recipients WHERE id = ?');
+// Get customer who is also a recipient
+$stmt = $pdo->prepare('SELECT * FROM customers WHERE id = ? AND is_recipient = 1');
 $stmt->execute([$recipient_id]);
 $recipient = $stmt->fetch(PDO::FETCH_ASSOC);
 

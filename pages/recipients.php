@@ -123,10 +123,8 @@ if (!hasPermission('view_recipient')) {
                         <label for="recipient_phone2" class="form-label">ژمارەی مۆبایلی دووەم</label>
                         <input type="text" class="form-control" id="recipient_phone2" name="phone2">
                     </div>
-                    <div class="mb-3">
-                        <label for="recipient_opening_meter_total" class="form-label">کۆی بڕی مەتری گیراوی سەرەتایی (م³)</label>
-                        <input type="number" class="form-control" id="recipient_opening_meter_total" name="opening_meter_total" min="0" step="0.01">
-                    </div>
+                    <!-- Note: opening_meter_total is not stored in customers table -->
+                    <!-- Removed opening_meter_total field as it's not applicable for customers -->
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
@@ -161,10 +159,8 @@ if (!hasPermission('view_recipient')) {
                         <label for="editRecipientPhone2" class="form-label">ژمارەی مۆبایلی دووەم</label>
                         <input type="text" class="form-control" id="editRecipientPhone2" name="phone2">
                     </div>
-                    <div class="mb-3">
-                        <label for="editRecipientOpeningMeter" class="form-label">کۆی بڕی مەتری گیراوی سەرەتایی (م³)</label>
-                        <input type="number" class="form-control" id="editRecipientOpeningMeter" name="opening_meter_total" min="0" step="0.01">
-                    </div>
+                    <!-- Note: opening_meter_total is not stored in customers table -->
+                    <!-- Removed opening_meter_total field as it's not applicable for customers -->
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>

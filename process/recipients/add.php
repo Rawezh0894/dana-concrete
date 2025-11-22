@@ -21,7 +21,6 @@ if (!hasPermission('add_recipient')) {
 $name = trim($_POST['name'] ?? '');
 $phone1 = trim($_POST['phone1'] ?? '');
 $phone2 = trim($_POST['phone2'] ?? '');
-$opening_meter_total = isset($_POST['opening_meter_total']) ? floatval($_POST['opening_meter_total']) : 0;
 
 if ($name === '' || $phone1 === '') {
     echo json_encode(['success' => false, 'message' => 'تکایە ناو و ژمارەی مۆبایلی یەکەم پڕبکەرەوە.']);
@@ -29,37 +28,64 @@ if ($name === '' || $phone1 === '') {
 }
 
 try {
-    $stmt = $pdo->prepare("SELECT id FROM recipients WHERE phone1 = ?");
+    // Check if customer with this mobile already exists
+    $stmt = $pdo->prepare("SELECT id, is_recipient FROM customers WHERE mobile1 = ?");
     $stmt->execute([$phone1]);
-    if ($stmt->fetch()) {
-        echo json_encode(['success' => false, 'message' => 'ئەم ژمارەیە پێشتر بە وەرگرێک تۆمارکراوە.']);
-        exit;
-    }
+    $existingCustomer = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    $insert = $pdo->prepare("
-        INSERT INTO recipients (name, phone1, phone2, opening_meter_total)
-        VALUES (:name, :phone1, :phone2, :opening_meter_total)
-    ");
-    $result = $insert->execute([
-        ':name' => $name,
-        ':phone1' => $phone1,
-        ':phone2' => $phone2 !== '' ? $phone2 : null,
-        ':opening_meter_total' => max(0, $opening_meter_total)
-    ]);
-
-    if ($result) {
-        $newId = $pdo->lastInsertId();
-        $stmt = $pdo->prepare("SELECT id, name, phone1, phone2 FROM recipients WHERE id = ?");
-        $stmt->execute([$newId]);
-        $recipient = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        echo json_encode([
-            'success' => true,
-            'message' => 'وەرگر زیادکرا.',
-            'recipient' => $recipient
+    if ($existingCustomer) {
+        // Customer exists, just update is_recipient to 1
+        if ($existingCustomer['is_recipient'] == 1) {
+            echo json_encode(['success' => false, 'message' => 'ئەم کڕیارە پێشتر بە وەرگر تۆمارکراوە.']);
+            exit;
+        }
+        
+        $update = $pdo->prepare("UPDATE customers SET is_recipient = 1, name = ?, mobile2 = ? WHERE id = ?");
+        $result = $update->execute([
+            $name,
+            $phone2 !== '' ? $phone2 : null,
+            $existingCustomer['id']
         ]);
+        
+        if ($result) {
+            $stmt = $pdo->prepare("SELECT id, name, mobile1 AS phone1, mobile2 AS phone2 FROM customers WHERE id = ?");
+            $stmt->execute([$existingCustomer['id']]);
+            $recipient = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            echo json_encode([
+                'success' => true,
+                'message' => 'وەرگر زیادکرا.',
+                'recipient' => $recipient
+            ]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'نەتوانرا وەرگر زیادبکرێت.']);
+        }
     } else {
-        echo json_encode(['success' => false, 'message' => 'نەتوانرا وەرگر زیادبکرێت.']);
+        // Customer doesn't exist, create new customer with is_recipient = 1
+        $insert = $pdo->prepare("
+            INSERT INTO customers (name, mobile1, mobile2, is_recipient, opening_debt_usd, opening_debt_iqd)
+            VALUES (?, ?, ?, 1, 0, 0)
+        ");
+        $result = $insert->execute([
+            $name,
+            $phone1,
+            $phone2 !== '' ? $phone2 : null
+        ]);
+
+        if ($result) {
+            $newId = $pdo->lastInsertId();
+            $stmt = $pdo->prepare("SELECT id, name, mobile1 AS phone1, mobile2 AS phone2 FROM customers WHERE id = ?");
+            $stmt->execute([$newId]);
+            $recipient = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            echo json_encode([
+                'success' => true,
+                'message' => 'وەرگر زیادکرا.',
+                'recipient' => $recipient
+            ]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'نەتوانرا وەرگر زیادبکرێت.']);
+        }
     }
 } catch (Exception $e) {
     http_response_code(500);

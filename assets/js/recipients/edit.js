@@ -17,11 +17,9 @@ $(document).on('click', '.edit-recipient-btn', function () {
             $('#editRecipientName').val(recipient.name || '');
             $('#editRecipientPhone1').val(recipient.phone1 || '');
             $('#editRecipientPhone2').val(recipient.phone2 || '');
-            $('#editRecipientOpeningMeter').val(
-                recipient.opening_meter_total !== null && recipient.opening_meter_total !== undefined
-                    ? Number(recipient.opening_meter_total)
-                    : ''
-            );
+            // Note: opening_meter_total is not stored in customers table, so we skip it
+            // or set it to empty
+            $('#editRecipientOpeningMeter').val('');
 
             modal?.show();
         } else {
