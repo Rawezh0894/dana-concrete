@@ -102,6 +102,7 @@ if (!hasPermission('view_customer')) {
                     <th>ژمارە مۆبایلی دووەم</th>
                     <th>بڕی قەرزی سەرەتایی (USD)</th>
                     <th>بڕی قەرزی سەرەتایی (IQD)</th>
+                    <th>وەرگر</th>
                     <th>کردارەکان</th>
                 </tr>
             </thead>
