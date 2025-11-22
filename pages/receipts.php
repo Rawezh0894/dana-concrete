@@ -614,7 +614,6 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         <thead>
             <tr>
                 <th>شوێن</th>
-                <th>وەرگر</th>
                 <th>پێوانە</th>
                 <th>ڕێژە</th>
                 <th>نرخی 1 م 3</th>
