@@ -319,10 +319,10 @@ body {
     }
     
     .receipt-meta {
-        flex: 0 1 28%;
-        min-width: 170px;
-        max-width: 200px;
-        gap: 0.4rem;
+        flex: 0 1 22%;
+        min-width: 140px;
+        max-width: 160px;
+        gap: 0.3rem;
         text-align: right;
         align-items: flex-start;
         margin-right: 0.5rem;
@@ -331,11 +331,11 @@ body {
     .payment-date-row,
     .phone-number-row {
         width: 100%;
-        padding: 0.45rem 0.7rem;
-        font-size: 0.9rem;
+        padding: 0.35rem 0.5rem;
+        font-size: 0.8rem;
         word-break: break-word;
         overflow-wrap: break-word;
-        margin-bottom: 0.2rem;
+        margin-bottom: 0.15rem;
     }
     
     .payment-date-row:last-child,
@@ -345,16 +345,16 @@ body {
     
     .payment-date-row span,
     .phone-number-row span {
-        font-size: 0.9rem;
+        font-size: 0.8rem;
         word-break: break-word;
-        line-height: 1.4;
+        line-height: 1.3;
     }
     
     .phone-number {
-        font-size: 0.9rem !important;
+        font-size: 0.8rem !important;
         word-break: break-word;
         overflow-wrap: break-word;
-        line-height: 1.4;
+        line-height: 1.3;
     }
     
     .company-info-row {
