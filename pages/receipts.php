@@ -41,8 +41,6 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             #refresh-btn, .fa-refresh {
                 display: none !important;
             }
-            
-            /* Print styles are handled in receipts.css for consistency */
         }
         
         /* Checkbox styling */
