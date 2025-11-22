@@ -50,7 +50,6 @@ try {
 $sql = "SELECT 
         s.order_date,
         s.location,
-        s.recipient,
         f.strength_mpa, 
         f.strength_kg,
         SUM(s.quantity) as total_quantity,
@@ -120,7 +119,7 @@ if ($recipient !== 'all' && $recipient !== 'none') {
     }
 }
 
-$sql .= " GROUP BY s.order_date, s.location, s.recipient, f.strength_mpa, f.strength_kg, s.price_per_unit";
+$sql .= " GROUP BY s.order_date, s.location, f.strength_mpa, f.strength_kg, s.price_per_unit";
 $sql .= " ORDER BY s.order_date ASC";
 
 // Debug: Log the SQL query
@@ -150,32 +149,6 @@ try {
     // Debug: Log each grouped row
     error_log("Grouped row - Date: " . $row['order_date'] . ", Ratio: " . $rezh . ", Quantity: " . $row['total_quantity'] . ", Invoices: " . $row['invoice_numbers']);
     
-    // Determine recipient type: check if recipient exists in recipients table or customers table with is_recipient = 1
-    $recipient_name = $row['recipient'] ?? '';
-    $recipient_type = '';
-    
-    if ($recipient_name) {
-        // Check if recipient exists in recipients table
-        $recipient_check_sql = "SELECT COUNT(*) as count FROM recipients WHERE name = :recipient_name";
-        $recipient_check_stmt = $pdo->prepare($recipient_check_sql);
-        $recipient_check_stmt->execute(['recipient_name' => $recipient_name]);
-        $recipient_in_table = $recipient_check_stmt->fetch(PDO::FETCH_ASSOC)['count'] > 0;
-        
-        // Check if recipient exists in customers table with is_recipient = 1
-        $customer_check_sql = "SELECT COUNT(*) as count FROM customers WHERE name = :recipient_name AND is_recipient = 1";
-        $customer_check_stmt = $pdo->prepare($customer_check_sql);
-        $customer_check_stmt->execute(['recipient_name' => $recipient_name]);
-        $recipient_in_customers = $customer_check_stmt->fetch(PDO::FETCH_ASSOC)['count'] > 0;
-        
-        if ($recipient_in_customers) {
-            $recipient_type = 'کڕیار و وەرگر';
-        } elseif ($recipient_in_table) {
-            $recipient_type = 'تەنها وەرگر';
-        } else {
-            $recipient_type = 'نەناسراو';
-        }
-    }
-    
     $data[] = [
         'location' => $row['location'] ?? '',
         'quantity' => $quantity,
@@ -184,7 +157,6 @@ try {
         'total_price' => $total,
         'remaining_amount' => $remaining,
         'invoice_number' => $row['invoice_numbers'],
-        'recipient_type' => $recipient_type,
         'order_date' => $row['order_date']
     ];
     }

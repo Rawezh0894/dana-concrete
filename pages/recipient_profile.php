@@ -44,10 +44,17 @@ if ($recipient_id <= 0) {
     exit;
 }
 
-// Get customer who is also a recipient
-$stmt = $pdo->prepare('SELECT * FROM customers WHERE id = ? AND is_recipient = 1');
+// First try to get from recipients table
+$stmt = $pdo->prepare('SELECT *, "recipient_only" AS recipient_type FROM recipients WHERE id = ?');
 $stmt->execute([$recipient_id]);
 $recipient = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// If not found, try to get from customers table (is_recipient = 1)
+if (!$recipient) {
+    $stmt = $pdo->prepare('SELECT *, "customer_and_recipient" AS recipient_type FROM customers WHERE id = ? AND is_recipient = 1');
+    $stmt->execute([$recipient_id]);
+    $recipient = $stmt->fetch(PDO::FETCH_ASSOC);
+}
 
 if (!$recipient) {
     echo '<!DOCTYPE html>
@@ -99,7 +106,21 @@ $recipient_name = $recipient['name'];
 <div class="container-fluid py-5">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
         <div>
-            <h2 class="mb-1" style="color: var(--seafoam-green); font-weight: bold;"><?php echo htmlspecialchars($recipient_name); ?></h2>
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;"><?php echo htmlspecialchars($recipient_name); ?></h2>
+                <?php 
+                $recipient_type = $recipient['recipient_type'] ?? 'recipient_only';
+                if ($recipient_type === 'customer_and_recipient'): 
+                ?>
+                    <span class="badge bg-success" style="font-size: 0.9rem;">
+                        <i class="fas fa-user-check"></i> کڕیار و وەرگر
+                    </span>
+                <?php else: ?>
+                    <span class="badge bg-info" style="font-size: 0.9rem;">
+                        <i class="fas fa-user"></i> تەنها وەرگر
+                    </span>
+                <?php endif; ?>
+            </div>
             <p class="text-muted mb-0">پوختەی هەموو فرۆشتنەکان بەم وەرگرەوە پەیوەست بوون</p>
         </div>
         <div class="d-flex flex-wrap gap-2">

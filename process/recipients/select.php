@@ -23,7 +23,7 @@ $recipientId = isset($_GET['id']) ? intval($_GET['id']) : 0;
 try {
     if ($recipientId > 0) {
         // First try to get from recipients table
-        $stmt = $pdo->prepare("SELECT id, name, phone1, phone2, opening_meter_total, created_at, updated_at FROM recipients WHERE id = :id");
+        $stmt = $pdo->prepare("SELECT id, name, phone1, phone2, opening_meter_total, created_at, updated_at, 'recipient_only' AS recipient_type FROM recipients WHERE id = :id");
         $stmt->execute([':id' => $recipientId]);
         $recipient = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -37,7 +37,8 @@ try {
                     mobile2 AS phone2, 
                     0.00 AS opening_meter_total,
                     NULL AS created_at,
-                    NULL AS updated_at
+                    NULL AS updated_at,
+                    'customer_and_recipient' AS recipient_type
                 FROM customers 
                 WHERE id = :id AND is_recipient = 1
             ");
@@ -55,7 +56,7 @@ try {
 
     // Get recipients from both tables: recipients table and customers with is_recipient = 1
     $recipients_from_table = $pdo->query("
-        SELECT id, name, phone1, phone2, opening_meter_total, created_at, updated_at
+        SELECT id, name, phone1, phone2, opening_meter_total, created_at, updated_at, 'recipient_only' AS recipient_type
         FROM recipients
         ORDER BY name
     ")->fetchAll(PDO::FETCH_ASSOC);
@@ -68,7 +69,8 @@ try {
             mobile2 AS phone2, 
             0.00 AS opening_meter_total,
             NULL AS created_at,
-            NULL AS updated_at
+            NULL AS updated_at,
+            'customer_and_recipient' AS recipient_type
         FROM customers
         WHERE is_recipient = 1
         ORDER BY name

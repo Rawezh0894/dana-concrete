@@ -1,5 +1,5 @@
 function loadRecipients() {
-    const columns = ['#', 'name', 'phone1', 'phone2', 'opening_meter_total', 'actions'];
+    const columns = ['#', 'name', 'phone1', 'phone2', 'recipient_type', 'opening_meter_total', 'actions'];
     TableController.showLoading('#recipientsTable', columns);
 
     const canEdit = !!(window.recipientPermissions && window.recipientPermissions.canEdit);
@@ -32,11 +32,18 @@ function loadRecipients() {
                     `);
                 }
 
+                // Determine recipient type
+                const recipientType = recipient.recipient_type || 'recipient_only';
+                const typeBadge = recipientType === 'customer_and_recipient' 
+                    ? '<span class="badge bg-success"><i class="fas fa-user-check"></i> کڕیار و وەرگر</span>'
+                    : '<span class="badge bg-info"><i class="fas fa-user"></i> تەنها وەرگر</span>';
+
                 return {
                     '#': index + 1,
                     name: recipient.name || '-',
                     phone1: recipient.phone1 || '-',
                     phone2: recipient.phone2 || '-',
+                    recipient_type: typeBadge,
                     opening_meter_total: `${Number(recipient.opening_meter_total || 0).toLocaleString('en-US', {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2
