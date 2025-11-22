@@ -281,10 +281,10 @@ body {
     .receipt-container { 
         box-shadow: none; 
         border: none; 
-        max-width: none;
-        width: 100%;
-        padding: 0.8cm 1cm;
-        margin: 0 auto;
+        max-width: 100%;
+        width: calc(100% - 1.2cm);
+        padding: 0.7cm 0.8cm;
+        margin: 0.25cm auto;
     }
     
     .receipt-header { 
@@ -386,7 +386,7 @@ body {
     }
     
     @page {
-        margin: 0.4cm 0.6cm;
+        margin: 0.5cm 0.7cm;
         size: A4;
     }
 }
