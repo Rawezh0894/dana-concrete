@@ -620,6 +620,7 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 <th>کۆی نرخ</th>
                 <th>پارەی ماوە</th>
                 <th>ژمارەی پسووڵە</th>
+                <th>جۆری وەرگر</th>
                 <th>بەروار</th>
             </tr>
         </thead>

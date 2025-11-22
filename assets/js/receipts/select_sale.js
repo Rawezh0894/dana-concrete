@@ -357,6 +357,18 @@ class ReceiptManager {
                 total += cleanTotal;
                 remainingTotal += cleanRemaining;
 
+                // Format recipient type with badge
+                let recipientTypeBadge = '';
+                if (row.recipient_type) {
+                    if (row.recipient_type === 'کڕیار و وەرگر') {
+                        recipientTypeBadge = `<span style="background: #28a745; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">${row.recipient_type}</span>`;
+                    } else if (row.recipient_type === 'تەنها وەرگر') {
+                        recipientTypeBadge = `<span style="background: #17a2b8; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">${row.recipient_type}</span>`;
+                    } else {
+                        recipientTypeBadge = `<span style="background: #6c757d; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">${row.recipient_type}</span>`;
+                    }
+                }
+                
                 return `
                     <tr class="receipt-row" data-receipt-id="${row.invoice_number || ''}">
                         <td>${row.location || ''}</td>
@@ -366,6 +378,7 @@ class ReceiptManager {
                         <td>${this.formatCurrency(row.total_price)}</td>
                         <td>${this.formatCurrency(row.remaining_amount)}</td>
                         <td>${this.formatReceiptNumber(row.invoice_number)}</td>
+                        <td>${recipientTypeBadge}</td>
                         <td>${this.formatDate(row.order_date)}</td>
                     </tr>
                 `;
@@ -423,11 +436,12 @@ class ReceiptManager {
             // The table shows only sales transaction totals, not opening debt
             
             // Set colspan based on invoice column visibility
-            // When invoice column is visible: 2 + 2 + 4 = 8 columns
-            // When invoice column is hidden: 2 + 2 + 4 = 8 columns
+            // Now we have 9 columns: Location, Quantity, Ratio, Price per unit, Total, Remaining, Invoice, Recipient Type, Date
+            // When invoice column is visible: 2 + 2 + 5 = 9 columns
+            // When invoice column is hidden: 2 + 2 + 4 = 8 columns (but we still have recipient type column)
             const firstColspan = '2';  // Location + Quantity
             const secondColspan = '2'; // Ratio + Price per unit
-            const thirdColspan = showInvoiceColumn ? '4' : '4'; // Total + Remaining + Invoice + Date
+            const thirdColspan = showInvoiceColumn ? '5' : '5'; // Total + Remaining + Invoice + Recipient Type + Date
             
             tfoot.innerHTML = `
                 <tr class="summary-row">
