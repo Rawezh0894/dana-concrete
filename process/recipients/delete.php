@@ -26,54 +26,93 @@ if ($id <= 0) {
 }
 
 try {
-    // First try to get from recipients table
-    $checkStmt = $pdo->prepare("SELECT id, name FROM recipients WHERE id = :id");
-    $checkStmt->execute([':id' => $id]);
-    $recipient = $checkStmt->fetch(PDO::FETCH_ASSOC);
-    $isFromRecipientsTable = true;
-
-    // If not found, try to get from customers table (is_recipient = 1)
-    if (!$recipient) {
-        $checkStmt = $pdo->prepare("SELECT id, name FROM customers WHERE id = :id AND is_recipient = 1");
-        $checkStmt->execute([':id' => $id]);
-        $recipient = $checkStmt->fetch(PDO::FETCH_ASSOC);
-        $isFromRecipientsTable = false;
+    // First check if recipient exists in recipients table
+    $recipientStmt = $pdo->prepare("SELECT id, name FROM recipients WHERE id = :id");
+    $recipientStmt->execute([':id' => $id]);
+    $recipient = $recipientStmt->fetch(PDO::FETCH_ASSOC);
+    
+    $recipientName = null;
+    $isFromRecipientsTable = false;
+    $isFromCustomersTable = false;
+    
+    if ($recipient) {
+        // Recipient exists in recipients table
+        $recipientName = $recipient['name'];
+        $isFromRecipientsTable = true;
+    } else {
+        // Check if customer exists and is a recipient
+        $customerStmt = $pdo->prepare("SELECT id, name FROM customers WHERE id = :id AND is_recipient = 1");
+        $customerStmt->execute([':id' => $id]);
+        $customer = $customerStmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($customer) {
+            $recipientName = $customer['name'];
+            $isFromCustomersTable = true;
+        } else {
+            echo json_encode(['success' => false, 'message' => 'وەرگر نەدۆزرایەوە.']);
+            exit;
+        }
     }
-
-    if (!$recipient) {
-        echo json_encode(['success' => false, 'message' => 'وەرگر نەدۆزرایەوە.']);
-        exit;
-    }
-
-    $recipientName = $recipient['name'];
-
-    // Check if recipient has concrete receipts
-    $hasConcreteReceipts = $pdo->prepare("SELECT COUNT(*) FROM concrete_receipts WHERE receiver_name = :recipient_name");
-    $hasConcreteReceipts->execute([':recipient_name' => $recipientName]);
-    if ($hasConcreteReceipts->fetchColumn() > 0) {
-        echo json_encode(['success' => false, 'message' => 'ناتوانرێت وەرگر بسڕدرێت چونکە پسوڵەی کۆنکرێت بۆ تۆمارکراوە']);
-        exit;
-    }
-
-    // Check if recipient has notes
-    $hasNotes = $pdo->prepare("SELECT COUNT(*) FROM notes WHERE recipient = :recipient_name");
-    $hasNotes->execute([':recipient_name' => $recipientName]);
-    if ($hasNotes->fetchColumn() > 0) {
-        echo json_encode(['success' => false, 'message' => 'ناتوانرێت وەرگر بسڕدرێت چونکە تێبینی بۆ تۆمارکراوە']);
-        exit;
-    }
-
-    // Check if recipient has sales (as recipient or as customer)
-    $hasSales = $pdo->prepare("SELECT COUNT(*) FROM sales WHERE recipient = :recipient_name OR customer_id = :customer_id");
-    $hasSales->execute([':recipient_name' => $recipientName, ':customer_id' => $id]);
-    if ($hasSales->fetchColumn() > 0) {
-        echo json_encode(['success' => false, 'message' => 'ناتوانرێت وەرگر بسڕدرێت چونکە مامەڵەی فرۆشتن بۆ تۆمارکراوە']);
-        exit;
-    }
-
-    // Delete based on source table
+    
+    // Check if recipient has sales receipts
     if ($isFromRecipientsTable) {
-        // Delete from recipients table
+        // Check sales by recipient name
+        $hasSales = $pdo->prepare("SELECT COUNT(*) FROM sales WHERE recipient = :recipient_name");
+        $hasSales->execute([':recipient_name' => $recipientName]);
+    } else {
+        // Check sales by customer_id OR recipient name
+        $hasSales = $pdo->prepare("SELECT COUNT(*) FROM sales WHERE customer_id = :customer_id OR recipient = :recipient_name");
+        $hasSales->execute([
+            ':customer_id' => $id,
+            ':recipient_name' => $recipientName
+        ]);
+    }
+    
+    if ($hasSales->fetchColumn() > 0) {
+        echo json_encode(['success' => false, 'message' => 'ناتوانرێت وەرگر بسڕدرێتەوە چونکە پسووڵەی فرۆشتن بۆ تۆمارکراوە']);
+        exit;
+    }
+    
+    // Check if recipient has concrete receipts
+    if ($isFromRecipientsTable) {
+        // Check concrete receipts by receiver_name only
+        $hasConcreteReceipts = $pdo->prepare("SELECT COUNT(*) FROM concrete_receipts WHERE receiver_name = :recipient_name");
+        $hasConcreteReceipts->execute([':recipient_name' => $recipientName]);
+    } else {
+        // Check concrete receipts by customer_id OR receiver_name
+        $hasConcreteReceipts = $pdo->prepare("SELECT COUNT(*) FROM concrete_receipts WHERE customer_id = :customer_id OR receiver_name = :recipient_name");
+        $hasConcreteReceipts->execute([
+            ':customer_id' => $id,
+            ':recipient_name' => $recipientName
+        ]);
+    }
+    
+    if ($hasConcreteReceipts->fetchColumn() > 0) {
+        echo json_encode(['success' => false, 'message' => 'ناتوانرێت وەرگر بسڕدرێتەوە چونکە پسووڵەی کۆنکرێت بۆ تۆمارکراوە']);
+        exit;
+    }
+    
+    // Check if recipient has notes
+    if ($isFromRecipientsTable) {
+        // Check notes by recipient name only
+        $hasNotes = $pdo->prepare("SELECT COUNT(*) FROM notes WHERE recipient = :recipient_name");
+        $hasNotes->execute([':recipient_name' => $recipientName]);
+    } else {
+        // Check notes by customer_id OR recipient name
+        $hasNotes = $pdo->prepare("SELECT COUNT(*) FROM notes WHERE customer_id = :customer_id OR recipient = :recipient_name");
+        $hasNotes->execute([
+            ':customer_id' => $id,
+            ':recipient_name' => $recipientName
+        ]);
+    }
+    
+    if ($hasNotes->fetchColumn() > 0) {
+        echo json_encode(['success' => false, 'message' => 'ناتوانرێت وەرگر بسڕدرێتەوە چونکە تێبینی بۆ تۆمارکراوە']);
+        exit;
+    }
+    
+    // If recipient is from recipients table, delete it
+    if ($isFromRecipientsTable) {
         $delete = $pdo->prepare("DELETE FROM recipients WHERE id = :id");
         $result = $delete->execute([':id' => $id]);
         
@@ -83,10 +122,10 @@ try {
             echo json_encode(['success' => false, 'message' => 'نەتوانرا وەرگر بسڕدرێتەوە.']);
         }
     } else {
-        // Set is_recipient to 0 instead of deleting (to keep customer data)
+        // If recipient is from customers table, set is_recipient to 0
         $update = $pdo->prepare("UPDATE customers SET is_recipient = 0 WHERE id = :id");
         $result = $update->execute([':id' => $id]);
-
+        
         if ($result && $update->rowCount() > 0) {
             echo json_encode(['success' => true, 'message' => 'وەرگر سڕایەوە.']);
         } else {
