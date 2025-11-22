@@ -30,7 +30,7 @@ body {
     padding-bottom: 1rem;
     margin-bottom: 1rem;
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: 1.2rem;
 }
 .logo-circle {
     width: 100px;
@@ -89,6 +89,9 @@ body {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    flex: 0 0 auto;
+    min-width: 200px;
+    max-width: 250px;
 }
 
 .payment-date-row,
@@ -102,6 +105,8 @@ body {
     padding: 0.6rem 1rem;
     box-shadow: 0 2px 6px #003b7315;
     transition: all 0.3s ease;
+    word-break: break-word;
+    overflow-wrap: break-word;
 }
 
 .payment-date-row:hover,
@@ -124,6 +129,10 @@ body {
     font-family: 'Rabar', sans-serif;
     font-size: 1rem;
     font-weight: 500;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    flex: 1;
+    min-width: 0;
 }
 
 @media (max-width: 768px) {
@@ -289,19 +298,19 @@ body {
     
     .receipt-header { 
         border-bottom: 4px solid var(--seafoam-green); 
-        padding-bottom: 1rem;
-        margin-bottom: 1rem;
-        align-items: flex-start;
+        padding-bottom: 0.9rem;
+        margin-bottom: 0.9rem;
+        align-items: center;
         flex-wrap: wrap;
         gap: 1rem;
         justify-content: space-between;
     }
     
     .receipt-title {
-        flex: 0 1 28%;
-        min-width: 150px;
-        max-width: 200px;
-        font-size: 1.15rem;
+        flex: 0 1 30%;
+        min-width: 160px;
+        max-width: 220px;
+        font-size: 1.2rem;
         padding: 0.5rem 0.7rem;
         margin: 0;
         border-width: 2px;
@@ -310,33 +319,33 @@ body {
     }
     
     .logo-circle {
-        flex: 0 0 80px;
-        width: 80px;
-        height: 80px;
+        flex: 0 0 85px;
+        width: 85px;
+        height: 85px;
         margin-left: 0;
-        margin-right: 0.8rem;
+        margin-right: 0.5rem;
         box-shadow: none;
     }
     
     .receipt-meta {
-        flex: 0 1 18%;
-        min-width: 120px;
-        max-width: 140px;
-        gap: 0.35rem;
+        flex: 0 0 auto;
+        min-width: 180px;
+        max-width: 220px;
+        gap: 0.4rem;
         text-align: right;
         align-items: flex-start;
-        margin-right: 0.8rem;
+        margin-right: 0.5rem;
     }
     
     .payment-date-row,
     .phone-number-row {
         width: 100%;
-        padding: 0.35rem 0.5rem;
-        font-size: 0.75rem;
+        padding: 0.45rem 0.7rem;
+        font-size: 0.85rem;
         word-break: break-word;
         overflow-wrap: break-word;
-        margin-bottom: 0.25rem;
-        line-height: 1.25;
+        margin-bottom: 0.2rem;
+        box-sizing: border-box;
     }
     
     .payment-date-row:last-child,
@@ -346,36 +355,37 @@ body {
     
     .payment-date-row span,
     .phone-number-row span {
-        font-size: 0.75rem;
+        font-size: 0.85rem;
         word-break: break-word;
-        line-height: 1.25;
-        display: inline-block;
-        max-width: 100%;
-    }
-    
-    .phone-number {
-        font-size: 0.75rem !important;
-        word-break: break-word;
-        overflow-wrap: break-word;
-        line-height: 1.25;
-        display: inline-block;
-        max-width: 100%;
+        line-height: 1.4;
+        flex: 1;
+        min-width: 0;
     }
     
     .payment-date-row i,
     .phone-number-row i {
-        font-size: 0.7rem;
-        min-width: 14px;
+        font-size: 0.8rem;
+        min-width: 16px;
+        flex-shrink: 0;
+    }
+    
+    .phone-number {
+        font-size: 0.85rem !important;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        line-height: 1.4;
+        display: inline-block;
+        max-width: 100%;
     }
     
     .company-info-row {
-        gap: 1rem;
-        margin-bottom: 1.2rem;
-        margin-top: 0.7rem;
+        gap: 0.8rem;
+        margin-bottom: 1rem;
+        margin-top: 0.5rem;
     }
     
     .company-info-box {
-        padding: 0.6rem 1.1rem;
+        padding: 0.55rem 1rem;
         font-size: 1rem;
         min-width: 130px;
     }
