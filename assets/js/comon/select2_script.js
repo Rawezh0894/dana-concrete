@@ -13,12 +13,15 @@ function enableSelect2(selector, modalSelector) {
         }
     }
     const allowNewRecipient = String($element.data('allowNewRecipient')).toLowerCase() === 'true';
+    // Check if select has an empty option (for allowing "none" selection)
+    const hasEmptyOption = $element.find('option[value=""]').length > 0;
     const select2Options = {
         dropdownParent: $(modalSelector),
         width: '100%',
         placeholder: $element.attr('data-placeholder') || "هەڵبژێرە",
         dir: "rtl",
-        matcher: customMatcher
+        matcher: customMatcher,
+        allowClear: hasEmptyOption // Allow clearing if empty option exists
     };
 
     if (allowNewRecipient) {
