@@ -610,11 +610,15 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
     }
 
     function handleRecipientAdded(recipient) {
-        const optionHtml = buildRecipientOption(recipient);
+        if (!recipient || !recipient.id) {
+            return;
+        }
         const pendingSelector = window.pendingRecipientSelectId || '';
+        
         recipientSelectIds.forEach(function(id) {
             const select = document.getElementById(id);
             if (!select) return;
+            
             const $select = $(select);
             const shouldSelect = pendingSelector === `#${id}`;
             const isSelect2Initialized = $select.hasClass('select2-hidden-accessible');
@@ -622,30 +626,28 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
             // Check if option already exists
             const exists = Array.from(select.options).some(opt => String(opt.value) === String(recipient.id));
             if (!exists) {
-                // Destroy Select2 temporarily if initialized
-                if (isSelect2Initialized) {
-                    try {
-                        $select.select2('destroy');
-                    } catch(e) {
-                        console.log('Error destroying select2:', e);
-                    }
-                }
+                // Create new option element
+                const newOption = new Option(recipient.name || '', recipient.id, false, false);
+                newOption.setAttribute('data-name', recipient.name || '');
+                const phones = [recipient.phone1, recipient.phone2].filter(Boolean).join(' / ');
+                const searchMeta = (recipient.name + ' ' + phones).trim();
+                newOption.setAttribute('data-search', searchMeta);
                 
-                // Add the new option
-                select.insertAdjacentHTML('beforeend', optionHtml);
+                // Add option to select
+                select.appendChild(newOption);
                 
-                // Reinitialize Select2 if it was initialized before
+                // If Select2 is initialized, trigger change to refresh
                 if (isSelect2Initialized) {
-                    const modalSelector = id === 'recipient' ? '#addNoteModal' : '#editNoteModal';
-                    enableSelect2('#' + id, modalSelector);
+                    // Select2 should automatically detect new options, but trigger change to ensure
+                    $select.trigger('change');
                 }
             }
             
             // Select the new recipient if needed
             if (shouldSelect) {
-                select.value = recipient.id;
+                $select.val(recipient.id);
                 if (isSelect2Initialized) {
-                    $select.trigger('change.select2');
+                    $select.trigger('change');
                 } else {
                     $select.trigger('change');
                 }
@@ -660,10 +662,6 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
         $.get('../process/recipients/select.php', function(response) {
             if (!(response && response.success && Array.isArray(response.data))) return;
 
-            const optionsHtml = ['<option value="">وەرگرێک هەڵبژێرە</option>']
-                .concat(response.data.map(buildRecipientOption))
-                .join('');
-
             recipientSelectIds.forEach(function(id) {
                 const select = document.getElementById(id);
                 if (!select) return;
@@ -671,30 +669,40 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
                 const currentValue = select.value;
                 const isSelect2Initialized = $select.hasClass('select2-hidden-accessible');
                 
-                // Destroy Select2 if initialized
-                if (isSelect2Initialized) {
-                    try {
-                        $select.select2('destroy');
-                    } catch(e) {
-                        console.log('Error destroying select2:', e);
-                    }
+                // Clear existing options except the first empty one
+                const emptyOption = select.querySelector('option[value=""]');
+                select.innerHTML = '';
+                if (emptyOption) {
+                    select.appendChild(emptyOption);
+                } else {
+                    const newEmptyOption = new Option('وەرگرێک هەڵبژێرە', '', false, false);
+                    select.appendChild(newEmptyOption);
                 }
                 
-                // Update innerHTML
-                select.innerHTML = optionsHtml;
+                // Add all recipients as options
+                response.data.forEach(function(recipient) {
+                    const option = new Option(recipient.name || '', recipient.id, false, false);
+                    option.setAttribute('data-name', recipient.name || '');
+                    const phones = [recipient.phone1, recipient.phone2].filter(Boolean).join(' / ');
+                    const searchMeta = (recipient.name + ' ' + phones).trim();
+                    option.setAttribute('data-search', searchMeta);
+                    select.appendChild(option);
+                });
                 
-                // Restore value if it exists
+                // Restore value if it exists and is still valid
                 if (currentValue) {
-                    select.value = currentValue;
+                    const optionExists = Array.from(select.options).some(opt => String(opt.value) === String(currentValue));
+                    if (optionExists) {
+                        select.value = currentValue;
+                    } else {
+                        select.selectedIndex = 0;
+                    }
                 } else {
                     select.selectedIndex = 0;
                 }
                 
-                // Reinitialize Select2 if it was initialized before
+                // Trigger change to update Select2
                 if (isSelect2Initialized) {
-                    const modalSelector = id === 'recipient' ? '#addNoteModal' : '#editNoteModal';
-                    enableSelect2('#' + id, modalSelector);
-                } else {
                     $select.trigger('change');
                 }
             });
@@ -708,6 +716,14 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
         if (recipient) {
             handleRecipientAdded(recipient);
         } else {
+            refreshRecipientDropdowns();
+        }
+    });
+
+    // Refresh recipient dropdown when edit modal is shown
+    $(document).on('shown.bs.modal', '#editNoteModal', function() {
+        // Refresh recipient dropdown to ensure it has the latest data
+        if (window.refreshRecipientDropdowns) {
             refreshRecipientDropdowns();
         }
     });
