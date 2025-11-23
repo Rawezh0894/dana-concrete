@@ -3,7 +3,7 @@ session_start();
 require_once '../../config/db_conected.php';
 require_once '../../config/permissions.php';
 
-if (!hasPermission('edit_customer')) {
+if (!hasPermission('update_customer')) {
     http_response_code(403);
     echo json_encode(['error' => 'Permission denied']);
     exit;
