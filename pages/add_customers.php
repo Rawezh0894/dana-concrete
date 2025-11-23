@@ -60,6 +60,7 @@ if (!hasPermission('view_customer')) {
 
     <!-- Summary Cards -->
     <div class="row mb-4" id="summary-cards">
+        <?php if (hasPermission('view_total_customer_debt')): ?>
         <div class="col-md-4 mb-3">
             <div class="card text-center shadow  card-gradient-success card-animate-hover">
                 <div class="card-body">
@@ -70,7 +71,8 @@ if (!hasPermission('view_customer')) {
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-3">
+        <?php endif; ?>
+        <div class="<?php echo hasPermission('view_total_customer_debt') ? 'col-md-4' : 'col-md-6'; ?> mb-3">
             <div class="card text-center shadow  card-gradient-warning card-animate-hover">
                 <div class="card-body">
                     <i class="fas fa-users card-icon"></i>
@@ -80,7 +82,7 @@ if (!hasPermission('view_customer')) {
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-3">
+        <div class="<?php echo hasPermission('view_total_customer_debt') ? 'col-md-4' : 'col-md-6'; ?> mb-3">
             <div class="card text-center shadow  card-gradient-info card-animate-hover">
                 <div class="card-body">
                     <i class="fas fa-user-times card-icon"></i>

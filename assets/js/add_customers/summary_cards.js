@@ -22,24 +22,33 @@ function loadSummaryCardsData() {
                 const totalCustomersValue = summary.total_customers !== undefined ? summary.total_customers : 0;
                 const customersWithDebtValue = summary.customers_with_debt !== undefined ? summary.customers_with_debt : 0;
 
-                $('#total_debt').text('$' + Number(totalDebtValue || 0).toLocaleString('en-US', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                }));
+                // Update total debt card only if it exists (user has permission)
+                const totalDebtCard = $('#total_debt');
+                if (totalDebtCard.length > 0) {
+                    totalDebtCard.text('$' + Number(totalDebtValue || 0).toLocaleString('en-US', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }));
+                }
+                
                 $('#total_customers').text(Number(totalCustomersValue || 0).toLocaleString('en-US'));
                 $('#customers_with_debt').text(Number(customersWithDebtValue || 0).toLocaleString('en-US'));
             } else {
                 console.error('Error loading summary data:', response.message);
-                // Set default values
-                $('#total_debt').text('$0');
+                // Set default values only if cards exist
+                if ($('#total_debt').length > 0) {
+                    $('#total_debt').text('$0');
+                }
                 $('#total_customers').text('0');
                 $('#customers_with_debt').text('0');
             }
         },
         error: function(xhr, status, error) {
             console.error('AJAX Error:', error);
-            // Set default values on error
-            $('#total_debt').text('$0');
+            // Set default values on error only if cards exist
+            if ($('#total_debt').length > 0) {
+                $('#total_debt').text('$0');
+            }
             $('#total_customers').text('0');
             $('#customers_with_debt').text('0');
         }
