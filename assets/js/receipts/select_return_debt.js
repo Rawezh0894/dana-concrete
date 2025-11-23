@@ -42,6 +42,39 @@ function formatInvoiceNumbers(input) {
     return invoiceNumbers.join(', ');
 }
 
+// Function to format date as DD/MM/YYYY
+function formatDate(dateString) {
+    if (!dateString) return '';
+    
+    try {
+        // Handle different date formats
+        let date;
+        if (typeof dateString === 'string') {
+            // Try to parse the date string
+            date = new Date(dateString);
+        } else if (dateString instanceof Date) {
+            date = dateString;
+        } else {
+            return String(dateString);
+        }
+        
+        // Check if date is valid
+        if (isNaN(date.getTime())) {
+            return String(dateString);
+        }
+        
+        // Format as DD/MM/YYYY (day/month/year)
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        
+        return `${day}/${month}/${year}`;
+    } catch (e) {
+        console.warn('Error formatting date:', dateString, e);
+        return String(dateString);
+    }
+}
+
 // Listen for filter changes and reload paid-table
 ['month-filter', 'date-from-filter', 'date-to-filter', 'paid-date-from-filter', 'paid-date-to-filter'].forEach(function(id) {
     var el = document.getElementById(id);
@@ -144,7 +177,7 @@ function loadReturnDebt() {
                         <tr>
                             <td>${'$' + (amountUsd ? amountUsd.toLocaleString() : '0')}</td>
                             <td>${amountIqd ? amountIqd.toLocaleString() + ' د.ع' : '0 د.ع'}</td>
-                            <td>${row.date}</td>
+                            <td>${formatDate(row.date)}</td>
                             <td>${row.note && row.note.trim() ? row.note : '–'}</td>
                         </tr>
                     `;
