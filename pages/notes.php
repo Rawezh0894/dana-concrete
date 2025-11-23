@@ -614,8 +614,42 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
         const pendingSelector = window.pendingRecipientSelectId || '';
         recipientSelectIds.forEach(function(id) {
             const select = document.getElementById(id);
+            if (!select) return;
+            const $select = $(select);
             const shouldSelect = pendingSelector === `#${id}`;
-            addRecipientOption(select, optionHtml, recipient.id, shouldSelect);
+            const isSelect2Initialized = $select.hasClass('select2-hidden-accessible');
+            
+            // Check if option already exists
+            const exists = Array.from(select.options).some(opt => String(opt.value) === String(recipient.id));
+            if (!exists) {
+                // Destroy Select2 temporarily if initialized
+                if (isSelect2Initialized) {
+                    try {
+                        $select.select2('destroy');
+                    } catch(e) {
+                        console.log('Error destroying select2:', e);
+                    }
+                }
+                
+                // Add the new option
+                select.insertAdjacentHTML('beforeend', optionHtml);
+                
+                // Reinitialize Select2 if it was initialized before
+                if (isSelect2Initialized) {
+                    const modalSelector = id === 'recipient' ? '#addNoteModal' : '#editNoteModal';
+                    enableSelect2('#' + id, modalSelector);
+                }
+            }
+            
+            // Select the new recipient if needed
+            if (shouldSelect) {
+                select.value = recipient.id;
+                if (isSelect2Initialized) {
+                    $select.trigger('change.select2');
+                } else {
+                    $select.trigger('change');
+                }
+            }
         });
         if (pendingSelector) {
             clearPendingSelection();
@@ -633,14 +667,36 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
             recipientSelectIds.forEach(function(id) {
                 const select = document.getElementById(id);
                 if (!select) return;
+                const $select = $(select);
                 const currentValue = select.value;
+                const isSelect2Initialized = $select.hasClass('select2-hidden-accessible');
+                
+                // Destroy Select2 if initialized
+                if (isSelect2Initialized) {
+                    try {
+                        $select.select2('destroy');
+                    } catch(e) {
+                        console.log('Error destroying select2:', e);
+                    }
+                }
+                
+                // Update innerHTML
                 select.innerHTML = optionsHtml;
+                
+                // Restore value if it exists
                 if (currentValue) {
                     select.value = currentValue;
                 } else {
                     select.selectedIndex = 0;
                 }
-                $(select).trigger('change.select2');
+                
+                // Reinitialize Select2 if it was initialized before
+                if (isSelect2Initialized) {
+                    const modalSelector = id === 'recipient' ? '#addNoteModal' : '#editNoteModal';
+                    enableSelect2('#' + id, modalSelector);
+                } else {
+                    $select.trigger('change');
+                }
             });
         }, 'json');
     }

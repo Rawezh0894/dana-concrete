@@ -36,6 +36,32 @@ document.addEventListener('DOMContentLoaded', function() {
         safeDestroySelect2('#pump_driver_id');
     }
 
+    // Reset form when modal is shown
+    const addNoteModal = document.getElementById('addNoteModal');
+    if (addNoteModal) {
+        addNoteModal.addEventListener('show.bs.modal', function() {
+            // Reset form
+            addNoteForm.reset();
+            
+            // Reset date to tomorrow
+            document.getElementById('date').value = tomorrowFormatted;
+            
+            // Reset time to empty
+            document.getElementById('time').value = '';
+            
+            // Reset Select2 dropdowns
+            $('#customer_id').val('').trigger('change');
+            $('#recipient').val('').trigger('change');
+            
+            // Reset other select fields
+            $('#formula_id').val('');
+            $('#mixer_car_id').val('');
+            $('#mixer_driver_id').val('');
+            $('#pump_car_id').val('');
+            $('#pump_driver_id').val('');
+        });
+    }
+
     addNoteForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         console.log('Form submission started');
