@@ -20,7 +20,7 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-if (!hasPermission('view_accounts')) {
+if (!hasPermission('add_company')) {
     error_log('Permission denied for user: ' . $_SESSION['user_id'] . ' to add company');
     http_response_code(403);
     echo json_encode(['error' => 'ڕێگەت پێنەدراوە!']);

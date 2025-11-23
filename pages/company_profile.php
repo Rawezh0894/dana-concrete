@@ -2,7 +2,7 @@
 session_start();
 require_once '../config/db_conected.php';
 require_once '../config/permissions.php';
-if (!hasPermission('view_accounts')) {
+if (!hasPermission('view_company')) {
     echo '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;">'
         .'<i class="bi bi-lock-fill" style="font-size:5rem;color:#ccc;"></i>'
         .'<h2 style="color:#888;">توانای دەست گەیشتنت نییە بەم پەیجە</h2>'

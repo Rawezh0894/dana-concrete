@@ -2,7 +2,7 @@
 session_start();
 require_once '../config/db_conected.php';
 require_once '../config/permissions.php';
-if (!hasPermission('view_accounts')) {
+if (!hasPermission('view_company')) {
     echo '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;">'
         .'<i class="bi bi-lock-fill" style="font-size:5rem;color:#ccc;"></i>'
         .'<h2 style="color:#888;">توانای دەست گەیشتنت نییە بەم پەیجە</h2>'
@@ -36,7 +36,9 @@ if (!isset($_SESSION['user_id'])) {
 <div class="container-fluid py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">کۆمپانیاکان</h2>
+        <?php if (hasPermission('add_company')): ?>
         <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addCompanyModal" style="background: var(--seafoam-green); font-weight: bold;">+ زیادکردنی کۆمپانیا</button>
+        <?php endif; ?>
     </div>
 
     <!-- Summary Cards -->
