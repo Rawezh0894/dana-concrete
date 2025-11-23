@@ -18,7 +18,7 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-if (!hasPermission('view_accounts')) {
+if (!hasPermission('view_car')) {
     error_log('Permission denied for user: ' . $_SESSION['user_id'] . ' to view cars');
     echo json_encode([]);
     exit;

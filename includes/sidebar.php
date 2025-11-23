@@ -76,9 +76,13 @@ $logout_pages = ['logout.php'];
         <?php if (hasPermission('view_company')): ?>
           <li><a href="../pages/add_company.php" class="sidebar-link<?php if($current_page == 'add_company.php') echo ' active'; ?>"><i class="bi bi-building me-2"></i> کۆمپانیا</a></li>
         <?php endif; ?>
-        <?php if (hasPermission('view_accounts')): ?>
+        <?php if (hasPermission('view_car')): ?>
           <li><a href="../pages/add_car.php" class="sidebar-link<?php if($current_page == 'add_car.php') echo ' active'; ?>"><i class="bi bi-truck me-2"></i> سەیارەکان</a></li>
+        <?php endif; ?>
+        <?php if (hasPermission('view_customer')): ?>
           <li><a href="../pages/add_customers.php" class="sidebar-link<?php if($current_page == 'add_customers.php') echo ' active'; ?>"><i class="bi bi-person-badge me-2"></i> کڕیار</a></li>
+        <?php endif; ?>
+        <?php if (hasPermission('view_employee')): ?>
           <li><a href="../pages/add_employee.php" class="sidebar-link<?php if($current_page == 'add_employee.php') echo ' active'; ?>"><i class="bi bi-person-workspace me-2"></i> کارمەند</a></li>
         <?php endif; ?>
         <?php if (hasPermission('view_recipient')): ?>
