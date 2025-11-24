@@ -21,38 +21,41 @@ if (!hasPermission('add_recipient')) {
 $name = trim($_POST['name'] ?? '');
 $phone1 = trim($_POST['phone1'] ?? '');
 $phone2 = trim($_POST['phone2'] ?? '');
+$openingMeterTotal = isset($_POST['opening_meter_total']) ? (float)$_POST['opening_meter_total'] : 0.0;
 
-if ($name === '' || $phone1 === '') {
-    echo json_encode(['success' => false, 'message' => 'تکایە ناو و ژمارەی مۆبایلی یەکەم پڕبکەرەوە.']);
-    exit;
-}
+$name = $name === '' ? null : $name;
+$phone1 = $phone1 === '' ? null : $phone1;
+$phone2 = $phone2 === '' ? null : $phone2;
 
 try {
-    // Check if customer with this mobile already exists (any customer, regardless of is_recipient)
-    $stmt = $pdo->prepare("SELECT id FROM customers WHERE mobile1 = ?");
-    $stmt->execute([$phone1]);
-    if ($stmt->fetch()) {
-        echo json_encode(['success' => false, 'message' => 'ئەم ژمارەی مۆبایلە پێشتر وەک کڕیار داخڵ کراوە.']);
-        exit;
-    }
-    
-    // Check if recipient with this mobile already exists in recipients table
-    $recipientStmt = $pdo->prepare("SELECT id FROM recipients WHERE phone1 = ?");
-    $recipientStmt->execute([$phone1]);
-    if ($recipientStmt->fetch()) {
-        echo json_encode(['success' => false, 'message' => 'ئەم ژمارەی مۆبایلە پێشتر وەک وەرگر تۆمارکراوە.']);
-        exit;
+    if ($phone1 !== null) {
+        // Check if customer with this mobile already exists (any customer, regardless of is_recipient)
+        $stmt = $pdo->prepare("SELECT id FROM customers WHERE mobile1 = ?");
+        $stmt->execute([$phone1]);
+        if ($stmt->fetch()) {
+            echo json_encode(['success' => false, 'message' => 'ئەم ژمارەی مۆبایلە پێشتر وەک کڕیار داخڵ کراوە.']);
+            exit;
+        }
+        
+        // Check if recipient with this mobile already exists in recipients table
+        $recipientStmt = $pdo->prepare("SELECT id FROM recipients WHERE phone1 = ?");
+        $recipientStmt->execute([$phone1]);
+        if ($recipientStmt->fetch()) {
+            echo json_encode(['success' => false, 'message' => 'ئەم ژمارەی مۆبایلە پێشتر وەک وەرگر تۆمارکراوە.']);
+            exit;
+        }
     }
     
     // If no customer or recipient exists, create new recipient in recipients table only
     $insert = $pdo->prepare("
         INSERT INTO recipients (name, phone1, phone2, opening_meter_total)
-        VALUES (?, ?, ?, 0.00)
+        VALUES (?, ?, ?, ?)
     ");
     $result = $insert->execute([
         $name,
         $phone1,
-        $phone2 !== '' ? $phone2 : null
+        $phone2,
+        $openingMeterTotal
     ]);
 
     if ($result) {
