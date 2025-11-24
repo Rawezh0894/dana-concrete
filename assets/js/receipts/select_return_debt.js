@@ -42,6 +42,19 @@ function formatInvoiceNumbers(input) {
     return invoiceNumbers.join(', ');
 }
 
+function formatUsdAmount(amount) {
+    const num = parseFloat(amount);
+    if (!isFinite(num) || num === 0) {
+        return '$0';
+    }
+    return '$' + num.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+}
+
+function shouldShowDebtDiscount() {
+    const checkbox = document.getElementById('show-debt-discount');
+    return checkbox ? checkbox.checked === true : false;
+}
+
 // Function to format date as DD/MM/YYYY
 function formatDate(dateString) {
     if (!dateString) return '';
@@ -157,11 +170,22 @@ function loadReturnDebt() {
                 let totalPaidUsd = 0;
                 let totalPaidIqd = 0;
                 let totalIqdToUsd = 0;
+                let totalDiscount = 0;
                 let iqdConversionPossible = true;
+                const showDiscountColumn = shouldShowDebtDiscount();
+                const paidTable = document.getElementById('paid-table');
+                if (paidTable) {
+                    if (showDiscountColumn) {
+                        paidTable.classList.add('show-debt-discount');
+                    } else {
+                        paidTable.classList.remove('show-debt-discount');
+                    }
+                }
                 data.forEach(row => {
                     const amountUsd = parseFloat(row.paid_usd || 0);
                     const amountIqd = parseFloat(row.paid_iqd || 0);
                     const rate = parseFloat(row.dolar_rate || 0);
+                    const discountAmount = parseFloat(row.discount || 0) || 0;
                     let iqdToUsd = 0;
                     if (amountIqd > 0) {
                         if (rate > 0) {
@@ -173,10 +197,12 @@ function loadReturnDebt() {
                     totalPaidUsd += amountUsd;
                     totalPaidIqd += amountIqd;
                     totalIqdToUsd += iqdToUsd;
+                    totalDiscount += discountAmount;
                     paidTableBody.innerHTML += `
                         <tr>
                             <td>${'$' + (amountUsd ? amountUsd.toLocaleString() : '0')}</td>
                             <td>${amountIqd ? amountIqd.toLocaleString() + ' د.ع' : '0 د.ع'}</td>
+                            <td class="debt-discount-col">${formatUsdAmount(discountAmount)}</td>
                             <td>${formatDate(row.date)}</td>
                             <td>${row.note && row.note.trim() ? row.note : '–'}</td>
                         </tr>
@@ -192,17 +218,20 @@ function loadReturnDebt() {
                         totalText = '$' + totalPaidUsd.toLocaleString(undefined, {maximumFractionDigits:2}) + ' <span style="color:red;font-size:0.95em">(نرخی دۆلار بۆ دینار نییە!)</span>';
                     }
                     paidTableBody.innerHTML += `
-                        <tr>
-                        <td colspan="2" style="font-weight:bold;">${totalText}</td>
+                        <tr class="paid-summary-row">
+                            <td colspan="2" style="font-weight:bold;">${totalText}</td>
+                            <td class="debt-discount-col" style="font-weight:bold; text-align:center;">
+                                ${formatUsdAmount(totalDiscount)}
+                                <div style="font-size:0.85em; font-weight:normal; margin-top:0.25rem;">کۆی داشکاندن</div>
+                            </td>
                             <td colspan="2" style="font-weight:bold;">کۆی پارەی واسڵ کراو</td>
-                            
                         </tr>
                     `;
                 } else {
                     // Show "no payments" message when there are no payments
                     paidTableBody.innerHTML = `
                         <tr>
-                            <td colspan="4" style="text-align: center; padding: 2rem; color: #6c757d; font-style: italic;">
+                            <td colspan="5" style="text-align: center; padding: 2rem; color: #6c757d; font-style: italic;">
                                 <i class="fa fa-info-circle" style="margin-left: 0.5rem;"></i>
                                 هیچ پارەدانێک نیە
                             </td>

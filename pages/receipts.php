@@ -100,6 +100,15 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             display: table-cell !important;
         }
         
+        /* Debt discount column visibility */
+        #paid-table .debt-discount-col {
+            display: none;
+        }
+        
+        #paid-table.show-debt-discount .debt-discount-col {
+            display: table-cell;
+        }
+        
         /* Filter Section Styles */
         .filter-section {
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
@@ -605,6 +614,14 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                         <i class="fa fa-columns"></i> جیاکردنەوەی زانیارییەکانی قەرز
                     </label>
                 </div>
+                
+                <div class="filter-group checkbox-group">
+                    <label for="show-debt-discount" class="filter-checkbox-label">
+                        <input type="checkbox" id="show-debt-discount" class="filter-checkbox">
+                        <span class="checkmark"></span>
+                        <i class="fa fa-tags"></i> نیشاندانی داشکاندن لە دانەوەی قەرز
+                    </label>
+                </div>
             </div>
         </div>
     </div>
@@ -637,6 +654,7 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             <tr>
                 <th>پارەی واسڵ کراو (USD)</th>
                 <th>پارەی واسڵ کراو (د.ع)</th>
+                <th class="debt-discount-col">داشکاندن</th>
                 <th>بەرواری پارەدان</th>
                 <th>تێبینی</th>
             </tr>
@@ -798,6 +816,27 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 // Note: Table summary is NOT affected by opening debt filter
                 // The table shows only sales transaction totals, not opening debt
             });
+        }
+        
+        // Show debt discount column toggle
+        var showDebtDiscountCheckbox = document.getElementById('show-debt-discount');
+        if (showDebtDiscountCheckbox) {
+            const savedDebtDiscountPreference = localStorage.getItem('showDebtDiscount');
+            if (savedDebtDiscountPreference !== null) {
+                showDebtDiscountCheckbox.checked = savedDebtDiscountPreference === 'true';
+            }
+            toggleDebtDiscountColumn(showDebtDiscountCheckbox.checked);
+            
+            showDebtDiscountCheckbox.addEventListener('change', function() {
+                const isChecked = this.checked;
+                toggleDebtDiscountColumn(isChecked);
+                localStorage.setItem('showDebtDiscount', isChecked.toString());
+                if (typeof loadReturnDebt === 'function') {
+                    loadReturnDebt();
+                }
+            });
+        } else {
+            toggleDebtDiscountColumn(false);
         }
         
         // Force debt pagination toggle
@@ -1025,6 +1064,18 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                     }
                 }
             }
+        }
+    }
+    
+    // Function to toggle debt discount column visibility in paid table
+    function toggleDebtDiscountColumn(show) {
+        const paidTable = document.getElementById('paid-table');
+        if (!paidTable) return;
+        
+        if (show) {
+            paidTable.classList.add('show-debt-discount');
+        } else {
+            paidTable.classList.remove('show-debt-discount');
         }
     }
     
