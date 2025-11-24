@@ -1,8 +1,13 @@
 // Load recipients for receipts filter
 function loadRecipientsForReceipts() {
-    console.log('Loading recipients for receipts...');
-    
-    fetch('../process/recipients/select.php')
+    if (typeof CUSTOMER_ID === 'undefined' || !CUSTOMER_ID) {
+        console.warn('Cannot load recipients: CUSTOMER_ID is missing');
+        return;
+    }
+
+    const params = new URLSearchParams({ customer_id: CUSTOMER_ID });
+
+    fetch(`../process/receipts/select_recipients.php?${params.toString()}`)
         .then(response => {
             console.log('Recipients response status:', response.status);
             return response.json();
