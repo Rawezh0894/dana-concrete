@@ -493,12 +493,12 @@ $mixer_drivers = array_filter($employees, function ($emp) {
           </div>
           <div class="modal-body">
             <div class="mb-3">
-              <label for="recipient_name" class="form-label">ناو *</label>
-              <input type="text" class="form-control" id="recipient_name" name="name" required>
+              <label for="recipient_name" class="form-label">ناو</label>
+              <input type="text" class="form-control" id="recipient_name" name="name">
             </div>
             <div class="mb-3">
-              <label for="recipient_phone1" class="form-label">ژمارەی مۆبایلی یەکەم *</label>
-              <input type="text" class="form-control" id="recipient_phone1" name="phone1" required>
+              <label for="recipient_phone1" class="form-label">ژمارەی مۆبایلی یەکەم</label>
+              <input type="text" class="form-control" id="recipient_phone1" name="phone1">
             </div>
             <div class="mb-3">
               <label for="recipient_phone2" class="form-label">ژمارەی مۆبایلی دووەم</label>
