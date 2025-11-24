@@ -6,6 +6,22 @@ header('Content-Type: application/json; charset=utf-8');
 require_once '../../config/db_conected.php';
 require_once '../../config/permissions.php';
 
+if (!function_exists('normalizeRecipientKey')) {
+    /**
+     * Normalize a recipient name to use as an array key.
+     */
+    function normalizeRecipientKey($value) {
+        $trimmed = trim((string)$value);
+        if ($trimmed === '') {
+            return '';
+        }
+        if (function_exists('mb_strtolower')) {
+            return mb_strtolower($trimmed, 'UTF-8');
+        }
+        return strtolower($trimmed);
+    }
+}
+
 if (!isset($_SESSION['user_id'])) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
@@ -19,6 +35,7 @@ if (!hasPermission('view_recipient')) {
 }
 
 $recipientId = isset($_GET['id']) ? intval($_GET['id']) : 0;
+$customerId = isset($_GET['customer_id']) ? intval($_GET['customer_id']) : 0;
 
 try {
     if ($recipientId > 0) {
@@ -51,6 +68,39 @@ try {
         } else {
             echo json_encode(['success' => false, 'message' => 'وەرگر نەدۆزرایەوە.']);
         }
+        exit;
+    }
+
+    if ($customerId > 0) {
+        $stmt = $pdo->prepare("
+            SELECT DISTINCT TRIM(recipient) AS recipient_name
+            FROM sales
+            WHERE customer_id = :customer_id
+              AND recipient IS NOT NULL
+              AND TRIM(recipient) != ''
+            ORDER BY recipient_name ASC
+        ");
+        $stmt->execute([':customer_id' => $customerId]);
+        $recipientNames = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        $uniqueRecipients = [];
+        foreach ($recipientNames as $name) {
+            $key = normalizeRecipientKey($name);
+            if ($key === '' || isset($uniqueRecipients[$key])) {
+                continue;
+            }
+            $uniqueRecipients[$key] = $name;
+        }
+
+        $responseData = [];
+        foreach ($uniqueRecipients as $key => $displayName) {
+            $responseData[] = [
+                'id' => 'txn_' . substr(md5($customerId . '_' . $key), 0, 12),
+                'name' => $displayName
+            ];
+        }
+
+        echo json_encode(['success' => true, 'data' => $responseData]);
         exit;
     }
 
