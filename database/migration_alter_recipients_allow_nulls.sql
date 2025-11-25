@@ -4,3 +4,4 @@ ALTER TABLE `recipients`
     MODIFY `phone1` VARCHAR(20) NULL DEFAULT NULL;
 
 
+

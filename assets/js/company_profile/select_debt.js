@@ -27,7 +27,7 @@ function loadDebts() {
         .then(res => res.json())
         .then(debts => {
             if (!debts || debts.length === 0) {
-                $('#debtTable').html(`<tr><td colspan="7" class="text-muted text-center">هیچ زانیارییەک نەدۆزرایەوە</td></tr>`);
+                $('#debtTable').html(`<tr><td colspan="8" class="text-muted text-center">هیچ زانیارییەک نەدۆزرایەوە</td></tr>`);
                 return;
             }
             // Prepare data for DataTables
@@ -36,6 +36,7 @@ function loadDebts() {
                 Number(debt.amount_usd).toLocaleString('en-US') + ' $',
                 Number(debt.amount_iqd).toLocaleString('en-US') + ' د.ع',
                 Number(debt.discount_usd || 0).toLocaleString('en-US') + ' $',
+                Number(debt.discount_iqd || 0).toLocaleString('en-US') + ' د.ع',
                 Number(debt.dollar_rate).toLocaleString('en-US') + ' د.ع',
                 debt.note || '',
                 `
@@ -45,6 +46,7 @@ function loadDebts() {
                         data-amount_usd="${debt.amount_usd}"
                         data-amount_iqd="${debt.amount_iqd}"
                         data-discount_usd="${debt.discount_usd || 0}"
+                        data-discount_iqd="${debt.discount_iqd || 0}"
                         data-dollar_rate="${debt.dollar_rate}"
                         data-note="${debt.note || ''}"
                         title="دەستکاری">
@@ -64,6 +66,7 @@ function loadDebts() {
                     { title: 'بڕی دۆلار' },
                     { title: 'بڕی دینار' },
                     { title: 'داشکاندن (دۆلار)' },
+                    { title: 'داشکاندن (دینار)' },
                     { title: 'نرخی دۆلار' },
                     { title: 'تێبینی' },
                     { title: 'کردارەکان' }

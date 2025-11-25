@@ -27,6 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
     $amount_usd = floatval($debt['amount_usd']);
     $amount_iqd = floatval($debt['amount_iqd']);
     $discount_usd = floatval($debt['discount_usd'] ?? 0);
+    $discount_iqd = floatval($debt['discount_iqd'] ?? 0);
 
     // Get company information for notification
     $stmt = $pdo->prepare("SELECT name FROM company WHERE id = ?");
@@ -41,14 +42,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
         'amount_usd' => $amount_usd,
         'amount_iqd' => $amount_iqd,
         'date' => $debt['date'],
-        'note' => $debt['note'] ?? ''
+        'note' => $debt['note'] ?? '',
+        'discount_usd' => $discount_usd,
+        'discount_iqd' => $discount_iqd
     ];
 
     $additional_info = [
         'action_type' => 'company_debt_payment_deletion',
         'payment_method' => $amount_usd > 0 ? 'USD' : ($amount_iqd > 0 ? 'IQD' : 'none'),
         'total_amount' => $amount_usd + $amount_iqd,
-        'discount_usd' => $discount_usd
+        'discount_usd' => $discount_usd,
+        'discount_iqd' => $discount_iqd
     ];
 
     // Delete the debt payment
@@ -128,6 +132,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
         // Then restore to opening debt
         if ($to_restore > 0) {
             $pdo->prepare('UPDATE company SET opening_debt_usd = opening_debt_usd + ? WHERE id = ?')->execute([$to_restore, $company_id]);
+        }
+    }
+    
+    // Reverse IQD discount
+    if ($discount_iqd > 0) {
+        $to_restore = $discount_iqd;
+        $purchases = $pdo->prepare('SELECT id, remaining_iqd, amount_iqd FROM purchases WHERE company_id = ? AND payment_type = "قەرز" AND type = "دینار" ORDER BY date DESC, id DESC');
+        $purchases->execute([$company_id]);
+        foreach ($purchases->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            if ($to_restore <= 0) break;
+            $max_restore = $row['amount_iqd'] - $row['remaining_iqd'];
+            if ($max_restore <= 0) continue;
+            $toRestore = min($max_restore, $to_restore);
+            $pdo->prepare('UPDATE purchases SET remaining_iqd = remaining_iqd + ? WHERE id = ?')->execute([$toRestore, $row['id']]);
+            $to_restore -= $toRestore;
+        }
+        if ($to_restore > 0) {
+            $pdo->prepare('UPDATE company SET opening_debt_iqd = opening_debt_iqd + ? WHERE id = ?')->execute([$to_restore, $company_id]);
         }
     }
     

@@ -10,6 +10,7 @@ $(document).on('click', '.edit-debt', function() {
         $('#edit_debt_amount_iqd').val(debt.amount_iqd || 0);
         $('#edit_debt_dollar_rate').val(debt.dollar_rate || 0);
         $('#edit_debt_discount_usd').val(debt.discount_usd || 0);
+        $('#edit_debt_discount_iqd').val(debt.discount_iqd || 0);
         $('#edit_debt_note').val(debt.note || '');
         var modal = new bootstrap.Modal(document.getElementById('editDebtModal'));
         modal.show();
@@ -32,8 +33,9 @@ $('#editDebtForm').on('submit', function(e) {
     const amount_usd = parseFloat(form.amount_usd.value) || 0;
     const amount_iqd = parseFloat(form.amount_iqd.value) || 0;
     const discount_usd = parseFloat(form.discount_usd?.value || 0);
-    if (amount_usd <= 0 && amount_iqd <= 0 && discount_usd <= 0) {
-        Swal.fire('هەڵە!', 'بە لایەنی کەم یەک بڕ پڕبکە (دۆلار یان دینار یان داشکاندن)', 'error');
+    const discount_iqd = parseFloat(form.discount_iqd?.value || 0);
+    if (amount_usd <= 0 && amount_iqd <= 0 && discount_usd <= 0 && discount_iqd <= 0) {
+        Swal.fire('هەڵە!', 'بە لایەنی کەم یەک بڕ پڕبکە (پارە یان داشکاندن)', 'error');
         return;
     }
     
@@ -74,6 +76,9 @@ document.addEventListener('click', function(e) {
         $('#edit_debt_amount_iqd').val(btn.getAttribute('data-amount_iqd'));
         if (btn.hasAttribute('data-discount_usd')) {
             $('#edit_debt_discount_usd').val(btn.getAttribute('data-discount_usd'));
+        }
+        if (btn.hasAttribute('data-discount_iqd')) {
+            $('#edit_debt_discount_iqd').val(btn.getAttribute('data-discount_iqd'));
         }
         $('#edit_debt_dollar_rate').val(btn.getAttribute('data-dollar_rate'));
         $('#edit_debt_note').val(btn.getAttribute('data-note'));

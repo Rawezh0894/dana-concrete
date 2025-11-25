@@ -429,6 +429,7 @@ CREATE TABLE `debt_payments` (
   `amount_usd` decimal(14,2) DEFAULT 0.00,
   `amount_iqd` decimal(20,2) DEFAULT 0.00,
   `discount_usd` decimal(14,2) NOT NULL DEFAULT 0.00,
+  `discount_iqd` decimal(20,2) NOT NULL DEFAULT 0.00,
   `note` varchar(255) DEFAULT NULL,
   `created_by` int(11) DEFAULT NULL,
   `dollar_rate` decimal(10,2) DEFAULT 150000.00,
@@ -442,8 +443,8 @@ CREATE TABLE `debt_payments` (
 -- Dumping data for table `debt_payments`
 --
 
-INSERT INTO `debt_payments` (`id`, `company_id`, `date`, `amount_usd`, `amount_iqd`, `discount_usd`, `note`, `created_by`, `dollar_rate`, `from_opening_debt_usd`, `from_opening_debt_iqd`, `from_purchases_usd`, `from_purchases_iqd`) VALUES
-(30, 30, '2025-08-10', 4000.00, 0.00, 8.00, '', 1, 139250.00, 0.00, 0.00, 0.00, 0.00);
+INSERT INTO `debt_payments` (`id`, `company_id`, `date`, `amount_usd`, `amount_iqd`, `discount_usd`, `discount_iqd`, `note`, `created_by`, `dollar_rate`, `from_opening_debt_usd`, `from_opening_debt_iqd`, `from_purchases_usd`, `from_purchases_iqd`) VALUES
+(30, 30, '2025-08-10', 4000.00, 0.00, 8.00, 0.00, '', 1, 139250.00, 0.00, 0.00, 0.00, 0.00);
 
 --
 -- Triggers `debt_payments`

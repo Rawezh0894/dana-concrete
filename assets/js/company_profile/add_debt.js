@@ -12,30 +12,35 @@ function fetchCompanyCurrencyType() {
         });
 }
 
+// Prefetch currency type so it's ready before opening the modal
+fetchCompanyCurrencyType();
+
 function recalculateAmounts() {
     let amount_usd = parseFloat($('#debt_amount_usd').val()) || 0;
     let amount_iqd = parseFloat($('#debt_amount_iqd').val()) || 0;
     let discount_usd = parseFloat($('#debt_discount_usd').val()) || 0;
+    let discount_iqd = parseFloat($('#debt_discount_iqd').val()) || 0;
     let dollar_rate = parseFloat($('#debt_dollar_rate').val()) || 150000;
+    const rateFactor = dollar_rate > 0 ? (dollar_rate / 100) : 0;
     if (companyCurrencyType === 'دۆلار') {
-        // Convert IQD payment to USD and add USD discount directly
-        let effective_usd_pay = amount_usd + (amount_iqd / (dollar_rate / 100));
-        let total_usd_effect = effective_usd_pay + discount_usd;
-        let new_remaining = lastTotalRemainingUSD - total_usd_effect;
+        // Convert IQD payment and discount to USD
+        let effective_usd_pay = amount_usd + (rateFactor > 0 ? (amount_iqd / rateFactor) : 0);
+        let effective_discount_usd = discount_usd + (rateFactor > 0 ? (discount_iqd / rateFactor) : 0);
+        let new_remaining = lastTotalRemainingUSD - (effective_usd_pay + effective_discount_usd);
         $('#total_remaining_usd').val(new_remaining.toLocaleString('en-US') + ' $');
         $('#total_remaining_iqd').val('');
     } else {
-        // Convert USD payment and USD discount to IQD
-        let usd_to_iqd = amount_usd * (dollar_rate / 100);
-        let discount_to_iqd = discount_usd * (dollar_rate / 100);
-        let effective_iqd_pay = amount_iqd + usd_to_iqd + discount_to_iqd;
-        let new_remaining = lastTotalRemainingIQD - effective_iqd_pay;
+        // Convert USD payment and discount to IQD
+        let usd_to_iqd = amount_usd * rateFactor;
+        let discount_to_iqd = discount_usd * rateFactor;
+        let total_iqd_effect = amount_iqd + discount_iqd + usd_to_iqd + discount_to_iqd;
+        let new_remaining = lastTotalRemainingIQD - total_iqd_effect;
         $('#total_remaining_iqd').val(new_remaining.toLocaleString('en-US') + ' د.ع');
         $('#total_remaining_usd').val('');
     }
 }
 
-$('#debt_amount_usd, #debt_amount_iqd, #debt_dollar_rate, #debt_discount_usd').on('input', recalculateAmounts);
+$('#debt_amount_usd, #debt_amount_iqd, #debt_dollar_rate, #debt_discount_usd, #debt_discount_iqd').on('input', recalculateAmounts);
 
 async function fetchAndSetDollarRate(inputId) {
     try {
@@ -77,24 +82,6 @@ $('#addDebtModal').on('show.bs.modal', function() {
     }
 });
 
-$('#addDebtForm').on('submit', function(e) {
-    if (companyCurrencyType === 'دۆلار') {
-        let amount_usd = parseFloat($('#debt_amount_usd').val()) || 0;
-        let amount_iqd = parseFloat($('#debt_amount_iqd').val()) || 0;
-        let dollar_rate = parseFloat($('#debt_dollar_rate').val()) || 0;
-        let effective_usd = amount_usd + (dollar_rate > 0 ? (amount_iqd / (dollar_rate / 100)) : 0);
-        $('#debt_amount_usd').val(effective_usd);
-        $('#debt_amount_iqd').val(0);
-    } else if (companyCurrencyType === 'دینار') {
-        let amount_usd = parseFloat($('#debt_amount_usd').val()) || 0;
-        let amount_iqd = parseFloat($('#debt_amount_iqd').val()) || 0;
-        let dollar_rate = parseFloat($('#debt_dollar_rate').val()) || 0;
-        let effective_iqd = amount_iqd + (dollar_rate > 0 ? (amount_usd * (dollar_rate / 100)) : 0);
-        $('#debt_amount_iqd').val(effective_iqd);
-        $('#debt_amount_usd').val(0);
-    }
-});
-
 document.getElementById('addDebtForm').onsubmit = async function(e) {
     e.preventDefault();
     
@@ -114,18 +101,22 @@ document.getElementById('addDebtForm').onsubmit = async function(e) {
     }
     
     const form = e.target;
-    const formData = new FormData(form);
-    // company_id is already in the form as a hidden field, no need to append
-    const amount_usd = parseFloat(form.amount_usd.value) || 0;
-    const amount_iqd = parseFloat(form.amount_iqd.value) || 0;
+    // Read raw values before conversion
+    const raw_amount_usd = parseFloat(form.amount_usd.value) || 0;
+    const raw_amount_iqd = parseFloat(form.amount_iqd.value) || 0;
+    const raw_discount_usd = parseFloat(form.discount_usd?.value || 0);
+    const raw_discount_iqd = parseFloat(form.discount_iqd?.value || 0);
+    const dollar_rate = parseFloat(form.dollar_rate?.value || 0);
     
     console.log('Form submission started');
-    console.log('Amount USD:', amount_usd);
-    console.log('Amount IQD:', amount_iqd);
+    console.log('Amount USD:', raw_amount_usd);
+    console.log('Amount IQD:', raw_amount_iqd);
+    console.log('Discount USD:', raw_discount_usd);
+    console.log('Discount IQD:', raw_discount_iqd);
     console.log('Company ID:', COMPANY_ID);
     
-    if (amount_usd <= 0 && amount_iqd <= 0) {
-        Swal.fire('هەڵە!', 'بە لایەنی کەم یەک بڕ پڕبکە (دۆلار یان دینار)', 'error');
+    if (raw_amount_usd <= 0 && raw_amount_iqd <= 0 && raw_discount_usd <= 0 && raw_discount_iqd <= 0) {
+        Swal.fire('هەڵە!', 'بە لایەنی کەم یەک بڕ پڕبکە (پارە یان داشکاندن)', 'error');
         submitting = false;
         if (submitBtn) {
             submitBtn.disabled = false;
@@ -133,6 +124,25 @@ document.getElementById('addDebtForm').onsubmit = async function(e) {
         }
         return;
     }
+    
+    const rateFactor = dollar_rate > 0 ? (dollar_rate / 100) : 0;
+    if (companyCurrencyType === 'دۆلار') {
+        const effectiveUsd = raw_amount_usd + (rateFactor > 0 ? (raw_amount_iqd / rateFactor) : 0);
+        const effectiveDiscountUsd = raw_discount_usd + (rateFactor > 0 ? (raw_discount_iqd / rateFactor) : 0);
+        form.amount_usd.value = effectiveUsd;
+        form.amount_iqd.value = 0;
+        form.discount_usd.value = effectiveDiscountUsd;
+        if (form.discount_iqd) form.discount_iqd.value = 0;
+    } else if (companyCurrencyType === 'دینار') {
+        const effectiveIqd = raw_amount_iqd + (rateFactor > 0 ? (raw_amount_usd * rateFactor) : 0);
+        const effectiveDiscountIqd = raw_discount_iqd + (rateFactor > 0 ? (raw_discount_usd * rateFactor) : 0);
+        form.amount_iqd.value = effectiveIqd;
+        form.amount_usd.value = 0;
+        if (form.discount_iqd) form.discount_iqd.value = effectiveDiscountIqd;
+        form.discount_usd.value = 0;
+    }
+    
+    const formData = new FormData(form);
     
     try {
         console.log('Sending request to add_debt.php');

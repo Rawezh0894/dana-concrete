@@ -27,13 +27,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $amount_iqd = floatval($_POST['amount_iqd'] ?? 0);
     $dollar_rate = floatval($_POST['dollar_rate'] ?? 150000);
     $discount_usd = floatval($_POST['discount_usd'] ?? 0);
+    $discount_iqd = floatval($_POST['discount_iqd'] ?? 0);
     $note = $_POST['note'] ?? '';
     $user_id = $_SESSION['user_id'];
     
     // Debug logging
     error_log("Processing debt payment - Company ID: $company_id, Date: $date, USD: $amount_usd, IQD: $amount_iqd, Rate: $dollar_rate");
     
-    if (!$company_id || !$date || ($amount_usd <= 0 && $amount_iqd <= 0 && $discount_usd <= 0)) {
+    if (!$company_id || !$date || ($amount_usd <= 0 && $amount_iqd <= 0 && $discount_usd <= 0 && $discount_iqd <= 0)) {
         echo json_encode(['success' => false, 'msg' => 'بە لایەنی کەم یەک بڕ پڕبکە (دۆلار یان دینار یان داشکاندن)']);
         exit;
     }
@@ -88,10 +89,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($currency_type === 'دۆلار') {
         if ($rate_per_usd > 0) {
             $effective_usd += $amount_iqd / $rate_per_usd;
-            $effective_usd += $discount_usd;
-        } else {
-            $effective_usd += $discount_usd;
+            $effective_usd += $discount_iqd / $rate_per_usd;
         }
+        $effective_usd += $discount_usd;
         if ($effective_usd - $total_usd > $tolerance) {
             echo json_encode(['success' => false, 'msg' => 'نابێت بڕی پارەی گەرەوا زیاتر بێت لە بڕی قەرز!']);
             exit;
@@ -100,6 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($rate_per_usd > 0) {
             $effective_iqd += ($amount_usd * $rate_per_usd) + ($discount_usd * $rate_per_usd);
         }
+        $effective_iqd += $discount_iqd;
         if ($effective_iqd - $total_iqd > $tolerance) {
             echo json_encode(['success' => false, 'msg' => 'نابێت بڕی پارەی گەرەوا زیاتر بێت لە بڕی قەرز!']);
             exit;
@@ -107,7 +108,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         if (($amount_usd > 0 && ($amount_usd - $total_usd) > $tolerance) ||
             ($amount_iqd > 0 && ($amount_iqd - $total_iqd) > $tolerance) ||
-            ($discount_usd > 0 && ($discount_usd - $total_usd) > $tolerance)) {
+            ($discount_usd > 0 && ($discount_usd - $total_usd) > $tolerance) ||
+            ($discount_iqd > 0 && ($discount_iqd - $total_iqd) > $tolerance)) {
         echo json_encode(['success' => false, 'msg' => 'نابێت بڕی پارەی گەرەوا زیاتر بێت لە بڕی قەرز!']);
         exit;
     }
@@ -124,8 +126,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdo->beginTransaction();
 
         // Insert into debt_payments
-        $stmt = $pdo->prepare('INSERT INTO debt_payments (company_id, date, amount_usd, amount_iqd, discount_usd, dollar_rate, note, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
-        $ok = $stmt->execute([$company_id, $date, $amount_usd, $amount_iqd, $discount_usd, $dollar_rate, $note, $user_id]);
+        $stmt = $pdo->prepare('INSERT INTO debt_payments (company_id, date, amount_usd, amount_iqd, discount_usd, discount_iqd, dollar_rate, note, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
+        $ok = $stmt->execute([$company_id, $date, $amount_usd, $amount_iqd, $discount_usd, $discount_iqd, $dollar_rate, $note, $user_id]);
         if (!$ok) {
             error_log('Failed to insert debt payment: ' . print_r($stmt->errorInfo(), true));
             throw new Exception('هەڵە لە تۆمارکردن');
@@ -142,6 +144,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'amount_usd' => $amount_usd,
             'amount_iqd' => $amount_iqd,
             'discount_usd' => $discount_usd,
+            'discount_iqd' => $discount_iqd,
             'dollar_rate' => $dollar_rate,
             'note' => $note,
             'created_by' => $user_id
@@ -150,7 +153,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $additional_info = [
             'action_type' => 'company_debt_payment',
             'payment_method' => $amount_usd > 0 ? 'USD' : ($amount_iqd > 0 ? 'IQD' : 'none'),
-            'total_amount' => $amount_usd + $amount_iqd
+            'total_amount' => $amount_usd + $amount_iqd,
+            'discount_usd' => $discount_usd,
+            'discount_iqd' => $discount_iqd
         ];
 
         createDetailedNotification(
@@ -215,6 +220,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if ($remaining <= 0) break;
                     $toReduce = min($row['remaining_usd'], $remaining);
                     $pdo->prepare('UPDATE purchases SET remaining_usd = remaining_usd - ? WHERE id = ?')->execute([$toReduce, $row['id']]);
+                    $remaining -= $toReduce;
+                }
+            }
+        }
+        
+        // Apply IQD discount (no cash box, FIFO against opening and purchases)
+        if ($discount_iqd > 0) {
+            $remaining = $discount_iqd;
+            $stmt = $pdo->prepare('SELECT opening_debt_iqd FROM company WHERE id = ?');
+            $stmt->execute([$company_id]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            $opening = floatval($row['opening_debt_iqd']);
+            if ($opening > 0) {
+                $toReduce = min($opening, $remaining);
+                $pdo->prepare('UPDATE company SET opening_debt_iqd = opening_debt_iqd - ? WHERE id = ?')->execute([$toReduce, $company_id]);
+                $remaining -= $toReduce;
+            }
+            if ($remaining > 0) {
+                $purchases = $pdo->prepare('SELECT id, remaining_iqd FROM purchases WHERE company_id = ? AND type = ? AND payment_type = "قەرز" AND remaining_iqd > 0 ORDER BY date ASC, id ASC');
+                $purchases->execute([$company_id, 'دینار']);
+                foreach ($purchases->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                    if ($remaining <= 0) break;
+                    $toReduce = min($row['remaining_iqd'], $remaining);
+                    $pdo->prepare('UPDATE purchases SET remaining_iqd = remaining_iqd - ? WHERE id = ?')->execute([$toReduce, $row['id']]);
                     $remaining -= $toReduce;
                 }
             }

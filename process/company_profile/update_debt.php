@@ -33,19 +33,23 @@ try {
     $amount_usd = floatval($_POST['amount_usd'] ?? 0);
     $amount_iqd = floatval($_POST['amount_iqd'] ?? 0);
     $discount_usd = floatval($_POST['discount_usd'] ?? 0);
+    $discount_iqd = floatval($_POST['discount_iqd'] ?? 0);
     $note = $_POST['note'] ?? '';
 
     // Log parsed variables for debugging
     error_log("Parsed vars: id='$id', company_id='$company_id', date='$date', dollar_rate='$dollar_rate', amount_usd='$amount_usd', amount_iqd='$amount_iqd', note='$note'");
 
-    if (!$id || !$company_id || !$date || ($amount_usd <= 0 && $amount_iqd <= 0)) {
+    if (
+        !$id || !$company_id || !$date ||
+        ($amount_usd <= 0 && $amount_iqd <= 0 && $discount_usd <= 0 && $discount_iqd <= 0)
+    ) {
         error_log('Missing required fields for company debt update');
         echo json_encode(['success' => false, 'msg' => 'هەموو خانەکان پڕ بکە!']);
         exit;
     }
 
     // Check if debt payment exists and get current values
-    $checkStmt = $pdo->prepare('SELECT id, amount_usd, amount_iqd, discount_usd FROM debt_payments WHERE id = ?');
+    $checkStmt = $pdo->prepare('SELECT id, amount_usd, amount_iqd, discount_usd, discount_iqd FROM debt_payments WHERE id = ?');
     $checkStmt->execute([$id]);
     $row = $checkStmt->fetch(PDO::FETCH_ASSOC);
     
@@ -61,11 +65,13 @@ try {
     $old_amount_usd = floatval($row['amount_usd'] ?? 0);
     $old_amount_iqd = floatval($row['amount_iqd'] ?? 0);
     $old_discount_usd = floatval($row['discount_usd'] ?? 0);
+    $old_discount_iqd = floatval($row['discount_iqd'] ?? 0);
 
     // هەژمارکردنی جیاوازییەکان
     $diff_usd = $amount_usd - $old_amount_usd;
     $diff_iqd = $amount_iqd - $old_amount_iqd;
     $diff_discount_usd = $discount_usd - $old_discount_usd;
+    $diff_discount_iqd = $discount_iqd - $old_discount_iqd;
 
     error_log("Old amounts - USD: $old_amount_usd, IQD: $old_amount_iqd");
     error_log("New amounts - USD: $amount_usd, IQD: $amount_iqd");
@@ -76,8 +82,8 @@ try {
         $pdo->beginTransaction();
 
         // نوێکردنەوەی قەرزەکە
-        $upd = $pdo->prepare('UPDATE debt_payments SET date=?, dollar_rate=?, amount_usd=?, amount_iqd=?, discount_usd=?, note=? WHERE id=?');
-        $result = $upd->execute([$date, $dollar_rate, $amount_usd, $amount_iqd, $discount_usd, $note, $id]);
+        $upd = $pdo->prepare('UPDATE debt_payments SET date=?, dollar_rate=?, amount_usd=?, amount_iqd=?, discount_usd=?, discount_iqd=?, note=? WHERE id=?');
+        $result = $upd->execute([$date, $dollar_rate, $amount_usd, $amount_iqd, $discount_usd, $discount_iqd, $note, $id]);
 
         if (!$result) {
             throw new Exception('هەڵە لە نوێکردنەوەی قەرزەکە');
@@ -215,7 +221,8 @@ try {
             'amount_usd' => $old_record['amount_usd'],
             'amount_iqd' => $old_record['amount_iqd'],
             'note' => $old_record['note'],
-            'discount_usd' => $old_record['discount_usd']
+            'discount_usd' => $old_record['discount_usd'],
+            'discount_iqd' => $old_record['discount_iqd']
         ];
 
         $new_values = [
@@ -226,6 +233,7 @@ try {
             'amount_usd' => $amount_usd,
             'amount_iqd' => $amount_iqd,
             'discount_usd' => $discount_usd,
+            'discount_iqd' => $discount_iqd,
             'note' => $note
         ];
 
@@ -235,7 +243,8 @@ try {
             'total_amount' => $amount_usd + $amount_iqd,
             'difference_usd' => $diff_usd,
             'difference_iqd' => $diff_iqd,
-            'difference_discount_usd' => $diff_discount_usd
+            'difference_discount_usd' => $diff_discount_usd,
+            'difference_discount_iqd' => $diff_discount_iqd
         ];
         // Handle USD discount differences (no cash box):
         if ($diff_discount_usd != 0) {
@@ -276,6 +285,45 @@ try {
                 }
                 if ($to_restore > 0) {
                     $pdo->prepare('UPDATE company SET opening_debt_usd = opening_debt_usd + ? WHERE id = ?')->execute([$to_restore, $company_id]);
+                }
+            }
+        }
+        if ($diff_discount_iqd != 0) {
+            if ($diff_discount_iqd > 0) {
+                $remaining = $diff_discount_iqd;
+                $stmt = $pdo->prepare('SELECT opening_debt_iqd FROM company WHERE id = ?');
+                $stmt->execute([$company_id]);
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                $opening = floatval($row['opening_debt_iqd']);
+                if ($opening > 0) {
+                    $toReduce = min($opening, $remaining);
+                    $pdo->prepare('UPDATE company SET opening_debt_iqd = opening_debt_iqd - ? WHERE id = ?')->execute([$toReduce, $company_id]);
+                    $remaining -= $toReduce;
+                }
+                if ($remaining > 0) {
+                    $purchases = $pdo->prepare('SELECT id, remaining_iqd FROM purchases WHERE company_id = ? AND type = ? AND payment_type = "قەرز" AND remaining_iqd > 0 ORDER BY date ASC, id ASC');
+                    $purchases->execute([$company_id, 'دینار']);
+                    foreach ($purchases->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                        if ($remaining <= 0) break;
+                        $toReduce = min($row['remaining_iqd'], $remaining);
+                        $pdo->prepare('UPDATE purchases SET remaining_iqd = remaining_iqd - ? WHERE id = ?')->execute([$toReduce, $row['id']]);
+                        $remaining -= $toReduce;
+                    }
+                }
+            } else {
+                $to_restore = abs($diff_discount_iqd);
+                $purchases = $pdo->prepare('SELECT id, remaining_iqd, amount_iqd FROM purchases WHERE company_id = ? AND payment_type = "قەرز" AND type = "دینار" ORDER BY date DESC, id DESC');
+                $purchases->execute([$company_id]);
+                foreach ($purchases->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                    if ($to_restore <= 0) break;
+                    $max_restore = $row['amount_iqd'] - $row['remaining_iqd'];
+                    if ($max_restore <= 0) continue;
+                    $toRestore = min($max_restore, $to_restore);
+                    $pdo->prepare('UPDATE purchases SET remaining_iqd = remaining_iqd + ? WHERE id = ?')->execute([$toRestore, $row['id']]);
+                    $to_restore -= $toRestore;
+                }
+                if ($to_restore > 0) {
+                    $pdo->prepare('UPDATE company SET opening_debt_iqd = opening_debt_iqd + ? WHERE id = ?')->execute([$to_restore, $company_id]);
                 }
             }
         }

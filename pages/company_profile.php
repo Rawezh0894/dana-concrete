@@ -173,8 +173,17 @@ if ($company_id) {
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label for="debt_discount_usd" class="form-label">داشکاندن (تەنیا بە دۆلار)</label>
-                            <input type="number" class="form-control" id="debt_discount_usd" name="discount_usd" min="0" step="0.01" value="0">
+                            <label class="form-label">داشکاندن</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="debt_discount_usd" class="form-label">دۆلار</label>
+                                    <input type="number" class="form-control" id="debt_discount_usd" name="discount_usd" min="0" step="0.01" value="0">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="debt_discount_iqd" class="form-label">دینار</label>
+                                    <input type="number" class="form-control" id="debt_discount_iqd" name="discount_iqd" min="0" step="0.01" value="0">
+                                </div>
+                            </div>
                         </div>
                         <div class="mb-3">
                             <label for="debt_dollar_rate" class="form-label">نرخی دۆلار</label>
@@ -235,8 +244,17 @@ if ($company_id) {
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label for="edit_debt_discount_usd" class="form-label">داشکاندن (تەنیا بە دۆلار)</label>
-                            <input type="number" class="form-control" id="edit_debt_discount_usd" name="discount_usd" min="0" step="0.01" value="0">
+                            <label class="form-label">داشکاندن</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="edit_debt_discount_usd" class="form-label">دۆلار</label>
+                                    <input type="number" class="form-control" id="edit_debt_discount_usd" name="discount_usd" min="0" step="0.01" value="0">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="edit_debt_discount_iqd" class="form-label">دینار</label>
+                                    <input type="number" class="form-control" id="edit_debt_discount_iqd" name="discount_iqd" min="0" step="0.01" value="0">
+                                </div>
+                            </div>
                         </div>
                         <div class="mb-3">
                             <label for="edit_debt_dollar_rate" class="form-label">نرخی دۆلار</label>
