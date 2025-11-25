@@ -170,12 +170,14 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
         </div>
         <div class="col-md-2">
             <label>خوێنراوە:</label>
-            <select id="filter_read" class="form-select" data-placeholder="هەڵبژێرە">
-                <option value=""></option>
-                <option value="all">هەموو</option>
-                <option value="0">نەخوێندراو</option>
-                <option value="1">خوێندرا</option>
-            </select>
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-success flex-fill" id="filter_read_read" type="button" data-read-value="1">
+                    <i class="fas fa-check-circle me-1"></i>خوێندرا
+                </button>
+                <button class="btn btn-outline-warning flex-fill" id="filter_read_unread" type="button" data-read-value="0">
+                    <i class="fas fa-exclamation-circle me-1"></i>نەخوێندراو
+                </button>
+            </div>
         </div>
         <div class="col-md-4 d-flex align-items-end gap-2">
             <button class="btn btn-outline-primary" id="filterToday" type="button">ئەمڕۆ</button>

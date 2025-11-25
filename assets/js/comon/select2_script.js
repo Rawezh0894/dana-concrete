@@ -227,9 +227,6 @@ $(document).ready(function() {
     if ($('#filter_customer').length > 0) {
         enableSelect2('#filter_customer', 'body');
     }
-    if ($('#filter_read').length > 0) {
-        enableSelect2('#filter_read', 'body');
-    }
     
     // بۆ concrete receipts filters - تەنها ئەگەر پەیجەکە هەبێت
     if ($('#filter_customer_id').length > 0) {
