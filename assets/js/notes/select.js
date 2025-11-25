@@ -5,11 +5,30 @@ let allNotes = [];
 let filteredNotes = [];
 let hasMoreNotes = true;
 
+function isDateInFuture(dateString) {
+    if (!dateString) return false;
+    const parts = dateString.split('-').map(Number);
+    if (parts.length !== 3 || parts.some(isNaN)) return false;
+    const [year, month, day] = parts;
+    const noteDate = new Date(year, month - 1, day);
+    noteDate.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return noteDate > today;
+}
+
+function normalizeReadFilterValue(value) {
+    if (value === undefined || value === null) return '';
+    if (value === '' || value === 'all') return '';
+    return value;
+}
+
 async function loadNotes() {
-    const from = document.getElementById('filter_from').value;
-    const to = document.getElementById('filter_to').value;
-    const customer_id = document.getElementById('filter_customer').value;
-    const is_read = document.getElementById('filter_read').value;
+    const from = document.getElementById('filter_from')?.value || '';
+    const to = document.getElementById('filter_to')?.value || '';
+    const customer_id = document.getElementById('filter_customer')?.value || '';
+    const readFilterRaw = document.getElementById('filter_read')?.value || '';
+    const is_read = normalizeReadFilterValue(readFilterRaw);
     
     let url = '../process/notes/select.php';
     const params = [];
@@ -82,6 +101,8 @@ function createNoteCard(note) {
     const isRead = note.is_read == 1;
     const readClass = isRead ? 'read' : 'unread';
     const statusText = isRead ? 'خوێندرا' : 'نەخوێندراو';
+    const isFutureNote = isDateInFuture(note.date);
+    const markReadBlockedMessage = 'ناتوانیت ئەم تێبینەیە خوێندن بکەیت پێش بەرواری نیشانکراو.';
     
     function formatNumber(n) {
         if (n === null || n === undefined || n === '') return '-';
@@ -166,7 +187,7 @@ function createNoteCard(note) {
                         <i class='fa fa-file-invoice'></i> پسووڵە
                     </button>
                     ${!isRead && window.userPermissions && window.userPermissions.canMarkRead ? 
-                        `<button class='btn-mark-read mark-as-read' data-id='${note.id}' title='نیشانەکردن وەک خوێندراو'>
+                        `<button class='btn-mark-read mark-as-read ${isFutureNote ? 'disabled' : ''}' data-id='${note.id}' data-note-date='${note.date || ''}' data-blocked-message='${isFutureNote ? markReadBlockedMessage : ''}' title='${isFutureNote ? markReadBlockedMessage : 'نیشانەکردن وەک خوێندراو'}'>
                             <i class='fa fa-check'></i> خوێندن
                         </button>` : ''
                     }
@@ -217,134 +238,118 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add event listeners for mark as read buttons
     document.addEventListener('click', function(e) {
         if (e.target.closest('.mark-as-read')) {
-            const noteId = e.target.closest('.mark-as-read').getAttribute('data-id');
+            const button = e.target.closest('.mark-as-read');
+            if (button.classList.contains('disabled')) {
+                const blockedMessage = button.getAttribute('data-blocked-message') || 'ئەم دووگمەیە ناتوانرێت بەکارببرێت هێشتا.';
+                showAlert('warning', blockedMessage);
+                return;
+            }
+            const noteId = button.getAttribute('data-id');
             markAsRead(noteId);
         }
     });
 });
 
-// Filter events
-document.getElementById('filter_from')?.addEventListener('input', function() {
-    currentPage = 1;
-    loadNotes();
-});
-
-document.getElementById('filter_to')?.addEventListener('input', function() {
-    currentPage = 1;
-    loadNotes();
-});
-
-document.getElementById('filter_customer')?.addEventListener('change', function() {
-    currentPage = 1;
-    loadNotes();
-});
-
-document.getElementById('filter_read')?.addEventListener('change', function() {
-    currentPage = 1;
-    loadNotes();
-});
-
-// Filter buttons
-document.getElementById('filterToday')?.addEventListener('click', function() {
-    // Remove active class from all filter buttons
+function resetFilterButtonsActiveState() {
     document.querySelectorAll('#filterToday, #filterTomorrow, #filterYesterday').forEach(btn => {
         btn.classList.remove('active');
     });
-    
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('filter_from').value = today;
-    document.getElementById('filter_to').value = today;
-    document.getElementById('filter_customer').value = '';
-    document.getElementById('filter_read').value = '';
-    
-    // Reset Select2 dropdowns
-    $('#filter_customer').val('').trigger('change');
-    $('#filter_read').val('').trigger('change');
-    
-    currentPage = 1;
-    
-    // Add active class to this button
-    this.classList.add('active');
-    
-    loadNotes();
-});
+}
 
-document.getElementById('filterTomorrow')?.addEventListener('click', function() {
-    // Remove active class from all filter buttons
-    document.querySelectorAll('#filterToday, #filterTomorrow, #filterYesterday').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const tomorrowFormatted = tomorrow.toISOString().split('T')[0];
-    document.getElementById('filter_from').value = tomorrowFormatted;
-    document.getElementById('filter_to').value = tomorrowFormatted;
-    document.getElementById('filter_customer').value = '';
-    document.getElementById('filter_read').value = '';
-    
-    // Reset Select2 dropdowns
+function resetFiltersToEmpty() {
+    const filterFrom = document.getElementById('filter_from');
+    const filterTo = document.getElementById('filter_to');
+    const filterCustomer = document.getElementById('filter_customer');
+    const filterRead = document.getElementById('filter_read');
+    if (filterFrom) filterFrom.value = '';
+    if (filterTo) filterTo.value = '';
+    if (filterCustomer) filterCustomer.value = '';
+    if (filterRead) filterRead.value = '';
     $('#filter_customer').val('').trigger('change');
     $('#filter_read').val('').trigger('change');
-    
-    currentPage = 1;
-    
-    // Add active class to this button
-    this.classList.add('active');
-    
-    loadNotes();
-});
+}
 
-document.getElementById('filterYesterday')?.addEventListener('click', function() {
-    // Remove active class from all filter buttons
-    document.querySelectorAll('#filterToday, #filterTomorrow, #filterYesterday').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayFormatted = yesterday.toISOString().split('T')[0];
-    document.getElementById('filter_from').value = yesterdayFormatted;
-    document.getElementById('filter_to').value = yesterdayFormatted;
-    document.getElementById('filter_customer').value = '';
-    document.getElementById('filter_read').value = '';
-    
-    // Reset Select2 dropdowns
-    $('#filter_customer').val('').trigger('change');
-    $('#filter_read').val('').trigger('change');
-    
-    currentPage = 1;
-    
-    // Add active class to this button
-    this.classList.add('active');
-    
-    loadNotes();
-});
+function setupFilterEventListeners() {
+    const filterFrom = document.getElementById('filter_from');
+    const filterTo = document.getElementById('filter_to');
+    const filterCustomer = document.getElementById('filter_customer');
+    const filterRead = document.getElementById('filter_read');
+    const filterTodayBtn = document.getElementById('filterToday');
+    const filterTomorrowBtn = document.getElementById('filterTomorrow');
+    const filterYesterdayBtn = document.getElementById('filterYesterday');
+    const clearFilterBtn = document.getElementById('clearFilterBtn');
 
-// Clear filter button
-document.getElementById('clearFilterBtn')?.addEventListener('click', function() {
-    // Remove active class from all filter buttons
-    document.querySelectorAll('#filterToday, #filterTomorrow, #filterYesterday').forEach(btn => {
-        btn.classList.remove('active');
+    const handleFilterChange = () => {
+        currentPage = 1;
+        loadNotes();
+    };
+
+    filterFrom?.addEventListener('input', handleFilterChange);
+    filterTo?.addEventListener('input', handleFilterChange);
+    filterCustomer?.addEventListener('change', handleFilterChange);
+    filterRead?.addEventListener('change', handleFilterChange);
+
+    filterTodayBtn?.addEventListener('click', function() {
+        resetFilterButtonsActiveState();
+        const today = new Date().toISOString().split('T')[0];
+        if (filterFrom) filterFrom.value = today;
+        if (filterTo) filterTo.value = today;
+        if (filterCustomer) filterCustomer.value = '';
+        if (filterRead) filterRead.value = '';
+        $('#filter_customer').val('').trigger('change');
+        $('#filter_read').val('').trigger('change');
+        currentPage = 1;
+        this.classList.add('active');
+        loadNotes();
     });
-    
-    document.getElementById('filter_from').value = '';
-    document.getElementById('filter_to').value = '';
-    document.getElementById('filter_customer').value = '';
-    document.getElementById('filter_read').value = '';
-    
-    // Reset Select2 dropdowns
-    $('#filter_customer').val('').trigger('change');
-    $('#filter_read').val('').trigger('change');
-    
-    currentPage = 1;
-    loadNotes();
-});
+
+    filterTomorrowBtn?.addEventListener('click', function() {
+        resetFilterButtonsActiveState();
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const tomorrowFormatted = tomorrow.toISOString().split('T')[0];
+        if (filterFrom) filterFrom.value = tomorrowFormatted;
+        if (filterTo) filterTo.value = tomorrowFormatted;
+        if (filterCustomer) filterCustomer.value = '';
+        if (filterRead) filterRead.value = '';
+        $('#filter_customer').val('').trigger('change');
+        $('#filter_read').val('').trigger('change');
+        currentPage = 1;
+        this.classList.add('active');
+        loadNotes();
+    });
+
+    filterYesterdayBtn?.addEventListener('click', function() {
+        resetFilterButtonsActiveState();
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayFormatted = yesterday.toISOString().split('T')[0];
+        if (filterFrom) filterFrom.value = yesterdayFormatted;
+        if (filterTo) filterTo.value = yesterdayFormatted;
+        if (filterCustomer) filterCustomer.value = '';
+        if (filterRead) filterRead.value = '';
+        $('#filter_customer').val('').trigger('change');
+        $('#filter_read').val('').trigger('change');
+        currentPage = 1;
+        this.classList.add('active');
+        loadNotes();
+    });
+
+    clearFilterBtn?.addEventListener('click', function() {
+        resetFilterButtonsActiveState();
+        resetFiltersToEmpty();
+        currentPage = 1;
+        loadNotes();
+    });
+}
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     // Set default filter to show all notes (empty value)
-    document.getElementById('filter_read').value = '';
+    const filterReadElement = document.getElementById('filter_read');
+    if (filterReadElement) {
+        filterReadElement.value = '';
+    }
     
     // Initialize Select2 for filters if not already done
     if ($('#filter_customer').length > 0 && !$('#filter_customer').hasClass('select2-hidden-accessible')) {
@@ -357,6 +362,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Trigger change event to update Select2 display
     $('#filter_read').val('').trigger('change');
     
+    setupFilterEventListeners();
     loadNotes();
     
     // Add event listeners for convert to receipt buttons
@@ -417,6 +423,16 @@ let isMarkingAsRead = false;
 
 // Mark note as read function
 async function markAsRead(noteId) {
+    const note = allNotes.find(n => n.id == noteId);
+    if (!note) {
+        showAlert('error', 'تێبینیەکە نەدۆزرایەوە');
+        return;
+    }
+    if (isDateInFuture(note.date)) {
+        showAlert('warning', 'ناتوانیت ئەم تێبینەیە خوێندن بکەیت پێش بەرواری نیشانکراو.');
+        return;
+    }
+
     // Prevent multiple mark as read operations
     if (isMarkingAsRead) {
         showAlert('warning', 'تکایە چاوەڕوان بە...');

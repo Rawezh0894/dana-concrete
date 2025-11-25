@@ -170,8 +170,9 @@ $mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mix
         </div>
         <div class="col-md-2">
             <label>خوێنراوە:</label>
-            <select id="filter_read" class="form-select">
-                <option value="">هەموو</option>
+            <select id="filter_read" class="form-select" data-placeholder="هەڵبژێرە">
+                <option value=""></option>
+                <option value="all">هەموو</option>
                 <option value="0">نەخوێندراو</option>
                 <option value="1">خوێندرا</option>
             </select>

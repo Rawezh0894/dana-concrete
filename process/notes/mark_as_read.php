@@ -29,6 +29,26 @@ if (!isset($input['note_id']) || empty($input['note_id'])) {
 $note_id = intval($input['note_id']);
 
 try {
+    // Fetch note date to validate schedule
+    $stmt = $pdo->prepare("SELECT date FROM notes WHERE id = ?");
+    $stmt->execute([$note_id]);
+    $note = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$note) {
+        http_response_code(404);
+        echo json_encode(['success' => false, 'error' => 'تێبینیەکە نەدۆزرایەوە']);
+        exit;
+    }
+
+    $noteDate = DateTime::createFromFormat('Y-m-d', $note['date'] ?? '');
+    $today = new DateTime('today');
+
+    if ($noteDate && $noteDate > $today) {
+        http_response_code(422);
+        echo json_encode(['success' => false, 'error' => 'ناتوانیت ئەم تێبینەیە خوێندن بکەیت پێش بەرواری نیشانکراو.']);
+        exit;
+    }
+
     // Update the note to mark as read
     $stmt = $pdo->prepare("UPDATE notes SET is_read = 1, updated_at = NOW() WHERE id = ?");
     $result = $stmt->execute([$note_id]);
