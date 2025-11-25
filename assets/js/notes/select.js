@@ -5,18 +5,6 @@ let allNotes = [];
 let filteredNotes = [];
 let hasMoreNotes = true;
 
-function isDateInFuture(dateString) {
-    if (!dateString) return false;
-    const parts = dateString.split('-').map(Number);
-    if (parts.length !== 3 || parts.some(isNaN)) return false;
-    const [year, month, day] = parts;
-    const noteDate = new Date(year, month - 1, day);
-    noteDate.setHours(0, 0, 0, 0);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return noteDate > today;
-}
-
 async function loadNotes() {
     const from = document.getElementById('filter_from')?.value || '';
     const to = document.getElementById('filter_to')?.value || '';
@@ -103,8 +91,6 @@ function createNoteCard(note) {
     const isRead = note.is_read == 1;
     const readClass = isRead ? 'read' : 'unread';
     const statusText = isRead ? 'خوێندرا' : 'نەخوێندراو';
-    const isFutureNote = isDateInFuture(note.date);
-    const markReadBlockedMessage = 'ناتوانیت ئەم تێبینەیە خوێندن بکەیت پێش بەرواری نیشانکراو.';
     
     function formatNumber(n) {
         if (n === null || n === undefined || n === '') return '-';
@@ -189,7 +175,7 @@ function createNoteCard(note) {
                         <i class='fa fa-file-invoice'></i> پسووڵە
                     </button>
                     ${!isRead && window.userPermissions && window.userPermissions.canMarkRead ? 
-                        `<button class='btn-mark-read mark-as-read ${isFutureNote ? 'disabled' : ''}' data-id='${note.id}' data-note-date='${note.date || ''}' data-blocked-message='${isFutureNote ? markReadBlockedMessage : ''}' title='${isFutureNote ? markReadBlockedMessage : 'نیشانەکردن وەک خوێندراو'}'>
+                        `<button class='btn-mark-read mark-as-read' data-id='${note.id}' title='نیشانەکردن وەک خوێندراو'>
                             <i class='fa fa-check'></i> خوێندن
                         </button>` : ''
                     }
@@ -241,11 +227,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('click', function(e) {
         if (e.target.closest('.mark-as-read')) {
             const button = e.target.closest('.mark-as-read');
-            if (button.classList.contains('disabled')) {
-                const blockedMessage = button.getAttribute('data-blocked-message') || 'ئەم دووگمەیە ناتوانرێت بەکارببرێت هێشتا.';
-                showAlert('warning', blockedMessage);
-                return;
-            }
             const noteId = button.getAttribute('data-id');
             markAsRead(noteId);
         }
@@ -288,7 +269,7 @@ function setupFilterEventListeners() {
     const clearFilterBtn = document.getElementById('clearFilterBtn');
 
     const handleFilterChange = () => {
-        currentPage = 1;
+    currentPage = 1;
         loadNotes();
     };
 
@@ -303,7 +284,7 @@ function setupFilterEventListeners() {
             this.classList.remove('active');
         } else {
             // Activate this button and deactivate the other
-            this.classList.add('active');
+    this.classList.add('active');
             if (readUnreadBtn) readUnreadBtn.classList.remove('active');
         }
         handleFilterChange();
@@ -337,35 +318,35 @@ function setupFilterEventListeners() {
 
     filterTomorrowBtn?.addEventListener('click', function() {
         resetFilterButtonsActiveState();
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        const tomorrowFormatted = tomorrow.toISOString().split('T')[0];
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowFormatted = tomorrow.toISOString().split('T')[0];
         if (filterFrom) filterFrom.value = tomorrowFormatted;
         if (filterTo) filterTo.value = tomorrowFormatted;
         if (filterCustomer) filterCustomer.value = '';
         if (readReadBtn) readReadBtn.classList.remove('active');
         if (readUnreadBtn) readUnreadBtn.classList.remove('active');
-        $('#filter_customer').val('').trigger('change');
-        currentPage = 1;
-        this.classList.add('active');
-        loadNotes();
-    });
+    $('#filter_customer').val('').trigger('change');
+    currentPage = 1;
+    this.classList.add('active');
+    loadNotes();
+});
 
     filterYesterdayBtn?.addEventListener('click', function() {
         resetFilterButtonsActiveState();
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        const yesterdayFormatted = yesterday.toISOString().split('T')[0];
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayFormatted = yesterday.toISOString().split('T')[0];
         if (filterFrom) filterFrom.value = yesterdayFormatted;
         if (filterTo) filterTo.value = yesterdayFormatted;
         if (filterCustomer) filterCustomer.value = '';
         if (readReadBtn) readReadBtn.classList.remove('active');
         if (readUnreadBtn) readUnreadBtn.classList.remove('active');
-        $('#filter_customer').val('').trigger('change');
-        currentPage = 1;
-        this.classList.add('active');
-        loadNotes();
-    });
+    $('#filter_customer').val('').trigger('change');
+    currentPage = 1;
+    this.classList.add('active');
+    loadNotes();
+});
 
     clearFilterBtn?.addEventListener('click', function() {
         resetFilterButtonsActiveState();
@@ -446,10 +427,6 @@ async function markAsRead(noteId) {
     const note = allNotes.find(n => n.id == noteId);
     if (!note) {
         showAlert('error', 'تێبینیەکە نەدۆزرایەوە');
-        return;
-    }
-    if (isDateInFuture(note.date)) {
-        showAlert('warning', 'ناتوانیت ئەم تێبینەیە خوێندن بکەیت پێش بەرواری نیشانکراو.');
         return;
     }
 
