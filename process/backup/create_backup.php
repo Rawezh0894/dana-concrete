@@ -147,6 +147,7 @@ function findMysqldumpPath() {
 }
 
 try {
+    $error_details = null;
     // Create backup filename with timestamp
     $timestamp = date('Y-m-d_H-i-s');
     $backup_filename = "backup_{$database}_{$timestamp}.sql";
@@ -211,16 +212,24 @@ try {
     // Check for errors
     if ($return_code !== 0) {
         $error_content = file_exists($error_log_file) ? file_get_contents($error_log_file) : 'No error log found';
+        $command_output = implode(' ', $output);
+        $error_details = trim($error_content ?: $command_output);
+        
         error_log("Backup command failed with return code: $return_code");
         error_log("Error output: " . $error_content);
-        error_log("Command output: " . implode(' ', $output));
+        error_log("Command output: " . $command_output);
         
-        // Clean up error log file
         if (file_exists($error_log_file)) {
             unlink($error_log_file);
         }
         
-        throw new Exception('هەڵە لە دروستکردنی باک ئەپ. کۆد: ' . $return_code . '. زانیاری زیاتر لە error log ببینە.');
+        echo json_encode([
+            'success' => false,
+            'message' => 'هەڵە لە دروستکردنی باک ئەپ. کۆد: ' . $return_code . '.',
+            'error_code' => $return_code,
+            'error_details' => $error_details
+        ]);
+        exit;
     }
     
     // Clean up error log file if backup was successful
@@ -262,7 +271,8 @@ try {
     error_log("Backup creation error: " . $e->getMessage());
     echo json_encode([
         'success' => false,
-        'message' => $e->getMessage()
+        'message' => $e->getMessage(),
+        'error_details' => isset($error_details) ? $error_details : null
     ]);
 }
 

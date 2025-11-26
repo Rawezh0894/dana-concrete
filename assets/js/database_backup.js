@@ -64,12 +64,18 @@ function createBackup() {
                 }, 2000);
             } else {
                 showAlert('هەڵەیەک ڕوویدا: ' + data.message, 'danger');
+                if (data.error_details) {
+                    console.error('Backup error details:', data.error_details);
+                } else {
+                    console.error('Backup error response:', data);
+                }
             }
         }, 1000);
     })
     .catch(error => {
         showProgress(false);
         showAlert('هەڵەیەک ڕوویدا: ' + error.message, 'danger');
+        console.error('Backup request failed:', error);
     });
 }
 
