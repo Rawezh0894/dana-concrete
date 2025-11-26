@@ -374,6 +374,9 @@ try {
     if (!file_exists($backup_path) || filesize($backup_path) === 0) {
         throw new Exception(\'Backup file not created or empty\');
     }
+
+    // Fix collation compatibility issues
+    fixCollationIssues($backup_path);
     
     // Update schedule
     $schedule[\'last_backup\'] = time();
@@ -403,6 +406,33 @@ function cleanOldBackups($backup_dir) {
             unlink($file);
             error_log("Old auto backup removed: " . basename($file));
         }
+    }
+}
+
+function fixCollationIssues($file_path) {
+    $content = file_get_contents($file_path);
+    if ($content === false) {
+        throw new Exception(\'Unable to read backup file for collation fixes\');
+    }
+
+    $replacements = [
+        \'utf8mb4_0900_ai_ci\' => \'utf8mb4_unicode_ci\',
+        \'utf8mb4_0900_as_cs\' => \'utf8mb4_unicode_ci\',
+        \'utf8mb4_0900_as_ci\' => \'utf8mb4_unicode_ci\',
+        \'utf8mb4_0900_bin\' => \'utf8mb4_bin\',
+        \'utf8mb4_ja_0900_as_cs\' => \'utf8mb4_unicode_ci\',
+        \'utf8mb4_ja_0900_as_cs_ks\' => \'utf8mb4_unicode_ci\'
+    ];
+
+    $fixed_content = $content;
+    foreach ($replacements as $old => $new) {
+        $fixed_content = str_replace($old, $new, $fixed_content);
+    }
+
+    $fixed_content = preg_replace(\'/SET NAMES utf8mb4 COLLATE utf8mb4_0900_[^;]+;/\', \'SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;\', $fixed_content);
+
+    if (file_put_contents($file_path, $fixed_content) === false) {
+        throw new Exception(\'Unable to write fixed backup file\');
     }
 }
 ?>';
