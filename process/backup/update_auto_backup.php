@@ -99,11 +99,11 @@ try {
 
 function createWindowsTask($interval_hours) {
     $task_name = 'DanaConcreteAutoBackup';
-    $php_path = 'C:\\xampp\\php\\php.exe';
+    $php_path = getPhpExecutablePath();
     $script_path = dirname(__DIR__) . '\\backup\\auto_backup_cron.php';
 
-    if (!file_exists($php_path)) {
-        return ['success' => false, 'message' => 'PHP executable نەدۆزرایەوە لە ' . $php_path];
+    if (!$php_path) {
+        return ['success' => false, 'message' => 'PHP executable نەدۆزرایەوە. تکایە ڕێکخستنی PHP_PATH لە .env بۆ ڕێڕەوی ڕاست بنووسە.'];
     }
 
     if (!file_exists($script_path)) {
@@ -154,6 +154,38 @@ function removeWindowsTask() {
     $message = implode(' ', $output);
     error_log("Failed to remove Windows Task: " . $message);
     return ['success' => false, 'message' => $message];
+}
+
+function getPhpExecutablePath() {
+    $candidates = [];
+
+    // Highest priority: .env override
+    $envPath = env('PHP_PATH', null);
+    if (!empty($envPath)) {
+        $candidates[] = $envPath;
+    }
+
+    // PHP binary used to run current script
+    if (defined('PHP_BINARY')) {
+        $candidates[] = PHP_BINARY;
+    }
+
+    // Common Windows/Linux paths
+    $candidates = array_merge($candidates, [
+        'C:\\xampp\\php\\php.exe',
+        'C:\\Program Files\\php\\php.exe',
+        'C:\\Program Files (x86)\\php\\php.exe',
+        '/usr/bin/php',
+        '/usr/local/bin/php',
+    ]);
+
+    foreach ($candidates as $path) {
+        if ($path && file_exists($path)) {
+            return $path;
+        }
+    }
+
+    return null;
 }
 
 function createAutoBackupCronScript() {
