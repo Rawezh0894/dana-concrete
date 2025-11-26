@@ -98,6 +98,13 @@ try {
 }
 
 function createWindowsTask($interval_hours) {
+    if (stripos(PHP_OS_FAMILY ?? php_uname('s'), 'Windows') === false) {
+        return [
+            'success' => false,
+            'message' => 'ئۆتۆماتیکی کردن تەنها لە ویندۆز کاردەکات. تکایە cron یان سیستەمی زمان‌بندیی دیکە لە سێرڤەرەکەت دابنێ.'
+        ];
+    }
+
     $task_name = 'DanaConcreteAutoBackup';
     $php_path = getPhpExecutablePath();
     $script_path = dirname(__DIR__) . '\\backup\\auto_backup_cron.php';
