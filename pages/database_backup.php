@@ -20,6 +20,30 @@ $username = env('DB_USER', 'dana_user');
 $password = env('DB_PASS', 'Rawezh.Jaza@0894');
 $database = env('DB_NAME', 'dana_concrete_db');
 
+// Load auto-backup schedule defaults
+$autoBackupSettings = [
+    'enabled' => true,
+    'interval_hours' => 24,
+    'last_backup' => null,
+    'next_backup' => null,
+];
+$scheduleFile = '../backups/auto_backup_schedule.json';
+if (file_exists($scheduleFile)) {
+    $scheduleData = json_decode(file_get_contents($scheduleFile), true);
+    if (is_array($scheduleData)) {
+        $autoBackupSettings = array_merge($autoBackupSettings, $scheduleData);
+    }
+}
+$autoBackupEnabled = !empty($autoBackupSettings['enabled']);
+$autoBackupInterval = intval($autoBackupSettings['interval_hours'] ?? 24);
+if (!in_array($autoBackupInterval, [1, 6, 12, 24], true)) {
+    $autoBackupInterval = 24;
+}
+function formatTimestampReadable($timestamp) {
+    if (empty($timestamp)) return 'نەدۆزرایەوە';
+    return date('Y-m-d H:i', $timestamp);
+}
+
 // Set backup directory
 $backup_dir = '../backups/';
 if (!file_exists($backup_dir)) {
@@ -149,7 +173,7 @@ function formatFileSize($bytes) {
                     <div class="mb-3">
                         <label class="form-label">دۆخی باک ئەپی ئۆتۆماتیکی:</label>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="autoBackupEnabled" checked>
+                            <input class="form-check-input" type="checkbox" id="autoBackupEnabled" <?php echo $autoBackupEnabled ? 'checked' : ''; ?>>
                             <label class="form-check-label" for="autoBackupEnabled">
                                 چالاککردنی باک ئەپی ئۆتۆماتیکی
                             </label>
@@ -160,10 +184,10 @@ function formatFileSize($bytes) {
                     <div class="mb-3">
                         <label class="form-label">کاتەکانی باک ئەپ:</label>
                         <select class="form-select" id="backupInterval">
-                            <option value="24">هەموو 24 کاتژمێرێک</option>
-                            <option value="12">هەموو 12 کاتژمێرێک</option>
-                            <option value="6">هەموو 6 کاتژمێرێک</option>
-                            <option value="1">هەموو کاتژمێرێک</option>
+                            <option value="24" <?php echo $autoBackupInterval === 24 ? 'selected' : ''; ?>>هەموو 24 کاتژمێرێک</option>
+                            <option value="12" <?php echo $autoBackupInterval === 12 ? 'selected' : ''; ?>>هەموو 12 کاتژمێرێک</option>
+                            <option value="6" <?php echo $autoBackupInterval === 6 ? 'selected' : ''; ?>>هەموو 6 کاتژمێرێک</option>
+                            <option value="1" <?php echo $autoBackupInterval === 1 ? 'selected' : ''; ?>>هەموو کاتژمێرێک</option>
                         </select>
                     </div>
                 </div>
@@ -172,6 +196,10 @@ function formatFileSize($bytes) {
                 <i class="fas fa-cog"></i>
                 نوێکردنەوەی ڕێکخستنەکان
             </button>
+            <div class="mt-3 text-muted small">
+                <div>دوایین باک ئەپ: <strong><?php echo htmlspecialchars(formatTimestampReadable($autoBackupSettings['last_backup'] ?? null)); ?></strong></div>
+                <div>کاتی داهاتووی باک ئەپ: <strong><?php echo htmlspecialchars(formatTimestampReadable($autoBackupSettings['next_backup'] ?? null)); ?></strong></div>
+            </div>
         </div>
     </div>
 
