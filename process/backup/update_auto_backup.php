@@ -64,12 +64,18 @@ try {
     
     // Create/update Windows Task Scheduler entry for automatic backups
     if ($enabled) {
-        $taskResult = createWindowsTask($interval);
+        $taskResult = isWindowsSystem()
+            ? createWindowsTask($interval)
+            : createLinuxCronTask($interval);
+
         if (!$taskResult['success']) {
             throw new Exception('نەتوانرا باک ئەپی ئۆتۆماتیکی چالاک بکرێت: ' . $taskResult['message']);
         }
     } else {
-        $taskResult = removeWindowsTask();
+        $taskResult = isWindowsSystem()
+            ? removeWindowsTask()
+            : removeLinuxCronTask();
+
         if (!$taskResult['success']) {
             error_log("Auto backup task remove warning: " . $taskResult['message']);
         }
@@ -98,10 +104,10 @@ try {
 }
 
 function createWindowsTask($interval_hours) {
-    if (stripos(PHP_OS_FAMILY ?? php_uname('s'), 'Windows') === false) {
+    if (!isWindowsSystem()) {
         return [
             'success' => false,
-            'message' => 'ئۆتۆماتیکی کردن تەنها لە ویندۆز کاردەکات. تکایە cron یان سیستەمی زمان‌بندیی دیکە لە سێرڤەرەکەت دابنێ.'
+            'message' => 'ئۆتۆماتیکی کردن بە تاسک شیدوڵر تەنها لە ویندۆز کاردەکات. لە لینوکس/مک تکایە cron بەکاربێنە.'
         ];
     }
 
@@ -163,6 +169,88 @@ function removeWindowsTask() {
     return ['success' => false, 'message' => $message];
 }
 
+function createLinuxCronTask($interval_hours) {
+    if (!function_exists('exec')) {
+        return ['success' => false, 'message' => 'فەرمانی exec لەسەر سێرڤەر ناچالاکە (cron ناتوانرێت بەکاربهێنرێت)'];
+    }
+
+    $php_path = getPhpExecutablePath();
+    if (!$php_path) {
+        return ['success' => false, 'message' => 'php نەدۆزرایەوە. تکایە PHP_PATH لە .env دابنێ'];
+    }
+
+    $script_path = realpath(dirname(__DIR__) . '/backup/auto_backup_cron.php');
+    if (!$script_path) {
+        return ['success' => false, 'message' => 'فایل auto_backup_cron.php نەدۆزرایەوە'];
+    }
+
+    $identifier = '# DanaConcreteAutoBackup';
+    $interval_hours = max(1, intval($interval_hours));
+    $cron_expression = "0 */{$interval_hours} * * *";
+    $cron_line = "{$cron_expression} " . escapeshellarg($php_path) . ' ' . escapeshellarg($script_path) . " {$identifier}";
+
+    $currentCron = [];
+    $returnCode = 0;
+    exec('crontab -l 2>/dev/null', $currentCron, $returnCode);
+    if ($returnCode !== 0) {
+        $currentCron = [];
+    }
+
+    $filtered = array_filter($currentCron, function($line) use ($identifier) {
+        return strpos($line, $identifier) === false;
+    });
+    $filtered[] = $cron_line;
+
+    $tempFile = tempnam(sys_get_temp_dir(), 'cron');
+    if ($tempFile === false) {
+        return ['success' => false, 'message' => 'ناتوانم فایلەکەی کۆتایی بۆ cron دروست بکەم'];
+    }
+
+    file_put_contents($tempFile, implode(PHP_EOL, $filtered) . PHP_EOL);
+    exec('crontab ' . escapeshellarg($tempFile) . ' 2>&1', $cronOutput, $cronReturn);
+    unlink($tempFile);
+
+    if ($cronReturn !== 0) {
+        return ['success' => false, 'message' => implode(' ', $cronOutput)];
+    }
+
+    return ['success' => true];
+}
+
+function removeLinuxCronTask() {
+    if (!function_exists('exec')) {
+        return ['success' => false, 'message' => 'exec ناچالاکە'];
+    }
+
+    $identifier = '# DanaConcreteAutoBackup';
+    $currentCron = [];
+    $returnCode = 0;
+    exec('crontab -l 2>/dev/null', $currentCron, $returnCode);
+
+    if ($returnCode !== 0 || empty($currentCron)) {
+        return ['success' => true];
+    }
+
+    $filtered = array_filter($currentCron, function($line) use ($identifier) {
+        return strpos($line, $identifier) === false;
+    });
+
+    $tempFile = tempnam(sys_get_temp_dir(), 'cron');
+    if ($tempFile === false) {
+        return ['success' => false, 'message' => 'ناتوانم فایلە مۆقەت بۆ cron دروست بکەم'];
+    }
+
+    file_put_contents($tempFile, implode(PHP_EOL, $filtered) . PHP_EOL);
+    exec('crontab ' . escapeshellarg($tempFile) . ' 2>&1', $cronOutput, $cronReturn);
+    unlink($tempFile);
+
+    if ($cronReturn !== 0) {
+        return ['success' => false, 'message' => implode(' ', $cronOutput)];
+    }
+
+    return ['success' => true];
+}
+
 function getPhpExecutablePath() {
     $candidates = [];
 
@@ -193,6 +281,11 @@ function getPhpExecutablePath() {
     }
 
     return null;
+}
+
+function isWindowsSystem() {
+    $family = PHP_OS_FAMILY ?? php_uname('s');
+    return stripos($family, 'Windows') !== false;
 }
 
 function createAutoBackupCronScript() {
