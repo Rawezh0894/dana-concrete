@@ -18,9 +18,9 @@ $export_type = $input['export_type'] ?? 'table';
 try {
     // Get database configuration
     $host = env('DB_HOST', 'localhost');
-    $username = env('DB_USERNAME', 'dana_user');
-    $password = env('DB_PASSWORD', 'Rawezh.Jaza@0894');
-    $database = env('DB_DATABASE', 'dana_concrete_db');
+    $username = env('DB_USER', 'dana_user');
+    $password = env('DB_PASS', 'Rawezh.Jaza@0894');
+    $database = env('DB_NAME', 'dana_concrete_db');
 
     $pdo = new PDO("mysql:host=$host;dbname=$database", $username, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

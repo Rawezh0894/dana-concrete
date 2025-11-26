@@ -16,9 +16,9 @@ if (!hasPermission('view_users')) {
 
 // Get database configuration
 $host = env('DB_HOST', 'localhost');
-$username = env('DB_USERNAME', 'root');
-$password = env('DB_PASSWORD', '');
-$database = env('DB_DATABASE', 'dana_concrete_db');
+$username = env('DB_USER', 'dana_user');
+$password = env('DB_PASS', 'Rawezh.Jaza@0894');
+$database = env('DB_NAME', 'dana_concrete_db');
 
 // Set backup directory
 $backup_dir = '../backups/';
