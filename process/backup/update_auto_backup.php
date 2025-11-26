@@ -62,16 +62,22 @@ try {
         }
     }
     
-    // Save schedule
-    if (!file_put_contents($schedule_file, json_encode($schedule, JSON_PRETTY_PRINT))) {
-        throw new Exception('نەتوانرا فایلەکەی ڕێکخستنەکان هەڵبگرێت');
-    }
-    
     // Create/update Windows Task Scheduler entry for automatic backups
     if ($enabled) {
-        createWindowsTask($interval);
+        $taskResult = createWindowsTask($interval);
+        if (!$taskResult['success']) {
+            throw new Exception('نەتوانرا باک ئەپی ئۆتۆماتیکی چالاک بکرێت: ' . $taskResult['message']);
+        }
     } else {
-        removeWindowsTask();
+        $taskResult = removeWindowsTask();
+        if (!$taskResult['success']) {
+            error_log("Auto backup task remove warning: " . $taskResult['message']);
+        }
+    }
+
+    // Save schedule only after task creation/removal handled
+    if (!file_put_contents($schedule_file, json_encode($schedule, JSON_PRETTY_PRINT))) {
+        throw new Exception('نەتوانرا فایلەکەی ڕێکخستنەکان هەڵبگرێت');
     }
     
     // Log settings update
@@ -92,58 +98,62 @@ try {
 }
 
 function createWindowsTask($interval_hours) {
-    try {
-        // Get current script directory
-        $script_dir = dirname(__DIR__);
-        $php_path = 'C:\\xampp\\php\\php.exe';
-        $script_path = $script_dir . '\\backup\\auto_backup_cron.php';
-        
-        // Create the cron script if it doesn't exist
-        createAutoBackupCronScript();
-        
-        // Task name
-        $task_name = 'DanaConcreteAutoBackup';
-        
-        // Calculate interval in minutes
-        $interval_minutes = $interval_hours * 60;
-        
-        // Create Windows Task Scheduler command
-        $command = "schtasks /create /tn \"{$task_name}\" /tr \"{$php_path} {$script_path}\" /sc minute /mo {$interval_minutes} /f";
-        
-        // Execute command
-        $output = [];
-        $return_code = 0;
-        exec($command . ' 2>&1', $output, $return_code);
-        
-        if ($return_code === 0) {
-            error_log("Windows Task created successfully: {$task_name}");
-        } else {
-            error_log("Failed to create Windows Task: " . implode(' ', $output));
-        }
-        
-    } catch (Exception $e) {
-        error_log("Error creating Windows Task: " . $e->getMessage());
+    $task_name = 'DanaConcreteAutoBackup';
+    $php_path = 'C:\\xampp\\php\\php.exe';
+    $script_path = dirname(__DIR__) . '\\backup\\auto_backup_cron.php';
+
+    if (!file_exists($php_path)) {
+        return ['success' => false, 'message' => 'PHP executable نەدۆزرایەوە لە ' . $php_path];
     }
+
+    if (!file_exists($script_path)) {
+        createAutoBackupCronScript();
+    }
+
+    $interval_hours = max(1, intval($interval_hours));
+    $interval_minutes = $interval_hours * 60;
+    $schedule_switch = '';
+
+    if ($interval_minutes <= 1439) {
+        $schedule_switch = "/sc minute /mo {$interval_minutes}";
+    } else {
+        $days = max(1, ceil($interval_hours / 24));
+        $schedule_switch = "/sc daily /mo {$days}";
+    }
+
+    $task_run = '"' . $php_path . '" "' . $script_path . '"';
+    $command = 'schtasks /create /tn "' . $task_name . '" /tr "' . $task_run . '" ' . $schedule_switch . ' /f';
+
+    $output = [];
+    $return_code = 0;
+    exec($command . ' 2>&1', $output, $return_code);
+
+    if ($return_code === 0) {
+        error_log("Windows Task created successfully: {$task_name}");
+        return ['success' => true];
+    }
+
+    $message = implode(' ', $output);
+    error_log("Failed to create Windows Task: " . $message);
+    return ['success' => false, 'message' => $message];
 }
 
 function removeWindowsTask() {
-    try {
-        $task_name = 'DanaConcreteAutoBackup';
-        $command = "schtasks /delete /tn \"{$task_name}\" /f";
-        
-        $output = [];
-        $return_code = 0;
-        exec($command . ' 2>&1', $output, $return_code);
-        
-        if ($return_code === 0) {
-            error_log("Windows Task removed successfully: {$task_name}");
-        } else {
-            error_log("Failed to remove Windows Task: " . implode(' ', $output));
-        }
-        
-    } catch (Exception $e) {
-        error_log("Error removing Windows Task: " . $e->getMessage());
+    $task_name = 'DanaConcreteAutoBackup';
+    $command = "schtasks /delete /tn \"{$task_name}\" /f";
+
+    $output = [];
+    $return_code = 0;
+    exec($command . ' 2>&1', $output, $return_code);
+
+    if ($return_code === 0) {
+        error_log("Windows Task removed successfully: {$task_name}");
+        return ['success' => true];
     }
+
+    $message = implode(' ', $output);
+    error_log("Failed to remove Windows Task: " . $message);
+    return ['success' => false, 'message' => $message];
 }
 
 function createAutoBackupCronScript() {
