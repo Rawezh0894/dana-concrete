@@ -1,6 +1,33 @@
 // Multiple submission prevention flag
 let isUpdating = false;
 
+function ensureEditDriverSelect2() {
+    if (typeof $ === 'undefined' || typeof $.fn.select2 === 'undefined') return;
+    const $driverSelect = $('#edit_driver_id');
+    const $modal = $('#editPurchaseModal');
+    if ($driverSelect.length === 0 || $modal.length === 0) return;
+    
+    try {
+        if ($driverSelect.hasClass('select2-hidden-accessible')) {
+            $driverSelect.select2('destroy');
+        }
+        $driverSelect.select2({
+            dropdownParent: $modal,
+            width: '100%',
+            dir: 'rtl',
+            placeholder: $driverSelect.attr('data-placeholder') || 'شۆفێرەکان',
+            allowClear: $driverSelect.find('option[value=""]').length > 0
+        });
+    } catch (error) {
+        console.error('Failed to initialize select2 on edit driver select:', error);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    ensureEditDriverSelect2();
+    $('#editPurchaseModal').on('shown.bs.modal', ensureEditDriverSelect2);
+});
+
 // Function to fetch dollar rate from API
 async function fetchDollarRateFromAPI() {
     try {
