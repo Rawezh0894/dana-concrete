@@ -27,6 +27,17 @@ try {
         exit;
     }
     
+    $include_sales = [];
+    if (!empty($_GET['include_sales'])) {
+        $raw_ids = explode(',', $_GET['include_sales']);
+        foreach ($raw_ids as $raw_id) {
+            $sale_id = intval($raw_id);
+            if ($sale_id > 0) {
+                $include_sales[] = $sale_id;
+            }
+        }
+    }
+    
     if (isset($_GET['stats'])) {
         // Get opening debt
         $row = $pdo->prepare('SELECT opening_debt_usd, opening_debt_iqd FROM customers WHERE id = ?');
@@ -83,15 +94,24 @@ try {
     
     if ($remaining_only) {
         // Get only sales with remaining debt for payment allocation
-        $stmt = $pdo->prepare('
+        $params = [$customer_id];
+        $includeClause = '';
+        if (!empty($include_sales)) {
+            $placeholders = implode(',', array_fill(0, count($include_sales), '?'));
+            $includeClause = " OR s.id IN ($placeholders)";
+            $params = array_merge($params, $include_sales);
+        }
+        $stmt = $pdo->prepare("
             SELECT s.*, c.name AS customer_name, f.strength_mpa, f.strength_kg
             FROM sales s
             LEFT JOIN customers c ON s.customer_id = c.id
             LEFT JOIN concrete_formulas f ON s.formula_id = f.id
-            WHERE s.customer_id = ? AND s.payment_type = "قەرز" AND s.remaining_amount > 0
+            WHERE s.customer_id = ?
+              AND s.payment_type = 'قەرز'
+              AND (s.remaining_amount > 0{$includeClause})
             ORDER BY s.order_date ASC, s.id ASC
-        ');
-        $stmt->execute([$customer_id]);
+        ");
+        $stmt->execute($params);
         $sales = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
         error_log('Customer remaining sales retrieved: Customer=' . $customer_id . ', Count=' . count($sales));

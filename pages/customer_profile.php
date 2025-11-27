@@ -473,6 +473,8 @@ if ($customer_id) {
 
 <script>
     // Modal improvement functions
+    window.editPaymentAllocations = window.editPaymentAllocations || [];
+
     document.addEventListener('DOMContentLoaded', function() {
         // Initialize modals with better event handling
         const addModal = document.getElementById('addCustomerDebtModal');
@@ -504,6 +506,7 @@ if ($customer_id) {
                 // Reset form when closing edit modal
                 document.getElementById('editCustomerDebtForm').reset();
                 document.getElementById('edit_customer_debt_id').value = '';
+                window.editPaymentAllocations = [];
             });
         }
         
@@ -517,17 +520,9 @@ if ($customer_id) {
             const remainingInput = addForm.querySelector('#customer_debt_remaining');
             
             function calculateRemaining() {
-                const paidUsd = parseFloat(paidUsdInput.value) || 0;
-                const paidIqd = parseFloat(paidIqdInput.value) || 0;
-                const discount = parseFloat(discountInput.value) || 0;
-                const dolarRate = parseFloat(dolarRateInput.value) || 150000;
-                
-                const paidIqdUsd = dolarRate > 0 ? paidIqd / (dolarRate / 100) : 0;
-                const totalPaid = paidUsd + paidIqdUsd + discount;
-                
-                // Get customer's total debt (this would need to be fetched from server)
-                // For now, just show the calculated total
-                remainingInput.value = totalPaid.toFixed(4) + ' USD';
+                if (typeof calculateRemainingDebt === 'function') {
+                    calculateRemainingDebt();
+                }
             }
             
             [paidUsdInput, paidIqdInput, discountInput, dolarRateInput].forEach(input => {
@@ -666,15 +661,28 @@ if ($customer_id) {
     function loadSalesForEditSelection() {
         if (!CUSTOMER_ID) return;
         
-        $.get('../process/customer_profile/select_sale.php', { 
+        const params = { 
             customer_id: CUSTOMER_ID, 
             remaining_only: 1 
-        }, function(data) {
+        };
+        
+        if (Array.isArray(window.editPaymentAllocations) && window.editPaymentAllocations.length > 0) {
+            params.include_sales = window.editPaymentAllocations.map(item => item.sale_id).join(',');
+        }
+        
+        $.get('../process/customer_profile/select_sale.php', params, function(data) {
             if (data && data.sales) {
                 const container = document.getElementById('edit_sales_selection_container');
                 container.innerHTML = '';
+                const allocationMap = {};
+                (window.editPaymentAllocations || []).forEach(item => {
+                    allocationMap[item.sale_id] = parseFloat(item.allocated_amount);
+                });
                 
                 data.sales.forEach(sale => {
+                    const baseRemaining = parseFloat(sale.remaining_amount);
+                    const allocatedAmount = allocationMap[sale.id] || 0;
+                    const displayRemaining = (isNaN(baseRemaining) ? 0 : baseRemaining) + allocatedAmount;
                     const saleDiv = document.createElement('div');
                     saleDiv.className = 'card mb-3';
                     saleDiv.innerHTML = `
@@ -699,7 +707,7 @@ if ($customer_id) {
                                         </div>
                                         <div class="col-md-3">
                                             <small class="text-muted">ماوە:</small><br>
-                                            <strong class="text-danger">${parseFloat(sale.remaining_amount).toFixed(2)} $</strong>
+                                            <strong class="text-danger">${displayRemaining.toFixed(2)} $</strong>
                                         </div>
                                         <div class="col-md-3">
                                             <small class="text-muted">وەرگر:</small><br>
@@ -711,7 +719,7 @@ if ($customer_id) {
                                     <label class="form-label small">بڕی پارە:</label>
                                     <div class="input-group input-group-sm">
                                         <input type="number" class="form-control edit-sale-amount" 
-                                               data-sale-id="${sale.id}" min="0" max="${sale.remaining_amount}" 
+                                               data-sale-id="${sale.id}" min="0" max="${displayRemaining}" 
                                                step="0.01" placeholder="0.00">
                                         <span class="input-group-text">$</span>
                                     </div>
@@ -734,6 +742,15 @@ if ($customer_id) {
                     checkbox.addEventListener('change', function() {
                         validatePaymentInputs();
                     });
+                    
+                    const allocationValue = allocationMap[checkbox.value] || 0;
+                    if (allocationValue > 0) {
+                        checkbox.checked = true;
+                        const amountInput = container.querySelector(`.edit-sale-amount[data-sale-id="${checkbox.value}"]`);
+                        if (amountInput) {
+                            amountInput.value = allocationValue.toFixed(2);
+                        }
+                    }
                 });
             }
         }, 'json');

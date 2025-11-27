@@ -12,6 +12,48 @@ function formatIQD(num) {
     return num ? `${formatNumber(num)} د.ع` : '0 د.ع';
 }
 
+async function openEditDebtModal(debtId) {
+    try {
+        const res = await fetch(`../process/person_other_expenses_profile/select_debt.php?debt_id=${debtId}`);
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const payload = await res.json();
+        if (!payload.success || !payload.data) {
+            Swal.fire('هەڵە!', 'دانەوە نەدۆزرایەوە.', 'error');
+            return;
+        }
+
+        const debt = payload.data;
+        const amountUsd = parseFloat(debt.amount_usd ?? 0) || 0;
+        const discountUsd = parseFloat(debt.discount_usd ?? 0) || 0;
+        const amountIqd = parseFloat(debt.amount_iqd ?? 0) || 0;
+        const discountIqd = parseFloat(debt.discount_iqd ?? 0) || 0;
+
+        $('#edit_debt_id').val(debt.id);
+        $('#edit_debt_date').val(debt.date || '');
+        $('#edit_debt_amount_usd').val(amountUsd);
+        $('#edit_debt_discount_usd').val(discountUsd);
+        $('#edit_debt_amount_iqd').val(amountIqd);
+        $('#edit_debt_discount_iqd').val(discountIqd);
+        $('#edit_debt_note').val(debt.note || '');
+
+        if (typeof setupEditDebtModal === 'function') {
+            setupEditDebtModal({
+                amount_usd: amountUsd,
+                discount_usd: discountUsd,
+                amount_iqd: amountIqd,
+                discount_iqd: discountIqd
+            });
+        }
+
+        $('#editDebtModal').modal('show');
+    } catch (error) {
+        console.error('Error loading debt payment:', error);
+        Swal.fire('هەڵە!', 'هەڵە لە بارکردنی دانەوە.', 'error');
+    }
+}
+
 async function loadDebtPayments() {
     try {
         // Destroy existing table if it exists
@@ -87,14 +129,7 @@ async function loadDebtPayments() {
                 formatIQD(discountIqd),
                 row.note || '',
                 `
-                <button class="btn btn-sm btn-warning edit-debt"
-                    data-id="${row.id}"
-                    data-date="${row.date}"
-                    data-amount_usd="${amountUsd}"
-                    data-amount_iqd="${amountIqd}"
-                    data-discount_usd="${discountUsd}"
-                    data-discount_iqd="${discountIqd}"
-                    data-note="${row.note || ''}">
+                <button class="btn btn-sm btn-warning edit-debt" data-id="${row.id}">
                     <i class="fa fa-edit"></i>
                 </button>
                 <button class="btn btn-sm btn-danger delete-debt" data-id="${row.id}">
@@ -143,34 +178,14 @@ async function loadDebtPayments() {
                 { extend: 'excel', text: 'Excel', className: 'btn btn-sm btn-outline-success' },
                 { extend: 'print', text: 'پرینت', className: 'btn btn-sm btn-outline-primary' }
             ],
-            rowCallback: function(row, data) {
-                // Attach edit and delete event handlers
+            rowCallback: function(row) {
                 $(row).find('button.edit-debt').off('click').on('click', function() {
-        const btn = $(this);
-        const amountUsd = parseFloat(btn.data('amount_usd')) || 0;
-        const discountUsd = parseFloat(btn.data('discount_usd')) || 0;
-        const amountIqd = parseFloat(btn.data('amount_iqd')) || 0;
-        const discountIqd = parseFloat(btn.data('discount_iqd')) || 0;
+                    const id = $(this).data('id');
+                    if (id) {
+                        openEditDebtModal(id);
+                    }
+                });
 
-        $('#edit_debt_id').val(btn.data('id'));
-        $('#edit_debt_date').val(btn.data('date'));
-        $('#edit_debt_amount_usd').val(amountUsd);
-        $('#edit_debt_discount_usd').val(discountUsd);
-        $('#edit_debt_amount_iqd').val(amountIqd);
-        $('#edit_debt_discount_iqd').val(discountIqd);
-        $('#edit_debt_note').val(btn.data('note'));
-
-        $('#editDebtModal').modal('show');
-        if (typeof setupEditDebtModal === 'function') {
-            setupEditDebtModal({
-                amount_usd: amountUsd,
-                discount_usd: discountUsd,
-                amount_iqd: amountIqd,
-                discount_iqd: discountIqd
-            });
-        }
-    });
-                
                 $(row).find('button.delete-debt').off('click').on('click', function() {
                     if (typeof deleteDebt === 'function') {
                         deleteDebt($(this).data('id'));
@@ -269,3 +284,4 @@ function updateDebtSummaryCards() {
 document.addEventListener('DOMContentLoaded', loadDebtPayments);
 
 window.loadDebtTable = loadDebtPayments;
+window.openEditDebtModal = openEditDebtModal;

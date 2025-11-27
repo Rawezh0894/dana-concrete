@@ -103,6 +103,16 @@ document.addEventListener('click', async function(e) {
             document.getElementById('edit_customer_debt_paid_iqd').value = data.paid_iqd || '';
             document.getElementById('edit_customer_debt_discount').value = data.discount || '';
             document.getElementById('edit_customer_debt_note').value = data.note || '';
+            const paymentTypeField = document.getElementById('edit_customer_debt_payment_type');
+            if (paymentTypeField) {
+                paymentTypeField.value = data.payment_type || 'fifo';
+            }
+            if (typeof window.editPaymentAllocations !== 'undefined') {
+                window.editPaymentAllocations = data.allocations || [];
+            }
+            if (typeof handleEditPaymentTypeChange === 'function') {
+                handleEditPaymentTypeChange();
+            }
             
             // نیشاندانی مۆداڵ
             const modalElement = document.getElementById('editCustomerDebtModal');

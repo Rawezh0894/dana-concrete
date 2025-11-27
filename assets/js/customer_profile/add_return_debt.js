@@ -68,10 +68,20 @@ window.updateDollarRateInModal = updateDollarRateInModal;
 
 // Function to calculate and display remaining debt
 function calculateRemainingDebt() {
-    const dolar_rate = parseFloat(document.getElementById('customer_debt_dolar_rate').value) || 0;
-    const paid_usd = parseFloat(document.getElementById('customer_debt_paid_usd').value) || 0;
-    const paid_iqd = parseFloat(document.getElementById('customer_debt_paid_iqd').value) || 0;
-    const discount = parseFloat(document.getElementById('customer_debt_discount').value) || 0;
+    const dolarRateInput = document.getElementById('customer_debt_dolar_rate');
+    const paidUsdInput = document.getElementById('customer_debt_paid_usd');
+    const paidIqdInput = document.getElementById('customer_debt_paid_iqd');
+    const discountInput = document.getElementById('customer_debt_discount');
+    const remainingElement = document.getElementById('customer_debt_remaining');
+
+    if (!dolarRateInput || !paidUsdInput || !paidIqdInput || !discountInput || !remainingElement) {
+        return;
+    }
+
+    const dolar_rate = parseFloat(dolarRateInput.value) || 0;
+    const paid_usd = parseFloat(paidUsdInput.value) || 0;
+    const paid_iqd = parseFloat(paidIqdInput.value) || 0;
+    const discount = parseFloat(discountInput.value) || 0;
     
     // Calculate IQD to USD conversion
     const paid_iqd_usd = dolar_rate > 0 ? paid_iqd / (dolar_rate / 100) : 0;
@@ -84,7 +94,6 @@ function calculateRemainingDebt() {
     const adjustedRemainingDebt = Math.abs(remainingDebt) < 0.01 ? 0 : remainingDebt;
     
     // Format and display remaining debt
-    const remainingElement = document.getElementById('customer_debt_remaining');
     if (remainingElement) {
         remainingElement.value = adjustedRemainingDebt.toFixed(4) + ' USD';
         
@@ -135,7 +144,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-document.getElementById('addCustomerDebtForm').addEventListener('submit', async function(e) {
+const addCustomerDebtForm = document.getElementById('addCustomerDebtForm');
+if (addCustomerDebtForm) {
+addCustomerDebtForm.addEventListener('submit', async function(e) {
     e.preventDefault();
     
     // Prevent multiple submissions
@@ -225,7 +236,7 @@ document.getElementById('addCustomerDebtForm').addEventListener('submit', async 
         const data = await res.json();
         if (data.success) {
             Swal.fire('سەرکەوتوو', data.msg, 'success');
-            document.getElementById('addCustomerDebtForm').reset();
+            addCustomerDebtForm.reset();
             // Recalculate remaining debt after form reset
             setTimeout(() => {
                 if (typeof CUSTOMER_ID !== 'undefined' && CUSTOMER_ID) {
@@ -258,3 +269,4 @@ document.getElementById('addCustomerDebtForm').addEventListener('submit', async 
         }
     }
 });
+}

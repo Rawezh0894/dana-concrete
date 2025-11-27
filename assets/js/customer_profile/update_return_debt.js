@@ -30,7 +30,9 @@ async function updateDollarRateInEditModal() {
     }
 }
 
-document.getElementById('editCustomerDebtForm').addEventListener('submit', async function(e) {
+const editCustomerDebtForm = document.getElementById('editCustomerDebtForm');
+if (editCustomerDebtForm) {
+editCustomerDebtForm.addEventListener('submit', async function(e) {
     e.preventDefault();
     
     // Prevent multiple submissions
@@ -55,6 +57,8 @@ document.getElementById('editCustomerDebtForm').addEventListener('submit', async
         const paid_iqd = parseFloat(document.getElementById('edit_customer_debt_paid_iqd').value) || 0;
         const discount = parseFloat(document.getElementById('edit_customer_debt_discount').value) || 0;
         const note = document.getElementById('edit_customer_debt_note').value;
+        const paymentTypeField = document.getElementById('edit_customer_debt_payment_type');
+        const payment_type = paymentTypeField ? paymentTypeField.value : 'fifo';
 
         if (!id || !customer_id || !date || (paid_usd <= 0 && paid_iqd <= 0 && discount <= 0)) {
             Swal.fire('هەڵە', 'هەموو خانەکان پڕ بکە!', 'error');
@@ -70,6 +74,23 @@ document.getElementById('editCustomerDebtForm').addEventListener('submit', async
         formData.append('paid_iqd', paid_iqd);
         formData.append('discount', discount);
         formData.append('note', note);
+        formData.append('payment_type', payment_type);
+
+        if (payment_type === 'specific_sales') {
+            const selectedSales = {};
+            document.querySelectorAll('.edit-sale-checkbox:checked').forEach(checkbox => {
+                const saleId = checkbox.value;
+                const amountInput = document.querySelector(`.edit-sale-amount[data-sale-id="${saleId}"]`);
+                const amount = amountInput ? parseFloat(amountInput.value) || 0 : 0;
+                if (amount > 0) {
+                    selectedSales[saleId] = amount;
+                }
+            });
+
+            if (Object.keys(selectedSales).length > 0) {
+                formData.append('specific_sales', JSON.stringify(selectedSales));
+            }
+        }
 
         const res = await fetch('../process/customer_profile/update_return_debt.php', {
             method: 'POST',
@@ -115,6 +136,7 @@ document.getElementById('editCustomerDebtForm').addEventListener('submit', async
         submitBtn.disabled = false;
     }
 });
+}
 
 // Add modal cleanup function
 function cleanupEditModal() {

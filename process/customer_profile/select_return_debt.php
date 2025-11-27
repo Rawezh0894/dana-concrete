@@ -7,10 +7,6 @@ ini_set('error_log', __DIR__ . '/../../php-error.log');
 require_once '../../config/db_conected.php';
 require_once '../../config/permissions.php';
 
-// Log session and GET data for debugging
-error_log('SESSION: ' . print_r($_SESSION, true));
-error_log('select_return_debt.php GET: ' . print_r($_GET, true));
-
 header('Content-Type: application/json; charset=utf-8');
 
 if (!isset($_SESSION['user_id']) || !hasPermission('view_customer')) {
@@ -28,9 +24,9 @@ try {
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         
         if ($row) {
-            error_log('Debt payment found: ID=' . $debt_id);
-        } else {
-            error_log('Debt payment not found: ID=' . $debt_id);
+            $allocStmt = $pdo->prepare('SELECT sale_id, allocated_amount FROM customer_payment_allocations WHERE debt_payment_id = ? ORDER BY id ASC');
+            $allocStmt->execute([$debt_id]);
+            $row['allocations'] = $allocStmt->fetchAll(PDO::FETCH_ASSOC);
         }
         
         echo json_encode($row ?: []);
@@ -44,7 +40,7 @@ try {
         exit;
     }
     
-    $stmt = $pdo->prepare('SELECT id, date, dolar_rate, paid_usd, paid_iqd, discount, note FROM customer_debt_payments WHERE customer_id = ? ORDER BY date DESC, id DESC');
+    $stmt = $pdo->prepare('SELECT id, date, dolar_rate, paid_usd, paid_iqd, discount, note, payment_type FROM customer_debt_payments WHERE customer_id = ? ORDER BY date DESC, id DESC');
     $stmt->execute([$customer_id]);
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
     

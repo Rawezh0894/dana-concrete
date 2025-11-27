@@ -1,153 +1,95 @@
 <?php
-require_once '../../config/db_conected.php';
+session_start();
+ini_set('log_errors', 1);
+ini_set('error_log', __DIR__ . '/../../php-error.log');
 
-$person_id = intval($_POST['person_id'] ?? 0);
+require_once '../../config/db_conected.php';
+require_once '../../config/permissions.php';
+require_once __DIR__ . '/debt_helpers.php';
+
+header('Content-Type: application/json; charset=utf-8');
+
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['success' => false, 'msg' => 'سێشن نییە!']);
+    exit;
+}
+
+if (!hasPermission('view_person_other_expenses_profile')) {
+    echo json_encode(['success' => false, 'msg' => 'ڕێگە پێنەدراوە!']);
+    exit;
+}
+
+$person_id = isset($_POST['person_id']) ? intval($_POST['person_id']) : 0;
 $date = $_POST['date'] ?? date('Y-m-d');
 $amount_usd = max(0, floatval($_POST['amount_usd'] ?? 0));
 $amount_iqd = max(0, floatval($_POST['amount_iqd'] ?? 0));
 $discount_usd = max(0, floatval($_POST['discount_usd'] ?? 0));
 $discount_iqd = max(0, floatval($_POST['discount_iqd'] ?? 0));
-$note = $_POST['note'] ?? '';
+$note = trim($_POST['note'] ?? '');
 
 if (
     !$person_id ||
     ($amount_usd <= 0 && $amount_iqd <= 0 && $discount_usd <= 0 && $discount_iqd <= 0)
 ) {
-    echo json_encode(['success' => false, 'msg' => 'زانیاری پێویست نەبوو']);
+    echo json_encode(['success' => false, 'msg' => 'زانیاری پێویست بە شێوەیەکی دروست داخڵ بکە!']);
     exit;
 }
 
 try {
-    $pdo->beginTransaction();
+    $snapshot = getPersonDebtSnapshot($pdo, $person_id);
+    $total_usd_available = $snapshot['total_debt_usd'];
+    $total_iqd_available = $snapshot['total_debt_iqd'];
+    $tolerance = 0.0001;
 
-    // وەرگرتنی قەرزی سەرەتایی
-    $stmt = $pdo->prepare("SELECT opening_debt_usd, opening_debt_iqd FROM other_expense_persons WHERE id=? FOR UPDATE");
-    $stmt->execute([$person_id]);
-    $person = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    // Check not exceeding current debt (opening + remaining in other_expenses + remaining in purchase_materials)
-    $stmt = $pdo->prepare("SELECT SUM(remaining_usd) as rem_usd, SUM(remaining_iqd) as rem_iqd FROM other_expenses WHERE person_id=? AND payment_type='قەرز'");
-    $stmt->execute([$person_id]);
-    $rem_expenses = $stmt->fetch(PDO::FETCH_ASSOC);
-    
-    $stmt = $pdo->prepare("SELECT SUM(remaining_amount_usd) as rem_usd, SUM(remaining_amount_iqd) as rem_iqd FROM purchase_materials WHERE person_id=? AND payment_type='قەرز'");
-    $stmt->execute([$person_id]);
-    $rem_purchases = $stmt->fetch(PDO::FETCH_ASSOC);
-    
-    $total_usd_available = round(floatval($person['opening_debt_usd']) + floatval($rem_expenses['rem_usd']) + floatval($rem_purchases['rem_usd']), 2);
-    $total_iqd_available = round(floatval($person['opening_debt_iqd']) + floatval($rem_expenses['rem_iqd']) + floatval($rem_purchases['rem_iqd']), 2);
-    $total_usd_reduction = round($amount_usd + $discount_usd, 2);
-    $total_iqd_reduction = round($amount_iqd + $discount_iqd, 2);
-    if (
-        ($total_usd_reduction > 0 && $total_usd_reduction - $total_usd_available > 0.0001) ||
-        ($total_iqd_reduction > 0 && $total_iqd_reduction - $total_iqd_available > 0.0001)
-    ) {
-        echo json_encode(['success' => false, 'msg' => 'نابێت بڕی پارەی گەرەوا زیاتر بێت لە بڕی قەرز!']);
-        $pdo->rollBack();
+    if (($amount_usd + $discount_usd) - $total_usd_available > $tolerance) {
+        echo json_encode(['success' => false, 'msg' => 'بڕی پارەی دۆلار زیاترە لە قەرزی ماوە!']);
         exit;
     }
 
-    $remain_usd = $total_usd_reduction;
-    $remain_iqd = $total_iqd_reduction;
-
-    $deduct_opening_usd = 0;
-    $deduct_opening_iqd = 0;
-    $deduct_expenses_usd = 0;
-    $deduct_expenses_iqd = 0;
-    $deduct_purchases_usd = 0;
-    $deduct_purchases_iqd = 0;
-
-    // 1. سەرەتا opening_debt_usd کەم بکە
-    $opening_usd = floatval($person['opening_debt_usd']);
-    $deduct_opening_usd = min($opening_usd, $remain_usd);
-    if ($deduct_opening_usd > 0) {
-        $pdo->prepare("UPDATE other_expense_persons SET opening_debt_usd = opening_debt_usd - ? WHERE id=?")->execute([$deduct_opening_usd, $person_id]);
-        $remain_usd -= $deduct_opening_usd;
-    }
-    
-    // 2. FIFO لە other_expenses.remaining_usd (یەکەم expenses)
-    if ($remain_usd > 0) {
-        $stmt = $pdo->prepare("SELECT id, remaining_usd FROM other_expenses WHERE person_id=? AND payment_type='قەرز' AND remaining_usd > 0 ORDER BY date ASC, id ASC FOR UPDATE");
-        $stmt->execute([$person_id]);
-        foreach ($stmt as $row) {
-            if ($remain_usd <= 0) break;
-            $to_deduct = min(floatval($row['remaining_usd']), $remain_usd);
-            if ($to_deduct <= 0) continue;
-            $pdo->prepare("UPDATE other_expenses SET remaining_usd = remaining_usd - ? WHERE id=?")->execute([$to_deduct, $row['id']]);
-            $remain_usd -= $to_deduct;
-            $deduct_expenses_usd += $to_deduct;
-        }
-    }
-    
-    // 3. FIFO لە purchase_materials.remaining_amount_usd (پاشان purchases)
-    if ($remain_usd > 0) {
-        $stmt = $pdo->prepare("SELECT id, remaining_amount_usd FROM purchase_materials WHERE person_id=? AND payment_type='قەرز' AND remaining_amount_usd > 0 ORDER BY purchase_date ASC, id ASC FOR UPDATE");
-        $stmt->execute([$person_id]);
-        foreach ($stmt as $row) {
-            if ($remain_usd <= 0) break;
-            $to_deduct = min(floatval($row['remaining_amount_usd']), $remain_usd);
-            if ($to_deduct <= 0) continue;
-            $pdo->prepare("UPDATE purchase_materials SET remaining_amount_usd = remaining_amount_usd - ? WHERE id=?")->execute([$to_deduct, $row['id']]);
-            $remain_usd -= $to_deduct;
-            $deduct_purchases_usd += $to_deduct;
-        }
+    if (($amount_iqd + $discount_iqd) - $total_iqd_available > $tolerance) {
+        echo json_encode(['success' => false, 'msg' => 'بڕی پارەی دینار زیاترە لە قەرزی ماوە!']);
+        exit;
     }
 
-    // IQD - Same FIFO logic
-    $opening_iqd = floatval($person['opening_debt_iqd']);
-    $deduct_opening_iqd = min($opening_iqd, $remain_iqd);
-    if ($deduct_opening_iqd > 0) {
-        $pdo->prepare("UPDATE other_expense_persons SET opening_debt_iqd = opening_debt_iqd - ? WHERE id=?")->execute([$deduct_opening_iqd, $person_id]);
-        $remain_iqd -= $deduct_opening_iqd;
-    }
-    
-    // FIFO لە other_expenses.remaining_iqd (یەکەم expenses)
-    if ($remain_iqd > 0) {
-        $stmt = $pdo->prepare("SELECT id, remaining_iqd FROM other_expenses WHERE person_id=? AND payment_type='قەرز' AND remaining_iqd > 0 ORDER BY date ASC, id ASC FOR UPDATE");
-        $stmt->execute([$person_id]);
-        foreach ($stmt as $row) {
-            if ($remain_iqd <= 0) break;
-            $to_deduct = min(floatval($row['remaining_iqd']), $remain_iqd);
-            if ($to_deduct <= 0) continue;
-            $pdo->prepare("UPDATE other_expenses SET remaining_iqd = remaining_iqd - ? WHERE id=?")->execute([$to_deduct, $row['id']]);
-            $remain_iqd -= $to_deduct;
-            $deduct_expenses_iqd += $to_deduct;
-        }
-    }
-    
-    // FIFO لە purchase_materials.remaining_amount_iqd (پاشان purchases)
-    if ($remain_iqd > 0) {
-        $stmt = $pdo->prepare("SELECT id, remaining_amount_iqd FROM purchase_materials WHERE person_id=? AND payment_type='قەرز' AND remaining_amount_iqd > 0 ORDER BY purchase_date ASC, id ASC FOR UPDATE");
-        $stmt->execute([$person_id]);
-        foreach ($stmt as $row) {
-            if ($remain_iqd <= 0) break;
-            $to_deduct = min(floatval($row['remaining_amount_iqd']), $remain_iqd);
-            if ($to_deduct <= 0) continue;
-            $pdo->prepare("UPDATE purchase_materials SET remaining_amount_iqd = remaining_amount_iqd - ? WHERE id=?")->execute([$to_deduct, $row['id']]);
-            $remain_iqd -= $to_deduct;
-            $deduct_purchases_iqd += $to_deduct;
-        }
-    }
+    $pdo->beginTransaction();
 
-    // Track how much was paid from other_expenses for summary update
-    if ($deduct_expenses_usd > 0) {
-        $pdo->prepare("UPDATE other_expense_persons SET expense_usd = GREATEST(expense_usd - ?, 0) WHERE id=?")->execute([$deduct_expenses_usd, $person_id]);
-    }
-    if ($deduct_expenses_iqd > 0) {
-        $pdo->prepare("UPDATE other_expense_persons SET expense_iqd = GREATEST(expense_iqd - ?, 0) WHERE id=?")->execute([$deduct_expenses_iqd, $person_id]);
-    }
+    $insert = $pdo->prepare("
+        INSERT INTO person_other_expenses_debt_payments
+        (person_id, date, amount_usd, amount_iqd, discount_usd, discount_iqd, note)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    ");
+    $insert->execute([
+        $person_id,
+        $date,
+        $amount_usd,
+        $amount_iqd,
+        $discount_usd,
+        $discount_iqd,
+        $note
+    ]);
 
-    // تۆمارکردنی مامەڵەکە
-    $stmt = $pdo->prepare("INSERT INTO person_other_expenses_debt_payments (person_id, date, amount_usd, amount_iqd, discount_usd, discount_iqd, note) VALUES (?, ?, ?, ?, ?, ?, ?)");
-    $stmt->execute([$person_id, $date, $amount_usd, $amount_iqd, $discount_usd, $discount_iqd, $note]);
-    $inserted_id = $pdo->lastInsertId();
+    $debt_payment_id = (int)$pdo->lastInsertId();
+
+    applyPersonCurrencyReduction($pdo, $person_id, 'usd', $amount_usd);
+    applyPersonCurrencyReduction($pdo, $person_id, 'usd', $discount_usd);
+    applyPersonCurrencyReduction($pdo, $person_id, 'iqd', $amount_iqd);
+    applyPersonCurrencyReduction($pdo, $person_id, 'iqd', $discount_iqd);
+
     require_once __DIR__ . '/../../includes/notify.php';
-    notify('insert', 'person_other_expenses_debt_payments', $inserted_id, 'پارەدان بۆ قەرزی کەسانی تر زیادکرا (کەس: ' . $person_id . ')');
-    $pdo->commit();
-    echo json_encode(['success' => true]);
-} catch (Exception $e) {
-    $pdo->rollBack();
-    echo json_encode(['success' => false, 'msg' => 'هەڵەی داتابەیس: ' . $e->getMessage()]);
-}
+    notify(
+        'insert',
+        'person_other_expenses_debt_payments',
+        $debt_payment_id,
+        'پارەدان بۆ قەرزی کەسانی تر زیادکرا (کەس: ' . $person_id . ')'
+    );
 
+    $pdo->commit();
+    echo json_encode(['success' => true, 'msg' => 'دانەوەی قەرز بەسەرکەوتوویی تۆمارکرا!']);
+} catch (Throwable $e) {
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    error_log('person add_debt error: ' . $e->getMessage());
+    echo json_encode(['success' => false, 'msg' => 'هەڵەیەک ڕویدا: ' . $e->getMessage()]);
+}
 

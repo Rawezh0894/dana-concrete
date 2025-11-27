@@ -7,10 +7,6 @@ ini_set('error_log', __DIR__ . '/../../php-error.log');
 require_once '../../config/db_conected.php';
 require_once '../../config/permissions.php';
 
-// Log session and POST data for debugging
-error_log('SESSION: ' . print_r($_SESSION, true));
-error_log('add_return_debt.php POST: ' . print_r($_POST, true));
-
 header('Content-Type: application/json; charset=utf-8');
 
 if (!isset($_SESSION['user_id'])) {
@@ -111,6 +107,8 @@ try {
         }
     }
 
+    $pdo->beginTransaction();
+
     // 3. زیادکردنی قەرزە گەڕاوەکە بەپێی جۆری پارەدان
     $usd_left = $total_paid_usd;
     $from_sales_usd = 0;
@@ -194,6 +192,7 @@ try {
     $ok = $stmt->execute([$customer_id, $date, $dolar_rate, $paid_usd, $paid_iqd, $discount, $note, $payment_type, $paid_from_opening, $paid_from_sales]);
     
     if (!$ok) {
+        $pdo->rollBack();
         error_log('Failed to insert debt payment record');
         echo json_encode(['success' => false, 'msg' => 'هەڵە لە تۆمارکردن']);
         exit;
@@ -244,13 +243,21 @@ try {
         getUserIP()
     );
     
+    $pdo->commit();
+
     error_log('Return debt successfully added: Customer=' . $customer_name . ' (ID: ' . $customer_id . '), Amount=' . $total_paid_usd);
     echo json_encode(['success' => true, 'msg' => 'دانەوەی قەرز بەسەرکەوتوویی تۆمارکرا!']);
     
 } catch (PDOException $e) {
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
     error_log('PDOException in add_return_debt.php: ' . $e->getMessage());
     echo json_encode(['success' => false, 'msg' => 'هەڵەی داتابەیس: ' . $e->getMessage()]);
 } catch (Exception $e) {
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
     error_log('Exception in add_return_debt.php: ' . $e->getMessage());
     echo json_encode(['success' => false, 'msg' => 'هەڵەی سیستەم: ' . $e->getMessage()]);
 }

@@ -44,6 +44,9 @@ try {
         exit;
     }
     
+    // Normalize collations for compatibility before download
+    sanitizeBackupCollations($file_path);
+
     // Get file info
     $file_size = filesize($file_path);
     $file_mime = 'application/sql';
@@ -95,5 +98,31 @@ function formatFileSize($bytes) {
     $pow = min($pow, count($units) - 1);
     $bytes /= pow(1024, $pow);
     return round($bytes, 2) . ' ' . $units[$pow];
+}
+
+function sanitizeBackupCollations($file_path) {
+    if (!is_readable($file_path) || !is_writable($file_path)) {
+        return;
+    }
+
+    $content = file_get_contents($file_path);
+    if ($content === false || $content === '') {
+        return;
+    }
+
+    $replacements = [
+        'utf8mb4_0900_ai_ci' => 'utf8mb4_unicode_ci',
+        'utf8mb4_0900_as_cs' => 'utf8mb4_unicode_ci',
+        'utf8mb4_0900_as_ci' => 'utf8mb4_unicode_ci',
+        'utf8mb4_0900_bin'   => 'utf8mb4_bin',
+        'utf8mb4_0900_general_ci' => 'utf8mb4_unicode_ci'
+    ];
+
+    $updated = str_replace(array_keys($replacements), array_values($replacements), $content);
+    $updated = preg_replace('/SET NAMES utf8mb4 COLLATE utf8mb4_0900_[^;]+;/', 'SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;', $updated);
+
+    if ($updated !== null) {
+        file_put_contents($file_path, $updated);
+    }
 }
 ?>

@@ -7,10 +7,6 @@ ini_set('error_log', __DIR__ . '/../../php-error.log');
 require_once '../../config/db_conected.php';
 require_once '../../config/permissions.php';
 
-// Log session and POST data for debugging
-error_log('SESSION: ' . print_r($_SESSION, true));
-error_log('delete_return_debt.php POST: ' . print_r($_POST, true));
-
 header('Content-Type: application/json; charset=utf-8');
 
 if (!isset($_SESSION['user_id'])) {
@@ -28,10 +24,11 @@ if (!hasPermission('delete_debt')) {
 try {
     $id = $_POST['id'] ?? null;
     if (!$id) {
-        error_log('No debt ID provided for deletion');
         echo json_encode(['success' => false, 'msg' => 'ناسنامەی قەرز پێویستە!']);
         exit;
     }
+
+    $pdo->beginTransaction();
 
     // وەرگرتنی زانیاری قەرزەکە لەگەڵ payment_type
     $stmt = $pdo->prepare('SELECT customer_id, paid_usd, paid_iqd, discount, dolar_rate, from_opening_debt_usd, from_sales_usd, date, note, payment_type FROM customer_debt_payments WHERE id = ?');
@@ -39,12 +36,10 @@ try {
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
     
     if (!$row) {
-        error_log('Debt payment not found: ID=' . $id);
+        $pdo->rollBack();
         echo json_encode(['success' => false, 'msg' => 'قەرز نەدۆزرایەوە!']);
         exit;
     }
-    
-    error_log('Found debt payment for deletion: ' . print_r($row, true));
     
     $customer_id = $row['customer_id'];
     $paid_usd = floatval($row['paid_usd']);
@@ -197,17 +192,25 @@ try {
             getUserIP()
         );
 
+        $pdo->commit();
         error_log('Return debt successfully deleted: ID=' . $id . ', Customer=' . $customer_name . ' (ID: ' . $customer_id . ')');
         echo json_encode(['success' => true, 'msg' => 'قەرز بەسەرکەوتوویی سڕایەوە!']);
     } else {
+        $pdo->rollBack();
         error_log('Failed to delete debt payment: ID=' . $id);
         echo json_encode(['success' => false, 'msg' => 'هەڵە لە سڕینەوە!']);
     }
     
 } catch (PDOException $e) {
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
     error_log('PDOException in delete_return_debt.php: ' . $e->getMessage());
     echo json_encode(['success' => false, 'msg' => 'هەڵەی داتابەیس: ' . $e->getMessage()]);
 } catch (Exception $e) {
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
     error_log('Exception in delete_return_debt.php: ' . $e->getMessage());
     echo json_encode(['success' => false, 'msg' => 'هەڵەی سیستەم: ' . $e->getMessage()]);
 }
