@@ -49,7 +49,8 @@ function loadSalesTable() {
                 d.from = document.getElementById('filter_from')?.value || '';
                 d.to = document.getElementById('filter_to')?.value || '';
                 d.customer_id = document.getElementById('filter_customer')?.value || '';
-                d.quantity_range = document.getElementById('filter_quantity')?.value || '';
+                d.min_quantity = document.getElementById('filter_quantity_min')?.value || '';
+                d.max_quantity = document.getElementById('filter_quantity_max')?.value || '';
                 d.amount_min = document.getElementById('filter_amount_min')?.value || '';
                 d.amount_max = document.getElementById('filter_amount_max')?.value || '';
             },

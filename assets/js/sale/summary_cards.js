@@ -14,7 +14,8 @@ function loadSummaryCardsData(filterParams = '') {
     const customerId = params.get('customer_id') || document.getElementById('filter_customer')?.value || '';
     const fromDate = params.get('from') || document.getElementById('filter_from')?.value || '';
     const toDate = params.get('to') || document.getElementById('filter_to')?.value || '';
-    const quantityRange = params.get('quantity_range') || document.getElementById('filter_quantity')?.value || '';
+    const minQuantity = params.get('min_quantity') || document.getElementById('filter_quantity_min')?.value || '';
+    const maxQuantity = params.get('max_quantity') || document.getElementById('filter_quantity_max')?.value || '';
     
     $.ajax({
         url: '../process/sale/get_summary_stats.php',
@@ -23,7 +24,8 @@ function loadSummaryCardsData(filterParams = '') {
             customer_id: customerId,
             from_date: fromDate,
             to_date: toDate,
-            quantity_range: quantityRange
+            min_quantity: minQuantity,
+            max_quantity: maxQuantity
         },
         dataType: 'json',
         success: function(response) {
@@ -59,12 +61,16 @@ function exportSaleSummaryToExcel() {
     const customerId = $('#filter_customer') ? $('#filter_customer').val() : '';
     const fromDate = $('#filter_from').val() || '';
     const toDate = $('#filter_to').val() || '';
+    const minQuantity = $('#filter_quantity_min').val() || '';
+    const maxQuantity = $('#filter_quantity_max').val() || '';
     
     // Create form data
     const formData = new FormData();
     formData.append('customer_id', customerId);
     formData.append('from_date', fromDate);
     formData.append('to_date', toDate);
+    formData.append('min_quantity', minQuantity);
+    formData.append('max_quantity', maxQuantity);
     formData.append('export_type', 'summary');
     
     // Show loading message

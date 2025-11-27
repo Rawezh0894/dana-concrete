@@ -364,13 +364,12 @@ usort($recipients, function($a, $b) {
         </select>
       </div>
       <div class="col-md-3">
-        <label for="filter_quantity">بڕ (م³) سێجا</label>
-        <select class="form-select" id="filter_quantity">
-          <option value="">هەموو</option>
-          <option value="<5">کەمتر لە 5 م³</option>
-          <option value="5-10">لە نێوان 5 تا 10 م³</option>
-          <option value=">10">زیاتر لە 10 م³</option>
-        </select>
+        <label for="filter_quantity_min">کەمترین بڕ (م³)</label>
+        <input type="number" class="form-control" id="filter_quantity_min" step="0.01" placeholder="بۆ نموونە 5">
+      </div>
+      <div class="col-md-3">
+        <label for="filter_quantity_max">زۆرترین بڕ (م³)</label>
+        <input type="number" class="form-control" id="filter_quantity_max" step="0.01" placeholder="بۆ نموونە 10">
       </div>
       <div class="col-md-3 d-flex align-items-end gap-2">
         <button class="btn btn-secondary" id="clearFilterBtn" type="button">پاککردنەوە</button>
@@ -703,7 +702,7 @@ usort($recipients, function($a, $b) {
 // Filter functionality for customer and date
 $(document).ready(function() {
     // Add event listeners for all filters
-    $('#filter_customer, #filter_from, #filter_to, #filter_quantity').on('change', function() {
+    $('#filter_customer, #filter_from, #filter_to, #filter_quantity_min, #filter_quantity_max').on('input change', function() {
         applyFilters();
     });
     
@@ -712,7 +711,8 @@ $(document).ready(function() {
         $('#filter_customer').val('');
         $('#filter_from').val('');
         $('#filter_to').val('');
-        $('#filter_quantity').val('');
+        $('#filter_quantity_min').val('');
+        $('#filter_quantity_max').val('');
         applyFilters();
     });
     
@@ -721,14 +721,16 @@ $(document).ready(function() {
         const customerId = $('#filter_customer').val();
         const fromDate = $('#filter_from').val();
         const toDate = $('#filter_to').val();
-        const quantityRange = $('#filter_quantity').val();
+        const minQuantity = $('#filter_quantity_min').val();
+        const maxQuantity = $('#filter_quantity_max').val();
         
         // Build filter parameters
         const params = new URLSearchParams();
         if (customerId) params.append('customer_id', customerId);
         if (fromDate) params.append('from', fromDate);
         if (toDate) params.append('to', toDate);
-        if (quantityRange) params.append('quantity_range', quantityRange);
+        if (minQuantity) params.append('min_quantity', minQuantity);
+        if (maxQuantity) params.append('max_quantity', maxQuantity);
         
         // Call the existing loadSales function with filters
         if (typeof loadSales === 'function') {
