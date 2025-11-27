@@ -585,16 +585,12 @@ document.addEventListener('click', async function(e) {
             
             console.log('Purchase data for edit:', data);
             
-            // Show modal first
-            const modal = new bootstrap.Modal(document.getElementById('editPurchaseModal'));
-            modal.show();
+            const modalEl = document.getElementById('editPurchaseModal');
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
             
-            // Wait for modal to be fully shown, then initialize select2 and populate fields
             $('#editPurchaseModal').off('shown.bs.modal.edit').on('shown.bs.modal.edit', function() {
-                // Initialize select2 for edit modal first
                 initializeEditModalSelect2();
                 
-                // Wait for select2 to be fully initialized, then populate fields
                 setTimeout(() => {
                     // پڕکردنەوەی خانەکان
                     const fieldMappings = {
@@ -684,6 +680,8 @@ document.addEventListener('click', async function(e) {
                     }
                 }, 300);
             });
+            
+            modal.show();
             
         } catch (error) {
             console.error('Error loading purchase for edit:', error);
