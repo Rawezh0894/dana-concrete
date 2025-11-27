@@ -33,8 +33,14 @@ $(document).on('click', '.delete-purchase', function() {
             $.post('../process/purchase/delete_purchase.php', { id }, function(res) {
                 if (res.success) {
                     Swal.fire('سڕایەوە!', 'کڕینەکە سڕایەوە.', 'success');
-                    if (typeof loadPurchases === 'function') loadPurchases();
-                    if (typeof loadPurchaseSummary === 'function') loadPurchaseSummary();
+                    if (typeof refreshPurchaseTable === 'function') {
+                        refreshPurchaseTable();
+                    } else if (typeof loadPurchases === 'function') {
+                        loadPurchases(currentFilterParams || '', currentPurchasePage || 1, currentSearchTerm || '');
+                    }
+                    if (typeof loadPurchaseSummary === 'function') {
+                        loadPurchaseSummary(typeof currentFilterParams === 'string' ? currentFilterParams : '');
+                    }
                 } else {
                     console.error('Delete error:', res);
                     Swal.fire('هەڵە!', res.msg || 'هەڵەیەک ڕویدا', 'error');

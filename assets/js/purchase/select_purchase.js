@@ -3,6 +3,17 @@ let currentFilterParams = '';
 let currentSearchTerm = '';
 let purchaseSearchTimeout = null;
 
+function refreshPurchaseTable(options = {}) {
+    const { resetPage = false } = options;
+    const targetPage = resetPage ? 1 : currentPurchasePage || 1;
+    
+    if (typeof loadPurchases === 'function') {
+        loadPurchases(currentFilterParams || '', targetPage, currentSearchTerm || '');
+    }
+}
+
+window.refreshPurchaseTable = refreshPurchaseTable;
+
 async function loadPurchases(filterParams = '', page = 1, searchTerm = '') {
     currentPurchasePage = page;
     currentFilterParams = filterParams;

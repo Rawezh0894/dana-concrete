@@ -155,8 +155,14 @@ document.getElementById('editPurchaseForm').onsubmit = async function(e) {
             Swal.fire('سەرکەوتوو!', 'کڕین نوێکرایەوە', 'success');
             var modal = bootstrap.Modal.getInstance(document.getElementById('editPurchaseModal'));
             modal.hide();
-            if (typeof loadPurchases === 'function') loadPurchases();
-            if (typeof loadPurchaseSummary === 'function') loadPurchaseSummary();
+            if (typeof refreshPurchaseTable === 'function') {
+                refreshPurchaseTable();
+            } else if (typeof loadPurchases === 'function') {
+                loadPurchases(currentFilterParams || '', currentPurchasePage || 1, currentSearchTerm || '');
+            }
+            if (typeof loadPurchaseSummary === 'function') {
+                loadPurchaseSummary(typeof currentFilterParams === 'string' ? currentFilterParams : '');
+            }
         } else {
             Swal.fire('هەڵە!', data.msg || 'هەڵەیەک ڕویدا', 'error');
         }
