@@ -499,30 +499,6 @@ if (!isset($_SESSION['user_id'])) {
     <div class="row" id="dashboard-summary-cards" style="margin-bottom:2rem;">
         <!-- Cards will be rendered here by JS -->
     </div>
-
-    <div class="card shadow-sm mb-4" id="debt-discount-details">
-        <div class="card-header bg-white d-flex justify-content-between align-items-center">
-            <div class="fw-bold text-success">
-                <i class="fa fa-percent me-2"></i>وردەکاری داشکاندنی گەڕاندنەوەی قەرز
-            </div>
-            <small class="text-muted">پێشاندانی کڕیارانی داگیرساندراو به‌ فلتەری دیاریکراو</small>
-        </div>
-        <div class="card-body">
-            <p id="debt-discount-empty" class="text-muted mb-0">هیچ داشکاندنێک بۆ قەرزی کڕیاران بە فلتەری ئێستا تۆمار نەکراوە.</p>
-            <div class="table-responsive">
-                <table class="table table-striped table-hover align-middle mb-0" id="debt-discount-table">
-                    <thead class="table-light">
-                        <tr>
-                            <th style="width:80px;">#</th>
-                            <th>ناوی کڕیار</th>
-                            <th style="width:220px;">کۆی داشکاندن (USD)</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
     
     <!-- Charts Section -->
     <div class="row g-4 mb-4">

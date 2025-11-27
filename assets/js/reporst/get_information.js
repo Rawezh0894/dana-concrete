@@ -37,10 +37,6 @@ function fetchAndRenderReportData() {
             } else {
                 console.error('renderCharts function not found');
             }
-
-            if (typeof renderDebtDiscountDetails === 'function') {
-                renderDebtDiscountDetails(result);
-            }
         })
         .catch(error => {
             console.error('Fetch error:', error);
@@ -436,32 +432,4 @@ function formatNumber(amount) {
     }
     const num = parseFloat(amount);
     return num.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-}
-
-function renderDebtDiscountDetails(result) {
-    const section = document.getElementById('debt-discount-details');
-    const tableBody = document.querySelector('#debt-discount-table tbody');
-    const emptyState = document.getElementById('debt-discount-empty');
-
-    if (!section || !tableBody || !emptyState) {
-        console.warn('Debt discount detail elements not found');
-        return;
-    }
-
-    const rows = result?.data?.discounts?.by_customer || [];
-
-    if (!rows.length) {
-        emptyState.classList.remove('d-none');
-        tableBody.innerHTML = '';
-        return;
-    }
-
-    emptyState.classList.add('d-none');
-    tableBody.innerHTML = rows.map((row, index) => `
-        <tr>
-            <td>${index + 1}</td>
-            <td>${row.customer_name || '-'}</td>
-            <td>${formatCurrency(row.total_discount_usd || 0, 'USD')}</td>
-        </tr>
-    `).join('');
 }

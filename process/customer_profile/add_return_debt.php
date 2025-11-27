@@ -244,7 +244,7 @@ try {
     );
     
     $pdo->commit();
-
+    
     error_log('Return debt successfully added: Customer=' . $customer_name . ' (ID: ' . $customer_id . '), Amount=' . $total_paid_usd);
     echo json_encode(['success' => true, 'msg' => 'دانەوەی قەرز بەسەرکەوتوویی تۆمارکرا!']);
     
