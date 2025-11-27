@@ -727,7 +727,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
   <div class="modal-dialog">
     <div class="modal-content">
       <form id="editDriverForm">
-        <input type="hidden" id="edit_driver_id" name="id">
+        <input type="hidden" id="edit_driver_modal_id" name="id">
         <div class="modal-header">
           <h5 class="modal-title" id="editDriverModalLabel">نوێکردنەوەی شۆفێر</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>

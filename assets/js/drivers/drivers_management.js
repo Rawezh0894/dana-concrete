@@ -124,7 +124,7 @@ $(document).ready(function() {
     // Update driver function
     function updateDriver() {
         const formData = {
-            id: $('#edit_driver_id').val(),
+            id: $('#edit_driver_modal_id').val(),
             name: $('#edit_driver_name').val(),
             load_capacity: $('#edit_driver_load_capacity').val() || null
         };
@@ -193,7 +193,7 @@ $(document).ready(function() {
         const name = $(this).data('name');
         const loadCapacity = $(this).data('load-capacity');
 
-        $('#edit_driver_id').val(id);
+        $('#edit_driver_modal_id').val(id);
         $('#edit_driver_name').val(name);
         $('#edit_driver_load_capacity').val(loadCapacity);
 
