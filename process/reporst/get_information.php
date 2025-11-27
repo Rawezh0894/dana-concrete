@@ -255,6 +255,28 @@ try {
     $stmt = $pdo->query($customer_debt_discounts_query);
     $row = $stmt->fetch();
     $customer_debt_discounts = $row['total_discount'] ?? 0;
+
+    // Detailed customer-level debt discount breakdown
+    $discounts_by_customer = [];
+    $customer_discounts_stmt = $pdo->query("
+        SELECT 
+            c.id,
+            c.name,
+            COALESCE(SUM(cdp.discount), 0) AS total_discount_usd
+        FROM customer_debt_payments cdp
+        JOIN customers c ON c.id = cdp.customer_id
+        WHERE 1=1 $date_condition_date
+        GROUP BY c.id, c.name
+        HAVING total_discount_usd > 0
+        ORDER BY total_discount_usd DESC
+    ");
+    while ($detail_row = $customer_discounts_stmt->fetch(PDO::FETCH_ASSOC)) {
+        $discounts_by_customer[] = [
+            'customer_id' => (int)$detail_row['id'],
+            'customer_name' => $detail_row['name'],
+            'total_discount_usd' => (float)$detail_row['total_discount_usd']
+        ];
+    }
     
     // Total discounts = sales discounts + customer debt payment discounts
     $total_discount = $sales_discounts + $customer_debt_discounts;
@@ -813,7 +835,8 @@ try {
             'discounts' => [
                 'total_usd' => $total_discount,
                 'sales_usd' => $sales_discounts,
-                'customer_debt_usd' => $customer_debt_discounts
+                'customer_debt_usd' => $customer_debt_discounts,
+                'by_customer' => $discounts_by_customer
             ],
             'gas_income' => [
                 'usd' => $gas_income_total_usd
