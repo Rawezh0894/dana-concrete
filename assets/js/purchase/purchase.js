@@ -67,8 +67,14 @@ function updateAmountsFor(prefix) {
         $('#' + prefix + 'remaining_usd').prop('readonly', true);
         $('#' + prefix + 'remaining_iqd').prop('readonly', false);
         const paid_usd_to_iqd = paid_usd * exchange_rate / 100;
-        const remaining_iqd = amount_iqd - (paid_iqd + paid_usd_to_iqd);
-        if (!remainingIqdFocused) $('#' + prefix + 'remaining_iqd').val(remaining_iqd.toFixed(2));
+        let remaining_iqd = amount_iqd - (paid_iqd + paid_usd_to_iqd);
+        if (!remainingIqdFocused) {
+            if (remaining_iqd < 0) {
+                remaining_iqd = 0;
+            }
+            const flooredRemainingIqd = Math.floor(remaining_iqd / 1000) * 1000;
+            $('#' + prefix + 'remaining_iqd').val(flooredRemainingIqd.toFixed(0));
+        }
         $('#' + prefix + 'remaining_usd').val(0);
     } else if (type === 'دۆلار') {
         // Allow manual input for amount_iqd when type is دۆلار
