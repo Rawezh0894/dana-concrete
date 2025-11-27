@@ -88,12 +88,16 @@ function exportSaleToExcel() {
     const customerId = $('#filter_customer') ? $('#filter_customer').val() : '';
     const fromDate = $('#filter_from').val() || '';
     const toDate = $('#filter_to').val() || '';
+    const quantityRange = $('#filter_quantity').val() || '';
+    const quantityRange = $('#filter_quantity').val() || '';
     
     // Create form data
     const formData = new FormData();
     formData.append('customer_id', customerId);
     formData.append('from_date', fromDate);
     formData.append('to_date', toDate);
+    formData.append('quantity_range', quantityRange);
+    formData.append('quantity_range', quantityRange);
     
     // Show loading message
     Swal.fire({

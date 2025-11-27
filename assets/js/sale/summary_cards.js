@@ -11,9 +11,10 @@ $(document).ready(function() {
 function loadSummaryCardsData(filterParams = '') {
     // Parse filter parameters
     const params = new URLSearchParams(filterParams);
-    const customerId = params.get('customer_id') || '';
-    const fromDate = params.get('from') || '';
-    const toDate = params.get('to') || '';
+    const customerId = params.get('customer_id') || document.getElementById('filter_customer')?.value || '';
+    const fromDate = params.get('from') || document.getElementById('filter_from')?.value || '';
+    const toDate = params.get('to') || document.getElementById('filter_to')?.value || '';
+    const quantityRange = params.get('quantity_range') || document.getElementById('filter_quantity')?.value || '';
     
     $.ajax({
         url: '../process/sale/get_summary_stats.php',
@@ -21,7 +22,8 @@ function loadSummaryCardsData(filterParams = '') {
         data: {
             customer_id: customerId,
             from_date: fromDate,
-            to_date: toDate
+            to_date: toDate,
+            quantity_range: quantityRange
         },
         dataType: 'json',
         success: function(response) {

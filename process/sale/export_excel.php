@@ -18,6 +18,7 @@ $customer_id = $_POST['customer_id'] ?? '';
 $from_date = $_POST['from_date'] ?? '';
 $to_date = $_POST['to_date'] ?? '';
 $export_type = $_POST['export_type'] ?? 'detailed';
+$quantity_range = $_POST['quantity_range'] ?? '';
 
 // Build WHERE clause
 $where = [];
@@ -36,6 +37,24 @@ if ($from_date) {
 if ($to_date) {
     $where[] = "s.order_date <= ?";
     $params[] = $to_date;
+}
+
+if ($quantity_range) {
+    switch ($quantity_range) {
+        case '<5':
+            $where[] = "s.quantity < ?";
+            $params[] = 5;
+            break;
+        case '5-10':
+            $where[] = "(s.quantity BETWEEN ? AND ?)";
+            $params[] = 5;
+            $params[] = 10;
+            break;
+        case '>10':
+            $where[] = "s.quantity > ?";
+            $params[] = 10;
+            break;
+    }
 }
 
 $where_sql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';

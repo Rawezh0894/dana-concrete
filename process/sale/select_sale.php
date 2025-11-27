@@ -12,6 +12,8 @@ $from = $_GET['from'] ?? null;
 $to = $_GET['to'] ?? null;
 $customerId = $_GET['customer_id'] ?? null;
 $minQuantity = $_GET['min_quantity'] ?? null;
+$quantityRange = $_GET['quantity_range'] ?? '';
+$maxQuantity = $_GET['max_quantity'] ?? null;
 $amountMin = $_GET['amount_min'] ?? null;
 $amountMax = $_GET['amount_max'] ?? null;
     $where = [];
@@ -32,6 +34,29 @@ if ($customerId) {
 if ($minQuantity !== null && $minQuantity !== '') {
     $where[] = "s.quantity >= :min_quantity";
     $filterParams['min_quantity'] = (float)$minQuantity;
+}
+if ($maxQuantity !== null && $maxQuantity !== '') {
+    $where[] = "s.quantity <= :max_quantity";
+    $filterParams['max_quantity'] = (float)$maxQuantity;
+}
+if ($quantityRange) {
+    switch ($quantityRange) {
+        case '<5':
+            $where[] = "s.quantity < :quantity_range_max";
+            $filterParams['quantity_range_max'] = 5;
+            unset($filterParams['quantity_range_min']);
+            break;
+        case '5-10':
+            $where[] = "(s.quantity BETWEEN :quantity_range_min AND :quantity_range_max)";
+            $filterParams['quantity_range_min'] = 5;
+            $filterParams['quantity_range_max'] = 10;
+            break;
+        case '>10':
+            $where[] = "s.quantity > :quantity_range_min";
+            $filterParams['quantity_range_min'] = 10;
+            unset($filterParams['quantity_range_max']);
+            break;
+    }
 }
 if ($amountMin !== null && $amountMin !== '') {
     $where[] = "s.total_price >= :amount_min";

@@ -8,6 +8,7 @@ header('Content-Type: application/json');
 $customer_id = $_GET['customer_id'] ?? '';
 $from_date = $_GET['from_date'] ?? '';
 $to_date = $_GET['to_date'] ?? '';
+$quantity_range = $_GET['quantity_range'] ?? '';
 
 // Build WHERE clause for filters
 $where_conditions = [];
@@ -26,6 +27,24 @@ if ($from_date) {
 if ($to_date) {
     $where_conditions[] = "order_date <= ?";
     $params[] = $to_date;
+}
+
+if ($quantity_range) {
+    switch ($quantity_range) {
+        case '<5':
+            $where_conditions[] = "quantity < ?";
+            $params[] = 5;
+            break;
+        case '5-10':
+            $where_conditions[] = "(quantity BETWEEN ? AND ?)";
+            $params[] = 5;
+            $params[] = 10;
+            break;
+        case '>10':
+            $where_conditions[] = "quantity > ?";
+            $params[] = 10;
+            break;
+    }
 }
 
 $where_sql = $where_conditions ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
