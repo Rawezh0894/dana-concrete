@@ -363,6 +363,20 @@ usort($recipients, function($a, $b) {
           <?php endforeach; ?>
         </select>
       </div>
+      <div class="col-md-3">
+        <label for="filter_quantity">بڕ (م³) >=</label>
+        <input type="number" class="form-control" id="filter_quantity" placeholder="بڕی بەختەوەر" min="0" step="0.01">
+      </div>
+    </div>
+    <div class="row mb-3">
+      <div class="col-md-3">
+        <label for="filter_amount_min">کۆی نرخ >=</label>
+        <input type="number" class="form-control" id="filter_amount_min" placeholder="کمترین کۆی نرخ" min="0" step="0.01">
+      </div>
+      <div class="col-md-3">
+        <label for="filter_amount_max">کۆی نرخ <=</label>
+        <input type="number" class="form-control" id="filter_amount_max" placeholder="زۆرترین کۆی نرخ" min="0" step="0.01">
+      </div>
       <div class="col-md-3 d-flex align-items-end">
         <button class="btn btn-secondary" id="clearFilterBtn" type="button">پاککردنەوە</button>
       </div>
@@ -694,7 +708,7 @@ usort($recipients, function($a, $b) {
 // Filter functionality for customer and date
 $(document).ready(function() {
     // Add event listeners for all filters
-    $('#filter_customer, #filter_from, #filter_to').on('change', function() {
+    $('#filter_customer, #filter_from, #filter_to, #filter_quantity, #filter_amount_min, #filter_amount_max').on('change input', function() {
         applyFilters();
     });
     
@@ -703,6 +717,9 @@ $(document).ready(function() {
         $('#filter_customer').val('');
         $('#filter_from').val('');
         $('#filter_to').val('');
+        $('#filter_quantity').val('');
+        $('#filter_amount_min').val('');
+        $('#filter_amount_max').val('');
         applyFilters();
     });
     
@@ -711,21 +728,25 @@ $(document).ready(function() {
         const customerId = $('#filter_customer').val();
         const fromDate = $('#filter_from').val();
         const toDate = $('#filter_to').val();
+        const quantity = $('#filter_quantity').val();
+        const amountMin = $('#filter_amount_min').val();
+        const amountMax = $('#filter_amount_max').val();
         
-        // Build filter parameters
         const params = new URLSearchParams();
         if (customerId) params.append('customer_id', customerId);
         if (fromDate) params.append('from', fromDate);
         if (toDate) params.append('to', toDate);
+        if (quantity) params.append('min_quantity', quantity);
+        if (amountMin) params.append('amount_min', amountMin);
+        if (amountMax) params.append('amount_max', amountMax);
         
-        // Call the existing loadSales function with filters
-        if (typeof loadSales === 'function') {
-            loadSales(params.toString());
-        }
+        const queryString = params.toString();
         
-        // Also update summary cards if the function exists
         if (typeof loadSummaryCardsData === 'function') {
-            loadSummaryCardsData(params.toString());
+            loadSummaryCardsData(queryString);
+        }
+        if (typeof loadSalesTable === 'function') {
+            loadSalesTable();
         }
     }
     

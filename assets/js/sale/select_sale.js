@@ -48,6 +48,10 @@ function loadSalesTable() {
             data: function(d) {
                 d.from = document.getElementById('filter_from')?.value || '';
                 d.to = document.getElementById('filter_to')?.value || '';
+                d.customer_id = document.getElementById('filter_customer')?.value || '';
+                d.min_quantity = document.getElementById('filter_quantity')?.value || '';
+                d.amount_min = document.getElementById('filter_amount_min')?.value || '';
+                d.amount_max = document.getElementById('filter_amount_max')?.value || '';
             },
             error: function(xhr) {
                 console.error('Error loading sales:', xhr?.responseText || xhr);
@@ -178,18 +182,3 @@ window.reloadSales = function() {
     loadSalesTable();
 };
 
-const fromInput = document.getElementById('filter_from');
-const toInput = document.getElementById('filter_to');
-if (fromInput && toInput) {
-    fromInput.addEventListener('change', loadSalesTable);
-    toInput.addEventListener('change', loadSalesTable);
-}
-
-const clearBtn = document.getElementById('clearFilterBtn');
-if (clearBtn) {
-    clearBtn.addEventListener('click', function() {
-        if (fromInput) fromInput.value = '';
-        if (toInput) toInput.value = '';
-        loadSalesTable();
-    });
-}

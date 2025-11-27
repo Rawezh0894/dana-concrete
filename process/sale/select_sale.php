@@ -8,8 +8,12 @@ if (!hasPermission('view_sale')) {
 header('Content-Type: application/json; charset=utf-8');
 
 try {
-    $from = $_GET['from'] ?? null;
-    $to = $_GET['to'] ?? null;
+$from = $_GET['from'] ?? null;
+$to = $_GET['to'] ?? null;
+$customerId = $_GET['customer_id'] ?? null;
+$minQuantity = $_GET['min_quantity'] ?? null;
+$amountMin = $_GET['amount_min'] ?? null;
+$amountMax = $_GET['amount_max'] ?? null;
     $where = [];
     $filterParams = [];
     
@@ -21,6 +25,22 @@ try {
         $where[] = "s.order_date <= :to_date";
         $filterParams['to_date'] = $to;
     }
+if ($customerId) {
+    $where[] = "s.customer_id = :customer_id";
+    $filterParams['customer_id'] = $customerId;
+}
+if ($minQuantity !== null && $minQuantity !== '') {
+    $where[] = "s.quantity >= :min_quantity";
+    $filterParams['min_quantity'] = (float)$minQuantity;
+}
+if ($amountMin !== null && $amountMin !== '') {
+    $where[] = "s.total_price >= :amount_min";
+    $filterParams['amount_min'] = (float)$amountMin;
+}
+if ($amountMax !== null && $amountMax !== '') {
+    $where[] = "s.total_price <= :amount_max";
+    $filterParams['amount_max'] = (float)$amountMax;
+}
     
     $isDataTable = isset($_GET['draw']);
     
