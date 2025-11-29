@@ -28,52 +28,7 @@ document.addEventListener('DOMContentLoaded', function() {
     $('#editPurchaseModal').on('shown.bs.modal', ensureEditDriverSelect2);
 });
 
-// Function to fetch dollar rate from API
-async function fetchDollarRateFromAPI() {
-    try {
-        const response = await fetch('https://dinarapi.hediworks.site/api/get-price?id=8&api_token=S3gl9SVEkZ1Vvc93cCjsbLLmwDvgzk');
-        const data = await response.json();
-        if (data && data.value && !isNaN(data.value)) {
-            return parseFloat(data.value);
-        }
-    } catch (error) {
-        console.error('Error fetching dollar rate from API:', error);
-    }
-    return null; // No default fallback value
-}
-
-// Function to update dollar rate in edit modal
-async function updateDollarRateInEditModal() {
-    const rateInput = document.getElementById('edit_exchange_rate');
-    if (rateInput) {
-        // Preserve the current value (from database) as fallback
-        const currentValue = rateInput.value;
-        const apiRate = await fetchDollarRateFromAPI();
-        if (apiRate !== null && apiRate > 0) {
-            rateInput.value = apiRate;
-        } else {
-            // If API fails, keep the current value (from database)
-            // Only clear if current value is 0 or empty
-            if (!currentValue || parseFloat(currentValue) <= 0) {
-                console.error('Failed to fetch dollar rate from API and no valid value exists');
-                rateInput.value = '';
-            } else {
-                // Keep the existing value from database
-                console.log('API failed, keeping existing exchange rate:', currentValue);
-            }
-        }
-    }
-}
-
-// Initialize edit modal with API rate
-document.addEventListener('DOMContentLoaded', function() {
-    const modal = document.getElementById('editPurchaseModal');
-    if (modal) {
-        modal.addEventListener('shown.bs.modal', function() {
-            updateDollarRateInEditModal();
-        });
-    }
-});
+// API call removed - exchange_rate will be manually entered by user with default value of 0
 
 document.getElementById('editPurchaseForm').onsubmit = async function(e) {
     e.preventDefault();

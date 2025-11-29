@@ -34,6 +34,7 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             #date-to-filter, label[for="date-to-filter"],
             #location-filter, label[for="location-filter"],
             #invoice-number-filter, label[for="invoice-number-filter"],
+            #sale-filter-mode, label[for="sale-filter-mode"],
             #show-invoice-number, label[for="show-invoice-number"],
             #show-opening-debt, label[for="show-opening-debt"],
             #force-debt-pagination, label[for="force-debt-pagination"],
@@ -587,6 +588,17 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                     </label>
                     <input type="text" id="invoice-number-filter" class="filter-input" placeholder="ژمارەی پسووڵە بنووسە (A-0001, A-0002, A-0003...)">
                 </div>
+                
+                <div class="filter-group">
+                    <label for="sale-filter-mode" class="filter-label">
+                        <i class="fa fa-filter"></i> جۆری فلتەر:
+                    </label>
+                    <select id="sale-filter-mode" class="filter-select">
+                        <option value="all">هەموو پارەدانەکان</option>
+                        <option value="with">بەس ئەم ئیشانەی تێدا بێت</option>
+                        <option value="without">بەس ئەم ئیشانەی تێدا نەبێت</option>
+                    </select>
+                </div>
             </div>
             
             <!-- Row 5: Display Options -->
@@ -900,6 +912,28 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                         loadReturnDebt();
                     }
                 }, 500); // 500ms delay to avoid too many requests
+            });
+        }
+        
+        // Sale filter mode change listener
+        var saleFilterMode = document.getElementById('sale-filter-mode');
+        if (saleFilterMode) {
+            saleFilterMode.addEventListener('change', function() {
+                // Reload paid table data when sale filter mode changes
+                if (typeof loadReturnDebt === 'function') {
+                    loadReturnDebt();
+                }
+            });
+        }
+        
+        // Sale filter mode change listener
+        var saleFilterMode = document.getElementById('sale-filter-mode');
+        if (saleFilterMode) {
+            saleFilterMode.addEventListener('change', function() {
+                // Reload paid table data when sale filter mode changes
+                if (typeof loadReturnDebt === 'function') {
+                    loadReturnDebt();
+                }
             });
         }
         
