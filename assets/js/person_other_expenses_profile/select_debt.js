@@ -183,9 +183,9 @@ async function loadDebtPayments() {
                     const id = $(this).data('id');
                     if (id) {
                         openEditDebtModal(id);
-                    }
-                });
-
+        }
+    });
+                
                 $(row).find('button.delete-debt').off('click').on('click', function() {
                     if (typeof deleteDebt === 'function') {
                         deleteDebt($(this).data('id'));
