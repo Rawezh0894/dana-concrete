@@ -29,6 +29,12 @@ function getInvoiceNumberFilter() {
     return invoiceNumberElem ? invoiceNumberElem.value.trim() : '';
 }
 
+function getInvoiceFilterMode() {
+    const modeElem = document.getElementById('invoice-filter-mode');
+    const mode = modeElem ? modeElem.value : 'include';
+    return mode === 'exclude' ? 'exclude' : 'include';
+}
+
 // Function to validate and format invoice numbers
 function formatInvoiceNumbers(input) {
     if (!input) return '';
@@ -117,6 +123,18 @@ if (invoiceNumberFilter) {
     });
 }
 
+const invoiceFilterModeSelect = document.getElementById('invoice-filter-mode');
+if (invoiceFilterModeSelect) {
+    invoiceFilterModeSelect.addEventListener('change', function() {
+        const invoiceValue = getInvoiceNumberFilter();
+        if (invoiceValue.length === 0) {
+            // No invoice numbers; reset mode to include for clarity
+            invoiceFilterModeSelect.value = 'include';
+        }
+        loadReturnDebt();
+    });
+}
+
 function loadReturnDebt() {
     if (typeof CUSTOMER_ID === 'undefined' || !CUSTOMER_ID) {
         console.error('CUSTOMER_ID is not defined for return debt loading');
@@ -126,6 +144,7 @@ function loadReturnDebt() {
     const date_from = getPaidDateFrom();
     const date_to = getPaidDateTo();
     const invoice_number = getInvoiceNumberFilter();
+    const invoice_filter_mode = getInvoiceFilterMode();
     const params = new URLSearchParams({
         customer_id: CUSTOMER_ID,
         month,
@@ -136,6 +155,7 @@ function loadReturnDebt() {
     // Add invoice number filter if provided
     if (invoice_number) {
         params.append('invoice_number', invoice_number);
+        params.append('invoice_filter_mode', invoice_filter_mode);
     }
     return fetch('../process/receipts/select_return_debt.php?' + params.toString())
         .then(res => {

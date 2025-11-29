@@ -587,6 +587,18 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                     </label>
                     <input type="text" id="invoice-number-filter" class="filter-input" placeholder="ژمارەی پسووڵە بنووسە (A-0001, A-0002, A-0003...)">
                 </div>
+                <div class="filter-group">
+                    <label for="invoice-filter-mode" class="filter-label">
+                        <i class="fa fa-filter-circle-xmark"></i> جۆری فلتەری پسووڵەکان:
+                    </label>
+                    <select id="invoice-filter-mode" class="filter-select">
+                        <option value="include">تەنها ئەو پارەدانەی تێدا بێت</option>
+                        <option value="exclude">تەنها ئەو پارەدانەی تێدا نەبێت</option>
+                    </select>
+                    <small style="color: #6c757d; font-size: 12px; margin-top: 4px;">
+                        ئەم فلتەرە تەنها کاتێک کاریگەرە کە ژمارەی پسووڵە دابنێیت
+                    </small>
+                </div>
             </div>
             
             <!-- Row 5: Display Options -->
