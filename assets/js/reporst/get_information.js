@@ -174,6 +174,14 @@ function renderDashboardCards(data) {
             value: formatCurrency((Number(data.data?.sales?.cash?.usd) || 0) + (Number(data.data?.sales?.credit?.usd) || 0), 'USD'),
             subtitle: 'کۆی فرۆشتنەکان'
         },
+        {
+            key: 'total_income',
+            label: 'کۆی داهات',
+            icon: 'fa-coins',
+            cardClass: 'income-card',
+            value: formatCurrency(Number(data.data?.income?.usd) || 0, 'USD'),
+            subtitle: 'فرۆشتن + داهاتی تر - خەرجی'
+        },
 
         {
             key: 'sales_discounts',
