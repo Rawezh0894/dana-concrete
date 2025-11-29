@@ -566,7 +566,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
           <div class="row">
             <div class="col-md-6 mb-3">
               <label for="exchange_rate" class="form-label">نرخی 100 دۆلار بە دینار</label>
-              <input type="number" class="form-control" id="exchange_rate" name="exchange_rate" min="0" step="1" required>
+              <input type="number" class="form-control" id="exchange_rate" name="exchange_rate" min="0" step="1" required value="0">
             </div>
            
             <div class="col-md-6 mb-3">
@@ -866,7 +866,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
           <div class="row">
             <div class="col-md-6 mb-3">
               <label for="edit_exchange_rate" class="form-label">نرخی 100 دۆلار بە دینار</label>
-              <input type="number" class="form-control" id="edit_exchange_rate" name="exchange_rate" min="0" step="1" required>
+              <input type="number" class="form-control" id="edit_exchange_rate" name="exchange_rate" min="0" step="1" required value="0">
             </div>
             <div class="col-md-6 mb-3">
               <label for="edit_payment_type" class="form-label">جۆری پارەدان</label>
