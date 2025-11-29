@@ -29,6 +29,11 @@ function getInvoiceNumberFilter() {
     return invoiceNumberElem ? invoiceNumberElem.value.trim() : '';
 }
 
+function getDebtAllocationFilter() {
+    const allocationElem = document.getElementById('debt-allocation-filter');
+    return allocationElem ? allocationElem.value : 'all';
+}
+
 // Function to validate and format invoice numbers
 function formatInvoiceNumbers(input) {
     if (!input) return '';
@@ -89,7 +94,7 @@ function formatDate(dateString) {
 }
 
 // Listen for filter changes and reload paid-table
-['month-filter', 'date-from-filter', 'date-to-filter', 'paid-date-from-filter', 'paid-date-to-filter'].forEach(function(id) {
+['month-filter', 'date-from-filter', 'date-to-filter', 'paid-date-from-filter', 'paid-date-to-filter', 'debt-allocation-filter'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) {
         el.addEventListener('change', function() {
@@ -126,6 +131,7 @@ function loadReturnDebt() {
     const date_from = getPaidDateFrom();
     const date_to = getPaidDateTo();
     const invoice_number = getInvoiceNumberFilter();
+    const allocationFilter = getDebtAllocationFilter();
     const params = new URLSearchParams({
         customer_id: CUSTOMER_ID,
         month,
@@ -136,6 +142,9 @@ function loadReturnDebt() {
     // Add invoice number filter if provided
     if (invoice_number) {
         params.append('invoice_number', invoice_number);
+    }
+    if (allocationFilter && allocationFilter !== 'all') {
+        params.append('invoice_allocation', allocationFilter);
     }
     return fetch('../process/receipts/select_return_debt.php?' + params.toString())
         .then(res => {

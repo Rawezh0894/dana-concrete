@@ -9,70 +9,72 @@ $month = isset($_GET['month']) ? $_GET['month'] : 'all';
 $date_from = isset($_GET['date_from']) ? $_GET['date_from'] : '';
 $date_to = isset($_GET['date_to']) ? $_GET['date_to'] : '';
 $invoice_number = isset($_GET['invoice_number']) ? trim($_GET['invoice_number']) : '';
+$invoice_allocation = isset($_GET['invoice_allocation']) ? $_GET['invoice_allocation'] : 'all';
+$invoice_allocation = in_array($invoice_allocation, ['all', 'linked', 'unlinked']) ? $invoice_allocation : 'all';
 
-// Base query - if invoice number filter is provided, join with allocations and sales tables
+$params = ['customer_id' => $customer_id];
+$where = ["cdp.customer_id = :customer_id"];
+$joins = '';
+
+// Handle invoice number filtering with joins
 if ($invoice_number) {
-    // Split invoice numbers by comma and clean them
     $invoice_numbers = array_map('trim', explode(',', $invoice_number));
-    $invoice_numbers = array_filter($invoice_numbers); // Remove empty values
+    $invoice_numbers = array_filter($invoice_numbers);
     
-    if (!empty($invoice_numbers)) {
-        $sql = "SELECT DISTINCT cdp.paid_usd, cdp.paid_iqd, cdp.date, cdp.discount, cdp.note, cdp.dolar_rate 
-                FROM customer_debt_payments cdp
-                INNER JOIN customer_payment_allocations cpa ON cdp.id = cpa.debt_payment_id
-                INNER JOIN sales s ON cpa.sale_id = s.id
-                WHERE cdp.customer_id = :customer_id 
-                AND (";
-        
-        $params = ['customer_id' => $customer_id];
-        $conditions = [];
-        
-        foreach ($invoice_numbers as $index => $inv_num) {
-            $param_name = 'invoice_number_' . $index;
-            $conditions[] = "s.invoice_number LIKE :" . $param_name;
-            $params[$param_name] = '%' . $inv_num . '%';
-        }
-        
-        $sql .= implode(' OR ', $conditions) . ")";
-    } else {
-        // If no valid invoice numbers, return empty result
-        $sql = "SELECT paid_usd, paid_iqd, date, discount, note, dolar_rate FROM customer_debt_payments WHERE 1=0";
-        $params = [];
+    if (empty($invoice_numbers)) {
+        echo json_encode([]);
+        exit;
     }
-} else {
-    $sql = "SELECT paid_usd, paid_iqd, date, discount, note, dolar_rate FROM customer_debt_payments WHERE customer_id = :customer_id";
-    $params = ['customer_id' => $customer_id];
+    
+    $joins .= " INNER JOIN customer_payment_allocations cpa_filter ON cpa_filter.debt_payment_id = cdp.id
+                INNER JOIN sales s ON s.id = cpa_filter.sale_id";
+    $invoiceConditions = [];
+    foreach ($invoice_numbers as $index => $inv_num) {
+        $param_name = 'invoice_number_' . $index;
+        $invoiceConditions[] = "s.invoice_number LIKE :" . $param_name;
+        $params[$param_name] = '%' . $inv_num . '%';
+    }
+    if ($invoiceConditions) {
+        $where[] = '(' . implode(' OR ', $invoiceConditions) . ')';
+    }
+}
+
+// Handle allocation-only filter
+if ($invoice_allocation === 'linked') {
+    $where[] = "EXISTS (
+        SELECT 1 FROM customer_payment_allocations cpa_link
+        WHERE cpa_link.debt_payment_id = cdp.id
+    )";
+} elseif ($invoice_allocation === 'unlinked') {
+    $where[] = "NOT EXISTS (
+        SELECT 1 FROM customer_payment_allocations cpa_unlink
+        WHERE cpa_unlink.debt_payment_id = cdp.id
+    )";
 }
 
 if ($month !== 'all') {
-    if ($invoice_number) {
-        $sql .= " AND MONTH(cdp.date) = :month";
-    } else {
-        $sql .= " AND MONTH(date) = :month";
-    }
+    $where[] = "MONTH(cdp.date) = :month";
     $params['month'] = $month;
 }
 if ($date_from) {
-    if ($invoice_number) {
-        $sql .= " AND cdp.date >= :date_from";
-    } else {
-        $sql .= " AND date >= :date_from";
-    }
+    $where[] = "cdp.date >= :date_from";
     $params['date_from'] = $date_from;
 }
 if ($date_to) {
-    if ($invoice_number) {
-        $sql .= " AND cdp.date <= :date_to";
-    } else {
-        $sql .= " AND date <= :date_to";
-    }
+    $where[] = "cdp.date <= :date_to";
     $params['date_to'] = $date_to;
 }
-if ($invoice_number) {
-    $sql .= " ORDER BY cdp.date ASC";
-} else {
-    $sql .= " ORDER BY date ASC";
+
+$sql = "SELECT cdp.paid_usd, cdp.paid_iqd, cdp.date, cdp.discount, cdp.note, cdp.dolar_rate
+        FROM customer_debt_payments cdp
+        $joins";
+
+if ($where) {
+    $sql .= ' WHERE ' . implode(' AND ', $where);
 }
+
+$sql .= " ORDER BY cdp.date ASC";
+
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $data = [];
@@ -80,3 +82,4 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     $data[] = $row;
 }
 echo json_encode($data, JSON_UNESCAPED_UNICODE);
+

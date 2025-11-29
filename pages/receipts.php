@@ -576,7 +576,7 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 </div>
             </div>
             
-            <!-- Row 4: Invoice Number Filter for Paid Amounts -->
+            <!-- Row 4: Invoice Number Filter & Allocation Filter -->
             <div class="filter-row">
                 <div class="filter-group">
                     <label for="invoice-number-filter" class="filter-label">
@@ -586,6 +586,16 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                         </small>
                     </label>
                     <input type="text" id="invoice-number-filter" class="filter-input" placeholder="ژمارەی پسووڵە بنووسە (A-0001, A-0002, A-0003...)">
+                </div>
+                <div class="filter-group">
+                    <label for="debt-allocation-filter" class="filter-label">
+                        <i class="fa fa-link"></i> پەیوەندی بە ژمارەی پسووڵە:
+                    </label>
+                    <select id="debt-allocation-filter" class="filter-select">
+                        <option value="all">هەموو پارەدانەکان</option>
+                        <option value="linked">تەنها پارەدانە پەیوەندیدارەکان</option>
+                        <option value="unlinked">پارەدانە نەپەیوەندیدارەکان</option>
+                    </select>
                 </div>
             </div>
             
