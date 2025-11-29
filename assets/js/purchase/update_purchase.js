@@ -46,13 +46,21 @@ async function fetchDollarRateFromAPI() {
 async function updateDollarRateInEditModal() {
     const rateInput = document.getElementById('edit_exchange_rate');
     if (rateInput) {
+        // Preserve the current value (from database) as fallback
+        const currentValue = rateInput.value;
         const apiRate = await fetchDollarRateFromAPI();
-        if (apiRate !== null) {
+        if (apiRate !== null && apiRate > 0) {
             rateInput.value = apiRate;
         } else {
-            // Show error if API fails
-            console.error('Failed to fetch dollar rate from API');
-            rateInput.value = '';
+            // If API fails, keep the current value (from database)
+            // Only clear if current value is 0 or empty
+            if (!currentValue || parseFloat(currentValue) <= 0) {
+                console.error('Failed to fetch dollar rate from API and no valid value exists');
+                rateInput.value = '';
+            } else {
+                // Keep the existing value from database
+                console.log('API failed, keeping existing exchange rate:', currentValue);
+            }
         }
     }
 }
@@ -102,6 +110,15 @@ document.getElementById('editPurchaseForm').onsubmit = async function(e) {
         } else {
             if (field) field.classList.remove('is-invalid');
         }
+    }
+    
+    // Validate exchange_rate (must be greater than 0)
+    const exchangeRate = parseFloat(form.querySelector('[name="exchange_rate"]').value) || 0;
+    if (exchangeRate <= 0) {
+        missingFields.push('exchange_rate');
+        form.querySelector('[name="exchange_rate"]').classList.add('is-invalid');
+    } else {
+        form.querySelector('[name="exchange_rate"]').classList.remove('is-invalid');
     }
     
     // Validate price_per_kg based on type

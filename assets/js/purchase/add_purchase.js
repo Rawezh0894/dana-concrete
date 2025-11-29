@@ -101,6 +101,22 @@ document.getElementById('addPurchaseForm').onsubmit = async function(e) {
         return;
     }
     
+    // Validate exchange_rate (must be greater than 0)
+    const exchangeRate = parseFloat(form.querySelector('[name="exchange_rate"]').value) || 0;
+    if (exchangeRate <= 0) {
+        Swal.fire('هەڵە!', 'تکایە نرخی 100 دۆلار بە دینار داخڵ بکە!', 'error');
+        form.querySelector('[name="exchange_rate"]').classList.add('is-invalid');
+        form.querySelector('[name="exchange_rate"]').focus();
+        submitting = false;
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+        }
+        return;
+    } else {
+        form.querySelector('[name="exchange_rate"]').classList.remove('is-invalid');
+    }
+    
     // Prevent remaining_usd or remaining_iqd if payment_type is 'نەقد'
     const paymentType = form.querySelector('[name="payment_type"]').value;
     const remainingUsd = parseFloat(form.querySelector('[name="remaining_usd"]').value) || 0;
