@@ -29,6 +29,11 @@ function getInvoiceNumberFilter() {
     return invoiceNumberElem ? invoiceNumberElem.value.trim() : '';
 }
 
+function getAllocationFilter() {
+    const allocationElem = document.getElementById('allocation-filter');
+    return allocationElem ? allocationElem.value : 'all';
+}
+
 // Function to validate and format invoice numbers
 function formatInvoiceNumbers(input) {
     if (!input) return '';
@@ -117,6 +122,13 @@ if (invoiceNumberFilter) {
     });
 }
 
+const allocationFilterElement = document.getElementById('allocation-filter');
+if (allocationFilterElement) {
+    allocationFilterElement.addEventListener('change', function() {
+        loadReturnDebt();
+    });
+}
+
 function loadReturnDebt() {
     if (typeof CUSTOMER_ID === 'undefined' || !CUSTOMER_ID) {
         console.error('CUSTOMER_ID is not defined for return debt loading');
@@ -126,11 +138,13 @@ function loadReturnDebt() {
     const date_from = getPaidDateFrom();
     const date_to = getPaidDateTo();
     const invoice_number = getInvoiceNumberFilter();
+    const allocation_filter = getAllocationFilter();
     const params = new URLSearchParams({
         customer_id: CUSTOMER_ID,
         month,
         date_from,
-        date_to
+        date_to,
+        allocation_filter
     });
     
     // Add invoice number filter if provided

@@ -589,6 +589,23 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 </div>
             </div>
             
+            <!-- Row 5: Debt allocation filter -->
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="allocation-filter" class="filter-label">
+                        <i class="fa fa-layer-group"></i> فلتەری پارەدان بە فرۆشتن:
+                        <small style="color: #6c757d; font-size: 12px; display: block; margin-top: 2px;">
+                            دەتوانیت پارەدانەکانی قەرز بە پێی ئەوەی پێوەستن بە فرۆشتن هەیە یان نا هەڵبژێرێت.
+                        </small>
+                    </label>
+                    <select id="allocation-filter" class="filter-select">
+                        <option value="all">هەموو پارەدانەکان</option>
+                        <option value="allocated">تەنها ئەوانەی پێوەستن بە فرۆشتن</option>
+                        <option value="unallocated">تەنها ئەوانەی نەپێوەستن بە فرۆشتن</option>
+                    </select>
+                </div>
+            </div>
+            
             <!-- Row 5: Display Options -->
             <div class="filter-row">
                 <div class="filter-group checkbox-group">
