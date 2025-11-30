@@ -350,6 +350,38 @@ if (!isset($_SESSION['user_id'])) {
             font-size: 0.9rem;
             opacity: 0.9;
         }
+        
+        /* Cash Sales Card Styles */
+        .cash-sales-card {
+            background: linear-gradient(135deg, #007bff, #0056b3) !important;
+            color: white;
+            border: none;
+            transition: all 0.3s ease;
+        }
+        
+        .cash-sales-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 123, 255, 0.4);
+        }
+        
+        .cash-sales-card i {
+            color: #e9ecef;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .cash-sales-card .card-value {
+            color: #ffffff;
+            font-size: 1.6rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .cash-sales-card .section-label {
+            color: #e9ecef;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
 
         
         /* Chart Section Styles */

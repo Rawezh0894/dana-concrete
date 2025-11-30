@@ -220,6 +220,18 @@ try {
             $sales['credit']['usd'] = $row['usd'] ?? 0;
         }
     }
+    
+    // Cash Sales - Calculate actual payments received (USD and IQD separately)
+    $cash_sales_query = "SELECT 
+        SUM(amount_paid_usd) as paid_usd, 
+        SUM(amount_paid_iq) as paid_iqd 
+        FROM sales 
+        WHERE payment_type = 'نەقد' 
+        $date_condition_sales";
+    $stmt = $pdo->query($cash_sales_query);
+    $row = $stmt->fetch();
+    $cash_sales_paid_usd = $row['paid_usd'] ?? 0;
+    $cash_sales_paid_iqd = $row['paid_iqd'] ?? 0;
 
     // Remaining Sales
     $stmt = $pdo->query("SELECT SUM(remaining_amount) as usd, SUM(amount_paid_iq) as iqd, SUM(amount_paid_iq / NULLIF(dolar_rate, 0)) as iqd_converted FROM sales");
@@ -810,6 +822,10 @@ try {
             'person' => ['usd' => $person_debt_usd, 'iqd' => 0],
             'purchases' => $purchases,
             'sales' => $sales,
+            'cash_sales_payments' => [
+                'usd' => $cash_sales_paid_usd,
+                'iqd' => $cash_sales_paid_iqd
+            ],
             'discounts' => [
                 'total_usd' => $total_discount,
                 'sales_usd' => $sales_discounts,

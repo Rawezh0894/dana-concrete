@@ -182,6 +182,14 @@ function renderDashboardCards(data) {
             value: formatCurrency((Number(data.data?.sales?.cash?.usd) || 0) + (Number(data.data?.sales?.credit?.usd) || 0), 'USD'),
             subtitle: 'کۆی فرۆشتنەکان'
         },
+        {
+            key: 'cash_sales_payments',
+            label: 'کۆی فرۆشتن بە نەقدی',
+            icon: 'fa-money-bill-wave',
+            cardClass: 'cash-sales-card',
+            value: formatCurrency(data.data?.cash_sales_payments?.usd || 0, 'USD') + '<br><small style="font-size: 0.9rem; opacity: 0.9;">' + formatCurrency(data.data?.cash_sales_payments?.iqd || 0, 'IQD') + '</small>',
+            subtitle: 'پارەی وەرگیراو بە نەقدی (دۆلار + دینار)'
+        },
 
         {
             key: 'sales_discounts',
