@@ -183,12 +183,12 @@ function renderDashboardCards(data) {
             subtitle: 'کۆی فرۆشتنەکان'
         },
         {
-            key: 'cash_sales_payments',
+            key: 'cash_sales',
             label: 'کۆی فرۆشتن بە نەقدی',
-            icon: 'fa-money-bill-wave',
+            icon: 'fa-money-bill',
             cardClass: 'cash-sales-card',
-            value: formatCurrency(data.data?.cash_sales_payments?.usd || 0, 'USD') + '<br><small style="font-size: 0.9rem; opacity: 0.9;">' + formatCurrency(data.data?.cash_sales_payments?.iqd || 0, 'IQD') + '</small>',
-            subtitle: 'پارەی وەرگیراو بە نەقدی (دۆلار + دینار)'
+            value: formatCurrency(data.data?.cash_sales?.paid_usd || 0, 'USD') + '<br><small style="font-size: 0.9rem; opacity: 0.9;">' + formatCurrency(data.data?.cash_sales?.paid_iqd || 0, 'IQD') + '</small>',
+            subtitle: 'پارەی وەرگیراو بە نەقدی'
         },
 
         {
