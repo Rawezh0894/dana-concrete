@@ -15,6 +15,9 @@ $(function() {
                 $.post('../process/employee_payments/delete.php', {id: id}, function(response) {
                     if (response.success) {
                         if (window.loadPayments) window.loadPayments();
+                        if (window.employeePaymentsSummary && window.employeePaymentsSummary.loadSummaryData) {
+                            window.employeePaymentsSummary.loadSummaryData();
+                        }
                         swalAlert('سەرکەوتوو', 'پارەدان سڕایەوە!', 'success');
                     } else {
                         swalAlert('هەڵە', response.message || 'هەڵەیەک هەیە', 'error');

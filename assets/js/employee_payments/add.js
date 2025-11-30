@@ -7,6 +7,9 @@ $(function() {
                 swalAlert('سەرکەوتوو', 'پارەدان بەسەرکەوتوویی زیادکرا!', 'success');
                 $('#addPaymentForm')[0].reset();
                 if (window.loadPayments) window.loadPayments();
+                if (window.employeePaymentsSummary && window.employeePaymentsSummary.loadSummaryData) {
+                    window.employeePaymentsSummary.loadSummaryData();
+                }
                 $('#addPaymentModal').modal('hide');
             } else {
                 swalAlert('هەڵە', response.message || 'هەڵەیەک هەیە', 'error');

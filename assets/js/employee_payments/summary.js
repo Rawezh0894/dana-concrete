@@ -35,6 +35,9 @@ function loadSummaryData() {
             }
             if ($('#employee-filter option').length <= 1) {
                 populateEmployeeFilter(data.filters.employees);
+            } else {
+                // Re-initialize Select2 if already populated
+                initializeEmployeeSelect2();
             }
         })
         .catch(error => {
@@ -55,6 +58,30 @@ function populateMonthFilter(months) {
     });
 }
 
+// Initialize Select2 for employee filter
+function initializeEmployeeSelect2() {
+    const employeeFilter = $('#employee-filter');
+    if (employeeFilter.length === 0) return;
+    
+    // Destroy existing Select2 if exists
+    if (employeeFilter.hasClass('select2-hidden-accessible')) {
+        try {
+            employeeFilter.select2('destroy');
+        } catch (e) {
+            console.log('Error destroying select2:', e);
+        }
+    }
+    
+    // Initialize Select2
+    employeeFilter.select2({
+        theme: 'bootstrap-5',
+        width: '100%',
+        placeholder: 'هەموو کارمەندەکان',
+        allowClear: true,
+        dir: 'rtl'
+    });
+}
+
 // Populate employee filter dropdown
 function populateEmployeeFilter(employees) {
     const employeeFilter = $('#employee-filter');
@@ -66,6 +93,9 @@ function populateEmployeeFilter(employees) {
             .text(employee.name);
         employeeFilter.append(option);
     });
+    
+    // Initialize Select2 after populating
+    initializeEmployeeSelect2();
 }
 
 // Format currency
@@ -92,12 +122,22 @@ $(document).ready(function() {
     // Load initial data
     loadSummaryData();
     
-    // Handle filter changes
-    $('#month-filter, #employee-filter').on('change', function() {
+    // Handle filter changes - use Select2 change event if available
+    $('#month-filter').on('change', function() {
         loadSummaryData();
-        
-        // Also trigger table refresh if table controller exists
-        if (typeof loadEmployeePayments === 'function') {
+        if (typeof loadPayments === 'function') {
+            loadPayments();
+        } else if (typeof loadEmployeePayments === 'function') {
+            loadEmployeePayments();
+        }
+    });
+    
+    // Handle employee filter change - use Select2 event
+    $(document).on('change', '#employee-filter', function() {
+        loadSummaryData();
+        if (typeof loadPayments === 'function') {
+            loadPayments();
+        } else if (typeof loadEmployeePayments === 'function') {
             loadEmployeePayments();
         }
     });

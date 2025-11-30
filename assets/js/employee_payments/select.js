@@ -36,5 +36,6 @@ $(function() {
         }, 'json');
     }
     loadPayments();
+    window.loadPayments = loadPayments;
     window.loadEmployeePayments = loadPayments;
 });

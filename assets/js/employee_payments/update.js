@@ -19,6 +19,9 @@ $(function() {
             if (response.success) {
                 $('#editPaymentModal').modal('hide');
                 if (window.loadPayments) window.loadPayments();
+                if (window.employeePaymentsSummary && window.employeePaymentsSummary.loadSummaryData) {
+                    window.employeePaymentsSummary.loadSummaryData();
+                }
                 swalAlert('سەرکەوتوو', 'پارەدان نوێکرایەوە!', 'success');
             } else {
                 swalAlert('هەڵە', response.message || 'هەڵەیەک هەیە', 'error');
