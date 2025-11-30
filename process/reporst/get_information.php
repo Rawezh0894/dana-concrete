@@ -282,10 +282,6 @@ try {
     $customer_debt_payments_iqd_converted = ($usd_iqd_rate > 0) ? ($customer_debt_payments_iqd / ($usd_iqd_rate / 100)) : 0;
     $customer_debt_payments_total_usd = $customer_debt_payments_usd + $customer_debt_payments_iqd_converted;
 
-    // Calculate total money received (cash sales + customer debt payments)
-    $cash_sales_usd = $sales['cash']['usd'] ?? 0;
-    $total_money_received_usd = $cash_sales_usd + $customer_debt_payments_total_usd;
-
     // Person other expenses debt payments
     $person_debt_payments_query = "SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd FROM person_other_expenses_debt_payments WHERE 1=1 $date_condition_date";
     $stmt = $pdo->query($person_debt_payments_query);
@@ -814,14 +810,6 @@ try {
             'person' => ['usd' => $person_debt_usd, 'iqd' => 0],
             'purchases' => $purchases,
             'sales' => $sales,
-            'money_received' => [
-                'total_usd' => $total_money_received_usd,
-                'cash_sales_usd' => $cash_sales_usd,
-                'customer_debt_payments_usd' => $customer_debt_payments_total_usd
-            ],
-            'customer_debt_collected' => [
-                'total_usd' => $customer_debt_payments_total_usd
-            ],
             'discounts' => [
                 'total_usd' => $total_discount,
                 'sales_usd' => $sales_discounts,
@@ -829,6 +817,11 @@ try {
             ],
             'gas_income' => [
                 'usd' => $gas_income_total_usd
+            ],
+            'customer_debt_payments' => [
+                'usd' => $customer_debt_payments_total_usd,
+                'iqd' => $customer_debt_payments_iqd,
+                'usd_amount' => $customer_debt_payments_usd
             ],
             'total_expenses' => [
                 'usd' => $total_expenses_usd,

@@ -135,6 +135,14 @@ function renderDashboardCards(data) {
             subtitle: 'قەرزی کڕیارەکان'
         },
         {
+            key: 'customer_debt_received',
+            label: 'کۆی قەرزی وەرگیراو لە کڕیار',
+            icon: 'fa-hand-holding-usd',
+            cardClass: 'customer-debt-received-card',
+            value: formatCurrency(data.data?.customer_debt_payments?.usd || 0, 'USD') + '<br><small style="font-size: 0.9rem; opacity: 0.9;">' + formatCurrency(data.data?.customer_debt_payments?.iqd || 0, 'IQD') + '</small>',
+            subtitle: 'پارەی وەرگیراو لە کڕیار'
+        },
+        {
             key: 'company',
             label: 'قەرزی ئێمە لەگەڵ کۆمپانیاکان',
             icon: 'fa-building',
@@ -174,22 +182,7 @@ function renderDashboardCards(data) {
             value: formatCurrency((Number(data.data?.sales?.cash?.usd) || 0) + (Number(data.data?.sales?.credit?.usd) || 0), 'USD'),
             subtitle: 'کۆی فرۆشتنەکان'
         },
-        {
-            key: 'money_received',
-            label: 'کۆی پارەی وەرگیراو',
-            icon: 'fa-money-bill-wave',
-            cardClass: 'money-received-card',
-            value: formatCurrency(Number(data.data?.money_received?.total_usd) || 0, 'USD'),
-            subtitle: 'نەقدی فرۆشتن + پارەی وەرگیراو لە کڕیار'
-        },
-        {
-            key: 'customer_debt_collected',
-            label: 'کۆی قەرزی وەرگیراو لە کڕیار',
-            icon: 'fa-hand-holding-usd',
-            cardClass: 'debt-collected-card',
-            value: formatCurrency(Number(data.data?.customer_debt_collected?.total_usd) || 0, 'USD'),
-            subtitle: 'پارەی وەرگیراو لە کڕیار'
-        },
+
         {
             key: 'sales_discounts',
             label: 'داشکاندنی فرۆشتن',
