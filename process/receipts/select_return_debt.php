@@ -57,18 +57,18 @@ if ($invoice_number) {
 }
 
 if ($month !== 'all') {
-    $sql .= " AND MONTH(cdp.date) = :month";
+        $sql .= " AND MONTH(cdp.date) = :month";
     $params['month'] = $month;
 }
 if ($date_from) {
-    $sql .= " AND cdp.date >= :date_from";
+        $sql .= " AND cdp.date >= :date_from";
     $params['date_from'] = $date_from;
 }
 if ($date_to) {
-    $sql .= " AND cdp.date <= :date_to";
+        $sql .= " AND cdp.date <= :date_to";
     $params['date_to'] = $date_to;
 }
-$sql .= " ORDER BY cdp.date ASC";
+    $sql .= " ORDER BY cdp.date ASC";
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $data = [];
