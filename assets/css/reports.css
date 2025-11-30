@@ -342,6 +342,35 @@
   opacity: 0.9;
 }
 
+/* Person Debt Payments Card - پارەی دانەوە بۆ کەسانی خەرجی تر */
+.report-card.person-debt-payments-card {
+  border-top: 6px solid #8e24aa;
+  background: linear-gradient(135deg, #f3e5f5 0%, #f8fffa 100%);
+  height: 280px; /* Same height as base */
+}
+.report-card.person-debt-payments-card .card-title,
+.report-card.person-debt-payments-card .fa,
+.report-card.person-debt-payments-card .section-label {
+  color: #8e24aa;
+}
+.report-card.person-debt-payments-card .section-label {
+  background: #f3e5f5;
+}
+.report-card.person-debt-payments-card .card-value {
+  color: var(--report-card-value);
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 0.3rem;
+  line-height: 1.4;
+}
+.report-card.person-debt-payments-card .card-value small {
+  display: block;
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 0.3rem;
+  opacity: 0.9;
+}
+
 @media (max-width: 768px) {
   .report-card {
     padding: 1.2rem 0.7rem 0.7rem 0.7rem;
@@ -370,7 +399,8 @@
   .report-card.other-expenses-card,
   .report-card.purchase-materials-card,
   .report-card.gas-income-card,
-  .report-card.cash-sales-card {
+  .report-card.cash-sales-card,
+  .report-card.person-debt-payments-card {
     height: 250px;
   }
 }

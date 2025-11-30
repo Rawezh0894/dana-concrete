@@ -143,6 +143,14 @@ function renderDashboardCards(data) {
             subtitle: 'پارەی وەرگیراو لە کڕیار'
         },
         {
+            key: 'person_debt_payments',
+            label: 'کۆی پارەی دانەوە بۆ کەسانی خەرجی تر',
+            icon: 'fa-hand-holding-usd',
+            cardClass: 'person-debt-payments-card',
+            value: formatCurrency(data.data?.person_debt_payments?.usd || 0, 'USD') + '<br><small style="font-size: 0.9rem; opacity: 0.9;">' + formatCurrency(data.data?.person_debt_payments?.iqd || 0, 'IQD') + '</small>',
+            subtitle: 'پارەی دانەوە بۆ کەسانی خەرجی تر'
+        },
+        {
             key: 'company',
             label: 'قەرزی ئێمە لەگەڵ کۆمپانیاکان',
             icon: 'fa-building',
