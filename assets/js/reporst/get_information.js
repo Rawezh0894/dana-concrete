@@ -124,8 +124,6 @@ function renderDashboardCards(data) {
     const discountsTotalUsd = Number(data.data?.discounts?.total_usd) || 0;
     const salesDiscountUsd = Number(data.data?.discounts?.sales_usd) || 0;
     const debtDiscountUsd = Number(data.data?.discounts?.customer_debt_usd) || 0;
-    const cashInflowsUsd = data.data?.cash_inflows?.usd || {};
-    const cashInflowsIqd = data.data?.cash_inflows?.iqd || {};
 
     const cards = [
         {
@@ -177,22 +175,21 @@ function renderDashboardCards(data) {
             subtitle: 'کۆی فرۆشتنەکان'
         },
         {
-            key: 'cash_inflow_usd',
-            label: 'پارەی هاتوو بە دۆلار',
-            icon: 'fa-sack-dollar',
-            cardClass: 'sales-card',
-            value: formatCurrency(Number(cashInflowsUsd.total) || 0, 'USD'),
-            subtitle: `نەقدی فرۆشتن: ${formatCurrency(Number(cashInflowsUsd.cash_sales) || 0, 'USD')} | پارەی قەرز: ${formatCurrency(Number(cashInflowsUsd.debt_collections) || 0, 'USD')}`
+            key: 'money_received',
+            label: 'کۆی پارەی وەرگیراو',
+            icon: 'fa-money-bill-wave',
+            cardClass: 'money-received-card',
+            value: formatCurrency(Number(data.data?.money_received?.total_usd) || 0, 'USD'),
+            subtitle: 'نەقدی فرۆشتن + پارەی وەرگیراو لە کڕیار'
         },
         {
-            key: 'cash_inflow_iqd',
-            label: 'پارەی هاتوو بە دینار',
-            icon: 'fa-sack-dollar',
-            cardClass: 'purchases-card',
-            value: formatCurrency(Number(cashInflowsIqd.total) || 0, 'IQD'),
-            subtitle: `نەقدی فرۆشتن: ${formatCurrency(Number(cashInflowsIqd.cash_sales) || 0, 'IQD')} | پارەی قەرز: ${formatCurrency(Number(cashInflowsIqd.debt_collections) || 0, 'IQD')}`
+            key: 'customer_debt_collected',
+            label: 'کۆی قەرزی وەرگیراو لە کڕیار',
+            icon: 'fa-hand-holding-usd',
+            cardClass: 'debt-collected-card',
+            value: formatCurrency(Number(data.data?.customer_debt_collected?.total_usd) || 0, 'USD'),
+            subtitle: 'پارەی وەرگیراو لە کڕیار'
         },
-
         {
             key: 'sales_discounts',
             label: 'داشکاندنی فرۆشتن',

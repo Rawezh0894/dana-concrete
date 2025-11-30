@@ -319,6 +319,70 @@ if (!isset($_SESSION['user_id'])) {
             opacity: 0.9;
         }
         
+        /* Money Received Card Styles */
+        .money-received-card {
+            background: linear-gradient(135deg, #28a745, #20c997) !important;
+            color: white;
+            border: none;
+            transition: all 0.3s ease;
+        }
+        
+        .money-received-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+        }
+        
+        .money-received-card i {
+            color: #e9ecef;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .money-received-card .card-value {
+            color: #ffffff;
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .money-received-card .section-label {
+            color: #e9ecef;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        /* Debt Collected Card Styles */
+        .debt-collected-card {
+            background: linear-gradient(135deg, #17a2b8, #138496) !important;
+            color: white;
+            border: none;
+            transition: all 0.3s ease;
+        }
+        
+        .debt-collected-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(23, 162, 184, 0.4);
+        }
+        
+        .debt-collected-card i {
+            color: #e9ecef;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .debt-collected-card .card-value {
+            color: #ffffff;
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .debt-collected-card .section-label {
+            color: #e9ecef;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
 
         
         /* Chart Section Styles */

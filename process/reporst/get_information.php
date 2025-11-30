@@ -208,18 +208,16 @@ try {
 
     // Sales (فرۆشتن) - Only USD
     $sales = [
-        'cash' => ['usd' => 0, 'iqd' => 0],
-        'credit' => ['usd' => 0, 'iqd' => 0]
+        'cash' => ['usd' => 0],
+        'credit' => ['usd' => 0]
     ];
-    $sales_query = "SELECT payment_type, SUM(total_price) as usd, SUM(amount_paid_iq) as iqd FROM sales WHERE 1=1 $date_condition_sales GROUP BY payment_type";
+    $sales_query = "SELECT payment_type, SUM(total_price) as usd FROM sales WHERE 1=1 $date_condition_sales GROUP BY payment_type";
     $stmt = $pdo->query($sales_query);
     while ($row = $stmt->fetch()) {
         if ($row['payment_type'] === 'نەقد') {
             $sales['cash']['usd'] = $row['usd'] ?? 0;
-            $sales['cash']['iqd'] = $row['iqd'] ?? 0;
         } elseif ($row['payment_type'] === 'قەرز') {
             $sales['credit']['usd'] = $row['usd'] ?? 0;
-            $sales['credit']['iqd'] = $row['iqd'] ?? 0;
         }
     }
 
@@ -284,21 +282,9 @@ try {
     $customer_debt_payments_iqd_converted = ($usd_iqd_rate > 0) ? ($customer_debt_payments_iqd / ($usd_iqd_rate / 100)) : 0;
     $customer_debt_payments_total_usd = $customer_debt_payments_usd + $customer_debt_payments_iqd_converted;
 
-    // Cash inflows summary (cash sales + debt collections)
-    $cash_sales_usd = floatval($sales['cash']['usd'] ?? 0);
-    $cash_sales_iqd = floatval($sales['cash']['iqd'] ?? 0);
-    $cash_inflows = [
-        'usd' => [
-            'cash_sales' => $cash_sales_usd,
-            'debt_collections' => floatval($customer_debt_payments_usd),
-            'total' => $cash_sales_usd + floatval($customer_debt_payments_usd)
-        ],
-        'iqd' => [
-            'cash_sales' => $cash_sales_iqd,
-            'debt_collections' => floatval($customer_debt_payments_iqd),
-            'total' => $cash_sales_iqd + floatval($customer_debt_payments_iqd)
-        ]
-    ];
+    // Calculate total money received (cash sales + customer debt payments)
+    $cash_sales_usd = $sales['cash']['usd'] ?? 0;
+    $total_money_received_usd = $cash_sales_usd + $customer_debt_payments_total_usd;
 
     // Person other expenses debt payments
     $person_debt_payments_query = "SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd FROM person_other_expenses_debt_payments WHERE 1=1 $date_condition_date";
@@ -828,6 +814,14 @@ try {
             'person' => ['usd' => $person_debt_usd, 'iqd' => 0],
             'purchases' => $purchases,
             'sales' => $sales,
+            'money_received' => [
+                'total_usd' => $total_money_received_usd,
+                'cash_sales_usd' => $cash_sales_usd,
+                'customer_debt_payments_usd' => $customer_debt_payments_total_usd
+            ],
+            'customer_debt_collected' => [
+                'total_usd' => $customer_debt_payments_total_usd
+            ],
             'discounts' => [
                 'total_usd' => $total_discount,
                 'sales_usd' => $sales_discounts,
@@ -852,7 +846,6 @@ try {
                     'employee_payments' => $employee_payments_usd
                 ]
             ],
-            'cash_inflows' => $cash_inflows,
             // Additional professional reports data
             'employees' => $employee_stats,
             'cars' => $car_stats,
