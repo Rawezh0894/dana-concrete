@@ -313,6 +313,35 @@
   background: #e0f7fa;
 }
 
+/* Cash Sales Card - پارەی وەرگیراو لە فرۆشتن بە نەقدی */
+.report-card.cash-sales-card {
+  border-top: 6px solid #007bff;
+  background: linear-gradient(135deg, #e3f2fd 0%, #f8fffa 100%);
+  height: 280px; /* Same height as base */
+}
+.report-card.cash-sales-card .card-title,
+.report-card.cash-sales-card .fa,
+.report-card.cash-sales-card .section-label {
+  color: #007bff;
+}
+.report-card.cash-sales-card .section-label {
+  background: #e3f2fd;
+}
+.report-card.cash-sales-card .card-value {
+  color: var(--report-card-value);
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 0.3rem;
+  line-height: 1.4;
+}
+.report-card.cash-sales-card .card-value small {
+  display: block;
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 0.3rem;
+  opacity: 0.9;
+}
+
 @media (max-width: 768px) {
   .report-card {
     padding: 1.2rem 0.7rem 0.7rem 0.7rem;
@@ -340,7 +369,8 @@
   .report-card.employee-expenses-card,
   .report-card.other-expenses-card,
   .report-card.purchase-materials-card,
-  .report-card.gas-income-card {
+  .report-card.gas-income-card,
+  .report-card.cash-sales-card {
     height: 250px;
   }
 }

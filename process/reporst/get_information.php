@@ -222,6 +222,7 @@ try {
     }
     
     // Cash Sales - Calculate received amounts in USD and IQD separately
+    // تەنها فرۆشتن بە نەقدی (payment_type = 'نەقد') و فلتەری بەروار
     $cash_sales_query = "SELECT 
         SUM(amount_paid_usd) as paid_usd, 
         SUM(amount_paid_iq) as paid_iqd 
