@@ -167,6 +167,18 @@ if (!isset($_SESSION['user_id'])) {
               </div>
             </div>
             <div class="col-md-3">
+              <label for="paymentTypeFilter" class="form-label">جۆری پارەدان:</label>
+              <select id="paymentTypeFilter" class="form-control">
+                <option value="">هەموو جۆرەکان</option>
+                <option value="نەقد">نەقد</option>
+                <option value="قەرز">قەرز</option>
+              </select>
+              <div class="auto-filter-indicator mt-1">
+                <i class="fas fa-bolt me-1"></i>
+                خودکار - سەیارەکان + خەرجی تر
+              </div>
+            </div>
+            <div class="col-md-3">
               <label class="form-label">جۆری خەرجی</label>
               <div class="d-flex gap-3 flex-wrap">
                 <div class="form-check">

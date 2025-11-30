@@ -20,6 +20,7 @@ $monthFilter = $_POST['monthFilter'] ?? '';
 $carFilter = $_POST['carFilter'] ?? '';
 $employeeFilter = $_POST['employeeFilter'] ?? '';
 $personFilter = $_POST['personFilter'] ?? '';
+$paymentTypeFilter = $_POST['paymentTypeFilter'] ?? '';
 $expenseTypes = $_POST['expenseTypes'] ?? [];
 $export_type = $_POST['export_type'] ?? 'detailed';
 
@@ -55,6 +56,11 @@ if ($employeeFilter) {
 if ($personFilter) {
     $where[] = "oe.person_id = ?";
     $params[] = $personFilter;
+}
+
+if ($paymentTypeFilter) {
+    $where[] = "oe.payment_type = ?";
+    $params[] = $paymentTypeFilter;
 }
 
 if (!empty($expenseTypes)) {

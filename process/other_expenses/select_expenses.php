@@ -42,6 +42,11 @@ try {
         $params[] = $_GET['person'];
     }
     
+    if (!empty($_GET['paymentType'])) {
+        $whereConditions[] = "oe.payment_type = ?";
+        $params[] = $_GET['paymentType'];
+    }
+    
     if (!empty($_GET['expenseTypes']) && is_array($_GET['expenseTypes'])) {
         $placeholders = str_repeat('?,', count($_GET['expenseTypes']) - 1) . '?';
         $whereConditions[] = "oe.expense_type IN ($placeholders)";

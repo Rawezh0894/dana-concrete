@@ -9,6 +9,7 @@ class AdvancedFilters {
             car: '',
             employee: '',
             person: '',
+            paymentType: '',
             expenseTypes: [], // Changed to array for multiple selection
             amountFromIqd: '',
             amountToIqd: '',
@@ -66,6 +67,11 @@ class AdvancedFilters {
 
         document.getElementById('personFilter')?.addEventListener('change', (e) => {
             this.filters.person = e.target.value;
+            this.debouncedApplyFilters();
+        });
+
+        document.getElementById('paymentTypeFilter')?.addEventListener('change', (e) => {
+            this.filters.paymentType = e.target.value;
             this.debouncedApplyFilters();
         });
 
@@ -339,7 +345,7 @@ class AdvancedFilters {
 
         // Clear form inputs
         const formElements = [
-            'dateFrom', 'dateTo', 'monthFilter', 'carFilter', 'employeeFilter', 'personFilter'
+            'dateFrom', 'dateTo', 'monthFilter', 'carFilter', 'employeeFilter', 'personFilter', 'paymentTypeFilter'
         ];
         
         formElements.forEach(id => {
