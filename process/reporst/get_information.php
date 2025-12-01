@@ -220,7 +220,7 @@ try {
             $sales['credit']['usd'] = $row['usd'] ?? 0;
         }
     }
-    
+
     // Cash Sales - Calculate received amounts in USD and IQD separately
     // تەنها فرۆشتن بە نەقدی (payment_type = 'نەقد') و فلتەری بەروار
     $cash_sales_query = "SELECT 

@@ -1119,9 +1119,123 @@ function calculateKgFromTotalWeight() {
     }
 }
 
+// Load USD to IQD exchange rate from API
+function loadUsdRate() {
+    // API configuration
+    const apiUrl = 'https://dinarapi.hediworks.site/api/get-price';
+    const apiToken = 'S3gl9SVEkZ1Vvc93cCjsbLLmwDvgzk';
+    const id = '8'; // 100 dollar ID
+    
+    $.ajax({
+        url: `${apiUrl}?id=${id}&api_token=${apiToken}`,
+        type: 'GET',
+        dataType: 'json',
+        timeout: 5000, // 5 seconds timeout
+        success: function(response) {
+            console.log('API Response:', response);
+            
+            // Check different possible response formats
+            let rate = null;
+            
+            if (response.success && response.data && response.data.price) {
+                rate = response.data.price;
+            } else if (response.value) {
+                rate = response.value;
+            } else if (response.price) {
+                rate = response.price;
+            } else if (response.rate) {
+                rate = response.rate;
+            }
+            
+            if (rate && rate > 0) {
+                $('#exchange_rate').val(rate);
+                console.log('USD rate loaded successfully from API:', rate);
+                // Trigger calculations if needed
+                if (typeof updateAmountsFor === 'function') {
+                    updateAmountsFor('');
+                }
+            } else {
+                console.warn('Invalid rate from API, using default:', response);
+                // Use default value 141000
+                $('#exchange_rate').val(141000);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.warn('Error loading USD rate from API:', error, '- Using default value 141000');
+            // Use default value 141000 if API fails
+            $('#exchange_rate').val(141000);
+        }
+    });
+}
+
+// Load USD to IQD exchange rate from API for edit modal
+function loadEditUsdRate() {
+    // API configuration
+    const apiUrl = 'https://dinarapi.hediworks.site/api/get-price';
+    const apiToken = 'S3gl9SVEkZ1Vvc93cCjsbLLmwDvgzk';
+    const id = '8'; // 100 dollar ID
+    
+    $.ajax({
+        url: `${apiUrl}?id=${id}&api_token=${apiToken}`,
+        type: 'GET',
+        dataType: 'json',
+        timeout: 5000, // 5 seconds timeout
+        success: function(response) {
+            console.log('API Response for Edit:', response);
+            
+            // Check different possible response formats
+            let rate = null;
+            
+            if (response.success && response.data && response.data.price) {
+                rate = response.data.price;
+            } else if (response.value) {
+                rate = response.value;
+            } else if (response.price) {
+                rate = response.price;
+            } else if (response.rate) {
+                rate = response.rate;
+            }
+            
+            if (rate && rate > 0) {
+                // Only update if the field is empty or has default value
+                const currentValue = $('#edit_exchange_rate').val();
+                if (!currentValue || currentValue === '0' || currentValue === '141000') {
+                    $('#edit_exchange_rate').val(rate);
+                    console.log('USD rate loaded successfully from API for edit:', rate);
+                    // Trigger calculations if needed
+                    if (typeof updateAmountsFor === 'function') {
+                        updateAmountsFor('edit_');
+                    }
+                }
+            } else {
+                console.warn('Invalid rate from API for edit, using default:', response);
+                // Use default value 141000 only if field is empty
+                const currentValue = $('#edit_exchange_rate').val();
+                if (!currentValue || currentValue === '0') {
+                    $('#edit_exchange_rate').val(141000);
+                }
+            }
+        },
+        error: function(xhr, status, error) {
+            console.warn('Error loading USD rate from API for edit:', error, '- Using default value 141000');
+            // Use default value 141000 if API fails and field is empty
+            const currentValue = $('#edit_exchange_rate').val();
+            if (!currentValue || currentValue === '0') {
+                $('#edit_exchange_rate').val(141000);
+            }
+        }
+    });
+}
+
 // Load drivers data when modal opens
 $('#addPurchaseModal').on('shown.bs.modal', function() {
     loadDriversData();
+    loadUsdRate(); // Load USD rate when modal opens
+});
+
+// Load USD rate when edit modal opens (only if field is empty)
+$('#editPurchaseModal').on('shown.bs.modal', function() {
+    loadEditUsdRate(); // Load USD rate when edit modal opens
 });
 
 // Listen for driver selection change
