@@ -371,6 +371,35 @@
   opacity: 0.9;
 }
 
+/* Company Debt Payments Card - کۆی دانەوەی قەرزی کۆمپانیا */
+.report-card.company-debt-payments-card {
+  border-top: 6px solid #1976d2;
+  background: linear-gradient(135deg, #e3f2fd 0%, #f8fffa 100%);
+  height: 280px; /* Same height as base */
+}
+.report-card.company-debt-payments-card .card-title,
+.report-card.company-debt-payments-card .fa,
+.report-card.company-debt-payments-card .section-label {
+  color: #1976d2;
+}
+.report-card.company-debt-payments-card .section-label {
+  background: #e3f2fd;
+}
+.report-card.company-debt-payments-card .card-value {
+  color: var(--report-card-value);
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 0.3rem;
+  line-height: 1.4;
+}
+.report-card.company-debt-payments-card .card-value small {
+  display: block;
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 0.3rem;
+  opacity: 0.9;
+}
+
 @media (max-width: 768px) {
   .report-card {
     padding: 1.2rem 0.7rem 0.7rem 0.7rem;
@@ -401,6 +430,9 @@
   .report-card.gas-income-card,
   .report-card.cash-sales-card,
   .report-card.person-debt-payments-card {
+    height: 250px;
+  }
+  .report-card.company-debt-payments-card {
     height: 250px;
   }
 }

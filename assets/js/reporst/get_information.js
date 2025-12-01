@@ -151,6 +151,14 @@ function renderDashboardCards(data) {
             subtitle: 'پارەی دانەوە بۆ کەسانی خەرجی تر'
         },
         {
+            key: 'company_debt_payments',
+            label: 'کۆی دانەوەی قەرزی کۆمپانیا',
+            icon: 'fa-building',
+            cardClass: 'company-debt-payments-card',
+            value: formatCurrency(data.data?.company_debt_payments?.usd || 0, 'USD') + '<br><small style="font-size: 0.9rem; opacity: 0.9;">' + formatCurrency(data.data?.company_debt_payments?.iqd || 0, 'IQD') + '</small>',
+            subtitle: 'پارەی دانەوە بۆ کۆمپانیاکان'
+        },
+        {
             key: 'company',
             label: 'قەرزی ئێمە لەگەڵ کۆمپانیاکان',
             icon: 'fa-building',

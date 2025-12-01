@@ -841,6 +841,11 @@ try {
                 'iqd' => $person_debt_payments_iqd,
                 'usd_amount' => $person_debt_payments_usd
             ],
+            'company_debt_payments' => [
+                'usd' => $debt_payments_total_usd,
+                'iqd' => $debt_payments_iqd,
+                'usd_amount' => $debt_payments_usd
+            ],
             'cash_sales' => [
                 'paid_usd' => $cash_sales_paid_usd,
                 'paid_iqd' => $cash_sales_paid_iqd
