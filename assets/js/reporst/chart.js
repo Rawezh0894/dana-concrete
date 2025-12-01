@@ -1,35 +1,6 @@
 // Chart.js rendering for reports page
 // Assumes Chart.js is loaded and canvas elements with correct IDs exist
 
-// Main function to render all charts
-function renderCharts(data) {
-    // Check if Chart.js is loaded
-    if (typeof Chart === 'undefined') {
-        console.error('Chart.js is not loaded');
-        return;
-    }
-    
-    if (!data || !data.data) {
-        console.error('No data provided to renderCharts');
-        return;
-    }
-    
-    const chartData = data.data;
-    
-    // Render charts with error handling
-    try {
-        renderStockByMaterial(chartData);
-        renderIncomeByMonthYear(chartData);
-        renderSalesVsExpenses(chartData);
-        renderDebtAnalysis(chartData);
-        renderEmployeePerformance(chartData);
-        renderCarExpenses(chartData);
-        renderMaterialConsumption(chartData);
-    } catch (error) {
-        console.error('Chart rendering error:', error);
-    }
-}
-
 document.addEventListener('DOMContentLoaded', function() {
     // Check if Chart.js is loaded
     if (typeof Chart === 'undefined') {
@@ -44,9 +15,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Failed to fetch data:', result.error);
                 return;
             }
+            const data = result.data;
             
-            // Use renderCharts function
-            renderCharts(result);
+            // Render charts with error handling
+            try {
+                renderStockByMaterial(data);
+                renderIncomeByMonthYear(data);
+                renderSalesVsExpenses(data);
+                renderDebtAnalysis(data);
+                renderEmployeePerformance(data);
+                renderCarExpenses(data);
+                renderMaterialConsumption(data);
+            } catch (error) {
+                console.error('Chart rendering error:', error);
+            }
         })
         .catch(error => {
             console.error('Failed to fetch chart data:', error);

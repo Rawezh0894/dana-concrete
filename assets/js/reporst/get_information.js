@@ -155,7 +155,7 @@ function renderDashboardCards(data) {
             label: 'کۆی دانەوەی قەرزی کۆمپانیا',
             icon: 'fa-building',
             cardClass: 'company-debt-payments-card',
-            value: formatCurrency(data.data?.company_debt_payments?.usd || 0, 'USD') + '<br><small style="font-size: 0.9rem; opacity: 0.9;">' + formatCurrency(data.data?.company_debt_payments?.iqd || 0, 'IQD') + '</small>',
+            value: formatCurrency(data.data?.company_debt_payments?.usd_amount || 0, 'USD') + '<br><small style="font-size: 0.9rem; opacity: 0.9;">' + formatCurrency(data.data?.company_debt_payments?.iqd || 0, 'IQD') + '</small>',
             subtitle: 'پارەی دانەوە بۆ کۆمپانیاکان'
         },
         {
@@ -389,11 +389,8 @@ function renderDashboardCards(data) {
     
     let html = '';
     cards.forEach(card => {
-        // Add click handler for company_debt_payments card
-        const clickHandler = card.key === 'company_debt_payments' ? 'onclick="showCompanyDebtPaymentsDetails()"' : '';
-        const cursorStyle = card.key === 'company_debt_payments' ? 'style="cursor: pointer;"' : '';
         html += `<div class="col-lg-3 col-md-4 col-sm-6 mb-3">
-            <div class="report-card ${card.cardClass}" ${clickHandler} ${cursorStyle}>
+            <div class="report-card ${card.cardClass}">
                 <i class="fa ${card.icon}"></i>
                 <div class="card-title">${card.label}</div>
                 <div class="card-value">${card.value}</div>
@@ -412,128 +409,6 @@ function renderDashboardCards(data) {
     } else {
         console.error('Target element dashboard-summary-cards not found');
     }
-}
-
-// Function to show company debt payments details
-function showCompanyDebtPaymentsDetails() {
-    const fromDate = document.getElementById('from-date')?.value || '';
-    const toDate = document.getElementById('to-date')?.value || '';
-    
-    // Build URL with date filters
-    let url = '../process/reporst/get_company_debt_payments_details.php';
-    const params = new URLSearchParams();
-    if (fromDate) params.append('from_date', fromDate);
-    if (toDate) params.append('to_date', toDate);
-    if (params.toString()) url += '?' + params.toString();
-    
-    // Show loading
-    Swal.fire({
-        title: 'چاوەڕوان بە...',
-        text: 'وردەکاریەکان وەردەگرێت',
-        allowOutsideClick: false,
-        didOpen: () => {
-            Swal.showLoading();
-        }
-    });
-    
-    fetch(url)
-        .then(res => res.json())
-        .then(result => {
-            if (!result.success) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'هەڵە',
-                    text: result.error || 'هەڵەیەک ڕویدا'
-                });
-                return;
-            }
-            
-            const data = result.data || {};
-            const totalUsd = parseFloat(data.total_usd || 0);
-            const totalIqd = parseFloat(data.total_iqd || 0);
-            const usdAmount = parseFloat(data.usd_amount || 0);
-            const count = parseInt(data.count || 0);
-            const payments = data.payments || [];
-            
-            // Build details HTML
-            let detailsHtml = `
-                <div style="text-align: right; direction: rtl; font-family: 'Rabar', sans-serif;">
-                    <div style="margin-bottom: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
-                        <h5 style="color: #1976d2; margin-bottom: 0.5rem;">کۆی گشتی:</h5>
-                        <p style="margin: 0.25rem 0;"><strong>کۆی گشتی بە دۆلار:</strong> ${formatCurrency(totalUsd, 'USD')}</p>
-                        <p style="margin: 0.25rem 0;"><strong>بڕی دۆلار:</strong> ${formatCurrency(usdAmount, 'USD')}</p>
-                        <p style="margin: 0.25rem 0;"><strong>بڕی دینار:</strong> ${formatCurrency(totalIqd, 'IQD')}</p>
-                        <p style="margin: 0.25rem 0;"><strong>ژمارەی دانەوەکان:</strong> ${count}</p>
-                    </div>
-            `;
-            
-            if (payments.length > 0) {
-                detailsHtml += `
-                    <div style="max-height: 400px; overflow-y: auto;">
-                        <h6 style="color: #1976d2; margin-bottom: 0.5rem;">لیستی دانەوەکان:</h6>
-                        <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
-                            <thead>
-                                <tr style="background: #e3f2fd;">
-                                    <th style="padding: 0.5rem; border: 1px solid #ddd; text-align: center;">#</th>
-                                    <th style="padding: 0.5rem; border: 1px solid #ddd; text-align: center;">بەروار</th>
-                                    <th style="padding: 0.5rem; border: 1px solid #ddd; text-align: center;">دۆلار</th>
-                                    <th style="padding: 0.5rem; border: 1px solid #ddd; text-align: center;">دینار</th>
-                                    <th style="padding: 0.5rem; border: 1px solid #ddd; text-align: center;">داشکاندن (دۆلار)</th>
-                                    <th style="padding: 0.5rem; border: 1px solid #ddd; text-align: center;">داشکاندن (دینار)</th>
-                                    <th style="padding: 0.5rem; border: 1px solid #ddd; text-align: center;">نرخی دۆلار</th>
-                                    <th style="padding: 0.5rem; border: 1px solid #ddd; text-align: center;">تێبینی</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                `;
-                
-                payments.forEach((payment, index) => {
-                    detailsHtml += `
-                        <tr>
-                            <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: center;">${index + 1}</td>
-                            <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: center;">${payment.date || '-'}</td>
-                            <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: center;">${formatCurrency(payment.amount_usd || 0, 'USD')}</td>
-                            <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: center;">${formatCurrency(payment.amount_iqd || 0, 'IQD')}</td>
-                            <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: center;">${formatCurrency(payment.discount_usd || 0, 'USD')}</td>
-                            <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: center;">${formatCurrency(payment.discount_iqd || 0, 'IQD')}</td>
-                            <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: center;">${payment.dollar_rate ? formatCurrency(payment.dollar_rate, 'IQD') : '-'}</td>
-                            <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: center;">${payment.note || '-'}</td>
-                        </tr>
-                    `;
-                });
-                
-                detailsHtml += `
-                            </tbody>
-                        </table>
-                    </div>
-                `;
-            } else {
-                detailsHtml += `<p style="text-align: center; color: #666; padding: 1rem;">هیچ دانەوەیەک نەدۆزرایەوە</p>`;
-            }
-            
-            detailsHtml += `</div>`;
-            
-            Swal.fire({
-                icon: 'info',
-                title: 'وردەکاریەکانی دانەوەی قەرزی کۆمپانیا',
-                html: detailsHtml,
-                width: '90%',
-                customClass: {
-                    popup: 'rtl-popup'
-                },
-                showConfirmButton: true,
-                confirmButtonText: 'داخستن',
-                confirmButtonColor: '#1976d2'
-            });
-        })
-        .catch(error => {
-            console.error('Error fetching details:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'هەڵە',
-                text: 'هەڵە لە وەرگرتنی وردەکاریەکان: ' + error.message
-            });
-        });
 }
 
 document.addEventListener('DOMContentLoaded', function() {
