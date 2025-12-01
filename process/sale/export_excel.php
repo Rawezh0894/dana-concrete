@@ -209,8 +209,8 @@ try {
             echo '<td class="number">' . number_format($row['quantity'] ?? 0, 4) . '</td>';
             echo '<td class="number">' . number_format($row['price_per_unit'] ?? 0, 2) . '</td>';
             echo '<td class="number">' . number_format($row['total_price'] ?? 0, 2) . '</td>';
-            echo '<td class="number">' . number_format($row['amount_paid_iq'] ?? 0, 0) . ' د.ع</td>';
-            echo '<td class="number">' . number_format($row['amount_paid_usd'] ?? 0, 2) . ' $</td>';
+            echo '<td class="number">' . number_format($row['amount_paid_iq'] ?? 0, 0) . '</td>';
+            echo '<td class="number">' . number_format($row['amount_paid_usd'] ?? 0, 2) . '</td>';
             echo '<td class="number">' . number_format($row['remaining_amount'] ?? 0, 2) . '</td>';
             echo '<td class="number">' . number_format($row['dolar_rate'] ?? 0, 0) . '</td>';
             echo '<td class="number">' . number_format($row['discount'] ?? 0, 2) . '</td>';
