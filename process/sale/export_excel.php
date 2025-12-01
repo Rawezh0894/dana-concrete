@@ -19,6 +19,8 @@ $from_date = $_POST['from_date'] ?? '';
 $to_date = $_POST['to_date'] ?? '';
 $export_type = $_POST['export_type'] ?? 'detailed';
 $quantity_range = $_POST['quantity_range'] ?? '';
+$min_quantity = $_POST['min_quantity'] ?? '';
+$max_quantity = $_POST['max_quantity'] ?? '';
 
 // Build WHERE clause
 $where = [];
@@ -39,7 +41,17 @@ if ($to_date) {
     $params[] = $to_date;
 }
 
-if ($quantity_range) {
+// Handle quantity filters (min_quantity and max_quantity take priority over quantity_range)
+if ($min_quantity !== '' || $max_quantity !== '') {
+    if ($min_quantity !== '') {
+        $where[] = "s.quantity >= ?";
+        $params[] = $min_quantity;
+    }
+    if ($max_quantity !== '') {
+        $where[] = "s.quantity <= ?";
+        $params[] = $max_quantity;
+    }
+} elseif ($quantity_range) {
     switch ($quantity_range) {
         case '<5':
             $where[] = "s.quantity < ?";
@@ -88,8 +100,12 @@ try {
     $stmt->execute($params);
     $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    // Set headers for Excel download
+    // Set headers for Excel download with proper UTF-8 encoding
     header('Content-Type: application/vnd.ms-excel; charset=utf-8');
+    header('Content-Transfer-Encoding: binary');
+    
+    // Output UTF-8 BOM for proper encoding
+    echo "\xEF\xBB\xBF";
     
     if ($export_type === 'summary') {
         // Export summary data
@@ -113,6 +129,7 @@ try {
         echo '<!DOCTYPE html>';
         echo '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
         echo '<head>';
+        echo '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">';
         echo '<meta charset="UTF-8">';
         echo '<style>';
         echo 'table { border-collapse: collapse; width: 100%; }';
@@ -144,6 +161,7 @@ try {
         echo '<!DOCTYPE html>';
         echo '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
         echo '<head>';
+        echo '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">';
         echo '<meta charset="UTF-8">';
         echo '<style>';
         echo 'table { border-collapse: collapse; width: 100%; }';
