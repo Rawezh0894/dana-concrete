@@ -71,10 +71,10 @@ try {
     }
     
     // Get USD to IQD rate for conversion
-    $rate_query = "SELECT usd_iqd_rate FROM settings LIMIT 1";
+    $rate_query = "SELECT value FROM settings WHERE name = 'usd_iqd_rate' LIMIT 1";
     $rate_stmt = $pdo->query($rate_query);
     $rate_row = $rate_stmt->fetch(PDO::FETCH_ASSOC);
-    $usd_iqd_rate = floatval($rate_row['usd_iqd_rate'] ?? 150000);
+    $usd_iqd_rate = floatval($rate_row['value'] ?? 150000);
     
     // Convert IQD to USD
     $iqd_converted = ($usd_iqd_rate > 0) ? ($total_iqd / ($usd_iqd_rate / 100)) : 0;
