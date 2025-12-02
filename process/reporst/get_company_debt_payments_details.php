@@ -2,6 +2,11 @@
 session_start();
 require_once '../../config/db_conected.php';
 
+// Set error reporting for debugging (remove in production)
+error_reporting(E_ALL);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+
 header('Content-Type: application/json; charset=utf-8');
 
 if (!isset($_SESSION['user_id'])) {
@@ -75,7 +80,7 @@ try {
     $iqd_converted = ($usd_iqd_rate > 0) ? ($total_iqd / ($usd_iqd_rate / 100)) : 0;
     $total_usd_converted = $usd_amount + $iqd_converted;
     
-    echo json_encode([
+    $response = [
         'success' => true,
         'data' => [
             'total_usd' => $total_usd_converted,
@@ -84,10 +89,24 @@ try {
             'count' => $count,
             'payments' => $payments
         ]
-    ]);
+    ];
+    
+    $json_output = json_encode($response, JSON_UNESCAPED_UNICODE);
+    
+    if ($json_output === false) {
+        error_log('JSON encoding error: ' . json_last_error_msg());
+        echo json_encode(['success' => false, 'error' => 'هەڵە لە دروستکردنی وەڵام: ' . json_last_error_msg()]);
+    } else {
+        echo $json_output;
+    }
     
 } catch (PDOException $e) {
-    error_log('Error in get_company_debt_payments_details.php: ' . $e->getMessage());
-    echo json_encode(['success' => false, 'error' => 'هەڵە لە وەرگرتنی وردەکاریەکان']);
+    error_log('PDOException in get_company_debt_payments_details.php: ' . $e->getMessage());
+    error_log('Stack trace: ' . $e->getTraceAsString());
+    echo json_encode(['success' => false, 'error' => 'هەڵە لە وەرگرتنی وردەکاریەکان: ' . $e->getMessage()]);
+} catch (Exception $e) {
+    error_log('Exception in get_company_debt_payments_details.php: ' . $e->getMessage());
+    error_log('Stack trace: ' . $e->getTraceAsString());
+    echo json_encode(['success' => false, 'error' => 'هەڵە لە وەرگرتنی وردەکاریەکان: ' . $e->getMessage()]);
 }
 

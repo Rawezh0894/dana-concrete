@@ -481,6 +481,8 @@ function showCompanyDebtPaymentsDetails() {
     if (toDate) params.append('to_date', toDate);
     if (params.toString()) url += '?' + params.toString();
     
+    console.log('Fetching company debt payments details from:', url);
+    
     // Show loading
     Swal.fire({
         title: 'چاوەڕوان بە...',
@@ -492,16 +494,40 @@ function showCompanyDebtPaymentsDetails() {
     });
     
     fetch(url)
-        .then(res => res.json())
-        .then(result => {
-            if (!result.success) {
+        .then(res => {
+            console.log('Response status:', res.status);
+            if (!res.ok) {
+                throw new Error('HTTP error! status: ' + res.status);
+            }
+            return res.text();
+        })
+        .then(text => {
+            console.log('Response text:', text);
+            try {
+                const result = JSON.parse(text);
+                console.log('Parsed result:', result);
+                if (!result.success) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'هەڵە',
+                        text: result.error || 'هەڵەیەک ڕویدا'
+                    });
+                    return null;
+                }
+                return result;
+            } catch (e) {
+                console.error('JSON parse error:', e);
+                console.error('Response text:', text);
                 Swal.fire({
                     icon: 'error',
                     title: 'هەڵە',
-                    text: result.error || 'هەڵەیەک ڕویدا'
+                    text: 'هەڵە لە وەرگرتنی وردەکاریەکان: ' + e.message
                 });
-                return;
+                return null;
             }
+        })
+        .then(result => {
+            if (!result) return;
             
             const data = result.data || {};
             const totalUsd = parseFloat(data.total_usd || 0);
