@@ -50,6 +50,7 @@ try {
         echo json_encode(['success' => false, 'message' => 'هەڵە لە زیادکردن!']);
     }
 } catch (Exception $e) {
-    echo json_encode(['success' => false, 'message' => 'هەڵەی داتابەیس: ' . $e->getMessage()]);
+    error_log('Exception in add_customer.php: ' . $e->getMessage());
+    echo json_encode(['success' => false, 'message' => 'هەڵە لە زیادکردنی کڕیار!']);
 }
 ?>

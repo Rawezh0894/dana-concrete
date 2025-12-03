@@ -101,8 +101,8 @@ try {
 
 } catch (PDOException $e) {
     error_log('PDOException in update_user.php: ' . $e->getMessage());
-    echo json_encode(['success' => false, 'message' => 'هەڵەی داتابەیس: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'هەڵە لە نوێکردنەوەی بەکارهێنەر!']);
 } catch (Exception $e) {
     error_log('Exception in update_user.php: ' . $e->getMessage());
-    echo json_encode(['success' => false, 'message' => 'هەڵەی سیستەم: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'هەڵە لە نوێکردنەوەی بەکارهێنەر!']);
 }

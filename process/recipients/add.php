@@ -73,7 +73,8 @@ try {
         echo json_encode(['success' => false, 'message' => 'نەتوانرا وەرگر زیادبکرێت.']);
     }
 } catch (Exception $e) {
+    error_log('Exception in recipients/add.php: ' . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'هەڵەی داتابەیس: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'هەڵە لە زیادکردنی وەرگر!']);
 }
 

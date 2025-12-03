@@ -79,8 +79,8 @@ try {
 
 } catch (PDOException $e) {
     error_log('PDOException in company/delete_company.php: ' . $e->getMessage());
-    echo json_encode(['success' => false, 'message' => 'هەڵەی داتابەیس: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'هەڵە لە سڕینەوەی کۆمپانیا!']);
 } catch (Exception $e) {
     error_log('Exception in company/delete_company.php: ' . $e->getMessage());
-    echo json_encode(['success' => false, 'message' => 'هەڵەی سیستەم: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'هەڵە لە سڕینەوەی کۆمپانیا!']);
 }

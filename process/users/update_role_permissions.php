@@ -79,8 +79,8 @@ try {
 
 } catch (PDOException $e) {
     error_log('PDOException in update_role_permissions.php: ' . $e->getMessage());
-    echo json_encode(['success' => false, 'message' => 'هەڵەی داتابەیس: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'هەڵە لە نوێکردنەوەی دەسەڵات!']);
 } catch (Exception $e) {
     error_log('Exception in update_role_permissions.php: ' . $e->getMessage());
-    echo json_encode(['success' => false, 'message' => 'هەڵەی سیستەم: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'هەڵە لە نوێکردنەوەی دەسەڵات!']);
 } 

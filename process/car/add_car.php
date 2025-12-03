@@ -67,8 +67,8 @@ try {
 
 } catch (PDOException $e) {
     error_log('PDOException in car/add_car.php: ' . $e->getMessage());
-    echo json_encode(['success' => false, 'msg' => 'هەڵەی داتابەیس: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'msg' => 'هەڵە لە زیادکردنی ئۆتۆمبێل!']);
 } catch (Exception $e) {
     error_log('Exception in car/add_car.php: ' . $e->getMessage());
-    echo json_encode(['success' => false, 'msg' => 'هەڵەی سیستەم: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'msg' => 'هەڵە لە زیادکردنی ئۆتۆمبێل!']);
 }

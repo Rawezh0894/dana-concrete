@@ -71,9 +71,9 @@ try {
 } catch (PDOException $e) {
     error_log('PDOException in car/delete_car.php: ' . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['success' => false, 'msg' => 'هەڵەی داتابەیس: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'msg' => 'هەڵە لە سڕینەوەی ئۆتۆمبێل!']);
 } catch (Exception $e) {
     error_log('Exception in car/delete_car.php: ' . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['success' => false, 'msg' => 'هەڵەی سیستەم: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'msg' => 'هەڵە لە سڕینەوەی ئۆتۆمبێل!']);
 }

@@ -90,9 +90,9 @@ try {
 
 } catch (PDOException $e) {
     error_log('PDOException in company/update_company.php: ' . $e->getMessage());
-    echo json_encode(['success' => false, 'message' => 'هەڵەی داتابەیس: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'هەڵە لە نوێکردنەوەی کۆمپانیا!']);
 } catch (Exception $e) {
     error_log('Exception in company/update_company.php: ' . $e->getMessage());
-    echo json_encode(['success' => false, 'message' => 'هەڵەی سیستەم: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'هەڵە لە نوێکردنەوەی کۆمپانیا!']);
 }
 ?>

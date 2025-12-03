@@ -79,5 +79,6 @@ try {
         echo json_encode(['success' => false, 'message' => 'هەڵە لە سڕینەوە']);
     }
 } catch (PDOException $e) {
-    echo json_encode(['success' => false, 'message' => 'SQL Error: ' . $e->getMessage()]);
+    error_log('PDOException in employee_payments/delete.php: ' . $e->getMessage());
+    echo json_encode(['success' => false, 'message' => 'هەڵە لە سڕینەوەی پارەدان!']);
 }

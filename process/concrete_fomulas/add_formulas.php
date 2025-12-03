@@ -62,5 +62,6 @@ try {
         echo json_encode(['success' => false, 'message' => 'هەڵە لە زیادکردنەوەی فۆرمولا']);
     }
 } catch (Exception $e) {
-    echo json_encode(['success' => false, 'message' => 'هەڵەیەک ڕووی دا: ' . $e->getMessage()]);
+    error_log('Exception in concrete_fomulas/add_formulas.php: ' . $e->getMessage());
+    echo json_encode(['success' => false, 'message' => 'هەڵە لە زیادکردنی فۆرمولا!']);
 }

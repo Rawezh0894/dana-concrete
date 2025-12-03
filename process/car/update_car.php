@@ -85,8 +85,8 @@ try {
 
 } catch (PDOException $e) {
     error_log('PDOException in car/update_car.php: ' . $e->getMessage());
-    echo json_encode(['success' => false, 'msg' => 'هەڵەی داتابەیس: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'msg' => 'هەڵە لە نوێکردنەوەی ئۆتۆمبێل!']);
 } catch (Exception $e) {
     error_log('Exception in car/update_car.php: ' . $e->getMessage());
-    echo json_encode(['success' => false, 'msg' => 'هەڵەی سیستەم: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'msg' => 'هەڵە لە نوێکردنەوەی ئۆتۆمبێل!']);
 }

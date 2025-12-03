@@ -99,5 +99,6 @@ try {
         echo json_encode(['success' => false, 'message' => 'هەڵە لە نوێکردنەوە']);
     }
 } catch (PDOException $e) {
-    echo json_encode(['success' => false, 'message' => 'SQL Error: ' . $e->getMessage()]);
+    error_log('PDOException in employee_payments/update.php: ' . $e->getMessage());
+    echo json_encode(['success' => false, 'message' => 'هەڵە لە نوێکردنەوەی پارەدان!']);
 }

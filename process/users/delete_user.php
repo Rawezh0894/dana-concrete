@@ -67,8 +67,8 @@ try {
 
 } catch (PDOException $e) {
     error_log('PDOException in delete_user.php: ' . $e->getMessage());
-    echo json_encode(['success' => false, 'message' => 'هەڵەی داتابەیس: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'هەڵە لە سڕینەوەی بەکارهێنەر!']);
 } catch (Exception $e) {
     error_log('Exception in delete_user.php: ' . $e->getMessage());
-    echo json_encode(['success' => false, 'message' => 'هەڵەی سیستەم: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'هەڵە لە سڕینەوەی بەکارهێنەر!']);
 }

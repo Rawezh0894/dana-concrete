@@ -34,5 +34,6 @@ try {
     echo json_encode(['success' => true, 'message' => 'گۆڕانکاری سڕایەوە']);
 } catch (Exception $e) {
     if ($pdo && $pdo->inTransaction()) $pdo->rollBack();
-    echo json_encode(['success' => false, 'message' => 'هەڵە: ' . $e->getMessage()]);
+    error_log('Exception in stock_adjustments/delete.php: ' . $e->getMessage());
+    echo json_encode(['success' => false, 'message' => 'هەڵە لە سڕینەوەی گۆڕانکاری!']);
 }

@@ -87,8 +87,8 @@ try {
 
 } catch (PDOException $e) {
     error_log('PDOException in add_employee.php: ' . $e->getMessage());
-    echo json_encode(['success' => false, 'message' => 'هەڵەی داتابەیس: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'هەڵە لە زیادکردنی کارمەند!']);
 } catch (Exception $e) {
     error_log('Exception in add_employee.php: ' . $e->getMessage());
-    echo json_encode(['success' => false, 'message' => 'هەڵەی سیستەم: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'هەڵە لە زیادکردنی کارمەند!']);
 }
