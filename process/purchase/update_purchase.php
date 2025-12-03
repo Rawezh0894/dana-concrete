@@ -102,7 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Validate payment type logic
-    if ($payment_type === 'نەقد' && ($remaining_usd != 0 || $remaining_iqd != 0)) {
+    if ($payment_type === 'نەقد' && ($remaining_usd !== 0.0 || $remaining_iqd !== 0.0)) {
         error_log('Invalid payment type: cash payment with remaining amount');
         echo json_encode(['success' => false, 'msg' => 'بڕی پارەی ماوە نابێت بێت کاتێک جۆری پارەدان نەقدە!']);
         exit;

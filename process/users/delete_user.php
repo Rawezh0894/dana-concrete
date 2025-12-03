@@ -37,7 +37,7 @@ try {
         exit;
     }
 
-    if ($id == $_SESSION['user_id']) {
+    if ($id === intval($_SESSION['user_id'])) {
         error_log('User trying to delete themselves: User=' . $_SESSION['user_id']);
         echo json_encode(['success' => false, 'message' => 'ناتوانیت خۆت بسڕیتەوە!']);
         exit;

@@ -17,7 +17,7 @@ try {
     $price_usd = floatval($_POST['price_usd'] ?? 0);
     $price_iqd = floatval($_POST['price_iqd'] ?? 0);
     $user_id = $_SESSION['user_id'];
-    if ($bin_id <= 0 || $adjustment == 0 || $reason === '') {
+    if ($bin_id <= 0 || $adjustment === 0.0 || $reason === '') {
         echo json_encode(['success' => false, 'message' => 'هەموو خانەکان پڕبکە']);
         exit;
     }

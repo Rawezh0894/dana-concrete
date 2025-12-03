@@ -54,7 +54,7 @@ try {
     }
 
     // Check if user is trying to change their own role
-    if ($id == $_SESSION['user_id'] && $role !== $_SESSION['role']) {
+    if ($id === intval($_SESSION['user_id']) && $role !== $_SESSION['role']) {
         error_log('User trying to change their own role: User=' . $_SESSION['user_id'] . ', Current Role=' . $_SESSION['role'] . ', New Role=' . $role);
         echo json_encode(['success' => false, 'message' => 'ناتوانیت دەسەڵاتی خۆت بگۆڕیت!']);
         exit;

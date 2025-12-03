@@ -20,7 +20,7 @@ $mobile1 = $_POST['mobile1'] ?? '';
 $mobile2 = $_POST['mobile2'] ?? '';
 $opening_debt_usd = floatval($_POST['opening_debt_usd'] ?? 0);
 $opening_debt_iqd = floatval($_POST['opening_debt_iqd'] ?? 0);
-$is_recipient = isset($_POST['is_recipient']) && $_POST['is_recipient'] == '1' ? 1 : 0;
+$is_recipient = isset($_POST['is_recipient']) && $_POST['is_recipient'] === '1' ? 1 : 0;
 
 // Validate required fields
 if (empty($name) || empty($mobile1)) {

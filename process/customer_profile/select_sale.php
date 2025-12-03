@@ -90,7 +90,7 @@ try {
     }
     
     // Check if we need only sales with remaining debt
-    $remaining_only = isset($_GET['remaining_only']) && $_GET['remaining_only'] == '1';
+    $remaining_only = isset($_GET['remaining_only']) && $_GET['remaining_only'] === '1';
     
     if ($remaining_only) {
         // Get only sales with remaining debt for payment allocation
