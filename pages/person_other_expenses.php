@@ -36,7 +36,15 @@ if (!isset($_SESSION['user_id'])) {
 <div class="container-fluid py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">کەسانی خەرجی تر</h2>
-        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addPersonModal" style="background: var(--seafoam-green); font-weight: bold;">+ زیادکردنی کەس</button>
+        <div class="d-flex gap-2 align-items-center">
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="filterDebtOnly" style="cursor: pointer;">
+                <label class="form-check-label" for="filterDebtOnly" style="cursor: pointer; user-select: none;">
+                    <i class="fas fa-filter me-1"></i>تەنها کەسانی قەرزدار
+                </label>
+            </div>
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addPersonModal" style="background: var(--seafoam-green); font-weight: bold;">+ زیادکردنی کەس</button>
+        </div>
     </div>
     
     <!-- Summary Cards -->

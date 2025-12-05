@@ -7,8 +7,41 @@ if (!hasPermission('view_person_other_expenses')) {
     exit;
 }
 
+// Check if filter for persons with debt is requested
+$filter_debt_only = isset($_GET['debt_only']) && $_GET['debt_only'] === 'true';
+
 // Get persons data
-$stmt = $pdo->query("SELECT id, name, expense_usd, expense_iqd, opening_debt_usd, opening_debt_iqd FROM other_expense_persons ORDER BY name ASC");
+if ($filter_debt_only) {
+    // Only get persons who have debt (opening debt OR remaining expenses OR remaining purchases)
+    $stmt = $pdo->prepare("
+        SELECT DISTINCT 
+            p.id, 
+            p.name, 
+            p.expense_usd, 
+            p.expense_iqd, 
+            p.opening_debt_usd, 
+            p.opening_debt_iqd
+        FROM other_expense_persons p
+        WHERE 
+            (p.opening_debt_usd > 0 OR p.opening_debt_iqd > 0)
+            OR EXISTS (
+                SELECT 1 FROM other_expenses oe 
+                WHERE oe.person_id = p.id 
+                AND oe.payment_type = 'قەرز' 
+                AND (oe.remaining_usd > 0 OR oe.remaining_iqd > 0)
+            )
+            OR EXISTS (
+                SELECT 1 FROM purchase_materials pm 
+                WHERE pm.person_id = p.id 
+                AND pm.payment_type = 'قەرز' 
+                AND (pm.remaining_amount_usd > 0 OR pm.remaining_amount_iqd > 0)
+            )
+        ORDER BY p.name ASC
+    ");
+    $stmt->execute();
+} else {
+    $stmt = $pdo->query("SELECT id, name, expense_usd, expense_iqd, opening_debt_usd, opening_debt_iqd FROM other_expense_persons ORDER BY name ASC");
+}
 $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $persons = [];
 foreach ($data as $row) {

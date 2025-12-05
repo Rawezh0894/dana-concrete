@@ -1,5 +1,8 @@
-async function loadPersons() {
-    const res = await fetch('../process/person_other_expenses/select_person.php');
+async function loadPersons(debtOnly = false) {
+    const url = debtOnly 
+        ? '../process/person_other_expenses/select_person.php?debt_only=true'
+        : '../process/person_other_expenses/select_person.php';
+    const res = await fetch(url);
     const data = await res.json();
     
     // Update summary cards
@@ -88,4 +91,12 @@ document.addEventListener('DOMContentLoaded', function() {
     loadPersons();
     // Also attach events for any elements that might already exist
     attachAllPersonEvents();
+    
+    // Add filter toggle event
+    const filterDebtOnly = document.getElementById('filterDebtOnly');
+    if (filterDebtOnly) {
+        filterDebtOnly.addEventListener('change', function() {
+            loadPersons(this.checked);
+        });
+    }
 });
