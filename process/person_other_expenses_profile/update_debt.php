@@ -66,20 +66,39 @@ try {
         throw new RuntimeException('بڕی پارەی دینار زیاترە لە قەرزی ماوە!');
     }
 
-    $updateStmt = $pdo->prepare('
-        UPDATE person_other_expenses_debt_payments
-        SET date = ?, amount_usd = ?, amount_iqd = ?, discount_usd = ?, discount_iqd = ?, note = ?
-        WHERE id = ?
-    ');
-    $updateStmt->execute([
-        $date,
-        $amount_usd,
-        $amount_iqd,
-        $discount_usd,
-        $discount_iqd,
-        $note,
-        $id
-    ]);
+    // Check if discount columns exist
+    $checkDiscount = $pdo->query("SHOW COLUMNS FROM `person_other_expenses_debt_payments` LIKE 'discount_usd'");
+    $hasDiscount = $checkDiscount->rowCount() > 0;
+    
+    if ($hasDiscount) {
+        $updateStmt = $pdo->prepare('
+            UPDATE person_other_expenses_debt_payments
+            SET date = ?, amount_usd = ?, amount_iqd = ?, discount_usd = ?, discount_iqd = ?, note = ?
+            WHERE id = ?
+        ');
+        $updateStmt->execute([
+            $date,
+            $amount_usd,
+            $amount_iqd,
+            $discount_usd,
+            $discount_iqd,
+            $note,
+            $id
+        ]);
+    } else {
+        $updateStmt = $pdo->prepare('
+            UPDATE person_other_expenses_debt_payments
+            SET date = ?, amount_usd = ?, amount_iqd = ?, note = ?
+            WHERE id = ?
+        ');
+        $updateStmt->execute([
+            $date,
+            $amount_usd,
+            $amount_iqd,
+            $note,
+            $id
+        ]);
+    }
 
     applyPersonCurrencyReduction($pdo, $person_id, 'usd', $amount_usd);
     applyPersonCurrencyReduction($pdo, $person_id, 'usd', $discount_usd);

@@ -153,7 +153,8 @@ function restorePersonCurrencyAmount(PDO $pdo, int $personId, string $currency, 
     $purchaseTotalColumn = $currency === 'usd' ? 'total_price_usd' : 'total_price_iqd';
     $typeValue = $currency === 'usd' ? 'دۆلار' : 'دینار';
 
-    // Restore purchases first (LIFO)
+    // Restore purchases first (LIFO - Last In First Out)
+    // Get all purchases that have been paid (remaining < total)
     $purchaseStmt = $pdo->prepare("
         SELECT id, {$purchaseRemainingColumn} AS remaining, {$purchaseTotalColumn} AS total
         FROM purchase_materials
@@ -163,6 +164,7 @@ function restorePersonCurrencyAmount(PDO $pdo, int $personId, string $currency, 
     ");
     $purchaseStmt->execute([$personId]);
 
+    $restoredPurchases = 0;
     while ($amount > 0 && ($row = $purchaseStmt->fetch(PDO::FETCH_ASSOC))) {
         $total = (float)$row['total'];
         $remaining = (float)$row['remaining'];
@@ -171,9 +173,12 @@ function restorePersonCurrencyAmount(PDO $pdo, int $personId, string $currency, 
             continue;
         }
         $toRestore = min($used, $amount);
-        $pdo->prepare("UPDATE purchase_materials SET {$purchaseRemainingColumn} = {$purchaseRemainingColumn} + ? WHERE id = ?")
-            ->execute([$toRestore, $row['id']]);
-        $amount -= $toRestore;
+        if ($toRestore > 0) {
+            $pdo->prepare("UPDATE purchase_materials SET {$purchaseRemainingColumn} = LEAST({$purchaseRemainingColumn} + ?, {$purchaseTotalColumn}) WHERE id = ?")
+                ->execute([$toRestore, $row['id']]);
+            $amount -= $toRestore;
+            $restoredPurchases += $toRestore;
+        }
     }
 
     // Then restore other expenses (LIFO)
@@ -195,10 +200,12 @@ function restorePersonCurrencyAmount(PDO $pdo, int $personId, string $currency, 
             continue;
         }
         $toRestore = min($used, $amount);
-        $pdo->prepare("UPDATE other_expenses SET {$expenseRemainingColumn} = {$expenseRemainingColumn} + ? WHERE id = ?")
-            ->execute([$toRestore, $row['id']]);
-        $amount -= $toRestore;
-        $restoredExpenses += $toRestore;
+        if ($toRestore > 0) {
+            $pdo->prepare("UPDATE other_expenses SET {$expenseRemainingColumn} = LEAST({$expenseRemainingColumn} + ?, {$expenseTotalColumn}) WHERE id = ?")
+                ->execute([$toRestore, $row['id']]);
+            $amount -= $toRestore;
+            $restoredExpenses += $toRestore;
+        }
     }
 
     if ($restoredExpenses > 0) {

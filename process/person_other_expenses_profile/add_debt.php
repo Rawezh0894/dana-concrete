@@ -53,20 +53,39 @@ try {
 
     $pdo->beginTransaction();
 
-    $insert = $pdo->prepare("
-        INSERT INTO person_other_expenses_debt_payments
-        (person_id, date, amount_usd, amount_iqd, discount_usd, discount_iqd, note)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    ");
-    $insert->execute([
-        $person_id,
-        $date,
-        $amount_usd,
-        $amount_iqd,
-        $discount_usd,
-        $discount_iqd,
-        $note
-    ]);
+    // Check if discount columns exist
+    $checkDiscount = $pdo->query("SHOW COLUMNS FROM `person_other_expenses_debt_payments` LIKE 'discount_usd'");
+    $hasDiscount = $checkDiscount->rowCount() > 0;
+    
+    if ($hasDiscount) {
+        $insert = $pdo->prepare("
+            INSERT INTO person_other_expenses_debt_payments
+            (person_id, date, amount_usd, amount_iqd, discount_usd, discount_iqd, note)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ");
+        $insert->execute([
+            $person_id,
+            $date,
+            $amount_usd,
+            $amount_iqd,
+            $discount_usd,
+            $discount_iqd,
+            $note
+        ]);
+    } else {
+        $insert = $pdo->prepare("
+            INSERT INTO person_other_expenses_debt_payments
+            (person_id, date, amount_usd, amount_iqd, note)
+            VALUES (?, ?, ?, ?, ?)
+        ");
+        $insert->execute([
+            $person_id,
+            $date,
+            $amount_usd,
+            $amount_iqd,
+            $note
+        ]);
+    }
 
     $debt_payment_id = (int)$pdo->lastInsertId();
 

@@ -154,12 +154,12 @@ try {
 } catch (PDOException $e) {
     echo json_encode([
         'success' => false,
-        'error' => 'Database error: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8')
-    ]);
+        'error' => 'Database error: ' . $e->getMessage()
+    ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
 } catch (Exception $e) {
     echo json_encode([
         'success' => false,
-        'error' => 'General error: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8')
-    ]);
+        'error' => 'General error: ' . $e->getMessage()
+    ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
 }
 

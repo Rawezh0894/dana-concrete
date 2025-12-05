@@ -40,9 +40,13 @@ try {
     $person_id = intval($payment['person_id']);
 
     restorePersonCurrencyAmount($pdo, $person_id, 'usd', floatval($payment['amount_usd'] ?? 0));
-    restorePersonCurrencyAmount($pdo, $person_id, 'usd', floatval($payment['discount_usd'] ?? 0));
     restorePersonCurrencyAmount($pdo, $person_id, 'iqd', floatval($payment['amount_iqd'] ?? 0));
-    restorePersonCurrencyAmount($pdo, $person_id, 'iqd', floatval($payment['discount_iqd'] ?? 0));
+    
+    // Restore discount if columns exist
+    if (isset($payment['discount_usd']) && isset($payment['discount_iqd'])) {
+        restorePersonCurrencyAmount($pdo, $person_id, 'usd', floatval($payment['discount_usd'] ?? 0));
+        restorePersonCurrencyAmount($pdo, $person_id, 'iqd', floatval($payment['discount_iqd'] ?? 0));
+    }
 
     $deleteStmt = $pdo->prepare('DELETE FROM person_other_expenses_debt_payments WHERE id = ?');
     $deleteStmt->execute([$id]);
