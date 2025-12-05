@@ -81,7 +81,7 @@ if ($person_id) {
         </div>
         <div class="row mb-3" id="person-summary-cards">
           <div class="col mb-2">
-            <div class="card text-center shadow card-gradient-danger card-animate-hover">
+            <div class="card text-center shadow card-gradient-danger card-animate-hover" style="cursor: pointer;" onclick="showDebtBreakdown('usd')" title="کلیک بکە بۆ بینینی وردەکاری قەرزەکە">
               <div class="card-body">
                 <i class="fas fa-credit-card card-icon"></i>
                 <h6 class="card-title">کۆی قەرزی ئێمە بە دۆلار</h6>
@@ -91,7 +91,7 @@ if ($person_id) {
             </div>
           </div>
           <div class="col mb-2">
-            <div class="card text-center shadow card-gradient-primary card-animate-hover">
+            <div class="card text-center shadow card-gradient-primary card-animate-hover" style="cursor: pointer;" onclick="showDebtBreakdown('iqd')" title="کلیک بکە بۆ بینینی وردەکاری قەرزەکە">
               <div class="card-body">
                 <i class="fas fa-credit-card card-icon"></i>
                 <h6 class="card-title">کۆی قەرزی ئێمە بە دینار</h6>
@@ -533,6 +533,188 @@ if ($person_id) {
             });
         }
         
+        // Show debt breakdown modal
+        function showDebtBreakdown(currency) {
+            $.ajax({
+                url: '../process/person_other_expenses_profile/get_debt_breakdown.php',
+                type: 'GET',
+                data: {
+                    person_id: PERSON_ID,
+                    currency: currency
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        showDebtBreakdownModal(response.data, currency);
+                    } else {
+                        console.error('Error loading debt breakdown:', response.error);
+                        alert('هەڵە لە بارکردنی وردەکاری قەرز: ' + response.error);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', error);
+                    alert('هەڵە لە پەیوەندی بە سێرڤەر');
+                }
+            });
+        }
+        
+        // Show debt breakdown modal
+        function showDebtBreakdownModal(data, currency) {
+            const currencyLabel = currency === 'usd' ? 'دۆلار' : 'دینار';
+            const currencySymbol = currency === 'usd' ? '$' : 'د.ع';
+            
+            let expensesRows = '';
+            if (data.expenses && data.expenses.length > 0) {
+                data.expenses.forEach(function(expense) {
+                    expensesRows += `
+                        <tr>
+                            <td>خەرجی</td>
+                            <td>${expense.date}</td>
+                            <td>${expense.description || '-'}</td>
+                            <td>${expense.invoice_number || '-'}</td>
+                            <td>${Number(expense.amount_usd).toLocaleString('en-US', {minimumFractionDigits: 2})} $</td>
+                            <td>${Number(expense.amount_iqd).toLocaleString('en-US', {minimumFractionDigits: 2})} د.ع</td>
+                            <td class="fw-bold">${Number(expense.remaining).toLocaleString('en-US', {minimumFractionDigits: 2})} ${currencySymbol}</td>
+                        </tr>
+                    `;
+                });
+            } else {
+                expensesRows = '<tr><td colspan="7" class="text-center text-muted">هیچ خەرجییەکی قەرز نییە</td></tr>';
+            }
+            
+            let purchasesRows = '';
+            if (data.purchases && data.purchases.length > 0) {
+                data.purchases.forEach(function(purchase) {
+                    purchasesRows += `
+                        <tr>
+                            <td>کڕین</td>
+                            <td>${purchase.date}</td>
+                            <td>${purchase.receipt_number || '-'}</td>
+                            <td>${purchase.notes || '-'}</td>
+                            <td>${Number(purchase.total_price_usd).toLocaleString('en-US', {minimumFractionDigits: 2})} $</td>
+                            <td>${Number(purchase.total_price_iqd).toLocaleString('en-US', {minimumFractionDigits: 2})} د.ع</td>
+                            <td class="fw-bold">${Number(purchase.remaining).toLocaleString('en-US', {minimumFractionDigits: 2})} ${currencySymbol}</td>
+                        </tr>
+                    `;
+                });
+            } else {
+                purchasesRows = '<tr><td colspan="7" class="text-center text-muted">هیچ کڕینێکی قەرز نییە</td></tr>';
+            }
+            
+            const modalContent = `
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-list-alt me-2"></i>وردەکاری قەرز بە ${currencyLabel}
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <h6 class="text-primary">کۆی گشتی:</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>جۆر</th>
+                                            <th>بڕ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${data.totals.opening_debt > 0 ? `
+                                        <tr>
+                                            <td>قەرزی سەرەتایی</td>
+                                            <td class="fw-bold">${Number(data.totals.opening_debt).toLocaleString('en-US', {minimumFractionDigits: 2})} ${currencySymbol}</td>
+                                        </tr>
+                                        ` : ''}
+                                        <tr>
+                                            <td>ماوەی خەرجیەکان</td>
+                                            <td class="fw-bold">${Number(data.totals.expenses_remaining).toLocaleString('en-US', {minimumFractionDigits: 2})} ${currencySymbol}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>ماوەی کڕینەکان</td>
+                                            <td class="fw-bold">${Number(data.totals.purchases_remaining).toLocaleString('en-US', {minimumFractionDigits: 2})} ${currencySymbol}</td>
+                                        </tr>
+                                        <tr class="table-primary">
+                                            <td><strong>کۆی قەرزی ئێمە</strong></td>
+                                            <td class="fw-bold"><strong>${Number(data.totals.total_debt).toLocaleString('en-US', {minimumFractionDigits: 2})} ${currencySymbol}</strong></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <h6 class="text-success">خەرجیەکان:</h6>
+                            <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                                <table class="table table-sm table-bordered table-hover">
+                                    <thead class="table-light sticky-top">
+                                        <tr>
+                                            <th>جۆر</th>
+                                            <th>بەروار</th>
+                                            <th>بەکارهێنان</th>
+                                            <th>ژمارەی فاکتور</th>
+                                            <th>کۆی دۆلار</th>
+                                            <th>کۆی دینار</th>
+                                            <th>ماوە بە ${currencyLabel}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${expensesRows}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <h6 class="text-warning">کڕینەکان:</h6>
+                            <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                                <table class="table table-sm table-bordered table-hover">
+                                    <thead class="table-light sticky-top">
+                                        <tr>
+                                            <th>جۆر</th>
+                                            <th>بەروار</th>
+                                            <th>ژمارەی وەسڵ</th>
+                                            <th>تێبینی</th>
+                                            <th>کۆی دۆلار</th>
+                                            <th>کۆی دینار</th>
+                                            <th>ماوە بە ${currencyLabel}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${purchasesRows}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
+                </div>
+            `;
+            
+            // Create and show modal
+            const modal = `
+                <div class="modal fade" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-xl">
+                        <div class="modal-content">
+                            ${modalContent}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            $('body').append(modal);
+            $('.modal').modal('show');
+            
+            // Remove modal from DOM when hidden
+            $('.modal').on('hidden.bs.modal', function() {
+                $(this).remove();
+            });
+        }
 
     </script>
 </body>
