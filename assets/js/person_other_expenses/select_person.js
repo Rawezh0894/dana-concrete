@@ -87,6 +87,18 @@ function updateSummaryCards(summary) {
     document.getElementById('personsOpeningIQD').textContent = formatIQD(summary.persons_opening_debt.iqd);
 }
 
+// Export debtors to Excel
+function exportDebtorsToExcel() {
+    // Create a form and submit it to trigger download
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '../process/person_other_expenses/export_excel.php';
+    form.style.display = 'none';
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     loadPersons();
     // Also attach events for any elements that might already exist
@@ -100,3 +112,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// Make exportDebtorsToExcel available globally
+window.exportDebtorsToExcel = exportDebtorsToExcel;

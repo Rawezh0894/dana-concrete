@@ -43,6 +43,9 @@ if (!isset($_SESSION['user_id'])) {
                     <i class="fas fa-filter me-1"></i>تەنها کەسانی قەرزدار
                 </label>
             </div>
+            <button class="btn btn-warning" onclick="exportDebtorsToExcel()" style="font-weight: bold;" title="ئیکسپۆرتی کڕیارە قەرزدارەکان بۆ Excel">
+                <i class="fas fa-file-excel me-1"></i>ئیکسپۆرتی Excel
+            </button>
             <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addPersonModal" style="background: var(--seafoam-green); font-weight: bold;">+ زیادکردنی کەس</button>
         </div>
     </div>
