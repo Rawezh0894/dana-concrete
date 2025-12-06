@@ -135,12 +135,20 @@ function renderDashboardCards(data) {
             subtitle: 'قەرزی کڕیارەکان'
         },
         {
-            key: 'customer_debt_received',
-            label: 'کۆی قەرزی وەرگیراو لە کڕیار',
+            key: 'customer_debt_received_usd',
+            label: 'کۆی قەرزی وەرگیراو لە کڕیار (دۆلار)',
             icon: 'fa-hand-holding-usd',
             cardClass: 'customer-debt-received-card',
-            value: formatCurrency(data.data?.customer_debt_payments?.usd || 0, 'USD') + '<br><small style="font-size: 0.9rem; opacity: 0.9;">' + formatCurrency(data.data?.customer_debt_payments?.iqd || 0, 'IQD') + '</small>',
-            subtitle: 'پارەی وەرگیراو لە کڕیار'
+            value: formatCurrency(data.data?.customer_debt_payments?.usd_amount || 0, 'USD'),
+            subtitle: 'پارەی وەرگیراو لە کڕیار بە دۆلار'
+        },
+        {
+            key: 'customer_debt_received_iqd',
+            label: 'کۆی قەرزی وەرگیراو لە کڕیار (دینار)',
+            icon: 'fa-hand-holding-usd',
+            cardClass: 'customer-debt-received-card',
+            value: formatCurrency(data.data?.customer_debt_payments?.iqd || 0, 'IQD'),
+            subtitle: 'پارەی وەرگیراو لە کڕیار بە دینار'
         },
         {
             key: 'person_debt_payments',
@@ -151,12 +159,20 @@ function renderDashboardCards(data) {
             subtitle: 'پارەی دانەوە بۆ کەسانی خەرجی تر'
         },
         {
-            key: 'company_debt_payments',
-            label: 'کۆی دانەوەی قەرزی کۆمپانیا',
+            key: 'company_debt_payments_usd',
+            label: 'کۆی دانەوەی قەرزی کۆمپانیا (دۆلار)',
             icon: 'fa-building',
             cardClass: 'company-debt-payments-card',
-            value: formatCurrency(data.data?.company_debt_payments?.usd_amount || 0, 'USD') + '<br><small style="font-size: 0.9rem; opacity: 0.9;">' + formatCurrency(data.data?.company_debt_payments?.iqd || 0, 'IQD') + '</small>',
-            subtitle: 'پارەی دانەوە بۆ کۆمپانیاکان'
+            value: formatCurrency(data.data?.company_debt_payments?.usd_amount || 0, 'USD'),
+            subtitle: 'پارەی دانەوە بۆ کۆمپانیاکان بە دۆلار'
+        },
+        {
+            key: 'company_debt_payments_iqd',
+            label: 'کۆی دانەوەی قەرزی کۆمپانیا (دینار)',
+            icon: 'fa-building',
+            cardClass: 'company-debt-payments-card',
+            value: formatCurrency(data.data?.company_debt_payments?.iqd || 0, 'IQD'),
+            subtitle: 'پارەی دانەوە بۆ کۆمپانیاکان بە دینار'
         },
         {
             key: 'company',
@@ -199,12 +215,20 @@ function renderDashboardCards(data) {
             subtitle: 'کۆی فرۆشتنەکان'
         },
         {
-            key: 'cash_sales',
-            label: 'کۆی فرۆشتن بە نەقدی',
+            key: 'cash_sales_usd',
+            label: 'کۆی فرۆشتن بە نەقدی (دۆلار)',
             icon: 'fa-money-bill',
             cardClass: 'cash-sales-card',
-            value: formatCurrency(data.data?.cash_sales?.paid_usd || 0, 'USD') + '<br><small style="font-size: 0.9rem; opacity: 0.9;">' + formatCurrency(data.data?.cash_sales?.paid_iqd || 0, 'IQD') + '</small>',
-            subtitle: 'پارەی وەرگیراو بە نەقدی'
+            value: formatCurrency(data.data?.cash_sales?.paid_usd || 0, 'USD'),
+            subtitle: 'پارەی وەرگیراو بە نەقدی بە دۆلار'
+        },
+        {
+            key: 'cash_sales_iqd',
+            label: 'کۆی فرۆشتن بە نەقدی (دینار)',
+            icon: 'fa-money-bill',
+            cardClass: 'cash-sales-card',
+            value: formatCurrency(data.data?.cash_sales?.paid_iqd || 0, 'IQD'),
+            subtitle: 'پارەی وەرگیراو بە نەقدی بە دینار'
         },
 
         {
@@ -389,9 +413,9 @@ function renderDashboardCards(data) {
     
     let html = '';
     cards.forEach(card => {
-        // Add click handler for company_debt_payments card
-        const clickHandler = card.key === 'company_debt_payments' ? 'onclick="showCompanyDebtPaymentsDetails()"' : '';
-        const cursorStyle = card.key === 'company_debt_payments' ? 'style="cursor: pointer;"' : '';
+        // Add click handler for company_debt_payments cards (both USD and IQD)
+        const clickHandler = (card.key === 'company_debt_payments_usd' || card.key === 'company_debt_payments_iqd') ? 'onclick="showCompanyDebtPaymentsDetails()"' : '';
+        const cursorStyle = (card.key === 'company_debt_payments_usd' || card.key === 'company_debt_payments_iqd') ? 'style="cursor: pointer;"' : '';
         html += `<div class="col-lg-3 col-md-4 col-sm-6 mb-3">
             <div class="report-card ${card.cardClass}" ${clickHandler} ${cursorStyle}>
                 <i class="fa ${card.icon}"></i>
