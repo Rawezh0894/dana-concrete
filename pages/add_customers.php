@@ -49,6 +49,9 @@ if (!hasPermission('view_customer')) {
             <button class="btn btn-success me-2" id="exportCustomersExcelBtn" style="background: var(--seafoam-green); font-weight: bold;">
                 <i class="fas fa-file-excel"></i> ئیکسپۆرت بۆ Excel
             </button>
+            <button class="btn btn-success me-2" id="exportPaymentHistoryExcelBtn" style="background: var(--seafoam-green); font-weight: bold;">
+                <i class="fas fa-file-excel"></i> ئیکسپۆرتی مێژووی دانەوەکانی قەرز
+            </button>
             <button class="btn btn-success me-2" style="background: var(--seafoam-green); font-weight: bold;" onclick="window.location.href='credit_of_all_customers.php'">
                 <i class="fa fa-print"></i> پرینتی قەرزی کڕیارەکان
             </button>
@@ -225,5 +228,6 @@ if (!hasPermission('view_customer')) {
 <script src="../assets/js/add_customers/summary_cards.js"></script>
 <script src="../assets/js/customer/customer.js"></script>
 <script src="../assets/js/customer/export_customers_excel.js"></script>
+<script src="../assets/js/customer/export_payment_history_excel.js"></script>
 </body>
 </html>
