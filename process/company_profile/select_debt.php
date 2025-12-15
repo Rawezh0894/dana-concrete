@@ -53,6 +53,18 @@ if (isset($_GET['stats'])) {
     $total_remaining_usd = floatval($purchases_result['remaining_usd']);
     $total_remaining_iqd = floatval($purchases_result['remaining_iqd']);
     $total_remaining_iqd_converted = floatval($purchases_result['remaining_iqd_converted']);
+
+    // Sum of total purchase price (separated by currency) and total kg
+    $totals_stmt = $pdo->prepare("
+        SELECT 
+            COALESCE(SUM(CASE WHEN p.type = 'دۆلار' THEN p.price ELSE 0 END), 0) AS total_price_usd,
+            COALESCE(SUM(CASE WHEN p.type = 'دینار' THEN p.price ELSE 0 END), 0) AS total_price_iqd,
+            COALESCE(SUM(p.kg), 0) AS total_kg
+        FROM purchases p
+        WHERE p.company_id = ? $date_condition
+    ");
+    $totals_stmt->execute($params);
+    $totals = $totals_stmt->fetch(PDO::FETCH_ASSOC);
     
     // Add opening debt (only if filtering by dates, otherwise include it)
     $total_debt_usd = $total_remaining_usd + $total_remaining_iqd_converted;
@@ -73,7 +85,10 @@ if (isset($_GET['stats'])) {
         'total_debt_iqd' => $total_debt_iqd,
         'opening_debt_usd' => $debt['opening_debt_usd'] ?? 0,
         'opening_debt_iqd' => $debt['opening_debt_iqd'] ?? 0,
-        'credit_count' => $credit_count
+        'credit_count' => $credit_count,
+        'total_price_usd' => floatval($totals['total_price_usd'] ?? 0),
+        'total_price_iqd' => floatval($totals['total_price_iqd'] ?? 0),
+        'total_kg' => floatval($totals['total_kg'] ?? 0)
     ]]);
     exit;
 }

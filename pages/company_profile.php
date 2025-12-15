@@ -83,7 +83,7 @@ if ($company_id) {
     </div>
 
     <div class="row mb-3" id="company-info-cards">
-        <div class="col-md-4 mb-2">
+        <div class="col-md-4 col-lg-3 mb-2">
             <div class="card text-center shadow  card-gradient-danger card-animate-hover">
                 <div class="card-body">
                     <i class="fas fa-money-bill-wave card-icon"></i>
@@ -93,7 +93,7 @@ if ($company_id) {
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-2">
+        <div class="col-md-4 col-lg-3 mb-2">
             <div class="card text-center shadow  card-gradient-info card-animate-hover">
                 <div class="card-body">
                     <i class="fas fa-shopping-cart card-icon"></i>
@@ -103,13 +103,33 @@ if ($company_id) {
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-2">
+        <div class="col-md-4 col-lg-3 mb-2">
             <div class="card text-center shadow  card-gradient-warning card-animate-hover">
                 <div class="card-body">
                     <i class="fas fa-credit-card card-icon"></i>
                     <h6 class="card-title">کۆی قەرزی سەرەتایی</h6>
                     <div class="fs-4 fw-bold" id="opening-debt">...</div>
                     <small class="text-light">قەرزی سەرەتایی</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-3 mb-2">
+            <div class="card text-center shadow  card-gradient-success card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-tags card-icon"></i>
+                    <h6 class="card-title">کۆی نرخ</h6>
+                    <div class="fs-4 fw-bold" id="total-price">...</div>
+                    <small class="text-light">بەپێی فلتەرەکان</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-3 mb-2">
+            <div class="card text-center shadow  card-gradient-primary card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-weight-hanging card-icon"></i>
+                    <h6 class="card-title">کۆی کیلۆگرام</h6>
+                    <div class="fs-4 fw-bold" id="total-kg">...</div>
+                    <small class="text-light">بەپێی فلتەرەکان</small>
                 </div>
             </div>
         </div>
@@ -305,6 +325,21 @@ if ($company_id) {
                 openingDebtText = s.opening_debt_iqd.toLocaleString('en-US') + ' د.ع';
             }
             $('#opening-debt').text(openingDebtText);
+
+            // Total price (per filters)
+            let priceText = '';
+            if ((s.total_price_usd ?? 0) > 0 && (s.total_price_iqd ?? 0) > 0) {
+                priceText = s.total_price_usd.toLocaleString('en-US') + ' $ / ' + s.total_price_iqd.toLocaleString('en-US') + ' د.ع';
+            } else if ((s.total_price_usd ?? 0) > 0) {
+                priceText = s.total_price_usd.toLocaleString('en-US') + ' $';
+            } else {
+                priceText = s.total_price_iqd.toLocaleString('en-US') + ' د.ع';
+            }
+            $('#total-price').text(priceText);
+            
+            // Total KG (per filters)
+            const totalKg = s.total_kg ?? 0;
+            $('#total-kg').text(totalKg.toLocaleString('en-US'));
         }, 'json');
     }
     
