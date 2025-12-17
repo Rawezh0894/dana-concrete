@@ -9,8 +9,15 @@ require_once '../../config/db_conected.php';
 header('Content-Type: application/json; charset=utf-8');
 $customer_id = isset($_GET['customer_id']) ? intval($_GET['customer_id']) : 0;
 if (!$customer_id) { 
-    echo json_encode(['error' => 'Customer ID is required', 'sales_data' => []]); 
-    exit; 
+    http_response_code(400);
+    exit(json_encode(
+        ['error' => 'Customer ID is required', 'sales_data' => []],
+        JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+    ));
+}
+
+function sanitize_text($value) {
+    return htmlentities((string)($value ?? ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
 
 $type = isset($_GET['type']) ? $_GET['type'] : 'all';
@@ -27,8 +34,8 @@ try {
     $customer_stmt->execute(['customer_id' => $customer_id]);
     $customer_data = $customer_stmt->fetch(PDO::FETCH_ASSOC);
     $opening_debt = is_numeric($customer_data['opening_debt_usd']) ? floatval($customer_data['opening_debt_usd']) : 0;
-    $company_name = $customer_data['name'] ?? '';
-    $mobile = $customer_data['mobile1'] ?? '';
+    $company_name = sanitize_text($customer_data['name'] ?? '');
+    $mobile = sanitize_text($customer_data['mobile1'] ?? '');
     
     // Get unique locations from sales table for this customer
     $locations_sql = "SELECT DISTINCT location FROM sales WHERE customer_id = :customer_id AND location IS NOT NULL AND location != '' ORDER BY location ASC";
@@ -41,10 +48,21 @@ try {
     $recipients_stmt = $pdo->prepare($recipients_sql);
     $recipients_stmt->execute(['customer_id' => $customer_id]);
     $recipients = $recipients_stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Sanitize option lists (these values may be rendered into the DOM by JS)
+    $locations = array_map(function($row) {
+        return ['location' => sanitize_text($row['location'] ?? '')];
+    }, $locations ?: []);
+    $recipients = array_map(function($row) {
+        return ['recipient' => sanitize_text($row['recipient'] ?? '')];
+    }, $recipients ?: []);
 } catch (Exception $e) {
     error_log("Database error in select_sale.php: " . $e->getMessage());
-    echo json_encode(['error' => 'Database error occurred', 'sales_data' => []]);
-    exit;
+    http_response_code(500);
+    exit(json_encode(
+        ['error' => 'Database error occurred', 'sales_data' => []],
+        JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+    ));
 }
 
 $sql = "SELECT 
@@ -169,27 +187,28 @@ try {
     $totalQuantitySum = 0; // Track total quantity for summary
     
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-    $quantity = number_format($row['total_quantity'], 2) . ' م³';
-    $rezh = $row['strength_mpa'] ? $row['strength_mpa'] . ' MPa' : ($row['strength_kg'] ? $row['strength_kg'] . ' Kg' : '');
-    $ppu = is_numeric($row['price_per_unit']) ? '$' . number_format($row['price_per_unit'], 2, '.', ',') : '';
-    $total = is_numeric($row['total_price_sum']) ? '$' . number_format($row['total_price_sum'], 2, '.', ',') : '';
-    $remaining = is_numeric($row['total_remaining_amount']) ? '$' . number_format($row['total_remaining_amount'], 2, '.', ',') : '$0.00';
+    $quantity = sanitize_text(number_format($row['total_quantity'], 2) . ' م³');
+    $rezhRaw = $row['strength_mpa'] ? $row['strength_mpa'] . ' MPa' : ($row['strength_kg'] ? $row['strength_kg'] . ' Kg' : '');
+    $rezh = sanitize_text($rezhRaw);
+    $ppu = sanitize_text(is_numeric($row['price_per_unit']) ? '$' . number_format($row['price_per_unit'], 2, '.', ',') : '');
+    $total = sanitize_text(is_numeric($row['total_price_sum']) ? '$' . number_format($row['total_price_sum'], 2, '.', ',') : '');
+    $remaining = sanitize_text(is_numeric($row['total_remaining_amount']) ? '$' . number_format($row['total_remaining_amount'], 2, '.', ',') : '$0.00');
     
     // Add to total quantity sum
     $totalQuantitySum += floatval($row['total_quantity']);
     
     // Debug: Log each grouped row
-    error_log("Grouped row - Date: " . $row['order_date'] . ", Ratio: " . $rezh . ", Quantity: " . $row['total_quantity'] . ", Invoices: " . $row['invoice_numbers']);
+    error_log("Grouped row - Date: " . ($row['order_date'] ?? '') . ", Ratio: " . $rezhRaw . ", Quantity: " . ($row['total_quantity'] ?? '') . ", Invoices: " . ($row['invoice_numbers'] ?? ''));
     
     $data[] = [
-        'location' => $row['location'] ?? '',
+        'location' => sanitize_text($row['location'] ?? ''),
         'quantity' => $quantity,
         'rezh' => $rezh,
         'price_per_unit' => $ppu,
         'total_price' => $total,
         'remaining_amount' => $remaining,
-        'invoice_number' => $row['invoice_numbers'],
-        'order_date' => $row['order_date']
+        'invoice_number' => sanitize_text($row['invoice_numbers'] ?? ''),
+        'order_date' => sanitize_text($row['order_date'] ?? '')
     ];
     }
 
@@ -198,8 +217,8 @@ try {
 
     $response = [
         'sales_data' => $data,
-        'opening_debt' => '$' . number_format($opening_debt, 2, '.', ','),
-        'total_quantity' => number_format($totalQuantitySum, 2) . ' م³',
+        'opening_debt' => sanitize_text('$' . number_format($opening_debt, 2, '.', ',')),
+        'total_quantity' => sanitize_text(number_format($totalQuantitySum, 2) . ' م³'),
         'customer_info' => [
             'company_name' => $company_name,
             'mobile' => $mobile
@@ -208,9 +227,16 @@ try {
         'recipients' => $recipients
     ];
 
-    echo json_encode($response, JSON_UNESCAPED_UNICODE);
+    exit(json_encode(
+        $response,
+        JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+    ));
     
 } catch (Exception $e) {
     error_log("Database error in select_sale.php main query: " . $e->getMessage());
-    echo json_encode(['error' => 'Database error occurred', 'sales_data' => []]);
+    http_response_code(500);
+    exit(json_encode(
+        ['error' => 'Database error occurred', 'sales_data' => []],
+        JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+    ));
 }
