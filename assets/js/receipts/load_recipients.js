@@ -56,12 +56,13 @@ function loadRecipientsForReceipts() {
             const normalizedRecipients = data.data
                 .map((recipient, index) => {
                     if (typeof recipient === 'string') {
-                        return { id: null, name: recipient };
+                        return { id: null, name: recipient, value: recipient };
                     }
                     
                     return {
                         id: recipient.id || null,
-                        name: recipient.name || recipient.recipient || ''
+                        name: recipient.name || recipient.recipient || '',
+                        value: recipient.value || recipient.name || recipient.recipient || ''
                     };
                 })
                 .filter(recipient => recipient.name && recipient.name.trim() !== '');
@@ -92,7 +93,7 @@ function loadRecipientsForReceipts() {
                 checkbox.type = 'checkbox';
                 checkbox.className = 'location-checkbox';
                 checkbox.id = createRecipientOptionId(recipient, index);
-                checkbox.value = recipient.name;
+                checkbox.value = recipient.value || recipient.name;
                 
                 const label = document.createElement('label');
                 label.htmlFor = checkbox.id;

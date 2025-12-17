@@ -108,18 +108,42 @@ if ($location === 'none') {
 if ($recipient !== 'all' && $recipient !== 'none') {
     // Handle multiple recipients (comma-separated)
     if (strpos($recipient, ',') !== false) {
-        $recipientArray = explode(',', $recipient);
-        $recipientPlaceholders = [];
-        foreach ($recipientArray as $index => $recv) {
-            $paramName = 'recipient_' . $index;
-            $recipientPlaceholders[] = ':' . $paramName;
-            $params[$paramName] = trim($recv);
+        $recipientArray = array_map('trim', explode(',', $recipient));
+        $recipientArray = array_filter($recipientArray, fn($v) => $v !== '');
+
+        $includeEmpty = in_array('__EMPTY__', $recipientArray, true);
+        $recipientArray = array_values(array_filter($recipientArray, fn($v) => $v !== '__EMPTY__'));
+
+        $recipientConditions = [];
+
+        if (!empty($recipientArray)) {
+            $recipientPlaceholders = [];
+            foreach ($recipientArray as $index => $recv) {
+                $paramName = 'recipient_' . $index;
+                $recipientPlaceholders[] = ':' . $paramName;
+                $params[$paramName] = $recv;
+            }
+            $recipientConditions[] = "s.recipient IN (" . implode(',', $recipientPlaceholders) . ")";
         }
-        $sql .= " AND s.recipient IN (" . implode(',', $recipientPlaceholders) . ")";
+
+        if ($includeEmpty) {
+            $recipientConditions[] = "(s.recipient IS NULL OR TRIM(s.recipient) = '')";
+        }
+
+        if (!empty($recipientConditions)) {
+            $sql .= " AND (" . implode(' OR ', $recipientConditions) . ")";
+        } else {
+            // No valid recipients after parsing => return no rows
+            $sql .= " AND 1=0";
+        }
     } else {
         // Single recipient
-        $sql .= " AND s.recipient = :recipient_filter";
-        $params['recipient_filter'] = $recipient;
+        if (trim($recipient) === '__EMPTY__') {
+            $sql .= " AND (s.recipient IS NULL OR TRIM(s.recipient) = '')";
+        } else {
+            $sql .= " AND s.recipient = :recipient_filter";
+            $params['recipient_filter'] = $recipient;
+        }
     }
 }
 if ($recipient === 'none') {

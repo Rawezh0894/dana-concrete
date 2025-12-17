@@ -72,6 +72,16 @@ try {
     }
 
     if ($customerId > 0) {
+        // Check if there are any sales rows with an empty recipient (NULL or blank)
+        $emptyStmt = $pdo->prepare("
+            SELECT COUNT(*) 
+            FROM sales
+            WHERE customer_id = :customer_id
+              AND (recipient IS NULL OR TRIM(recipient) = '')
+        ");
+        $emptyStmt->execute([':customer_id' => $customerId]);
+        $hasEmptyRecipient = ((int)$emptyStmt->fetchColumn()) > 0;
+
         $stmt = $pdo->prepare("
             SELECT DISTINCT TRIM(recipient) AS recipient_name
             FROM sales
@@ -93,10 +103,21 @@ try {
         }
 
         $responseData = [];
+
+        if ($hasEmptyRecipient) {
+            // Special option to represent empty recipient
+            $responseData[] = [
+                'id' => 'txn_empty_' . substr(md5($customerId . '_empty_recipient'), 0, 12),
+                'name' => 'بێ وەرگر',
+                'value' => '__EMPTY__'
+            ];
+        }
+
         foreach ($uniqueRecipients as $key => $displayName) {
             $responseData[] = [
                 'id' => 'txn_' . substr(md5($customerId . '_' . $key), 0, 12),
-                'name' => $displayName
+                'name' => $displayName,
+                'value' => $displayName
             ];
         }
 
