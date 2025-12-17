@@ -35,18 +35,8 @@ function getInvoiceFilterMode() {
     return mode === 'exclude' ? 'exclude' : 'include';
 }
 
-// Function to validate and format invoice numbers
-function formatInvoiceNumbers(input) {
-    if (!input) return '';
-    
-    // Split by comma and clean each invoice number
-    const invoiceNumbers = input.split(',')
-        .map(inv => inv.trim())
-        .filter(inv => inv.length > 0)
-        .map(inv => inv.toUpperCase()); // Convert to uppercase for consistency
-    
-    return invoiceNumbers.join(', ');
-}
+// Note: We intentionally do NOT auto-format the invoice input field.
+// Auto-formatting while the user is typing (e.g., removing a trailing comma) is disruptive.
 
 function formatUsdAmount(amount) {
     const num = parseFloat(amount);
@@ -111,12 +101,6 @@ if (invoiceNumberFilter) {
     invoiceNumberFilter.addEventListener('input', function() {
         clearTimeout(invoiceFilterTimeout);
         invoiceFilterTimeout = setTimeout(() => {
-            // Format the input (convert to uppercase, clean spaces)
-            const formatted = formatInvoiceNumbers(this.value);
-            if (formatted !== this.value) {
-                this.value = formatted;
-            }
-            
             // Reload paid table data when invoice filter changes
             loadReturnDebt();
         }, 500); // 500ms delay to avoid too many requests
