@@ -16,6 +16,22 @@ function createRecipientOptionId(recipient, index) {
     return `recipient-${slug || 'auto'}-${index}`;
 }
 
+function setAllRecipientsChecked(checked) {
+    const recipientCheckboxes = document.querySelectorAll('#recipient-multiselect .location-checkbox:not(#recipient-all)');
+    recipientCheckboxes.forEach(cb => {
+        cb.checked = checked;
+    });
+}
+
+function syncRecipientAllCheckboxState() {
+    const allCheckbox = document.getElementById('recipient-all');
+    const recipientCheckboxes = document.querySelectorAll('#recipient-multiselect .location-checkbox:not(#recipient-all)');
+    if (!allCheckbox || recipientCheckboxes.length === 0) return;
+    
+    const checkedCount = Array.from(recipientCheckboxes).filter(cb => cb.checked).length;
+    allCheckbox.checked = checkedCount === recipientCheckboxes.length;
+}
+
 // Load recipients for receipts filter
 function loadRecipientsForReceipts() {
     if (typeof CUSTOMER_ID === 'undefined' || !CUSTOMER_ID) {
@@ -86,19 +102,7 @@ function loadRecipientsForReceipts() {
                 optionDiv.appendChild(label);
                 
                 checkbox.addEventListener('change', function() {
-                    const allCheckbox = document.getElementById('recipient-all');
-                    const recipientCheckboxes = document.querySelectorAll('#recipient-multiselect .location-checkbox:not(#recipient-all)');
-                    
-                    if (this.checked) {
-                        if (allCheckbox) {
-                            allCheckbox.checked = false;
-                        }
-                    } else {
-                        const checkedCount = Array.from(recipientCheckboxes).filter(cb => cb.checked).length;
-                        if (checkedCount === 0 && allCheckbox) {
-                            allCheckbox.checked = true;
-                        }
-                    }
+                    syncRecipientAllCheckboxState();
                     
                     updateRecipientSelectText();
                     
@@ -110,6 +114,28 @@ function loadRecipientsForReceipts() {
                 recipientContainer.appendChild(optionDiv);
             });
             
+            // Wire "Select All" (Excel-like)
+            const allCheckbox = document.getElementById('recipient-all');
+            if (allCheckbox && !allCheckbox.dataset.boundExcelLike) {
+                allCheckbox.dataset.boundExcelLike = 'true';
+                allCheckbox.addEventListener('change', function() {
+                    setAllRecipientsChecked(this.checked);
+                    updateRecipientSelectText();
+                    if (typeof loadSalesData === 'function') {
+                        loadSalesData();
+                    }
+                });
+            }
+
+            // Default behavior: if "all" is checked, ensure all options are checked too
+            const all = document.getElementById('recipient-all');
+            if (all && all.checked) {
+                setAllRecipientsChecked(true);
+            } else {
+                // If nothing checked initially, keep as-is (allows "none" => no results)
+                syncRecipientAllCheckboxState();
+            }
+
             updateRecipientSelectText();
         })
         .catch(error => {

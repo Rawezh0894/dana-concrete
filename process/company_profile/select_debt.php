@@ -53,7 +53,7 @@ if (isset($_GET['stats'])) {
     $total_remaining_usd = floatval($purchases_result['remaining_usd']);
     $total_remaining_iqd = floatval($purchases_result['remaining_iqd']);
     $total_remaining_iqd_converted = floatval($purchases_result['remaining_iqd_converted']);
-
+    
     // Sum of total purchase price (separated by currency) and total kg
     $totals_stmt = $pdo->prepare("
         SELECT 

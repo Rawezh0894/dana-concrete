@@ -99,6 +99,10 @@ if ($location !== 'all' && $location !== 'none') {
         $params['location'] = $location;
     }
 }
+if ($location === 'none') {
+    // Explicitly requested no locations => return no rows
+    $sql .= " AND 1=0";
+}
 
 // Add recipient filter
 if ($recipient !== 'all' && $recipient !== 'none') {
@@ -117,6 +121,10 @@ if ($recipient !== 'all' && $recipient !== 'none') {
         $sql .= " AND s.recipient = :recipient_filter";
         $params['recipient_filter'] = $recipient;
     }
+}
+if ($recipient === 'none') {
+    // Explicitly requested no recipients => return no rows
+    $sql .= " AND 1=0";
 }
 
 $sql .= " GROUP BY s.order_date, s.location, f.strength_mpa, f.strength_kg, s.price_per_unit";

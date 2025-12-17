@@ -915,35 +915,23 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             });
         }
         
-        // Add event listener for recipient "all" checkbox
-        document.addEventListener('DOMContentLoaded', function() {
-            const recipientAllCheckbox = document.getElementById('recipient-all');
-            if (recipientAllCheckbox) {
-                recipientAllCheckbox.addEventListener('change', function() {
-                    const recipientCheckboxes = document.querySelectorAll('#recipient-multiselect .location-checkbox:not(#recipient-all)');
-                    
-                    if (this.checked) {
-                        // If "all" is checked, uncheck all individual recipients
-                        recipientCheckboxes.forEach(checkbox => {
-                            checkbox.checked = false;
-                        });
-                    } else {
-                        // If "all" is unchecked, check the first recipient (or handle as needed)
-                        // This prevents having no recipients selected
-                        if (recipientCheckboxes.length > 0) {
-                            recipientCheckboxes[0].checked = true;
-                        }
-                    }
-                    
-                    updateRecipientSelectText();
-                    
-                    // Reload data when recipient selection changes
-                    if (typeof loadSalesData === 'function') {
-                        loadSalesData();
-                    }
+        // Recipient "Select All" (Excel-like): when checked -> check all; when unchecked -> uncheck all
+        const recipientAllCheckbox = document.getElementById('recipient-all');
+        if (recipientAllCheckbox && !recipientAllCheckbox.dataset.boundExcelLike) {
+            recipientAllCheckbox.dataset.boundExcelLike = 'true';
+            recipientAllCheckbox.addEventListener('change', function() {
+                const recipientCheckboxes = document.querySelectorAll('#recipient-multiselect .location-checkbox:not(#recipient-all)');
+                recipientCheckboxes.forEach(cb => {
+                    cb.checked = this.checked;
                 });
-            }
-        });
+                
+                updateRecipientSelectText();
+                
+                if (typeof loadSalesData === 'function') {
+                    loadSalesData();
+                }
+            });
+        }
         
         // Format all invoice numbers on page load
         function formatAllInvoiceNumbers() {
