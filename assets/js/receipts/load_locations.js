@@ -57,6 +57,13 @@ function loadLocationsForReceipts() {
                             handleAllLocationCheckboxChange();
                         });
                     }
+
+                    // Default: if "all" is checked, check all options too (Excel-like)
+                    if (allCheckbox && allCheckbox.checked) {
+                        handleAllLocationCheckboxChange();
+                    } else {
+                        handleLocationCheckboxChange();
+                    }
                     
                     console.log('Locations loaded successfully:', data.locations.length, 'locations');
                 } else {
@@ -75,16 +82,9 @@ function loadLocationsForReceipts() {
 function handleLocationCheckboxChange() {
     const allCheckbox = document.getElementById('location-all');
     const locationCheckboxes = document.querySelectorAll('.location-checkbox:not(#location-all)');
-    const checkedCount = Array.from(locationCheckboxes).filter(cb => cb.checked).length;
-    
-    // If any individual location is checked, uncheck "all"
-    if (checkedCount > 0 && allCheckbox.checked) {
-        allCheckbox.checked = false;
-    }
-    
-    // If all individual locations are unchecked, check "all"
-    if (checkedCount === 0 && !allCheckbox.checked) {
-        allCheckbox.checked = true;
+    if (allCheckbox && locationCheckboxes.length > 0) {
+        const checkedCount = Array.from(locationCheckboxes).filter(cb => cb.checked).length;
+        allCheckbox.checked = checkedCount === locationCheckboxes.length;
     }
     
     updateLocationSelectText();
@@ -100,12 +100,10 @@ function handleAllLocationCheckboxChange() {
     const allCheckbox = document.getElementById('location-all');
     const locationCheckboxes = document.querySelectorAll('.location-checkbox:not(#location-all)');
     
-    if (allCheckbox.checked) {
-        // Uncheck all individual locations
-        locationCheckboxes.forEach(checkbox => {
-            checkbox.checked = false;
-        });
-    }
+    // Excel-like: checked => check all, unchecked => uncheck all
+    locationCheckboxes.forEach(checkbox => {
+        checkbox.checked = !!(allCheckbox && allCheckbox.checked);
+    });
     
     updateLocationSelectText();
     

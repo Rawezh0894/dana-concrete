@@ -1195,8 +1195,9 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             allCheckbox.checked = true;
         }
         
+        // Excel-like: when "all" is checked, all options should be checked too
         locationCheckboxes.forEach(checkbox => {
-            checkbox.checked = false;
+            checkbox.checked = true;
         });
         
         updateLocationSelectText();
@@ -1247,14 +1248,15 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         const allCheckbox = document.getElementById('location-all');
         const locationCheckboxes = document.querySelectorAll('.location-checkbox:not(#location-all)');
         
-        if (allCheckbox && allCheckbox.checked) {
-            return 'all';
-        }
-        
+        // Excel-like: "all" is true only when all individual options are checked.
         const selectedLocations = Array.from(locationCheckboxes)
             .filter(checkbox => checkbox.checked)
             .map(checkbox => checkbox.value);
-        
+
+        if (locationCheckboxes.length > 0 && selectedLocations.length === locationCheckboxes.length) {
+            return 'all';
+        }
+
         return selectedLocations.length > 0 ? selectedLocations.join(',') : 'none';
     }
     
