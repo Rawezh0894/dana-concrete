@@ -2,15 +2,15 @@
 let submittingExpense = false;
 const addExpenseForm = document.getElementById('addExpenseForm');
 if (addExpenseForm) {
-    addExpenseForm.onsubmit = async function(e) {
+    addExpenseForm.onsubmit = async function (e) {
         e.preventDefault();
-        
+
         // Prevent multiple submissions
         if (submittingExpense) {
             showAlert('warning', 'تکایە چاوەڕوان بە...');
             return false;
         }
-        
+
         // Set submitting flag and disable submit button
         submittingExpense = true;
         const submitBtn = this.querySelector('button[type="submit"]');
@@ -32,24 +32,24 @@ if (addExpenseForm) {
                     }
                 }
             }
-                    if (duplicate) {
-            Swal.fire('هەڵە!', 'ئەم ژمارەی پسوڵەیە پێشتر تۆمارکراوە!', 'error');
-            submittingExpense = false;
-            return;
-        }
+            if (duplicate) {
+                Swal.fire('هەڵە!', 'ئەم ژمارەی پسوڵەیە پێشتر تۆمارکراوە!', 'error');
+                submittingExpense = false;
+                return;
+            }
 
-        // Check if there's an error message indicating insufficient material
-        const errorMessage = document.querySelector('.material-availability-message.text-danger');
-        if (errorMessage) {
-            Swal.fire({
-                icon: 'error',
-                title: 'هەڵە',
-                text: 'ناتوانرێت خەرجی تۆمار بکرێت - بڕی پێویست لە کۆگا نەماوە',
-                confirmButtonText: 'باشە'
-            });
-            submittingExpense = false;
-            return;
-        }
+            // Check if there's an error message indicating insufficient material
+            const errorMessage = document.querySelector('.material-availability-message.text-danger');
+            if (errorMessage) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'هەڵە',
+                    text: 'ناتوانرێت خەرجی تۆمار بکرێت - بڕی پێویست لە کۆگا نەماوە',
+                    confirmButtonText: 'باشە'
+                });
+                submittingExpense = false;
+                return;
+            }
         }
         const formData = new FormData(addExpenseForm);
         // Add gas_liters if present in the form
@@ -102,8 +102,7 @@ if (addExpenseForm) {
         } else {
             formData.append('payment_type', 'نەقد'); // Default value
         }
-        
-        // Add currency_type
+
         if (document.getElementById('currency_type')) {
             const currencyType = document.getElementById('currency_type').value;
             if (currencyType && currencyType.trim() !== '') {
@@ -114,28 +113,57 @@ if (addExpenseForm) {
         } else {
             formData.append('currency_type', 'دینار'); // Default value
         }
+
+        // --- VALIDATION START ---
+        const paymentTypeVal = formData.get('payment_type');
+        const remIqd = parseFloat(formData.get('remaining_iqd') || 0);
+        const remUsd = parseFloat(formData.get('remaining_usd') || 0);
+        const totalRem = remIqd + remUsd;
+
+        if (paymentTypeVal === 'قەرز') {
+            if (totalRem == 0) {
+                Swal.fire('هەڵە!', 'بۆ مامەڵەی قەرز، نابێت پارەی ماوە سفر بێت!', 'error');
+                submittingExpense = false;
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
+                }
+                return;
+            }
+        } else if (paymentTypeVal === 'نەقد') {
+            if (totalRem > 0) {
+                Swal.fire('هەڵە!', 'بۆ مامەڵەی نەقد، نابێت هیچ پارەیەک بمێنێتەوە (پارەی ماوە دەبێت 0 بێت)!', 'error');
+                submittingExpense = false;
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
+                }
+                return;
+            }
+        }
+        // --- VALIDATION END ---
         try {
             console.log('Submitting expense form...');
             console.log('Form data entries:');
             for (let [key, value] of formData.entries()) {
                 console.log(`${key}: ${value}`);
             }
-            
+
             const res = await fetch('../process/other_expenses/add_expenses.php', {
                 method: 'POST',
                 body: formData
             });
-            
+
             console.log('Response status:', res.status);
             console.log('Response headers:', res.headers);
-            
+
             if (!res.ok) {
                 throw new Error(`HTTP error! status: ${res.status}`);
             }
-            
+
             const data = await res.json();
             console.log('Response data:', data);
-            
+
             if (data.success) {
                 console.log('Expense added successfully');
                 Swal.fire('سەرکەوتوو!', 'خەرجی تر زیادکرا', 'success');
@@ -183,7 +211,7 @@ async function fetchAndSetUsdRate() {
     try {
         const response = await fetch('../process/other_expenses/get_usd_rate.php');
         const data = await response.json();
-        
+
         if (data.success && data.rate) {
             document.getElementById('exchange_rate').value = data.rate;
             console.log('USD rate fetched successfully:', data.rate);
@@ -210,7 +238,7 @@ if (addExpenseModal) {
         populateSelect('../process/other_expenses/select_employees.php', 'employee_id');
         populateSelect('../process/other_expenses/select_cars.php', 'car_id');
         populateSelect('../process/other_expenses/select_materials.php', 'material_id');
-        
+
         // Fetch and set USD exchange rate when modal opens
         fetchAndSetUsdRate();
     });
@@ -220,15 +248,15 @@ if (addExpenseModal) {
 let submittingPerson = false;
 const addPersonForm = document.getElementById('addPersonForm');
 if (addPersonForm) {
-    addPersonForm.onsubmit = async function(e) {
+    addPersonForm.onsubmit = async function (e) {
         e.preventDefault();
-        
+
         // Prevent multiple submissions
         if (submittingPerson) {
             showAlert('warning', 'تکایە چاوەڕوان بە...');
             return false;
         }
-        
+
         // Set submitting flag and disable submit button
         submittingPerson = true;
         const submitBtn = this.querySelector('button[type="submit"]');
@@ -237,7 +265,7 @@ if (addPersonForm) {
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>چاوەڕوان بە...';
         }
-        
+
         const formData = new FormData(addPersonForm);
         try {
             const res = await fetch('../process/other_expenses/add_person.php', {

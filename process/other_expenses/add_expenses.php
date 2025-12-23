@@ -95,6 +95,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    // Validations for Payment Type vs Remaining Amount
+    $totalRemaining = $remaining_iqd + $remaining_usd;
+    
+    if ($payment_type === 'قەرز' && $totalRemaining == 0) {
+        echo json_encode(['success' => false, 'msg' => 'بۆ مامەڵەی قەرز، نابێت پارەی ماوە سفر بێت!']);
+        exit;
+    }
+    
+    if ($payment_type === 'نەقد' && $totalRemaining > 0) {
+        echo json_encode(['success' => false, 'msg' => 'بۆ مامەڵەی نەقد، نابێت هیچ پارەیەک بمێنێتەوە!']);
+        exit;
+    }
+
     // Check material availability for warehouse material usage
     if ($expense_type === 'بەکارهێنانی کاڵای کۆگا' && $material_id && $material_quantity && $usage_unit_type) {
         // Get current stock quantity and unit info for the material
