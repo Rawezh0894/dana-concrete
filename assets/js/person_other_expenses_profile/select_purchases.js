@@ -155,7 +155,6 @@ function loadPurchaseMaterialsHistory() {
                             "last": "کۆتایی"
                         }
                     },
-                    responsive: false,
                     scrollX: true,
                     pageLength: 10,
                     lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
@@ -208,7 +207,6 @@ function loadPurchaseMaterialsHistory() {
                         "last": "کۆتایی"
                     }
                 },
-                responsive: false,
                 scrollX: true,
                 pageLength: 10,
                 lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
@@ -272,7 +270,6 @@ function renderPurchaseMaterialsTable(purchases) {
                     "last": "کۆتایی"
                 }
             },
-            responsive: false,
             scrollX: true,
             pageLength: 10,
             lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
@@ -352,7 +349,6 @@ function renderPurchaseMaterialsTable(purchases) {
                 "last": "کۆتایی"
             }
         },
-        responsive: false,
         scrollX: true,
         pageLength: 10,
         lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],

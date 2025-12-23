@@ -30,8 +30,8 @@ try {
             COUNT(pm.id) as materials_count,
             SUM(pm.total_price_usd) as total_price_usd,
             SUM(pm.total_price_iqd) as total_price_iqd,
-            SUM(pm.paid_amount_usd) as paid_amount_usd,
-            SUM(pm.paid_amount_iqd) as paid_amount_iqd,
+            (SUM(pm.total_price_usd) - SUM(pm.remaining_amount_usd)) as paid_amount_usd,
+            (SUM(pm.total_price_iqd) - SUM(pm.remaining_amount_iqd)) as paid_amount_iqd,
             SUM(pm.remaining_amount_usd) as remaining_amount_usd,
             SUM(pm.remaining_amount_iqd) as remaining_amount_iqd
         FROM purchase_materials pm
