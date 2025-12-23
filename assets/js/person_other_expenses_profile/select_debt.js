@@ -63,14 +63,14 @@ async function loadDebtPayments() {
             $('#debtTable').empty();
         }
 
-    const res = await fetch(`../process/person_other_expenses_profile/select_debt.php?person_id=${PERSON_ID}`);
-        
+        const res = await fetch(`../process/person_other_expenses_profile/select_debt.php?person_id=${PERSON_ID}`);
+
         if (!res.ok) {
             throw new Error(`HTTP error! status: ${res.status}`);
         }
-        
-    const data = await res.json();
-        
+
+        const data = await res.json();
+
         if (!data || data.length === 0) {
             debtTable = new DataTable('#debtTable', {
                 data: [],
@@ -100,7 +100,8 @@ async function loadDebtPayments() {
                         "last": "کۆتایی"
                     }
                 },
-                responsive: true,
+                responsive: false,
+                scrollX: true,
                 pageLength: 10,
                 lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
                 order: [[0, 'desc']],
@@ -114,7 +115,7 @@ async function loadDebtPayments() {
             });
             return;
         }
-        
+
         const tableData = data.map((row) => {
             const amountUsd = parseFloat(row.amount_usd ?? 0) || 0;
             const discountUsd = parseFloat(row.discount_usd ?? 0) || 0;
@@ -138,7 +139,7 @@ async function loadDebtPayments() {
             `
             ];
         });
-        
+
         debtTable = new DataTable('#debtTable', {
             data: tableData,
             columns: [
@@ -167,7 +168,8 @@ async function loadDebtPayments() {
                     "last": "کۆتایی"
                 }
             },
-            responsive: true,
+            responsive: false,
+            scrollX: true,
             pageLength: 10,
             lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
             order: [[0, 'desc']],
@@ -178,32 +180,32 @@ async function loadDebtPayments() {
                 { extend: 'excel', text: 'Excel', className: 'btn btn-sm btn-outline-success' },
                 { extend: 'print', text: 'پرینت', className: 'btn btn-sm btn-outline-primary' }
             ],
-            rowCallback: function(row) {
-                $(row).find('button.edit-debt').off('click').on('click', function() {
+            rowCallback: function (row) {
+                $(row).find('button.edit-debt').off('click').on('click', function () {
                     const id = $(this).data('id');
                     if (id) {
                         openEditDebtModal(id);
-        }
-    });
-                
-                $(row).find('button.delete-debt').off('click').on('click', function() {
+                    }
+                });
+
+                $(row).find('button.delete-debt').off('click').on('click', function () {
                     if (typeof deleteDebt === 'function') {
                         deleteDebt($(this).data('id'));
                     }
                 });
             },
-            drawCallback: function() {
+            drawCallback: function () {
                 // Update summary cards when debt table is redrawn
                 updateDebtSummaryCards();
             }
         });
-        
+
         // Setup date filter
         setupDateFilter('#debtDateFrom', '#debtDateTo', debtTable, 0, '#clearDebtFilter');
-        
+
         // Store original data
         window.debtOriginalData = data;
-        
+
     } catch (error) {
         console.error('Error loading debt payments:', error);
         if (debtTable) {
@@ -219,45 +221,45 @@ function setupDateFilter(fromId, toId, table, dateColumnIndex, clearBtnId) {
     const fromInput = document.querySelector(fromId);
     const toInput = document.querySelector(toId);
     const clearBtn = document.querySelector(clearBtnId);
-    
+
     if (!fromInput || !toInput || !table) return;
-    
+
     // Custom filter function
     $.fn.dataTable.ext.search.push(
-        function(settings, data, dataIndex) {
+        function (settings, data, dataIndex) {
             // Only apply to the specific table
             if (settings.nTable.id !== table.table().node().id) return true;
-            
+
             const rowDate = data[dateColumnIndex] || '';
             if (!rowDate) return true;
-            
+
             const dateFrom = fromInput.value ? new Date(fromInput.value) : null;
             const dateTo = toInput.value ? new Date(toInput.value) : null;
             const rowDateObj = new Date(rowDate);
-            
+
             // If both dates are empty, show all
             if (!dateFrom && !dateTo) return true;
-            
+
             // Check date range
             if (dateFrom && rowDateObj < dateFrom) return false;
             if (dateTo && rowDateObj > dateTo) return false;
-            
+
             return true;
         }
     );
-    
+
     // Add event listeners
-    fromInput.addEventListener('change', function() {
+    fromInput.addEventListener('change', function () {
         table.draw();
     });
-    
-    toInput.addEventListener('change', function() {
+
+    toInput.addEventListener('change', function () {
         table.draw();
     });
-    
+
     // Clear filter button
     if (clearBtn) {
-        clearBtn.addEventListener('click', function() {
+        clearBtn.addEventListener('click', function () {
             fromInput.value = '';
             toInput.value = '';
             table.draw();
@@ -273,10 +275,10 @@ function updateDebtSummaryCards() {
     if (typeof loadSummaryCards === 'function') {
         const dateFromInput = document.querySelector('#debtDateFrom');
         const dateToInput = document.querySelector('#debtDateTo');
-        
+
         const dateFrom = dateFromInput ? dateFromInput.value : null;
         const dateTo = dateToInput ? dateToInput.value : null;
-        
+
         loadSummaryCards(dateFrom, dateTo);
     }
 }

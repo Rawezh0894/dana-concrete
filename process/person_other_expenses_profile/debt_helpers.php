@@ -96,8 +96,11 @@ function applyPersonCurrencyReduction(PDO $pdo, int $personId, string $currency,
             continue;
         }
         $toDeduct = min($remaining, $amount);
-        $pdo->prepare("UPDATE other_expenses SET {$expenseRemainingColumn} = {$expenseRemainingColumn} - ? WHERE id = ?")
-            ->execute([$toDeduct, $row['id']]);
+        
+        $paidColumn = $currency === 'usd' ? 'paid_usd' : 'paid_iqd';
+        
+        $pdo->prepare("UPDATE other_expenses SET {$expenseRemainingColumn} = {$expenseRemainingColumn} - ?, {$paidColumn} = {$paidColumn} + ? WHERE id = ?")
+            ->execute([$toDeduct, $toDeduct, $row['id']]);
         $amount -= $toDeduct;
         $deductedFromExpenses += $toDeduct;
     }
@@ -127,8 +130,11 @@ function applyPersonCurrencyReduction(PDO $pdo, int $personId, string $currency,
             continue;
         }
         $toDeduct = min($remaining, $amount);
-        $pdo->prepare("UPDATE purchase_materials SET {$purchaseRemainingColumn} = {$purchaseRemainingColumn} - ? WHERE id = ?")
-            ->execute([$toDeduct, $row['id']]);
+        
+        $paidColumn = $currency === 'usd' ? 'paid_amount_usd' : 'paid_amount_iqd';
+        
+        $pdo->prepare("UPDATE purchase_materials SET {$purchaseRemainingColumn} = {$purchaseRemainingColumn} - ?, {$paidColumn} = {$paidColumn} + ? WHERE id = ?")
+            ->execute([$toDeduct, $toDeduct, $row['id']]);
         $amount -= $toDeduct;
     }
 
@@ -174,8 +180,10 @@ function restorePersonCurrencyAmount(PDO $pdo, int $personId, string $currency, 
         }
         $toRestore = min($used, $amount);
         if ($toRestore > 0) {
-            $pdo->prepare("UPDATE purchase_materials SET {$purchaseRemainingColumn} = LEAST({$purchaseRemainingColumn} + ?, {$purchaseTotalColumn}) WHERE id = ?")
-                ->execute([$toRestore, $row['id']]);
+            $paidColumn = $currency === 'usd' ? 'paid_amount_usd' : 'paid_amount_iqd';
+            
+            $pdo->prepare("UPDATE purchase_materials SET {$purchaseRemainingColumn} = LEAST({$purchaseRemainingColumn} + ?, {$purchaseTotalColumn}), {$paidColumn} = GREATEST({$paidColumn} - ?, 0) WHERE id = ?")
+                ->execute([$toRestore, $toRestore, $row['id']]);
             $amount -= $toRestore;
             $restoredPurchases += $toRestore;
         }
@@ -201,8 +209,10 @@ function restorePersonCurrencyAmount(PDO $pdo, int $personId, string $currency, 
         }
         $toRestore = min($used, $amount);
         if ($toRestore > 0) {
-            $pdo->prepare("UPDATE other_expenses SET {$expenseRemainingColumn} = LEAST({$expenseRemainingColumn} + ?, {$expenseTotalColumn}) WHERE id = ?")
-                ->execute([$toRestore, $row['id']]);
+            $paidColumn = $currency === 'usd' ? 'paid_usd' : 'paid_iqd';
+            
+            $pdo->prepare("UPDATE other_expenses SET {$expenseRemainingColumn} = LEAST({$expenseRemainingColumn} + ?, {$expenseTotalColumn}), {$paidColumn} = GREATEST({$paidColumn} - ?, 0) WHERE id = ?")
+                ->execute([$toRestore, $toRestore, $row['id']]);
             $amount -= $toRestore;
             $restoredExpenses += $toRestore;
         }

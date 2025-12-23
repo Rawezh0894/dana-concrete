@@ -23,45 +23,45 @@ function setupPurchaseDateFilter(fromId, toId, table, dateColumnIndex, clearBtnI
     const fromInput = document.querySelector(fromId);
     const toInput = document.querySelector(toId);
     const clearBtn = document.querySelector(clearBtnId);
-    
+
     if (!fromInput || !toInput || !table) return;
-    
+
     // Custom filter function
     $.fn.dataTable.ext.search.push(
-        function(settings, data, dataIndex) {
+        function (settings, data, dataIndex) {
             // Only apply to the specific table
             if (settings.nTable.id !== table.table().node().id) return true;
-            
+
             const rowDate = data[dateColumnIndex] || '';
             if (!rowDate) return true;
-            
+
             const dateFrom = fromInput.value ? new Date(fromInput.value) : null;
             const dateTo = toInput.value ? new Date(toInput.value) : null;
             const rowDateObj = new Date(rowDate);
-            
+
             // If both dates are empty, show all
             if (!dateFrom && !dateTo) return true;
-            
+
             // Check date range
             if (dateFrom && rowDateObj < dateFrom) return false;
             if (dateTo && rowDateObj > dateTo) return false;
-            
+
             return true;
         }
     );
-    
+
     // Add event listeners
-    fromInput.addEventListener('change', function() {
+    fromInput.addEventListener('change', function () {
         table.draw();
     });
-    
-    toInput.addEventListener('change', function() {
+
+    toInput.addEventListener('change', function () {
         table.draw();
     });
-    
+
     // Clear filter button
     if (clearBtn) {
-        clearBtn.addEventListener('click', function() {
+        clearBtn.addEventListener('click', function () {
             fromInput.value = '';
             toInput.value = '';
             table.draw();
@@ -69,9 +69,9 @@ function setupPurchaseDateFilter(fromId, toId, table, dateColumnIndex, clearBtnI
     }
 }
 
-$(document).ready(function() {
+$(document).ready(function () {
     // Load purchases when the purchases tab is shown (use one event handler)
-    $('#purchases-tab').on('shown.bs.tab', function() {
+    $('#purchases-tab').on('shown.bs.tab', function () {
         if (!purchasesTable && !isPurchasesTableLoading) {
             loadPurchaseMaterialsHistory();
         }
@@ -83,9 +83,9 @@ function loadPurchaseMaterialsHistory() {
     if (isPurchasesTableLoading) {
         return;
     }
-    
+
     isPurchasesTableLoading = true;
-    
+
     // Destroy existing table if it exists
     if (purchasesTable) {
         try {
@@ -95,7 +95,7 @@ function loadPurchaseMaterialsHistory() {
         }
         purchasesTable = null;
     }
-    
+
     // Check if DataTable is already initialized on the element
     const tableElement = $('#purchasesTable');
     if ($.fn.DataTable.isDataTable(tableElement)) {
@@ -105,16 +105,16 @@ function loadPurchaseMaterialsHistory() {
             console.warn('Error destroying existing DataTable:', e);
         }
     }
-    
+
     // Clear the table element completely
     tableElement.empty();
-    
+
     $.ajax({
         url: '../process/person_other_expenses_profile/select_purchases.php',
         type: 'GET',
         data: { person_id: PERSON_ID },
         dataType: 'json',
-        success: function(response) {
+        success: function (response) {
             isPurchasesTableLoading = false;
             if (response.success) {
                 renderPurchaseMaterialsTable(response.data);
@@ -155,7 +155,8 @@ function loadPurchaseMaterialsHistory() {
                             "last": "کۆتایی"
                         }
                     },
-                    responsive: true,
+                    responsive: false,
+                    scrollX: true,
                     pageLength: 10,
                     lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
                     order: [[1, 'desc']],
@@ -169,7 +170,7 @@ function loadPurchaseMaterialsHistory() {
                 });
             }
         },
-        error: function(xhr, status, error) {
+        error: function (xhr, status, error) {
             isPurchasesTableLoading = false;
             console.error('AJAX Error:', error);
             // Create empty DataTable with error message
@@ -207,7 +208,8 @@ function loadPurchaseMaterialsHistory() {
                         "last": "کۆتایی"
                     }
                 },
-                responsive: true,
+                responsive: false,
+                scrollX: true,
                 pageLength: 10,
                 lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
                 order: [[1, 'desc']],
@@ -234,7 +236,7 @@ function renderPurchaseMaterialsTable(purchases) {
         }
     }
     tableElement.empty();
-    
+
     if (!purchases || purchases.length === 0) {
         purchasesTable = new DataTable('#purchasesTable', {
             data: [],
@@ -270,7 +272,8 @@ function renderPurchaseMaterialsTable(purchases) {
                     "last": "کۆتایی"
                 }
             },
-            responsive: true,
+            responsive: false,
+            scrollX: true,
             pageLength: 10,
             lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
             order: [[1, 'desc']],
@@ -285,7 +288,7 @@ function renderPurchaseMaterialsTable(purchases) {
         isPurchasesTableLoading = false;
         return;
     }
-    
+
     // Format the data for DataTables
     const tableData = purchases.map((purchase, index) => [
         purchase.receipt_number || '-',
@@ -314,7 +317,7 @@ function renderPurchaseMaterialsTable(purchases) {
             </div>
         `
     ]);
-    
+
     purchasesTable = new DataTable('#purchasesTable', {
         data: tableData,
         columns: [
@@ -349,7 +352,8 @@ function renderPurchaseMaterialsTable(purchases) {
                 "last": "کۆتایی"
             }
         },
-        responsive: true,
+        responsive: false,
+        scrollX: true,
         pageLength: 10,
         lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
         order: [[1, 'desc']],
@@ -360,23 +364,23 @@ function renderPurchaseMaterialsTable(purchases) {
             { extend: 'excel', text: 'Excel', className: 'btn btn-sm btn-outline-success' },
             { extend: 'print', text: 'پرینت', className: 'btn btn-sm btn-outline-primary' }
         ],
-        rowCallback: function(row, data) {
+        rowCallback: function (row, data) {
             // Store receipt number for expandable rows functionality
             const receiptNumber = data[0];
             $(row).attr('data-receipt-number', receiptNumber);
         },
-        drawCallback: function() {
+        drawCallback: function () {
             // Update summary cards when table is redrawn
             updatePurchasesSummaryCards();
         }
     });
-    
+
     // Setup date filter (date column is index 1)
     setupPurchaseDateFilter('#purchasesDateFrom', '#purchasesDateTo', purchasesTable, 1, '#clearPurchasesFilter');
-    
+
     // Store original data for summary calculations
     window.purchasesOriginalData = purchases;
-    
+
     // Mark loading as complete
     isPurchasesTableLoading = false;
 }
@@ -384,14 +388,14 @@ function renderPurchaseMaterialsTable(purchases) {
 // Update summary cards based on filtered purchases data
 function updatePurchasesSummaryCards() {
     if (!purchasesTable) return;
-    
+
     // Get date filter values
     const dateFromInput = document.querySelector('#purchasesDateFrom');
     const dateToInput = document.querySelector('#purchasesDateTo');
-    
+
     const dateFrom = dateFromInput ? dateFromInput.value : null;
     const dateTo = dateToInput ? dateToInput.value : null;
-    
+
     // Reload summary cards with date filters (includes purchases data)
     if (typeof loadSummaryCards === 'function') {
         loadSummaryCards(dateFrom, dateTo);
@@ -404,12 +408,12 @@ function showPurchaseDetails(receiptNumber) {
     $.ajax({
         url: '../process/person_other_expenses_profile/get_purchase_details.php',
         type: 'GET',
-        data: { 
+        data: {
             person_id: PERSON_ID,
-            receipt_number: receiptNumber 
+            receipt_number: receiptNumber
         },
         dataType: 'json',
-        success: function(response) {
+        success: function (response) {
             if (response.success) {
                 showPurchaseDetailsModal(response.data);
             } else {
@@ -417,7 +421,7 @@ function showPurchaseDetails(receiptNumber) {
                 alert('هەڵە لە بارکردنی وردەکاری پسووڵە');
             }
         },
-        error: function(xhr, status, error) {
+        error: function (xhr, status, error) {
             console.error('AJAX Error:', error);
             alert('هەڵە لە پەیوەندی بە سێرڤەر');
         }
@@ -472,7 +476,7 @@ function showPurchaseDetailsModal(purchaseData) {
             </div>
         </div>
     `;
-    
+
     // Create and show modal
     showModal('وردەکاری پسووڵە', modalContent);
 }
@@ -481,23 +485,23 @@ function showPurchaseDetailsModal(purchaseData) {
 function togglePurchaseItems(receiptNumber) {
     // Check if items are already shown
     const existingRow = $(`#purchase-items-${receiptNumber.replace(/[^a-zA-Z0-9]/g, '')}`);
-    
+
     if (existingRow.length > 0) {
         // Hide items
         existingRow.remove();
         return;
     }
-    
+
     // Fetch items for this receipt
     $.ajax({
         url: '../process/person_other_expenses_profile/get_purchase_items.php',
         type: 'GET',
-        data: { 
+        data: {
             person_id: PERSON_ID,
-            receipt_number: receiptNumber 
+            receipt_number: receiptNumber
         },
         dataType: 'json',
-        success: function(response) {
+        success: function (response) {
             if (response.success) {
                 showPurchaseItems(receiptNumber, response.data);
             } else {
@@ -505,7 +509,7 @@ function togglePurchaseItems(receiptNumber) {
                 alert('هەڵە لە بارکردنی کاڵاکان');
             }
         },
-        error: function(xhr, status, error) {
+        error: function (xhr, status, error) {
             console.error('AJAX Error:', error);
             alert('هەڵە لە پەیوەندی بە سێرڤەر');
         }
@@ -515,10 +519,10 @@ function togglePurchaseItems(receiptNumber) {
 // Show purchase items below the receipt row
 function showPurchaseItems(receiptNumber, items) {
     const safeReceiptNumber = receiptNumber.replace(/[^a-zA-Z0-9]/g, '');
-    
+
     // Find the receipt row and insert items below it
     const receiptRow = $(`#purchasesTable tbody tr:contains('${receiptNumber}')`).first();
-    
+
     if (receiptRow.length > 0) {
         const itemsRow = `
             <tr id="purchase-items-${safeReceiptNumber}" class="purchase-items-row">
@@ -562,7 +566,7 @@ function showPurchaseItems(receiptNumber, items) {
                 </td>
             </tr>
         `;
-        
+
         receiptRow.after(itemsRow);
     }
 }
@@ -571,7 +575,7 @@ function showPurchaseItems(receiptNumber, items) {
 function showModal(title, content) {
     // Remove existing modal if any
     $('.purchase-modal').remove();
-    
+
     const modal = `
         <div class="modal fade purchase-modal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-lg">
@@ -581,15 +585,15 @@ function showModal(title, content) {
             </div>
         </div>
     `;
-    
+
     $('body').append(modal);
-    
+
     // Show modal
     const modalElement = $('.purchase-modal');
     modalElement.modal('show');
-    
+
     // Remove modal from DOM when hidden
-    modalElement.on('hidden.bs.modal', function() {
+    modalElement.on('hidden.bs.modal', function () {
         $(this).remove();
     });
 }
@@ -608,12 +612,12 @@ function debugPurchaseData(receiptNumber) {
     $.ajax({
         url: '../process/person_other_expenses_profile/debug_purchase_data.php',
         type: 'GET',
-        data: { 
+        data: {
             person_id: PERSON_ID,
-            receipt_number: receiptNumber 
+            receipt_number: receiptNumber
         },
         dataType: 'json',
-        success: function(response) {
+        success: function (response) {
             if (response.success) {
                 showDebugModal(response.data);
             } else {
@@ -621,7 +625,7 @@ function debugPurchaseData(receiptNumber) {
                 alert('هەڵە لە بارکردنی داتای پشکنین');
             }
         },
-        error: function(xhr, status, error) {
+        error: function (xhr, status, error) {
             console.error('AJAX Error:', error);
             alert('هەڵە لە پەیوەندی بە سێرڤەر');
         }
@@ -716,7 +720,7 @@ function showDebugModal(debugData) {
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
         </div>
     `;
-    
+
     // Create and show modal
     showModal('پشکنینی داتا', modalContent);
 }
@@ -726,16 +730,16 @@ function repairPurchaseData(receiptNumber) {
     if (!confirm('دڵنیای لە چاککردنەوەی داتاکان؟ ئەم کردارە ناتوانرێت هەڵوەشێنرێتەوە.')) {
         return;
     }
-    
+
     $.ajax({
         url: '../process/person_other_expenses_profile/repair_purchase_data.php',
         type: 'GET',
-        data: { 
+        data: {
             person_id: PERSON_ID,
-            receipt_number: receiptNumber 
+            receipt_number: receiptNumber
         },
         dataType: 'json',
-        success: function(response) {
+        success: function (response) {
             if (response.success) {
                 alert('داتاکان بە سەرکەوتووی چاککرانەوە!');
                 // Close the debug modal
@@ -747,11 +751,11 @@ function repairPurchaseData(receiptNumber) {
                 alert('هەڵە لە چاککردنەوەی داتا: ' + response.error);
             }
         },
-        error: function(xhr, status, error) {
+        error: function (xhr, status, error) {
             console.error('AJAX Error:', error);
             alert('هەڵە لە پەیوەندی بە سێرڤەر');
         }
-        });
+    });
 }
 
 // Check remaining amounts function
@@ -759,12 +763,12 @@ function checkRemainingAmounts(receiptNumber) {
     $.ajax({
         url: '../process/person_other_expenses_profile/check_remaining_amounts.php',
         type: 'GET',
-        data: { 
+        data: {
             person_id: PERSON_ID,
-            receipt_number: receiptNumber 
+            receipt_number: receiptNumber
         },
         dataType: 'json',
-        success: function(response) {
+        success: function (response) {
             if (response.success) {
                 showRemainingAmountsModal(response.data);
             } else {
@@ -772,7 +776,7 @@ function checkRemainingAmounts(receiptNumber) {
                 alert('هەڵە لە پشکنینی پارەی ماوەکان');
             }
         },
-        error: function(xhr, status, error) {
+        error: function (xhr, status, error) {
             console.error('AJAX Error:', error);
             alert('هەڵە لە پەیوەندی بە سێرڤەر');
         }
@@ -863,7 +867,7 @@ function showRemainingAmountsModal(checkData) {
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
         </div>
     `;
-    
+
     // Create and show modal
     showModal('پشکنینی پارەی ماوە', modalContent);
 }
@@ -873,16 +877,16 @@ function fixRemainingAmounts(receiptNumber) {
     if (!confirm('دڵنیای لە چاککردنەوەی پارەی ماوەکان؟ ئەم کردارە ناتوانرێت هەڵوەشێنرێتەوە.')) {
         return;
     }
-    
+
     $.ajax({
         url: '../process/person_other_expenses_profile/fix_remaining_amounts.php',
         type: 'GET',
-        data: { 
+        data: {
             person_id: PERSON_ID,
-            receipt_number: receiptNumber 
+            receipt_number: receiptNumber
         },
         dataType: 'json',
-        success: function(response) {
+        success: function (response) {
             if (response.success) {
                 alert('پارەی ماوەکان بە سەرکەوتووی چاککرانەوە!');
                 // Close the debug modal
@@ -896,7 +900,7 @@ function fixRemainingAmounts(receiptNumber) {
                 alert('هەڵە لە چاککردنەوەی پارەی ماوەکان: ' + response.error);
             }
         },
-        error: function(xhr, status, error) {
+        error: function (xhr, status, error) {
             console.error('AJAX Error:', error);
             alert('هەڵە لە پەیوەندی بە سێرڤەر');
         }

@@ -32,8 +32,8 @@ try {
             SUM(pm.total_price_iqd) as total_price_iqd,
             SUM(pm.paid_amount_usd) as paid_amount_usd,
             SUM(pm.paid_amount_iqd) as paid_amount_iqd,
-            (SUM(pm.total_price_usd) - SUM(pm.paid_amount_usd)) as remaining_amount_usd,
-            (SUM(pm.total_price_iqd) - SUM(pm.paid_amount_iqd)) as remaining_amount_iqd
+            SUM(pm.remaining_amount_usd) as remaining_amount_usd,
+            SUM(pm.remaining_amount_iqd) as remaining_amount_iqd
         FROM purchase_materials pm
         WHERE pm.person_id = ?
         GROUP BY pm.receipt_number, pm.purchase_date, pm.currency_type, pm.payment_type, pm.notes, pm.created_at

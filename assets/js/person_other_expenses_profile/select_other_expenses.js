@@ -21,14 +21,14 @@ async function loadOtherExpenses() {
             $('#expensesTable').empty();
         }
 
-    const res = await fetch(`../process/person_other_expenses_profile/select_other_expenses.php?person_id=${PERSON_ID}`);
-        
+        const res = await fetch(`../process/person_other_expenses_profile/select_other_expenses.php?person_id=${PERSON_ID}`);
+
         if (!res.ok) {
             throw new Error(`HTTP error! status: ${res.status}`);
         }
-        
-    const data = await res.json();
-        
+
+        const data = await res.json();
+
         if (!data || data.length === 0) {
             expensesTable = new DataTable('#expensesTable', {
                 data: [],
@@ -65,7 +65,8 @@ async function loadOtherExpenses() {
                         "last": "کۆتایی"
                     }
                 },
-                responsive: true,
+                responsive: false,
+                scrollX: true,
                 pageLength: 10,
                 lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
                 order: [[13, 'desc']],
@@ -79,7 +80,7 @@ async function loadOtherExpenses() {
             });
             return;
         }
-        
+
         const tableData = data.map((row) => [
             row.purpose || '',
             row.employee_name || '',
@@ -96,10 +97,10 @@ async function loadOtherExpenses() {
             formatUSD(row.remaining_usd || 0),
             row.date || ''
         ]);
-        
+
         // Store original data for calculations
         window.expensesOriginalData = data;
-        
+
         expensesTable = new DataTable('#expensesTable', {
             data: tableData,
             columns: [
@@ -135,7 +136,8 @@ async function loadOtherExpenses() {
                     "last": "کۆتایی"
                 }
             },
-            responsive: true,
+            responsive: false,
+            scrollX: true,
             pageLength: 10,
             lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
             order: [[13, 'desc']],
@@ -146,15 +148,15 @@ async function loadOtherExpenses() {
                 { extend: 'excel', text: 'Excel', className: 'btn btn-sm btn-outline-success' },
                 { extend: 'print', text: 'پرینت', className: 'btn btn-sm btn-outline-primary' }
             ],
-            drawCallback: function() {
+            drawCallback: function () {
                 // Update summary cards when table is redrawn
                 updateExpensesSummaryCards();
             }
         });
-        
+
         // Setup date filter
         setupDateFilter('#expensesDateFrom', '#expensesDateTo', expensesTable, 13, '#clearExpensesFilter');
-        
+
     } catch (error) {
         console.error('Error loading other expenses:', error);
         if (expensesTable) {
@@ -168,14 +170,14 @@ async function loadOtherExpenses() {
 // Update summary cards based on filtered expenses data
 function updateExpensesSummaryCards() {
     if (!expensesTable) return;
-    
+
     // Get date filter values
     const dateFromInput = document.querySelector('#expensesDateFrom');
     const dateToInput = document.querySelector('#expensesDateTo');
-    
+
     const dateFrom = dateFromInput ? dateFromInput.value : null;
     const dateTo = dateToInput ? dateToInput.value : null;
-    
+
     // Reload summary cards with date filters
     if (typeof loadSummaryCards === 'function') {
         loadSummaryCards(dateFrom, dateTo);
@@ -187,45 +189,45 @@ function setupDateFilter(fromId, toId, table, dateColumnIndex, clearBtnId) {
     const fromInput = document.querySelector(fromId);
     const toInput = document.querySelector(toId);
     const clearBtn = document.querySelector(clearBtnId);
-    
+
     if (!fromInput || !toInput || !table) return;
-    
+
     // Custom filter function
     $.fn.dataTable.ext.search.push(
-        function(settings, data, dataIndex) {
+        function (settings, data, dataIndex) {
             // Only apply to the specific table
             if (settings.nTable.id !== table.table().node().id) return true;
-            
+
             const rowDate = data[dateColumnIndex] || '';
             if (!rowDate) return true;
-            
+
             const dateFrom = fromInput.value ? new Date(fromInput.value) : null;
             const dateTo = toInput.value ? new Date(toInput.value) : null;
             const rowDateObj = new Date(rowDate);
-            
+
             // If both dates are empty, show all
             if (!dateFrom && !dateTo) return true;
-            
+
             // Check date range
             if (dateFrom && rowDateObj < dateFrom) return false;
             if (dateTo && rowDateObj > dateTo) return false;
-            
+
             return true;
         }
     );
-    
+
     // Add event listeners
-    fromInput.addEventListener('change', function() {
+    fromInput.addEventListener('change', function () {
         table.draw();
     });
-    
-    toInput.addEventListener('change', function() {
+
+    toInput.addEventListener('change', function () {
         table.draw();
     });
-    
+
     // Clear filter button
     if (clearBtn) {
-        clearBtn.addEventListener('click', function() {
+        clearBtn.addEventListener('click', function () {
             fromInput.value = '';
             toInput.value = '';
             table.draw();
