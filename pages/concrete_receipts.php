@@ -368,6 +368,10 @@ $mixer_drivers = array_filter($employees, function ($emp) {
                 <input type="text" class="form-control" id="edit_receipt_number" name="receipt_number" required>
               </div>
               <div class="col-md-6">
+                <label for="edit_date" class="form-label">بەروار</label>
+                <input type="date" class="form-control" id="edit_date" name="date" required>
+              </div>
+              <div class="col-md-6">
                 <label for="edit_customer_id" class="form-label">ناوی کڕیار</label>
                 <select class="form-select" id="edit_customer_id" name="customer_id" required>
                   <option value="">هەڵبژێرە</option>

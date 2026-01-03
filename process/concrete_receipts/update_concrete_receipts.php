@@ -141,11 +141,22 @@ try {
         'mixer_car_name' => $old_mixer_car_name,
         'mixer_driver_id' => $old_record['mixer_driver_id'],
         'mixer_driver_name' => $old_mixer_driver_name,
-        'receiver_name' => $old_record['receiver_name']
+        'receiver_name' => $old_record['receiver_name'],
+        'created_at' => $old_record['created_at']
     ];
 
+    // Verify date is valid format if provided
+    $day_date = $_POST['date'] ?? null;
+    $new_created_at = $old_record['created_at'];
+    
+    if ($day_date) {
+        // Extract time from old record
+        $time_part = date('H:i:s', strtotime($old_record['created_at']));
+        $new_created_at = $day_date . ' ' . $time_part;
+    }
+
     // Now perform the update
-    $stmt = $pdo->prepare('UPDATE concrete_receipts SET receipt_number=?, customer_id=?, location=?, meter_amount=?, formulas_id=?, pump_car_id=?, pump_driver_id=?, mixer_car_id=?, mixer_driver_id=?, receiver_name=? WHERE id=?');
+    $stmt = $pdo->prepare('UPDATE concrete_receipts SET receipt_number=?, customer_id=?, location=?, meter_amount=?, formulas_id=?, pump_car_id=?, pump_driver_id=?, mixer_car_id=?, mixer_driver_id=?, receiver_name=?, created_at=? WHERE id=?');
     $result = $stmt->execute([
         $receipt_number,
         $customer_id ?: null,
@@ -157,6 +168,7 @@ try {
         $mixer_car_id ?: null,
         $mixer_driver_id ?: null,
         $receiver_name !== '' ? $receiver_name : null,
+        $new_created_at,
         $id
     ]);
     
@@ -227,7 +239,8 @@ try {
             'mixer_car_name' => $mixer_car_name,
             'mixer_driver_id' => $mixer_driver_id,
             'mixer_driver_name' => $mixer_driver_name,
-            'receiver_name' => $receiver_name
+            'receiver_name' => $receiver_name,
+            'created_at' => $new_created_at
         ];
 
         $additional_info = [
