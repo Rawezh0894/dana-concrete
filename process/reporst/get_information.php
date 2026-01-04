@@ -595,7 +595,7 @@ try {
     // cement_cem2_tons = ماس (تۆن)
     $material_consumption_tons = [];
     foreach ($material_consumption as $material => $kg_amount) {
-        $material_consumption_tons[$material] = round($kg_amount / 1000, 2);
+        $material_consumption_tons[$material] = round($kg_amount / 1000, 3);
     }
     
     // Get current stock levels for comparison
