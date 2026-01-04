@@ -104,28 +104,23 @@ try {
     $usdRate = $latestRate ?: 139250; // Fallback to default if no purchases exist
     $company_debt_total_usd += (floatval($openingDebt['iqd'] ?? 0) / ($usdRate / 100));
 
-    // Other expense persons - Calculate total debt (opening debt + expenses - payments)
-    // Fix: Use separate queries to avoid cartesian product in joins
-    $opening_debt = $pdo->query("SELECT SUM(opening_debt_usd) as usd, SUM(opening_debt_iqd) as iqd FROM other_expense_persons")->fetch();
+    // Other expense persons - Calculate total debt (opening debt + remaining from expenses + remaining from purchases)
+    // Fix: Use the same logic as debt_helpers.php to get current remaining debt
     
-    $expenses = $pdo->query("
-        SELECT 
-            SUM(amount_usd) as usd, 
-            SUM(amount_iqd) as iqd,
-            SUM(amount_iqd / NULLIF(exchange_rate / 100, 0)) as iqd_converted
-        FROM other_expenses 
-        WHERE person_id IS NOT NULL
-    ")->fetch();
+    // 1. Sum of current opening debts
+    $stmt = $pdo->query("SELECT SUM(opening_debt_usd) as usd, SUM(opening_debt_iqd) as iqd FROM other_expense_persons");
+    $opening = $stmt->fetch();
     
-    $payments = $pdo->query("
-        SELECT 
-            SUM(amount_usd) as usd, 
-            SUM(amount_iqd) as iqd
-        FROM person_other_expenses_debt_payments
-    ")->fetch();
+    // 2. Sum of remaining from other_expenses
+    $stmt = $pdo->query("SELECT SUM(remaining_usd) as usd, SUM(remaining_iqd) as iqd FROM other_expenses WHERE payment_type = 'قەرز'");
+    $expenses = $stmt->fetch();
     
-    $person_debt_usd = floatval($opening_debt['usd'] ?? 0) + floatval($expenses['usd'] ?? 0) + floatval($expenses['iqd_converted'] ?? 0) - floatval($payments['usd'] ?? 0);
-    $person_debt_iqd = floatval($opening_debt['iqd'] ?? 0) + floatval($expenses['iqd'] ?? 0) - floatval($payments['iqd'] ?? 0);
+    // 3. Sum of remaining from purchase_materials
+    $stmt = $pdo->query("SELECT SUM(remaining_amount_usd) as usd, SUM(remaining_amount_iqd) as iqd FROM purchase_materials WHERE payment_type = 'قەرز'");
+    $purchases = $stmt->fetch();
+    
+    $person_debt_usd = floatval($opening['usd'] ?? 0) + floatval($expenses['usd'] ?? 0) + floatval($purchases['usd'] ?? 0);
+    $person_debt_iqd = floatval($opening['iqd'] ?? 0) + floatval($expenses['iqd'] ?? 0) + floatval($purchases['iqd'] ?? 0);
     
     $person_debt_iqd_converted = ($usd_iqd_rate > 0) ? ($person_debt_iqd / ($usd_iqd_rate / 100)) : 0;
     $person_debt_total_usd = $person_debt_usd + $person_debt_iqd_converted;
