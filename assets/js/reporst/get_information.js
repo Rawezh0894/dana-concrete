@@ -187,7 +187,7 @@ function renderDashboardCards(data) {
             label: 'قەرزی ئێمە لەگەڵ کەسانی خەرجی تر',
             icon: 'fa-user-tie',
             cardClass: 'person-card',
-            value: formatCurrency(person_debt_usd, 'USD'),
+            value: formatCurrency(data.data?.person?.usd || 0, 'USD') + '<br><small style="font-size: 0.9rem; opacity: 0.9;">' + formatCurrency(data.data?.person?.iqd || 0, 'IQD') + '</small>',
             subtitle: 'قەرزی کەسانی تر'
         },
         {
@@ -289,22 +289,6 @@ function renderDashboardCards(data) {
             subtitle: 'داهاتی گاز'
         },
         {
-            key: 'medicine_usage',
-            label: 'بەکارهێنانی دەرمان',
-            icon: 'fa-pills',
-            cardClass: 'medicine-usage-card',
-            value: formatCurrency(Number(data.data?.total_expenses?.breakdown?.medicine_usage) || 0, 'USD'),
-            subtitle: 'کۆی خەرجی دەرمان'
-        },
-        {
-            key: 'gas_usage',
-            label: 'بەکارهێنانی گاز',
-            icon: 'fa-gas-pump',
-            cardClass: 'gas-usage-card',
-            value: formatCurrency(Number(data.data?.total_expenses?.breakdown?.gas_usage) || 0, 'USD'),
-            subtitle: 'کۆی خەرجی گاز'
-        },
-        {
             key: 'usd_rate',
             label: 'نرخی ١٠٠ دۆلار',
             icon: 'fa-dollar-sign',
@@ -363,19 +347,27 @@ function renderDashboardCards(data) {
             value: formatMaterialConsumption(data.data?.material_consumption?.tons?.cement_cem2 || 0, 'تۆن'),
             subtitle: 'ماس'
         },
-        // Material Summary Cards
+        {
+            key: 'additive_consumption',
+            label: 'بەکارهێنانی دەرمان (زیادکراو)',
+            icon: 'fa-flask',
+            cardClass: 'material-consumption-card',
+            value: formatMaterialConsumption(data.data?.material_consumption?.tons?.additive || 0, 'تۆن'),
+            subtitle: 'دەرمانی کۆنکرێت'
+        },
         {
             key: 'total_material_consumption',
             label: 'کۆی بەکارهێنانی ماتریاڵەکان',
             icon: 'fa-chart-line',
             cardClass: 'material-summary-card',
             value: formatMaterialConsumption(
-                (data.data?.material_consumption?.tons?.black_sand || 0) +
-                (data.data?.material_consumption?.tons?.brown_sand || 0) +
-                (data.data?.material_consumption?.tons?.gravel_bin3 || 0) +
-                (data.data?.material_consumption?.tons?.gravel_bin4 || 0) +
-                (data.data?.material_consumption?.tons?.cement_cem1 || 0) +
-                (data.data?.material_consumption?.tons?.cement_cem2 || 0), 'تۆن'),
+                (parseFloat(data.data?.material_consumption?.tons?.black_sand || 0)) +
+                (parseFloat(data.data?.material_consumption?.tons?.brown_sand || 0)) +
+                (parseFloat(data.data?.material_consumption?.tons?.gravel_bin3 || 0)) +
+                (parseFloat(data.data?.material_consumption?.tons?.gravel_bin4 || 0)) +
+                (parseFloat(data.data?.material_consumption?.tons?.cement_cem1 || 0)) +
+                (parseFloat(data.data?.material_consumption?.tons?.cement_cem2 || 0)) +
+                (parseFloat(data.data?.material_consumption?.tons?.additive || 0)), 'تۆن'),
             subtitle: 'کۆی هەموو ماتریاڵەکان'
         },
         {

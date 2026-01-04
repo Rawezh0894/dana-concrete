@@ -351,70 +351,6 @@ if (!isset($_SESSION['user_id'])) {
             opacity: 0.9;
         }
 
-        /* Medicine Usage Card Styles */
-        .medicine-usage-card {
-            background: linear-gradient(135deg, #e91e63, #c2185b) !important;
-            color: white;
-            border: none;
-            transition: all 0.3s ease;
-        }
-        
-        .medicine-usage-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(233, 30, 99, 0.4);
-        }
-        
-        .medicine-usage-card i {
-            color: #e9ecef;
-            font-size: 2rem;
-            margin-bottom: 1rem;
-        }
-        
-        .medicine-usage-card .card-value {
-            color: #ffffff;
-            font-size: 1.6rem;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-        }
-        
-        .medicine-usage-card .section-label {
-            color: #e9ecef;
-            font-size: 0.9rem;
-            opacity: 0.9;
-        }
-
-        /* Gas Usage Card Styles */
-        .gas-usage-card {
-            background: linear-gradient(135deg, #ff9800, #f57c00) !important;
-            color: white;
-            border: none;
-            transition: all 0.3s ease;
-        }
-        
-        .gas-usage-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(255, 152, 0, 0.4);
-        }
-        
-        .gas-usage-card i {
-            color: #e9ecef;
-            font-size: 2rem;
-            margin-bottom: 1rem;
-        }
-        
-        .gas-usage-card .card-value {
-            color: #ffffff;
-            font-size: 1.6rem;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-        }
-        
-        .gas-usage-card .section-label {
-            color: #e9ecef;
-            font-size: 0.9rem;
-            opacity: 0.9;
-        }
-
         
         /* Chart Section Styles */
         .chart-section {
@@ -659,7 +595,7 @@ if (!isset($_SESSION['user_id'])) {
     <div class="row g-4 mb-4">
         <div class="col-lg-12 col-md-12">
             <div class="card p-3 shadow-sm chart-section">
-                <h5 class="mb-3">بەکارهێنانی ماتریاڵەکان بە جۆر (دەلتا + لاڤارج + ماس)</h5>
+                <h5 class="mb-3">بەکارهێنانی ماتریاڵەکان بە جۆر (دەلتا + لاڤارج + ماس + دەرمان)</h5>
                 <div class="chart-container">
                     <canvas id="chart-material-consumption"></canvas>
                 </div>

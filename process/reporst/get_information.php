@@ -105,33 +105,28 @@ try {
     $company_debt_total_usd += (floatval($openingDebt['iqd'] ?? 0) / ($usdRate / 100));
 
     // Other expense persons - Calculate total debt (opening debt + expenses - payments)
-    $person_debt_query = "
+    // Fix: Use separate queries to avoid cartesian product in joins
+    $opening_debt = $pdo->query("SELECT SUM(opening_debt_usd) as usd, SUM(opening_debt_iqd) as iqd FROM other_expense_persons")->fetch();
+    
+    $expenses = $pdo->query("
         SELECT 
-            SUM(p.opening_debt_usd) as opening_debt_usd,
-            SUM(p.opening_debt_iqd) as opening_debt_iqd,
-            COALESCE(SUM(oe.amount_usd), 0) as total_expenses_usd,
-            COALESCE(SUM(oe.amount_iqd), 0) as total_expenses_iqd,
-            COALESCE(SUM(oe.amount_iqd / NULLIF(oe.exchange_rate / 100, 0)), 0) as total_expenses_iqd_converted,
-            COALESCE(SUM(pedp.amount_usd), 0) as total_payments_usd,
-            COALESCE(SUM(pedp.amount_iqd), 0) as total_payments_iqd
-        FROM other_expense_persons p
-        LEFT JOIN other_expenses oe ON p.id = oe.person_id
-        LEFT JOIN person_other_expenses_debt_payments pedp ON p.id = pedp.person_id
-    ";
-    $stmt = $pdo->query($person_debt_query);
-    $row = $stmt->fetch();
+            SUM(amount_usd) as usd, 
+            SUM(amount_iqd) as iqd,
+            SUM(amount_iqd / NULLIF(exchange_rate / 100, 0)) as iqd_converted
+        FROM other_expenses 
+        WHERE person_id IS NOT NULL
+    ")->fetch();
     
-    $opening_debt_usd = floatval($row['opening_debt_usd'] ?? 0);
-    $opening_debt_iqd = floatval($row['opening_debt_iqd'] ?? 0);
-    $total_expenses_usd = floatval($row['total_expenses_usd'] ?? 0);
-    $total_expenses_iqd = floatval($row['total_expenses_iqd'] ?? 0);
-    $total_expenses_iqd_converted = floatval($row['total_expenses_iqd_converted'] ?? 0);
-    $total_payments_usd = floatval($row['total_payments_usd'] ?? 0);
-    $total_payments_iqd = floatval($row['total_payments_iqd'] ?? 0);
+    $payments = $pdo->query("
+        SELECT 
+            SUM(amount_usd) as usd, 
+            SUM(amount_iqd) as iqd
+        FROM person_other_expenses_debt_payments
+    ")->fetch();
     
-    // Calculate total debt: opening debt + expenses - payments
-    $person_debt_usd = $opening_debt_usd + $total_expenses_usd + $total_expenses_iqd_converted - $total_payments_usd;
-    $person_debt_iqd = $opening_debt_iqd + $total_expenses_iqd - $total_payments_iqd;
+    $person_debt_usd = floatval($opening_debt['usd'] ?? 0) + floatval($expenses['usd'] ?? 0) + floatval($expenses['iqd_converted'] ?? 0) - floatval($payments['usd'] ?? 0);
+    $person_debt_iqd = floatval($opening_debt['iqd'] ?? 0) + floatval($expenses['iqd'] ?? 0) - floatval($payments['iqd'] ?? 0);
+    
     $person_debt_iqd_converted = ($usd_iqd_rate > 0) ? ($person_debt_iqd / ($usd_iqd_rate / 100)) : 0;
     $person_debt_total_usd = $person_debt_usd + $person_debt_iqd_converted;
 
@@ -370,15 +365,6 @@ try {
     $gas_usage_iqd = $row['iqd'] ?? 0;
     $gas_usage_total_usd = $gas_usage_usd + (($usd_iqd_rate > 0) ? ($gas_usage_iqd / ($usd_iqd_rate / 100)) : 0);
     $total_expenses_breakdown['gas_usage'] = $gas_usage_total_usd;
-
-    // Medicine usage (بەکارهێنانی دەرمان) with date filter
-    $medicine_usage_query = "SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd FROM other_expenses WHERE expense_type = 'بەکارهێنانی دەرمان' $date_condition_date";
-    $stmt = $pdo->query($medicine_usage_query);
-    $row = $stmt->fetch();
-    $medicine_usage_usd = $row['usd'] ?? 0;
-    $medicine_usage_iqd = $row['iqd'] ?? 0;
-    $medicine_usage_total_usd = $medicine_usage_usd + (($usd_iqd_rate > 0) ? ($medicine_usage_iqd / ($usd_iqd_rate / 100)) : 0);
-    $total_expenses_breakdown['medicine_usage'] = $medicine_usage_total_usd;
     
     // Gas Income (داهاتی گاز) - Calculate based on specific cars using car_id
     $gas_income_query = "
@@ -568,7 +554,8 @@ try {
         'gravel_bin3' => 0,     // چەوی چاوی ٣
         'gravel_bin4' => 0,     // چەوی چاوی ٤
         'cement_cem1' => 0,     // چیمەنتۆی سایلۆی ١ (دەلتا + لاڤارج)
-        'cement_cem2' => 0      // چیمەنتۆی سایلۆی ٢ (ماس)
+        'cement_cem2' => 0,     // چیمەنتۆی سایلۆی ٢ (ماس)
+        'additive' => 0         // زیادکراو (دەرمان)
     ];
     
     // Get material consumption from sales based on formulas used
@@ -583,7 +570,8 @@ try {
             cf.gravel_bin3_kg,
             cf.gravel_bin4_kg,
             cf.cement_cem1_kg,
-            cf.cement_cem2_kg
+            cf.cement_cem2_kg,
+            cf.additive_kg
         FROM sales s
         JOIN concrete_formulas cf ON s.formula_id = cf.id
         WHERE 1=1 $date_condition_sales
@@ -601,6 +589,7 @@ try {
             $material_consumption['gravel_bin4'] += floatval($row['gravel_bin4_kg']) * $cubic_meters;
             $material_consumption['cement_cem1'] += floatval($row['cement_cem1_kg']) * $cubic_meters;
             $material_consumption['cement_cem2'] += floatval($row['cement_cem2_kg']) * $cubic_meters;
+            $material_consumption['additive'] += floatval($row['additive_kg']) * $cubic_meters;
         }
     } catch (Exception $e) {
         error_log("Error calculating material consumption: " . $e->getMessage());
@@ -829,7 +818,7 @@ try {
             'usd_iqd_rate' => $usd_iqd_rate,
             'customer' => ['usd' => $customer_debt_total_usd, 'iqd' => 0],
             'company' => ['usd' => $company_debt_total_usd, 'iqd' => 0],
-            'person' => ['usd' => $person_debt_usd, 'iqd' => 0],
+            'person' => ['usd' => $person_debt_usd, 'iqd' => $person_debt_iqd],
             'purchases' => $purchases,
             'sales' => $sales,
             'discounts' => [
