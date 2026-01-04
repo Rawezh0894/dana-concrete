@@ -531,84 +531,10 @@ if (!isset($_SESSION['user_id'])) {
         <!-- Cards will be rendered here by JS -->
     </div>
     
-    <!-- Charts Section -->
-    <div class="row g-4 mb-4">
-        <div class="col-lg-6 col-md-12">
-            <div class="card p-3 shadow-sm chart-section">
-                <h5 class="mb-3">ستۆک بە جۆری ماتریاڵ</h5>
-                <div class="chart-container">
-                    <canvas id="chart-stock-material"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-6 col-md-12">
-            <div class="card p-3 shadow-sm chart-section">
-                <h5 class="mb-3">گۆڕانکاری داهات و خەرجی بە مانگ</h5>
-                <div class="chart-container">
-                    <canvas id="chart-income-by-month-year"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Additional Charts Section -->
-    <div class="row g-4 mb-4">
-        <div class="col-lg-6 col-md-12">
-            <div class="card p-3 shadow-sm chart-section">
-                <h5 class="mb-3">فرۆشتن vs خەرجی vs قازانج</h5>
-                <div class="chart-container">
-                    <canvas id="chart-sales-vs-expenses"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-6 col-md-12">
-            <div class="card p-3 shadow-sm chart-section">
-                <h5 class="mb-3">شیکردنەوەی قەرزەکان</h5>
-                <div class="chart-container">
-                    <canvas id="chart-debt-analysis"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Performance Charts Section -->
-    <div class="row g-4 mb-4">
-        <div class="col-lg-6 col-md-12">
-            <div class="card p-3 shadow-sm chart-section">
-                <h5 class="mb-3">کارایی کارمەندان</h5>
-                <div class="chart-container">
-                    <canvas id="chart-employee-performance"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-6 col-md-12">
-            <div class="card p-3 shadow-sm chart-section">
-                <h5 class="mb-3">خەرجی سەیارەکان</h5>
-                <div class="chart-container">
-                    <canvas id="chart-car-expenses"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Material Consumption Chart Section -->
-    <div class="row g-4 mb-4">
-        <div class="col-lg-12 col-md-12">
-            <div class="card p-3 shadow-sm chart-section">
-                <h5 class="mb-3">بەکارهێنانی ماتریاڵەکان بە جۆر (دەلتا + لاڤارج + ماس + دەرمان)</h5>
-                <div class="chart-container">
-                    <canvas id="chart-material-consumption"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="../assets/js/swalAlert.js"></script>
 <script src="../assets/js/reporst/get_information.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="../assets/js/reporst/chart.js"></script>
 <script>
 // Fetch and set the current rate
 fetch('../process/reporst/get_information.php')

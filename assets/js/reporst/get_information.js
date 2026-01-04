@@ -355,29 +355,6 @@ function renderDashboardCards(data) {
             value: formatMaterialConsumption(data.data?.material_consumption?.tons?.additive || 0, 'تۆن'),
             subtitle: 'دەرمانی کۆنکرێت'
         },
-        {
-            key: 'total_material_consumption',
-            label: 'کۆی بەکارهێنانی ماتریاڵەکان',
-            icon: 'fa-chart-line',
-            cardClass: 'material-summary-card',
-            value: formatMaterialConsumption(
-                (parseFloat(data.data?.material_consumption?.tons?.black_sand || 0)) +
-                (parseFloat(data.data?.material_consumption?.tons?.brown_sand || 0)) +
-                (parseFloat(data.data?.material_consumption?.tons?.gravel_bin3 || 0)) +
-                (parseFloat(data.data?.material_consumption?.tons?.gravel_bin4 || 0)) +
-                (parseFloat(data.data?.material_consumption?.tons?.cement_cem1 || 0)) +
-                (parseFloat(data.data?.material_consumption?.tons?.cement_cem2 || 0)) +
-                (parseFloat(data.data?.material_consumption?.tons?.additive || 0)), 'تۆن'),
-            subtitle: 'کۆی هەموو ماتریاڵەکان'
-        },
-        {
-            key: 'current_stock_status',
-            label: 'دۆخی ئێستای کۆگا',
-            icon: 'fa-warehouse',
-            cardClass: 'stock-status-card',
-            value: getStockStatusText(data.data?.material_consumption?.current_stock || {}),
-            subtitle: 'بەکارهێنانی ماتریاڵەکان'
-        },
         // Stock vs Consumption Cards
         {
             key: 'black_sand_stock',
