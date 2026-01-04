@@ -6,23 +6,23 @@ function fetchAndRenderReportData() {
     let url = `../process/reporst/get_information.php?filter=${currentReportFilter}`;
     if (fromDate) url += `&from_date=${fromDate}`;
     if (toDate) url += `&to_date=${toDate}`;
-    
+
     console.log('Fetching data from:', url);
-    
+
     fetch(url)
         .then(res => res.json())
         .then(result => {
             console.log('API Response:', result);
-            
+
             if (!result.success) {
                 console.error('API Error:', result.error);
                 swalAlert('هەڵە', result.error, 'error');
                 return;
             }
-            
+
             const data = result.data;
             console.log('Data received:', data);
-            
+
             // Cards will be rendered by renderDashboardCards function
             if (typeof renderDashboardCards === 'function') {
                 console.log('Calling renderDashboardCards');
@@ -30,7 +30,7 @@ function fetchAndRenderReportData() {
             } else {
                 console.error('renderDashboardCards function not found');
             }
-            
+
             if (typeof renderCharts === 'function') {
                 console.log('Calling renderCharts');
                 renderCharts(result);
@@ -56,17 +56,17 @@ function getStockStatusText(currentStock) {
     if (!currentStock || Object.keys(currentStock).length === 0) {
         return 'هیچ زانیارییەک نییە';
     }
-    
+
     let totalItems = 0;
     let lowStockItems = 0;
-    
+
     Object.values(currentStock).forEach(stock => {
         totalItems++;
         if (stock.amount < 1000) { // Less than 1 ton
             lowStockItems++;
         }
     });
-    
+
     if (lowStockItems === 0) {
         return 'کۆگا پڕە';
     } else if (lowStockItems <= totalItems * 0.3) {
@@ -81,11 +81,11 @@ function formatStockInfo(stock, consumption) {
     if (!stock || !stock.amount) {
         return `بەکارهێنان: ${consumption.toFixed(2)} تۆن`;
     }
-    
+
     const stockTons = stock.amount;
     const consumptionTons = consumption;
     const remaining = stockTons - consumptionTons;
-    
+
     if (remaining <= 0) {
         return `ستۆک: 0 تۆن (کەمە)`;
     } else if (remaining < stockTons * 0.2) {
@@ -98,7 +98,7 @@ function formatStockInfo(stock, consumption) {
 // Function to render dashboard cards with consistent styling
 function renderDashboardCards(data) {
     console.log('renderDashboardCards called with data:', data);
-    
+
     const usd_iqd_rate = data.data?.usd_iqd_rate || 0;
     const company_debt_usd = Number(data.data?.company?.usd) || 0;
     const person_debt_usd = Number(data.data?.person?.usd) || 0;
@@ -108,7 +108,7 @@ function renderDashboardCards(data) {
     const purchases_cash_iqd = Number(data.data?.purchases?.cash?.iqd) || 0;
     const purchases_credit_iqd = Number(data.data?.purchases?.credit?.iqd) || 0;
     const purchases_iqd_total = purchases_cash_iqd + purchases_credit_iqd;
-    
+
     console.log('Extracted values:', {
         usd_iqd_rate,
         company_debt_usd,
@@ -120,7 +120,7 @@ function renderDashboardCards(data) {
         purchases_credit_iqd,
         purchases_iqd_total
     });
-    
+
     const discountsTotalUsd = Number(data.data?.discounts?.total_usd) || 0;
     const salesDiscountUsd = Number(data.data?.discounts?.sales_usd) || 0;
     const debtDiscountUsd = Number(data.data?.discounts?.customer_debt_usd) || 0;
@@ -289,6 +289,22 @@ function renderDashboardCards(data) {
             subtitle: 'داهاتی گاز'
         },
         {
+            key: 'medicine_usage',
+            label: 'بەکارهێنانی دەرمان',
+            icon: 'fa-pills',
+            cardClass: 'medicine-usage-card',
+            value: formatCurrency(Number(data.data?.total_expenses?.breakdown?.medicine_usage) || 0, 'USD'),
+            subtitle: 'کۆی خەرجی دەرمان'
+        },
+        {
+            key: 'gas_usage',
+            label: 'بەکارهێنانی گاز',
+            icon: 'fa-gas-pump',
+            cardClass: 'gas-usage-card',
+            value: formatCurrency(Number(data.data?.total_expenses?.breakdown?.gas_usage) || 0, 'USD'),
+            subtitle: 'کۆی خەرجی گاز'
+        },
+        {
             key: 'usd_rate',
             label: 'نرخی ١٠٠ دۆلار',
             icon: 'fa-dollar-sign',
@@ -402,21 +418,21 @@ function renderDashboardCards(data) {
             subtitle: 'سایلۆی ١ (دەلتا+لاڤارج) + سایلۆی ٢ (ماس) - ستۆک vs بەکارهێنان'
         }
     ];
-    
+
     // Material consumption summary:
     // - cement_cem1: دەلتا + لاڤارج (سایلۆی یەک)
     // - cement_cem2: ماس (سایلۆی دوو)
     // - Total cement = دەلتا + لاڤارج + ماس
     // - Total materials = لمی کەسارە + لمی ڕەش + چەوی چاوی ٣ + چەوی چاوی ٤ + دەلتا + لاڤارج + ماس
-    
+
     console.log('Cards array created:', cards);
-    
+
     let html = '';
     cards.forEach(card => {
         // Add click handler for company_debt_payments cards (both USD and IQD)
         let clickHandler = '';
         let cursorStyle = '';
-        
+
         if (card.key === 'company_debt_payments_usd' || card.key === 'company_debt_payments_iqd') {
             clickHandler = 'onclick="showCompanyDebtPaymentsDetails()"';
             cursorStyle = 'style="cursor: pointer;"';
@@ -424,7 +440,7 @@ function renderDashboardCards(data) {
             clickHandler = 'onclick="showPersonDebtPaymentsDetails()"';
             cursorStyle = 'style="cursor: pointer;"';
         }
-        
+
         html += `<div class="col-lg-3 col-md-4 col-sm-6 mb-3">
             <div class="report-card ${card.cardClass}" ${clickHandler} ${cursorStyle}>
                 <i class="fa ${card.icon}"></i>
@@ -434,10 +450,10 @@ function renderDashboardCards(data) {
             </div>
         </div>`;
     });
-    
+
     console.log('HTML generated:', html);
     console.log('Target element:', document.getElementById('dashboard-summary-cards'));
-    
+
     const targetElement = document.getElementById('dashboard-summary-cards');
     if (targetElement) {
         targetElement.innerHTML = html;
@@ -447,12 +463,12 @@ function renderDashboardCards(data) {
     }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Initial load
     fetchAndRenderReportData();
     // Filter button click
     document.querySelectorAll('#report-date-filter .filter-tab').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function () {
             document.querySelectorAll('#report-date-filter .filter-tab').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
             currentReportFilter = this.getAttribute('data-filter');
@@ -463,17 +479,17 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     // Date range change
-    document.getElementById('from-date').addEventListener('change', function() {
+    document.getElementById('from-date').addEventListener('change', function () {
         // Remove active from filter buttons
         document.querySelectorAll('#report-date-filter .filter-tab').forEach(b => b.classList.remove('active'));
         fetchAndRenderReportData();
     });
-    document.getElementById('to-date').addEventListener('change', function() {
+    document.getElementById('to-date').addEventListener('change', function () {
         document.querySelectorAll('#report-date-filter .filter-tab').forEach(b => b.classList.remove('active'));
         fetchAndRenderReportData();
     });
     // Clear filters button
-    document.getElementById('clear-filters-btn').addEventListener('click', function() {
+    document.getElementById('clear-filters-btn').addEventListener('click', function () {
         document.getElementById('from-date').value = '';
         document.getElementById('to-date').value = '';
         // Reset filter buttons to 'year'
@@ -488,9 +504,9 @@ document.addEventListener('DOMContentLoaded', function() {
 // Helper to format currency
 function formatCurrency(amount, currency) {
     if (currency === 'USD') {
-        return Number(amount).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' $';
+        return Number(amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' $';
     } else {
-        return Number(amount).toLocaleString('en-US', {maximumFractionDigits: 0}) + ' دینار';
+        return Number(amount).toLocaleString('en-US', { maximumFractionDigits: 0 }) + ' دینار';
     }
 }
 
@@ -506,16 +522,16 @@ function formatNumber(amount) {
 function showCompanyDebtPaymentsDetails() {
     const fromDate = document.getElementById('from-date')?.value || '';
     const toDate = document.getElementById('to-date')?.value || '';
-    
+
     // Build URL with date filters
     let url = '../process/reporst/get_company_debt_payments_details.php';
     const params = new URLSearchParams();
     if (fromDate) params.append('from_date', fromDate);
     if (toDate) params.append('to_date', toDate);
     if (params.toString()) url += '?' + params.toString();
-    
+
     console.log('Fetching company debt payments details from:', url);
-    
+
     // Show loading
     Swal.fire({
         title: 'چاوەڕوان بە...',
@@ -525,7 +541,7 @@ function showCompanyDebtPaymentsDetails() {
             Swal.showLoading();
         }
     });
-    
+
     fetch(url)
         .then(res => {
             console.log('Response status:', res.status);
@@ -561,14 +577,14 @@ function showCompanyDebtPaymentsDetails() {
         })
         .then(result => {
             if (!result) return;
-            
+
             const data = result.data || {};
             const totalUsd = parseFloat(data.total_usd || 0);
             const totalIqd = parseFloat(data.total_iqd || 0);
             const usdAmount = parseFloat(data.usd_amount || 0);
             const count = parseInt(data.count || 0);
             const payments = data.payments || [];
-            
+
             // Build details HTML
             let detailsHtml = `
                 <div style="text-align: right; direction: rtl; font-family: 'Rabar', sans-serif;">
@@ -580,7 +596,7 @@ function showCompanyDebtPaymentsDetails() {
                         <p style="margin: 0.25rem 0;"><strong>ژمارەی دانەوەکان:</strong> ${count}</p>
                     </div>
             `;
-            
+
             if (payments.length > 0) {
                 detailsHtml += `
                     <div style="max-height: 400px; overflow-y: auto;">
@@ -601,7 +617,7 @@ function showCompanyDebtPaymentsDetails() {
                             </thead>
                             <tbody>
                 `;
-                
+
                 payments.forEach((payment, index) => {
                     detailsHtml += `
                         <tr>
@@ -617,7 +633,7 @@ function showCompanyDebtPaymentsDetails() {
                         </tr>
                     `;
                 });
-                
+
                 detailsHtml += `
                             </tbody>
                         </table>
@@ -626,9 +642,9 @@ function showCompanyDebtPaymentsDetails() {
             } else {
                 detailsHtml += `<p style="text-align: center; color: #666; padding: 1rem;">هیچ دانەوەیەک نەدۆزرایەوە</p>`;
             }
-            
+
             detailsHtml += `</div>`;
-            
+
             Swal.fire({
                 icon: 'info',
                 title: 'وردەکاریەکانی دانەوەی قەرزی کۆمپانیا',
@@ -656,16 +672,16 @@ function showCompanyDebtPaymentsDetails() {
 function showPersonDebtPaymentsDetails() {
     const fromDate = document.getElementById('from-date')?.value || '';
     const toDate = document.getElementById('to-date')?.value || '';
-    
+
     // Build URL with date filters
     let url = '../process/reporst/get_person_debt_payments_details.php';
     const params = new URLSearchParams();
     if (fromDate) params.append('from_date', fromDate);
     if (toDate) params.append('to_date', toDate);
     if (params.toString()) url += '?' + params.toString();
-    
+
     console.log('Fetching person debt payments details from:', url);
-    
+
     // Show loading
     Swal.fire({
         title: 'چاوەڕوان بە...',
@@ -675,7 +691,7 @@ function showPersonDebtPaymentsDetails() {
             Swal.showLoading();
         }
     });
-    
+
     fetch(url)
         .then(res => {
             console.log('Response status:', res.status);
@@ -711,14 +727,14 @@ function showPersonDebtPaymentsDetails() {
         })
         .then(result => {
             if (!result) return;
-            
+
             const data = result.data || {};
             const totalUsd = parseFloat(data.total_usd || 0);
             const totalIqd = parseFloat(data.total_iqd || 0);
             const usdAmount = parseFloat(data.usd_amount || 0);
             const count = parseInt(data.count || 0);
             const payments = data.payments || [];
-            
+
             // Build details HTML
             let detailsHtml = `
                 <div style="text-align: right; direction: rtl; font-family: 'Rabar', sans-serif;">
@@ -730,7 +746,7 @@ function showPersonDebtPaymentsDetails() {
                         <p style="margin: 0.25rem 0;"><strong>ژمارەی دانەوەکان:</strong> ${count}</p>
                     </div>
             `;
-            
+
             if (payments.length > 0) {
                 detailsHtml += `
                     <div style="max-height: 400px; overflow-y: auto;">
@@ -750,7 +766,7 @@ function showPersonDebtPaymentsDetails() {
                             </thead>
                             <tbody>
                 `;
-                
+
                 payments.forEach((payment, index) => {
                     detailsHtml += `
                         <tr>
@@ -765,7 +781,7 @@ function showPersonDebtPaymentsDetails() {
                         </tr>
                     `;
                 });
-                
+
                 detailsHtml += `
                             </tbody>
                         </table>
@@ -774,9 +790,9 @@ function showPersonDebtPaymentsDetails() {
             } else {
                 detailsHtml += `<p style="text-align: center; color: #666; padding: 1rem;">هیچ دانەوەیەک نەدۆزرایەوە</p>`;
             }
-            
+
             detailsHtml += `</div>`;
-            
+
             Swal.fire({
                 icon: 'info',
                 title: 'وردەکاریەکانی دانەوەی قەرزی کەسانی خەرجی تر',

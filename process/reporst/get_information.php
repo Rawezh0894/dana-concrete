@@ -370,6 +370,15 @@ try {
     $gas_usage_iqd = $row['iqd'] ?? 0;
     $gas_usage_total_usd = $gas_usage_usd + (($usd_iqd_rate > 0) ? ($gas_usage_iqd / ($usd_iqd_rate / 100)) : 0);
     $total_expenses_breakdown['gas_usage'] = $gas_usage_total_usd;
+
+    // Medicine usage (بەکارهێنانی دەرمان) with date filter
+    $medicine_usage_query = "SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd FROM other_expenses WHERE expense_type = 'بەکارهێنانی دەرمان' $date_condition_date";
+    $stmt = $pdo->query($medicine_usage_query);
+    $row = $stmt->fetch();
+    $medicine_usage_usd = $row['usd'] ?? 0;
+    $medicine_usage_iqd = $row['iqd'] ?? 0;
+    $medicine_usage_total_usd = $medicine_usage_usd + (($usd_iqd_rate > 0) ? ($medicine_usage_iqd / ($usd_iqd_rate / 100)) : 0);
+    $total_expenses_breakdown['medicine_usage'] = $medicine_usage_total_usd;
     
     // Gas Income (داهاتی گاز) - Calculate based on specific cars using car_id
     $gas_income_query = "
