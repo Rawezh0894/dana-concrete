@@ -49,8 +49,8 @@ if (!hasPermission('view_concrete_formulas')) {
                     <th>جۆر</th>
                     <th>قووە (KG)</th>
                     <th>قووە (MPA)</th>
-                    <th>لمی ڕەش</th>
                     <th>لمی کەسارە</th>
+                    <th>لمی ڕەش</th>
                     <th>چەو 3</th>
                     <th>چەو 4</th>
                     <th>چیمەنتۆ 1</th>
@@ -129,11 +129,11 @@ if (!hasPermission('view_concrete_formulas')) {
               </select>
             </div>
             <div class="col-md-6">
-              <label for="black_sand_kg" class="form-label">لمی ڕەش (kg)</label>
+              <label for="black_sand_kg" class="form-label">لمی کەسارە (kg)</label>
               <input type="number" step="0.01" class="form-control" id="black_sand_kg" name="black_sand_kg" value="0">
             </div>
             <div class="col-md-6">
-              <label for="brown_sand_kg" class="form-label">لمی کەسارە (kg)</label>
+              <label for="brown_sand_kg" class="form-label">لمی ڕەش (kg)</label>
               <input type="number" step="0.01" class="form-control" id="brown_sand_kg" name="brown_sand_kg" value="0">
             </div>
             <div class="col-md-6">
@@ -233,11 +233,11 @@ if (!hasPermission('view_concrete_formulas')) {
               </select>
             </div>
             <div class="col-md-6">
-              <label for="update_black_sand_kg" class="form-label">لمی ڕەش (kg)</label>
+              <label for="update_black_sand_kg" class="form-label">لمی کەسارە (kg)</label>
               <input type="number" step="0.01" class="form-control" id="update_black_sand_kg" name="black_sand_kg" value="0">
             </div>
             <div class="col-md-6">
-              <label for="update_brown_sand_kg" class="form-label">لمی کەسارە (kg)</label>
+              <label for="update_brown_sand_kg" class="form-label">لمی ڕەش (kg)</label>
               <input type="number" step="0.01" class="form-control" id="update_brown_sand_kg" name="brown_sand_kg" value="0">
             </div>
             <div class="col-md-6">
