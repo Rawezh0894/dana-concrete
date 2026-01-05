@@ -436,6 +436,7 @@ if (!isset($_SESSION['user_id'])) {
               <select class="form-control" id="currency_type" name="currency_type">
                 <option value="دینار">دینار</option>
                 <option value="دۆلار">دۆلار</option>
+                <option value="تێکەڵ">تێکەڵ</option>
               </select>
             </div>
           </div>
@@ -624,6 +625,7 @@ if (!isset($_SESSION['user_id'])) {
               <select class="form-control" id="edit_currency_type" name="currency_type">
                 <option value="دینار">دینار</option>
                 <option value="دۆلار">دۆلار</option>
+                <option value="تێکەڵ">تێکەڵ</option>
               </select>
             </div>
           </div>

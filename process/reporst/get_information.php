@@ -437,6 +437,7 @@ try {
             SUM(CASE 
                 WHEN currency_type = 'دۆلار' THEN amount_usd 
                 WHEN currency_type = 'دینار' THEN amount_iqd / NULLIF(exchange_rate / 100, 0)
+                WHEN currency_type = 'تێکەڵ' THEN amount_usd + (amount_iqd / NULLIF(exchange_rate / 100, 0))
                 ELSE 0 
             END) as gas_income_usd
             FROM other_expenses 
@@ -474,6 +475,7 @@ try {
             SUM(CASE 
                 WHEN currency_type = 'دۆلار' THEN amount_usd 
                 WHEN currency_type = 'دینار' THEN amount_iqd / NULLIF(exchange_rate / 100, 0)
+                WHEN currency_type = 'تێکەڵ' THEN amount_usd + (amount_iqd / NULLIF(exchange_rate / 100, 0))
                 ELSE 0 
             END) as other_expenses_usd
             FROM other_expenses 

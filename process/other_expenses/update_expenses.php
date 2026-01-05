@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     $currency_type = $_POST['currency_type'] ?? 'دینار'; // Default to دینار if empty
     // Ensure currency_type is valid
-    if (!in_array($currency_type, ['دینار', 'دۆلار'])) {
+    if (!in_array($currency_type, ['دینار', 'دۆلار', 'تێکەڵ'])) {
         $currency_type = 'دینار';
     }
     $invoice_number = $_POST['invoice_number'] ?? '';

@@ -147,23 +147,23 @@ function setupEditExpenseModal() {
     const exchangeRate = document.getElementById('edit_exchange_rate');
     if (currencyType && amountIqd && amountUsd && paidIqd && paidUsd && exchangeRate) {
         function handleCurrencyChange() {
+            // Never disable fields, let the user enter both if needed
+            amountIqd.disabled = false;
+            amountUsd.disabled = false;
+
             if (currencyType.value === 'دینار') {
-                amountUsd.value = 0;
-                amountUsd.disabled = true;
-                amountIqd.disabled = false;
+                // Keep them enabled but maybe clear the other if empty
+                // amountUsd.value = 0; // Don't auto-clear if it has value
             } else if (currencyType.value === 'دۆلار') {
-                amountIqd.value = 0;
-                amountIqd.disabled = true;
-                amountUsd.disabled = false;
-            } else {
-                amountIqd.disabled = false;
-                amountUsd.disabled = false;
+                // amountIqd.value = 0;
             }
-            if (remainingIqd) remainingIqd.value = 0;
-            if (remainingUsd) remainingUsd.value = 0;
+            // For 'تێکەڵ', both remain enabled (which they are anyway now)
+
             updateRemaining();
         }
         function updateRemaining() {
+            let amountIqdVal = parseFloat(amountIqd.value) || 0;
+            let amountUsdVal = parseFloat(amountUsd.value) || 0;
             let paidIqdVal = parseFloat(paidIqd.value) || 0;
             let paidUsdVal = parseFloat(paidUsd.value) || 0;
             let exRate = parseFloat(exchangeRate.value) || 0;
@@ -177,18 +177,24 @@ function setupEditExpenseModal() {
                 }
             }
             if (currencyType.value === 'دینار') {
-                if (paidUsdVal > 0) {
-                    paidIqdVal += paidUsdVal * (exRate / 100);
-                }
-                remainingIqd.value = (parseFloat(amountIqd.value) || 0) - paidIqdVal;
+                // Convert everything to IQD for the primary balance check
+                let totalBillInIqd = amountIqdVal + (amountUsdVal * (exRate / 100));
+                let totalPaidInIqd = paidIqdVal + (paidUsdVal * (exRate / 100));
+                remainingIqd.value = (totalBillInIqd - totalPaidInIqd).toFixed(0);
+                remainingUsd.value = 0;
             } else if (currencyType.value === 'دۆلار') {
-                if (paidIqd.value > 0) {
-                    paidUsdVal += (parseFloat(paidIqd.value) || 0) / (exRate / 100);
-                }
-                remainingUsd.value = (parseFloat(amountUsd.value) || 0) - paidUsdVal;
+                // Convert everything to USD for the primary balance check
+                let totalBillInUsd = amountUsdVal + (amountIqdVal / (exRate / 100));
+                let totalPaidInUsd = paidUsdVal + (paidIqdVal / (exRate / 100));
+                remainingUsd.value = (totalBillInUsd - totalPaidInUsd).toFixed(2);
+                remainingIqd.value = 0;
+            } else if (currencyType.value === 'تێکەڵ') {
+                // Calculate both independently
+                remainingIqd.value = (amountIqdVal - paidIqdVal).toFixed(0);
+                remainingUsd.value = (amountUsdVal - paidUsdVal).toFixed(2);
             } else {
-                if (remainingIqd) remainingIqd.value = (parseFloat(amountIqd.value) || 0) - paidIqdVal;
-                if (remainingUsd) remainingUsd.value = (parseFloat(amountUsd.value) || 0) - paidUsdVal;
+                if (remainingIqd) remainingIqd.value = (amountIqdVal - paidIqdVal).toFixed(0);
+                if (remainingUsd) remainingUsd.value = (amountUsdVal - paidUsdVal).toFixed(2);
             }
         }
         currencyType.addEventListener('change', handleCurrencyChange);

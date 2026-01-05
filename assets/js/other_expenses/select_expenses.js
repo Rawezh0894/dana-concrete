@@ -15,14 +15,14 @@ function formatIQD(num) {
 async function loadOtherExpenses() {
     try {
         console.log('Loading other expenses...');
-        
+
         // Destroy existing table if it exists
         if (otherExpensesTable) {
             otherExpensesTable.destroy();
             otherExpensesTable = null;
             $('#otherExpensesTable').empty();
         }
-        
+
         // Get USD rate
         let usdRate = 139250;
         const exchangeRateInput = document.getElementById('exchange_rate');
@@ -43,21 +43,21 @@ async function loadOtherExpenses() {
         }
 
         const monthFilter = document.getElementById('monthFilter');
-        
+
         // Use current filters from advanced filters if available
         let url = '../process/other_expenses/select_expenses.php';
         if (window.currentFilters && window.currentFilters.length > 0) {
             url += '?' + window.currentFilters;
         }
-        
+
         const res = await fetch(url);
-        
+
         if (!res.ok) {
             throw new Error(`HTTP error! status: ${res.status}`);
         }
-        
+
         const result = await res.json();
-        
+
         let data;
         if (Array.isArray(result)) {
             data = result;
@@ -68,62 +68,69 @@ async function loadOtherExpenses() {
             $('#otherExpensesTable').html(`<tr><td colspan="26" class="text-muted text-center">هیچ زانیارییەک نەدۆزرایەوە</td></tr>`);
             return;
         }
-        
+
         window.otherExpensesData = data;
-        
-    function iqdToUsd(iqd) {
-        return usdRate && iqd ? (parseFloat(iqd) / (usdRate / 100)) : 0;
-    }
-        
+
+        function iqdToUsd(iqd) {
+            return usdRate && iqd ? (parseFloat(iqd) / (usdRate / 100)) : 0;
+        }
+
         // Use data directly (server already filtered it)
-    let filtered = data;
-        
+        let filtered = data;
+
         // Calculate totals
         let totalCarMaterialCostIQD = 0, totalCarMaterialCostUSD = 0, totalCarGasCost = 0;
-    let totalOtherExpensesIQD = 0, totalOtherExpensesUSD = 0;
-    
-    filtered.forEach(row => {
-        if (row.car_id && row.expense_type === 'بەکارهێنانی کاڵای کۆگا') {
-            totalCarMaterialCostIQD += parseFloat(row.material_purchase_price_iqd || 0) * parseFloat(row.material_quantity || 0);
-            totalCarMaterialCostUSD += parseFloat(row.material_purchase_price_usd || 0) * parseFloat(row.material_quantity || 0);
-        }
-        
-        if (row.car_id && row.expense_type === 'بەکارهێنانی گاز') {
-            totalCarGasCost += parseFloat(row.gas_total_cost || 0);
-        }
-        
-        if (!row.car_id || (row.expense_type !== 'بەکارهێنانی کاڵای کۆگا' && row.expense_type !== 'بەکارهێنانی گاز')) {
-            if (row.currency_type === 'دۆلار') {
-                totalOtherExpensesUSD += parseFloat(row.amount_usd || 0);
-            } else {
-                totalOtherExpensesIQD += parseFloat(row.amount_iqd || 0);
+        let totalOtherExpensesIQD = 0, totalOtherExpensesUSD = 0;
+
+        filtered.forEach(row => {
+            if (row.car_id && row.expense_type === 'بەکارهێنانی کاڵای کۆگا') {
+                totalCarMaterialCostIQD += parseFloat(row.material_purchase_price_iqd || 0) * parseFloat(row.material_quantity || 0);
+                totalCarMaterialCostUSD += parseFloat(row.material_purchase_price_usd || 0) * parseFloat(row.material_quantity || 0);
             }
-        }
-    });
-    
-    const totalCarMaterialCostUSDConverted = totalCarMaterialCostIQD / (usdRate / 100) + totalCarMaterialCostUSD;
-    const totalCarGasCostUSD = totalCarGasCost / (usdRate / 100);
-    const totalOtherExpensesUSDConverted = totalOtherExpensesIQD / (usdRate / 100) + totalOtherExpensesUSD;
-    const totalCarExpensesUSD = totalCarMaterialCostUSDConverted + totalCarGasCostUSD;
-    const totalAllExpensesUSD = totalOtherExpensesUSDConverted + totalCarExpensesUSD;
-    
-    // Calculate total IQD and USD expenses
-    const totalExpensesIQD = totalCarMaterialCostIQD + totalCarGasCost + totalOtherExpensesIQD;
-    const totalExpensesUSD = totalCarMaterialCostUSD + totalOtherExpensesUSD;
-    
-    document.getElementById('totalCarMaterialCost').innerHTML = `${formatUSD(totalCarMaterialCostUSDConverted)}`;
-    document.getElementById('totalCarGasCost').innerHTML = `${formatUSD(totalCarGasCostUSD)}`;
-    document.getElementById('totalOtherExpenses').innerHTML = `${formatUSD(totalOtherExpensesUSDConverted)}`;
-    document.getElementById('totalCarExpenses').innerHTML = `${formatUSD(totalAllExpensesUSD)}`;
-    document.getElementById('totalExpensesIQD').innerHTML = `${formatIQD(totalExpensesIQD)}`;
-    document.getElementById('totalExpensesUSD').innerHTML = `${formatUSD(totalExpensesUSD)}`;
-    document.getElementById('usdExchangeRate').innerHTML = `${formatNumber(usdRate)} د.ع`;
-        
+
+            if (row.car_id && row.expense_type === 'بەکارهێنانی گاز') {
+                totalCarGasCost += parseFloat(row.gas_total_cost || 0);
+            }
+
+            if (!row.car_id || (row.expense_type !== 'بەکارهێنانی کاڵای کۆگا' && row.expense_type !== 'بەکارهێنانی گاز')) {
+                if (row.currency_type === 'دۆلار') {
+                    totalOtherExpensesUSD += parseFloat(row.amount_usd || 0);
+                } else if (row.currency_type === 'دینار') {
+                    totalOtherExpensesIQD += parseFloat(row.amount_iqd || 0);
+                } else if (row.currency_type === 'تێکەڵ') {
+                    totalOtherExpensesUSD += parseFloat(row.amount_usd || 0);
+                    totalOtherExpensesIQD += parseFloat(row.amount_iqd || 0);
+                } else {
+                    // Handle any other cases by counting both if they exist
+                    totalOtherExpensesUSD += parseFloat(row.amount_usd || 0);
+                    totalOtherExpensesIQD += parseFloat(row.amount_iqd || 0);
+                }
+            }
+        });
+
+        const totalCarMaterialCostUSDConverted = totalCarMaterialCostIQD / (usdRate / 100) + totalCarMaterialCostUSD;
+        const totalCarGasCostUSD = totalCarGasCost / (usdRate / 100);
+        const totalOtherExpensesUSDConverted = totalOtherExpensesIQD / (usdRate / 100) + totalOtherExpensesUSD;
+        const totalCarExpensesUSD = totalCarMaterialCostUSDConverted + totalCarGasCostUSD;
+        const totalAllExpensesUSD = totalOtherExpensesUSDConverted + totalCarExpensesUSD;
+
+        // Calculate total IQD and USD expenses
+        const totalExpensesIQD = totalCarMaterialCostIQD + totalCarGasCost + totalOtherExpensesIQD;
+        const totalExpensesUSD = totalCarMaterialCostUSD + totalOtherExpensesUSD;
+
+        document.getElementById('totalCarMaterialCost').innerHTML = `${formatUSD(totalCarMaterialCostUSDConverted)}`;
+        document.getElementById('totalCarGasCost').innerHTML = `${formatUSD(totalCarGasCostUSD)}`;
+        document.getElementById('totalOtherExpenses').innerHTML = `${formatUSD(totalOtherExpensesUSDConverted)}`;
+        document.getElementById('totalCarExpenses').innerHTML = `${formatUSD(totalAllExpensesUSD)}`;
+        document.getElementById('totalExpensesIQD').innerHTML = `${formatIQD(totalExpensesIQD)}`;
+        document.getElementById('totalExpensesUSD').innerHTML = `${formatUSD(totalExpensesUSD)}`;
+        document.getElementById('usdExchangeRate').innerHTML = `${formatNumber(usdRate)} د.ع`;
+
         if (!filtered || filtered.length === 0) {
             $('#otherExpensesTable').html(`<tr><td colspan="26" class="text-muted text-center">هیچ زانیارییەک نەدۆزرایەوە</td></tr>`);
-                return;
+            return;
         }
-        
+
         const tableData = filtered.map((row) => [
             row.purpose || '',
             row.person_name || '',
@@ -152,7 +159,7 @@ async function loadOtherExpenses() {
             `<button class="btn btn-sm btn-danger delete-expense" data-id="${row.id}"><i class="fa fa-trash"></i></button> <button class="btn btn-sm btn-primary edit-expense" data-id="${row.id}"><i class="fa fa-edit"></i></button>`,
             row.id
         ]);
-        
+
         otherExpensesTable = new DataTable('#otherExpensesTable', {
             data: tableData,
             columns: [
@@ -215,45 +222,45 @@ async function loadOtherExpenses() {
                 { extend: 'excel', text: 'Excel', className: 'btn btn-sm btn-outline-success' },
                 { extend: 'print', text: 'پرینت', className: 'btn btn-sm btn-outline-primary' }
             ],
-            rowCallback: function(row, data) {
+            rowCallback: function (row, data) {
                 const rowId = data[25];
-                $(row).find('button.delete-expense').attr('data-id', rowId).off('click').on('click', function() {
+                $(row).find('button.delete-expense').attr('data-id', rowId).off('click').on('click', function () {
                     if (typeof deleteExpense === 'function') deleteExpense(rowId);
                 });
-                $(row).find('button.edit-expense').attr('data-id', rowId).off('click').on('click', async function() {
+                $(row).find('button.edit-expense').attr('data-id', rowId).off('click').on('click', async function () {
                     if (typeof openEditModalById === 'function') await openEditModalById(rowId);
                 });
             },
-            initComplete: function() {
-                this.api().columns().every(function() {
+            initComplete: function () {
+                this.api().columns().every(function () {
                     const column = this;
                     const header = $(column.header());
                     if (header.text().includes('کردارەکان')) return;
-                    
+
                     const searchInput = $('<input>')
                         .attr('type', 'text')
                         .attr('placeholder', 'فلتەر...')
                         .addClass('form-control form-control-sm mt-1 column-filter')
                         .css({ 'width': '100%', 'padding': '0.25rem 0.5rem', 'border': '1px solid #ced4da', 'border-radius': '0.25rem' });
                     header.append(searchInput);
-                    searchInput.on('keyup change', function() {
+                    searchInput.on('keyup change', function () {
                         column.search(this.value).draw();
                     });
                 });
             }
         });
-        
+
     } catch (err) {
         console.error('Error loading other expenses:', err);
         $('#otherExpensesTable').html(`<tr><td colspan="26" class="text-danger text-center">هەڵە لە بارکردنی زانیاریەکان</td></tr>`);
     }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     loadOtherExpenses();
     const monthFilter = document.getElementById('monthFilter');
     if (monthFilter) {
-        monthFilter.addEventListener('change', function() {
+        monthFilter.addEventListener('change', function () {
             if (otherExpensesTable) loadOtherExpenses();
         });
     }
@@ -279,7 +286,7 @@ async function populateSelect(url, selectId, selectedId) {
     }
 }
 
-window.openEditModalById = async function(id) {
+window.openEditModalById = async function (id) {
     try {
         const dataSource = window.otherExpensesData || [];
         const row = dataSource.find(r => String(r.id) === String(id));
@@ -287,11 +294,11 @@ window.openEditModalById = async function(id) {
             console.error('openEditModalById: row not found', { id });
             return;
         }
-        
+
         await populateSelect('../process/other_expenses/select_persons.php', 'edit_person_id', row.person_id);
         await populateSelect('../process/other_expenses/select_employees.php', 'edit_employee_id', row.employee_id);
         await populateSelect('../process/other_expenses/select_cars.php', 'edit_car_id', row.car_id);
-        
+
         document.getElementById('edit_id').value = row.id;
         document.getElementById('edit_purpose').value = row.purpose;
         document.getElementById('edit_payment_type').value = row.payment_type;
@@ -304,30 +311,30 @@ window.openEditModalById = async function(id) {
         document.getElementById('edit_exchange_rate').value = row.exchange_rate;
         document.getElementById('edit_remaining_iqd').value = row.remaining_iqd;
         document.getElementById('edit_remaining_usd').value = row.remaining_usd;
-        
+
         if (document.getElementById('edit_gas_liters')) {
             document.getElementById('edit_gas_liters').value = row.gas_liters || '';
         }
-        
+
         if (document.getElementById('edit_expense_type')) {
             document.getElementById('edit_expense_type').value = row.expense_type || '';
             const event = new Event('change');
             document.getElementById('edit_expense_type').dispatchEvent(event);
-            
+
             if (row.expense_type === 'بەکارهێنانی گاز') {
-                setTimeout(() => { 
-                    if (typeof populateGasPurchasePrice === 'function') populateGasPurchasePrice('edit'); 
+                setTimeout(() => {
+                    if (typeof populateGasPurchasePrice === 'function') populateGasPurchasePrice('edit');
                 }, 100);
             }
         }
-        
+
         if (document.getElementById('edit_material_id')) {
             populateSelect('../process/other_expenses/select_materials.php', 'edit_material_id', row.material_id);
             setTimeout(() => {
                 if (row.material_id && typeof populateMaterialPrices === 'function') populateMaterialPrices(row.material_id, 'edit');
             }, 100);
         }
-        
+
         if (document.getElementById('edit_material_quantity')) document.getElementById('edit_material_quantity').value = row.material_quantity || '';
         if (document.getElementById('edit_usage_unit_type')) document.getElementById('edit_usage_unit_type').value = row.usage_unit_type || '';
         if (document.getElementById('edit_material_purchase_price_iqd')) document.getElementById('edit_material_purchase_price_iqd').value = row.material_purchase_price_iqd || '';
@@ -335,12 +342,12 @@ window.openEditModalById = async function(id) {
         if (document.getElementById('edit_material_total_cost')) document.getElementById('edit_material_total_cost').value = row.material_total_cost || '';
         if (document.getElementById('edit_gas_purchase_price_input')) document.getElementById('edit_gas_purchase_price_input').value = row.gas_purchase_price_input || '';
         if (document.getElementById('edit_gas_total_cost')) document.getElementById('edit_gas_total_cost').value = row.gas_total_cost || '';
-        
+
         document.getElementById('edit_date').value = row.date;
-        
+
         const modal = new bootstrap.Modal(document.getElementById('editExpenseModal'));
         modal.show();
-        
+
         if (typeof setupEditExpenseModal === 'function') setupEditExpenseModal();
     } catch (error) {
         console.error('openEditModalById failed', error);
