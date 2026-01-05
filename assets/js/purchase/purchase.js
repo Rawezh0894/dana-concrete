@@ -1,5 +1,5 @@
 // Dynamic bin select based on material
-$(document).on('change', '#material_id', function() {
+$(document).on('change', '#material_id', function () {
     const material = $('#material_id option:selected').text().trim();
     const $bin = $('#bin_id');
     $bin.val('');
@@ -56,18 +56,30 @@ function updateAmountsFor(prefix) {
     const remainingUsdFocused = document.activeElement === document.getElementById(prefix + 'remaining_usd');
     const remainingIqdFocused = document.activeElement === document.getElementById(prefix + 'remaining_iqd');
     const amountIqdFocused = document.activeElement === document.getElementById(prefix + 'amount_iqd');
-    
+
     if (type === 'دینار') {
         $('#' + prefix + 'price').prop('readonly', true).val(0);
         // Allow manual input for amount_iqd when type is دینار
         $('#' + prefix + 'amount_iqd').prop('readonly', false);
         if (!amountIqdFocused) {
-            $('#' + prefix + 'amount_iqd').val(amount.toFixed(2));
+            const flooredAmount = Math.floor(amount / 1000) * 1000;
+            $('#' + prefix + 'amount_iqd').val(flooredAmount.toFixed(0));
         }
+
+        // Also round paid_iqd if not focused to match the request "input of amount should be cut"
+        const paidIqdFocused = document.activeElement === document.getElementById(prefix + 'paid_iqd');
+        if (!paidIqdFocused) {
+            const currentPaidIqd = parseFloat($('#' + prefix + 'paid_iqd').val()) || 0;
+            const flooredPaidIqd = Math.floor(currentPaidIqd / 1000) * 1000;
+            $('#' + prefix + 'paid_iqd').val(flooredPaidIqd.toFixed(0));
+        }
+
         $('#' + prefix + 'remaining_usd').prop('readonly', true);
         $('#' + prefix + 'remaining_iqd').prop('readonly', false);
+        const updated_paid_iqd = parseFloat($('#' + prefix + 'paid_iqd').val()) || 0;
         const paid_usd_to_iqd = paid_usd * exchange_rate / 100;
-        let remaining_iqd = amount_iqd - (paid_iqd + paid_usd_to_iqd);
+        const current_amount_iqd = parseFloat($('#' + prefix + 'amount_iqd').val()) || 0;
+        let remaining_iqd = current_amount_iqd - (updated_paid_iqd + paid_usd_to_iqd);
         if (!remainingIqdFocused) {
             if (remaining_iqd < 0) {
                 remaining_iqd = 0;
@@ -82,8 +94,32 @@ function updateAmountsFor(prefix) {
         $('#' + prefix + 'price').prop('readonly', false).val(amount.toFixed(2));
         $('#' + prefix + 'remaining_iqd').prop('readonly', true);
         $('#' + prefix + 'remaining_usd').prop('readonly', false);
-        const paid_iqd_to_usd = paid_iqd * 100 / exchange_rate;
-        const remaining_usd = price - (paid_usd + paid_iqd_to_usd);
+
+        // Round amount_iqd if not focused
+        if (!amountIqdFocused) {
+            const currentA = parseFloat($('#' + prefix + 'amount_iqd').val()) || 0;
+            if (currentA > 0) {
+                const flooredA = Math.floor(currentA / 1000) * 1000;
+                $('#' + prefix + 'amount_iqd').val(flooredA.toFixed(0));
+            }
+        }
+
+        // Also round paid_iqd if not focused
+        const paidIqdFocused = document.activeElement === document.getElementById(prefix + 'paid_iqd');
+        if (!paidIqdFocused) {
+            const p_iqd = parseFloat($('#' + prefix + 'paid_iqd').val()) || 0;
+            const flooredP = Math.floor(p_iqd / 1000) * 1000;
+            $('#' + prefix + 'paid_iqd').val(flooredP.toFixed(0));
+        }
+
+        const updated_paid_iqd = parseFloat($('#' + prefix + 'paid_iqd').val()) || 0;
+        const paid_iqd_to_usd = updated_paid_iqd * 100 / exchange_rate;
+        const current_price = parseFloat($('#' + prefix + 'price').val()) || 0;
+        const current_paid_usd = parseFloat($('#' + prefix + 'paid_usd').val()) || 0;
+
+        let remaining_usd = current_price - (current_paid_usd + paid_iqd_to_usd);
+        if (remaining_usd < 0) remaining_usd = 0;
+
         if (!remainingUsdFocused) $('#' + prefix + 'remaining_usd').val(remaining_usd.toFixed(2));
         $('#' + prefix + 'remaining_iqd').val(0);
     } else {
@@ -96,7 +132,7 @@ function updateAmountsFor(prefix) {
     }
 }
 
-$(document).ready(function() {
+$(document).ready(function () {
     // Set default date to yesterday
     const dateInput = document.getElementById('date');
     if (dateInput) {
@@ -124,7 +160,7 @@ function exportPurchaseToExcel(format = 'excel') {
     const materialId = $('#filter_material').val() || '';
     const fromDate = $('#filter_from').val() || '';
     const toDate = $('#filter_to').val() || '';
-    
+
     // Create form data
     const formData = new FormData();
     formData.append('company_id', companyId);
@@ -134,7 +170,7 @@ function exportPurchaseToExcel(format = 'excel') {
     formData.append('from_date', fromDate);
     formData.append('to_date', toDate);
     formData.append('export_format', format);
-    
+
     // Show loading message
     Swal.fire({
         title: 'چاوەڕوان بە...',
@@ -144,48 +180,48 @@ function exportPurchaseToExcel(format = 'excel') {
             Swal.showLoading();
         }
     });
-    
+
     // Make AJAX request to export
     fetch('../process/purchase/export_excel.php', {
         method: 'POST',
         body: formData
     })
-    .then(response => {
-        if (response.ok) {
-            return response.blob();
-        }
-        throw new Error('Network response was not ok');
-    })
-    .then(blob => {
-        // Create download link
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
-        const fileExtension = format === 'csv' ? '.csv' : '.xls';
-        a.download = `کڕینەکان_${new Date().toISOString().split('T')[0]}${fileExtension}`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-        
-        // Show success message
-        Swal.fire({
-            icon: 'success',
-            title: 'سەرکەوتوو!',
-            text: 'فایلەکە بە سەرکەوتوویی ئیکسپۆرت کرا',
-            timer: 2000,
-            showConfirmButton: false
+        .then(response => {
+            if (response.ok) {
+                return response.blob();
+            }
+            throw new Error('Network response was not ok');
+        })
+        .then(blob => {
+            // Create download link
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            const fileExtension = format === 'csv' ? '.csv' : '.xls';
+            a.download = `کڕینەکان_${new Date().toISOString().split('T')[0]}${fileExtension}`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+
+            // Show success message
+            Swal.fire({
+                icon: 'success',
+                title: 'سەرکەوتوو!',
+                text: 'فایلەکە بە سەرکەوتوویی ئیکسپۆرت کرا',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        })
+        .catch(error => {
+            console.error('Export error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'هەڵە!',
+                text: 'هەڵەیەک لە ئیکسپۆرتکردن هەیە. تکایە دواتر هەوڵ بدەوە'
+            });
         });
-    })
-    .catch(error => {
-        console.error('Export error:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'هەڵە!',
-            text: 'هەڵەیەک لە ئیکسپۆرتکردن هەیە. تکایە دواتر هەوڵ بدەوە'
-        });
-    });
 }
 
 // Monthly Report Export Function
@@ -197,7 +233,7 @@ function exportPurchaseMonthlyReport(format = 'excel') {
     const materialId = $('#filter_material').val() || '';
     const fromDate = $('#filter_from').val() || '';
     const toDate = $('#filter_to').val() || '';
-    
+
     // Create form data
     const formData = new FormData();
     formData.append('company_id', companyId);
@@ -208,7 +244,7 @@ function exportPurchaseMonthlyReport(format = 'excel') {
     formData.append('to_date', toDate);
     formData.append('export_type', 'monthly_report');
     formData.append('export_format', format);
-    
+
     // Show loading message
     Swal.fire({
         title: 'چاوەڕوان بە...',
@@ -218,48 +254,48 @@ function exportPurchaseMonthlyReport(format = 'excel') {
             Swal.showLoading();
         }
     });
-    
+
     // Make AJAX request to export monthly report
     fetch('../process/purchase/export_excel.php', {
         method: 'POST',
         body: formData
     })
-    .then(response => {
-        if (response.ok) {
-            return response.blob();
-        }
-        throw new Error('Network response was not ok');
-    })
-    .then(blob => {
-        // Create download link
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
-        const fileExtension = format === 'csv' ? '.csv' : '.xls';
-        a.download = `ڕاپۆرتی_مانگانەی_کڕینەکان_و_شۆفێرەکان_${new Date().toISOString().split('T')[0]}${fileExtension}`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-        
-        // Show success message
-        Swal.fire({
-            icon: 'success',
-            title: 'سەرکەوتوو!',
-            text: 'ڕاپۆرتی مانگانە بە سەرکەوتوویی ئیکسپۆرت کرا',
-            timer: 2000,
-            showConfirmButton: false
+        .then(response => {
+            if (response.ok) {
+                return response.blob();
+            }
+            throw new Error('Network response was not ok');
+        })
+        .then(blob => {
+            // Create download link
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            const fileExtension = format === 'csv' ? '.csv' : '.xls';
+            a.download = `ڕاپۆرتی_مانگانەی_کڕینەکان_و_شۆفێرەکان_${new Date().toISOString().split('T')[0]}${fileExtension}`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+
+            // Show success message
+            Swal.fire({
+                icon: 'success',
+                title: 'سەرکەوتوو!',
+                text: 'ڕاپۆرتی مانگانە بە سەرکەوتوویی ئیکسپۆرت کرا',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        })
+        .catch(error => {
+            console.error('Monthly report export error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'هەڵە!',
+                text: 'هەڵەیەک لە ئیکسپۆرتی ڕاپۆرتی مانگانە هەیە. تکایە دواتر هەوڵ بدەوە'
+            });
         });
-    })
-    .catch(error => {
-        console.error('Monthly report export error:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'هەڵە!',
-            text: 'هەڵەیەک لە ئیکسپۆرتی ڕاپۆرتی مانگانە هەیە. تکایە دواتر هەوڵ بدەوە'
-        });
-    });
 }
 
 // CSV Export Functions
@@ -280,7 +316,7 @@ function exportPurchaseSummaryToExcel() {
     const materialId = $('#filter_material').val() || '';
     const fromDate = $('#filter_from').val() || '';
     const toDate = $('#filter_to').val() || '';
-    
+
     // Create form data
     const formData = new FormData();
     formData.append('company_id', companyId);
@@ -291,7 +327,7 @@ function exportPurchaseSummaryToExcel() {
     formData.append('to_date', toDate);
     formData.append('export_type', 'summary');
     formData.append('export_format', 'excel');
-    
+
     // Show loading message
     Swal.fire({
         title: 'چاوەڕوان بە...',
@@ -301,45 +337,45 @@ function exportPurchaseSummaryToExcel() {
             Swal.showLoading();
         }
     });
-    
+
     // Make AJAX request to export summary
     fetch('../process/purchase/export_excel.php', {
         method: 'POST',
         body: formData
     })
-    .then(response => {
-        if (response.ok) {
-            return response.blob();
-        }
-        throw new Error('Network response was not ok');
-    })
-    .then(blob => {
-        // Create download link
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
-        a.download = `کورتەی_کڕینەکان_${new Date().toISOString().split('T')[0]}.xls`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-        
-        // Show success message
-        Swal.fire({
-            icon: 'success',
-            title: 'سەرکەوتوو!',
-            text: 'کورتە بە سەرکەوتوویی ئیکسپۆرت کرا',
-            timer: 2000,
-            showConfirmButton: false
+        .then(response => {
+            if (response.ok) {
+                return response.blob();
+            }
+            throw new Error('Network response was not ok');
+        })
+        .then(blob => {
+            // Create download link
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = `کورتەی_کڕینەکان_${new Date().toISOString().split('T')[0]}.xls`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+
+            // Show success message
+            Swal.fire({
+                icon: 'success',
+                title: 'سەرکەوتوو!',
+                text: 'کورتە بە سەرکەوتوویی ئیکسپۆرت کرا',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        })
+        .catch(error => {
+            console.error('Summary export error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'هەڵە!',
+                text: 'هەڵەیەک لە ئیکسپۆرتی کورتە هەیە. تکایە دواتر هەوڵ بدەوە'
+            });
         });
-    })
-    .catch(error => {
-        console.error('Summary export error:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'هەڵە!',
-            text: 'هەڵەیەک لە ئیکسپۆرتی کورتە هەیە. تکایە دواتر هەوڵ بدەوە'
-        });
-    });
 }
