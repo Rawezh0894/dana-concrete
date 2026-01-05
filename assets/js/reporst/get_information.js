@@ -393,7 +393,7 @@ function renderDashboardCards(data) {
             icon: 'fa-dollar-sign',
             cardClass: 'purchase-materials-card',
             value: formatCurrency(data.data?.material_consumption?.costs?.black_sand || 0, 'USD'),
-            subtitle: 'کۆی تێچووی لمی کەسارەی بەکارهاتوو'
+            subtitle: `تێکڕای نرخ: ${formatCurrency(data.data?.material_consumption?.prices?.black_sand || 0, 'USD')} / تۆن`
         },
         {
             key: 'brown_sand_cost',
@@ -401,7 +401,7 @@ function renderDashboardCards(data) {
             icon: 'fa-dollar-sign',
             cardClass: 'purchase-materials-card',
             value: formatCurrency(data.data?.material_consumption?.costs?.brown_sand || 0, 'USD'),
-            subtitle: 'کۆی تێچووی لمی ڕەشی بەکارهاتوو'
+            subtitle: `تێکڕای نرخ: ${formatCurrency(data.data?.material_consumption?.prices?.brown_sand || 0, 'USD')} / تۆن`
         },
         {
             key: 'gravel_bin3_cost',
@@ -409,7 +409,7 @@ function renderDashboardCards(data) {
             icon: 'fa-dollar-sign',
             cardClass: 'purchase-materials-card',
             value: formatCurrency(data.data?.material_consumption?.costs?.gravel_bin3 || 0, 'USD'),
-            subtitle: 'کۆی تێچووی چەوی ٣ی بەکارهاتوو'
+            subtitle: `تێکڕای نرخ: ${formatCurrency(data.data?.material_consumption?.prices?.gravel || 0, 'USD')} / تۆن`
         },
         {
             key: 'gravel_bin4_cost',
@@ -417,7 +417,7 @@ function renderDashboardCards(data) {
             icon: 'fa-dollar-sign',
             cardClass: 'purchase-materials-card',
             value: formatCurrency(data.data?.material_consumption?.costs?.gravel_bin4 || 0, 'USD'),
-            subtitle: 'کۆی تێچووی چەوی ٤ی بەکارهاتوو'
+            subtitle: `تێکڕای نرخ: ${formatCurrency(data.data?.material_consumption?.prices?.gravel || 0, 'USD')} / تۆن`
         },
         {
             key: 'cement_cem1_cost',
@@ -425,7 +425,7 @@ function renderDashboardCards(data) {
             icon: 'fa-dollar-sign',
             cardClass: 'purchase-materials-card',
             value: formatCurrency(data.data?.material_consumption?.costs?.cement_cem1 || 0, 'USD'),
-            subtitle: 'تێچووی چیمەنتۆ (دەلتا + لاڤارج)'
+            subtitle: `تێکڕای نرخ: ${formatCurrency(data.data?.material_consumption?.prices?.cement || 0, 'USD')} / تۆن`
         },
         {
             key: 'cement_cem2_cost',
@@ -433,7 +433,7 @@ function renderDashboardCards(data) {
             icon: 'fa-dollar-sign',
             cardClass: 'purchase-materials-card',
             value: formatCurrency(data.data?.material_consumption?.costs?.cement_cem2 || 0, 'USD'),
-            subtitle: 'تێچووی چیمەنتۆ (ماس)'
+            subtitle: `تێکڕای نرخ: ${formatCurrency(data.data?.material_consumption?.prices?.cement || 0, 'USD')} / تۆن`
         },
         {
             key: 'additive_cost',
@@ -441,7 +441,7 @@ function renderDashboardCards(data) {
             icon: 'fa-dollar-sign',
             cardClass: 'purchase-materials-card',
             value: formatCurrency(data.data?.material_consumption?.costs?.additive || 0, 'USD'),
-            subtitle: 'تێچووی دەرمانی بەکارهاتوو'
+            subtitle: `تێکڕای نرخ: ${formatCurrency(data.data?.material_consumption?.prices?.additive || 0, 'USD')} / تۆن`
         },
         {
             key: 'total_material_usage_cost',

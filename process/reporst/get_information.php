@@ -930,6 +930,7 @@ try {
     'material_consumption' => [
         'kg' => $material_consumption,
         'tons' => $material_consumption_tons,
+        'prices' => $material_prices,
         'costs' => $material_costs,
         'total_cost_usd' => $total_used_material_cost_usd,
         'current_stock' => $current_stock
