@@ -385,6 +385,71 @@ function renderDashboardCards(data) {
                 (data.data?.material_consumption?.tons?.cement_cem1 || 0) + (data.data?.material_consumption?.tons?.cement_cem2 || 0)
             ),
             subtitle: 'سایلۆی ١ (دەلتا+لاڤارج) + سایلۆی ٢ (ماس) - ستۆک vs بەکارهێنان'
+        },
+        // Material Cost Cards
+        {
+            key: 'black_sand_cost',
+            label: 'تێچووی لمی کەسارە',
+            icon: 'fa-dollar-sign',
+            cardClass: 'purchase-materials-card',
+            value: formatCurrency(data.data?.material_consumption?.costs?.black_sand || 0, 'USD'),
+            subtitle: 'کۆی تێچووی لمی کەسارەی بەکارهاتوو'
+        },
+        {
+            key: 'brown_sand_cost',
+            label: 'تێچووی لمی ڕەش',
+            icon: 'fa-dollar-sign',
+            cardClass: 'purchase-materials-card',
+            value: formatCurrency(data.data?.material_consumption?.costs?.brown_sand || 0, 'USD'),
+            subtitle: 'کۆی تێچووی لمی ڕەشی بەکارهاتوو'
+        },
+        {
+            key: 'gravel_bin3_cost',
+            label: 'تێچووی چەوی چاوی ٣',
+            icon: 'fa-dollar-sign',
+            cardClass: 'purchase-materials-card',
+            value: formatCurrency(data.data?.material_consumption?.costs?.gravel_bin3 || 0, 'USD'),
+            subtitle: 'کۆی تێچووی چەوی ٣ی بەکارهاتوو'
+        },
+        {
+            key: 'gravel_bin4_cost',
+            label: 'تێچووی چەوی چاوی ٤',
+            icon: 'fa-dollar-sign',
+            cardClass: 'purchase-materials-card',
+            value: formatCurrency(data.data?.material_consumption?.costs?.gravel_bin4 || 0, 'USD'),
+            subtitle: 'کۆی تێچووی چەوی ٤ی بەکارهاتوو'
+        },
+        {
+            key: 'cement_cem1_cost',
+            label: 'تێچووی چیمەنتۆی سایلۆی ١',
+            icon: 'fa-dollar-sign',
+            cardClass: 'purchase-materials-card',
+            value: formatCurrency(data.data?.material_consumption?.costs?.cement_cem1 || 0, 'USD'),
+            subtitle: 'تێچووی چیمەنتۆ (دەلتا + لاڤارج)'
+        },
+        {
+            key: 'cement_cem2_cost',
+            label: 'تێچووی چیمەنتۆی سایلۆی ٢',
+            icon: 'fa-dollar-sign',
+            cardClass: 'purchase-materials-card',
+            value: formatCurrency(data.data?.material_consumption?.costs?.cement_cem2 || 0, 'USD'),
+            subtitle: 'تێچووی چیمەنتۆ (ماس)'
+        },
+        {
+            key: 'additive_cost',
+            label: 'تێچووی دەرمان',
+            icon: 'fa-dollar-sign',
+            cardClass: 'purchase-materials-card',
+            value: formatCurrency(data.data?.material_consumption?.costs?.additive || 0, 'USD'),
+            subtitle: 'تێچووی دەرمانی بەکارهاتوو'
+        },
+        {
+            key: 'total_material_usage_cost',
+            label: 'کۆی گشتی تێچووی مەوادەکان',
+            icon: 'fa-calculator',
+            cardClass: 'total-expenses-card',
+            value: formatCurrency(data.data?.material_consumption?.total_cost_usd || 0, 'USD'),
+            subtitle: 'کۆی هەموو مەوادە بەکارهاتووەکان'
         }
     ];
 

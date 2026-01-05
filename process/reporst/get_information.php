@@ -597,6 +597,53 @@ try {
     foreach ($material_consumption as $material => $kg_amount) {
         $material_consumption_tons[$material] = round($kg_amount / 1000, 3);
     }
+
+    // Calculate average purchase prices per ton (USD)
+    $material_prices = [
+        'black_sand' => 0,
+        'brown_sand' => 0,
+        'gravel' => 0,
+        'cement' => 0,
+        'additive' => 0
+    ];
+
+    try {
+        $avg_query = "
+            SELECT 
+                m.name,
+                SUM(CASE WHEN p.type = 'دۆلار' THEN p.price ELSE p.amount_iqd / NULLIF(p.exchange_rate / 100, 0) END) as total_usd,
+                SUM(p.kg) as total_kg
+            FROM purchases p
+            JOIN materials m ON p.material_id = m.id
+            WHERE p.kg > 0
+            GROUP BY m.name
+        ";
+        $stmt_avg = $pdo->query($avg_query);
+        while ($row = $stmt_avg->fetch()) {
+            $price_per_ton = ($row['total_kg'] > 0) ? ($row['total_usd'] / $row['total_kg'] * 1000) : 0;
+            $m_name = $row['name'];
+            if ($m_name == 'لمی کەسارە') $material_prices['black_sand'] = $price_per_ton;
+            elseif ($m_name == 'لمی ڕەش') $material_prices['brown_sand'] = $price_per_ton;
+            elseif ($m_name == 'چەو') $material_prices['gravel'] = $price_per_ton;
+            elseif ($m_name == 'چیمەنتۆ') $material_prices['cement'] = $price_per_ton;
+            elseif ($m_name == 'دەرمان') $material_prices['additive'] = $price_per_ton;
+        }
+    } catch (Exception $e) {
+        error_log("Error calculating material prices: " . $e->getMessage());
+    }
+
+    // Calculate costs for each consumption category
+    $material_costs = [
+        'black_sand' => $material_consumption_tons['black_sand'] * $material_prices['black_sand'],
+        'brown_sand' => $material_consumption_tons['brown_sand'] * $material_prices['brown_sand'],
+        'gravel_bin3' => $material_consumption_tons['gravel_bin3'] * $material_prices['gravel'],
+        'gravel_bin4' => $material_consumption_tons['gravel_bin4'] * $material_prices['gravel'],
+        'cement_cem1' => $material_consumption_tons['cement_cem1'] * $material_prices['cement'],
+        'cement_cem2' => $material_consumption_tons['cement_cem2'] * $material_prices['cement'],
+        'additive' => $material_consumption_tons['additive'] * $material_prices['additive']
+    ];
+
+    $total_used_material_cost_usd = array_sum($material_costs);
     
     // Get current stock levels for comparison
     // سایلۆی یەک: دەلتا + لاڤارج
@@ -883,6 +930,8 @@ try {
     'material_consumption' => [
         'kg' => $material_consumption,
         'tons' => $material_consumption_tons,
+        'costs' => $material_costs,
+        'total_cost_usd' => $total_used_material_cost_usd,
         'current_stock' => $current_stock
     ]
         ]
