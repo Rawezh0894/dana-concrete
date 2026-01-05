@@ -61,8 +61,15 @@ function updateAmountsFor(prefix) {
         $('#' + prefix + 'price').prop('readonly', true).val(0);
         // Allow manual input for amount_iqd when type is دینار
         $('#' + prefix + 'amount_iqd').prop('readonly', false);
+        if (amountIqdFocused && kg > 0) {
+            const calculatedPricePerTon = (amount_iqd / (kg / 1000));
+            $('#' + prefix + 'price_per_kg_iqd').val(calculatedPricePerTon.toFixed(2));
+        }
+
         if (!amountIqdFocused) {
-            const flooredAmount = Math.floor(amount / 1000) * 1000;
+            const currentPricePerTon = parseFloat($('#' + prefix + 'price_per_kg_iqd').val()) || 0;
+            const calculatedAmount = (kg / 1000) * currentPricePerTon;
+            const flooredAmount = Math.floor(calculatedAmount / 1000) * 1000;
             $('#' + prefix + 'amount_iqd').val(flooredAmount.toFixed(0));
         }
 
