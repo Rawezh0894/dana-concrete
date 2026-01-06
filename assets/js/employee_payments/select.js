@@ -27,12 +27,13 @@ $(function () {
 
                 // Color formatting for transaction types
                 let typeColor = 'text-primary';
-                if (row.type.includes('Payment') || row.type.includes('وەصڵ')) typeColor = 'text-success';
-                else if (row.type.includes('Bonus') || row.type.includes('پاداشت')) typeColor = 'text-info';
-                else if (row.type.includes('Penalty') || row.type.includes('سزا')) typeColor = 'text-danger';
-                else if (row.type.includes('Advance') || row.type.includes('پێشەکی')) typeColor = 'text-warning';
+                let typeText = row.type || '';
+                if (typeText.includes('Payment') || typeText.includes('وەصڵ')) typeColor = 'text-success';
+                else if (typeText.includes('Bonus') || typeText.includes('پاداشت')) typeColor = 'text-info';
+                else if (typeText.includes('Penalty') || typeText.includes('سزا')) typeColor = 'text-danger';
+                else if (typeText.includes('Advance') || typeText.includes('پێشەکی')) typeColor = 'text-warning';
 
-                newRow.type = `<span class="fw-bold ${typeColor}">${row.type}</span>`;
+                newRow.type = `<span class="fw-bold ${typeColor}">${typeText}</span>`;
 
                 newRow.actions = `
                     <button class="btn btn-sm btn-primary edit-transaction" data-id="${row.id}" data-json='${JSON.stringify(row)}'><i class="fa fa-edit"></i></button>

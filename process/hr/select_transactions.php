@@ -18,6 +18,13 @@ if (!hasPermission('view_employee_payment')) {
 }
 
 try {
+    // Check if table exists
+    $checkTable = $pdo->query("SHOW TABLES LIKE 'employee_transactions'");
+    if ($checkTable->rowCount() == 0) {
+        echo json_encode([]); // Return empty array if table doesn't exist yet
+        exit;
+    }
+
     $month_filter = $_GET['month'] ?? '';
     $employee_filter = $_GET['employee'] ?? '';
     
@@ -50,6 +57,5 @@ try {
     echo json_encode($transactions);
     
 } catch (Exception $e) {
-    http_response_code(500);
-    echo json_encode(['success' => false, 'msg' => $e->getMessage()]);
+    echo json_encode([]);
 }

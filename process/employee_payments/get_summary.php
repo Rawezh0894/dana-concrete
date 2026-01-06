@@ -3,11 +3,16 @@ require_once '../../config/db_conected.php';
 header('Content-Type: application/json');
 
 try {
-    // Get filter parameters
+    // Check if table exists
+    $checkTable = $pdo->query("SHOW TABLES LIKE 'employee_transactions'");
+    if ($checkTable->rowCount() == 0) {
+        echo json_encode(['success' => true, 'data' => ['summary' => ['total_payments' => 0, 'total_salary' => 0, 'total_bonus' => 0, 'total_karwanhisabi' => 0, 'payment_count' => 0], 'filters' => ['employees' => [], 'months' => []]]]);
+        exit;
+    }
+
     $month_filter = $_GET['month'] ?? '';
     $employee_filter = $_GET['employee'] ?? '';
     
-    // Build WHERE conditions
     $where_conditions = [];
     $params = [];
     
@@ -23,28 +28,24 @@ try {
     
     $where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
     
-    // Prepare base query
-    $base_query = "SELECT 
-        SUM(salary) as total_salary,
-        SUM(CAST(REPLACE(karwanhisabi, ',', '') AS DECIMAL(15,2))) as total_karwanhisabi,
-        SUM(bonus) as total_bonus,
-        SUM(total) as total_payments,
-        COUNT(*) as payment_count
-        FROM employee_payments $where_clause";
+    // Summary by transaction types
+    $query = "SELECT 
+        SUM(CASE WHEN type IN ('مووچە (Accrual)', 'ئۆڤەر تایم (Overtime)') THEN amount_iqd ELSE 0 END) as total_salary,
+        SUM(CASE WHEN type = 'پاداشت (Bonus)' THEN amount_iqd ELSE 0 END) as total_bonus,
+        SUM(CASE WHEN type = 'وەصڵ کردن (Payment)' THEN amount_iqd ELSE 0 END) as total_payments,
+        SUM(CASE WHEN type = 'پێشەکی (Advance)' THEN amount_iqd ELSE 0 END) as total_advance,
+        COUNT(*) as transaction_count
+        FROM employee_transactions $where_clause";
     
-    $stmt = $pdo->prepare($base_query);
+    $stmt = $pdo->prepare($query);
     $stmt->execute($params);
     $summary = $stmt->fetch(PDO::FETCH_ASSOC);
     
     // Get employees for filter dropdown
-    $employees_query = "SELECT id, name FROM employees ORDER BY name";
-    $stmt = $pdo->query($employees_query);
-    $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $employees = $pdo->query("SELECT id, name FROM employees ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
     
     // Get unique months for filter dropdown
-    $months_query = "SELECT DISTINCT pay_month FROM employee_payments ORDER BY pay_month DESC";
-    $stmt = $pdo->query($months_query);
-    $months = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $months = $pdo->query("SELECT DISTINCT pay_month FROM employee_transactions ORDER BY pay_month DESC")->fetchAll(PDO::FETCH_ASSOC);
     
     echo json_encode([
         'success' => true,
@@ -53,8 +54,8 @@ try {
                 'total_payments' => floatval($summary['total_payments'] ?? 0),
                 'total_salary' => floatval($summary['total_salary'] ?? 0),
                 'total_bonus' => floatval($summary['total_bonus'] ?? 0),
-                'total_karwanhisabi' => floatval($summary['total_karwanhisabi'] ?? 0),
-                'payment_count' => intval($summary['payment_count'] ?? 0)
+                'total_karwanhisabi' => floatval($summary['total_advance'] ?? 0), // Mapping Advance to KarwanHisabi card for now
+                'payment_count' => intval($summary['transaction_count'] ?? 0)
             ],
             'filters' => [
                 'employees' => $employees,

@@ -201,45 +201,6 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
 <script src="../assets/js/comon/table-controler.js"></script>
 <script src="../assets/js/employee_payments/add.js"></script>
 <script src="../assets/js/employee_payments/select.js"></script>
-<script src="../assets/js/employee_payments/update.js"></script>
-<script src="../assets/js/employee_payments/delete.js"></script>
 <script src="../assets/js/employee_payments/summary.js"></script>
-<script>
-$(function() {
-    function calcTotalAdd() {
-        var salary = parseFloat($('#salary').val()) || 0;
-        var karwan = $('#karwanhisabi').val().replace(/,/g, '');
-        var karwanVal = parseFloat(karwan) || 0;
-        var bonus = parseFloat($('#bonus').val()) || 0;
-        var total = salary + karwanVal + bonus;
-        $('#total_add').val(total.toLocaleString('en-US') + ' د.ع');
-    }
-    function calcTotalEdit() {
-        var salary = parseFloat($('#edit_salary').val()) || 0;
-        var karwan = $('#edit_karwanhisabi').val().replace(/,/g, '');
-        var karwanVal = parseFloat(karwan) || 0;
-        var bonus = parseFloat($('#edit_bonus').val()) || 0;
-        var total = salary + karwanVal + bonus;
-        $('#total_edit').val(total.toLocaleString('en-US') + ' د.ع');
-    }
-    $('#salary, #karwanhisabi, #bonus').on('input change', calcTotalAdd);
-    $('#edit_salary, #edit_karwanhisabi, #edit_bonus').on('input change', calcTotalEdit);
-    // Auto-fill salary in Add Payment Modal
-    $('#employee_id').on('change', function() {
-        var salary = $(this).find('option:selected').data('salary') || '';
-        $('#salary').val(salary);
-        calcTotalAdd();
-    });
-    // Auto-fill salary in Edit Payment Modal
-    $('#edit_employee_id').on('change', function() {
-        var salary = $(this).find('option:selected').data('salary') || '';
-        $('#edit_salary').val(salary);
-        calcTotalEdit();
-    });
-    // Initial calculation
-    calcTotalAdd();
-    calcTotalEdit();
-});
-</script>
 </body>
 </html>
