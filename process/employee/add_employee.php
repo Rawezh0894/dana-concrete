@@ -37,41 +37,34 @@ try {
     $name = trim($_POST['name'] ?? '');
     $mobile = trim($_POST['mobile'] ?? '');
     $role = trim($_POST['role'] ?? '');
-    // Mapping basic_salary from form to 'salary' column for backward compatibility or use basic_salary
-    // The user's prompt implies full HR. I will save to both if needed, but the table now has 'basic_salary'.
-    // Let's assume 'salary' column holds the main monthly salary.
-    $salary = floatval($_POST['salary'] ?? 0); 
-    
-    // New Fields
-    $job_title = trim($_POST['job_title'] ?? '');
-    $department = trim($_POST['department'] ?? '');
-    $join_date = !empty($_POST['join_date']) ? $_POST['join_date'] : null;
-    $basic_salary = floatval($_POST['basic_salary'] ?? 0);
-    $daily_rate = floatval($_POST['daily_rate'] ?? 0);
-    $overtime_rate = floatval($_POST['overtime_rate'] ?? 0);
-    $status = trim($_POST['status'] ?? 'active');
+    $salary = trim($_POST['salary'] ?? '');
 
-    // If basic salary is provided but salary (legacy) is 0, use basic.
-    if ($salary == 0 && $basic_salary > 0) {
-        $salary = $basic_salary;
+    // Log parsed variables for debugging
+    error_log("Parsed vars: name='$name', mobile='$mobile', role='$role', salary='$salary'");
+
+    // Validate required fields
+    if (empty($name)) {
+        error_log('Employee name is empty');
+        echo json_encode(['success' => false, 'message' => 'ناوی کارمەند پێویستە!']);
+        exit;
     }
 
-    // Image Upload Handling
-    $image_path = null;
-    if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-        $uploadDir = '../../uploads/employees/';
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0777, true);
-        }
-        $fileExt = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
-        $allowed = ['jpg', 'jpeg', 'png', 'gif'];
-        if (in_array($fileExt, $allowed)) {
-            $fileName = uniqid('emp_') . '.' . $fileExt;
-            $destPath = $uploadDir . $fileName;
-            if (move_uploaded_file($_FILES['image']['tmp_name'], $destPath)) {
-                $image_path = 'uploads/employees/' . $fileName;
-            }
-        }
+    if (empty($mobile)) {
+        error_log('Employee mobile is empty');
+        echo json_encode(['success' => false, 'message' => 'ژمارەی مۆبایلی کارمەند پێویستە!']);
+        exit;
+    }
+
+    if (empty($role)) {
+        error_log('Employee role is empty');
+        echo json_encode(['success' => false, 'message' => 'پۆستی کارمەند پێویستە!']);
+        exit;
+    }
+
+    if (empty($salary)) {
+        error_log('Employee salary is empty');
+        echo json_encode(['success' => false, 'message' => 'مووچەی کارمەند پێویستە!']);
+        exit;
     }
 
     // Check for duplicate mobile number
@@ -83,11 +76,9 @@ try {
         exit;
     }
 
-    $sql = "INSERT INTO employees (name, mobile, role, salary, job_title, department, join_date, basic_salary, daily_rate, overtime_rate, status, image) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    $stmt = $pdo->prepare($sql);
-    if ($stmt->execute([$name, $mobile, $role, $salary, $job_title, $department, $join_date, $basic_salary, $daily_rate, $overtime_rate, $status, $image_path])) {
-        error_log('Employee successfully added: Name=' . $name);
+    $stmt = $pdo->prepare('INSERT INTO employees (name, mobile, role, salary) VALUES (?, ?, ?, ?)');
+    if ($stmt->execute([$name, $mobile, $role, $salary])) {
+        error_log('Employee successfully added: Name=' . $name . ', Mobile=' . $mobile . ', Role=' . $role);
         echo json_encode(['success' => true, 'message' => 'کارمەند بەسەرکەوتوویی زیادکرا!']);
     } else {
         error_log('Failed to add employee: Name=' . $name);

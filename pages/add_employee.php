@@ -97,86 +97,32 @@ if (!hasPermission('view_employee')) {
 <div class="modal fade" id="addEmployeeModal" tabindex="-1" aria-labelledby="addEmployeeModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <form id="addEmployeeForm" enctype="multipart/form-data">
+      <form id="addEmployeeForm">
         <div class="modal-header">
-          <h5 class="modal-title" id="addEmployeeModalLabel">زیادکردنی کارمەند (HR Profile)</h5>
+          <h5 class="modal-title" id="addEmployeeModalLabel">زیادکردنی کارمەند</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <div class="row">
-              <!-- Basic Info -->
-              <div class="col-md-6 mb-3">
-                <label for="employee_name" class="form-label">ناوی کارمەند</label>
-                <input type="text" class="form-control" id="employee_name" name="name" required placeholder="ناوی سیانی">
-              </div>
-              <div class="col-md-6 mb-3">
-                <label for="employee_mobile" class="form-label">ژمارەی مۆبایل</label>
-                <input type="text" class="form-control" id="employee_mobile" name="mobile" required placeholder="07xxxxxxxxx">
-              </div>
-
-              <!-- HR Info -->
-              <div class="col-md-6 mb-3">
-                <label for="employee_job_title" class="form-label">ناونیشانی وەزیفی</label>
-                <input type="text" class="form-control" id="employee_job_title" name="job_title" placeholder="نم: ئەندازیار">
-              </div>
-              <div class="col-md-6 mb-3">
-                <label for="employee_department" class="form-label">بەش / Department</label>
-                <select class="form-select" id="employee_department" name="department">
-                  <option value="">-- هەڵبژێرە --</option>
-                  <option value="کارگێڕی">کارگێڕی (Administration)</option>
-                  <option value="ژمێریاری">ژمێریاری (Accounting)</option>
-                  <option value="فرۆشتن">فرۆشتن (Sales)</option>
-                  <option value="بەرهەمهێنان">بەرهەمهێنان (Production)</option>
-                  <option value="گواستنەوە">گواستنەوە (Logistics)</option>
-                  <option value="سایت">سایت (Site)</option>
-                </select>
-              </div>
-
-              <div class="col-md-6 mb-3">
-                <label for="employee_role" class="form-label">ڕۆڵ (Permission)</label>
-                <select class="form-select" id="employee_role" name="role" required>
-                  <option value="">-- هەڵبژێرە --</option>
-                  <option value="شۆفێر">شۆفێر</option>
-                  <option value="موحاسیب">موحاسیب</option>
-                  <option value="وەکیل">وەکیل</option>
-                  <option value="کارمەند">کارمەند</option>
-                  <option value="بەڕێوەبەر">بەڕێوەبەر</option>
-                </select>
-              </div>
-              <div class="col-md-6 mb-3">
-                <label for="employee_join_date" class="form-label">بەرواری دەستبەکاربوون</label>
-                <input type="date" class="form-control" id="employee_join_date" name="join_date">
-              </div>
-
-              <!-- Salary Info -->
-              <hr class="my-3">
-              <h6 class="text-muted mb-3">زانیاری مووچە (Financials)</h6>
-
-              <div class="col-md-6 mb-3">
-                <label for="employee_basic_salary" class="form-label">مووچەی بنەڕەتی (Monthly)</label>
-                <input type="number" class="form-control" id="employee_basic_salary" name="basic_salary" min="0" step="0.01" value="0">
-              </div>
-              <div class="col-md-3 mb-3">
-                <label for="employee_daily_rate" class="form-label">کرێی ڕۆژانە</label>
-                <input type="number" class="form-control" id="employee_daily_rate" name="daily_rate" min="0" step="0.01" value="0">
-              </div>
-              <div class="col-md-3 mb-3">
-                <label for="employee_overtime_rate" class="form-label">پارەی ئۆڤەرتایم (کاتژمێر)</label>
-                <input type="number" class="form-control" id="employee_overtime_rate" name="overtime_rate" min="0" step="0.01" value="0">
-              </div>
-
-              <div class="col-md-6 mb-3">
-                <label for="employee_status" class="form-label">دۆخی کارمەند</label>
-                <select class="form-select" id="employee_status" name="status">
-                  <option value="active" selected>چالاک (Active)</option>
-                  <option value="on_leave">مۆڵەت (On Leave)</option>
-                  <option value="inactive">ناچالاک (Inactive)</option>
-                </select>
-              </div>
-              <div class="col-md-6 mb-3">
-                <label for="employee_image" class="form-label">وێنەی کارمەند</label>
-                <input type="file" class="form-control" id="employee_image" name="image" accept="image/*">
-              </div>
+          <div class="mb-3">
+            <label for="employee_name" class="form-label">ناوی کارمەند</label>
+            <input type="text" class="form-control" id="employee_name" name="name" required placeholder="ناوی کارمەند بنووسە">
+          </div>
+          <div class="mb-3">
+            <label for="employee_mobile" class="form-label">ژمارەی مۆبایل</label>
+            <input type="text" class="form-control" id="employee_mobile" name="mobile" required placeholder="ژمارەی مۆبایل بنووسە">
+          </div>
+          <div class="mb-3">
+            <label for="employee_role" class="form-label">ڕۆڵ</label>
+            <select class="form-select" id="employee_role" name="role" required>
+              <option value="">-- هەلبژێرە --</option>
+              <option value="شۆفێر">شۆفێر</option>
+              <option value="موحاسیب">موحاسیب</option>
+              <option value="وەکیل">وەکیل</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="employee_salary" class="form-label">موچە</label>
+            <input type="number" class="form-control" id="employee_salary" name="salary" min="0" step="0.01" required placeholder="موچە بنووسە" value="0">
           </div>
         </div>
         <div class="modal-footer">
