@@ -1,35 +1,26 @@
-(function (global) {
-    const $ = global.jQuery || global.$;
-    const swalAlert = global.swalAlert;
-    const console = global.console;
-    const doc = global.document;
-
-    if (!$ || !doc) return;
-
-    $(function () {
-        $('#addPaymentForm').on('submit', function (e) {
-            e.preventDefault();
-            var formData = $(this).serialize();
-            $.post('../process/employee_payments/add.php', formData, function (response) {
-                if (response.success) {
-                    if (typeof swalAlert === 'function') swalAlert('سەرکەوتوو', response.message || 'تۆمارکرا', 'success');
-                    $('#addPaymentForm')[0].reset();
-                    if (typeof global.loadPayments === 'function') global.loadPayments();
-                    if (global.employeePaymentsSummary && typeof global.employeePaymentsSummary.loadSummaryData === 'function') {
-                        global.employeePaymentsSummary.loadSummaryData();
-                    }
-                    $('#addPayrollModal').modal('hide');
-                } else {
-                    if (typeof swalAlert === 'function') swalAlert('هەڵە', response.message || 'هەڵەیەک هەیە', 'error');
+$(function () {
+    $('#addPaymentForm').on('submit', function (e) {
+        e.preventDefault();
+        var formData = $(this).serialize();
+        $.post('../process/employee_payments/add.php', formData, function (response) {
+            if (response.success) {
+                swalAlert('سەرکەوتوو', 'پارەدان بەسەرکەوتوویی زیادکرا!', 'success');
+                $('#addPaymentForm')[0].reset();
+                if (window.loadPayments) window.loadPayments();
+                if (window.employeePaymentsSummary && window.employeePaymentsSummary.loadSummaryData) {
+                    window.employeePaymentsSummary.loadSummaryData();
                 }
-            }, 'json').fail(function (xhr) {
-                if (console && console.error) console.error('AJAX Error:', xhr.responseText);
-                let msg = 'هەڵەیەک هەیە لە پەیوەندیدا.';
-                if (xhr.responseText) {
-                    msg += '\n' + xhr.responseText;
-                }
-                if (typeof swalAlert === 'function') swalAlert('هەڵە', msg, 'error');
-            });
+                $('#addPaymentModal').modal('hide');
+            } else {
+                swalAlert('هەڵە', response.message || 'هەڵەیەک هەیە', 'error');
+            }
+        }, 'json').fail(function (xhr) {
+            console.error('AJAX Error:', xhr.responseText);
+            let msg = 'هەڵەیەک هەیە لە پەیوەندیدا.';
+            if (xhr.responseText) {
+                msg += '\n' + xhr.responseText;
+            }
+            swalAlert('هەڵە', msg, 'error');
         });
     });
-})(globalThis);
+});

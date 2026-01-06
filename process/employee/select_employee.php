@@ -6,7 +6,6 @@ ini_set('error_log', __DIR__ . '/../../php-error.log');
 
 require_once '../../config/db_conected.php';
 require_once '../../config/permissions.php';
-require_once '../../config/employee_ledger_schema.php';
 
 // Log session data for debugging
 error_log('SESSION: ' . print_r($_SESSION, true));
@@ -28,13 +27,12 @@ if (!hasPermission('view_employee')) {
 }
 
 try {
-    ensureEmployeeLedgerSchema($pdo);
     // Get employees data
-    $stmt = $pdo->query('SELECT id, name, mobile, role, salary, balance FROM employees ORDER BY id DESC');
+    $stmt = $pdo->query('SELECT id, name, mobile, role, salary FROM employees ORDER BY id DESC');
     $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     // Get summary statistics
-    $summary_stmt = $pdo->query('SELECT COUNT(*) as total_employees, SUM(salary) as total_salary, SUM(balance) as total_balance FROM employees');
+    $summary_stmt = $pdo->query('SELECT COUNT(*) as total_employees, SUM(salary) as total_salary FROM employees');
     $summary = $summary_stmt->fetch(PDO::FETCH_ASSOC);
     
     error_log('Employees retrieved successfully: Count=' . count($employees));
@@ -42,8 +40,7 @@ try {
         'employees' => $employees,
         'summary' => [
             'total_employees' => (int)($summary['total_employees'] ?? 0),
-            'total_salary' => (float)($summary['total_salary'] ?? 0),
-            'total_balance' => (float)($summary['total_balance'] ?? 0)
+            'total_salary' => (float)($summary['total_salary'] ?? 0)
         ]
     ]);
     
