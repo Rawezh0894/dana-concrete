@@ -107,118 +107,87 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
         </div>
     </div>
     <div class="table-responsive">
-        <table class="table table-bordered table-hover align-middle text-center" id="employeePaymentsTable">
+        <table class="table table-bordered table-hover align-middle text-center" id="hrTransactionsTable">
             <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
                 <tr>
                     <th>#</th>
-                    <th>کارمەند</th>
-                    <th>مووچە (د.ع)</th>
-                    <th>کاروانحیسابی</th>
-                    <th>بەخشیش (د.ع)</th>
-                    <th>کۆی گشتی</th>
-                    <th>مانگ</th>
                     <th>بەروار</th>
+                    <th>کارمەند</th>
+                    <th>جۆری مامەڵە</th>
+                    <th>بڕ (دینار)</th>
+                    <th>بڕ (دۆلار)</th>
+                    <th>مانگ</th>
+                    <th>تێبینی</th>
+                    <th>بەرهەمهێنەر</th>
                     <th>کردارەکان</th>
                 </tr>
             </thead>
             <tbody>
-                <!-- Payments will be loaded here by JS -->
+                <!-- Transactions will be loaded here by JS -->
             </tbody>
         </table>
     </div>
 </div>
-<!-- Add Payment Modal -->
-<div class="modal fade" id="addPaymentModal" tabindex="-1" aria-labelledby="addPaymentModalLabel" aria-hidden="true">
+
+<!-- Add/Edit HR Transaction Modal -->
+<div class="modal fade" id="hrTransactionModal" tabindex="-1" aria-labelledby="hrTransactionModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <form id="addPaymentForm">
+      <form id="hrTransactionForm">
         <div class="modal-header">
-          <h5 class="modal-title" id="addPaymentModalLabel">زیادکردنی پارەدان</h5>
+          <h5 class="modal-title" id="hrTransactionModalLabel">مامەڵەی نوێ (HR)</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
+          <input type="hidden" id="transaction_id" name="id">
           <div class="mb-3">
             <label for="employee_id" class="form-label">کارمەند</label>
-            <select class="form-select" id="employee_id" name="employee_id" required>
-              <option value="">-- هەلبژێرە --</option>
+            <select class="form-select select2-enable" id="employee_id" name="employee_id" required>
+              <option value="">-- هەڵبژێرە --</option>
               <?php foreach($employees as $emp): ?>
                 <option value="<?= $emp['id'] ?>" data-salary="<?= $emp['salary'] ?>"><?= htmlspecialchars($emp['name']) ?></option>
               <?php endforeach; ?>
             </select>
           </div>
           <div class="mb-3">
-            <label for="salary" class="form-label">مووچە (د.ع)</label>
-            <input type="text" class="form-control" id="salary" name="salary"  required>
-          </div>
-          <div class="mb-3">
-            <label for="karwanhisabi" class="form-label">کاروانحیسابی</label>
-            <input type="text" class="form-control" id="karwanhisabi" name="karwanhisabi" required>
-          </div>
-          <div class="mb-3">
-            <label for="bonus" class="form-label">بەخشیش (د.ع)</label>
-            <input type="number" class="form-control" id="bonus" name="bonus" min="0" step="0.01" value="0">
-          </div>
-          <div class="mb-3">
-            <label for="total_add" class="form-label">کۆی گشتی (مووچە + کاروانحیسابی + بەخشیش)</label>
-            <input type="text" class="form-control" id="total_add" readonly>
-          </div>
-          <div class="mb-3">
-            <label for="pay_month" class="form-label">مانگ</label>
-            <input type="month" class="form-control" id="pay_month" name="pay_month" required>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
-          <button type="submit" class="btn btn-success" style="background: var(--seafoam-green); font-weight: bold;">زیادکردن</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-<!-- Edit Payment Modal -->
-<div class="modal fade" id="editPaymentModal" tabindex="-1" aria-labelledby="editPaymentModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <form id="editPaymentForm">
-        <div class="modal-header">
-          <h5 class="modal-title" id="editPaymentModalLabel">دەستکاری پارەدان</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <input type="hidden" id="edit_payment_id" name="id">
-          <div class="mb-3">
-            <label for="edit_employee_id" class="form-label">کارمەند</label>
-            <select class="form-select" id="edit_employee_id" name="employee_id" required>
-              <option value="">-- هەلبژێرە --</option>
-              <?php foreach($employees as $emp): ?>
-                <option value="<?= $emp['id'] ?>" data-salary="<?= $emp['salary'] ?>"><?= htmlspecialchars($emp['name']) ?></option>
-              <?php endforeach; ?>
+            <label for="transaction_type" class="form-label">جۆری مامەڵە</label>
+            <select class="form-select" id="transaction_type" name="type" required>
+              <option value="مووچە (Accrual)">مووچە (Accrual)</option>
+              <option value="وەصڵ کردن (Payment)">وەصڵ کردن (Payment)</option>
+              <option value="پاداشت (Bonus)">پاداشت (Bonus)</option>
+              <option value="ئۆڤەر تایم (Overtime)">ئۆڤەر تایم (Overtime)</option>
+              <option value="سزا (Penalty)">سزا (Penalty)</option>
+              <option value="پێشەکی (Advance)">پێشەکی (Advance)</option>
             </select>
           </div>
-          <div class="mb-3">
-            <label for="edit_salary" class="form-label">مووچە (د.ع)</label>
-            <input type="text" class="form-control" id="edit_salary" name="salary" required>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="amount_iqd" class="form-label">بڕ (دینار)</label>
+              <input type="number" class="form-control" id="amount_iqd" name="amount_iqd" value="0">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="amount_usd" class="form-label">بڕ (دۆلار)</label>
+              <input type="number" class="form-control" id="amount_usd" name="amount_usd" value="0" step="0.01">
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="pay_month" class="form-label">مانگ</label>
+              <input type="month" class="form-control" id="pay_month" name="pay_month" value="<?= date('Y-m') ?>" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="transaction_date" class="form-label">بەروار</label>
+              <input type="date" class="form-control" id="transaction_date" name="date" value="<?= date('Y-m-d') ?>" required>
+            </div>
           </div>
           <div class="mb-3">
-            <label for="edit_karwanhisabi" class="form-label">کاروانحیسابی</label>
-            <input type="text" class="form-control" id="edit_karwanhisabi" name="karwanhisabi" required>
-          </div>
-          <div class="mb-3">
-            <label for="edit_bonus" class="form-label">بەخشیش (د.ع)</label>
-            <input type="number" class="form-control" id="edit_bonus" name="bonus" min="0" step="0.01" value="0">
-          </div>
-          <div class="mb-3">
-            <label for="total_edit" class="form-label">کۆی گشتی (مووچە + کاروانحیسابی + بەخشیش)</label>
-            <input type="text" class="form-control" id="total_edit" readonly>
-          </div>
-          <div class="mb-3">
-            <label for="edit_pay_month" class="form-label">مانگ</label>
-            <input type="month" class="form-control" id="edit_pay_month" name="pay_month" required>
+            <label for="note" class="form-label">تێبینی</label>
+            <textarea class="form-control" id="note" name="note" rows="2"></textarea>
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
-          <button type="submit" class="btn btn-primary">نوێکردنەوە</button>
+          <button type="submit" class="btn btn-success" id="saveTransactionBtn">پاشەکەوتکردن</button>
         </div>
       </form>
     </div>

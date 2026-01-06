@@ -84,6 +84,8 @@ if (!hasPermission('view_employee')) {
                     <th>ژمارەی مۆبایل</th>
                     <th>ڕۆڵ</th>
                     <th>موچە (د.ع)</th>
+                    <th>باڵانس (دینار)</th>
+                    <th>باڵانس (دۆلار)</th>
                     <th>کردارەکان</th>
                 </tr>
             </thead>
