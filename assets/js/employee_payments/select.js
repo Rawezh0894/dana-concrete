@@ -20,9 +20,10 @@ $(function () {
                 TableController.render('#hrTransactionsTable', [], columns);
                 return;
             }
-            res.forEach(row => {
-                row.amount_iqd = parseFloat(row.amount_iqd).toLocaleString() + ' د.ع';
-                row.amount_usd = '$' + parseFloat(row.amount_usd).toLocaleString();
+            const displayData = res.map(row => {
+                const newRow = { ...row };
+                newRow.amount_iqd = (parseFloat(row.amount_iqd) || 0).toLocaleString() + ' د.ع';
+                newRow.amount_usd = '$' + (parseFloat(row.amount_usd) || 0).toLocaleString();
 
                 // Color formatting for transaction types
                 let typeColor = 'text-primary';
@@ -31,14 +32,15 @@ $(function () {
                 else if (row.type.includes('Penalty') || row.type.includes('سزا')) typeColor = 'text-danger';
                 else if (row.type.includes('Advance') || row.type.includes('پێشەکی')) typeColor = 'text-warning';
 
-                row.type = `<span class="fw-bold ${typeColor}">${row.type}</span>`;
+                newRow.type = `<span class="fw-bold ${typeColor}">${row.type}</span>`;
 
-                row.actions = `
+                newRow.actions = `
                     <button class="btn btn-sm btn-primary edit-transaction" data-id="${row.id}" data-json='${JSON.stringify(row)}'><i class="fa fa-edit"></i></button>
                     <button class="btn btn-sm btn-danger delete-transaction" data-id="${row.id}"><i class="fa fa-trash"></i></button>
                 `;
+                return newRow;
             });
-            TableController.renderWithPagination('#hrTransactionsTable', res, columns);
+            TableController.renderWithPagination('#hrTransactionsTable', displayData, columns);
         }, 'json');
     }
 
@@ -47,8 +49,8 @@ $(function () {
         $('#transaction_id').val(data.id);
         $('#employee_id').val(data.employee_id).trigger('change');
         $('#transaction_type').val(data.type);
-        $('#amount_iqd').val(data.amount_iqd.replace(/[^0-9.]/g, ''));
-        $('#amount_usd').val(data.amount_usd.replace(/[^0-9.]/g, ''));
+        $('#amount_iqd').val(data.amount_iqd || 0);
+        $('#amount_usd').val(data.amount_usd || 0);
         $('#pay_month').val(data.pay_month);
         $('#transaction_date').val(data.date);
         $('#note').val(data.note);

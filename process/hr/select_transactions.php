@@ -36,7 +36,7 @@ try {
     
     $where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
     
-    $sql = "SELECT t.*, e.name as employee_name, u.full_name as created_by_name
+    $sql = "SELECT t.*, e.name as employee_name, u.username as created_by_name
             FROM employee_transactions t
             JOIN employees e ON t.employee_id = e.id
             LEFT JOIN users u ON t.created_by = u.id
