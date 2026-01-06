@@ -2,10 +2,20 @@ $(function () {
     function formatSalary(salary) {
         return Number(salary).toLocaleString('en-US') + ' د.ع';
     }
+    function formatBalance(balance) {
+        const n = Number(balance || 0);
+        const abs = Math.abs(n).toLocaleString('en-US');
+        if (n > 0) return `<span class="text-success fw-bold">+${abs} د.ع</span>`;
+        if (n < 0) return `<span class="text-danger fw-bold">-${abs} د.ع</span>`;
+        return `<span class="text-muted">0 د.ع</span>`;
+    }
 
     function updateSummaryCards(summary) {
         $('#total_employees').text(summary.total_employees.toLocaleString());
         $('#total_salary').text(formatSalary(summary.total_salary));
+        if ($('#total_balance').length) {
+            $('#total_balance').html(formatBalance(summary.total_balance));
+        }
 
         // Convert salary to dollars if dollar rate is available
         const dollarRateElement = $('#dollar_rate');
@@ -23,10 +33,10 @@ $(function () {
     }
 
     function loadEmployees() {
-        TableController.showLoading('#employeeTable', ['#', 'name', 'mobile', 'role', 'salary', 'actions']);
+        TableController.showLoading('#employeeTable', ['#', 'name', 'mobile', 'role', 'salary', 'balance', 'actions']);
         $.get('../process/employee/select_employee.php', function (res) {
             if (!res || !res.employees || !Array.isArray(res.employees)) {
-                TableController.render('#employeeTable', [], ['#', 'name', 'mobile', 'role', 'salary', 'actions']);
+                TableController.render('#employeeTable', [], ['#', 'name', 'mobile', 'role', 'salary', 'balance', 'actions']);
                 updateSummaryCards({ total_employees: 0, total_salary: 0 });
                 return;
             }
@@ -41,12 +51,13 @@ $(function () {
             res.employees.forEach(emp => {
                 const rawSalary = emp.salary;
                 emp.salary = formatSalary(emp.salary);
+                emp.balance = formatBalance(emp.balance);
                 emp.actions = `
                     <button class="btn btn-sm btn-primary edit-employee" data-id="${emp.id}" data-name="${emp.name}" data-mobile="${emp.mobile}" data-role="${emp.role}" data-salary="${rawSalary}"><i class="fa fa-edit"></i></button>
                     <button class="btn btn-sm btn-danger delete-employee" data-id="${emp.id}"><i class="fa fa-trash"></i></button>
                 `;
             });
-            TableController.renderWithPagination('#employeeTable', res.employees, ['#', 'name', 'mobile', 'role', 'salary', 'actions']);
+            TableController.renderWithPagination('#employeeTable', res.employees, ['#', 'name', 'mobile', 'role', 'salary', 'balance', 'actions']);
         }, 'json');
     }
     loadEmployees();

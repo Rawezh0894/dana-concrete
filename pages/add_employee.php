@@ -52,6 +52,16 @@ if (!hasPermission('view_employee')) {
             </div>
         </div>
         <div class="col-md-4 mb-3">
+            <div class="card text-center shadow card-gradient-purple card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-balance-scale card-icon"></i>
+                    <h6 class="card-title">کۆی باڵانس</h6>
+                    <div class="fs-4 fw-bold" id="total_balance">0</div>
+                    <small class="text-light">دیناری عێراقی</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
             <div class="card text-center shadow card-gradient-success card-animate-hover">
                 <div class="card-body">
                     <i class="fas fa-money-bill-wave card-icon"></i>
@@ -84,6 +94,7 @@ if (!hasPermission('view_employee')) {
                     <th>ژمارەی مۆبایل</th>
                     <th>ڕۆڵ</th>
                     <th>موچە (د.ع)</th>
+                    <th>باڵانس (د.ع)</th>
                     <th>کردارەکان</th>
                 </tr>
             </thead>
@@ -123,6 +134,11 @@ if (!hasPermission('view_employee')) {
           <div class="mb-3">
             <label for="employee_salary" class="form-label">موچە</label>
             <input type="number" class="form-control" id="employee_salary" name="salary" min="0" step="0.01" required placeholder="موچە بنووسە" value="0">
+          </div>
+          <div class="mb-3">
+            <label for="opening_balance" class="form-label">باڵانسی سەرەتا (د.ع)</label>
+            <input type="number" class="form-control" id="opening_balance" name="opening_balance" step="0.01" value="0" placeholder="ئەگەر لەسەر کۆمپانیا ماوە (+) ، ئەگەر قەرزی کۆمپانیایە (-)">
+            <small class="text-muted">(+): کۆمپانیا قەرزاری کارمەندە | (-): کارمەند قەرزاری کۆمپانیا</small>
           </div>
         </div>
         <div class="modal-footer">
