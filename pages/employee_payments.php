@@ -42,101 +42,154 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
 <?php include '../includes/navbar.php'; ?>
 <?php include '../includes/sidebar.php'; ?>
 <div class="container-fluid py-5">
+    
+    <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">پارەدان بە کارمەندەکان</h2>
-        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addPaymentModal" style="background: var(--seafoam-green); font-weight: bold;">+ زیادکردنی پارەدان</button>
-    </div>
-    
-    <!-- Summary Cards -->
-    <div class="row mb-4" id="summary-cards">
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card text-center shadow  card-gradient-info card-animate-hover">
-                <div class="card-body">
-                    <i class="fas fa-money-bill-wave card-icon"></i>
-                    <h6 class="card-title">کۆی پارەدان</h6>
-                    <div class="fs-4 fw-bold" id="total-payments">0 د.ع</div>
-                    <small class="text-light">کۆی پارەدان بە کارمەندەکان</small>
-                </div>
-            </div>
+        <div>
+            <h2 class="mb-1" style="color: var(--seafoam-green); font-weight: bold;">مووچە و باڵانسی کارمەندان (Payroll & HR)</h2>
+            <p class="text-muted">بەڕێوەبردنی مووچە، پاداشت، و باڵانسی کارمەندەکان</p>
         </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card text-center shadow  card-gradient-success card-animate-hover">
-                <div class="card-body">
-                    <i class="fas fa-user-tie card-icon"></i>
-                    <h6 class="card-title">کۆی مووچە</h6>
-                    <div class="fs-4 fw-bold" id="total-salary">0 د.ع</div>
-                    <small class="text-light">کۆی مووچەی کارمەندەکان</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card text-center shadow  card-gradient-warning card-animate-hover">
-                <div class="card-body">
-                    <i class="fas fa-gift card-icon"></i>
-                    <h6 class="card-title">کۆی بەخشیش</h6>
-                    <div class="fs-4 fw-bold" id="total-bonus">0 د.ع</div>
-                    <small class="text-light">کۆی بەخشیشی کارمەندەکان</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card text-center shadow  card-gradient-purple card-animate-hover">
-                <div class="card-body">
-                    <i class="fas fa-calculator card-icon"></i>
-                    <h6 class="card-title">کۆی کاروانحیسابی</h6>
-                    <div class="fs-4 fw-bold" id="total-karwanhisabi">0 د.ع</div>
-                    <small class="text-light">کۆی کاروانحیسابی</small>
-                </div>
-            </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#makePaymentModal">
+                <i class="fas fa-hand-holding-usd"></i> خەرجکردنی پارە (Payment)
+            </button>
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addPaymentModal" style="background: var(--seafoam-green); font-weight: bold;">
+                <i class="fas fa-file-invoice-dollar"></i> تۆمارکردنی مووچە (Payroll)
+            </button>
         </div>
     </div>
     
-    <!-- Filters -->
-    <div class="row mb-4">
-        <div class="col-md-6 mb-3">
-            <label for="month-filter" class="form-label">فلتەر بە مانگ:</label>
-            <select class="form-select" id="month-filter">
-                <option value="">هەموو مانگەکان</option>
-            </select>
+    <!-- Summary Cards (Balances) -->
+    <div class="row mb-4" id="balance-cards">
+        <!-- Will be populated by JS to show Total Company Debt / Total Paid this month etc -->
+         <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-center shadow card-gradient-info card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-wallet card-icon"></i>
+                    <h6 class="card-title">کۆی باڵانسی کارمەندان (قەرز)</h6>
+                    <div class="fs-4 fw-bold" id="total-balance-debt">0 د.ع</div>
+                    <small class="text-light">بڕی پارەی ماوە لای کۆمپانیا</small>
+                </div>
+            </div>
         </div>
-        <div class="col-md-6 mb-3">
-            <label for="employee-filter" class="form-label">فلتەر بە کارمەند:</label>
-            <select class="form-select" id="employee-filter">
-                <option value="">هەموو کارمەندەکان</option>
-            </select>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-center shadow card-gradient-success card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-file-invoice card-icon"></i>
+                    <h6 class="card-title">کۆی مووچەی ئەم مانگە</h6>
+                    <div class="fs-4 fw-bold" id="total-payroll-month">0 د.ع</div>
+                    <small class="text-light">بەپێی پسووڵەکانی مووچە</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-center shadow card-gradient-warning card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-money-bill-wave-alt card-icon"></i>
+                    <h6 class="card-title">کۆی پارەی دراو (Cash Out)</h6>
+                    <div class="fs-4 fw-bold" id="total-paid-month">0 د.ع</div>
+                    <small class="text-light">لە ئەم مانگەدا</small>
+                </div>
+            </div>
         </div>
     </div>
-    <div class="table-responsive">
-        <table class="table table-bordered table-hover align-middle text-center" id="employeePaymentsTable">
-            <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
-                <tr>
-                    <th>#</th>
-                    <th>کارمەند</th>
-                    <th>مووچە (د.ع)</th>
-                    <th>کاروانحیسابی</th>
-                    <th>بەخشیش (د.ع)</th>
-                    <th>کۆی گشتی</th>
-                    <th>مانگ</th>
-                    <th>بەروار</th>
-                    <th>کردارەکان</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Payments will be loaded here by JS -->
-            </tbody>
-        </table>
+
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-tabs mb-3" id="hrTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="payroll-tab" data-bs-toggle="tab" data-bs-target="#payroll" type="button" role="tab" aria-selected="true">
+                <i class="fas fa-list-alt"></i> پسووڵەکانی مووچە (Payrolls)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="ledger-tab" data-bs-toggle="tab" data-bs-target="#ledger" type="button" role="tab" aria-selected="false">
+                <i class="fas fa-book"></i> تۆماری جووڵەکان (Ledger)
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="hrTabsContent">
+        
+        <!-- Payroll Tab (Existing Table) -->
+        <div class="tab-pane fade show active" id="payroll" role="tabpanel" aria-labelledby="payroll-tab">
+            <!-- Filters -->
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <select class="form-select" id="month-filter">
+                        <option value="">هەموو مانگەکان</option>
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <select class="form-select" id="employee-filter">
+                        <option value="">هەموو کارمەندەکان</option>
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle text-center" id="employeePaymentsTable">
+                    <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
+                        <tr>
+                            <th>#</th>
+                            <th>کارمەند</th>
+                            <th>مووچە (د.ع)</th>
+                            <th>کاروانحیسابی</th>
+                            <th>بەخشیش (د.ع)</th>
+                            <th>کۆی شایستە</th>
+                            <th>مانگ</th>
+                            <th>بەروار</th>
+                            <th>کردارەکان</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Payments loaded by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Ledger Tab (New) -->
+        <div class="tab-pane fade" id="ledger" role="tabpanel" aria-labelledby="ledger-tab">
+             <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle text-center" id="ledgerTable">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>#</th>
+                            <th>کارمەند</th>
+                            <th>جۆر (Type)</th>
+                            <th>بڕ (Amount)</th>
+                            <th>کردار (Operation)</th>
+                            <th>بەروار</th>
+                            <th>تێبینی</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ledgerTableBody">
+                        <!-- Loaded via JS -->
+                        <tr><td colspan="7">تکایە چاوەڕوان بە...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
+    
 </div>
-<!-- Add Payment Modal -->
+
+<!-- Add Payroll Modal (Accrual) -->
 <div class="modal fade" id="addPaymentModal" tabindex="-1" aria-labelledby="addPaymentModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <form id="addPaymentForm">
         <div class="modal-header">
-          <h5 class="modal-title" id="addPaymentModalLabel">زیادکردنی پارەدان</h5>
+          <h5 class="modal-title" id="addPaymentModalLabel">تۆمارکردنی مووچە (Accrual)</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
+          <div class="alert alert-info">
+             ئەم بەشە بۆ دیاریکردنی شایستەی داراییە (Salary Accrual)، وەک قەرز دەچێتە سەر باڵانسی کارمەند.
+          </div>
           <div class="mb-3">
             <label for="employee_id" class="form-label">کارمەند</label>
             <select class="form-select" id="employee_id" name="employee_id" required>
@@ -146,130 +199,208 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
               <?php endforeach; ?>
             </select>
           </div>
-          <div class="mb-3">
-            <label for="salary" class="form-label">مووچە (د.ع)</label>
-            <input type="text" class="form-control" id="salary" name="salary"  required>
+          <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="salary" class="form-label">مووچەی بنەڕەتی (د.ع)</label>
+                <input type="number" class="form-control" id="salary" name="salary" step="any" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="karwanhisabi" class="form-label">کاروانحیسابی / دەرماڵە</label>
+                <input type="number" class="form-control" id="karwanhisabi" name="karwanhisabi" step="any" value="0">
+              </div>
           </div>
           <div class="mb-3">
-            <label for="karwanhisabi" class="form-label">کاروانحیسابی</label>
-            <input type="text" class="form-control" id="karwanhisabi" name="karwanhisabi" required>
+            <label for="bonus" class="form-label">بەخشیش / ئۆڤەرتایم (د.ع)</label>
+            <input type="number" class="form-control" id="bonus" name="bonus" step="any" value="0">
           </div>
           <div class="mb-3">
-            <label for="bonus" class="form-label">بەخشیش (د.ع)</label>
-            <input type="number" class="form-control" id="bonus" name="bonus" min="0" step="0.01" value="0">
+            <label for="total_add" class="form-label fw-bold">کۆی گشتی (دەچێتە سەر باڵانس)</label>
+            <input type="text" class="form-control fw-bold" id="total_add" readonly>
           </div>
           <div class="mb-3">
-            <label for="total_add" class="form-label">کۆی گشتی (مووچە + کاروانحیسابی + بەخشیش)</label>
-            <input type="text" class="form-control" id="total_add" readonly>
-          </div>
-          <div class="mb-3">
-            <label for="pay_month" class="form-label">مانگ</label>
+            <label for="pay_month" class="form-label">مانگی مووچە</label>
             <input type="month" class="form-control" id="pay_month" name="pay_month" required>
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
-          <button type="submit" class="btn btn-success" style="background: var(--seafoam-green); font-weight: bold;">زیادکردن</button>
+          <button type="submit" class="btn btn-success">تۆمارکردن</button>
         </div>
       </form>
     </div>
   </div>
 </div>
-<!-- Edit Payment Modal -->
-<div class="modal fade" id="editPaymentModal" tabindex="-1" aria-labelledby="editPaymentModalLabel" aria-hidden="true">
+
+<!-- Make Payment Modal (Cash Out) -->
+<div class="modal fade" id="makePaymentModal" tabindex="-1" aria-labelledby="makePaymentModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <form id="editPaymentForm">
+      <form id="makePaymentForm">
         <div class="modal-header">
-          <h5 class="modal-title" id="editPaymentModalLabel">دەستکاری پارەدان</h5>
+          <h5 class="modal-title" id="makePaymentModalLabel">خەرجکردنی پارە (Payment)</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <input type="hidden" id="edit_payment_id" name="id">
+          <div class="alert alert-warning">
+             ئەمە پارە لە قاسە دەردەکات و لە باڵانسی کارمەند کەمی دەکاتەوە.
+          </div>
           <div class="mb-3">
-            <label for="edit_employee_id" class="form-label">کارمەند</label>
-            <select class="form-select" id="edit_employee_id" name="employee_id" required>
+            <label for="pay_employee_id" class="form-label">کارمەند</label>
+            <select class="form-select" id="pay_employee_id" name="employee_id" required>
               <option value="">-- هەلبژێرە --</option>
               <?php foreach($employees as $emp): ?>
-                <option value="<?= $emp['id'] ?>" data-salary="<?= $emp['salary'] ?>"><?= htmlspecialchars($emp['name']) ?></option>
+                <option value="<?= $emp['id'] ?>"><?= htmlspecialchars($emp['name']) ?></option>
               <?php endforeach; ?>
             </select>
           </div>
           <div class="mb-3">
-            <label for="edit_salary" class="form-label">مووچە (د.ع)</label>
-            <input type="text" class="form-control" id="edit_salary" name="salary" required>
+            <label for="payment_amount" class="form-label">بڕی پارە (د.ع)</label>
+            <input type="number" class="form-control" id="payment_amount" name="amount" step="any" required placeholder="0.00">
           </div>
           <div class="mb-3">
-            <label for="edit_karwanhisabi" class="form-label">کاروانحیسابی</label>
-            <input type="text" class="form-control" id="edit_karwanhisabi" name="karwanhisabi" required>
+            <label for="payment_date" class="form-label">بەروار</label>
+            <input type="date" class="form-control" id="payment_date" name="date" value="<?= date('Y-m-d') ?>" required>
           </div>
           <div class="mb-3">
-            <label for="edit_bonus" class="form-label">بەخشیش (د.ع)</label>
-            <input type="number" class="form-control" id="edit_bonus" name="bonus" min="0" step="0.01" value="0">
-          </div>
-          <div class="mb-3">
-            <label for="total_edit" class="form-label">کۆی گشتی (مووچە + کاروانحیسابی + بەخشیش)</label>
-            <input type="text" class="form-control" id="total_edit" readonly>
-          </div>
-          <div class="mb-3">
-            <label for="edit_pay_month" class="form-label">مانگ</label>
-            <input type="month" class="form-control" id="edit_pay_month" name="pay_month" required>
+            <label for="payment_note" class="form-label">تێبینی</label>
+            <textarea class="form-control" id="payment_note" name="note" rows="2" placeholder="بۆ نموونە: پێشەکینە / مووچە"></textarea>
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
-          <button type="submit" class="btn btn-primary">نوێکردنەوە</button>
+          <button type="submit" class="btn btn-primary">خەرجکردن</button>
         </div>
       </form>
     </div>
   </div>
 </div>
+
+<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<!-- Select2 JS -->
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="../assets/js/swalAlert.js"></script>
+<!-- Keeping existing JS for table control -->
 <script src="../assets/js/comon/table-controler.js"></script>
+<!-- Existing scripts for Payroll add/edit -->
 <script src="../assets/js/employee_payments/add.js"></script>
 <script src="../assets/js/employee_payments/select.js"></script>
 <script src="../assets/js/employee_payments/update.js"></script>
 <script src="../assets/js/employee_payments/delete.js"></script>
 <script src="../assets/js/employee_payments/summary.js"></script>
+
+<!-- New JS for Ledger and Payments -->
 <script>
 $(function() {
+    // Select2
+    $('#employee_id, #edit_employee_id, #pay_employee_id').select2({
+        theme: 'bootstrap-5',
+        width: '100%',
+        dropdownParent: $('#addPaymentModal') // Adjust per modal
+    });
+    // Fix select2 in other modals
+    $('#pay_employee_id').select2({
+        theme: 'bootstrap-5',
+        width: '100%',
+        dropdownParent: $('#makePaymentModal')
+    });
+
+
+    // Calculate Total in Add Modal
     function calcTotalAdd() {
         var salary = parseFloat($('#salary').val()) || 0;
-        var karwan = $('#karwanhisabi').val().replace(/,/g, '');
-        var karwanVal = parseFloat(karwan) || 0;
+        var karwan = parseFloat($('#karwanhisabi').val()) || 0;
         var bonus = parseFloat($('#bonus').val()) || 0;
-        var total = salary + karwanVal + bonus;
+        var total = salary + karwan + bonus;
         $('#total_add').val(total.toLocaleString('en-US') + ' د.ع');
     }
-    function calcTotalEdit() {
-        var salary = parseFloat($('#edit_salary').val()) || 0;
-        var karwan = $('#edit_karwanhisabi').val().replace(/,/g, '');
-        var karwanVal = parseFloat(karwan) || 0;
-        var bonus = parseFloat($('#edit_bonus').val()) || 0;
-        var total = salary + karwanVal + bonus;
-        $('#total_edit').val(total.toLocaleString('en-US') + ' د.ع');
-    }
-    $('#salary, #karwanhisabi, #bonus').on('input change', calcTotalAdd);
-    $('#edit_salary, #edit_karwanhisabi, #edit_bonus').on('input change', calcTotalEdit);
-    // Auto-fill salary in Add Payment Modal
+    $('#salary, #karwanhisabi, #bonus').on('input keyup change', calcTotalAdd);
+    
+    // Auto fill Salary
     $('#employee_id').on('change', function() {
-        var salary = $(this).find('option:selected').data('salary') || '';
+        var salary = $(this).find('option:selected').data('salary') || 0;
         $('#salary').val(salary);
         calcTotalAdd();
     });
-    // Auto-fill salary in Edit Payment Modal
-    $('#edit_employee_id').on('change', function() {
-        var salary = $(this).find('option:selected').data('salary') || '';
-        $('#edit_salary').val(salary);
-        calcTotalEdit();
+
+    // Handle Make Payment Form
+    $('#makePaymentForm').on('submit', function(e){
+        e.preventDefault();
+        var formData = new FormData(this);
+        
+        $.ajax({
+            url: '../process/employee_payments/make_payment.php', // We will create this
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            dataType: 'json',
+            success: function(res) {
+                if(res.success) {
+                    Swal.fire('سەرکەوتوو', res.message, 'success');
+                    $('#makePaymentModal').modal('hide');
+                    $('#makePaymentForm')[0].reset();
+                    // Reload Ledger if active
+                    loadLedger();
+                } else {
+                    Swal.fire('هەڵە', res.message, 'error');
+                }
+            },
+            error: function() {
+                Swal.fire('هەڵە', 'ڕوویدا لە کاتی پەیوەندیکردن', 'error');
+            }
+        });
     });
-    // Initial calculation
-    calcTotalAdd();
-    calcTotalEdit();
+
+    // Load Ledger Tab
+    $('button[data-bs-target="#ledger"]').on('shown.bs.tab', function (e) {
+        loadLedger();
+    });
+
+    function loadLedger() {
+        $('#ledgerTableBody').html('<tr><td colspan="7">...</td></tr>');
+        $.ajax({
+            url: '../process/employee_payments/get_ledger.php', // We will create this
+            method: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                var html = '';
+                if(data.length > 0) {
+                    data.forEach(function(row, index) {
+                        var colorClass = row.operation === 'credit' ? 'text-success' : 'text-danger';
+                        var opText = row.operation === 'credit' ? 'زیادکردن (Salary)' : 'لێدەرکردن (Payment)';
+                        html += `<tr>
+                            <td>${index+1}</td>
+                            <td>${row.employee_name}</td>
+                            <td>${row.type}</td>
+                            <td class="${colorClass} fw-bold">${parseFloat(row.amount).toLocaleString()}</td>
+                            <td>${opText}</td>
+                            <td>${row.transaction_date}</td>
+                            <td>${row.description || ''}</td>
+                        </tr>`;
+                    });
+                } else {
+                    html = '<tr><td colspan="7">هیچ داتایەک نییە</td></tr>';
+                }
+                $('#ledgerTableBody').html(html);
+            }
+        });
+    }
+
+    // Refresh Balances on Load
+    updateBalances();
+    function updateBalances() {
+        // Fetch total debts/payrolls
+         $.ajax({
+            url: '../process/employee_payments/get_balances_summary.php', // We will create this
+            dataType: 'json',
+            success: function(res) {
+                $('#total-balance-debt').text(parseFloat(res.total_balance).toLocaleString() + ' د.ع');
+                $('#total-payroll-month').text(parseFloat(res.total_payroll).toLocaleString() + ' د.ع');
+                $('#total-paid-month').text(parseFloat(res.total_paid).toLocaleString() + ' د.ع');
+            }
+        });
+    }
 });
 </script>
 </body>
