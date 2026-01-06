@@ -61,6 +61,62 @@ if (!hasPermission('view_customer')) {
         </div>
     </div>
 
+    <!-- Filter Section -->
+    <div class="card mb-4 shadow-sm border-0" style="border-radius: 15px;">
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">ساڵ</label>
+                    <select id="filter_year" class="form-select">
+                        <option value="">هەمووی</option>
+                        <?php 
+                        $currentYear = date('Y');
+                        for($i = $currentYear; $i >= 2020; $i--) {
+                            echo "<option value='$i'>$i</option>";
+                        }
+                        ?>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">مانگ</label>
+                    <select id="filter_month" class="form-select">
+                        <option value="">هەمووی</option>
+                        <option value="01">01 - کانوونی دووەم</option>
+                        <option value="02">02 - شوبات</option>
+                        <option value="03">03 - ئازار</option>
+                        <option value="04">04 - نیسان</option>
+                        <option value="05">05 - ئایار</option>
+                        <option value="06">06 - حوزەیران</option>
+                        <option value="07">07 - تەمموز</option>
+                        <option value="08">08 - ئاب</option>
+                        <option value="09">09 - ئەیلوول</option>
+                        <option value="10">10 - تشرینی یەکەم</option>
+                        <option value="11">11 - تشرینی دووەم</option>
+                        <option value="12">12 - کانوونی یەکەم</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">لە بەرواری</label>
+                    <input type="date" id="filter_from_date" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">بۆ بەرواری</label>
+                    <input type="date" id="filter_to_date" class="form-control">
+                </div>
+                <div class="col-md-2">
+                    <div class="d-flex gap-2">
+                        <button id="apply_filters" class="btn btn-primary w-100" style="background: var(--kelly-green); border-color: var(--kelly-green);">
+                            <i class="fas fa-filter"></i> فلتەر
+                        </button>
+                        <button id="clear_filters" class="btn btn-secondary w-100">
+                            <i class="fas fa-times"></i> پاککردنەوە
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Summary Cards -->
     <div class="row mb-4" id="summary-cards">
         <?php if (hasPermission('view_total_customer_debt')): ?>

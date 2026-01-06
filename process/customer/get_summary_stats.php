@@ -49,10 +49,40 @@ try {
         error_log('Settings table query failed: ' . $e->getMessage());
     }
 
+    // Parse filters
+    $year = $_GET['year'] ?? '';
+    $month = $_GET['month'] ?? '';
+    $fromDate = $_GET['from_date'] ?? '';
+    $toDate = $_GET['to_date'] ?? '';
+
+    $salesWhere = "WHERE payment_type = 'قەرز'";
+    $salesParams = [];
+
+    if ($fromDate) {
+        $salesWhere .= " AND order_date >= :from_date";
+        $salesParams['from_date'] = $fromDate;
+    }
+    if ($toDate) {
+        $salesWhere .= " AND order_date <= :to_date";
+        $salesParams['to_date'] = $toDate;
+    }
+    if ($year) {
+        $salesWhere .= " AND YEAR(order_date) = :year";
+        $salesParams['year'] = $year;
+    }
+    if ($month) {
+        $salesWhere .= " AND MONTH(order_date) = :month";
+        $salesParams['month'] = $month;
+    }
+
+    $isFiltered = ($fromDate || $toDate || $year || $month);
+
     // Get total customers count
     $totalCustomers = 0;
     try {
         $totalCustomersQuery = "SELECT COUNT(*) as total FROM customers";
+        // If filtered, maybe we should filter by created_at if it exists, but for now we'll keep it as is
+        // or filter based on whether they have transactions in that period
         $totalCustomersStmt = $pdo->query($totalCustomersQuery);
         $totalCustomers = $totalCustomersStmt->fetchColumn();
     } catch (Exception $e) {
@@ -66,43 +96,52 @@ try {
             SELECT COUNT(DISTINCT c.id) as count 
             FROM customers c
             LEFT JOIN sales s ON c.id = s.customer_id AND s.payment_type = 'قەرز'
-            WHERE (c.opening_debt_usd > 0 OR c.opening_debt_iqd > 0 OR 
-                   COALESCE(s.remaining_amount, 0) > 0)
+            WHERE " . ($isFiltered ? "" : "(c.opening_debt_usd > 0 OR c.opening_debt_iqd > 0) OR ") . "
+                  (COALESCE(s.remaining_amount, 0) > 0" . str_replace("WHERE", "AND", $salesWhere) . ")
         ";
-        $customersWithDebtStmt = $pdo->query($customersWithDebtQuery);
+        $customersWithDebtStmt = $pdo->prepare($customersWithDebtQuery);
+        $customersWithDebtStmt->execute($salesParams);
         $customersWithDebt = $customersWithDebtStmt->fetchColumn();
     } catch (Exception $e) {
         error_log('Customers with debt query failed: ' . $e->getMessage());
     }
 
-    // Get total debt - ڕاستکردنەوەی هەژمارکردنی قەرز
+    // Get total debt
     $totalDebtUSD = 0;
     try {
-        // 1. قەرزی سەرەتایی (USD)
-        $openingDebtUSD = $pdo->query("SELECT COALESCE(SUM(opening_debt_usd), 0) FROM customers")->fetchColumn();
+        // 1. قەرزی سەرەتایی - Only include if not filtered
+        $openingDebtUSD = 0;
+        $openingDebtIQD_USD = 0;
         
-        // 2. کۆی ماوەی قەرز لە فرۆشتنەکان (تەنها ئەوانەی amount_paid_iq = 0)
-        $salesRemainingUSD = $pdo->query("
+        if (!$isFiltered) {
+            $openingDebtUSD = $pdo->query("SELECT COALESCE(SUM(opening_debt_usd), 0) FROM customers")->fetchColumn();
+            $openingDebtIQD = $pdo->query("SELECT COALESCE(SUM(opening_debt_iqd), 0) FROM customers")->fetchColumn();
+            $openingDebtIQD_USD = $usdRate > 0 ? ($openingDebtIQD / ($usdRate / 100)) : 0;
+        }
+        
+        // 2. کۆی ماوەی قەرز لە فرۆشتنەکان (USD - ئەوانەی amount_paid_iq = 0)
+        $salesRemainingUSDQuery = "
             SELECT COALESCE(SUM(remaining_amount), 0) 
             FROM sales 
-            WHERE payment_type = 'قەرز' 
+            $salesWhere 
             AND amount_paid_iq = 0
-        ")->fetchColumn();
+        ";
+        $stmt = $pdo->prepare($salesRemainingUSDQuery);
+        $stmt->execute($salesParams);
+        $salesRemainingUSD = $stmt->fetchColumn();
         
-        // 3. کۆی ماوەی قەرز لە فرۆشتنەکان (دینار - ئەوانەی amount_paid_iq > 0)
-        $salesRemainingIQD = $pdo->query("
+        // 3. کۆی ماوەی قەرز لە فرۆشتنەکان (IQD - ئەوانەی amount_paid_iq > 0)
+        $salesRemainingIQDQuery = "
             SELECT COALESCE(SUM(remaining_amount), 0) 
             FROM sales 
-            WHERE payment_type = 'قەرز' 
+            $salesWhere 
             AND amount_paid_iq > 0
-        ")->fetchColumn();
-        
-        // 4. قەرزی سەرەتایی (IQD) - گۆڕینی بۆ دۆلار
-        $openingDebtIQD = $pdo->query("SELECT COALESCE(SUM(opening_debt_iqd), 0) FROM customers")->fetchColumn();
-        $openingDebtIQD_USD = $usdRate > 0 ? ($openingDebtIQD / ($usdRate / 100)) : 0;
+        ";
+        $stmt = $pdo->prepare($salesRemainingIQDQuery);
+        $stmt->execute($salesParams);
+        $salesRemainingIQD = $stmt->fetchColumn();
         
         // 5. کۆکردنەوەی هەموو قەرزەکان بە دۆلار
-        // فۆرمۆلا: کۆی قەرز = پارەی ماوەی فرۆشتنەکان + قەرزی سەرەتایی
         $totalDebtUSD = floatval($openingDebtUSD) +           // قەرزی سەرەتایی (USD)
                        floatval($openingDebtIQD_USD) +        // قەرزی سەرەتایی (IQD → USD)
                        floatval($salesRemainingUSD) +         // پارەی ماوەی فرۆشتنەکان (USD)
