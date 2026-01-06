@@ -1,27 +1,26 @@
 $(function () {
-    $('#hrTransactionForm').on('submit', function (e) {
+    $('#addPaymentForm').on('submit', function (e) {
         e.preventDefault();
         var formData = $(this).serialize();
-        $.post('../process/hr/add_transaction.php', formData, function (response) {
+        $.post('../process/employee_payments/add.php', formData, function (response) {
             if (response.success) {
-                swalAlert('سەرکەوتوو', response.msg || 'کردارەکە بە سەرکەوتوویی ئەنجامدرا!', 'success');
-                $('#hrTransactionForm')[0].reset();
-                $('#transaction_id').val('');
+                swalAlert('سەرکەوتوو', 'پارەدان بەسەرکەوتوویی زیادکرا!', 'success');
+                $('#addPaymentForm')[0].reset();
                 if (window.loadPayments) window.loadPayments();
-                $('#hrTransactionModal').modal('hide');
+                if (window.employeePaymentsSummary && window.employeePaymentsSummary.loadSummaryData) {
+                    window.employeePaymentsSummary.loadSummaryData();
+                }
+                $('#addPaymentModal').modal('hide');
             } else {
-                swalAlert('هەڵە', response.msg || 'هەڵەیەک هەیە', 'error');
+                swalAlert('هەڵە', response.message || 'هەڵەیەک هەیە', 'error');
             }
         }, 'json').fail(function (xhr) {
             console.error('AJAX Error:', xhr.responseText);
-            swalAlert('هەڵە', 'هەڵەیەک هەیە لە پەیوەندیدا.', 'error');
+            let msg = 'هەڵەیەک هەیە لە پەیوەندیدا.';
+            if (xhr.responseText) {
+                msg += '\n' + xhr.responseText;
+            }
+            swalAlert('هەڵە', msg, 'error');
         });
-    });
-
-    // Reset form when modal is hidden
-    $('#hrTransactionModal').on('hidden.bs.modal', function () {
-        $('#hrTransactionForm')[0].reset();
-        $('#transaction_id').val('');
-        $('#hrTransactionModalLabel').text('مامەڵەی نوێ (HR)');
     });
 });

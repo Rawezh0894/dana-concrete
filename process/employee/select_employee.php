@@ -28,7 +28,7 @@ if (!hasPermission('view_employee')) {
 
 try {
     // Get employees data
-    $stmt = $pdo->query('SELECT id, name, mobile, role, salary, payable_balance_iqd, payable_balance_usd FROM employees ORDER BY id DESC');
+    $stmt = $pdo->query('SELECT id, name, mobile, role, salary FROM employees ORDER BY id DESC');
     $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     // Get summary statistics

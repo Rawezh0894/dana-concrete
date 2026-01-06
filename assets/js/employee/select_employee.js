@@ -23,10 +23,10 @@ $(function () {
     }
 
     function loadEmployees() {
-        TableController.showLoading('#employeeTable', ['#', 'name', 'mobile', 'role', 'salary', 'payable_balance_iqd', 'payable_balance_usd', 'actions']);
+        TableController.showLoading('#employeeTable', ['#', 'name', 'mobile', 'role', 'salary', 'actions']);
         $.get('../process/employee/select_employee.php', function (res) {
             if (!res || !res.employees || !Array.isArray(res.employees)) {
-                TableController.render('#employeeTable', [], ['#', 'name', 'mobile', 'role', 'salary', 'payable_balance_iqd', 'payable_balance_usd', 'actions']);
+                TableController.render('#employeeTable', [], ['#', 'name', 'mobile', 'role', 'salary', 'actions']);
                 updateSummaryCards({ total_employees: 0, total_salary: 0 });
                 return;
             }
@@ -41,20 +41,12 @@ $(function () {
             res.employees.forEach(emp => {
                 const rawSalary = emp.salary;
                 emp.salary = formatSalary(emp.salary);
-
-                // Format balances with colors
-                const balIqd = parseFloat(emp.payable_balance_iqd) || 0;
-                const balUsd = parseFloat(emp.payable_balance_usd) || 0;
-
-                emp.payable_balance_iqd = `<span class="fw-bold ${balIqd > 0 ? 'text-danger' : (balIqd < 0 ? 'text-success' : 'text-muted')}">${balIqd.toLocaleString()} د.ع</span>`;
-                emp.payable_balance_usd = `<span class="fw-bold ${balUsd > 0 ? 'text-danger' : (balUsd < 0 ? 'text-success' : 'text-muted')}">$${balUsd.toLocaleString()}</span>`;
-
                 emp.actions = `
                     <button class="btn btn-sm btn-primary edit-employee" data-id="${emp.id}" data-name="${emp.name}" data-mobile="${emp.mobile}" data-role="${emp.role}" data-salary="${rawSalary}"><i class="fa fa-edit"></i></button>
                     <button class="btn btn-sm btn-danger delete-employee" data-id="${emp.id}"><i class="fa fa-trash"></i></button>
                 `;
             });
-            TableController.renderWithPagination('#employeeTable', res.employees, ['#', 'name', 'mobile', 'role', 'salary', 'payable_balance_iqd', 'payable_balance_usd', 'actions']);
+            TableController.renderWithPagination('#employeeTable', res.employees, ['#', 'name', 'mobile', 'role', 'salary', 'actions']);
         }, 'json');
     }
     loadEmployees();

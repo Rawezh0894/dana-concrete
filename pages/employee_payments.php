@@ -107,87 +107,118 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
         </div>
     </div>
     <div class="table-responsive">
-        <table class="table table-bordered table-hover align-middle text-center" id="hrTransactionsTable">
+        <table class="table table-bordered table-hover align-middle text-center" id="employeePaymentsTable">
             <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
                 <tr>
                     <th>#</th>
-                    <th>بەروار</th>
                     <th>کارمەند</th>
-                    <th>جۆری مامەڵە</th>
-                    <th>بڕ (دینار)</th>
-                    <th>بڕ (دۆلار)</th>
+                    <th>مووچە (د.ع)</th>
+                    <th>کاروانحیسابی</th>
+                    <th>بەخشیش (د.ع)</th>
+                    <th>کۆی گشتی</th>
                     <th>مانگ</th>
-                    <th>تێبینی</th>
-                    <th>بەرهەمهێنەر</th>
+                    <th>بەروار</th>
                     <th>کردارەکان</th>
                 </tr>
             </thead>
             <tbody>
-                <!-- Transactions will be loaded here by JS -->
+                <!-- Payments will be loaded here by JS -->
             </tbody>
         </table>
     </div>
 </div>
-
-<!-- Add/Edit HR Transaction Modal -->
-<div class="modal fade" id="hrTransactionModal" tabindex="-1" aria-labelledby="hrTransactionModalLabel" aria-hidden="true">
+<!-- Add Payment Modal -->
+<div class="modal fade" id="addPaymentModal" tabindex="-1" aria-labelledby="addPaymentModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <form id="hrTransactionForm">
+      <form id="addPaymentForm">
         <div class="modal-header">
-          <h5 class="modal-title" id="hrTransactionModalLabel">مامەڵەی نوێ (HR)</h5>
+          <h5 class="modal-title" id="addPaymentModalLabel">زیادکردنی پارەدان</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <input type="hidden" id="transaction_id" name="id">
           <div class="mb-3">
             <label for="employee_id" class="form-label">کارمەند</label>
-            <select class="form-select select2-enable" id="employee_id" name="employee_id" required>
-              <option value="">-- هەڵبژێرە --</option>
+            <select class="form-select" id="employee_id" name="employee_id" required>
+              <option value="">-- هەلبژێرە --</option>
               <?php foreach($employees as $emp): ?>
                 <option value="<?= $emp['id'] ?>" data-salary="<?= $emp['salary'] ?>"><?= htmlspecialchars($emp['name']) ?></option>
               <?php endforeach; ?>
             </select>
           </div>
           <div class="mb-3">
-            <label for="transaction_type" class="form-label">جۆری مامەڵە</label>
-            <select class="form-select" id="transaction_type" name="type" required>
-              <option value="مووچە (Accrual)">مووچە (Accrual)</option>
-              <option value="وەصڵ کردن (Payment)">وەصڵ کردن (Payment)</option>
-              <option value="پاداشت (Bonus)">پاداشت (Bonus)</option>
-              <option value="ئۆڤەر تایم (Overtime)">ئۆڤەر تایم (Overtime)</option>
-              <option value="سزا (Penalty)">سزا (Penalty)</option>
-              <option value="پێشەکی (Advance)">پێشەکی (Advance)</option>
-            </select>
-          </div>
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label for="amount_iqd" class="form-label">بڕ (دینار)</label>
-              <input type="number" class="form-control" id="amount_iqd" name="amount_iqd" value="0">
-            </div>
-            <div class="col-md-6 mb-3">
-              <label for="amount_usd" class="form-label">بڕ (دۆلار)</label>
-              <input type="number" class="form-control" id="amount_usd" name="amount_usd" value="0" step="0.01">
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label for="pay_month" class="form-label">مانگ</label>
-              <input type="month" class="form-control" id="pay_month" name="pay_month" value="<?= date('Y-m') ?>" required>
-            </div>
-            <div class="col-md-6 mb-3">
-              <label for="transaction_date" class="form-label">بەروار</label>
-              <input type="date" class="form-control" id="transaction_date" name="date" value="<?= date('Y-m-d') ?>" required>
-            </div>
+            <label for="salary" class="form-label">مووچە (د.ع)</label>
+            <input type="text" class="form-control" id="salary" name="salary"  required>
           </div>
           <div class="mb-3">
-            <label for="note" class="form-label">تێبینی</label>
-            <textarea class="form-control" id="note" name="note" rows="2"></textarea>
+            <label for="karwanhisabi" class="form-label">کاروانحیسابی</label>
+            <input type="text" class="form-control" id="karwanhisabi" name="karwanhisabi" required>
+          </div>
+          <div class="mb-3">
+            <label for="bonus" class="form-label">بەخشیش (د.ع)</label>
+            <input type="number" class="form-control" id="bonus" name="bonus" min="0" step="0.01" value="0">
+          </div>
+          <div class="mb-3">
+            <label for="total_add" class="form-label">کۆی گشتی (مووچە + کاروانحیسابی + بەخشیش)</label>
+            <input type="text" class="form-control" id="total_add" readonly>
+          </div>
+          <div class="mb-3">
+            <label for="pay_month" class="form-label">مانگ</label>
+            <input type="month" class="form-control" id="pay_month" name="pay_month" required>
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
-          <button type="submit" class="btn btn-success" id="saveTransactionBtn">پاشەکەوتکردن</button>
+          <button type="submit" class="btn btn-success" style="background: var(--seafoam-green); font-weight: bold;">زیادکردن</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<!-- Edit Payment Modal -->
+<div class="modal fade" id="editPaymentModal" tabindex="-1" aria-labelledby="editPaymentModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="editPaymentForm">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editPaymentModalLabel">دەستکاری پارەدان</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="edit_payment_id" name="id">
+          <div class="mb-3">
+            <label for="edit_employee_id" class="form-label">کارمەند</label>
+            <select class="form-select" id="edit_employee_id" name="employee_id" required>
+              <option value="">-- هەلبژێرە --</option>
+              <?php foreach($employees as $emp): ?>
+                <option value="<?= $emp['id'] ?>" data-salary="<?= $emp['salary'] ?>"><?= htmlspecialchars($emp['name']) ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="edit_salary" class="form-label">مووچە (د.ع)</label>
+            <input type="text" class="form-control" id="edit_salary" name="salary" required>
+          </div>
+          <div class="mb-3">
+            <label for="edit_karwanhisabi" class="form-label">کاروانحیسابی</label>
+            <input type="text" class="form-control" id="edit_karwanhisabi" name="karwanhisabi" required>
+          </div>
+          <div class="mb-3">
+            <label for="edit_bonus" class="form-label">بەخشیش (د.ع)</label>
+            <input type="number" class="form-control" id="edit_bonus" name="bonus" min="0" step="0.01" value="0">
+          </div>
+          <div class="mb-3">
+            <label for="total_edit" class="form-label">کۆی گشتی (مووچە + کاروانحیسابی + بەخشیش)</label>
+            <input type="text" class="form-control" id="total_edit" readonly>
+          </div>
+          <div class="mb-3">
+            <label for="edit_pay_month" class="form-label">مانگ</label>
+            <input type="month" class="form-control" id="edit_pay_month" name="pay_month" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
+          <button type="submit" class="btn btn-primary">نوێکردنەوە</button>
         </div>
       </form>
     </div>
@@ -201,6 +232,45 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
 <script src="../assets/js/comon/table-controler.js"></script>
 <script src="../assets/js/employee_payments/add.js"></script>
 <script src="../assets/js/employee_payments/select.js"></script>
+<script src="../assets/js/employee_payments/update.js"></script>
+<script src="../assets/js/employee_payments/delete.js"></script>
 <script src="../assets/js/employee_payments/summary.js"></script>
+<script>
+$(function() {
+    function calcTotalAdd() {
+        var salary = parseFloat($('#salary').val()) || 0;
+        var karwan = $('#karwanhisabi').val().replace(/,/g, '');
+        var karwanVal = parseFloat(karwan) || 0;
+        var bonus = parseFloat($('#bonus').val()) || 0;
+        var total = salary + karwanVal + bonus;
+        $('#total_add').val(total.toLocaleString('en-US') + ' د.ع');
+    }
+    function calcTotalEdit() {
+        var salary = parseFloat($('#edit_salary').val()) || 0;
+        var karwan = $('#edit_karwanhisabi').val().replace(/,/g, '');
+        var karwanVal = parseFloat(karwan) || 0;
+        var bonus = parseFloat($('#edit_bonus').val()) || 0;
+        var total = salary + karwanVal + bonus;
+        $('#total_edit').val(total.toLocaleString('en-US') + ' د.ع');
+    }
+    $('#salary, #karwanhisabi, #bonus').on('input change', calcTotalAdd);
+    $('#edit_salary, #edit_karwanhisabi, #edit_bonus').on('input change', calcTotalEdit);
+    // Auto-fill salary in Add Payment Modal
+    $('#employee_id').on('change', function() {
+        var salary = $(this).find('option:selected').data('salary') || '';
+        $('#salary').val(salary);
+        calcTotalAdd();
+    });
+    // Auto-fill salary in Edit Payment Modal
+    $('#edit_employee_id').on('change', function() {
+        var salary = $(this).find('option:selected').data('salary') || '';
+        $('#edit_salary').val(salary);
+        calcTotalEdit();
+    });
+    // Initial calculation
+    calcTotalAdd();
+    calcTotalEdit();
+});
+</script>
 </body>
 </html>
