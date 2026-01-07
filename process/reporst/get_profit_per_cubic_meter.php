@@ -15,29 +15,29 @@ try {
     
     if ($from_date && $to_date) {
         $date_condition = " AND DATE(cb.date) BETWEEN '$from_date' AND '$to_date'";
-        $date_condition_sales = " AND DATE(s.order_date) BETWEEN '$from_date' AND '$to_date'";
+        $date_condition_sales = " AND DATE(order_date) BETWEEN '$from_date' AND '$to_date'";
         $date_condition_date = " AND DATE(p.date) BETWEEN '$from_date' AND '$to_date'";
     } else {
         switch ($filter) {
             case 'today':
                 $date_condition = " AND DATE(cb.date) = CURDATE()";
-                $date_condition_sales = " AND DATE(s.order_date) = CURDATE()";
+                $date_condition_sales = " AND DATE(order_date) = CURDATE()";
                 $date_condition_date = " AND DATE(p.date) = CURDATE()";
                 break;
             case 'week':
                 $date_condition = " AND YEARWEEK(cb.date, 1) = YEARWEEK(CURDATE(), 1)";
-                $date_condition_sales = " AND YEARWEEK(s.order_date, 1) = YEARWEEK(CURDATE(), 1)";
+                $date_condition_sales = " AND YEARWEEK(order_date, 1) = YEARWEEK(CURDATE(), 1)";
                 $date_condition_date = " AND YEARWEEK(p.date, 1) = YEARWEEK(CURDATE(), 1)";
                 break;
             case 'month':
                 $date_condition = " AND YEAR(cb.date) = YEAR(CURDATE()) AND MONTH(cb.date) = MONTH(CURDATE())";
-                $date_condition_sales = " AND YEAR(s.order_date) = YEAR(CURDATE()) AND MONTH(s.order_date) = MONTH(CURDATE())";
+                $date_condition_sales = " AND YEAR(order_date) = YEAR(CURDATE()) AND MONTH(order_date) = MONTH(CURDATE())";
                 $date_condition_date = " AND YEAR(p.date) = YEAR(CURDATE()) AND MONTH(p.date) = MONTH(CURDATE())";
                 break;
             case 'year':
             default:
                 $date_condition = " AND YEAR(cb.date) = YEAR(CURDATE())";
-                $date_condition_sales = " AND YEAR(s.order_date) = YEAR(CURDATE())";
+                $date_condition_sales = " AND YEAR(order_date) = YEAR(CURDATE())";
                 $date_condition_date = " AND YEAR(p.date) = YEAR(CURDATE())";
                 break;
         }
