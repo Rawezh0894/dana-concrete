@@ -11,34 +11,40 @@ try {
     // Build date condition
     $date_condition = '';
     $date_condition_sales = '';
-    $date_condition_date = '';
+    $date_condition_purchases = '';
+    $date_condition_expenses = '';
     
     if ($from_date && $to_date) {
         $date_condition = " AND DATE(cb.date) BETWEEN '$from_date' AND '$to_date'";
         $date_condition_sales = " AND DATE(order_date) BETWEEN '$from_date' AND '$to_date'";
-        $date_condition_date = " AND DATE(p.date) BETWEEN '$from_date' AND '$to_date'";
+        $date_condition_purchases = " AND DATE(p.date) BETWEEN '$from_date' AND '$to_date'";
+        $date_condition_expenses = " AND DATE(date) BETWEEN '$from_date' AND '$to_date'";
     } else {
         switch ($filter) {
             case 'today':
                 $date_condition = " AND DATE(cb.date) = CURDATE()";
                 $date_condition_sales = " AND DATE(order_date) = CURDATE()";
-                $date_condition_date = " AND DATE(p.date) = CURDATE()";
+                $date_condition_purchases = " AND DATE(p.date) = CURDATE()";
+                $date_condition_expenses = " AND DATE(date) = CURDATE()";
                 break;
             case 'week':
                 $date_condition = " AND YEARWEEK(cb.date, 1) = YEARWEEK(CURDATE(), 1)";
                 $date_condition_sales = " AND YEARWEEK(order_date, 1) = YEARWEEK(CURDATE(), 1)";
-                $date_condition_date = " AND YEARWEEK(p.date, 1) = YEARWEEK(CURDATE(), 1)";
+                $date_condition_purchases = " AND YEARWEEK(p.date, 1) = YEARWEEK(CURDATE(), 1)";
+                $date_condition_expenses = " AND YEARWEEK(date, 1) = YEARWEEK(CURDATE(), 1)";
                 break;
             case 'month':
                 $date_condition = " AND YEAR(cb.date) = YEAR(CURDATE()) AND MONTH(cb.date) = MONTH(CURDATE())";
                 $date_condition_sales = " AND YEAR(order_date) = YEAR(CURDATE()) AND MONTH(order_date) = MONTH(CURDATE())";
-                $date_condition_date = " AND YEAR(p.date) = YEAR(CURDATE()) AND MONTH(p.date) = MONTH(CURDATE())";
+                $date_condition_purchases = " AND YEAR(p.date) = YEAR(CURDATE()) AND MONTH(p.date) = MONTH(CURDATE())";
+                $date_condition_expenses = " AND YEAR(date) = YEAR(CURDATE()) AND MONTH(date) = MONTH(CURDATE())";
                 break;
             case 'year':
             default:
                 $date_condition = " AND YEAR(cb.date) = YEAR(CURDATE())";
                 $date_condition_sales = " AND YEAR(order_date) = YEAR(CURDATE())";
-                $date_condition_date = " AND YEAR(p.date) = YEAR(CURDATE())";
+                $date_condition_purchases = " AND YEAR(p.date) = YEAR(CURDATE())";
+                $date_condition_expenses = " AND YEAR(date) = YEAR(CURDATE())";
                 break;
         }
     }
@@ -142,7 +148,7 @@ try {
             END) as avg_price_per_kg
         FROM purchases p
         JOIN materials m ON p.material_id = m.id
-        WHERE p.kg > 0 $date_condition_date
+        WHERE p.kg > 0 $date_condition_purchases
         GROUP BY m.name
     ";
     $purchases_stmt = $pdo->query($purchases_query);
@@ -262,7 +268,7 @@ try {
                 ELSE 0
             END), 0) as total_vehicle_expense
         FROM other_expenses
-        WHERE car_id IS NOT NULL $date_condition_date
+        WHERE car_id IS NOT NULL $date_condition_expenses
     ";
     $total_vehicle_expense_usd = floatval($pdo->query($vehicle_expense_query)->fetchColumn());
     
@@ -283,7 +289,7 @@ try {
                 ELSE 0
             END), 0) as total_daily_expense
         FROM other_expenses
-        WHERE expense_type IN ('خەرجی تر', 'خواردنگە', 'ئۆفیس') $date_condition_date
+        WHERE expense_type IN ('خەرجی تر', 'خواردنگە', 'ئۆفیس') $date_condition_expenses
     ";
     $total_daily_expense_usd = floatval($pdo->query($daily_expense_query)->fetchColumn());
     
