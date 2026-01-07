@@ -52,42 +52,46 @@ try {
     
     $expense_ids = [];
     
-    // Insert salary
+    // IMPORTANT: Insert in correct order to ensure balance calculation is correct
+    // 1. First insert salary, bonus, overtime (these increase payable_balance)
+    // 2. Then insert advance, deduction, penalty (these reduce payable_balance)
+    
+    // Insert salary FIRST (increases payable_balance)
     if ($salary > 0) {
         $stmt = $pdo->prepare('INSERT INTO employee_expenses (employee_id, expense_type, amount, notes, created_by, expense_date) VALUES (?, ?, ?, ?, ?, ?)');
         $stmt->execute([$employee_id, 'salary', $salary, $notes, $_SESSION['user_id'], $expense_date]);
         $expense_ids[] = ['type' => 'salary', 'id' => $pdo->lastInsertId(), 'amount' => $salary];
     }
     
-    // Insert bonus
+    // Insert bonus (increases payable_balance)
     if ($bonus > 0) {
         $stmt = $pdo->prepare('INSERT INTO employee_expenses (employee_id, expense_type, amount, notes, created_by, expense_date) VALUES (?, ?, ?, ?, ?, ?)');
         $stmt->execute([$employee_id, 'bonus', $bonus, $notes, $_SESSION['user_id'], $expense_date]);
         $expense_ids[] = ['type' => 'bonus', 'id' => $pdo->lastInsertId(), 'amount' => $bonus];
     }
     
-    // Insert overtime
+    // Insert overtime (increases payable_balance)
     if ($overtime > 0) {
         $stmt = $pdo->prepare('INSERT INTO employee_expenses (employee_id, expense_type, amount, notes, created_by, expense_date) VALUES (?, ?, ?, ?, ?, ?)');
         $stmt->execute([$employee_id, 'overtime', $overtime, $notes, $_SESSION['user_id'], $expense_date]);
         $expense_ids[] = ['type' => 'overtime', 'id' => $pdo->lastInsertId(), 'amount' => $overtime];
     }
     
-    // Insert advance
+    // NOW insert advance (reduces payable_balance) - AFTER salary/bonus/overtime
     if ($advance > 0) {
         $stmt = $pdo->prepare('INSERT INTO employee_expenses (employee_id, expense_type, amount, notes, created_by, expense_date) VALUES (?, ?, ?, ?, ?, ?)');
         $stmt->execute([$employee_id, 'advance', $advance, $notes, $_SESSION['user_id'], $expense_date]);
         $expense_ids[] = ['type' => 'advance', 'id' => $pdo->lastInsertId(), 'amount' => $advance];
     }
     
-    // Insert deduction
+    // Insert deduction (reduces payable_balance)
     if ($deduction > 0) {
         $stmt = $pdo->prepare('INSERT INTO employee_expenses (employee_id, expense_type, amount, notes, created_by, expense_date) VALUES (?, ?, ?, ?, ?, ?)');
         $stmt->execute([$employee_id, 'deduction', $deduction, $notes, $_SESSION['user_id'], $expense_date]);
         $expense_ids[] = ['type' => 'deduction', 'id' => $pdo->lastInsertId(), 'amount' => $deduction];
     }
     
-    // Insert penalty
+    // Insert penalty (reduces payable_balance)
     if ($penalty > 0) {
         $stmt = $pdo->prepare('INSERT INTO employee_expenses (employee_id, expense_type, amount, notes, created_by, expense_date) VALUES (?, ?, ?, ?, ?, ?)');
         $stmt->execute([$employee_id, 'penalty', $penalty, $notes, $_SESSION['user_id'], $expense_date]);
