@@ -47,6 +47,50 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
         <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addPaymentModal" style="background: var(--seafoam-green); font-weight: bold;">+ زیادکردنی پارەدان</button>
     </div>
     
+    <!-- Balance Cards -->
+    <div class="row mb-4" id="balance-cards">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-center shadow card-gradient-info card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-hand-holding-usd card-icon"></i>
+                    <h6 class="card-title">کۆی قەرزی کۆمپانیا</h6>
+                    <div class="fs-4 fw-bold" id="total-payable">0 د.ع</div>
+                    <small class="text-light">کۆی قەرزی کۆمپانیا بە کارمەندەکان</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-center shadow card-gradient-danger card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-money-check-alt card-icon"></i>
+                    <h6 class="card-title">کۆی قەرزی کارمەند</h6>
+                    <div class="fs-4 fw-bold" id="total-receivable">0 د.ع</div>
+                    <small class="text-light">کۆی قەرزی کارمەندەکان بە کۆمپانیا</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-center shadow card-gradient-success card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-balance-scale card-icon"></i>
+                    <h6 class="card-title">باڵانسی خالص</h6>
+                    <div class="fs-4 fw-bold" id="net-balance">0 د.ع</div>
+                    <small class="text-light">جیاوازی نێوان قەرزەکان</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-center shadow card-gradient-purple card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-users card-icon"></i>
+                    <h6 class="card-title">ژمارەی کارمەند</h6>
+                    <div class="fs-4 fw-bold" id="employee-count">0</div>
+                    <small class="text-light">کۆی کارمەندەکان</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- Summary Cards -->
     <div class="row mb-4" id="summary-cards">
         <div class="col-lg-3 col-md-6 mb-3">
@@ -106,7 +150,29 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
             </select>
         </div>
     </div>
+    <div class="table-responsive mb-4">
+        <h4 class="mb-3">خەرجی کارمەندەکان</h4>
+        <table class="table table-bordered table-hover align-middle text-center" id="employeeExpensesTable">
+            <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
+                <tr>
+                    <th>#</th>
+                    <th>کارمەند</th>
+                    <th>جۆری خەرجی</th>
+                    <th>بڕ (د.ع)</th>
+                    <th>مانگ</th>
+                    <th>تێبینی</th>
+                    <th>بەروار</th>
+                    <th>کردارەکان</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Expenses will be loaded here by JS -->
+            </tbody>
+        </table>
+    </div>
+    
     <div class="table-responsive">
+        <h4 class="mb-3">پارەدانە کۆنەکان</h4>
         <table class="table table-bordered table-hover align-middle text-center" id="employeePaymentsTable">
             <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
                 <tr>
@@ -146,25 +212,47 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
               <?php endforeach; ?>
             </select>
           </div>
-          <div class="mb-3">
-            <label for="salary" class="form-label">مووچە (د.ع)</label>
-            <input type="text" class="form-control" id="salary" name="salary"  required>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="salary" class="form-label">مووچە (د.ع)</label>
+              <input type="number" class="form-control" id="salary" name="salary" min="0" step="0.01" value="0">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="bonus" class="form-label">بەخشیش (د.ع)</label>
+              <input type="number" class="form-control" id="bonus" name="bonus" min="0" step="0.01" value="0">
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="overtime" class="form-label">کاروانحیسابی (د.ع)</label>
+              <input type="number" class="form-control" id="overtime" name="overtime" min="0" step="0.01" value="0">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="advance" class="form-label">پێشەکی/قەرز (د.ع)</label>
+              <input type="number" class="form-control" id="advance" name="advance" min="0" step="0.01" value="0">
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="deduction" class="form-label">کەمکردنەوە (د.ع)</label>
+              <input type="number" class="form-control" id="deduction" name="deduction" min="0" step="0.01" value="0">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="penalty" class="form-label">سزا (د.ع)</label>
+              <input type="number" class="form-control" id="penalty" name="penalty" min="0" step="0.01" value="0">
+            </div>
           </div>
           <div class="mb-3">
-            <label for="karwanhisabi" class="form-label">کاروانحیسابی</label>
-            <input type="text" class="form-control" id="karwanhisabi" name="karwanhisabi" required>
-          </div>
-          <div class="mb-3">
-            <label for="bonus" class="form-label">بەخشیش (د.ع)</label>
-            <input type="number" class="form-control" id="bonus" name="bonus" min="0" step="0.01" value="0">
-          </div>
-          <div class="mb-3">
-            <label for="total_add" class="form-label">کۆی گشتی (مووچە + کاروانحیسابی + بەخشیش)</label>
+            <label for="total_add" class="form-label">کۆی گشتی</label>
             <input type="text" class="form-control" id="total_add" readonly>
           </div>
           <div class="mb-3">
-            <label for="pay_month" class="form-label">مانگ</label>
-            <input type="month" class="form-control" id="pay_month" name="pay_month" required>
+            <label for="expense_date" class="form-label">مانگ (YYYY-MM)</label>
+            <input type="month" class="form-control" id="expense_date" name="expense_date" required>
+          </div>
+          <div class="mb-3">
+            <label for="notes" class="form-label">تێبینی</label>
+            <textarea class="form-control" id="notes" name="notes" rows="2"></textarea>
           </div>
         </div>
         <div class="modal-footer">
@@ -231,7 +319,10 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
 <script src="../assets/js/swalAlert.js"></script>
 <script src="../assets/js/comon/table-controler.js"></script>
 <script src="../assets/js/employee_payments/add.js"></script>
+<script src="../assets/js/employee_payments/add_expense.js"></script>
 <script src="../assets/js/employee_payments/select.js"></script>
+<script src="../assets/js/employee_payments/select_expenses.js"></script>
+<script src="../assets/js/employee_payments/balances.js"></script>
 <script src="../assets/js/employee_payments/update.js"></script>
 <script src="../assets/js/employee_payments/delete.js"></script>
 <script src="../assets/js/employee_payments/summary.js"></script>
@@ -239,10 +330,12 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
 $(function() {
     function calcTotalAdd() {
         var salary = parseFloat($('#salary').val()) || 0;
-        var karwan = $('#karwanhisabi').val().replace(/,/g, '');
-        var karwanVal = parseFloat(karwan) || 0;
         var bonus = parseFloat($('#bonus').val()) || 0;
-        var total = salary + karwanVal + bonus;
+        var overtime = parseFloat($('#overtime').val()) || 0;
+        var advance = parseFloat($('#advance').val()) || 0;
+        var deduction = parseFloat($('#deduction').val()) || 0;
+        var penalty = parseFloat($('#penalty').val()) || 0;
+        var total = salary + bonus + overtime + advance + deduction + penalty;
         $('#total_add').val(total.toLocaleString('en-US') + ' د.ع');
     }
     function calcTotalEdit() {
@@ -253,7 +346,7 @@ $(function() {
         var total = salary + karwanVal + bonus;
         $('#total_edit').val(total.toLocaleString('en-US') + ' د.ع');
     }
-    $('#salary, #karwanhisabi, #bonus').on('input change', calcTotalAdd);
+    $('#salary, #bonus, #overtime, #advance, #deduction, #penalty').on('input change', calcTotalAdd);
     $('#edit_salary, #edit_karwanhisabi, #edit_bonus').on('input change', calcTotalEdit);
     // Auto-fill salary in Add Payment Modal
     $('#employee_id').on('change', function() {
@@ -270,6 +363,11 @@ $(function() {
     // Initial calculation
     calcTotalAdd();
     calcTotalEdit();
+    
+    // Set default month to current month
+    var now = new Date();
+    var month = (now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0'));
+    $('#expense_date').val(month);
 });
 </script>
 </body>

@@ -130,6 +130,12 @@ $(document).ready(function() {
         } else if (typeof loadEmployeePayments === 'function') {
             loadEmployeePayments();
         }
+        if (typeof loadExpenses === 'function') {
+            loadExpenses();
+        }
+        if (typeof loadBalances === 'function') {
+            loadBalances();
+        }
     });
     
     // Handle employee filter change - use Select2 event
@@ -139,6 +145,12 @@ $(document).ready(function() {
             loadPayments();
         } else if (typeof loadEmployeePayments === 'function') {
             loadEmployeePayments();
+        }
+        if (typeof loadExpenses === 'function') {
+            loadExpenses();
+        }
+        if (typeof loadBalances === 'function') {
+            loadBalances();
         }
     });
 });
