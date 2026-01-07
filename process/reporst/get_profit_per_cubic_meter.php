@@ -45,9 +45,13 @@ try {
     
     // Get exchange rate
     $usd_iqd_rate = 139250; // Default fallback value
-    $rate_query = $pdo->query("SELECT usd_iqd_rate FROM information WHERE id = 1");
-    if ($rate_row = $rate_query->fetch()) {
-        $usd_iqd_rate = floatval($rate_row['usd_iqd_rate'] ?? 139250);
+    try {
+        $rate_query = $pdo->query("SELECT CAST(value AS DECIMAL(20,2)) as rate FROM settings WHERE name = 'usd_iqd_rate' LIMIT 1");
+        if ($rate_row = $rate_query->fetch()) {
+            $usd_iqd_rate = floatval($rate_row['rate'] ?? 139250);
+        }
+    } catch (Exception $e) {
+        error_log("Error fetching exchange rate: " . $e->getMessage());
     }
     
     // ============================================
