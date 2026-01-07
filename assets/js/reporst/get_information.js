@@ -9,6 +9,7 @@ function fetchAndRenderReportData() {
 
     console.log('Fetching data from:', url);
 
+    // Fetch main report data
     fetch(url)
         .then(res => res.json())
         .then(result => {
@@ -23,20 +24,44 @@ function fetchAndRenderReportData() {
             const data = result.data;
             console.log('Data received:', data);
 
-            // Cards will be rendered by renderDashboardCards function
-            if (typeof renderDashboardCards === 'function') {
-                console.log('Calling renderDashboardCards');
-                renderDashboardCards(result);
-            } else {
-                console.error('renderDashboardCards function not found');
-            }
+            // Fetch profit per cubic meter data
+            let profitUrl = `../process/reporst/get_profit_per_cubic_meter.php?filter=${currentReportFilter}`;
+            if (fromDate) profitUrl += `&from_date=${fromDate}`;
+            if (toDate) profitUrl += `&to_date=${toDate}`;
 
-            if (typeof renderCharts === 'function') {
-                console.log('Calling renderCharts');
-                renderCharts(result);
-            } else {
-                console.error('renderCharts function not found');
-            }
+            fetch(profitUrl)
+                .then(res => res.json())
+                .then(profitResult => {
+                    if (profitResult.success) {
+                        // Add profit data to result
+                        result.data.profit_per_m3 = profitResult.data;
+                    }
+                    
+                    // Cards will be rendered by renderDashboardCards function
+                    if (typeof renderDashboardCards === 'function') {
+                        console.log('Calling renderDashboardCards');
+                        renderDashboardCards(result);
+                    } else {
+                        console.error('renderDashboardCards function not found');
+                    }
+
+                    if (typeof renderCharts === 'function') {
+                        console.log('Calling renderCharts');
+                        renderCharts(result);
+                    } else {
+                        console.error('renderCharts function not found');
+                    }
+                })
+                .catch(error => {
+                    console.error('Profit fetch error:', error);
+                    // Continue rendering even if profit fetch fails
+                    if (typeof renderDashboardCards === 'function') {
+                        renderDashboardCards(result);
+                    }
+                    if (typeof renderCharts === 'function') {
+                        renderCharts(result);
+                    }
+                });
         })
         .catch(error => {
             console.error('Fetch error:', error);
@@ -296,6 +321,34 @@ function renderDashboardCards(data) {
             value: formatCurrency(usd_iqd_rate, 'IQD'),
             subtitle: 'نرخی دۆلار بە دینار'
         },
+        // Gross Profit Per Cubic Meter Card
+        {
+            key: 'gross_profit_per_m3',
+            label: 'قازانجی خامی بۆ 1 م³ کۆنکرێت',
+            icon: 'fa-chart-line',
+            cardClass: 'gross-profit-card',
+            value: data.data?.profit_per_m3?.gross_profit_per_m3 !== undefined 
+                ? formatCurrency(data.data.profit_per_m3.gross_profit_per_m3, 'USD') + 
+                  '<br><small style="font-size: 0.85rem; opacity: 0.9;">' +
+                  'ڕێژەی قازانج: ' + (data.data.profit_per_m3.profit_margin_percent || 0).toFixed(2) + '%' +
+                  '</small>'
+                : 'هیچ داتایەک نییە',
+            subtitle: data.data?.profit_per_m3?.total_cubic_meters 
+                ? `کۆی م³ فرۆشراو: ${data.data.profit_per_m3.total_cubic_meters.toFixed(2)}`
+                : 'هیچ فرۆشتنێک نییە',
+            onClick: () => {
+                if (data.data?.profit_per_m3?.explanation) {
+                    Swal.fire({
+                        title: 'ڕوونکردنەوەی قازانجی خامی',
+                        html: '<div style="text-align: right; direction: rtl; font-family: Rabar, sans-serif; white-space: pre-line;">' + 
+                              data.data.profit_per_m3.explanation.replace(/\n/g, '<br>') + 
+                              '</div>',
+                        width: '80%',
+                        confirmButtonText: 'باشە'
+                    });
+                }
+            }
+        },
         // Material Consumption Cards
         // cement_cem1 = دەلتا + لاڤارج (سایلۆی یەک)
         // cement_cem2 = ماس (سایلۆی دوو)
@@ -473,6 +526,9 @@ function renderDashboardCards(data) {
         } else if (card.key === 'person_debt_payments') {
             clickHandler = 'onclick="showPersonDebtPaymentsDetails()"';
             cursorStyle = 'style="cursor: pointer;"';
+        } else if (card.key === 'gross_profit_per_m3' && card.onClick) {
+            clickHandler = `onclick="showGrossProfitDetails()"`;
+            cursorStyle = 'style="cursor: pointer;"';
         }
 
         html += `<div class="col-lg-3 col-md-4 col-sm-6 mb-3">
@@ -542,6 +598,62 @@ function formatCurrency(amount, currency) {
     } else {
         return Number(amount).toLocaleString('en-US', { maximumFractionDigits: 0 }) + ' دینار';
     }
+}
+
+// Function to show gross profit details
+function showGrossProfitDetails() {
+    const fromDate = document.getElementById('from-date')?.value || '';
+    const toDate = document.getElementById('to-date')?.value || '';
+    const filter = currentReportFilter || 'year';
+
+    let url = `../process/reporst/get_profit_per_cubic_meter.php?filter=${filter}`;
+    if (fromDate) url += `&from_date=${fromDate}`;
+    if (toDate) url += `&to_date=${toDate}`;
+
+    Swal.fire({
+        title: 'چاوەڕوان بە...',
+        text: 'وردەکاریەکانی قازانج وەردەگرێت',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    fetch(url)
+        .then(res => res.json())
+        .then(result => {
+            if (!result.success) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'هەڵە',
+                    text: result.error || 'هەڵەیەک ڕویدا'
+                });
+                return;
+            }
+
+            const data = result.data;
+            const explanation = data.explanation || 'هیچ ڕوونکردنەوەیەک نییە';
+
+            Swal.fire({
+                title: 'ڕوونکردنەوەی قازانجی خامی بۆ 1 م³ کۆنکرێت',
+                html: '<div style="text-align: right; direction: rtl; font-family: Rabar, sans-serif; white-space: pre-line; font-size: 0.9rem; line-height: 1.8;">' + 
+                      explanation.replace(/\n/g, '<br>') + 
+                      '</div>',
+                width: '90%',
+                confirmButtonText: 'باشە',
+                customClass: {
+                    popup: 'rtl-popup'
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching profit details:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'هەڵە',
+                text: 'هەڵە لە وەرگرتنی وردەکاریەکان: ' + error.message
+            });
+        });
 }
 
 function formatNumber(amount) {

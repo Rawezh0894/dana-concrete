@@ -350,6 +350,39 @@ if (!isset($_SESSION['user_id'])) {
             font-size: 0.9rem;
             opacity: 0.9;
         }
+        
+        /* Gross Profit Per Cubic Meter Card Styles */
+        .gross-profit-card {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a6f) !important;
+            color: white;
+            border: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .gross-profit-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+        }
+        
+        .gross-profit-card i {
+            color: #e9ecef;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .gross-profit-card .card-value {
+            color: #ffffff;
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .gross-profit-card .section-label {
+            color: #e9ecef;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
 
         
         /* Chart Section Styles */
