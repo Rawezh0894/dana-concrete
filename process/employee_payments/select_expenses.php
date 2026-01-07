@@ -31,7 +31,9 @@ try {
             ee.notes,
             ee.expense_date,
             ee.created_at,
-            u.username as created_by_name
+            u.username as created_by_name,
+            COALESCE(e.payable_balance, 0) as employee_payable_balance,
+            COALESCE(e.receivable_balance, 0) as employee_receivable_balance
         FROM employee_expenses ee
         LEFT JOIN employees e ON ee.employee_id = e.id
         LEFT JOIN users u ON ee.created_by = u.id

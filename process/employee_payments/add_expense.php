@@ -129,12 +129,21 @@ try {
         getUserIP()
     );
     
+    // Get updated balances after insert
+    $stmt = $pdo->prepare("SELECT COALESCE(payable_balance, 0) as payable_balance, COALESCE(receivable_balance, 0) as receivable_balance FROM employees WHERE id = ?");
+    $stmt->execute([$employee_id]);
+    $updated_balances = $stmt->fetch(PDO::FETCH_ASSOC);
+    
     $pdo->commit();
     
     echo json_encode([
         'success' => true, 
         'message' => 'خەرجی کارمەند بە سەرکەوتوویی زیادکرا',
-        'expense_ids' => $expense_ids
+        'expense_ids' => $expense_ids,
+        'updated_balances' => [
+            'payable' => floatval($updated_balances['payable_balance'] ?? 0),
+            'receivable' => floatval($updated_balances['receivable_balance'] ?? 0)
+        ]
     ]);
     
 } catch (PDOException $e) {

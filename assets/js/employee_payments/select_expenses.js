@@ -4,7 +4,7 @@ $(function () {
     }
     
     function loadExpenses() {
-        const columns = ['#', 'employee_name', 'expense_type_kurdish', 'amount', 'expense_date', 'notes', 'created_at', 'actions'];
+        const columns = ['#', 'employee_name', 'expense_type_kurdish', 'amount', 'expense_date', 'notes', 'employee_balance', 'created_at', 'actions'];
         TableController.showLoading('#employeeExpensesTable', columns);
 
         // Get filter values
@@ -27,6 +27,28 @@ $(function () {
             res.forEach((row, index) => {
                 row['#'] = index + 1;
                 row.amount = formatMoney(row.amount);
+                
+                // Format employee balance
+                const payable = parseFloat(row.employee_payable_balance || 0);
+                const receivable = parseFloat(row.employee_receivable_balance || 0);
+                const netBalance = payable - receivable;
+                
+                let balanceHtml = '';
+                if (payable > 0 || receivable > 0) {
+                    balanceHtml = `
+                        <div class="small">
+                            <div class="text-success">قەرزی کۆمپانیا: ${formatMoney(payable)}</div>
+                            <div class="text-danger">قەرزی کارمەند: ${formatMoney(receivable)}</div>
+                            <div class="fw-bold ${netBalance >= 0 ? 'text-success' : 'text-danger'}">
+                                باڵانسی خالص: ${formatMoney(Math.abs(netBalance))}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    balanceHtml = '<span class="text-muted">0 د.ع</span>';
+                }
+                row.employee_balance = balanceHtml;
+                
                 row.actions = `
                     <button class="btn btn-sm btn-danger delete-expense" data-id="${row.id}"><i class="fa fa-trash"></i></button>
                 `;

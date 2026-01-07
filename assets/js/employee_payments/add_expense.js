@@ -28,12 +28,16 @@ $(function () {
                 $('#expense_date').val(month);
                 $('#total_add').val('0 د.ع');
                 
+                // Reload all data
                 if (window.loadPayments) window.loadPayments();
                 if (window.loadExpenses) window.loadExpenses();
                 if (window.employeePaymentsSummary && window.employeePaymentsSummary.loadSummaryData) {
                     window.employeePaymentsSummary.loadSummaryData();
                 }
-                if (window.loadBalances) window.loadBalances();
+                // Reload balances after a short delay to ensure trigger has updated
+                setTimeout(function() {
+                    if (window.loadBalances) window.loadBalances();
+                }, 500);
                 $('#addPaymentModal').modal('hide');
             } else {
                 swalAlert('هەڵە', response.message || 'هەڵەیەک هەیە', 'error');

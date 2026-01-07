@@ -48,7 +48,10 @@ $(function() {
                 $.post('../process/employee_payments/delete_expense.php', {id: id}, function(response) {
                     if (response.success) {
                         if (window.loadExpenses) window.loadExpenses();
-                        if (window.loadBalances) window.loadBalances();
+                        // Reload balances after a short delay to ensure trigger has updated
+                        setTimeout(function() {
+                            if (window.loadBalances) window.loadBalances();
+                        }, 500);
                         swalAlert('سەرکەوتوو', 'خەرجی سڕایەوە!', 'success');
                     } else {
                         swalAlert('هەڵە', response.message || 'هەڵەیەک هەیە', 'error');

@@ -161,6 +161,7 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
                     <th>بڕ (د.ع)</th>
                     <th>مانگ</th>
                     <th>تێبینی</th>
+                    <th>باڵانسی کارمەند</th>
                     <th>بەروار</th>
                     <th>کردارەکان</th>
                 </tr>

@@ -195,21 +195,38 @@ CREATE TRIGGER `trg_after_insert_employee_expense_balance`
 AFTER INSERT ON `employee_expenses` 
 FOR EACH ROW 
 BEGIN
+    DECLARE v_current_payable DECIMAL(15,2) DEFAULT 0;
+    DECLARE v_current_receivable DECIMAL(15,2) DEFAULT 0;
+    
+    -- Get current balances
+    SELECT COALESCE(payable_balance, 0), COALESCE(receivable_balance, 0)
+    INTO v_current_payable, v_current_receivable
+    FROM `employees` 
+    WHERE `id` = NEW.employee_id;
+    
     IF NEW.expense_type IN ('salary', 'bonus', 'overtime') THEN
         -- Increase payable balance (company owes employee)
         UPDATE `employees` 
-        SET `payable_balance` = `payable_balance` + NEW.amount 
+        SET `payable_balance` = COALESCE(`payable_balance`, 0) + NEW.amount 
         WHERE `id` = NEW.employee_id;
     ELSEIF NEW.expense_type IN ('deduction', 'penalty') THEN
-        -- Decrease payable balance or increase receivable balance
-        UPDATE `employees` 
-        SET `payable_balance` = GREATEST(0, `payable_balance` - NEW.amount),
-            `receivable_balance` = `receivable_balance` + GREATEST(0, NEW.amount - `payable_balance`)
-        WHERE `id` = NEW.employee_id;
+        -- First reduce payable balance, then add excess to receivable balance
+        IF v_current_payable >= NEW.amount THEN
+            -- All deduction comes from payable balance
+            UPDATE `employees` 
+            SET `payable_balance` = v_current_payable - NEW.amount
+            WHERE `id` = NEW.employee_id;
+        ELSE
+            -- Payable balance becomes 0, excess goes to receivable
+            UPDATE `employees` 
+            SET `payable_balance` = 0,
+                `receivable_balance` = COALESCE(`receivable_balance`, 0) + (NEW.amount - v_current_payable)
+            WHERE `id` = NEW.employee_id;
+        END IF;
     ELSEIF NEW.expense_type = 'advance' THEN
         -- Increase receivable balance (employee owes company)
         UPDATE `employees` 
-        SET `receivable_balance` = `receivable_balance` + NEW.amount 
+        SET `receivable_balance` = COALESCE(`receivable_balance`, 0) + NEW.amount 
         WHERE `id` = NEW.employee_id;
     END IF;
 END$$
@@ -219,36 +236,73 @@ CREATE TRIGGER `trg_after_update_employee_expense_balance`
 AFTER UPDATE ON `employee_expenses` 
 FOR EACH ROW 
 BEGIN
-    -- Revert old amount
-    IF OLD.expense_type IN ('salary', 'bonus', 'overtime') THEN
-        UPDATE `employees` 
-        SET `payable_balance` = GREATEST(0, `payable_balance` - OLD.amount) 
-        WHERE `id` = OLD.employee_id;
-    ELSEIF OLD.expense_type IN ('deduction', 'penalty') THEN
-        UPDATE `employees` 
-        SET `payable_balance` = `payable_balance` + OLD.amount,
-            `receivable_balance` = GREATEST(0, `receivable_balance` - OLD.amount)
-        WHERE `id` = OLD.employee_id;
-    ELSEIF OLD.expense_type = 'advance' THEN
-        UPDATE `employees` 
-        SET `receivable_balance` = GREATEST(0, `receivable_balance` - OLD.amount) 
-        WHERE `id` = OLD.employee_id;
-    END IF;
+    DECLARE v_current_payable DECIMAL(15,2) DEFAULT 0;
+    DECLARE v_current_receivable DECIMAL(15,2) DEFAULT 0;
     
-    -- Apply new amount
-    IF NEW.expense_type IN ('salary', 'bonus', 'overtime') THEN
-        UPDATE `employees` 
-        SET `payable_balance` = `payable_balance` + NEW.amount 
+    -- Only process if amount or type changed
+    IF OLD.amount != NEW.amount OR OLD.expense_type != NEW.expense_type THEN
+        -- Get current balances before reverting
+        SELECT COALESCE(payable_balance, 0), COALESCE(receivable_balance, 0)
+        INTO v_current_payable, v_current_receivable
+        FROM `employees` 
+        WHERE `id` = OLD.employee_id;
+        
+        -- Revert old amount
+        IF OLD.expense_type IN ('salary', 'bonus', 'overtime') THEN
+            UPDATE `employees` 
+            SET `payable_balance` = GREATEST(0, v_current_payable - OLD.amount) 
+            WHERE `id` = OLD.employee_id;
+        ELSEIF OLD.expense_type IN ('deduction', 'penalty') THEN
+            -- When reverting deduction/penalty:
+            -- If receivable has the amount, restore it to payable
+            -- Otherwise, just add back to payable
+            IF v_current_receivable >= OLD.amount THEN
+                -- All was in receivable, restore to payable
+                UPDATE `employees` 
+                SET `payable_balance` = v_current_payable + OLD.amount,
+                    `receivable_balance` = v_current_receivable - OLD.amount
+                WHERE `id` = OLD.employee_id;
+            ELSE
+                -- Some was in receivable, some was from payable
+                UPDATE `employees` 
+                SET `payable_balance` = v_current_payable + (OLD.amount - v_current_receivable),
+                    `receivable_balance` = 0
+                WHERE `id` = OLD.employee_id;
+            END IF;
+        ELSEIF OLD.expense_type = 'advance' THEN
+            UPDATE `employees` 
+            SET `receivable_balance` = GREATEST(0, v_current_receivable - OLD.amount) 
+            WHERE `id` = OLD.employee_id;
+        END IF;
+        
+        -- Get updated balances after revert
+        SELECT COALESCE(payable_balance, 0), COALESCE(receivable_balance, 0)
+        INTO v_current_payable, v_current_receivable
+        FROM `employees` 
         WHERE `id` = NEW.employee_id;
-    ELSEIF NEW.expense_type IN ('deduction', 'penalty') THEN
-        UPDATE `employees` 
-        SET `payable_balance` = GREATEST(0, `payable_balance` - NEW.amount),
-            `receivable_balance` = `receivable_balance` + GREATEST(0, NEW.amount - `payable_balance`)
-        WHERE `id` = NEW.employee_id;
-    ELSEIF NEW.expense_type = 'advance' THEN
-        UPDATE `employees` 
-        SET `receivable_balance` = `receivable_balance` + NEW.amount 
-        WHERE `id` = NEW.employee_id;
+        
+        -- Apply new amount
+        IF NEW.expense_type IN ('salary', 'bonus', 'overtime') THEN
+            UPDATE `employees` 
+            SET `payable_balance` = v_current_payable + NEW.amount 
+            WHERE `id` = NEW.employee_id;
+        ELSEIF NEW.expense_type IN ('deduction', 'penalty') THEN
+            -- First reduce payable balance, then add excess to receivable balance
+            IF v_current_payable >= NEW.amount THEN
+                UPDATE `employees` 
+                SET `payable_balance` = v_current_payable - NEW.amount
+                WHERE `id` = NEW.employee_id;
+            ELSE
+                UPDATE `employees` 
+                SET `payable_balance` = 0,
+                    `receivable_balance` = v_current_receivable + (NEW.amount - v_current_payable)
+                WHERE `id` = NEW.employee_id;
+            END IF;
+        ELSEIF NEW.expense_type = 'advance' THEN
+            UPDATE `employees` 
+            SET `receivable_balance` = v_current_receivable + NEW.amount 
+            WHERE `id` = NEW.employee_id;
+        END IF;
     END IF;
 END$$
 
@@ -257,19 +311,46 @@ CREATE TRIGGER `trg_after_delete_employee_expense_balance`
 AFTER DELETE ON `employee_expenses` 
 FOR EACH ROW 
 BEGIN
+    DECLARE v_current_payable DECIMAL(15,2) DEFAULT 0;
+    DECLARE v_current_receivable DECIMAL(15,2) DEFAULT 0;
+    
+    -- Get current balances
+    SELECT COALESCE(payable_balance, 0), COALESCE(receivable_balance, 0)
+    INTO v_current_payable, v_current_receivable
+    FROM `employees` 
+    WHERE `id` = OLD.employee_id;
+    
     -- Revert balance changes
     IF OLD.expense_type IN ('salary', 'bonus', 'overtime') THEN
+        -- Reduce payable balance
         UPDATE `employees` 
-        SET `payable_balance` = GREATEST(0, `payable_balance` - OLD.amount) 
+        SET `payable_balance` = GREATEST(0, v_current_payable - OLD.amount) 
         WHERE `id` = OLD.employee_id;
     ELSEIF OLD.expense_type IN ('deduction', 'penalty') THEN
-        UPDATE `employees` 
-        SET `payable_balance` = `payable_balance` + OLD.amount,
-            `receivable_balance` = GREATEST(0, `receivable_balance` - OLD.amount)
-        WHERE `id` = OLD.employee_id;
+        -- When reverting deduction/penalty, we need to restore the balance correctly
+        -- The deduction might have come from payable balance or been added to receivable
+        -- We need to check current state and restore appropriately
+        -- Strategy: Check if receivable has enough to cover the deduction amount
+        -- If yes, restore from receivable to payable
+        -- If no, restore what we can from receivable and add rest to payable
+        IF v_current_receivable >= OLD.amount THEN
+            -- All deduction amount is in receivable, restore it all to payable
+            UPDATE `employees` 
+            SET `payable_balance` = v_current_payable + OLD.amount,
+                `receivable_balance` = v_current_receivable - OLD.amount
+            WHERE `id` = OLD.employee_id;
+        ELSE
+            -- Part of deduction is in receivable, part was from payable
+            -- Restore receivable part to payable, and add the rest to payable
+            UPDATE `employees` 
+            SET `payable_balance` = v_current_payable + OLD.amount,
+                `receivable_balance` = 0
+            WHERE `id` = OLD.employee_id;
+        END IF;
     ELSEIF OLD.expense_type = 'advance' THEN
+        -- Reduce receivable balance
         UPDATE `employees` 
-        SET `receivable_balance` = GREATEST(0, `receivable_balance` - OLD.amount) 
+        SET `receivable_balance` = GREATEST(0, v_current_receivable - OLD.amount) 
         WHERE `id` = OLD.employee_id;
     END IF;
 END$$

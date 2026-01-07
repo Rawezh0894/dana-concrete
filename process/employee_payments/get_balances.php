@@ -15,11 +15,11 @@ try {
     // Get employee balances summary
     $query = "
         SELECT 
-            SUM(e.payable_balance) as total_payable,
-            SUM(e.receivable_balance) as total_receivable,
+            SUM(COALESCE(e.payable_balance, 0)) as total_payable,
+            SUM(COALESCE(e.receivable_balance, 0)) as total_receivable,
             COUNT(DISTINCT e.id) as employee_count,
-            SUM(CASE WHEN e.payable_balance > 0 THEN 1 ELSE 0 END) as employees_with_payable,
-            SUM(CASE WHEN e.receivable_balance > 0 THEN 1 ELSE 0 END) as employees_with_receivable
+            SUM(CASE WHEN COALESCE(e.payable_balance, 0) > 0 THEN 1 ELSE 0 END) as employees_with_payable,
+            SUM(CASE WHEN COALESCE(e.receivable_balance, 0) > 0 THEN 1 ELSE 0 END) as employees_with_receivable
         FROM employees e
         $where_clause
     ";
