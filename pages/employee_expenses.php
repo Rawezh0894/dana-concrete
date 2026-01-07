@@ -294,18 +294,41 @@ $(function() {
         $('#salary').val(salary);
         calcTotalAdd();
         
-        // Load and display employee balance
+        // Load and display employee balance with daily calculation
         if (employeeId) {
-            $.get('../process/employee_payments/get_employee_current_balance.php', {employee_id: employeeId}, function(response) {
+            var selectedMonth = $('#expense_date').val() || '';
+            var params = {employee_id: employeeId};
+            if (selectedMonth) {
+                params.month = selectedMonth.substring(0, 7); // Extract YYYY-MM
+            }
+            
+            $.get('../process/employee_payments/get_employee_current_balance.php', params, function(response) {
                 if (response.success) {
                     var balanceInfo = $('#employee-balance-info');
                     var data = response.data;
-                    var balanceText = 'باڵانسی ئێستا: ';
+                    var balanceText = '<div class="small">';
+                    balanceText += '<strong>باڵانسی ئێستا (بە پێی ڕۆژەکان):</strong><br>';
+                    
                     if (data.net_balance >= 0) {
                         balanceText += '<span class="text-success">' + data.balance_message + '</span>';
                     } else {
                         balanceText += '<span class="text-danger">' + data.balance_message + '</span>';
                     }
+                    
+                    // Add calculation details
+                    if (data.calculation_details) {
+                        balanceText += '<br><small class="text-muted mt-2 d-block">';
+                        balanceText += 'مووچەی مانگانە: ' + data.calculation_details.monthly_salary + '<br>';
+                        balanceText += 'ژمارەی ڕۆژەکان: ' + data.calculation_details.days_used + ' / ' + data.calculation_details.days_in_month + '<br>';
+                        balanceText += 'نرخی ڕۆژانە: ' + data.calculation_details.daily_salary_rate + '<br>';
+                        balanceText += 'مووچەی بەدەستهاتوو: ' + data.calculation_details.earned_salary + '<br>';
+                        if (parseFloat(data.calculation_details.advance_taken) > 0) {
+                            balanceText += 'پێشەکی وەرگیراو: ' + data.calculation_details.advance_taken;
+                        }
+                        balanceText += '</small>';
+                    }
+                    
+                    balanceText += '</div>';
                     balanceInfo.html(balanceText).show();
                 }
             }, 'json');
@@ -321,6 +344,14 @@ $(function() {
     var now = new Date();
     var month = (now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0'));
     $('#expense_date').val(month);
+    
+    // Reload balance when month changes
+    $('#expense_date').on('change', function() {
+        var employeeId = $('#employee_id').val();
+        if (employeeId) {
+            $('#employee_id').trigger('change');
+        }
+    });
     
     // Initialize Select2 for employee filter
     $('#employee-filter').select2({

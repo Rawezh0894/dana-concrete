@@ -4,7 +4,6 @@ header('Content-Type: application/json');
 
 try {
     $employee_id = intval($_GET['employee_id'] ?? 0);
-    $use_daily_calculation = isset($_GET['daily']) && $_GET['daily'] == '1'; // New parameter for daily calculation
     $month = $_GET['month'] ?? ''; // Format: YYYY-MM
     
     if ($employee_id <= 0) {
@@ -15,17 +14,39 @@ try {
         exit;
     }
     
-    // If daily calculation is requested, use the daily balance calculation
-    if ($use_daily_calculation) {
-        $month_param = $month ? '&month=' . urlencode($month) : '';
-        header('Location: get_daily_balance.php?employee_id=' . $employee_id . $month_param);
-        exit;
+    // Get current date
+    $current_date = date('Y-m-d');
+    
+    // If month is provided, use it; otherwise use current month
+    if ($month) {
+        $expense_date = $month . '-01';
+        $year = intval(substr($month, 0, 4));
+        $month_num = intval(substr($month, 5, 2));
+        
+        // If it's current month, use current date; otherwise use last day of month
+        if ($year == date('Y') && $month_num == date('m')) {
+            $end_date = $current_date;
+        } else {
+            $end_date = date('Y-m-t', strtotime($expense_date)); // Last day of month
+        }
+    } else {
+        $expense_date = date('Y-m-01');
+        $year = date('Y');
+        $month_num = date('m');
+        $end_date = $current_date;
     }
     
-    // Get current date for daily calculation
-    $current_date = date('Y-m-d');
-    $current_year = date('Y');
-    $current_month = date('m');
+    // Get days in month
+    $days_in_month = cal_days_in_month(CAL_GREGORIAN, $month_num, $year);
+    
+    // Calculate days used (from first day of month to end_date)
+    $start_date = $expense_date;
+    $days_used = (strtotime($end_date) - strtotime($start_date)) / (60 * 60 * 24) + 1;
+    
+    // Ensure days_used doesn't exceed days_in_month
+    if ($days_used > $days_in_month) {
+        $days_used = $days_in_month;
+    }
     
     // Get employee info
     $employee_query = "SELECT id, name, salary FROM employees WHERE id = ?";
@@ -43,27 +64,6 @@ try {
     
     $monthly_salary = floatval($employee['salary']);
     
-    // Calculate daily balance for current month
-    $month_to_calculate = $month ?: date('Y-m');
-    $expense_date = $month_to_calculate . '-01';
-    $year = intval(substr($month_to_calculate, 0, 4));
-    $month_num = intval(substr($month_to_calculate, 5, 2));
-    
-    // Get days in month
-    $days_in_month = cal_days_in_month(CAL_GREGORIAN, $month_num, $year);
-    
-    // Calculate days used
-    if ($year == $current_year && $month_num == $current_month) {
-        $end_date = $current_date;
-    } else {
-        $end_date = date('Y-m-t', strtotime($expense_date));
-    }
-    
-    $days_used = (strtotime($end_date) - strtotime($expense_date)) / (60 * 60 * 24) + 1;
-    if ($days_used > $days_in_month) {
-        $days_used = $days_in_month;
-    }
-    
     // Get expenses for this month
     $expenses_query = "
         SELECT 
@@ -77,10 +77,13 @@ try {
     ";
     
     $stmt = $pdo->prepare($expenses_query);
-    $stmt->execute([$employee_id, $month_to_calculate . '%']);
+    $stmt->execute([$employee_id, $month ? $month . '%' : date('Y-m') . '%']);
     $expenses = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    // Initialize totals with daily calculation
+    // Calculate daily rates
+    $daily_salary_rate = $days_in_month > 0 ? $monthly_salary / $days_in_month : 0;
+    
+    // Initialize totals
     $total_earned_salary = 0;
     $total_bonus = 0;
     $total_overtime = 0;
@@ -88,24 +91,26 @@ try {
     $total_deduction = 0;
     $total_penalty = 0;
     
-    // Process expenses with daily calculation
+    // Process expenses
     foreach ($expenses as $expense) {
         $amount = floatval($expense['amount']);
         $expense_type = $expense['expense_type'];
         $expense_date_str = $expense['expense_date'];
         
         // Calculate days used for this specific expense
+        // If expense is in current month and we're calculating for current month, use current date
         $expense_year = intval(substr($expense_date_str, 0, 4));
         $expense_month = intval(substr($expense_date_str, 5, 2));
-        $expense_days_in_month = cal_days_in_month(CAL_GREGORIAN, $expense_month, $expense_year);
         
-        if ($expense_year == $current_year && $expense_month == $current_month && $expense_date_str <= $current_date) {
+        if ($expense_year == date('Y') && $expense_month == date('m') && $expense_date_str <= $current_date) {
             $expense_end_date = $current_date;
         } else {
             $expense_end_date = date('Y-m-t', strtotime($expense_date_str));
         }
         
         $expense_days_used = (strtotime($expense_end_date) - strtotime($expense_date_str)) / (60 * 60 * 24) + 1;
+        $expense_days_in_month = cal_days_in_month(CAL_GREGORIAN, $expense_month, $expense_year);
+        
         if ($expense_days_used > $expense_days_in_month) {
             $expense_days_used = $expense_days_in_month;
         }
@@ -145,47 +150,37 @@ try {
     $payable_balance = max(0, $net_balance);
     $receivable_balance = max(0, -$net_balance);
     
-    // Also get stored balance for comparison
-    $stored_query = "
-        SELECT 
-            COALESCE(payable_balance, 0) as payable_balance,
-            COALESCE(receivable_balance, 0) as receivable_balance,
-            (COALESCE(payable_balance, 0) - COALESCE(receivable_balance, 0)) as net_balance
-        FROM employees
-        WHERE id = ?
-    ";
-    
-    $stmt = $pdo->prepare($stored_query);
-    $stmt->execute([$employee_id]);
-    $stored = $stmt->fetch(PDO::FETCH_ASSOC);
-    
     echo json_encode([
         'success' => true,
         'data' => [
-            'employee_id' => intval($employee['id']),
+            'employee_id' => $employee_id,
             'employee_name' => $employee['name'],
-            'month' => $month_to_calculate,
+            'month' => $month ?: date('Y-m'),
+            'monthly_salary' => $monthly_salary,
             'days_in_month' => $days_in_month,
             'days_used' => intval($days_used),
+            'daily_salary_rate' => round($daily_salary_rate, 2),
+            'total_earned_salary' => round($total_earned_salary, 2),
+            'total_bonus' => round($total_bonus, 2),
+            'total_overtime' => round($total_overtime, 2),
+            'total_advance' => round($total_advance, 2),
+            'total_deduction' => round($total_deduction, 2),
+            'total_penalty' => round($total_penalty, 2),
+            'total_income' => round($total_income, 2),
+            'total_deductions' => round($total_deductions, 2),
+            'net_balance' => round($net_balance, 2),
             'payable_balance' => round($payable_balance, 2),
             'receivable_balance' => round($receivable_balance, 2),
-            'net_balance' => round($net_balance, 2),
-            'stored_payable_balance' => floatval($stored['payable_balance']),
-            'stored_receivable_balance' => floatval($stored['receivable_balance']),
-            'stored_net_balance' => floatval($stored['net_balance']),
-            'total_earned_salary' => round($total_earned_salary, 2),
-            'total_advance' => round($total_advance, 2),
             'balance_message' => $net_balance >= 0 
                 ? 'کۆمپانیا قەرزی کارمەندە: ' . number_format($net_balance, 2) . ' د.ع'
                 : 'کارمەند قەرزی کۆمپانیایە: ' . number_format(abs($net_balance), 2) . ' د.ع',
-            'calculation_method' => 'daily',
             'calculation_details' => [
-                'monthly_salary' => number_format($monthly_salary, 2) . ' د.ع',
-                'days_in_month' => $days_in_month . ' ڕۆژ',
-                'days_used' => intval($days_used) . ' ڕۆژ',
-                'daily_salary_rate' => number_format($monthly_salary / $days_in_month, 2) . ' د.ع/ڕۆژ',
-                'earned_salary' => number_format($total_earned_salary, 2) . ' د.ع',
-                'advance_taken' => number_format($total_advance, 2) . ' د.ع'
+                'salary_calculation' => $total_earned_salary > 0 
+                    ? number_format($monthly_salary, 2) . ' د.ع ÷ ' . $days_in_month . ' ڕۆژ × ' . intval($days_used) . ' ڕۆژ = ' . number_format($total_earned_salary, 2) . ' د.ع'
+                    : '0 د.ع',
+                'advance_calculation' => $total_advance > 0
+                    ? 'پێشەکی بە پێی ڕۆژەکان: ' . number_format($total_advance, 2) . ' د.ع'
+                    : '0 د.ع'
             ]
         ]
     ]);
@@ -196,4 +191,5 @@ try {
         'error' => 'هەڵە لە وەرگرتنی زانیاری: ' . $e->getMessage()
     ]);
 }
+?>
 
