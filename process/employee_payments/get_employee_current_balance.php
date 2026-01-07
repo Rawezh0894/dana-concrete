@@ -88,6 +88,22 @@ try {
     $total_deduction = 0;
     $total_penalty = 0;
     
+    // Check if salary exists in expenses for this month
+    $has_salary_in_expenses = false;
+    foreach ($expenses as $expense) {
+        if ($expense['expense_type'] == 'salary') {
+            $has_salary_in_expenses = true;
+            break;
+        }
+    }
+    
+    // If no salary in expenses, use monthly salary from employees table
+    if (!$has_salary_in_expenses && $monthly_salary > 0) {
+        // Calculate salary based on days used in current month
+        $daily_salary_rate = $days_in_month > 0 ? $monthly_salary / $days_in_month : 0;
+        $total_earned_salary = $daily_salary_rate * $days_used;
+    }
+    
     // Process expenses with daily calculation
     foreach ($expenses as $expense) {
         $amount = floatval($expense['amount']);
