@@ -234,16 +234,28 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
     
     <!-- Filters -->
     <div class="row mb-4">
-        <div class="col-md-6 mb-3">
+        <div class="col-md-4 mb-3">
             <label for="month-filter" class="form-label">فلتەر بە مانگ:</label>
             <select class="form-select" id="month-filter">
                 <option value="">هەموو مانگەکان</option>
             </select>
         </div>
-        <div class="col-md-6 mb-3">
+        <div class="col-md-4 mb-3">
             <label for="employee-filter" class="form-label">فلتەر بە کارمەند:</label>
             <select class="form-select" id="employee-filter">
                 <option value="">هەموو کارمەندەکان</option>
+            </select>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label for="daily-balance-employee-select" class="form-label">
+                <i class="fas fa-calculator me-1"></i>
+                کارمەند بۆ باڵانسی ڕۆژانە:
+            </label>
+            <select class="form-select" id="daily-balance-employee-select">
+                <option value="">-- هەلبژێرە --</option>
+                <?php foreach($employees as $emp): ?>
+                    <option value="<?= $emp['id'] ?>"><?= htmlspecialchars($emp['name']) ?></option>
+                <?php endforeach; ?>
             </select>
         </div>
     </div>
