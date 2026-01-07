@@ -139,13 +139,15 @@ try {
     ];
     
     // یەکەم: بەکارهێنانی نرخی کڕین لە purchases تەیبڵ (سەرەکی)
+    // هەژمارکردنی نرخی مامناوەندی بۆ تۆن (وەک لە get_information.php دا)
     $purchases_query = "
         SELECT 
             m.name,
-            AVG(CASE 
-                WHEN p.type = 'دۆلار' THEN p.price_per_kg_usd
-                ELSE p.price_per_kg_iqd / NULLIF(p.exchange_rate / 100, 0)
-            END) as avg_price_per_kg
+            SUM(CASE 
+                WHEN p.type = 'دۆلار' THEN p.price 
+                ELSE p.amount_iqd / NULLIF(p.exchange_rate / 100, 0)
+            END) as total_usd,
+            SUM(p.kg) as total_kg
         FROM purchases p
         JOIN materials m ON p.material_id = m.id
         WHERE p.kg > 0 $date_condition_purchases
@@ -154,18 +156,22 @@ try {
     $purchases_stmt = $pdo->query($purchases_query);
     while ($purchase_row = $purchases_stmt->fetch()) {
         $m_name = $purchase_row['name'];
-        $avg_price = floatval($purchase_row['avg_price_per_kg']);
+        $total_usd = floatval($purchase_row['total_usd']);
+        $total_kg = floatval($purchase_row['total_kg']);
+        
+        // هەژمارکردنی نرخی بۆ کیلۆگرام (بە دابەشکردنی بە کیلۆگرام)
+        $price_per_kg = ($total_kg > 0) ? ($total_usd / $total_kg) : 0;
         
         if ($m_name == 'لمی کەسارە') {
-            $material_prices['black_sand'] = $avg_price;
+            $material_prices['black_sand'] = $price_per_kg;
         } elseif ($m_name == 'لمی ڕەش') {
-            $material_prices['brown_sand'] = $avg_price;
+            $material_prices['brown_sand'] = $price_per_kg;
         } elseif ($m_name == 'چەو') {
-            $material_prices['gravel'] = $avg_price;
+            $material_prices['gravel'] = $price_per_kg;
         } elseif ($m_name == 'چیمەنتۆ') {
-            $material_prices['cement'] = $avg_price;
+            $material_prices['cement'] = $price_per_kg;
         } elseif ($m_name == 'دەرمان') {
-            $material_prices['additive'] = $avg_price;
+            $material_prices['additive'] = $price_per_kg;
         }
     }
     
@@ -301,18 +307,10 @@ try {
     // ============================================
     
     // کۆی داهات لە فرۆشتنەکان (بە دۆلار)
-    // داهات = price_per_unit * quantity (بە دۆلار)
+    // لە get_information.php دا total_price بەکار دەهێنرێت و بە دۆلارە
+    // total_price = price_per_unit * quantity (بە دۆلار)
     $revenue_query = "
-        SELECT 
-            COALESCE(SUM(
-                CASE 
-                    WHEN price_per_unit > 0 THEN price_per_unit * quantity
-                    WHEN amount_paid_usd > 0 THEN amount_paid_usd
-                    WHEN amount_paid_iq > 0 THEN amount_paid_iq / NULLIF(dolar_rate / 100, 0)
-                    WHEN total_price > 0 AND dolar_rate > 0 THEN total_price / NULLIF(dolar_rate / 100, 0)
-                    ELSE 0
-                END
-            ), 0) as total_revenue
+        SELECT COALESCE(SUM(total_price), 0) as total_revenue
         FROM sales
         WHERE 1=1 $date_condition_sales
     ";
