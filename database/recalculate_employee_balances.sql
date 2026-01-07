@@ -19,35 +19,27 @@ INNER JOIN (
 ) calc ON e.id = calc.employee_id
 SET e.payable_balance = COALESCE(e.payable_balance, 0) + calc.total_amount;
 
--- بۆ پێشەکی - زیادکردن بە receivable_balance
-UPDATE `employees` e
-INNER JOIN (
-    SELECT 
-        employee_id,
-        SUM(amount) as total_amount
-    FROM `employee_expenses`
-    WHERE expense_type = 'advance'
-    GROUP BY employee_id
-) calc ON e.id = calc.employee_id
-SET e.receivable_balance = COALESCE(e.receivable_balance, 0) + calc.total_amount;
+-- بۆ پێشەکی - کەمکردنەوە لە payable_balance یان زیادکردن بە receivable_balance
+-- پێشەکی یەکەم لە مووچە (payable_balance) دەکەم، ئەگەر نەبوو زیاد بە receivable_balance
 
--- بۆ کەمکردنەوە و سزا - کەمکردنەوە لە payable_balance یان زیادکردن بە receivable_balance
--- ئەم کوئرییە بە شێوەیەکی خۆکار لۆجیکی deduction/penalty جێبەجێ دەکات
+-- بۆ پێشەکی و کەمکردنەوە و سزا - کەمکردنەوە لە payable_balance یان زیادکردن بە receivable_balance
+-- ئەم کوئرییە بە شێوەیەکی خۆکار لۆجیکی advance/deduction/penalty جێبەجێ دەکات
 DELIMITER $$
 
-DROP PROCEDURE IF EXISTS recalculate_deductions_penalties$$
-CREATE PROCEDURE recalculate_deductions_penalties()
+DROP PROCEDURE IF EXISTS recalculate_advances_deductions$$
+CREATE PROCEDURE recalculate_advances_deductions()
 BEGIN
     DECLARE done INT DEFAULT FALSE;
     DECLARE v_employee_id INT;
     DECLARE v_amount DECIMAL(10,2);
+    DECLARE v_expense_type VARCHAR(20);
     DECLARE v_current_payable DECIMAL(15,2);
     DECLARE v_current_receivable DECIMAL(15,2);
     
     DECLARE cur CURSOR FOR 
-        SELECT employee_id, amount 
+        SELECT employee_id, amount, expense_type
         FROM employee_expenses 
-        WHERE expense_type IN ('deduction', 'penalty')
+        WHERE expense_type IN ('advance', 'deduction', 'penalty')
         ORDER BY employee_id, created_at;
     
     DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
@@ -55,7 +47,7 @@ BEGIN
     OPEN cur;
     
     read_loop: LOOP
-        FETCH cur INTO v_employee_id, v_amount;
+        FETCH cur INTO v_employee_id, v_amount, v_expense_type;
         IF done THEN
             LEAVE read_loop;
         END IF;
@@ -66,9 +58,9 @@ BEGIN
         FROM employees
         WHERE id = v_employee_id;
         
-        -- Apply deduction/penalty logic
+        -- Apply advance/deduction/penalty logic (same logic for all)
         IF v_current_payable >= v_amount THEN
-            -- All deduction comes from payable balance
+            -- All comes from payable balance
             UPDATE employees
             SET payable_balance = v_current_payable - v_amount
             WHERE id = v_employee_id;
@@ -94,10 +86,10 @@ END$$
 DELIMITER ;
 
 -- جێبەجێکردنی procedure
-CALL recalculate_deductions_penalties();
+CALL recalculate_advances_deductions();
 
 -- سڕینەوەی procedure دوای بەکارهێنان
-DROP PROCEDURE IF EXISTS recalculate_deductions_penalties;
+DROP PROCEDURE IF EXISTS recalculate_advances_deductions;
 
 -- 3. پیشاندانی کۆی باڵانسەکان بۆ دڵنیابوون
 SELECT 

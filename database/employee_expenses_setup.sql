@@ -224,10 +224,20 @@ BEGIN
             WHERE `id` = NEW.employee_id;
         END IF;
     ELSEIF NEW.expense_type = 'advance' THEN
-        -- Increase receivable balance (employee owes company)
-        UPDATE `employees` 
-        SET `receivable_balance` = COALESCE(`receivable_balance`, 0) + NEW.amount 
-        WHERE `id` = NEW.employee_id;
+        -- Advance reduces payable balance first (money taken from salary)
+        -- If payable balance is not enough, excess goes to receivable balance
+        IF v_current_payable >= NEW.amount THEN
+            -- All advance comes from payable balance (salary)
+            UPDATE `employees` 
+            SET `payable_balance` = v_current_payable - NEW.amount
+            WHERE `id` = NEW.employee_id;
+        ELSE
+            -- Payable balance becomes 0, excess goes to receivable
+            UPDATE `employees` 
+            SET `payable_balance` = 0,
+                `receivable_balance` = v_current_receivable + (NEW.amount - v_current_payable)
+            WHERE `id` = NEW.employee_id;
+        END IF;
     END IF;
 END$$
 
@@ -270,9 +280,22 @@ BEGIN
                 WHERE `id` = OLD.employee_id;
             END IF;
         ELSEIF OLD.expense_type = 'advance' THEN
-            UPDATE `employees` 
-            SET `receivable_balance` = GREATEST(0, v_current_receivable - OLD.amount) 
-            WHERE `id` = OLD.employee_id;
+            -- When reverting advance:
+            -- If receivable has the amount, restore it to payable
+            -- Otherwise, just add back to payable
+            IF v_current_receivable >= OLD.amount THEN
+                -- All was in receivable, restore to payable
+                UPDATE `employees` 
+                SET `payable_balance` = v_current_payable + OLD.amount,
+                    `receivable_balance` = v_current_receivable - OLD.amount
+                WHERE `id` = OLD.employee_id;
+            ELSE
+                -- Some was in receivable, some was from payable
+                UPDATE `employees` 
+                SET `payable_balance` = v_current_payable + (OLD.amount - v_current_receivable),
+                    `receivable_balance` = 0
+                WHERE `id` = OLD.employee_id;
+            END IF;
         END IF;
         
         -- Get updated balances after revert
@@ -299,9 +322,17 @@ BEGIN
                 WHERE `id` = NEW.employee_id;
             END IF;
         ELSEIF NEW.expense_type = 'advance' THEN
-            UPDATE `employees` 
-            SET `receivable_balance` = v_current_receivable + NEW.amount 
-            WHERE `id` = NEW.employee_id;
+            -- Advance reduces payable balance first
+            IF v_current_payable >= NEW.amount THEN
+                UPDATE `employees` 
+                SET `payable_balance` = v_current_payable - NEW.amount
+                WHERE `id` = NEW.employee_id;
+            ELSE
+                UPDATE `employees` 
+                SET `payable_balance` = 0,
+                    `receivable_balance` = v_current_receivable + (NEW.amount - v_current_payable)
+                WHERE `id` = NEW.employee_id;
+            END IF;
         END IF;
     END IF;
 END$$
@@ -348,10 +379,22 @@ BEGIN
             WHERE `id` = OLD.employee_id;
         END IF;
     ELSEIF OLD.expense_type = 'advance' THEN
-        -- Reduce receivable balance
-        UPDATE `employees` 
-        SET `receivable_balance` = GREATEST(0, v_current_receivable - OLD.amount) 
-        WHERE `id` = OLD.employee_id;
+        -- When reverting advance:
+        -- If receivable has the amount, restore it to payable
+        -- Otherwise, just add back to payable
+        IF v_current_receivable >= OLD.amount THEN
+            -- All was in receivable, restore to payable
+            UPDATE `employees` 
+            SET `payable_balance` = v_current_payable + OLD.amount,
+                `receivable_balance` = v_current_receivable - OLD.amount
+            WHERE `id` = OLD.employee_id;
+        ELSE
+            -- Some was in receivable, some was from payable
+            UPDATE `employees` 
+            SET `payable_balance` = v_current_payable + (OLD.amount - v_current_receivable),
+                `receivable_balance` = 0
+            WHERE `id` = OLD.employee_id;
+        END IF;
     END IF;
 END$$
 

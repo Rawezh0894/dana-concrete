@@ -106,7 +106,12 @@ try {
     
     $expense_details = [];
     foreach ($expense_ids as $exp) {
-        $expense_details[] = $expense_types_kurdish[$exp['type']] . ': ' . $exp['amount'] . ' د.ع';
+        $detail = $expense_types_kurdish[$exp['type']] . ': ' . $exp['amount'] . ' د.ع';
+        // Add note for advance
+        if ($exp['type'] == 'advance') {
+            $detail .= ' (لە مووچە دەکەم)';
+        }
+        $expense_details[] = $detail;
     }
     
     $notification_message = "خەرجی کارمەند زیادکرا (کارمەند: $employee_name, مانگ: $expense_date)\n" . implode(', ', $expense_details);

@@ -37,10 +37,15 @@ $(function () {
                 if (payable > 0 || receivable > 0) {
                     balanceHtml = `
                         <div class="small">
-                            <div class="text-success">قەرزی کۆمپانیا: ${formatMoney(payable)}</div>
-                            <div class="text-danger">قەرزی کارمەند: ${formatMoney(receivable)}</div>
-                            <div class="fw-bold ${netBalance >= 0 ? 'text-success' : 'text-danger'}">
-                                باڵانسی خالص: ${formatMoney(Math.abs(netBalance))}
+                            <div class="text-success">
+                                <i class="fas fa-arrow-up"></i> قەرزی کۆمپانیا: ${formatMoney(payable)}
+                            </div>
+                            <div class="text-danger">
+                                <i class="fas fa-arrow-down"></i> قەرزی کارمەند: ${formatMoney(receivable)}
+                            </div>
+                            <div class="fw-bold mt-1 ${netBalance >= 0 ? 'text-success' : 'text-danger'}">
+                                <i class="fas fa-balance-scale"></i> باڵانسی خالص: ${formatMoney(Math.abs(netBalance))}
+                                ${netBalance >= 0 ? '(کۆمپانیا قەرزی کارمەندە)' : '(کارمەند قەرزی کۆمپانیایە)'}
                             </div>
                         </div>
                     `;

@@ -74,6 +74,24 @@
 2. `trg_after_update_employee_expense_balance` - دوای نوێکردنەوە
 3. `trg_after_delete_employee_expense_balance` - دوای سڕینەوە
 
+## لۆجیکی باڵانس
+
+### مووچە/بەخشیش/کاروانحیسابی
+- زیاد بە `payable_balance` (کۆمپانیا قەرزی کارمەندە)
+- نموونە: مووچە 600000 → payable_balance = 600000
+
+### پێشەکی (Advance)
+- یەکەم لە `payable_balance` کەم دەکات (لە مووچە دەکەم)
+- ئەگەر `payable_balance` کەم بوو، زیاد بە `receivable_balance`
+- نموونە:
+  - مووچە 600000 → payable_balance = 600000
+  - پێشەکی 200000 → payable_balance = 400000 (600000 - 200000)
+  - پێشەکی تر 500000 → payable_balance = 0, receivable_balance = 100000
+
+### کەمکردنەوە/سزا
+- یەکەم لە `payable_balance` کەم دەکات
+- ئەگەر `payable_balance` کەم بوو، زیاد بە `receivable_balance`
+
 ## فایلەکانی نوێ
 
 ### PHP

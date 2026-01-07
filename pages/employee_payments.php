@@ -212,6 +212,7 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
                 <option value="<?= $emp['id'] ?>" data-salary="<?= $emp['salary'] ?>"><?= htmlspecialchars($emp['name']) ?></option>
               <?php endforeach; ?>
             </select>
+            <small class="form-text text-muted" id="employee-balance-info" style="display: none;"></small>
           </div>
           <div class="row">
             <div class="col-md-6 mb-3">
@@ -231,6 +232,7 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
             <div class="col-md-6 mb-3">
               <label for="advance" class="form-label">پێشەکی/قەرز (د.ع)</label>
               <input type="number" class="form-control" id="advance" name="advance" min="0" step="0.01" value="0">
+              <small class="form-text text-muted">پێشەکی یەکەم لە مووچە (باڵانس) دەکەم</small>
             </div>
           </div>
           <div class="row">
@@ -246,6 +248,10 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
           <div class="mb-3">
             <label for="total_add" class="form-label">کۆی گشتی</label>
             <input type="text" class="form-control" id="total_add" readonly>
+            <small class="form-text text-muted">
+              <strong>تێبینی:</strong> پێشەکی و کەمکردنەوە و سزا لە مووچە (باڵانس) دەکەم. 
+              ئەگەر مووچە کەم بوو، زیاد بە قەرزی کارمەند دەکرێت.
+            </small>
           </div>
           <div class="mb-3">
             <label for="expense_date" class="form-label">مانگ (YYYY-MM)</label>
@@ -349,11 +355,31 @@ $(function() {
     }
     $('#salary, #bonus, #overtime, #advance, #deduction, #penalty').on('input change', calcTotalAdd);
     $('#edit_salary, #edit_karwanhisabi, #edit_bonus').on('input change', calcTotalEdit);
-    // Auto-fill salary in Add Payment Modal
+    // Auto-fill salary in Add Payment Modal and show balance
     $('#employee_id').on('change', function() {
+        var employeeId = $(this).val();
         var salary = $(this).find('option:selected').data('salary') || '';
         $('#salary').val(salary);
         calcTotalAdd();
+        
+        // Load and display employee balance
+        if (employeeId) {
+            $.get('../process/employee_payments/get_employee_current_balance.php', {employee_id: employeeId}, function(response) {
+                if (response.success) {
+                    var balanceInfo = $('#employee-balance-info');
+                    var data = response.data;
+                    var balanceText = 'باڵانسی ئێستا: ';
+                    if (data.net_balance >= 0) {
+                        balanceText += '<span class="text-success">' + data.balance_message + '</span>';
+                    } else {
+                        balanceText += '<span class="text-danger">' + data.balance_message + '</span>';
+                    }
+                    balanceInfo.html(balanceText).show();
+                }
+            }, 'json');
+        } else {
+            $('#employee-balance-info').hide();
+        }
     });
     // Auto-fill salary in Edit Payment Modal
     $('#edit_employee_id').on('change', function() {
