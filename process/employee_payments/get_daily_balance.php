@@ -118,6 +118,7 @@ try {
         switch ($expense_type) {
             case 'salary':
                 // Calculate proportional salary based on days used
+                // مووچە بە شێوەی ڕۆژانە هەژمار دەکرێت
                 $daily_amount = ($amount / $expense_days_in_month) * $expense_days_used;
                 $total_earned_salary += $daily_amount;
                 break;
@@ -128,14 +129,16 @@ try {
                 $total_overtime += $amount;
                 break;
             case 'advance':
-                // Calculate proportional advance based on days used
-                $daily_amount = ($amount / $expense_days_in_month) * $expense_days_used;
-                $total_advance += $daily_amount;
+                // وەرگرتن/پێشەکی بە تەواوی وەردەگیرێت (نەک بە شێوەی ڕۆژانە)
+                // چونکە وەرگرتن بە تەواوی دەدرێت بە کارمەند
+                $total_advance += $amount;
                 break;
             case 'deduction':
+                // کەمکردنەوە بە تەواوی
                 $total_deduction += $amount;
                 break;
             case 'penalty':
+                // سزا بە تەواوی
                 $total_penalty += $amount;
                 break;
         }
@@ -179,7 +182,7 @@ try {
                     ? number_format($monthly_salary, 2) . ' د.ع ÷ ' . $days_in_month . ' ڕۆژ × ' . intval($days_used) . ' ڕۆژ = ' . number_format($total_earned_salary, 2) . ' د.ع'
                     : '0 د.ع',
                 'advance_calculation' => $total_advance > 0
-                    ? 'پێشەکی بە پێی ڕۆژەکان: ' . number_format($total_advance, 2) . ' د.ع'
+                    ? 'وەرگرتن/پێشەکی بە تەواوی: ' . number_format($total_advance, 2) . ' د.ع (نەک بە شێوەی ڕۆژانە)'
                     : '0 د.ع'
             ]
         ]
