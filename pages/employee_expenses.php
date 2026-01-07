@@ -498,6 +498,18 @@ $(function() {
         if (employeeId) {
             loadDailyBalance(employeeId, selectedMonth);
         }
+        
+        // Also reload balance cards when month filter changes
+        if (window.loadBalances) {
+            window.loadBalances();
+        }
+    });
+    
+    // Reload balance cards when employee filter changes (Select2)
+    $(document).on('change', '#employee-filter', function() {
+        if (window.loadBalances) {
+            window.loadBalances();
+        }
     });
     
     // Function to load daily balance

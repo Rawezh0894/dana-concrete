@@ -49,8 +49,14 @@ $(document).ready(function() {
     // Load initial balances
     loadBalances();
     
-    // Reload balances when filters change
+    // Reload balances when filters change (handle both regular select and Select2)
+    // For regular select
     $('#employee-filter').on('change', function() {
+        loadBalances();
+    });
+    
+    // For Select2 (used in employee_expenses.php)
+    $(document).on('change', '#employee-filter', function() {
         loadBalances();
     });
     
