@@ -132,7 +132,38 @@ try {
         'additive' => 0
     ];
     
-    // بەکارهێنانی average_price لە bins_silos تەیبڵ
+    // یەکەم: بەکارهێنانی نرخی کڕین لە purchases تەیبڵ (سەرەکی)
+    $purchases_query = "
+        SELECT 
+            m.name,
+            AVG(CASE 
+                WHEN p.type = 'دۆلار' THEN p.price_per_kg_usd
+                ELSE p.price_per_kg_iqd / NULLIF(p.exchange_rate / 100, 0)
+            END) as avg_price_per_kg
+        FROM purchases p
+        JOIN materials m ON p.material_id = m.id
+        WHERE p.kg > 0 $date_condition_date
+        GROUP BY m.name
+    ";
+    $purchases_stmt = $pdo->query($purchases_query);
+    while ($purchase_row = $purchases_stmt->fetch()) {
+        $m_name = $purchase_row['name'];
+        $avg_price = floatval($purchase_row['avg_price_per_kg']);
+        
+        if ($m_name == 'لمی کەسارە') {
+            $material_prices['black_sand'] = $avg_price;
+        } elseif ($m_name == 'لمی ڕەش') {
+            $material_prices['brown_sand'] = $avg_price;
+        } elseif ($m_name == 'چەو') {
+            $material_prices['gravel'] = $avg_price;
+        } elseif ($m_name == 'چیمەنتۆ') {
+            $material_prices['cement'] = $avg_price;
+        } elseif ($m_name == 'دەرمان') {
+            $material_prices['additive'] = $avg_price;
+        }
+    }
+    
+    // Fallback: بەکارهێنانی average_price لە bins_silos تەیبڵ (ئەگەر لە purchases نرخی بەردەست نەبوو)
     $bins_query = "
         SELECT 
             material_type,
@@ -155,37 +186,6 @@ try {
             $material_prices['cement'] = $avg_price / 1000;
         } elseif ($material_type == 'دەرمان' && $material_prices['additive'] == 0) {
             $material_prices['additive'] = $avg_price / 1000;
-        }
-    }
-    
-    // Fallback: بەکارهێنانی نرخی کڕین لە purchases تەیبڵ
-    $purchases_query = "
-        SELECT 
-            m.name,
-            AVG(CASE 
-                WHEN p.type = 'دۆلار' THEN p.price_per_kg_usd
-                ELSE p.price_per_kg_iqd / NULLIF(p.exchange_rate / 100, 0)
-            END) as avg_price_per_kg
-        FROM purchases p
-        JOIN materials m ON p.material_id = m.id
-        WHERE p.kg > 0 $date_condition_date
-        GROUP BY m.name
-    ";
-    $purchases_stmt = $pdo->query($purchases_query);
-    while ($purchase_row = $purchases_stmt->fetch()) {
-        $m_name = $purchase_row['name'];
-        $avg_price = floatval($purchase_row['avg_price_per_kg']);
-        
-        if ($m_name == 'لمی کەسارە' && $material_prices['black_sand'] == 0) {
-            $material_prices['black_sand'] = $avg_price;
-        } elseif ($m_name == 'لمی ڕەش' && $material_prices['brown_sand'] == 0) {
-            $material_prices['brown_sand'] = $avg_price;
-        } elseif ($m_name == 'چەو' && $material_prices['gravel'] == 0) {
-            $material_prices['gravel'] = $avg_price;
-        } elseif ($m_name == 'چیمەنتۆ' && $material_prices['cement'] == 0) {
-            $material_prices['cement'] = $avg_price;
-        } elseif ($m_name == 'دەرمان' && $material_prices['additive'] == 0) {
-            $material_prices['additive'] = $avg_price;
         }
     }
     
