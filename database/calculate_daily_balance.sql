@@ -133,6 +133,11 @@ DELIMITER ;
 
 -- 5. کوئری بۆ هەژمارکردنی باڵانسی کارمەند بە پێی ڕۆژەکان
 -- ئەم کوئرییە باڵانسی کارمەند بە پێی مووچە و پێشەکی بە شێوەی ڕۆژانە هەژمار دەکات
+-- بۆ بەکارهێنان: لە کوێی `@employee_id` بڕی IDی کارمەند بنووسە
+-- نموونە: SET @employee_id = 1;
+
+SET @employee_id = 1;  -- ئەم بڕە بگۆڕە بۆ IDی کارمەندی دەتەوێت
+
 SELECT 
     e.id,
     e.name,
@@ -182,7 +187,7 @@ SELECT
     get_days_in_month(YEAR(CURDATE()), MONTH(CURDATE())) as days_in_month
 FROM employees e
 LEFT JOIN employee_expenses ee ON e.id = ee.employee_id
-WHERE e.id = ?  -- Replace ? with employee_id
+WHERE e.id = @employee_id
 GROUP BY e.id, e.name, e.salary;
 
 -- 6. کوئری بۆ هەژمارکردنی باڵانسی هەموو کارمەندەکان بە پێی ڕۆژەکان
@@ -230,64 +235,72 @@ ORDER BY e.name;
 
 -- 7. کوئری بۆ هەژمارکردنی باڵانس بۆ مانگێکی تایبەت
 -- بۆ نموونە: مانگی 1 (کانوونی دووەم) 2024
+-- بۆ بەکارهێنان: لە کوێی `@employee_id` و `@target_month` بڕەکان بنووسە
+-- نموونە: 
+-- SET @employee_id = 1;
+-- SET @target_month = '2024-01';
+
+SET @employee_id = 1;  -- ئەم بڕە بگۆڕە بۆ IDی کارمەندی دەتەوێت
+SET @target_month = '2024-01';  -- ئەم بڕە بگۆڕە بۆ مانگی دەتەوێت (YYYY-MM)
+
 SELECT 
     e.id,
     e.name,
     e.salary as monthly_salary,
-    '2024-01' as expense_month,
-    -- Calculate salary for January 2024 up to current date (if current month) or full month
+    @target_month as expense_month,
+    -- Calculate salary for the target month up to current date (if current month) or full month
     COALESCE(SUM(
         CASE 
-            WHEN ee.expense_type = 'salary' AND ee.expense_date = '2024-01-01' THEN 
-                calculate_daily_salary(ee.amount, '2024-01-01', 
+            WHEN ee.expense_type = 'salary' AND DATE_FORMAT(ee.expense_date, '%Y-%m') = @target_month THEN 
+                calculate_daily_salary(ee.amount, ee.expense_date, 
                     CASE 
-                        WHEN YEAR(CURDATE()) = 2024 AND MONTH(CURDATE()) = 1 THEN CURDATE()
-                        ELSE '2024-01-31'
+                        WHEN DATE_FORMAT(CURDATE(), '%Y-%m') = @target_month THEN CURDATE()
+                        ELSE LAST_DAY(ee.expense_date)
                     END)
-            WHEN ee.expense_type = 'bonus' AND ee.expense_date = '2024-01-01' THEN ee.amount
-            WHEN ee.expense_type = 'overtime' AND ee.expense_date = '2024-01-01' THEN ee.amount
+            WHEN ee.expense_type = 'bonus' AND DATE_FORMAT(ee.expense_date, '%Y-%m') = @target_month THEN ee.amount
+            WHEN ee.expense_type = 'overtime' AND DATE_FORMAT(ee.expense_date, '%Y-%m') = @target_month THEN ee.amount
             ELSE 0
         END
     ), 0) as total_earned_salary,
-    -- Calculate advances for January 2024
+    -- Calculate advances for the target month
     COALESCE(SUM(
         CASE 
-            WHEN ee.expense_type = 'advance' AND ee.expense_date = '2024-01-01' THEN 
-                calculate_daily_advance(ee.amount, '2024-01-01',
+            WHEN ee.expense_type = 'advance' AND DATE_FORMAT(ee.expense_date, '%Y-%m') = @target_month THEN 
+                calculate_daily_advance(ee.amount, ee.expense_date,
                     CASE 
-                        WHEN YEAR(CURDATE()) = 2024 AND MONTH(CURDATE()) = 1 THEN CURDATE()
-                        ELSE '2024-01-31'
+                        WHEN DATE_FORMAT(CURDATE(), '%Y-%m') = @target_month THEN CURDATE()
+                        ELSE LAST_DAY(ee.expense_date)
                     END)
-            WHEN ee.expense_type IN ('deduction', 'penalty') AND ee.expense_date = '2024-01-01' THEN ee.amount
+            WHEN ee.expense_type IN ('deduction', 'penalty') AND DATE_FORMAT(ee.expense_date, '%Y-%m') = @target_month THEN ee.amount
             ELSE 0
         END
     ), 0) as total_taken_advances,
     (COALESCE(SUM(
         CASE 
-            WHEN ee.expense_type = 'salary' AND ee.expense_date = '2024-01-01' THEN 
-                calculate_daily_salary(ee.amount, '2024-01-01',
+            WHEN ee.expense_type = 'salary' AND DATE_FORMAT(ee.expense_date, '%Y-%m') = @target_month THEN 
+                calculate_daily_salary(ee.amount, ee.expense_date,
                     CASE 
-                        WHEN YEAR(CURDATE()) = 2024 AND MONTH(CURDATE()) = 1 THEN CURDATE()
-                        ELSE '2024-01-31'
+                        WHEN DATE_FORMAT(CURDATE(), '%Y-%m') = @target_month THEN CURDATE()
+                        ELSE LAST_DAY(ee.expense_date)
                     END)
-            WHEN ee.expense_type = 'bonus' AND ee.expense_date = '2024-01-01' THEN ee.amount
-            WHEN ee.expense_type = 'overtime' AND ee.expense_date = '2024-01-01' THEN ee.amount
+            WHEN ee.expense_type = 'bonus' AND DATE_FORMAT(ee.expense_date, '%Y-%m') = @target_month THEN ee.amount
+            WHEN ee.expense_type = 'overtime' AND DATE_FORMAT(ee.expense_date, '%Y-%m') = @target_month THEN ee.amount
             ELSE 0
         END
     ), 0) - COALESCE(SUM(
         CASE 
-            WHEN ee.expense_type = 'advance' AND ee.expense_date = '2024-01-01' THEN 
-                calculate_daily_advance(ee.amount, '2024-01-01',
+            WHEN ee.expense_type = 'advance' AND DATE_FORMAT(ee.expense_date, '%Y-%m') = @target_month THEN 
+                calculate_daily_advance(ee.amount, ee.expense_date,
                     CASE 
-                        WHEN YEAR(CURDATE()) = 2024 AND MONTH(CURDATE()) = 1 THEN CURDATE()
-                        ELSE '2024-01-31'
+                        WHEN DATE_FORMAT(CURDATE(), '%Y-%m') = @target_month THEN CURDATE()
+                        ELSE LAST_DAY(ee.expense_date)
                     END)
-            WHEN ee.expense_type IN ('deduction', 'penalty') AND ee.expense_date = '2024-01-01' THEN ee.amount
+            WHEN ee.expense_type IN ('deduction', 'penalty') AND DATE_FORMAT(ee.expense_date, '%Y-%m') = @target_month THEN ee.amount
             ELSE 0
         END
     ), 0)) as net_balance
 FROM employees e
-LEFT JOIN employee_expenses ee ON e.id = ee.employee_id AND ee.expense_date LIKE '2024-01%'
-WHERE e.id = ?  -- Replace ? with employee_id
+LEFT JOIN employee_expenses ee ON e.id = ee.employee_id AND DATE_FORMAT(ee.expense_date, '%Y-%m') = @target_month
+WHERE e.id = @employee_id
 GROUP BY e.id, e.name, e.salary;
 
