@@ -69,8 +69,13 @@ $(function () {
     loadExpenses();
     window.loadExpenses = loadExpenses;
     
-    // Reload when filters change
-    $('#month-filter, #employee-filter').on('change', function() {
+    // Reload when filters change (handle both regular select and Select2)
+    $('#month-filter').on('change', function() {
+        loadExpenses();
+    });
+    
+    // Handle Select2 change event for employee filter
+    $(document).on('change', '#employee-filter', function() {
         loadExpenses();
     });
     

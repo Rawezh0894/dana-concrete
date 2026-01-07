@@ -21,7 +21,7 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>پارەدان بە کارمەندەکان</title>
+    <title>بەڕێوەبردنی خەرجی کارمەندەکان</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
     <link href="../assets/css/login.css" rel="stylesheet">
     <link href="../assets/css/variables.css" rel="stylesheet">
@@ -43,8 +43,10 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
 <?php include '../includes/sidebar.php'; ?>
 <div class="container-fluid py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">پارەدان بە کارمەندەکان</h2>
-        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addPaymentModal" style="background: var(--seafoam-green); font-weight: bold;">+ زیادکردنی پارەدان</button>
+        <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">بەڕێوەبردنی خەرجی کارمەندەکان</h2>
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addExpenseModal" style="background: var(--seafoam-green); font-weight: bold;">
+            <i class="fas fa-plus"></i> زیادکردنی خەرجی کارمەند
+        </button>
     </div>
     
     <!-- Balance Cards -->
@@ -97,16 +99,6 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
             <div class="card text-center shadow  card-gradient-info card-animate-hover">
                 <div class="card-body">
                     <i class="fas fa-money-bill-wave card-icon"></i>
-                    <h6 class="card-title">کۆی پارەدان</h6>
-                    <div class="fs-4 fw-bold" id="total-payments">0 د.ع</div>
-                    <small class="text-light">کۆی پارەدان بە کارمەندەکان</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card text-center shadow  card-gradient-success card-animate-hover">
-                <div class="card-body">
-                    <i class="fas fa-user-tie card-icon"></i>
                     <h6 class="card-title">کۆی مووچە</h6>
                     <div class="fs-4 fw-bold" id="total-salary">0 د.ع</div>
                     <small class="text-light">کۆی مووچەی کارمەندەکان</small>
@@ -128,8 +120,18 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
                 <div class="card-body">
                     <i class="fas fa-calculator card-icon"></i>
                     <h6 class="card-title">کۆی کاروانحیسابی</h6>
-                    <div class="fs-4 fw-bold" id="total-karwanhisabi">0 د.ع</div>
+                    <div class="fs-4 fw-bold" id="total-overtime">0 د.ع</div>
                     <small class="text-light">کۆی کاروانحیسابی</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-center shadow card-gradient-danger card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-hand-holding-usd card-icon"></i>
+                    <h6 class="card-title">کۆی پێشەکی</h6>
+                    <div class="fs-4 fw-bold" id="total-advance">0 د.ع</div>
+                    <small class="text-light">کۆی پێشەکی کارمەندەکان</small>
                 </div>
             </div>
         </div>
@@ -150,6 +152,8 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
             </select>
         </div>
     </div>
+    
+    <!-- Expenses Table -->
     <div class="table-responsive mb-4">
         <h4 class="mb-3">خەرجی کارمەندەکان</h4>
         <table class="table table-bordered table-hover align-middle text-center" id="employeeExpensesTable">
@@ -171,42 +175,15 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
             </tbody>
         </table>
     </div>
-    
-    <div class="table-responsive">
-        <h4 class="mb-3">پارەدانە کۆنەکان (سیستەمی کۆن - بۆ مێژوو)</h4>
-        <div class="alert alert-info mb-3">
-            <i class="fas fa-info-circle"></i> 
-            <strong>تێبینی:</strong> ئەم خشتەیە بۆ پارەدانە کۆنەکانە. 
-            بۆ خەرجی نوێکان، لە خشتەی سەرەوە بەکار بهێنە.
-            ئەم تەیبڵە باڵانس بە شێوەیەکی خۆکار ناگۆڕێت.
-        </div>
-        <table class="table table-bordered table-hover align-middle text-center" id="employeePaymentsTable">
-            <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
-                <tr>
-                    <th>#</th>
-                    <th>کارمەند</th>
-                    <th>مووچە (د.ع)</th>
-                    <th>کاروانحیسابی</th>
-                    <th>بەخشیش (د.ع)</th>
-                    <th>کۆی گشتی</th>
-                    <th>مانگ</th>
-                    <th>بەروار</th>
-                    <th>کردارەکان</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Payments will be loaded here by JS -->
-            </tbody>
-        </table>
-    </div>
 </div>
-<!-- Add Payment Modal -->
-<div class="modal fade" id="addPaymentModal" tabindex="-1" aria-labelledby="addPaymentModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
+
+<!-- Add Expense Modal -->
+<div class="modal fade" id="addExpenseModal" tabindex="-1" aria-labelledby="addExpenseModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
     <div class="modal-content">
-      <form id="addPaymentForm">
+      <form id="addExpenseForm">
         <div class="modal-header">
-          <h5 class="modal-title" id="addPaymentModalLabel">زیادکردنی پارەدان</h5>
+          <h5 class="modal-title" id="addExpenseModalLabel">زیادکردنی خەرجی کارمەند</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
@@ -220,6 +197,13 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
             </select>
             <small class="form-text text-muted" id="employee-balance-info" style="display: none;"></small>
           </div>
+          
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i>
+            <strong>تێبینی:</strong> دەتوانیت لە یەک کاتدا هەم مووچە و هەم بەخشیش و هەم کاروانحیسابی و هەم پێشەکی و هەم کەمکردنەوە و هەم سزا بنووسیت.
+            پێشەکی و کەمکردنەوە و سزا یەکەم لە مووچە (باڵانس) دەکەم.
+          </div>
+          
           <div class="row">
             <div class="col-md-6 mb-3">
               <label for="salary" class="form-label">مووچە (د.ع)</label>
@@ -276,69 +260,18 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
     </div>
   </div>
 </div>
-<!-- Edit Payment Modal -->
-<div class="modal fade" id="editPaymentModal" tabindex="-1" aria-labelledby="editPaymentModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <form id="editPaymentForm">
-        <div class="modal-header">
-          <h5 class="modal-title" id="editPaymentModalLabel">دەستکاری پارەدان</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <input type="hidden" id="edit_payment_id" name="id">
-          <div class="mb-3">
-            <label for="edit_employee_id" class="form-label">کارمەند</label>
-            <select class="form-select" id="edit_employee_id" name="employee_id" required>
-              <option value="">-- هەلبژێرە --</option>
-              <?php foreach($employees as $emp): ?>
-                <option value="<?= $emp['id'] ?>" data-salary="<?= $emp['salary'] ?>"><?= htmlspecialchars($emp['name']) ?></option>
-              <?php endforeach; ?>
-            </select>
-          </div>
-          <div class="mb-3">
-            <label for="edit_salary" class="form-label">مووچە (د.ع)</label>
-            <input type="text" class="form-control" id="edit_salary" name="salary" required>
-          </div>
-          <div class="mb-3">
-            <label for="edit_karwanhisabi" class="form-label">کاروانحیسابی</label>
-            <input type="text" class="form-control" id="edit_karwanhisabi" name="karwanhisabi" required>
-          </div>
-          <div class="mb-3">
-            <label for="edit_bonus" class="form-label">بەخشیش (د.ع)</label>
-            <input type="number" class="form-control" id="edit_bonus" name="bonus" min="0" step="0.01" value="0">
-          </div>
-          <div class="mb-3">
-            <label for="total_edit" class="form-label">کۆی گشتی (مووچە + کاروانحیسابی + بەخشیش)</label>
-            <input type="text" class="form-control" id="total_edit" readonly>
-          </div>
-          <div class="mb-3">
-            <label for="edit_pay_month" class="form-label">مانگ</label>
-            <input type="month" class="form-control" id="edit_pay_month" name="pay_month" required>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
-          <button type="submit" class="btn btn-primary">نوێکردنەوە</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <!-- Select2 JS -->
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="../assets/js/swalAlert.js"></script>
 <script src="../assets/js/comon/table-controler.js"></script>
-<script src="../assets/js/employee_payments/add.js"></script>
 <script src="../assets/js/employee_payments/add_expense.js"></script>
-<script src="../assets/js/employee_payments/select.js"></script>
 <script src="../assets/js/employee_payments/select_expenses.js"></script>
 <script src="../assets/js/employee_payments/balances.js"></script>
-<script src="../assets/js/employee_payments/update.js"></script>
 <script src="../assets/js/employee_payments/delete.js"></script>
-<script src="../assets/js/employee_payments/summary.js"></script>
+<script src="../assets/js/employee_payments/summary_expenses.js"></script>
 <script>
 $(function() {
     function calcTotalAdd() {
@@ -351,17 +284,10 @@ $(function() {
         var total = salary + bonus + overtime + advance + deduction + penalty;
         $('#total_add').val(total.toLocaleString('en-US') + ' د.ع');
     }
-    function calcTotalEdit() {
-        var salary = parseFloat($('#edit_salary').val()) || 0;
-        var karwan = $('#edit_karwanhisabi').val().replace(/,/g, '');
-        var karwanVal = parseFloat(karwan) || 0;
-        var bonus = parseFloat($('#edit_bonus').val()) || 0;
-        var total = salary + karwanVal + bonus;
-        $('#total_edit').val(total.toLocaleString('en-US') + ' د.ع');
-    }
+    
     $('#salary, #bonus, #overtime, #advance, #deduction, #penalty').on('input change', calcTotalAdd);
-    $('#edit_salary, #edit_karwanhisabi, #edit_bonus').on('input change', calcTotalEdit);
-    // Auto-fill salary in Add Payment Modal and show balance
+    
+    // Auto-fill salary in Add Expense Modal and show balance
     $('#employee_id').on('change', function() {
         var employeeId = $(this).val();
         var salary = $(this).find('option:selected').data('salary') || '';
@@ -387,21 +313,25 @@ $(function() {
             $('#employee-balance-info').hide();
         }
     });
-    // Auto-fill salary in Edit Payment Modal
-    $('#edit_employee_id').on('change', function() {
-        var salary = $(this).find('option:selected').data('salary') || '';
-        $('#edit_salary').val(salary);
-        calcTotalEdit();
-    });
+    
     // Initial calculation
     calcTotalAdd();
-    calcTotalEdit();
     
     // Set default month to current month
     var now = new Date();
     var month = (now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0'));
     $('#expense_date').val(month);
+    
+    // Initialize Select2 for employee filter
+    $('#employee-filter').select2({
+        theme: 'bootstrap-5',
+        width: '100%',
+        placeholder: 'هەموو کارمەندەکان',
+        allowClear: true,
+        dir: 'rtl'
+    });
 });
 </script>
 </body>
 </html>
+

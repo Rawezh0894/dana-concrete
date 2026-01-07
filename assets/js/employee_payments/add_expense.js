@@ -1,5 +1,6 @@
 $(function () {
-    $('#addPaymentForm').on('submit', function (e) {
+    // Handle both old and new form IDs
+    $('#addPaymentForm, #addExpenseForm').on('submit', function (e) {
         e.preventDefault();
         
         // Check if at least one expense field has a value
@@ -21,7 +22,7 @@ $(function () {
         $.post('../process/employee_payments/add_expense.php', formData, function (response) {
             if (response.success) {
                 swalAlert('سەرکەوتوو', 'خەرجی کارمەند بەسەرکەوتوویی زیادکرا!', 'success');
-                $('#addPaymentForm')[0].reset();
+                $('#addPaymentForm, #addExpenseForm')[0].reset();
                 // Reset to current month
                 var now = new Date();
                 var month = (now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0'));
@@ -34,11 +35,14 @@ $(function () {
                 if (window.employeePaymentsSummary && window.employeePaymentsSummary.loadSummaryData) {
                     window.employeePaymentsSummary.loadSummaryData();
                 }
+                if (window.employeeExpensesSummary && window.employeeExpensesSummary.loadSummaryData) {
+                    window.employeeExpensesSummary.loadSummaryData();
+                }
                 // Reload balances after a short delay to ensure trigger has updated
                 setTimeout(function() {
                     if (window.loadBalances) window.loadBalances();
                 }, 500);
-                $('#addPaymentModal').modal('hide');
+                $('#addPaymentModal, #addExpenseModal').modal('hide');
             } else {
                 swalAlert('هەڵە', response.message || 'هەڵەیەک هەیە', 'error');
             }

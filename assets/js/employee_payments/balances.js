@@ -57,10 +57,17 @@ $(document).ready(function() {
     // Export function for use in other scripts
     window.loadBalances = loadBalances;
     
-    // Reload balances when summary data is loaded
+    // Reload balances when summary data is loaded (for both old and new pages)
     if (window.employeePaymentsSummary) {
         const originalLoadSummaryData = window.employeePaymentsSummary.loadSummaryData;
         window.employeePaymentsSummary.loadSummaryData = function() {
+            originalLoadSummaryData();
+            loadBalances();
+        };
+    }
+    if (window.employeeExpensesSummary) {
+        const originalLoadSummaryData = window.employeeExpensesSummary.loadSummaryData;
+        window.employeeExpensesSummary.loadSummaryData = function() {
             originalLoadSummaryData();
             loadBalances();
         };
