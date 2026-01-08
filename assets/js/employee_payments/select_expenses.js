@@ -10,11 +10,15 @@ $(function () {
         // Get filter values
         const monthFilter = $('#month-filter').val();
         const employeeFilter = $('#employee-filter').val();
+        const fromDate = $('#date-from').val();
+        const toDate = $('#date-to').val();
 
         // Build query parameters
         const params = new URLSearchParams();
         if (monthFilter) params.append('month', monthFilter);
         if (employeeFilter) params.append('employee', employeeFilter);
+        if (fromDate) params.append('from_date', fromDate);
+        if (toDate) params.append('to_date', toDate);
 
         const url = '../process/employee_payments/select_expenses.php' + (params.toString() ? '?' + params.toString() : '');
 
@@ -81,6 +85,11 @@ $(function () {
     
     // Handle Select2 change event for employee filter
     $(document).on('change', '#employee-filter', function() {
+        loadExpenses();
+    });
+
+    // Handle date range changes
+    $('#date-from, #date-to').on('change', function() {
         loadExpenses();
     });
     

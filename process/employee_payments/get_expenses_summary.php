@@ -1,27 +1,13 @@
 <?php
-session_start();
 require_once '../../config/db_conected.php';
-require_once '../../config/permissions.php';
-header('Content-Type: application/json; charset=utf-8');
-
-if (!isset($_SESSION['user_id'])) {
-    http_response_code(403);
-    echo json_encode(['success' => false, 'error' => 'سێشن نییە! تکایە بچۆ ژوورەوە.']);
-    exit;
-}
-
-if (!hasPermission('view_employee_payment')) {
-    http_response_code(403);
-    echo json_encode(['success' => false, 'error' => 'ڕێگەت پێنەدراوە!']);
-    exit;
-}
+header('Content-Type: application/json');
 
 try {
     // Get filter parameters
     $month_filter = $_GET['month'] ?? '';
     $employee_filter = $_GET['employee'] ?? '';
-    $date_from = $_GET['date_from'] ?? '';
-    $date_to = $_GET['date_to'] ?? '';
+    $from_date = $_GET['from_date'] ?? '';
+    $to_date = $_GET['to_date'] ?? '';
     
     // Build WHERE conditions
     $where_conditions = [];
@@ -36,16 +22,18 @@ try {
         $where_conditions[] = "employee_id = ?";
         $params[] = $employee_filter;
     }
-    
-    // Date range filter (using created_at field)
-    if ($date_from) {
+
+    // Date range filter (based on created_at date)
+    $is_valid_date = function ($d) {
+        return is_string($d) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $d);
+    };
+    if ($from_date && $is_valid_date($from_date)) {
         $where_conditions[] = "DATE(created_at) >= ?";
-        $params[] = $date_from;
+        $params[] = $from_date;
     }
-    
-    if ($date_to) {
+    if ($to_date && $is_valid_date($to_date)) {
         $where_conditions[] = "DATE(created_at) <= ?";
-        $params[] = $date_to;
+        $params[] = $to_date;
     }
     
     $where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
@@ -53,12 +41,12 @@ try {
     // Prepare base query for summary
     $base_query = "
         SELECT 
-            COALESCE(SUM(CASE WHEN expense_type = 'salary' THEN amount ELSE 0 END), 0) as total_salary,
-            COALESCE(SUM(CASE WHEN expense_type = 'bonus' THEN amount ELSE 0 END), 0) as total_bonus,
-            COALESCE(SUM(CASE WHEN expense_type = 'overtime' THEN amount ELSE 0 END), 0) as total_overtime,
-            COALESCE(SUM(CASE WHEN expense_type = 'advance' THEN amount ELSE 0 END), 0) as total_advance,
-            COALESCE(SUM(CASE WHEN expense_type = 'deduction' THEN amount ELSE 0 END), 0) as total_deduction,
-            COALESCE(SUM(CASE WHEN expense_type = 'penalty' THEN amount ELSE 0 END), 0) as total_penalty,
+            SUM(CASE WHEN expense_type = 'salary' THEN amount ELSE 0 END) as total_salary,
+            SUM(CASE WHEN expense_type = 'bonus' THEN amount ELSE 0 END) as total_bonus,
+            SUM(CASE WHEN expense_type = 'overtime' THEN amount ELSE 0 END) as total_overtime,
+            SUM(CASE WHEN expense_type = 'advance' THEN amount ELSE 0 END) as total_advance,
+            SUM(CASE WHEN expense_type = 'deduction' THEN amount ELSE 0 END) as total_deduction,
+            SUM(CASE WHEN expense_type = 'penalty' THEN amount ELSE 0 END) as total_penalty,
             COUNT(*) as expense_count
         FROM employee_expenses 
         $where_clause
@@ -67,11 +55,6 @@ try {
     $stmt = $pdo->prepare($base_query);
     $stmt->execute($params);
     $summary = $stmt->fetch(PDO::FETCH_ASSOC);
-    
-    // Debug: Log the query and results
-    error_log('Summary Query: ' . $base_query);
-    error_log('Summary Params: ' . json_encode($params));
-    error_log('Summary Result: ' . json_encode($summary));
     
     // Get employees for filter dropdown
     $employees_query = "SELECT id, name FROM employees ORDER BY name";
@@ -82,21 +65,18 @@ try {
     $months_query = "SELECT DISTINCT expense_date FROM employee_expenses ORDER BY expense_date DESC";
     $stmt = $pdo->query($months_query);
     $months = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-    // Calculate salary balance: salary + bonus + overtime - deduction - penalty - advance
-    // Ensure values are numeric (handle NULL from COALESCE)
+
     $total_salary = floatval($summary['total_salary'] ?? 0);
     $total_bonus = floatval($summary['total_bonus'] ?? 0);
     $total_overtime = floatval($summary['total_overtime'] ?? 0);
     $total_advance = floatval($summary['total_advance'] ?? 0);
     $total_deduction = floatval($summary['total_deduction'] ?? 0);
     $total_penalty = floatval($summary['total_penalty'] ?? 0);
-    
-    $total_salary_plus_bonus = $total_salary + $total_bonus;
-    $total_salary_balance = $total_salary + $total_bonus + $total_overtime - $total_deduction - $total_penalty - $total_advance;
-    
-    // Debug output
-    error_log('Calculated totals - Salary: ' . $total_salary . ', Bonus: ' . $total_bonus . ', Overtime: ' . $total_overtime);
+
+    $total_salary_bonus = $total_salary + $total_bonus;
+    $total_income = $total_salary + $total_bonus + $total_overtime;
+    $total_deductions = $total_advance + $total_deduction + $total_penalty;
+    $net_salary_balance = $total_income - $total_deductions;
     
     echo json_encode([
         'success' => true,
@@ -104,12 +84,14 @@ try {
             'summary' => [
                 'total_salary' => $total_salary,
                 'total_bonus' => $total_bonus,
+                'total_salary_bonus' => $total_salary_bonus,
                 'total_overtime' => $total_overtime,
+                'total_income' => $total_income,
                 'total_advance' => $total_advance,
                 'total_deduction' => $total_deduction,
                 'total_penalty' => $total_penalty,
-                'total_salary_plus_bonus' => $total_salary_plus_bonus,
-                'total_salary_balance' => $total_salary_balance,
+                'total_deductions' => $total_deductions,
+                'net_salary_balance' => $net_salary_balance,
                 'expense_count' => intval($summary['expense_count'] ?? 0)
             ],
             'filters' => [

@@ -2,64 +2,41 @@
 function loadSummaryData() {
     const monthFilter = $('#month-filter').val();
     const employeeFilter = $('#employee-filter').val();
-    const dateFrom = $('#date-from-filter').val();
-    const dateTo = $('#date-to-filter').val();
+    const fromDate = $('#date-from').val();
+    const toDate = $('#date-to').val();
     
     let url = '../process/employee_payments/get_expenses_summary.php';
     const params = new URLSearchParams();
     
     if (monthFilter) params.append('month', monthFilter);
     if (employeeFilter) params.append('employee', employeeFilter);
-    if (dateFrom) params.append('date_from', dateFrom);
-    if (dateTo) params.append('date_to', dateTo);
+    if (fromDate) params.append('from_date', fromDate);
+    if (toDate) params.append('to_date', toDate);
     
     if (params.toString()) {
         url += '?' + params.toString();
     }
     
     fetch(url)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok: ' + response.status);
-            }
-            return response.json();
-        })
+        .then(response => response.json())
         .then(result => {
-            console.log('Summary API response:', result);
             if (!result.success) {
-                console.error('Error loading summary:', result.error || result.message);
-                // Set all cards to 0 on error
-                $('#total-salary, #total-bonus, #total-salary-plus-bonus, #total-overtime, #total-advance, #total-deduction, #total-penalty, #total-salary-balance').text('0 د.ع');
+                console.error('Error loading summary:', result.error);
                 return;
             }
             
             const data = result.data;
-            if (!data || !data.summary) {
-                console.error('Invalid data structure:', data);
-                return;
-            }
-            
-            console.log('Summary data:', data.summary);
             
             // Update summary cards
-            $('#total-salary').text(formatCurrency(data.summary.total_salary || 0));
-            $('#total-bonus').text(formatCurrency(data.summary.total_bonus || 0));
-            $('#total-salary-plus-bonus').text(formatCurrency(data.summary.total_salary_plus_bonus || 0));
-            $('#total-overtime').text(formatCurrency(data.summary.total_overtime || 0));
-            $('#total-advance').text(formatCurrency(data.summary.total_advance || 0));
-            $('#total-deduction').text(formatCurrency(data.summary.total_deduction || 0));
-            $('#total-penalty').text(formatCurrency(data.summary.total_penalty || 0));
-            $('#total-salary-balance').text(formatCurrency(data.summary.total_salary_balance || 0));
-            
-            // Color code salary balance card
-            const balanceCard = $('#total-salary-balance').closest('.card');
-            const balanceValue = parseFloat(data.summary.total_salary_balance || 0);
-            balanceCard.removeClass('border-success border-danger');
-            if (balanceValue > 0) {
-                balanceCard.addClass('border-success');
-            } else if (balanceValue < 0) {
-                balanceCard.addClass('border-danger');
-            }
+            $('#total-salary').text(formatCurrency(data.summary.total_salary));
+            $('#total-bonus').text(formatCurrency(data.summary.total_bonus));
+            $('#total-salary-bonus').text(formatCurrency(data.summary.total_salary_bonus));
+            $('#total-overtime').text(formatCurrency(data.summary.total_overtime));
+            $('#total-income').text(formatCurrency(data.summary.total_income));
+            $('#total-advance').text(formatCurrency(data.summary.total_advance));
+            $('#total-deduction').text(formatCurrency(data.summary.total_deduction));
+            $('#total-penalty').text(formatCurrency(data.summary.total_penalty));
+            $('#net-salary-balance').text(formatCurrency(data.summary.net_salary_balance));
             
             // Populate filter dropdowns if not already populated
             if ($('#month-filter option').length <= 1) {
@@ -175,9 +152,9 @@ $(document).ready(function() {
             loadBalances();
         }
     });
-    
-    // Handle date range filter changes
-    $('#date-from-filter, #date-to-filter').on('change', function() {
+
+    // Handle date range changes
+    $('#date-from, #date-to').on('change', function() {
         loadSummaryData();
         if (typeof loadExpenses === 'function') {
             loadExpenses();
