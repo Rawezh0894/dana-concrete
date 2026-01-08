@@ -44,10 +44,24 @@ try {
     $overtime_rate = floatval($setting['value'] ?? 0);
     
     // 3. Calculate Fixed Salary and Bonus from Employees table
+    
+    // Check if status column exists
+    $status_exists = false;
+    try {
+        $check_status = $pdo->query("SHOW COLUMNS FROM employees LIKE 'status'");
+        $status_exists = $check_status->rowCount() > 0;
+    } catch (Exception $e) {}
+
     $emp_params = [];
-    $emp_sql = "SELECT id, salary, COALESCE(bonus, 0) as bonus FROM employees";
+    $emp_sql = "SELECT id, salary, COALESCE(bonus, 0) as bonus FROM employees WHERE 1=1";
+    
+    // Filter active employees if status column exists
+    if ($status_exists) {
+        $emp_sql .= " AND status = 'active'";
+    }
+
     if ($employee_filter) {
-        $emp_sql .= " WHERE id = ?";
+        $emp_sql .= " AND id = ?";
         $emp_params[] = $employee_filter;
     }
     $stmt = $pdo->prepare($emp_sql);
