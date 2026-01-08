@@ -44,9 +44,14 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
 <div class="container-fluid py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">بەڕێوەبردنی خەرجی کارمەندەکان</h2>
-        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addExpenseModal" style="background: var(--seafoam-green); font-weight: bold;">
-            <i class="fas fa-plus"></i> زیادکردنی خەرجی کارمەند
-        </button>
+        <div>
+            <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#addIncomeExpenseModal" style="background: var(--seafoam-green); font-weight: bold;">
+                <i class="fas fa-plus"></i> زیادکردنی مووچە/بەخشیش/کاروانحیسابی
+            </button>
+            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#addDeductionExpenseModal" style="font-weight: bold;">
+                <i class="fas fa-minus"></i> زیادکردنی پێشەکی/کەمکردنەوە/سزا
+            </button>
+        </div>
     </div>
     
     <!-- Employee Count Card -->
@@ -254,84 +259,123 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
     </div>
 </div>
 
-<!-- Add Expense Modal -->
-<div class="modal fade" id="addExpenseModal" tabindex="-1" aria-labelledby="addExpenseModalLabel" aria-hidden="true">
+<!-- Add Income Expense Modal (مووچە/بەخشیش/کاروانحیسابی) -->
+<div class="modal fade" id="addIncomeExpenseModal" tabindex="-1" aria-labelledby="addIncomeExpenseModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-      <form id="addExpenseForm">
+      <form id="addIncomeExpenseForm">
         <div class="modal-header">
-          <h5 class="modal-title" id="addExpenseModalLabel">زیادکردنی خەرجی کارمەند</h5>
+          <h5 class="modal-title" id="addIncomeExpenseModalLabel">زیادکردنی مووچە/بەخشیش/کاروانحیسابی</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
           <div class="mb-3">
-            <label for="employee_id" class="form-label">کارمەند</label>
-            <select class="form-select" id="employee_id" name="employee_id" required>
+            <label for="income_employee_id" class="form-label">کارمەند</label>
+            <select class="form-select" id="income_employee_id" name="employee_id" required>
               <option value="">-- هەلبژێرە --</option>
               <?php foreach($employees as $emp): ?>
                 <option value="<?= $emp['id'] ?>" data-salary="<?= $emp['salary'] ?>"><?= htmlspecialchars($emp['name']) ?></option>
               <?php endforeach; ?>
             </select>
-            <small class="form-text text-muted" id="employee-balance-info" style="display: none;"></small>
+            <small class="form-text text-muted" id="income-employee-balance-info" style="display: none;"></small>
           </div>
           
           <div class="alert alert-info">
             <i class="fas fa-info-circle"></i>
-            <strong>تێبینی:</strong> دەتوانیت لە یەک کاتدا هەم مووچە و هەم بەخشیش و هەم کاروانحیسابی و هەم پێشەکی و هەم کەمکردنەوە و هەم سزا بنووسیت.
-            پێشەکی و کەمکردنەوە و سزا یەکەم لە مووچە (باڵانس) دەکەم.
+            <strong>تێبینی:</strong> دەتوانیت لە یەک کاتدا هەم مووچە و هەم بەخشیش و هەم کاروانحیسابی بنووسیت.
           </div>
           
           <div class="row">
-            <div class="col-md-6 mb-3">
-              <label for="salary" class="form-label">مووچە (د.ع)</label>
-              <input type="number" class="form-control" id="salary" name="salary" min="0" step="0.01" value="0">
+            <div class="col-md-4 mb-3">
+              <label for="income_salary" class="form-label">مووچە (د.ع)</label>
+              <input type="number" class="form-control" id="income_salary" name="salary" min="0" step="0.01" value="0">
             </div>
-            <div class="col-md-6 mb-3">
-              <label for="bonus" class="form-label">بەخشیش (د.ع)</label>
-              <input type="number" class="form-control" id="bonus" name="bonus" min="0" step="0.01" value="0">
+            <div class="col-md-4 mb-3">
+              <label for="income_bonus" class="form-label">بەخشیش (د.ع)</label>
+              <input type="number" class="form-control" id="income_bonus" name="bonus" min="0" step="0.01" value="0">
             </div>
-          </div>
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label for="overtime" class="form-label">کاروانحیسابی (د.ع)</label>
-              <input type="number" class="form-control" id="overtime" name="overtime" min="0" step="0.01" value="0">
-            </div>
-            <div class="col-md-6 mb-3">
-              <label for="advance" class="form-label">پێشەکی/قەرز (د.ع)</label>
-              <input type="number" class="form-control" id="advance" name="advance" min="0" step="0.01" value="0">
-              <small class="form-text text-muted">پێشەکی یەکەم لە مووچە (باڵانس) دەکەم</small>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label for="deduction" class="form-label">کەمکردنەوە (د.ع)</label>
-              <input type="number" class="form-control" id="deduction" name="deduction" min="0" step="0.01" value="0">
-            </div>
-            <div class="col-md-6 mb-3">
-              <label for="penalty" class="form-label">سزا (د.ع)</label>
-              <input type="number" class="form-control" id="penalty" name="penalty" min="0" step="0.01" value="0">
+            <div class="col-md-4 mb-3">
+              <label for="income_overtime" class="form-label">کاروانحیسابی (د.ع)</label>
+              <input type="number" class="form-control" id="income_overtime" name="overtime" min="0" step="0.01" value="0">
             </div>
           </div>
           <div class="mb-3">
-            <label for="total_add" class="form-label">کۆی گشتی</label>
-            <input type="text" class="form-control" id="total_add" readonly>
-            <small class="form-text text-muted">
-              <strong>تێبینی:</strong> پێشەکی و کەمکردنەوە و سزا لە مووچە (باڵانس) دەکەم. 
-              ئەگەر مووچە کەم بوو، زیاد بە قەرزی کارمەند دەکرێت.
-            </small>
+            <label for="income_total_add" class="form-label">کۆی گشتی</label>
+            <input type="text" class="form-control" id="income_total_add" readonly>
           </div>
           <div class="mb-3">
-            <label for="expense_date" class="form-label">مانگ (YYYY-MM)</label>
-            <input type="month" class="form-control" id="expense_date" name="expense_date" required>
+            <label for="income_expense_date" class="form-label">مانگ (YYYY-MM)</label>
+            <input type="month" class="form-control" id="income_expense_date" name="expense_date" required>
           </div>
           <div class="mb-3">
-            <label for="notes" class="form-label">تێبینی</label>
-            <textarea class="form-control" id="notes" name="notes" rows="2"></textarea>
+            <label for="income_notes" class="form-label">تێبینی</label>
+            <textarea class="form-control" id="income_notes" name="notes" rows="2"></textarea>
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
           <button type="submit" class="btn btn-success" style="background: var(--seafoam-green); font-weight: bold;">زیادکردن</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Add Deduction Expense Modal (پێشەکی/کەمکردنەوە/سزا) -->
+<div class="modal fade" id="addDeductionExpenseModal" tabindex="-1" aria-labelledby="addDeductionExpenseModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form id="addDeductionExpenseForm">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addDeductionExpenseModalLabel">زیادکردنی پێشەکی/کەمکردنەوە/سزا</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="deduction_employee_id" class="form-label">کارمەند</label>
+            <select class="form-select" id="deduction_employee_id" name="employee_id" required>
+              <option value="">-- هەلبژێرە --</option>
+              <?php foreach($employees as $emp): ?>
+                <option value="<?= $emp['id'] ?>"><?= htmlspecialchars($emp['name']) ?></option>
+              <?php endforeach; ?>
+            </select>
+            <small class="form-text text-muted" id="deduction-employee-balance-info" style="display: none;"></small>
+          </div>
+          
+          <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>تێبینی:</strong> پێشەکی و کەمکردنەوە و سزا یەکەم لە مووچە (باڵانس) دەکەم. 
+            ئەگەر مووچە کەم بوو، زیاد بە قەرزی کارمەند دەکرێت.
+          </div>
+          
+          <div class="mb-3">
+            <label for="deduction_expense_type" class="form-label">جۆری خەرجی</label>
+            <select class="form-select" id="deduction_expense_type" name="expense_type" required>
+              <option value="">-- هەلبژێرە --</option>
+              <option value="advance">پێشەکی/قەرز</option>
+              <option value="deduction">کەمکردنەوە</option>
+              <option value="penalty">سزا</option>
+            </select>
+          </div>
+          
+          <div class="mb-3">
+            <label for="deduction_amount" class="form-label">بڕ (د.ع)</label>
+            <input type="number" class="form-control" id="deduction_amount" name="amount" min="0" step="0.01" required>
+          </div>
+          
+          <div class="mb-3">
+            <label for="deduction_expense_date" class="form-label">مانگ (YYYY-MM)</label>
+            <input type="month" class="form-control" id="deduction_expense_date" name="expense_date" required>
+          </div>
+          
+          <div class="mb-3">
+            <label for="deduction_notes" class="form-label">تێبینی</label>
+            <textarea class="form-control" id="deduction_notes" name="notes" rows="2"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
+          <button type="submit" class="btn btn-warning" style="font-weight: bold;">زیادکردن</button>
         </div>
       </form>
     </div>
@@ -410,29 +454,27 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
 <script src="../assets/js/employee_payments/summary_expenses.js"></script>
 <script>
 $(function() {
-    function calcTotalAdd() {
-        var salary = parseFloat($('#salary').val()) || 0;
-        var bonus = parseFloat($('#bonus').val()) || 0;
-        var overtime = parseFloat($('#overtime').val()) || 0;
-        var advance = parseFloat($('#advance').val()) || 0;
-        var deduction = parseFloat($('#deduction').val()) || 0;
-        var penalty = parseFloat($('#penalty').val()) || 0;
-        var total = salary + bonus + overtime + advance + deduction + penalty;
-        $('#total_add').val(total.toLocaleString('en-US') + ' د.ع');
+    // Calculate total for Income Expense Modal (مووچە/بەخشیش/کاروانحیسابی)
+    function calcIncomeTotal() {
+        var salary = parseFloat($('#income_salary').val()) || 0;
+        var bonus = parseFloat($('#income_bonus').val()) || 0;
+        var overtime = parseFloat($('#income_overtime').val()) || 0;
+        var total = salary + bonus + overtime;
+        $('#income_total_add').val(total.toLocaleString('en-US') + ' د.ع');
     }
     
-    $('#salary, #bonus, #overtime, #advance, #deduction, #penalty').on('input change', calcTotalAdd);
+    $('#income_salary, #income_bonus, #income_overtime').on('input change', calcIncomeTotal);
     
-    // Auto-fill salary in Add Expense Modal and show balance
-    $('#employee_id').on('change', function() {
+    // Auto-fill salary in Income Expense Modal and show balance
+    $('#income_employee_id').on('change', function() {
         var employeeId = $(this).val();
         var salary = $(this).find('option:selected').data('salary') || '';
-        $('#salary').val(salary);
-        calcTotalAdd();
+        $('#income_salary').val(salary);
+        calcIncomeTotal();
         
         // Load and display employee balance with daily calculation
         if (employeeId) {
-            var selectedMonth = $('#expense_date').val() || '';
+            var selectedMonth = $('#income_expense_date').val() || '';
             var params = {employee_id: employeeId};
             if (selectedMonth) {
                 params.month = selectedMonth.substring(0, 7); // Extract YYYY-MM
@@ -440,7 +482,7 @@ $(function() {
             
             $.get('../process/employee_payments/get_employee_current_balance.php', params, function(response) {
                 if (response.success) {
-                    var balanceInfo = $('#employee-balance-info');
+                    var balanceInfo = $('#income-employee-balance-info');
                     var data = response.data;
                     var balanceText = '<div class="small">';
                     balanceText += '<strong>باڵانسی ئێستا (بە پێی ڕۆژەکان):</strong><br>';
@@ -469,23 +511,64 @@ $(function() {
                 }
             }, 'json');
         } else {
-            $('#employee-balance-info').hide();
+            $('#income-employee-balance-info').hide();
+        }
+    });
+    
+    // Load balance for Deduction Expense Modal
+    $('#deduction_employee_id').on('change', function() {
+        var employeeId = $(this).val();
+        
+        if (employeeId) {
+            var selectedMonth = $('#deduction_expense_date').val() || '';
+            var params = {employee_id: employeeId};
+            if (selectedMonth) {
+                params.month = selectedMonth.substring(0, 7);
+            }
+            
+            $.get('../process/employee_payments/get_employee_current_balance.php', params, function(response) {
+                if (response.success) {
+                    var balanceInfo = $('#deduction-employee-balance-info');
+                    var data = response.data;
+                    var balanceText = '<div class="small">';
+                    balanceText += '<strong>باڵانسی ئێستا:</strong><br>';
+                    
+                    if (data.net_balance >= 0) {
+                        balanceText += '<span class="text-success">' + data.balance_message + '</span>';
+                    } else {
+                        balanceText += '<span class="text-danger">' + data.balance_message + '</span>';
+                    }
+                    balanceText += '</div>';
+                    balanceInfo.html(balanceText).show();
+                }
+            }, 'json');
+        } else {
+            $('#deduction-employee-balance-info').hide();
         }
     });
     
     // Initial calculation
-    calcTotalAdd();
+    calcIncomeTotal();
     
-    // Set default month to current month
+    // Set default month to current month for both modals
     var now = new Date();
     var month = (now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0'));
-    $('#expense_date').val(month);
+    $('#income_expense_date').val(month);
+    $('#deduction_expense_date').val(month);
     
-    // Reload balance when month changes
-    $('#expense_date').on('change', function() {
-        var employeeId = $('#employee_id').val();
+    // Reload balance when month changes in Income Modal
+    $('#income_expense_date').on('change', function() {
+        var employeeId = $('#income_employee_id').val();
         if (employeeId) {
-            $('#employee_id').trigger('change');
+            $('#income_employee_id').trigger('change');
+        }
+    });
+    
+    // Reload balance when month changes in Deduction Modal
+    $('#deduction_expense_date').on('change', function() {
+        var employeeId = $('#deduction_employee_id').val();
+        if (employeeId) {
+            $('#deduction_employee_id').trigger('change');
         }
     });
     

@@ -235,32 +235,27 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
               <label for="overtime" class="form-label">کاروانحیسابی (د.ع)</label>
               <input type="number" class="form-control" id="overtime" name="overtime" min="0" step="0.01" value="0">
             </div>
-          </div>
-          <div class="alert alert-info">
-            <i class="fas fa-info-circle"></i>
-            <strong>تێبینی:</strong> پێشەکی/قەرز، کەمکردنەوە، سزا یەکەم لە مووچە (باڵانس) دەکەم.
-            ئەگەر مووچە کەم بوو، زیاد بە قەرزی کارمەند دەکرێت.
+            <div class="col-md-6 mb-3">
+              <label for="advance" class="form-label">پێشەکی/قەرز (د.ع)</label>
+              <input type="number" class="form-control" id="advance" name="advance" min="0" step="0.01" value="0">
+              <small class="form-text text-muted">پێشەکی یەکەم لە مووچە (باڵانس) دەکەم</small>
+            </div>
           </div>
           <div class="row">
             <div class="col-md-6 mb-3">
-              <label for="deduction_type" class="form-label">جۆری کەمکردنەوە</label>
-              <select class="form-select" id="deduction_type" name="deduction_type">
-                <option value="">-- هیچ --</option>
-                <option value="advance">پێشەکی/قەرز</option>
-                <option value="deduction">کەمکردنەوە</option>
-                <option value="penalty">سزا</option>
-              </select>
+              <label for="deduction" class="form-label">کەمکردنەوە (د.ع)</label>
+              <input type="number" class="form-control" id="deduction" name="deduction" min="0" step="0.01" value="0">
             </div>
             <div class="col-md-6 mb-3">
-              <label for="deduction_amount" class="form-label">بڕ (د.ع)</label>
-              <input type="number" class="form-control" id="deduction_amount" name="deduction_amount" min="0" step="0.01" value="0" disabled>
+              <label for="penalty" class="form-label">سزا (د.ع)</label>
+              <input type="number" class="form-control" id="penalty" name="penalty" min="0" step="0.01" value="0">
             </div>
           </div>
           <div class="mb-3">
-            <label for="total_add" class="form-label">کۆی گشتی (مووچە + بەخشیش + کاروانحیسابی)</label>
+            <label for="total_add" class="form-label">کۆی گشتی</label>
             <input type="text" class="form-control" id="total_add" readonly>
             <small class="form-text text-muted">
-              <strong>تێبینی:</strong> پێشەکی/قەرز، کەمکردنەوە، سزا لە مووچە (باڵانس) دەکەم. 
+              <strong>تێبینی:</strong> پێشەکی و کەمکردنەوە و سزا لە مووچە (باڵانس) دەکەم. 
               ئەگەر مووچە کەم بوو، زیاد بە قەرزی کارمەند دەکرێت.
             </small>
           </div>
@@ -350,8 +345,10 @@ $(function() {
         var salary = parseFloat($('#salary').val()) || 0;
         var bonus = parseFloat($('#bonus').val()) || 0;
         var overtime = parseFloat($('#overtime').val()) || 0;
-        var deductionAmount = parseFloat($('#deduction_amount').val()) || 0;
-        var total = salary + bonus + overtime + deductionAmount;
+        var advance = parseFloat($('#advance').val()) || 0;
+        var deduction = parseFloat($('#deduction').val()) || 0;
+        var penalty = parseFloat($('#penalty').val()) || 0;
+        var total = salary + bonus + overtime + advance + deduction + penalty;
         $('#total_add').val(total.toLocaleString('en-US') + ' د.ع');
     }
     function calcTotalEdit() {
@@ -362,20 +359,7 @@ $(function() {
         var total = salary + karwanVal + bonus;
         $('#total_edit').val(total.toLocaleString('en-US') + ' د.ع');
     }
-    
-    // Enable/disable deduction amount input based on selection
-    $('#deduction_type').on('change', function() {
-        var selectedType = $(this).val();
-        if (selectedType) {
-            $('#deduction_amount').prop('disabled', false);
-        } else {
-            $('#deduction_amount').prop('disabled', true);
-            $('#deduction_amount').val(0);
-        }
-        calcTotalAdd();
-    });
-    
-    $('#salary, #bonus, #overtime, #deduction_amount').on('input change', calcTotalAdd);
+    $('#salary, #bonus, #overtime, #advance, #deduction, #penalty').on('input change', calcTotalAdd);
     $('#edit_salary, #edit_karwanhisabi, #edit_bonus').on('input change', calcTotalEdit);
     // Auto-fill salary in Add Payment Modal and show balance
     $('#employee_id').on('change', function() {

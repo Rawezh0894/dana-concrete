@@ -25,23 +25,9 @@ $notes = trim($_POST['notes'] ?? '');
 $salary = floatval($_POST['salary'] ?? 0);
 $bonus = floatval($_POST['bonus'] ?? 0);
 $overtime = floatval($_POST['overtime'] ?? 0);
-
-// Get deduction type and amount (new way: single selection)
-$deduction_type = trim($_POST['deduction_type'] ?? '');
-$deduction_amount = floatval($_POST['deduction_amount'] ?? 0);
-
-// Map to old variable names for backward compatibility
-$advance = 0;
-$deduction = 0;
-$penalty = 0;
-
-if ($deduction_type === 'advance' && $deduction_amount > 0) {
-    $advance = $deduction_amount;
-} elseif ($deduction_type === 'deduction' && $deduction_amount > 0) {
-    $deduction = $deduction_amount;
-} elseif ($deduction_type === 'penalty' && $deduction_amount > 0) {
-    $penalty = $deduction_amount;
-}
+$advance = floatval($_POST['advance'] ?? 0);
+$deduction = floatval($_POST['deduction'] ?? 0);
+$penalty = floatval($_POST['penalty'] ?? 0);
 
 if ($employee_id <= 0 || $expense_date === '') {
     echo json_encode(['success' => false, 'message' => 'کارمەند و بەروار پێویستە']);
