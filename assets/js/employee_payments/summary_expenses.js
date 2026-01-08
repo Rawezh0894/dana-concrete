@@ -18,23 +18,37 @@ function loadSummaryData() {
     }
     
     fetch(url)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok: ' + response.status);
+            }
+            return response.json();
+        })
         .then(result => {
+            console.log('Summary API response:', result);
             if (!result.success) {
-                console.error('Error loading summary:', result.error);
+                console.error('Error loading summary:', result.error || result.message);
+                // Set all cards to 0 on error
+                $('#total-salary, #total-bonus, #total-salary-plus-bonus, #total-overtime, #total-advance, #total-deduction, #total-penalty, #total-salary-balance').text('0 د.ع');
                 return;
             }
             
             const data = result.data;
+            if (!data || !data.summary) {
+                console.error('Invalid data structure:', data);
+                return;
+            }
+            
+            console.log('Summary data:', data.summary);
             
             // Update summary cards
-            $('#total-salary').text(formatCurrency(data.summary.total_salary));
-            $('#total-bonus').text(formatCurrency(data.summary.total_bonus));
+            $('#total-salary').text(formatCurrency(data.summary.total_salary || 0));
+            $('#total-bonus').text(formatCurrency(data.summary.total_bonus || 0));
             $('#total-salary-plus-bonus').text(formatCurrency(data.summary.total_salary_plus_bonus || 0));
-            $('#total-overtime').text(formatCurrency(data.summary.total_overtime));
-            $('#total-advance').text(formatCurrency(data.summary.total_advance));
-            $('#total-deduction').text(formatCurrency(data.summary.total_deduction));
-            $('#total-penalty').text(formatCurrency(data.summary.total_penalty));
+            $('#total-overtime').text(formatCurrency(data.summary.total_overtime || 0));
+            $('#total-advance').text(formatCurrency(data.summary.total_advance || 0));
+            $('#total-deduction').text(formatCurrency(data.summary.total_deduction || 0));
+            $('#total-penalty').text(formatCurrency(data.summary.total_penalty || 0));
             $('#total-salary-balance').text(formatCurrency(data.summary.total_salary_balance || 0));
             
             // Color code salary balance card

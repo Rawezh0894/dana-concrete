@@ -1,6 +1,20 @@
 <?php
+session_start();
 require_once '../../config/db_conected.php';
-header('Content-Type: application/json');
+require_once '../../config/permissions.php';
+header('Content-Type: application/json; charset=utf-8');
+
+if (!isset($_SESSION['user_id'])) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'error' => 'سێشن نییە! تکایە بچۆ ژوورەوە.']);
+    exit;
+}
+
+if (!hasPermission('view_employee_payment')) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'error' => 'ڕێگەت پێنەدراوە!']);
+    exit;
+}
 
 try {
     // Get filter parameters
