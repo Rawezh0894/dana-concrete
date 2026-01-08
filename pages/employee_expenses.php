@@ -49,38 +49,8 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
         </button>
     </div>
     
-    <!-- Balance Cards -->
-    <div class="row mb-4" id="balance-cards">
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card text-center shadow card-gradient-info card-animate-hover">
-                <div class="card-body">
-                    <i class="fas fa-hand-holding-usd card-icon"></i>
-                    <h6 class="card-title">کۆی قەرزی کۆمپانیا</h6>
-                    <div class="fs-4 fw-bold" id="total-payable">0 د.ع</div>
-                    <small class="text-light">کۆی قەرزی کۆمپانیا بە کارمەندەکان</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card text-center shadow card-gradient-danger card-animate-hover">
-                <div class="card-body">
-                    <i class="fas fa-money-check-alt card-icon"></i>
-                    <h6 class="card-title">کۆی قەرزی کارمەند</h6>
-                    <div class="fs-4 fw-bold" id="total-receivable">0 د.ع</div>
-                    <small class="text-light">کۆی قەرزی کارمەندەکان بە کۆمپانیا</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card text-center shadow card-gradient-success card-animate-hover">
-                <div class="card-body">
-                    <i class="fas fa-balance-scale card-icon"></i>
-                    <h6 class="card-title">باڵانسی خالص</h6>
-                    <div class="fs-4 fw-bold" id="net-balance">0 د.ع</div>
-                    <small class="text-light">جیاوازی نێوان قەرزەکان</small>
-                </div>
-            </div>
-        </div>
+    <!-- Employee Count Card -->
+    <div class="row mb-4">
         <div class="col-lg-3 col-md-6 mb-3">
             <div class="card text-center shadow card-gradient-purple card-animate-hover">
                 <div class="card-body">

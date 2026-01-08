@@ -18,20 +18,30 @@ function loadBalances() {
             const data = result.data;
             const balances = data.balances;
             
-            // Update balance cards
-            $('#total-payable').text(formatCurrency(balances.total_payable));
-            $('#total-receivable').text(formatCurrency(balances.total_receivable));
-            $('#net-balance').text(formatCurrency(balances.net_balance));
-            $('#employee-count').text(balances.employee_count);
+            // Update employee count card (only if element exists)
+            if ($('#employee-count').length) {
+                $('#employee-count').text(balances.employee_count);
+            }
             
-            // Color code net balance
-            const netBalanceEl = $('#net-balance');
-            if (balances.net_balance > 0) {
-                netBalanceEl.removeClass('text-danger').addClass('text-success');
-            } else if (balances.net_balance < 0) {
-                netBalanceEl.removeClass('text-success').addClass('text-danger');
-            } else {
-                netBalanceEl.removeClass('text-success text-danger');
+            // Update balance cards (only if elements exist - for backward compatibility with old pages)
+            if ($('#total-payable').length) {
+                $('#total-payable').text(formatCurrency(balances.total_payable));
+            }
+            if ($('#total-receivable').length) {
+                $('#total-receivable').text(formatCurrency(balances.total_receivable));
+            }
+            if ($('#net-balance').length) {
+                $('#net-balance').text(formatCurrency(balances.net_balance));
+                
+                // Color code net balance
+                const netBalanceEl = $('#net-balance');
+                if (balances.net_balance > 0) {
+                    netBalanceEl.removeClass('text-danger').addClass('text-success');
+                } else if (balances.net_balance < 0) {
+                    netBalanceEl.removeClass('text-success').addClass('text-danger');
+                } else {
+                    netBalanceEl.removeClass('text-success text-danger');
+                }
             }
         })
         .catch(error => {

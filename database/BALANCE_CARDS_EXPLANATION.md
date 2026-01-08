@@ -169,3 +169,4 @@ net_balance = total_payable - total_receivable
 
 4. **کارتەکانی باڵانس**: لە `employees` تەیبڵەکەوە وەردەگرێت (کۆی گشتی).
 
+
