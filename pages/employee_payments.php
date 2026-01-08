@@ -222,7 +222,7 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
           </div>
           <div class="row">
             <div class="col-md-6 mb-3">
-              <label for="salary" class="form-label">مووچە (د.ع)</label>
+            <label for="salary" class="form-label">مووچە (د.ع)</label>
               <input type="number" class="form-control" id="salary" name="salary" min="0" step="0.01" value="0">
             </div>
             <div class="col-md-6 mb-3">

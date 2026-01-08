@@ -23,10 +23,10 @@ $(function () {
     }
 
     function loadEmployees() {
-        TableController.showLoading('#employeeTable', ['#', 'name', 'mobile', 'role', 'salary', 'actions']);
+        TableController.showLoading('#employeeTable', ['#', 'name', 'mobile', 'role', 'salary', 'bonus', 'status', 'actions']);
         $.get('../process/employee/select_employee.php', function (res) {
             if (!res || !res.employees || !Array.isArray(res.employees)) {
-                TableController.render('#employeeTable', [], ['#', 'name', 'mobile', 'role', 'salary', 'actions']);
+                TableController.render('#employeeTable', [], ['#', 'name', 'mobile', 'role', 'salary', 'bonus', 'status', 'actions']);
                 updateSummaryCards({ total_employees: 0, total_salary: 0 });
                 return;
             }
@@ -37,16 +37,27 @@ $(function () {
                 updateSummaryCards(res.summary);
             }
 
+            // Translate status to Kurdish
+            const statusMap = {
+                'active': 'چالاک',
+                'inactive': 'نەچالاک',
+                'on_leave': 'لە پشوودا',
+                'resigned': 'دەستلەکارکێشان'
+            };
+
             // Add actions column (edit/delete buttons) and format salary
             res.employees.forEach(emp => {
                 const rawSalary = emp.salary;
+                const rawBonus = emp.bonus || 0;
                 emp.salary = formatSalary(emp.salary);
+                emp.bonus = formatSalary(rawBonus);
+                emp.status = statusMap[emp.status] || emp.status;
                 emp.actions = `
-                    <button class="btn btn-sm btn-primary edit-employee" data-id="${emp.id}" data-name="${emp.name}" data-mobile="${emp.mobile}" data-role="${emp.role}" data-salary="${rawSalary}"><i class="fa fa-edit"></i></button>
+                    <button class="btn btn-sm btn-primary edit-employee" data-id="${emp.id}" data-name="${emp.name}" data-mobile="${emp.mobile}" data-role="${emp.role}" data-salary="${rawSalary}" data-bonus="${rawBonus}" data-status="${emp.status || 'active'}"><i class="fa fa-edit"></i></button>
                     <button class="btn btn-sm btn-danger delete-employee" data-id="${emp.id}"><i class="fa fa-trash"></i></button>
                 `;
             });
-            TableController.renderWithPagination('#employeeTable', res.employees, ['#', 'name', 'mobile', 'role', 'salary', 'actions']);
+            TableController.renderWithPagination('#employeeTable', res.employees, ['#', 'name', 'mobile', 'role', 'salary', 'bonus', 'status', 'actions']);
         }, 'json');
     }
     loadEmployees();

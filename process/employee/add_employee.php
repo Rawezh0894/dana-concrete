@@ -38,6 +38,8 @@ try {
     $mobile = trim($_POST['mobile'] ?? '');
     $role = trim($_POST['role'] ?? '');
     $salary = trim($_POST['salary'] ?? '');
+    $bonus = floatval($_POST['bonus'] ?? 0);
+    $status = trim($_POST['status'] ?? 'active');
 
     // Log parsed variables for debugging
     error_log("Parsed vars: name='$name', mobile='$mobile', role='$role', salary='$salary'");
@@ -67,6 +69,12 @@ try {
         exit;
     }
 
+    // Validate status
+    $valid_statuses = ['active', 'inactive', 'on_leave', 'resigned'];
+    if (!in_array($status, $valid_statuses)) {
+        $status = 'active'; // Default to active if invalid
+    }
+
     // Check for duplicate mobile number
     $stmt = $pdo->prepare('SELECT id FROM employees WHERE mobile = ?');
     $stmt->execute([$mobile]);
@@ -76,8 +84,8 @@ try {
         exit;
     }
 
-    $stmt = $pdo->prepare('INSERT INTO employees (name, mobile, role, salary) VALUES (?, ?, ?, ?)');
-    if ($stmt->execute([$name, $mobile, $role, $salary])) {
+    $stmt = $pdo->prepare('INSERT INTO employees (name, mobile, role, salary, bonus, status) VALUES (?, ?, ?, ?, ?, ?)');
+    if ($stmt->execute([$name, $mobile, $role, $salary, $bonus, $status])) {
         error_log('Employee successfully added: Name=' . $name . ', Mobile=' . $mobile . ', Role=' . $role);
         echo json_encode(['success' => true, 'message' => 'کارمەند بەسەرکەوتوویی زیادکرا!']);
     } else {

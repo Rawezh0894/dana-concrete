@@ -39,6 +39,8 @@ try {
     $mobile = trim($_POST['mobile'] ?? '');
     $role = trim($_POST['role'] ?? '');
     $salary = trim($_POST['salary'] ?? '');
+    $bonus = floatval($_POST['bonus'] ?? 0);
+    $status = trim($_POST['status'] ?? 'active');
 
     // Log parsed variables for debugging
     error_log("Parsed vars: id='$id', name='$name', mobile='$mobile', role='$role', salary='$salary'");
@@ -74,6 +76,12 @@ try {
         exit;
     }
 
+    // Validate status
+    $valid_statuses = ['active', 'inactive', 'on_leave', 'resigned'];
+    if (!in_array($status, $valid_statuses)) {
+        $status = 'active'; // Default to active if invalid
+    }
+
     // Check if employee exists
     $checkStmt = $pdo->prepare('SELECT id, name FROM employees WHERE id = ?');
     $checkStmt->execute([$id]);
@@ -85,8 +93,8 @@ try {
         exit;
     }
 
-    $stmt = $pdo->prepare('UPDATE employees SET name=?, mobile=?, role=?, salary=? WHERE id=?');
-    if ($stmt->execute([$name, $mobile, $role, $salary, $id])) {
+    $stmt = $pdo->prepare('UPDATE employees SET name=?, mobile=?, role=?, salary=?, bonus=?, status=? WHERE id=?');
+    if ($stmt->execute([$name, $mobile, $role, $salary, $bonus, $status, $id])) {
         error_log('Employee successfully updated: ID=' . $id . ', Name=' . $name);
         echo json_encode(['success' => true, 'message' => 'کارمەند نوێکرایەوە!']);
     } else {

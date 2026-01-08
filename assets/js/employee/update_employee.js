@@ -6,12 +6,17 @@ $(function() {
         const mobile = $(this).data('mobile');
         const role = $(this).data('role');
         let salary = $(this).data('salary');
+        let bonus = $(this).data('bonus') || 0;
+        const status = $(this).data('status') || 'active';
         salary = String(salary).replace(/[^\d.]/g, '');
+        bonus = String(bonus).replace(/[^\d.]/g, '');
         $('#edit_employee_id').val(id);
         $('#edit_employee_name').val(name);
         $('#edit_employee_mobile').val(mobile);
         $('#edit_employee_role').val(role);
         $('#edit_employee_salary').val(salary);
+        $('#edit_employee_bonus').val(bonus);
+        $('#edit_employee_status').val(status);
         $('#editEmployeeModal').modal('show');
     });
     // Multiple submission prevention flag

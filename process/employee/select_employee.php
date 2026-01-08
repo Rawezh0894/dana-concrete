@@ -28,7 +28,7 @@ if (!hasPermission('view_employee')) {
 
 try {
     // Get employees data
-    $stmt = $pdo->query('SELECT id, name, mobile, role, salary FROM employees ORDER BY id DESC');
+    $stmt = $pdo->query('SELECT id, name, mobile, role, salary, COALESCE(bonus, 0) as bonus, COALESCE(status, "active") as status FROM employees ORDER BY id DESC');
     $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     // Get summary statistics

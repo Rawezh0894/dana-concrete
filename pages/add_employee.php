@@ -84,6 +84,8 @@ if (!hasPermission('view_employee')) {
                     <th>ژمارەی مۆبایل</th>
                     <th>ڕۆڵ</th>
                     <th>موچە (د.ع)</th>
+                    <th>بەخشیش (د.ع)</th>
+                    <th>دۆخ</th>
                     <th>کردارەکان</th>
                 </tr>
             </thead>
@@ -124,6 +126,19 @@ if (!hasPermission('view_employee')) {
             <label for="employee_salary" class="form-label">موچە</label>
             <input type="number" class="form-control" id="employee_salary" name="salary" min="0" step="0.01" required placeholder="موچە بنووسە" value="0">
           </div>
+          <div class="mb-3">
+            <label for="employee_bonus" class="form-label">بەخشیش</label>
+            <input type="number" class="form-control" id="employee_bonus" name="bonus" min="0" step="0.01" placeholder="بەخشیش بنووسە" value="0">
+          </div>
+          <div class="mb-3">
+            <label for="employee_status" class="form-label">دۆخ</label>
+            <select class="form-select" id="employee_status" name="status" required>
+              <option value="active" selected>چالاک</option>
+              <option value="inactive">نەچالاک</option>
+              <option value="on_leave">لە پشوودا</option>
+              <option value="resigned">دەستلەکارکێشان</option>
+            </select>
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
@@ -163,6 +178,19 @@ if (!hasPermission('view_employee')) {
           <div class="mb-3">
             <label for="edit_employee_salary" class="form-label">موچە</label>
             <input type="number" class="form-control" id="edit_employee_salary" name="salary" min="0" step="0.01" required>
+          </div>
+          <div class="mb-3">
+            <label for="edit_employee_bonus" class="form-label">بەخشیش</label>
+            <input type="number" class="form-control" id="edit_employee_bonus" name="bonus" min="0" step="0.01" value="0">
+          </div>
+          <div class="mb-3">
+            <label for="edit_employee_status" class="form-label">دۆخ</label>
+            <select class="form-select" id="edit_employee_status" name="status" required>
+              <option value="active">چالاک</option>
+              <option value="inactive">نەچالاک</option>
+              <option value="on_leave">لە پشوودا</option>
+              <option value="resigned">دەستلەکارکێشان</option>
+            </select>
           </div>
         </div>
         <div class="modal-footer">
