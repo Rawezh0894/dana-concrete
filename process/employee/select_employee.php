@@ -27,9 +27,42 @@ if (!hasPermission('view_employee')) {
 }
 
 try {
+    // Check if bonus and status columns exist
+    $bonusExists = false;
+    $statusExists = false;
+    
+    try {
+        $checkColumns = $pdo->query("SHOW COLUMNS FROM employees LIKE 'bonus'");
+        $bonusExists = $checkColumns->rowCount() > 0;
+    } catch (Exception $e) {
+        error_log('Error checking bonus column: ' . $e->getMessage());
+    }
+    
+    try {
+        $checkColumns = $pdo->query("SHOW COLUMNS FROM employees LIKE 'status'");
+        $statusExists = $checkColumns->rowCount() > 0;
+    } catch (Exception $e) {
+        error_log('Error checking status column: ' . $e->getMessage());
+    }
+    
+    // Build query based on column existence
+    if ($bonusExists && $statusExists) {
+        $query = 'SELECT id, name, mobile, role, salary, COALESCE(bonus, 0) as bonus, COALESCE(status, "active") as status FROM employees ORDER BY id DESC';
+    } elseif ($bonusExists) {
+        $query = 'SELECT id, name, mobile, role, salary, COALESCE(bonus, 0) as bonus, "active" as status FROM employees ORDER BY id DESC';
+    } elseif ($statusExists) {
+        $query = 'SELECT id, name, mobile, role, salary, 0 as bonus, COALESCE(status, "active") as status FROM employees ORDER BY id DESC';
+    } else {
+        $query = 'SELECT id, name, mobile, role, salary, 0 as bonus, "active" as status FROM employees ORDER BY id DESC';
+    }
+    
+    error_log('Query: ' . $query);
+    
     // Get employees data
-    $stmt = $pdo->query('SELECT id, name, mobile, role, salary, COALESCE(bonus, 0) as bonus, COALESCE(status, "active") as status FROM employees ORDER BY id DESC');
+    $stmt = $pdo->query($query);
     $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    error_log('Employees fetched: ' . count($employees));
     
     // Get summary statistics
     $summary_stmt = $pdo->query('SELECT COUNT(*) as total_employees, SUM(salary) as total_salary FROM employees');
@@ -46,8 +79,18 @@ try {
     
 } catch (PDOException $e) {
     error_log('PDOException in select_employee.php: ' . $e->getMessage());
-    echo json_encode([]);
+    echo json_encode([
+        'success' => false,
+        'error' => 'هەڵە لە وەرگرتنی زانیاری: ' . $e->getMessage(),
+        'employees' => [],
+        'summary' => ['total_employees' => 0, 'total_salary' => 0]
+    ]);
 } catch (Exception $e) {
     error_log('Exception in select_employee.php: ' . $e->getMessage());
-    echo json_encode([]);
+    echo json_encode([
+        'success' => false,
+        'error' => 'هەڵە لە وەرگرتنی زانیاری: ' . $e->getMessage(),
+        'employees' => [],
+        'summary' => ['total_employees' => 0, 'total_salary' => 0]
+    ]);
 }

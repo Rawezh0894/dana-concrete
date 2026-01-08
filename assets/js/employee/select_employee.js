@@ -25,7 +25,19 @@ $(function () {
     function loadEmployees() {
         TableController.showLoading('#employeeTable', ['#', 'name', 'mobile', 'role', 'salary', 'bonus', 'status', 'actions']);
         $.get('../process/employee/select_employee.php', function (res) {
+            console.log('Response from select_employee.php:', res);
+            
+            // Handle error response
+            if (res && res.success === false) {
+                console.error('Error loading employees:', res.error);
+                swalAlert('هەڵە', res.error || 'هەڵە لە وەرگرتنی زانیاری', 'error');
+                TableController.render('#employeeTable', [], ['#', 'name', 'mobile', 'role', 'salary', 'bonus', 'status', 'actions']);
+                updateSummaryCards({ total_employees: 0, total_salary: 0 });
+                return;
+            }
+            
             if (!res || !res.employees || !Array.isArray(res.employees)) {
+                console.warn('Invalid response format:', res);
                 TableController.render('#employeeTable', [], ['#', 'name', 'mobile', 'role', 'salary', 'bonus', 'status', 'actions']);
                 updateSummaryCards({ total_employees: 0, total_salary: 0 });
                 return;
@@ -58,7 +70,13 @@ $(function () {
                 `;
             });
             TableController.renderWithPagination('#employeeTable', res.employees, ['#', 'name', 'mobile', 'role', 'salary', 'bonus', 'status', 'actions']);
-        }, 'json');
+        }, 'json').fail(function(xhr, status, error) {
+            console.error('AJAX Error:', status, error);
+            console.error('Response:', xhr.responseText);
+            swalAlert('هەڵە', 'هەڵەیەک هەیە لە وەرگرتنی زانیاری کارمەندەکان', 'error');
+            TableController.render('#employeeTable', [], ['#', 'name', 'mobile', 'role', 'salary', 'bonus', 'status', 'actions']);
+            updateSummaryCards({ total_employees: 0, total_salary: 0 });
+        });
     }
     loadEmployees();
     window.loadEmployees = loadEmployees;
