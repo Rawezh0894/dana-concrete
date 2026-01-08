@@ -249,9 +249,9 @@ BEGIN
     DECLARE v_current_payable DECIMAL(15,2) DEFAULT 0;
     DECLARE v_current_receivable DECIMAL(15,2) DEFAULT 0;
     
-    -- Only process if amount or type changed
-    IF OLD.amount != NEW.amount OR OLD.expense_type != NEW.expense_type THEN
-        -- Get current balances before reverting
+    -- Only process if amount, type, or employee_id changed
+    IF OLD.amount != NEW.amount OR OLD.expense_type != NEW.expense_type OR OLD.employee_id != NEW.employee_id THEN
+        -- Get current balances before reverting (from OLD employee)
         SELECT COALESCE(payable_balance, 0), COALESCE(receivable_balance, 0)
         INTO v_current_payable, v_current_receivable
         FROM `employees` 

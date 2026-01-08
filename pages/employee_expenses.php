@@ -338,6 +338,64 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
   </div>
 </div>
 
+<!-- Update Expense Modal -->
+<div class="modal fade" id="updateExpenseModal" tabindex="-1" aria-labelledby="updateExpenseModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form id="updateExpenseForm">
+        <input type="hidden" id="update_expense_id" name="id">
+        <div class="modal-header">
+          <h5 class="modal-title" id="updateExpenseModalLabel">نوێکردنەوەی خەرجی کارمەند</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="update_employee_id" class="form-label">کارمەند</label>
+            <select class="form-select" id="update_employee_id" name="employee_id" required>
+              <option value="">-- هەلبژێرە --</option>
+              <?php foreach($employees as $emp): ?>
+                <option value="<?= $emp['id'] ?>"><?= htmlspecialchars($emp['name']) ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          
+          <div class="mb-3">
+            <label for="update_expense_type" class="form-label">جۆری خەرجی</label>
+            <select class="form-select" id="update_expense_type" name="expense_type" required>
+              <option value="">-- هەلبژێرە --</option>
+              <option value="salary">مووچە</option>
+              <option value="bonus">بەخشیش</option>
+              <option value="overtime">کاروانحیسابی</option>
+              <option value="advance">پێشەکی</option>
+              <option value="deduction">کەمکردنەوە</option>
+              <option value="penalty">سزا</option>
+            </select>
+          </div>
+          
+          <div class="mb-3">
+            <label for="update_amount" class="form-label">بڕ (د.ع)</label>
+            <input type="number" class="form-control" id="update_amount" name="amount" min="0" step="0.01" required>
+          </div>
+          
+          <div class="mb-3">
+            <label for="update_expense_date" class="form-label">مانگ (YYYY-MM)</label>
+            <input type="month" class="form-control" id="update_expense_date" name="expense_date" required>
+          </div>
+          
+          <div class="mb-3">
+            <label for="update_notes" class="form-label">تێبینی</label>
+            <textarea class="form-control" id="update_notes" name="notes" rows="2"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
+          <button type="submit" class="btn btn-primary" style="background: var(--seafoam-green); font-weight: bold;">نوێکردنەوە</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <!-- Select2 JS -->
@@ -348,6 +406,7 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
 <script src="../assets/js/employee_payments/select_expenses.js"></script>
 <script src="../assets/js/employee_payments/balances.js"></script>
 <script src="../assets/js/employee_payments/delete.js"></script>
+<script src="../assets/js/employee_payments/update_expense.js"></script>
 <script src="../assets/js/employee_payments/summary_expenses.js"></script>
 <script>
 $(function() {

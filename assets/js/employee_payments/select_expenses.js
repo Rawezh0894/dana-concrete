@@ -55,7 +55,12 @@ $(function () {
                 row.employee_balance = balanceHtml;
                 
                 row.actions = `
-                    <button class="btn btn-sm btn-danger delete-expense" data-id="${row.id}"><i class="fa fa-trash"></i></button>
+                    <button class="btn btn-sm btn-primary update-expense me-1" data-id="${row.id}" title="نوێکردنەوە">
+                        <i class="fa fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger delete-expense" data-id="${row.id}" title="سڕینەوە">
+                        <i class="fa fa-trash"></i>
+                    </button>
                 `;
             });
             
