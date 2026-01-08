@@ -38,6 +38,7 @@ function loadSummaryData() {
             $('#total-salary').text(formatCurrency(data.total_salary));
             $('#total-bonus').text(formatCurrency(data.total_bonus));
             $('#total-salary-bonus').text(formatCurrency(salaryAndBonus));
+            $('#total-overtime').text(formatCurrency(data.total_overtime));
             $('#net-payable').text(formatCurrency(netPayable));
 
             $('#total-advance').text(formatCurrency(data.total_advance));
