@@ -81,6 +81,14 @@ try {
         $overtime_params = array_merge($employee_ids, [$period_start, $period_end]);
         
         try {
+            // Use COALESCE to fallback to created_at date if date column is NULL
+            // This handles cases where receipts are added without an explicit date (defaulting to created_at)
+            $overtime_sql = "SELECT COUNT(*) as count FROM concrete_receipts 
+                         WHERE mixer_driver_id IN ($placeholders) 
+                         AND COALESCE(`date`, DATE(created_at)) BETWEEN ? AND ?";
+                         
+            $overtime_params = array_merge($employee_ids, [$period_start, $period_end]);
+            
             $stmt = $pdo->prepare($overtime_sql);
             $stmt->execute($overtime_params);
             $overtime_result = $stmt->fetch(PDO::FETCH_ASSOC);
