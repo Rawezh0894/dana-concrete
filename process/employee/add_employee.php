@@ -84,8 +84,40 @@ try {
         exit;
     }
 
-    $stmt = $pdo->prepare('INSERT INTO employees (name, mobile, role, salary, bonus, status) VALUES (?, ?, ?, ?, ?, ?)');
-    if ($stmt->execute([$name, $mobile, $role, $salary, $bonus, $status])) {
+    // Check if bonus and status columns exist
+    $bonusExists = false;
+    $statusExists = false;
+    
+    try {
+        $checkColumns = $pdo->query("SHOW COLUMNS FROM employees LIKE 'bonus'");
+        $bonusExists = $checkColumns->rowCount() > 0;
+    } catch (Exception $e) {
+        error_log('Error checking bonus column: ' . $e->getMessage());
+    }
+    
+    try {
+        $checkColumns = $pdo->query("SHOW COLUMNS FROM employees LIKE 'status'");
+        $statusExists = $checkColumns->rowCount() > 0;
+    } catch (Exception $e) {
+        error_log('Error checking status column: ' . $e->getMessage());
+    }
+    
+    // Build INSERT query based on column existence
+    if ($bonusExists && $statusExists) {
+        $stmt = $pdo->prepare('INSERT INTO employees (name, mobile, role, salary, bonus, status) VALUES (?, ?, ?, ?, ?, ?)');
+        $result = $stmt->execute([$name, $mobile, $role, $salary, $bonus, $status]);
+    } elseif ($bonusExists) {
+        $stmt = $pdo->prepare('INSERT INTO employees (name, mobile, role, salary, bonus) VALUES (?, ?, ?, ?, ?)');
+        $result = $stmt->execute([$name, $mobile, $role, $salary, $bonus]);
+    } elseif ($statusExists) {
+        $stmt = $pdo->prepare('INSERT INTO employees (name, mobile, role, salary, status) VALUES (?, ?, ?, ?, ?)');
+        $result = $stmt->execute([$name, $mobile, $role, $salary, $status]);
+    } else {
+        $stmt = $pdo->prepare('INSERT INTO employees (name, mobile, role, salary) VALUES (?, ?, ?, ?)');
+        $result = $stmt->execute([$name, $mobile, $role, $salary]);
+    }
+    
+    if ($result) {
         error_log('Employee successfully added: Name=' . $name . ', Mobile=' . $mobile . ', Role=' . $role);
         echo json_encode(['success' => true, 'message' => 'کارمەند بەسەرکەوتوویی زیادکرا!']);
     } else {

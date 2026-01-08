@@ -93,8 +93,40 @@ try {
         exit;
     }
 
-    $stmt = $pdo->prepare('UPDATE employees SET name=?, mobile=?, role=?, salary=?, bonus=?, status=? WHERE id=?');
-    if ($stmt->execute([$name, $mobile, $role, $salary, $bonus, $status, $id])) {
+    // Check if bonus and status columns exist
+    $bonusExists = false;
+    $statusExists = false;
+    
+    try {
+        $checkColumns = $pdo->query("SHOW COLUMNS FROM employees LIKE 'bonus'");
+        $bonusExists = $checkColumns->rowCount() > 0;
+    } catch (Exception $e) {
+        error_log('Error checking bonus column: ' . $e->getMessage());
+    }
+    
+    try {
+        $checkColumns = $pdo->query("SHOW COLUMNS FROM employees LIKE 'status'");
+        $statusExists = $checkColumns->rowCount() > 0;
+    } catch (Exception $e) {
+        error_log('Error checking status column: ' . $e->getMessage());
+    }
+    
+    // Build UPDATE query based on column existence
+    if ($bonusExists && $statusExists) {
+        $stmt = $pdo->prepare('UPDATE employees SET name=?, mobile=?, role=?, salary=?, bonus=?, status=? WHERE id=?');
+        $result = $stmt->execute([$name, $mobile, $role, $salary, $bonus, $status, $id]);
+    } elseif ($bonusExists) {
+        $stmt = $pdo->prepare('UPDATE employees SET name=?, mobile=?, role=?, salary=?, bonus=? WHERE id=?');
+        $result = $stmt->execute([$name, $mobile, $role, $salary, $bonus, $id]);
+    } elseif ($statusExists) {
+        $stmt = $pdo->prepare('UPDATE employees SET name=?, mobile=?, role=?, salary=?, status=? WHERE id=?');
+        $result = $stmt->execute([$name, $mobile, $role, $salary, $status, $id]);
+    } else {
+        $stmt = $pdo->prepare('UPDATE employees SET name=?, mobile=?, role=?, salary=? WHERE id=?');
+        $result = $stmt->execute([$name, $mobile, $role, $salary, $id]);
+    }
+    
+    if ($result) {
         error_log('Employee successfully updated: ID=' . $id . ', Name=' . $name);
         echo json_encode(['success' => true, 'message' => 'کارمەند نوێکرایەوە!']);
     } else {
@@ -104,8 +136,10 @@ try {
 
 } catch (PDOException $e) {
     error_log('PDOException in update_employee.php: ' . $e->getMessage());
-    echo json_encode(['success' => false, 'message' => 'هەڵە لە نوێکردنەوەی کارمەند!']);
+    error_log('PDOException trace: ' . $e->getTraceAsString());
+    echo json_encode(['success' => false, 'message' => 'هەڵە لە نوێکردنەوەی کارمەند: ' . $e->getMessage()]);
 } catch (Exception $e) {
     error_log('Exception in update_employee.php: ' . $e->getMessage());
-    echo json_encode(['success' => false, 'message' => 'هەڵە لە نوێکردنەوەی کارمەند!']);
+    error_log('Exception trace: ' . $e->getTraceAsString());
+    echo json_encode(['success' => false, 'message' => 'هەڵە لە نوێکردنەوەی کارمەند: ' . $e->getMessage()]);
 }
