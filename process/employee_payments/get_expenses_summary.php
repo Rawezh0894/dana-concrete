@@ -6,6 +6,8 @@ try {
     // Get filter parameters
     $month_filter = $_GET['month'] ?? '';
     $employee_filter = $_GET['employee'] ?? '';
+    $date_from = $_GET['date_from'] ?? '';
+    $date_to = $_GET['date_to'] ?? '';
     
     // Build WHERE conditions
     $where_conditions = [];
@@ -19,6 +21,17 @@ try {
     if ($employee_filter) {
         $where_conditions[] = "employee_id = ?";
         $params[] = $employee_filter;
+    }
+    
+    // Date range filter (using created_at field)
+    if ($date_from) {
+        $where_conditions[] = "DATE(created_at) >= ?";
+        $params[] = $date_from;
+    }
+    
+    if ($date_to) {
+        $where_conditions[] = "DATE(created_at) <= ?";
+        $params[] = $date_to;
     }
     
     $where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
@@ -51,16 +64,29 @@ try {
     $stmt = $pdo->query($months_query);
     $months = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
+    // Calculate salary balance: salary + bonus + overtime - deduction - penalty - advance
+    $total_salary = floatval($summary['total_salary'] ?? 0);
+    $total_bonus = floatval($summary['total_bonus'] ?? 0);
+    $total_overtime = floatval($summary['total_overtime'] ?? 0);
+    $total_advance = floatval($summary['total_advance'] ?? 0);
+    $total_deduction = floatval($summary['total_deduction'] ?? 0);
+    $total_penalty = floatval($summary['total_penalty'] ?? 0);
+    
+    $total_salary_plus_bonus = $total_salary + $total_bonus;
+    $total_salary_balance = $total_salary + $total_bonus + $total_overtime - $total_deduction - $total_penalty - $total_advance;
+    
     echo json_encode([
         'success' => true,
         'data' => [
             'summary' => [
-                'total_salary' => floatval($summary['total_salary'] ?? 0),
-                'total_bonus' => floatval($summary['total_bonus'] ?? 0),
-                'total_overtime' => floatval($summary['total_overtime'] ?? 0),
-                'total_advance' => floatval($summary['total_advance'] ?? 0),
-                'total_deduction' => floatval($summary['total_deduction'] ?? 0),
-                'total_penalty' => floatval($summary['total_penalty'] ?? 0),
+                'total_salary' => $total_salary,
+                'total_bonus' => $total_bonus,
+                'total_overtime' => $total_overtime,
+                'total_advance' => $total_advance,
+                'total_deduction' => $total_deduction,
+                'total_penalty' => $total_penalty,
+                'total_salary_plus_bonus' => $total_salary_plus_bonus,
+                'total_salary_balance' => $total_salary_balance,
                 'expense_count' => intval($summary['expense_count'] ?? 0)
             ],
             'filters' => [

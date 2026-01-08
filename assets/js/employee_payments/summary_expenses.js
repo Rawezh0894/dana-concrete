@@ -2,12 +2,16 @@
 function loadSummaryData() {
     const monthFilter = $('#month-filter').val();
     const employeeFilter = $('#employee-filter').val();
+    const dateFrom = $('#date-from-filter').val();
+    const dateTo = $('#date-to-filter').val();
     
     let url = '../process/employee_payments/get_expenses_summary.php';
     const params = new URLSearchParams();
     
     if (monthFilter) params.append('month', monthFilter);
     if (employeeFilter) params.append('employee', employeeFilter);
+    if (dateFrom) params.append('date_from', dateFrom);
+    if (dateTo) params.append('date_to', dateTo);
     
     if (params.toString()) {
         url += '?' + params.toString();
@@ -26,8 +30,22 @@ function loadSummaryData() {
             // Update summary cards
             $('#total-salary').text(formatCurrency(data.summary.total_salary));
             $('#total-bonus').text(formatCurrency(data.summary.total_bonus));
+            $('#total-salary-plus-bonus').text(formatCurrency(data.summary.total_salary_plus_bonus || 0));
             $('#total-overtime').text(formatCurrency(data.summary.total_overtime));
             $('#total-advance').text(formatCurrency(data.summary.total_advance));
+            $('#total-deduction').text(formatCurrency(data.summary.total_deduction));
+            $('#total-penalty').text(formatCurrency(data.summary.total_penalty));
+            $('#total-salary-balance').text(formatCurrency(data.summary.total_salary_balance || 0));
+            
+            // Color code salary balance card
+            const balanceCard = $('#total-salary-balance').closest('.card');
+            const balanceValue = parseFloat(data.summary.total_salary_balance || 0);
+            balanceCard.removeClass('border-success border-danger');
+            if (balanceValue > 0) {
+                balanceCard.addClass('border-success');
+            } else if (balanceValue < 0) {
+                balanceCard.addClass('border-danger');
+            }
             
             // Populate filter dropdowns if not already populated
             if ($('#month-filter option').length <= 1) {
@@ -135,6 +153,17 @@ $(document).ready(function() {
     
     // Handle employee filter change - use Select2 event
     $(document).on('change', '#employee-filter', function() {
+        loadSummaryData();
+        if (typeof loadExpenses === 'function') {
+            loadExpenses();
+        }
+        if (typeof loadBalances === 'function') {
+            loadBalances();
+        }
+    });
+    
+    // Handle date range filter changes
+    $('#date-from-filter, #date-to-filter').on('change', function() {
         loadSummaryData();
         if (typeof loadExpenses === 'function') {
             loadExpenses();

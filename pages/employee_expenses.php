@@ -67,20 +67,111 @@ if ($bonusExists) {
         </div>
     </div>
     
+    <!-- Summary Cards -->
+    <div class="row mb-4" id="summary-cards">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-center shadow card-gradient-info card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-money-bill-wave card-icon"></i>
+                    <h6 class="card-title">کۆی مووچە</h6>
+                    <div class="fs-4 fw-bold" id="total-salary">0 د.ع</div>
+                    <small class="text-light">کۆی مووچەی کارمەندەکان</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-center shadow card-gradient-warning card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-gift card-icon"></i>
+                    <h6 class="card-title">کۆی بەخشیش</h6>
+                    <div class="fs-4 fw-bold" id="total-bonus">0 د.ع</div>
+                    <small class="text-light">کۆی بەخشیشی کارمەندەکان</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-center shadow card-gradient-success card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-calculator card-icon"></i>
+                    <h6 class="card-title">مووچە + بەخشیش</h6>
+                    <div class="fs-4 fw-bold" id="total-salary-plus-bonus">0 د.ع</div>
+                    <small class="text-light">کۆی مووچە + بەخشیش</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-center shadow card-gradient-purple card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-clock card-icon"></i>
+                    <h6 class="card-title">کۆی کاروانحیسابی</h6>
+                    <div class="fs-4 fw-bold" id="total-overtime">0 د.ع</div>
+                    <small class="text-light">کۆی کاروانحیسابی</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-center shadow card-gradient-danger card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-hand-holding-usd card-icon"></i>
+                    <h6 class="card-title">کۆی پێشەکی/قەرز</h6>
+                    <div class="fs-4 fw-bold" id="total-advance">0 د.ع</div>
+                    <small class="text-light">کۆی پێشەکی کارمەندەکان</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-center shadow card-gradient-secondary card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-minus-circle card-icon"></i>
+                    <h6 class="card-title">کۆی کەمکردنەوە</h6>
+                    <div class="fs-4 fw-bold" id="total-deduction">0 د.ع</div>
+                    <small class="text-light">کۆی کەمکردنەوەی کارمەندەکان</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-center shadow card-gradient-dark card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-exclamation-triangle card-icon"></i>
+                    <h6 class="card-title">کۆی سزا</h6>
+                    <div class="fs-4 fw-bold" id="total-penalty">0 د.ع</div>
+                    <small class="text-light">کۆی سزای کارمەندەکان</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-center shadow card-gradient-primary card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-balance-scale card-icon"></i>
+                    <h6 class="card-title">باڵانسی مووچەی کارمەند</h6>
+                    <div class="fs-4 fw-bold" id="total-salary-balance">0 د.ع</div>
+                    <small class="text-light">مووچە + بەخشیش + کاروانحیسابی - کەمکردنەوە - سزا - پێشەکی</small>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <!-- Filters -->
     <div class="row mb-4">
-        <div class="col-md-6 mb-3">
+        <div class="col-md-3 mb-3">
             <label for="month-filter" class="form-label">فلتەر بە مانگ:</label>
             <select class="form-select" id="month-filter">
                 <option value="">هەموو مانگەکان</option>
             </select>
         </div>
-        <div class="col-md-6 mb-3">
+        <div class="col-md-3 mb-3">
             <label for="employee-filter" class="form-label">فلتەر بە کارمەند:</label>
             <select class="form-select" id="employee-filter">
                 <option value="">هەموو کارمەندەکان</option>
             </select>
+        </div>
+        <div class="col-md-3 mb-3">
+            <label for="date-from-filter" class="form-label">لە بەرواری:</label>
+            <input type="date" class="form-control" id="date-from-filter">
+        </div>
+        <div class="col-md-3 mb-3">
+            <label for="date-to-filter" class="form-label">بۆ بەرواری:</label>
+            <input type="date" class="form-control" id="date-to-filter">
         </div>
     </div>
     
