@@ -478,14 +478,62 @@ $(function() {
     
     $('#income_salary, #income_bonus, #income_overtime').on('input change', calcIncomeTotal);
     
-    // Auto-fill salary and bonus in Income Expense Modal and show balance
+    // Auto-fill salary, bonus, and overtime in Income Expense Modal and show balance
     $('#income_employee_id').on('change', function() {
         var employeeId = $(this).val();
         var salary = $(this).find('option:selected').data('salary') || '';
         var bonus = $(this).find('option:selected').data('bonus') || 0;
         $('#income_salary').val(salary);
         $('#income_bonus').val(bonus);
-        calcIncomeTotal();
+        
+        // Load overtime amount based on concrete receipts
+        if (employeeId) {
+            var selectedMonth = $('#income_expense_date').val() || '';
+            var params = {employee_id: employeeId};
+            if (selectedMonth) {
+                params.month = selectedMonth.substring(0, 7); // Extract YYYY-MM
+            }
+            
+            // Get overtime amount
+            $.get('../process/employee_payments/get_employee_overtime.php', params, function(response) {
+                if (response.success) {
+                    var overtimeAmount = parseFloat(response.data.overtime_amount) || 0;
+                    $('#income_overtime').val(overtimeAmount.toFixed(2));
+                    calcIncomeTotal();
+                    
+                    // Show overtime calculation details
+                    var balanceInfo = $('#income-employee-balance-info');
+                    var data = response.data;
+                    var existingText = balanceInfo.html() || '';
+                    var overtimeText = '<div class="small mt-2">';
+                    overtimeText += '<strong>کاروانحیسابی:</strong><br>';
+                    overtimeText += 'کۆی مەتر (میکسەر): ' + data.mixer_total_meter.toFixed(2) + ' م³<br>';
+                    if (data.pump_total_meter > 0) {
+                        overtimeText += 'کۆی مەتر (پەمپ): ' + data.pump_total_meter.toFixed(2) + ' م³<br>';
+                    }
+                    overtimeText += 'کۆی گشتی: ' + data.total_meter.toFixed(2) + ' م³<br>';
+                    overtimeText += 'نرخی کاروانحیسابی: ' + data.overtime_rate.toLocaleString('en-US') + ' د.ع/م³<br>';
+                    overtimeText += '<strong>کۆی کاروانحیسابی: ' + overtimeAmount.toLocaleString('en-US') + ' د.ع</strong>';
+                    overtimeText += '</div>';
+                    
+                    if (existingText) {
+                        balanceInfo.html(existingText + overtimeText);
+                    } else {
+                        balanceInfo.html(overtimeText).show();
+                    }
+                } else {
+                    // If error, set overtime to 0
+                    $('#income_overtime').val(0);
+                    calcIncomeTotal();
+                }
+            }, 'json').fail(function() {
+                $('#income_overtime').val(0);
+                calcIncomeTotal();
+            });
+        } else {
+            $('#income_overtime').val(0);
+            calcIncomeTotal();
+        }
         
         // Load and display employee balance with daily calculation
         if (employeeId) {
@@ -522,7 +570,15 @@ $(function() {
                     }
                     
                     balanceText += '</div>';
-                    balanceInfo.html(balanceText).show();
+                    
+                    // Append to existing content (overtime info)
+                    var existingContent = balanceInfo.html();
+                    if (existingContent && existingContent.includes('کاروانحیسابی')) {
+                        // Overtime info already exists, prepend balance info
+                        balanceInfo.html(balanceText + existingContent);
+                    } else {
+                        balanceInfo.html(balanceText).show();
+                    }
                 }
             }, 'json');
         } else {
@@ -571,7 +627,7 @@ $(function() {
     $('#income_expense_date').val(month);
     $('#deduction_expense_date').val(month);
     
-    // Reload balance when month changes in Income Modal
+    // Reload balance and overtime when month changes in Income Modal
     $('#income_expense_date').on('change', function() {
         var employeeId = $('#income_employee_id').val();
         if (employeeId) {
