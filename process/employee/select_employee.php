@@ -65,16 +65,61 @@ try {
     error_log('Employees fetched: ' . count($employees));
     
     // Get summary statistics
-    $summary_stmt = $pdo->query('SELECT COUNT(*) as total_employees, SUM(salary) as total_salary FROM employees');
-    $summary = $summary_stmt->fetch(PDO::FETCH_ASSOC);
+    // Check if status column exists for filtering active employees
+    if ($statusExists) {
+        // Count all employees
+        $total_employees_stmt = $pdo->query('SELECT COUNT(*) as total_employees FROM employees');
+        $total_employees = $total_employees_stmt->fetch(PDO::FETCH_ASSOC);
+        
+        // Calculate salary and bonus for active employees only
+        $active_summary_stmt = $pdo->query("SELECT 
+            COUNT(*) as active_employees,
+            SUM(salary) as total_salary_active,
+            SUM(COALESCE(bonus, 0)) as total_bonus_active
+            FROM employees 
+            WHERE COALESCE(status, 'active') = 'active'");
+        $active_summary = $active_summary_stmt->fetch(PDO::FETCH_ASSOC);
+        
+        // Calculate total salary and bonus (all employees)
+        $all_summary_stmt = $pdo->query("SELECT 
+            SUM(salary) as total_salary_all,
+            SUM(COALESCE(bonus, 0)) as total_bonus_all
+            FROM employees");
+        $all_summary = $all_summary_stmt->fetch(PDO::FETCH_ASSOC);
+        
+        $summary = [
+            'total_employees' => (int)($total_employees['total_employees'] ?? 0),
+            'active_employees' => (int)($active_summary['active_employees'] ?? 0),
+            'total_salary' => (float)($active_summary['total_salary_active'] ?? 0), // Only active employees
+            'total_bonus' => (float)($active_summary['total_bonus_active'] ?? 0), // Only active employees
+            'total_salary_all' => (float)($all_summary['total_salary_all'] ?? 0),
+            'total_bonus_all' => (float)($all_summary['total_bonus_all'] ?? 0),
+            'total_salary_plus_bonus' => (float)($active_summary['total_salary_active'] ?? 0) + (float)($active_summary['total_bonus_active'] ?? 0)
+        ];
+    } else {
+        // If status column doesn't exist, treat all as active
+        $summary_stmt = $pdo->query("SELECT 
+            COUNT(*) as total_employees,
+            SUM(salary) as total_salary,
+            SUM(COALESCE(bonus, 0)) as total_bonus
+            FROM employees");
+        $summary_data = $summary_stmt->fetch(PDO::FETCH_ASSOC);
+        
+        $summary = [
+            'total_employees' => (int)($summary_data['total_employees'] ?? 0),
+            'active_employees' => (int)($summary_data['total_employees'] ?? 0),
+            'total_salary' => (float)($summary_data['total_salary'] ?? 0),
+            'total_bonus' => (float)($summary_data['total_bonus'] ?? 0),
+            'total_salary_all' => (float)($summary_data['total_salary'] ?? 0),
+            'total_bonus_all' => (float)($summary_data['total_bonus'] ?? 0),
+            'total_salary_plus_bonus' => (float)($summary_data['total_salary'] ?? 0) + (float)($summary_data['total_bonus'] ?? 0)
+        ];
+    }
     
     error_log('Employees retrieved successfully: Count=' . count($employees));
     echo json_encode([
         'employees' => $employees,
-        'summary' => [
-            'total_employees' => (int)($summary['total_employees'] ?? 0),
-            'total_salary' => (float)($summary['total_salary'] ?? 0)
-        ]
+        'summary' => $summary
     ]);
     
 } catch (PDOException $e) {

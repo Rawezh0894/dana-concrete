@@ -41,7 +41,7 @@ if (!hasPermission('view_employee')) {
     
     <!-- Summary Cards -->
     <div class="row mb-4">
-        <div class="col-md-4 mb-3">
+        <div class="col-md-3 mb-3">
             <div class="card text-center shadow card-gradient-info card-animate-hover">
                 <div class="card-body">
                     <i class="fas fa-users card-icon"></i>
@@ -51,17 +51,39 @@ if (!hasPermission('view_employee')) {
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-3">
+        <div class="col-md-3 mb-3">
             <div class="card text-center shadow card-gradient-success card-animate-hover">
                 <div class="card-body">
                     <i class="fas fa-money-bill-wave card-icon"></i>
-                    <h6 class="card-title">کۆی مووچەی کارمەندان</h6>
+                    <h6 class="card-title">کۆی مووچەی کارمەندە چالاکەکان</h6>
                     <div class="fs-4 fw-bold" id="total_salary">0</div>
                     <small class="text-light">دیناری عێراقی</small>
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-3">
+        <div class="col-md-3 mb-3">
+            <div class="card text-center shadow card-gradient-warning card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-gift card-icon"></i>
+                    <h6 class="card-title">کۆی بەخشیشی کارمەندە چالاکەکان</h6>
+                    <div class="fs-4 fw-bold" id="total_bonus">0</div>
+                    <small class="text-light">دیناری عێراقی</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center shadow card-gradient-purple card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-calculator card-icon"></i>
+                    <h6 class="card-title">کۆی مووچە + بەخشیش</h6>
+                    <div class="fs-4 fw-bold" id="total_salary_plus_bonus">0</div>
+                    <small class="text-light">دیناری عێراقی</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col-md-12 mb-3">
             <div class="card text-center shadow card-gradient-warning card-animate-hover">
                 <div class="card-body">
                     <i class="fas fa-dollar-sign card-icon"></i>
@@ -120,6 +142,9 @@ if (!hasPermission('view_employee')) {
               <option value="شۆفێر">شۆفێر</option>
               <option value="موحاسیب">موحاسیب</option>
               <option value="وەکیل">وەکیل</option>
+              <option value="پاسەوان">پاسەوان</option>
+              <option value="فیتەر">فیتەر</option>
+              <option value="موساعید">موساعید</option>
             </select>
           </div>
           <div class="mb-3">
@@ -173,6 +198,9 @@ if (!hasPermission('view_employee')) {
               <option value="شۆفێر">شۆفێر</option>
               <option value="موحاسیب">موحاسیب</option>
               <option value="وەکیل">وەکیل</option>
+              <option value="پاسەوان">پاسەوان</option>
+              <option value="فیتەر">فیتەر</option>
+              <option value="موساعید">موساعید</option>
             </select>
           </div>
           <div class="mb-3">

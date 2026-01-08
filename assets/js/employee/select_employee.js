@@ -5,14 +5,16 @@ $(function () {
 
     function updateSummaryCards(summary) {
         $('#total_employees').text(summary.total_employees.toLocaleString());
-        $('#total_salary').text(formatSalary(summary.total_salary));
+        $('#total_salary').text(formatSalary(summary.total_salary || 0));
+        $('#total_bonus').text(formatSalary(summary.total_bonus || 0));
+        $('#total_salary_plus_bonus').text(formatSalary(summary.total_salary_plus_bonus || 0));
 
         // Convert salary to dollars if dollar rate is available
         const dollarRateElement = $('#dollar_rate');
         if (dollarRateElement.length && dollarRateElement.text() !== '0' && dollarRateElement.text() !== 'جێبەجێکردن...') {
             const dollarRate = parseFloat(dollarRateElement.text().replace(/,/g, ''));
             if (dollarRate > 0) {
-                const salaryInDollars = summary.total_salary / (dollarRate / 100);
+                const salaryInDollars = (summary.total_salary || 0) / (dollarRate / 100);
                 const formattedDollars = salaryInDollars.toLocaleString('en-US', {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2
