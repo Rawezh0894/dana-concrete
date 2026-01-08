@@ -326,55 +326,12 @@ try {
         'purchase_materials' => 0
     ];
 
-    // Employee payments cost (Fixed Salary + Bonus)
-    // 1. Determine Date Range Days
-    $start_period = '';
-    $end_period = '';
-    
-    if ($use_range) {
-        $start_period = $from_date;
-        $end_period = $to_date;
-    } else {
-        if ($filter === 'today') {
-            $start_period = date('Y-m-d');
-            $end_period = date('Y-m-d');
-        } elseif ($filter === 'week') {
-            $start_period = date('Y-m-d', strtotime('monday this week'));
-            $end_period = date('Y-m-d', strtotime('sunday this week'));
-        } elseif ($filter === 'month') {
-            $start_period = date('Y-m-01');
-            $end_period = date('Y-m-t');
-        } elseif ($filter === 'year') {
-            $start_period = date('Y-01-01');
-            $end_period = date('Y-12-31');
-        }
-    }
-    
-    $days_in_period = 0;
-    if ($start_period && $end_period) {
-        $d1 = new DateTime($start_period);
-        $d2 = new DateTime($end_period);
-        $diff = $d1->diff($d2);
-        $days_in_period = $diff->days + 1;
-    }
-    
-    // 2. Get Monthly Fixed Cost (Salary + Bonus)
-    $status_exists = false;
-    try {
-        $check = $pdo->query("SHOW COLUMNS FROM employees LIKE 'status'");
-        $status_exists = $check->rowCount() > 0;
-    } catch (Exception $e) {}
-    
-    $emp_query = "SELECT SUM(salary + COALESCE(bonus, 0)) FROM employees WHERE 1=1";
-    if ($status_exists) {
-        $emp_query .= " AND status = 'active'";
-    }
-    $monthly_fixed_iqd = $pdo->query($emp_query)->fetchColumn() ?: 0;
-    
-    // 3. Calculate Prorated Cost (Monthly / 30 * Days)
-    $total_employee_expenses_iqd = ($monthly_fixed_iqd / 30) * $days_in_period;
-    $total_employee_expenses_usd = ($usd_iqd_rate > 0 ? ($total_employee_expenses_iqd / ($usd_iqd_rate / 100)) : 0);
-    
+    // Employee payments with date filter
+    $employee_payments_query = "SELECT SUM(total) as total_expenses FROM employee_payments WHERE 1=1 $date_condition_employee_payments";
+    $stmt = $pdo->query($employee_payments_query);
+    $row = $stmt->fetch();
+    $total_employee_expenses = $row['total_expenses'] ?? 0;
+    $total_employee_expenses_usd = ($usd_iqd_rate > 0 ? ($total_employee_expenses / ($usd_iqd_rate / 100)) : 0);
     $total_expenses_breakdown['employee_payments'] = $total_employee_expenses_usd;
 
     // Other expenses - including all expense types with date filter - includes cash box operations
@@ -551,8 +508,18 @@ try {
     }
     
     // Get employee payments total
-    // Already calculated above as $total_employee_expenses_usd based on Fixed Salary + Bonus logic
-    $employee_payments_usd = $total_employee_expenses_usd;
+    try {
+        $employee_payments_query = "SELECT 
+            SUM(total) / NULLIF(?, 0) as employee_payments_usd
+            FROM employee_payments 
+            WHERE DATE(CONCAT(pay_month, '-01')) BETWEEN ? AND ?";
+        $stmt = $pdo->prepare($employee_payments_query);
+        $stmt->execute([$usd_iqd_rate / 100, $from_date, $to_date]);
+        $employee_payments_usd = $stmt->fetchColumn() ?: 0;
+    } catch (Exception $e) {
+        error_log("Error calculating employee payments: " . $e->getMessage());
+        $employee_payments_usd = 0;
+    }
     
     // Calculate total income
     $total_income_usd = $total_sales_usd + $gas_income_usd - $total_purchases_usd - $total_discounts - $other_expenses_usd - $purchase_materials_usd - $employee_payments_usd;
