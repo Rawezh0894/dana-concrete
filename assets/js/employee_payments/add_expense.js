@@ -7,11 +7,10 @@ $(function () {
         var salary = parseFloat($('#salary').val()) || 0;
         var bonus = parseFloat($('#bonus').val()) || 0;
         var overtime = parseFloat($('#overtime').val()) || 0;
-        var advance = parseFloat($('#advance').val()) || 0;
-        var deduction = parseFloat($('#deduction').val()) || 0;
-        var penalty = parseFloat($('#penalty').val()) || 0;
+        var deductionType = $('#deduction_type').val();
+        var deductionAmount = parseFloat($('#deduction_amount').val()) || 0;
         
-        var total = salary + bonus + overtime + advance + deduction + penalty;
+        var total = salary + bonus + overtime + deductionAmount;
         
         if (total <= 0) {
             swalAlert('هەڵە', 'تکایە لانیکەم یەک جۆری خەرجی بنووسە', 'error');
