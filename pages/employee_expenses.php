@@ -70,112 +70,17 @@ if ($bonusExists) {
     
     <!-- Filters -->
     <div class="row mb-4">
-        <div class="col-md-3 mb-3">
+        <div class="col-md-6 mb-3">
             <label for="month-filter" class="form-label">فلتەر بە مانگ:</label>
             <select class="form-select" id="month-filter">
                 <option value="">هەموو مانگەکان</option>
             </select>
         </div>
-        <div class="col-md-3 mb-3">
+        <div class="col-md-6 mb-3">
             <label for="employee-filter" class="form-label">فلتەر بە کارمەند:</label>
             <select class="form-select" id="employee-filter">
                 <option value="">هەموو کارمەندەکان</option>
             </select>
-        </div>
-        <div class="col-md-3 mb-3">
-            <label for="date-from" class="form-label">لە بەرواری:</label>
-            <input type="date" class="form-control" id="date-from">
-        </div>
-        <div class="col-md-3 mb-3">
-            <label for="date-to" class="form-label">بۆ بەرواری:</label>
-            <input type="date" class="form-control" id="date-to">
-        </div>
-    </div>
-
-    <!-- Summary Cards -->
-    <div class="row w-100 mt-2 g-3 mb-4">
-        <div class="col-lg-3 col-md-4 col-sm-6">
-            <div class="card gradient-card green-gradient">
-                <div class="card-body">
-                    <h6 class="card-title">کۆی مووچە</h6>
-                    <div id="total-salary" class="card-value">0 د.ع</div>
-                    <small>کۆی مووچەی هەژمارکراو</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-4 col-sm-6">
-            <div class="card gradient-card teal-gradient">
-                <div class="card-body">
-                    <h6 class="card-title">کۆی بەخشیش</h6>
-                    <div id="total-bonus" class="card-value">0 د.ع</div>
-                    <small>کۆی بەخشیشەکان</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-4 col-sm-6">
-            <div class="card gradient-card blue-gradient">
-                <div class="card-body">
-                    <h6 class="card-title">مووچە + بەخشیش</h6>
-                    <div id="total-salary-bonus" class="card-value">0 د.ع</div>
-                    <small>مووچە + بەخشیش</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-4 col-sm-6">
-            <div class="card gradient-card purple-gradient">
-                <div class="card-body">
-                    <h6 class="card-title">کۆی کاروانحیسابی</h6>
-                    <div id="total-overtime" class="card-value">0 د.ع</div>
-                    <small>کۆی کاروانحیسابی</small>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-3 col-md-4 col-sm-6">
-            <div class="card gradient-card orange-gradient">
-                <div class="card-body">
-                    <h6 class="card-title">کۆی گشتی</h6>
-                    <div id="total-income" class="card-value">0 د.ع</div>
-                    <small>مووچە + بەخشیش + کاروانحیسابی</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-4 col-sm-6">
-            <div class="card gradient-card yellow-gradient">
-                <div class="card-body">
-                    <h6 class="card-title">پێشەکی / قەرز</h6>
-                    <div id="total-advance" class="card-value">0 د.ع</div>
-                    <small>کۆی پێشەکی و قەرزەکان</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-4 col-sm-6">
-            <div class="card gradient-card red-gradient">
-                <div class="card-body">
-                    <h6 class="card-title">کەمکردنەوە</h6>
-                    <div id="total-deduction" class="card-value">0 د.ع</div>
-                    <small>کۆی کەمکردنەوەکان</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-4 col-sm-6">
-            <div class="card gradient-card pink-gradient">
-                <div class="card-body">
-                    <h6 class="card-title">سزا</h6>
-                    <div id="total-penalty" class="card-value">0 د.ع</div>
-                    <small>کۆی سزا</small>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-4 col-md-6 col-sm-12 mx-auto">
-            <div class="card gradient-card green-gradient">
-                <div class="card-body">
-                    <h6 class="card-title">باڵانسی مووچە</h6>
-                    <div id="net-salary-balance" class="card-value">0 د.ع</div>
-                    <small>کۆی گشتی - (پێشەکی + کەمکردنەوە + سزا)</small>
-                </div>
-            </div>
         </div>
     </div>
     

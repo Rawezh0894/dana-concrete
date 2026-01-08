@@ -5,8 +5,6 @@ header('Content-Type: application/json');
 try {
     $month_filter = $_GET['month'] ?? '';
     $employee_filter = $_GET['employee'] ?? '';
-    $from_date = $_GET['from_date'] ?? '';
-    $to_date = $_GET['to_date'] ?? '';
     
     $where_conditions = [];
     $params = [];
@@ -19,19 +17,6 @@ try {
     if ($employee_filter) {
         $where_conditions[] = "ee.employee_id = ?";
         $params[] = $employee_filter;
-    }
-
-    // Date range filter (based on created_at date)
-    $is_valid_date = function ($d) {
-        return is_string($d) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $d);
-    };
-    if ($from_date && $is_valid_date($from_date)) {
-        $where_conditions[] = "DATE(ee.created_at) >= ?";
-        $params[] = $from_date;
-    }
-    if ($to_date && $is_valid_date($to_date)) {
-        $where_conditions[] = "DATE(ee.created_at) <= ?";
-        $params[] = $to_date;
     }
     
     $where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';

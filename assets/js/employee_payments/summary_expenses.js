@@ -2,16 +2,12 @@
 function loadSummaryData() {
     const monthFilter = $('#month-filter').val();
     const employeeFilter = $('#employee-filter').val();
-    const fromDate = $('#date-from').val();
-    const toDate = $('#date-to').val();
     
     let url = '../process/employee_payments/get_expenses_summary.php';
     const params = new URLSearchParams();
     
     if (monthFilter) params.append('month', monthFilter);
     if (employeeFilter) params.append('employee', employeeFilter);
-    if (fromDate) params.append('from_date', fromDate);
-    if (toDate) params.append('to_date', toDate);
     
     if (params.toString()) {
         url += '?' + params.toString();
@@ -30,13 +26,8 @@ function loadSummaryData() {
             // Update summary cards
             $('#total-salary').text(formatCurrency(data.summary.total_salary));
             $('#total-bonus').text(formatCurrency(data.summary.total_bonus));
-            $('#total-salary-bonus').text(formatCurrency(data.summary.total_salary_bonus));
             $('#total-overtime').text(formatCurrency(data.summary.total_overtime));
-            $('#total-income').text(formatCurrency(data.summary.total_income));
             $('#total-advance').text(formatCurrency(data.summary.total_advance));
-            $('#total-deduction').text(formatCurrency(data.summary.total_deduction));
-            $('#total-penalty').text(formatCurrency(data.summary.total_penalty));
-            $('#net-salary-balance').text(formatCurrency(data.summary.net_salary_balance));
             
             // Populate filter dropdowns if not already populated
             if ($('#month-filter option').length <= 1) {
@@ -144,17 +135,6 @@ $(document).ready(function() {
     
     // Handle employee filter change - use Select2 event
     $(document).on('change', '#employee-filter', function() {
-        loadSummaryData();
-        if (typeof loadExpenses === 'function') {
-            loadExpenses();
-        }
-        if (typeof loadBalances === 'function') {
-            loadBalances();
-        }
-    });
-
-    // Handle date range changes
-    $('#date-from, #date-to').on('change', function() {
         loadSummaryData();
         if (typeof loadExpenses === 'function') {
             loadExpenses();
