@@ -118,6 +118,15 @@ if ($bonusExists) {
             </div>
         </div>
         
+        <!-- Overtime Card -->
+        <div class="col-md-3">
+             <div class="card p-3 shadow-sm border-0 d-flex flex-column align-items-center justify-content-center h-100" style="background: linear-gradient(135deg, #e0f7fa, #b2ebf2);">
+                <i class="fas fa-truck-mixer fa-2x mb-2 text-info"></i>
+                <h6 class="text-muted fw-bold">کۆی کاروان حیسابی</h6>
+                <h4 id="total-overtime" class="mb-0 text-info">0 د.ع</h4>
+            </div>
+        </div>
+        
         <!-- Net Balance Card -->
         <div class="col-md-3">
             <div class="card p-3 shadow-sm border-0 d-flex flex-column align-items-center justify-content-center h-100" style="background: linear-gradient(135deg, #fff3e0, #ffe0b2);">
@@ -129,21 +138,21 @@ if ($bonusExists) {
         </div>
         
         <!-- Deduction Cards -->
-        <div class="col-md-4">
+        <div class="col-md-2"> <!-- Adjusted width -->
              <div class="card p-3 shadow-sm border-0 d-flex flex-column align-items-center justify-content-center h-100" style="background: #ffebee;">
                 <i class="fas fa-hand-holding-usd fa-2x mb-2 text-danger"></i>
                 <h6 class="text-muted fw-bold">پێشەکی / قەرز</h6>
                 <h4 id="total-advance" class="mb-0 text-danger">0 د.ع</h4>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-2"> <!-- Adjusted width -->
              <div class="card p-3 shadow-sm border-0 d-flex flex-column align-items-center justify-content-center h-100" style="background: #ffebee;">
                 <i class="fas fa-minus-circle fa-2x mb-2 text-danger"></i>
                 <h6 class="text-muted fw-bold">کەمکردنەوە</h6>
                 <h4 id="total-deduction" class="mb-0 text-danger">0 د.ع</h4>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-2"> <!-- Adjusted width -->
              <div class="card p-3 shadow-sm border-0 d-flex flex-column align-items-center justify-content-center h-100" style="background: #ffebee;">
                 <i class="fas fa-gavel fa-2x mb-2 text-danger"></i>
                 <h6 class="text-muted fw-bold">سزا</h6>

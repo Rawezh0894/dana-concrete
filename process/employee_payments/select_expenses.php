@@ -14,12 +14,14 @@ try {
     
     if ($start_date || $end_date) {
         if ($start_date) {
+            $start_month = date('Y-m', strtotime($start_date));
             $where_conditions[] = "ee.expense_date >= ?";
-            $params[] = $start_date;
+            $params[] = $start_month;
         }
         if ($end_date) {
+            $end_month = date('Y-m', strtotime($end_date));
             $where_conditions[] = "ee.expense_date <= ?";
-            $params[] = $end_date;
+            $params[] = $end_month;
         }
     } elseif ($month_filter) {
         $where_conditions[] = "ee.expense_date LIKE ?";
