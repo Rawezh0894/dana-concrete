@@ -139,6 +139,7 @@ try {
     $date_condition_sales = "";
     // For employee payments, filter by salary month, not payment creation date
     $date_condition_employee_payments = "";
+    $date_condition_employee_expenses = "";
     $date_condition_date = "";
     
     if ($use_range) {
@@ -147,25 +148,33 @@ try {
         $date_condition_sales = " AND order_date >= '$from' AND order_date <= '$to'";
         // Filter employee payments by the selected salary month range
         $date_condition_employee_payments = " AND DATE(CONCAT(pay_month, '-01')) >= '$from' AND DATE(CONCAT(pay_month, '-01')) <= '$to'";
+        // Filter employee expenses (bonus) by expense_date (YYYY-MM format)
+        $from_month = date('Y-m', strtotime($from));
+        $to_month = date('Y-m', strtotime($to));
+        $date_condition_employee_expenses = " AND expense_date >= '$from_month' AND expense_date <= '$to_month'";
         $date_condition_date = " AND date >= '$from' AND date <= '$to'";
     } else {
         if ($filter === 'today') {
             $date_condition_sales = " AND order_date = CURDATE()";
             // Map 'today' to current month for salary-month-based filtering
             $date_condition_employee_payments = " AND YEAR(DATE(CONCAT(pay_month, '-01'))) = YEAR(CURDATE()) AND MONTH(DATE(CONCAT(pay_month, '-01'))) = MONTH(CURDATE())";
+            $date_condition_employee_expenses = " AND expense_date = DATE_FORMAT(CURDATE(), '%Y-%m')";
             $date_condition_date = " AND date = CURDATE()";
         } elseif ($filter === 'week') {
             $date_condition_sales = " AND YEARWEEK(order_date, 1) = YEARWEEK(CURDATE(), 1)";
             // Map 'week' to current month for salary-month-based filtering
             $date_condition_employee_payments = " AND YEAR(DATE(CONCAT(pay_month, '-01'))) = YEAR(CURDATE()) AND MONTH(DATE(CONCAT(pay_month, '-01'))) = MONTH(CURDATE())";
+            $date_condition_employee_expenses = " AND expense_date = DATE_FORMAT(CURDATE(), '%Y-%m')";
             $date_condition_date = " AND YEARWEEK(date, 1) = YEARWEEK(CURDATE(), 1)";
         } elseif ($filter === 'month') {
             $date_condition_sales = " AND YEAR(order_date) = YEAR(CURDATE()) AND MONTH(order_date) = MONTH(CURDATE())";
             $date_condition_employee_payments = " AND YEAR(DATE(CONCAT(pay_month, '-01'))) = YEAR(CURDATE()) AND MONTH(DATE(CONCAT(pay_month, '-01'))) = MONTH(CURDATE())";
+            $date_condition_employee_expenses = " AND expense_date = DATE_FORMAT(CURDATE(), '%Y-%m')";
             $date_condition_date = " AND YEAR(date) = YEAR(CURDATE()) AND MONTH(date) = MONTH(CURDATE())";
         } elseif ($filter === 'year') {
             $date_condition_sales = " AND YEAR(order_date) = YEAR(CURDATE())";
             $date_condition_employee_payments = " AND YEAR(DATE(CONCAT(pay_month, '-01'))) = YEAR(CURDATE())";
+            $date_condition_employee_expenses = " AND YEAR(expense_date) = YEAR(CURDATE())";
             $date_condition_date = " AND YEAR(date) = YEAR(CURDATE())";
         }
     }
@@ -240,11 +249,20 @@ try {
     $other_expenses_iqd_converted = ($usd_iqd_rate > 0) ? ($other_expenses_iqd / ($usd_iqd_rate / 100)) : 0;
     $other_expenses_total_usd = $other_expenses_usd + $other_expenses_iqd_converted;
 
-    // Employee Expenses (خەرجی کارمەند) - filter by salary month
-    $employee_expenses_query = "SELECT SUM(total) as total_expenses FROM employee_payments WHERE 1=1 $date_condition_employee_payments";
-    $stmt = $pdo->query($employee_expenses_query);
+    // Employee Expenses (خەرجی کارمەند) - filter by salary month (salary + bonus)
+    $employee_salary_query = "SELECT SUM(total) as total_salary FROM employee_payments WHERE 1=1 $date_condition_employee_payments";
+    $stmt = $pdo->query($employee_salary_query);
     $row = $stmt->fetch();
-    $employee_expenses = $row['total_expenses'] ?? 0;
+    $employee_salary = $row['total_salary'] ?? 0;
+    
+    // Get bonus from employee_expenses
+    $employee_bonus_query = "SELECT SUM(amount) as total_bonus FROM employee_expenses WHERE expense_type = 'bonus' $date_condition_employee_expenses";
+    $stmt = $pdo->query($employee_bonus_query);
+    $row = $stmt->fetch();
+    $employee_bonus = $row['total_bonus'] ?? 0;
+    
+    // Total employee expenses = salary + bonus
+    $employee_expenses = $employee_salary + $employee_bonus;
     $employee_expenses_usd = ($usd_iqd_rate > 0) ? ($employee_expenses / ($usd_iqd_rate / 100)) : 0;
 
     // Discounts (کۆی داشکاندن) - From sales + customer debt payments
@@ -311,10 +329,19 @@ try {
     $iqd = $row['iqd'] ?? 0;
     $total_purchases += ($usd_iqd_rate > 0 ? ($iqd / ($usd_iqd_rate / 100)) : 0);
 
-    $total_employee_expenses = 0;
-    $stmt = $pdo->query("SELECT SUM(total) as total_expenses FROM employee_payments");
+    // Get total employee expenses (salary + bonus) - no date filter for this section
+    $total_employee_salary = 0;
+    $stmt = $pdo->query("SELECT SUM(total) as total_salary FROM employee_payments");
     $row = $stmt->fetch();
-    $total_employee_expenses = $row['total_expenses'] ?? 0;
+    $total_employee_salary = $row['total_salary'] ?? 0;
+    
+    // Get total bonus from employee_expenses
+    $stmt = $pdo->query("SELECT SUM(amount) as total_bonus FROM employee_expenses WHERE expense_type = 'bonus'");
+    $row = $stmt->fetch();
+    $total_employee_bonus = $row['total_bonus'] ?? 0;
+    
+    // Total employee expenses = salary + bonus
+    $total_employee_expenses = $total_employee_salary + $total_employee_bonus;
     // Convert IQD to USD for employee expenses using API rate
     $total_employee_expenses_usd = ($usd_iqd_rate > 0 ? ($total_employee_expenses / ($usd_iqd_rate / 100)) : 0);
 
@@ -326,11 +353,20 @@ try {
         'purchase_materials' => 0
     ];
 
-    // Employee payments with date filter
+    // Employee payments (salary) with date filter
     $employee_payments_query = "SELECT SUM(total) as total_expenses FROM employee_payments WHERE 1=1 $date_condition_employee_payments";
     $stmt = $pdo->query($employee_payments_query);
     $row = $stmt->fetch();
-    $total_employee_expenses = $row['total_expenses'] ?? 0;
+    $total_employee_salary = $row['total_expenses'] ?? 0;
+    
+    // Employee expenses (bonus) with date filter - bonus is stored in employee_expenses table
+    $employee_bonus_query = "SELECT SUM(amount) as total_bonus FROM employee_expenses WHERE expense_type = 'bonus' $date_condition_employee_expenses";
+    $stmt = $pdo->query($employee_bonus_query);
+    $row = $stmt->fetch();
+    $total_employee_bonus = $row['total_bonus'] ?? 0;
+    
+    // Total employee expenses = salary + bonus
+    $total_employee_expenses = $total_employee_salary + $total_employee_bonus;
     $total_employee_expenses_usd = ($usd_iqd_rate > 0 ? ($total_employee_expenses / ($usd_iqd_rate / 100)) : 0);
     $total_expenses_breakdown['employee_payments'] = $total_employee_expenses_usd;
 
@@ -507,15 +543,31 @@ try {
         $purchase_materials_usd = 0;
     }
     
-    // Get employee payments total
+    // Get employee payments total (salary + bonus)
     try {
-        $employee_payments_query = "SELECT 
-            SUM(total) / NULLIF(?, 0) as employee_payments_usd
+        // Get salary from employee_payments
+        $employee_salary_query = "SELECT 
+            SUM(total) / NULLIF(?, 0) as employee_salary_usd
             FROM employee_payments 
             WHERE DATE(CONCAT(pay_month, '-01')) BETWEEN ? AND ?";
-        $stmt = $pdo->prepare($employee_payments_query);
+        $stmt = $pdo->prepare($employee_salary_query);
         $stmt->execute([$usd_iqd_rate / 100, $from_date, $to_date]);
-        $employee_payments_usd = $stmt->fetchColumn() ?: 0;
+        $employee_salary_usd = $stmt->fetchColumn() ?: 0;
+        
+        // Get bonus from employee_expenses
+        $from_month = date('Y-m', strtotime($from_date));
+        $to_month = date('Y-m', strtotime($to_date));
+        $employee_bonus_query = "SELECT 
+            SUM(amount) / NULLIF(?, 0) as employee_bonus_usd
+            FROM employee_expenses 
+            WHERE expense_type = 'bonus' 
+            AND expense_date >= ? AND expense_date <= ?";
+        $stmt = $pdo->prepare($employee_bonus_query);
+        $stmt->execute([$usd_iqd_rate / 100, $from_month, $to_month]);
+        $employee_bonus_usd = $stmt->fetchColumn() ?: 0;
+        
+        // Total employee expenses = salary + bonus
+        $employee_payments_usd = $employee_salary_usd + $employee_bonus_usd;
     } catch (Exception $e) {
         error_log("Error calculating employee payments: " . $e->getMessage());
         $employee_payments_usd = 0;
@@ -801,14 +853,28 @@ try {
         $stmt->execute([$date]);
         $monthly_expenses = $stmt->fetchColumn() ?: 0;
         
-    // Employee payments - use pay_month (salary month)
+    // Employee payments (salary + bonus) - use pay_month (salary month) and expense_date (bonus month)
+        // Get salary from employee_payments
         $stmt = $pdo->prepare("
-            SELECT SUM(total) as total_employee_payments 
+            SELECT SUM(total) as total_employee_salary 
             FROM employee_payments 
             WHERE DATE_FORMAT(CONCAT(pay_month, '-01'), '%Y-%m') = ?
         ");
         $stmt->execute([$date]);
-        $employee_payments = $stmt->fetchColumn() ?: 0;
+        $employee_salary = $stmt->fetchColumn() ?: 0;
+        
+        // Get bonus from employee_expenses
+        $stmt = $pdo->prepare("
+            SELECT SUM(amount) as total_employee_bonus 
+            FROM employee_expenses 
+            WHERE expense_type = 'bonus' 
+            AND expense_date = ?
+        ");
+        $stmt->execute([$date]);
+        $employee_bonus = $stmt->fetchColumn() ?: 0;
+        
+        // Total employee payments = salary + bonus
+        $employee_payments = $employee_salary + $employee_bonus;
         
         $monthly_data[$year][$month] = [
             'sales' => $monthly_sales,
