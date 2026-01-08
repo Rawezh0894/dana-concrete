@@ -249,17 +249,58 @@ try {
     $other_expenses_iqd_converted = ($usd_iqd_rate > 0) ? ($other_expenses_iqd / ($usd_iqd_rate / 100)) : 0;
     $other_expenses_total_usd = $other_expenses_usd + $other_expenses_iqd_converted;
 
-    // Employee Expenses (خەرجی کارمەند) - filter by salary month (salary + bonus)
-    $employee_salary_query = "SELECT SUM(total) as total_salary FROM employee_payments WHERE 1=1 $date_condition_employee_payments";
-    $stmt = $pdo->query($employee_salary_query);
-    $row = $stmt->fetch();
-    $employee_salary = $row['total_salary'] ?? 0;
+    // Employee Expenses (خەرجی کارمەند) - from employees table (salary + bonus)
+    // Calculate prorate factor based on date range
+    $period_start_emp = null;
+    $period_end_emp = null;
     
-    // Get bonus from employee_expenses
-    $employee_bonus_query = "SELECT SUM(amount) as total_bonus FROM employee_expenses WHERE expense_type = 'bonus' $date_condition_employee_expenses";
-    $stmt = $pdo->query($employee_bonus_query);
+    if ($use_range) {
+        $period_start_emp = $from_date ? $from_date : '1000-01-01';
+        $period_end_emp = $to_date ? $to_date : '9999-12-31';
+    } else {
+        if ($filter === 'today') {
+            $period_start_emp = date('Y-m-d');
+            $period_end_emp = date('Y-m-d');
+        } elseif ($filter === 'week') {
+            $period_start_emp = date('Y-m-d', strtotime('monday this week'));
+            $period_end_emp = date('Y-m-d', strtotime('sunday this week'));
+        } elseif ($filter === 'month') {
+            $period_start_emp = date('Y-m-01');
+            $period_end_emp = date('Y-m-t');
+        } elseif ($filter === 'year') {
+            $period_start_emp = date('Y-01-01');
+            $period_end_emp = date('Y-12-31');
+        }
+    }
+    
+    // Calculate days in period
+    $start_ts_emp = strtotime($period_start_emp);
+    $end_ts_emp = strtotime($period_end_emp);
+    $days_in_period_emp = max(1, ($end_ts_emp - $start_ts_emp) / 86400 + 1);
+    
+    // For monthly salary calculation, use 30 days as basis or actual days in month
+    $days_in_month_basis_emp = 30;
+    if ($filter === 'month' || ($use_range && date('Y-m', $start_ts_emp) === date('Y-m', $end_ts_emp))) {
+        $days_in_month_basis_emp = cal_days_in_month(CAL_GREGORIAN, date('m', $start_ts_emp), date('Y', $start_ts_emp));
+    }
+    
+    $prorate_factor_emp = $days_in_period_emp / $days_in_month_basis_emp;
+    
+    // Get salary and bonus from employees table
+    $status_exists_emp = false;
+    try {
+        $check_status_emp = $pdo->query("SHOW COLUMNS FROM employees LIKE 'status'");
+        $status_exists_emp = $check_status_emp->rowCount() > 0;
+    } catch (Exception $e) {}
+    
+    $emp_sql_emp = "SELECT SUM(salary) as total_salary, SUM(COALESCE(bonus, 0)) as total_bonus FROM employees WHERE 1=1";
+    if ($status_exists_emp) {
+        $emp_sql_emp .= " AND status = 'active'";
+    }
+    $stmt = $pdo->query($emp_sql_emp);
     $row = $stmt->fetch();
-    $employee_bonus = $row['total_bonus'] ?? 0;
+    $employee_salary = floatval($row['total_salary'] ?? 0) * $prorate_factor_emp;
+    $employee_bonus = floatval($row['total_bonus'] ?? 0) * $prorate_factor_emp;
     
     // Total employee expenses = salary + bonus
     $employee_expenses = $employee_salary + $employee_bonus;
@@ -329,16 +370,22 @@ try {
     $iqd = $row['iqd'] ?? 0;
     $total_purchases += ($usd_iqd_rate > 0 ? ($iqd / ($usd_iqd_rate / 100)) : 0);
 
-    // Get total employee expenses (salary + bonus) - no date filter for this section
-    $total_employee_salary = 0;
-    $stmt = $pdo->query("SELECT SUM(total) as total_salary FROM employee_payments");
-    $row = $stmt->fetch();
-    $total_employee_salary = $row['total_salary'] ?? 0;
+    // Get total employee expenses (salary + bonus) from employees table - no date filter for this section
+    // Get salary and bonus from employees table
+    $status_exists_total = false;
+    try {
+        $check_status_total = $pdo->query("SHOW COLUMNS FROM employees LIKE 'status'");
+        $status_exists_total = $check_status_total->rowCount() > 0;
+    } catch (Exception $e) {}
     
-    // Get total bonus from employee_expenses
-    $stmt = $pdo->query("SELECT SUM(amount) as total_bonus FROM employee_expenses WHERE expense_type = 'bonus'");
+    $emp_sql_total = "SELECT SUM(salary) as total_salary, SUM(COALESCE(bonus, 0)) as total_bonus FROM employees WHERE 1=1";
+    if ($status_exists_total) {
+        $emp_sql_total .= " AND status = 'active'";
+    }
+    $stmt = $pdo->query($emp_sql_total);
     $row = $stmt->fetch();
-    $total_employee_bonus = $row['total_bonus'] ?? 0;
+    $total_employee_salary = floatval($row['total_salary'] ?? 0);
+    $total_employee_bonus = floatval($row['total_bonus'] ?? 0);
     
     // Total employee expenses = salary + bonus
     $total_employee_expenses = $total_employee_salary + $total_employee_bonus;
@@ -353,17 +400,58 @@ try {
         'purchase_materials' => 0
     ];
 
-    // Employee payments (salary) with date filter
-    $employee_payments_query = "SELECT SUM(total) as total_expenses FROM employee_payments WHERE 1=1 $date_condition_employee_payments";
-    $stmt = $pdo->query($employee_payments_query);
-    $row = $stmt->fetch();
-    $total_employee_salary = $row['total_expenses'] ?? 0;
+    // Employee expenses (salary + bonus) from employees table with date filter
+    // Calculate prorate factor based on date range
+    $period_start = null;
+    $period_end = null;
     
-    // Employee expenses (bonus) with date filter - bonus is stored in employee_expenses table
-    $employee_bonus_query = "SELECT SUM(amount) as total_bonus FROM employee_expenses WHERE expense_type = 'bonus' $date_condition_employee_expenses";
-    $stmt = $pdo->query($employee_bonus_query);
+    if ($use_range) {
+        $period_start = $from_date ? $from_date : '1000-01-01';
+        $period_end = $to_date ? $to_date : '9999-12-31';
+    } else {
+        if ($filter === 'today') {
+            $period_start = date('Y-m-d');
+            $period_end = date('Y-m-d');
+        } elseif ($filter === 'week') {
+            $period_start = date('Y-m-d', strtotime('monday this week'));
+            $period_end = date('Y-m-d', strtotime('sunday this week'));
+        } elseif ($filter === 'month') {
+            $period_start = date('Y-m-01');
+            $period_end = date('Y-m-t');
+        } elseif ($filter === 'year') {
+            $period_start = date('Y-01-01');
+            $period_end = date('Y-12-31');
+        }
+    }
+    
+    // Calculate days in period
+    $start_ts = strtotime($period_start);
+    $end_ts = strtotime($period_end);
+    $days_in_period = max(1, ($end_ts - $start_ts) / 86400 + 1);
+    
+    // For monthly salary calculation, use 30 days as basis or actual days in month
+    $days_in_month_basis = 30;
+    if ($filter === 'month' || ($use_range && date('Y-m', $start_ts) === date('Y-m', $end_ts))) {
+        $days_in_month_basis = cal_days_in_month(CAL_GREGORIAN, date('m', $start_ts), date('Y', $start_ts));
+    }
+    
+    $prorate_factor = $days_in_period / $days_in_month_basis;
+    
+    // Get salary and bonus from employees table
+    $status_exists = false;
+    try {
+        $check_status = $pdo->query("SHOW COLUMNS FROM employees LIKE 'status'");
+        $status_exists = $check_status->rowCount() > 0;
+    } catch (Exception $e) {}
+    
+    $emp_sql = "SELECT SUM(salary) as total_salary, SUM(COALESCE(bonus, 0)) as total_bonus FROM employees WHERE 1=1";
+    if ($status_exists) {
+        $emp_sql .= " AND status = 'active'";
+    }
+    $stmt = $pdo->query($emp_sql);
     $row = $stmt->fetch();
-    $total_employee_bonus = $row['total_bonus'] ?? 0;
+    $total_employee_salary = floatval($row['total_salary'] ?? 0) * $prorate_factor;
+    $total_employee_bonus = floatval($row['total_bonus'] ?? 0) * $prorate_factor;
     
     // Total employee expenses = salary + bonus
     $total_employee_expenses = $total_employee_salary + $total_employee_bonus;
@@ -543,31 +631,40 @@ try {
         $purchase_materials_usd = 0;
     }
     
-    // Get employee payments total (salary + bonus)
+    // Get employee payments total (salary + bonus) from employees table
     try {
-        // Get salary from employee_payments
-        $employee_salary_query = "SELECT 
-            SUM(total) / NULLIF(?, 0) as employee_salary_usd
-            FROM employee_payments 
-            WHERE DATE(CONCAT(pay_month, '-01')) BETWEEN ? AND ?";
-        $stmt = $pdo->prepare($employee_salary_query);
-        $stmt->execute([$usd_iqd_rate / 100, $from_date, $to_date]);
-        $employee_salary_usd = $stmt->fetchColumn() ?: 0;
+        // Calculate prorate factor based on date range
+        $start_ts_inc = strtotime($from_date);
+        $end_ts_inc = strtotime($to_date);
+        $days_in_period_inc = max(1, ($end_ts_inc - $start_ts_inc) / 86400 + 1);
         
-        // Get bonus from employee_expenses
-        $from_month = date('Y-m', strtotime($from_date));
-        $to_month = date('Y-m', strtotime($to_date));
-        $employee_bonus_query = "SELECT 
-            SUM(amount) / NULLIF(?, 0) as employee_bonus_usd
-            FROM employee_expenses 
-            WHERE expense_type = 'bonus' 
-            AND expense_date >= ? AND expense_date <= ?";
-        $stmt = $pdo->prepare($employee_bonus_query);
-        $stmt->execute([$usd_iqd_rate / 100, $from_month, $to_month]);
-        $employee_bonus_usd = $stmt->fetchColumn() ?: 0;
+        // For monthly salary calculation, use 30 days as basis or actual days in month
+        $days_in_month_basis_inc = 30;
+        if (date('Y-m', $start_ts_inc) === date('Y-m', $end_ts_inc)) {
+            $days_in_month_basis_inc = cal_days_in_month(CAL_GREGORIAN, date('m', $start_ts_inc), date('Y', $start_ts_inc));
+        }
+        
+        $prorate_factor_inc = $days_in_period_inc / $days_in_month_basis_inc;
+        
+        // Get salary and bonus from employees table
+        $status_exists_inc = false;
+        try {
+            $check_status_inc = $pdo->query("SHOW COLUMNS FROM employees LIKE 'status'");
+            $status_exists_inc = $check_status_inc->rowCount() > 0;
+        } catch (Exception $e) {}
+        
+        $emp_sql_inc = "SELECT SUM(salary) as total_salary, SUM(COALESCE(bonus, 0)) as total_bonus FROM employees WHERE 1=1";
+        if ($status_exists_inc) {
+            $emp_sql_inc .= " AND status = 'active'";
+        }
+        $stmt = $pdo->query($emp_sql_inc);
+        $row = $stmt->fetch();
+        $employee_salary_total = floatval($row['total_salary'] ?? 0) * $prorate_factor_inc;
+        $employee_bonus_total = floatval($row['total_bonus'] ?? 0) * $prorate_factor_inc;
         
         // Total employee expenses = salary + bonus
-        $employee_payments_usd = $employee_salary_usd + $employee_bonus_usd;
+        $employee_expenses_total = $employee_salary_total + $employee_bonus_total;
+        $employee_payments_usd = ($usd_iqd_rate > 0 ? ($employee_expenses_total / ($usd_iqd_rate / 100)) : 0);
     } catch (Exception $e) {
         error_log("Error calculating employee payments: " . $e->getMessage());
         $employee_payments_usd = 0;
@@ -853,25 +950,22 @@ try {
         $stmt->execute([$date]);
         $monthly_expenses = $stmt->fetchColumn() ?: 0;
         
-    // Employee payments (salary + bonus) - use pay_month (salary month) and expense_date (bonus month)
-        // Get salary from employee_payments
-        $stmt = $pdo->prepare("
-            SELECT SUM(total) as total_employee_salary 
-            FROM employee_payments 
-            WHERE DATE_FORMAT(CONCAT(pay_month, '-01'), '%Y-%m') = ?
-        ");
-        $stmt->execute([$date]);
-        $employee_salary = $stmt->fetchColumn() ?: 0;
+    // Employee payments (salary + bonus) from employees table
+        // Get salary and bonus from employees table for this month
+        $status_exists_monthly = false;
+        try {
+            $check_status_monthly = $pdo->query("SHOW COLUMNS FROM employees LIKE 'status'");
+            $status_exists_monthly = $check_status_monthly->rowCount() > 0;
+        } catch (Exception $e) {}
         
-        // Get bonus from employee_expenses
-        $stmt = $pdo->prepare("
-            SELECT SUM(amount) as total_employee_bonus 
-            FROM employee_expenses 
-            WHERE expense_type = 'bonus' 
-            AND expense_date = ?
-        ");
-        $stmt->execute([$date]);
-        $employee_bonus = $stmt->fetchColumn() ?: 0;
+        $emp_sql_monthly = "SELECT SUM(salary) as total_salary, SUM(COALESCE(bonus, 0)) as total_bonus FROM employees WHERE 1=1";
+        if ($status_exists_monthly) {
+            $emp_sql_monthly .= " AND status = 'active'";
+        }
+        $stmt = $pdo->query($emp_sql_monthly);
+        $row = $stmt->fetch();
+        $employee_salary = floatval($row['total_salary'] ?? 0);
+        $employee_bonus = floatval($row['total_bonus'] ?? 0);
         
         // Total employee payments = salary + bonus
         $employee_payments = $employee_salary + $employee_bonus;
