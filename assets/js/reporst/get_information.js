@@ -265,6 +265,14 @@ function renderDashboardCards(data) {
             subtitle: 'پارەدان بە کارمەند'
         },
         {
+            key: 'employee_total_fixed',
+            label: 'کۆی مووچەی کارمەندان',
+            icon: 'fa-money-check-alt',
+            cardClass: 'employee-expenses-card',
+            value: formatCurrency(Number(data.data?.employee_stats?.total_fixed_usd) || 0, 'USD'),
+            subtitle: 'مووچە + بەخشیش (بە دۆلار)'
+        },
+        {
             key: 'other_expenses',
             label: 'کۆی خەرجی تر',
             icon: 'fa-receipt',

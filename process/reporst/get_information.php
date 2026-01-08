@@ -712,6 +712,12 @@ try {
     $stmt = $pdo->query("SELECT SUM(salary) as total_salary FROM employees");
     $employee_stats['total_salary'] = $stmt->fetchColumn() ?: 0;
     
+    // Calculate Total Monthly Fixed Cost (Salary + Bonus) for Active Employees
+    // کۆی مووچە + بەخشیش بۆ کارمەندە چالاکەکان
+    $stmt = $pdo->query("SELECT SUM(salary + COALESCE(bonus, 0)) as total_fixed FROM employees WHERE status = 'active'");
+    $total_fixed_iqd = $stmt->fetchColumn() ?: 0;
+    $employee_stats['total_fixed_usd'] = ($usd_iqd_rate > 0) ? ($total_fixed_iqd / ($usd_iqd_rate / 100)) : 0;
+
     $stmt = $pdo->query("SELECT COUNT(*) as drivers FROM employees WHERE role = 'شۆفێر'");
     $employee_stats['drivers'] = $stmt->fetchColumn();
     
@@ -1074,6 +1080,9 @@ try {
     // Use the calculated total debt from above
     $person_debt_usd = $person_debt_total_usd; // This is already calculated correctly above
     // $person_debt_iqd is already calculated correctly above, no need to reassign
+
+    // Add employee stats to response data
+    $response_data['data']['employee_stats'] = $employee_stats;
 
     echo json_encode($response_data);
 } catch (Exception $e) {
