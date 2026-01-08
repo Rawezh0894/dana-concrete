@@ -67,183 +67,19 @@ if ($bonusExists) {
         </div>
     </div>
     
-    <!-- Employee Count Card -->
-    <div class="row mb-4">
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card text-center shadow card-gradient-purple card-animate-hover">
-                <div class="card-body">
-                    <i class="fas fa-users card-icon"></i>
-                    <h6 class="card-title">ژمارەی کارمەند</h6>
-                    <div class="fs-4 fw-bold" id="employee-count">0</div>
-                    <small class="text-light">کۆی کارمەندەکان</small>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Daily Balance Card (Special Card for Daily Balance Calculation) -->
-    <div class="row mb-4" id="daily-balance-card-row" style="display: none;">
-        <div class="col-12">
-            <div class="card shadow-lg border-primary">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-calculator me-2"></i>
-                        باڵانسی ڕۆژانە (بە پێی ژمارەی ڕۆژەکانی مانگ)
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3 mb-3">
-                            <div class="text-center p-3 bg-light rounded">
-                                <i class="fas fa-user-tie fa-2x text-primary mb-2"></i>
-                                <h6 class="text-muted mb-1">کارمەند</h6>
-                                <h5 class="mb-0" id="daily-balance-employee-name">-</h5>
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <div class="text-center p-3 bg-light rounded">
-                                <i class="fas fa-calendar-alt fa-2x text-info mb-2"></i>
-                                <h6 class="text-muted mb-1">مانگ</h6>
-                                <h5 class="mb-0" id="daily-balance-month">-</h5>
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <div class="text-center p-3 bg-light rounded">
-                                <i class="fas fa-calendar-day fa-2x text-warning mb-2"></i>
-                                <h6 class="text-muted mb-1">ژمارەی ڕۆژەکان</h6>
-                                <h5 class="mb-0">
-                                    <span id="daily-balance-days-used">0</span> / <span id="daily-balance-days-total">0</span>
-                                </h5>
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <div class="text-center p-3 bg-light rounded">
-                                <i class="fas fa-money-bill-wave fa-2x text-success mb-2"></i>
-                                <h6 class="text-muted mb-1">مووچەی مانگانە</h6>
-                                <h5 class="mb-0" id="daily-balance-monthly-salary">0 د.ع</h5>
-                            </div>
-                        </div>
-                    </div>
-                    <hr>
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <div class="card border-info">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-coins fa-2x text-info mb-2"></i>
-                                    <h6 class="text-muted mb-2">نرخی ڕۆژانە</h6>
-                                    <h4 class="text-info mb-0" id="daily-balance-daily-rate">0 د.ع/ڕۆژ</h4>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <div class="card border-success">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-arrow-up fa-2x text-success mb-2"></i>
-                                    <h6 class="text-muted mb-2">مووچەی بەدەستهاتوو</h6>
-                                    <h4 class="text-success mb-0" id="daily-balance-earned-salary">0 د.ع</h4>
-                                    <small class="text-muted" id="daily-balance-earned-details"></small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <div class="card border-danger">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-arrow-down fa-2x text-danger mb-2"></i>
-                                    <h6 class="text-muted mb-2">پێشەکی وەرگیراو</h6>
-                                    <h4 class="text-danger mb-0" id="daily-balance-advance-taken">0 د.ع</h4>
-                                    <small class="text-muted" id="daily-balance-advance-details"></small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <hr>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="card" id="daily-balance-net-card">
-                                <div class="card-body text-center">
-                                    <h5 class="mb-3">
-                                        <i class="fas fa-balance-scale me-2"></i>
-                                        باڵانسی کۆتایی
-                                    </h5>
-                                    <h2 class="mb-0" id="daily-balance-net-balance">0 د.ع</h2>
-                                    <p class="mb-0 mt-2" id="daily-balance-message"></p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Summary Cards -->
-    <div class="row mb-4" id="summary-cards">
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card text-center shadow  card-gradient-info card-animate-hover">
-                <div class="card-body">
-                    <i class="fas fa-money-bill-wave card-icon"></i>
-                    <h6 class="card-title">کۆی مووچە</h6>
-                    <div class="fs-4 fw-bold" id="total-salary">0 د.ع</div>
-                    <small class="text-light">کۆی مووچەی کارمەندەکان</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card text-center shadow  card-gradient-warning card-animate-hover">
-                <div class="card-body">
-                    <i class="fas fa-gift card-icon"></i>
-                    <h6 class="card-title">کۆی بەخشیش</h6>
-                    <div class="fs-4 fw-bold" id="total-bonus">0 د.ع</div>
-                    <small class="text-light">کۆی بەخشیشی کارمەندەکان</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card text-center shadow  card-gradient-purple card-animate-hover">
-                <div class="card-body">
-                    <i class="fas fa-calculator card-icon"></i>
-                    <h6 class="card-title">کۆی کاروانحیسابی</h6>
-                    <div class="fs-4 fw-bold" id="total-overtime">0 د.ع</div>
-                    <small class="text-light">کۆی کاروانحیسابی</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card text-center shadow card-gradient-danger card-animate-hover">
-                <div class="card-body">
-                    <i class="fas fa-hand-holding-usd card-icon"></i>
-                    <h6 class="card-title">کۆی پێشەکی</h6>
-                    <div class="fs-4 fw-bold" id="total-advance">0 د.ع</div>
-                    <small class="text-light">کۆی پێشەکی کارمەندەکان</small>
-                </div>
-            </div>
-        </div>
-    </div>
     
     <!-- Filters -->
     <div class="row mb-4">
-        <div class="col-md-4 mb-3">
+        <div class="col-md-6 mb-3">
             <label for="month-filter" class="form-label">فلتەر بە مانگ:</label>
             <select class="form-select" id="month-filter">
                 <option value="">هەموو مانگەکان</option>
             </select>
         </div>
-        <div class="col-md-4 mb-3">
+        <div class="col-md-6 mb-3">
             <label for="employee-filter" class="form-label">فلتەر بە کارمەند:</label>
             <select class="form-select" id="employee-filter">
                 <option value="">هەموو کارمەندەکان</option>
-            </select>
-        </div>
-        <div class="col-md-4 mb-3">
-            <label for="daily-balance-employee-select" class="form-label">
-                <i class="fas fa-calculator me-1"></i>
-                کارمەند بۆ باڵانسی ڕۆژانە:
-            </label>
-            <select class="form-select" id="daily-balance-employee-select">
-                <option value="">-- هەلبژێرە --</option>
-                <?php foreach($employees as $emp): ?>
-                    <option value="<?= $emp['id'] ?>"><?= htmlspecialchars($emp['name']) ?></option>
-                <?php endforeach; ?>
             </select>
         </div>
     </div>
@@ -655,40 +491,32 @@ $(function() {
         dir: 'rtl'
     });
     
-    // Initialize Select2 for daily balance employee select
-    $('#daily-balance-employee-select').select2({
+    // Initialize Select2 for employee selects in modals
+    $('#income_employee_id').select2({
         theme: 'bootstrap-5',
         width: '100%',
         placeholder: '-- هەلبژێرە --',
         allowClear: true,
-        dir: 'rtl'
+        dir: 'rtl',
+        dropdownParent: $('#addIncomeExpenseModal')
     });
     
-    // Load daily balance when employee is selected
-    $('#daily-balance-employee-select').on('change', function() {
-        var employeeId = $(this).val();
-        var selectedMonth = $('#month-filter').val() || '';
-        
-        if (employeeId) {
-            loadDailyBalance(employeeId, selectedMonth);
-        } else {
-            $('#daily-balance-card-row').hide();
-        }
+    $('#deduction_employee_id').select2({
+        theme: 'bootstrap-5',
+        width: '100%',
+        placeholder: '-- هەلبژێرە --',
+        allowClear: true,
+        dir: 'rtl',
+        dropdownParent: $('#addDeductionExpenseModal')
     });
     
-    // Reload daily balance when month filter changes
-    $('#month-filter').on('change', function() {
-        var employeeId = $('#daily-balance-employee-select').val();
-        var selectedMonth = $(this).val() || '';
-        
-        if (employeeId) {
-            loadDailyBalance(employeeId, selectedMonth);
-        }
-        
-        // Also reload balance cards when month filter changes
-        if (window.loadBalances) {
-            window.loadBalances();
-        }
+    $('#update_employee_id').select2({
+        theme: 'bootstrap-5',
+        width: '100%',
+        placeholder: '-- هەلبژێرە --',
+        allowClear: true,
+        dir: 'rtl',
+        dropdownParent: $('#updateExpenseModal')
     });
     
     // Reload balance cards when employee filter changes (Select2)
@@ -697,96 +525,6 @@ $(function() {
             window.loadBalances();
         }
     });
-    
-    // Function to load daily balance
-    function loadDailyBalance(employeeId, month) {
-        var params = {employee_id: employeeId};
-        if (month) {
-            params.month = month;
-        }
-        
-        $.get('../process/employee_payments/get_employee_current_balance.php', params, function(response) {
-            if (response.success) {
-                var data = response.data;
-                
-                // Show the card
-                $('#daily-balance-card-row').show();
-                
-                // Update employee name
-                $('#daily-balance-employee-name').text(data.employee_name || '-');
-                
-                // Update month
-                $('#daily-balance-month').text(data.month || '-');
-                
-                // Update days
-                $('#daily-balance-days-used').text(data.days_used || 0);
-                $('#daily-balance-days-total').text(data.days_in_month || 0);
-                
-                // Update monthly salary
-                if (data.calculation_details && data.calculation_details.monthly_salary) {
-                    $('#daily-balance-monthly-salary').text(data.calculation_details.monthly_salary);
-                } else {
-                    $('#daily-balance-monthly-salary').text(formatCurrency(data.monthly_salary || 0));
-                }
-                
-                // Update daily rate
-                if (data.calculation_details && data.calculation_details.daily_salary_rate) {
-                    $('#daily-balance-daily-rate').text(data.calculation_details.daily_salary_rate);
-                } else {
-                    var dailyRate = data.days_in_month > 0 ? (data.monthly_salary || 0) / data.days_in_month : 0;
-                    $('#daily-balance-daily-rate').text(formatCurrency(dailyRate) + '/ڕۆژ');
-                }
-                
-                // Update earned salary
-                $('#daily-balance-earned-salary').text(formatCurrency(data.total_earned_salary || 0));
-                if (data.calculation_details) {
-                    var earnedDetails = '';
-                    if (data.calculation_details.monthly_salary && data.calculation_details.days_in_month && data.calculation_details.days_used) {
-                        earnedDetails = data.calculation_details.monthly_salary + ' ÷ ' + 
-                                      data.calculation_details.days_in_month + ' × ' + 
-                                      data.calculation_details.days_used + ' = ' + 
-                                      (data.calculation_details.earned_salary || formatCurrency(data.total_earned_salary));
-                    }
-                    $('#daily-balance-earned-details').text(earnedDetails);
-                }
-                
-                // Update advance taken
-                $('#daily-balance-advance-taken').text(formatCurrency(data.total_advance || 0));
-                if (parseFloat(data.total_advance) > 0) {
-                    $('#daily-balance-advance-details').text('پێشەکی بە پێی ڕۆژەکان');
-                } else {
-                    $('#daily-balance-advance-details').text('');
-                }
-                
-                // Update net balance
-                var netBalance = parseFloat(data.net_balance || 0);
-                $('#daily-balance-net-balance').text(formatCurrency(Math.abs(netBalance)));
-                
-                // Update message and card color
-                var netCard = $('#daily-balance-net-card');
-                var message = $('#daily-balance-message');
-                
-                if (netBalance >= 0) {
-                    netCard.removeClass('border-danger').addClass('border-success');
-                    message.removeClass('text-danger').addClass('text-success');
-                    message.html('<i class="fas fa-check-circle me-1"></i>کۆمپانیا قەرزی کارمەندە: ' + formatCurrency(netBalance));
-                } else {
-                    netCard.removeClass('border-success').addClass('border-danger');
-                    message.removeClass('text-success').addClass('text-danger');
-                    message.html('<i class="fas fa-exclamation-circle me-1"></i>کارمەند قەرزی کۆمپانیایە: ' + formatCurrency(Math.abs(netBalance)));
-                }
-            } else {
-                $('#daily-balance-card-row').hide();
-            }
-        }, 'json').fail(function() {
-            $('#daily-balance-card-row').hide();
-        });
-    }
-    
-    // Format currency helper function
-    function formatCurrency(amount) {
-        return new Intl.NumberFormat('en-US').format(parseFloat(amount).toFixed(2)) + ' د.ع';
-    }
 });
 </script>
 </body>
