@@ -53,12 +53,12 @@ try {
     // Prepare base query for summary
     $base_query = "
         SELECT 
-            SUM(CASE WHEN expense_type = 'salary' THEN amount ELSE 0 END) as total_salary,
-            SUM(CASE WHEN expense_type = 'bonus' THEN amount ELSE 0 END) as total_bonus,
-            SUM(CASE WHEN expense_type = 'overtime' THEN amount ELSE 0 END) as total_overtime,
-            SUM(CASE WHEN expense_type = 'advance' THEN amount ELSE 0 END) as total_advance,
-            SUM(CASE WHEN expense_type = 'deduction' THEN amount ELSE 0 END) as total_deduction,
-            SUM(CASE WHEN expense_type = 'penalty' THEN amount ELSE 0 END) as total_penalty,
+            COALESCE(SUM(CASE WHEN expense_type = 'salary' THEN amount ELSE 0 END), 0) as total_salary,
+            COALESCE(SUM(CASE WHEN expense_type = 'bonus' THEN amount ELSE 0 END), 0) as total_bonus,
+            COALESCE(SUM(CASE WHEN expense_type = 'overtime' THEN amount ELSE 0 END), 0) as total_overtime,
+            COALESCE(SUM(CASE WHEN expense_type = 'advance' THEN amount ELSE 0 END), 0) as total_advance,
+            COALESCE(SUM(CASE WHEN expense_type = 'deduction' THEN amount ELSE 0 END), 0) as total_deduction,
+            COALESCE(SUM(CASE WHEN expense_type = 'penalty' THEN amount ELSE 0 END), 0) as total_penalty,
             COUNT(*) as expense_count
         FROM employee_expenses 
         $where_clause
@@ -67,6 +67,11 @@ try {
     $stmt = $pdo->prepare($base_query);
     $stmt->execute($params);
     $summary = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    // Debug: Log the query and results
+    error_log('Summary Query: ' . $base_query);
+    error_log('Summary Params: ' . json_encode($params));
+    error_log('Summary Result: ' . json_encode($summary));
     
     // Get employees for filter dropdown
     $employees_query = "SELECT id, name FROM employees ORDER BY name";
@@ -79,6 +84,7 @@ try {
     $months = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     // Calculate salary balance: salary + bonus + overtime - deduction - penalty - advance
+    // Ensure values are numeric (handle NULL from COALESCE)
     $total_salary = floatval($summary['total_salary'] ?? 0);
     $total_bonus = floatval($summary['total_bonus'] ?? 0);
     $total_overtime = floatval($summary['total_overtime'] ?? 0);
@@ -88,6 +94,9 @@ try {
     
     $total_salary_plus_bonus = $total_salary + $total_bonus;
     $total_salary_balance = $total_salary + $total_bonus + $total_overtime - $total_deduction - $total_penalty - $total_advance;
+    
+    // Debug output
+    error_log('Calculated totals - Salary: ' . $total_salary . ', Bonus: ' . $total_bonus . ', Overtime: ' . $total_overtime);
     
     echo json_encode([
         'success' => true,
