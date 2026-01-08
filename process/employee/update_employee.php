@@ -43,7 +43,8 @@ try {
     $status = trim($_POST['status'] ?? 'active');
 
     // Log parsed variables for debugging
-    error_log("Parsed vars: id='$id', name='$name', mobile='$mobile', role='$role', salary='$salary'");
+    error_log("Parsed vars: id='$id', name='$name', mobile='$mobile', role='$role', salary='$salary', bonus='$bonus', status='$status'");
+    error_log("POST data: " . print_r($_POST, true));
 
     // Validate required fields
     if ($id <= 0) {
@@ -100,6 +101,7 @@ try {
     try {
         $checkColumns = $pdo->query("SHOW COLUMNS FROM employees LIKE 'bonus'");
         $bonusExists = $checkColumns->rowCount() > 0;
+        error_log("Bonus column exists: " . ($bonusExists ? 'YES' : 'NO'));
     } catch (Exception $e) {
         error_log('Error checking bonus column: ' . $e->getMessage());
     }
@@ -107,31 +109,46 @@ try {
     try {
         $checkColumns = $pdo->query("SHOW COLUMNS FROM employees LIKE 'status'");
         $statusExists = $checkColumns->rowCount() > 0;
+        error_log("Status column exists: " . ($statusExists ? 'YES' : 'NO'));
     } catch (Exception $e) {
         error_log('Error checking status column: ' . $e->getMessage());
     }
     
     // Build UPDATE query based on column existence
+    $query = '';
+    $params = [];
+    
     if ($bonusExists && $statusExists) {
-        $stmt = $pdo->prepare('UPDATE employees SET name=?, mobile=?, role=?, salary=?, bonus=?, status=? WHERE id=?');
-        $result = $stmt->execute([$name, $mobile, $role, $salary, $bonus, $status, $id]);
+        $query = 'UPDATE employees SET name=?, mobile=?, role=?, salary=?, bonus=?, status=? WHERE id=?';
+        $params = [$name, $mobile, $role, $salary, $bonus, $status, $id];
+        error_log("Using query with bonus and status");
     } elseif ($bonusExists) {
-        $stmt = $pdo->prepare('UPDATE employees SET name=?, mobile=?, role=?, salary=?, bonus=? WHERE id=?');
-        $result = $stmt->execute([$name, $mobile, $role, $salary, $bonus, $id]);
+        $query = 'UPDATE employees SET name=?, mobile=?, role=?, salary=?, bonus=? WHERE id=?';
+        $params = [$name, $mobile, $role, $salary, $bonus, $id];
+        error_log("Using query with bonus only");
     } elseif ($statusExists) {
-        $stmt = $pdo->prepare('UPDATE employees SET name=?, mobile=?, role=?, salary=?, status=? WHERE id=?');
-        $result = $stmt->execute([$name, $mobile, $role, $salary, $status, $id]);
+        $query = 'UPDATE employees SET name=?, mobile=?, role=?, salary=?, status=? WHERE id=?';
+        $params = [$name, $mobile, $role, $salary, $status, $id];
+        error_log("Using query with status only");
     } else {
-        $stmt = $pdo->prepare('UPDATE employees SET name=?, mobile=?, role=?, salary=? WHERE id=?');
-        $result = $stmt->execute([$name, $mobile, $role, $salary, $id]);
+        $query = 'UPDATE employees SET name=?, mobile=?, role=?, salary=? WHERE id=?';
+        $params = [$name, $mobile, $role, $salary, $id];
+        error_log("Using query without bonus and status");
     }
     
+    error_log("Query: $query");
+    error_log("Params: " . print_r($params, true));
+    
+    $stmt = $pdo->prepare($query);
+    $result = $stmt->execute($params);
+    
     if ($result) {
-        error_log('Employee successfully updated: ID=' . $id . ', Name=' . $name);
+        error_log('Employee successfully updated: ID=' . $id . ', Name=' . $name . ', Bonus=' . $bonus);
         echo json_encode(['success' => true, 'message' => 'کارمەند نوێکرایەوە!']);
     } else {
-        error_log('Failed to update employee: ID=' . $id);
-        echo json_encode(['success' => false, 'message' => 'هەڵە لە نوێکردنەوە!']);
+        $errorInfo = $stmt->errorInfo();
+        error_log('Failed to update employee: ID=' . $id . ', Error: ' . print_r($errorInfo, true));
+        echo json_encode(['success' => false, 'message' => 'هەڵە لە نوێکردنەوە: ' . ($errorInfo[2] ?? 'Unknown error')]);
     }
 
 } catch (PDOException $e) {

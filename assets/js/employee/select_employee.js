@@ -61,11 +61,12 @@ $(function () {
             res.employees.forEach(emp => {
                 const rawSalary = emp.salary;
                 const rawBonus = emp.bonus || 0;
+                const rawStatus = emp.status || 'active'; // Keep original English status for data attribute
                 emp.salary = formatSalary(emp.salary);
                 emp.bonus = formatSalary(rawBonus);
-                emp.status = statusMap[emp.status] || emp.status;
+                emp.status = statusMap[emp.status] || emp.status; // Display Kurdish status in table
                 emp.actions = `
-                    <button class="btn btn-sm btn-primary edit-employee" data-id="${emp.id}" data-name="${emp.name}" data-mobile="${emp.mobile}" data-role="${emp.role}" data-salary="${rawSalary}" data-bonus="${rawBonus}" data-status="${emp.status || 'active'}"><i class="fa fa-edit"></i></button>
+                    <button class="btn btn-sm btn-primary edit-employee" data-id="${emp.id}" data-name="${emp.name}" data-mobile="${emp.mobile}" data-role="${emp.role}" data-salary="${rawSalary}" data-bonus="${rawBonus}" data-status="${rawStatus}"><i class="fa fa-edit"></i></button>
                     <button class="btn btn-sm btn-danger delete-employee" data-id="${emp.id}"><i class="fa fa-trash"></i></button>
                 `;
             });

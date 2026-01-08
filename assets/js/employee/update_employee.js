@@ -7,9 +7,24 @@ $(function() {
         const role = $(this).data('role');
         let salary = $(this).data('salary');
         let bonus = $(this).data('bonus') || 0;
-        const status = $(this).data('status') || 'active';
+        let status = $(this).data('status') || 'active';
+        
+        // Clean salary and bonus values
         salary = String(salary).replace(/[^\d.]/g, '');
         bonus = String(bonus).replace(/[^\d.]/g, '');
+        
+        // Ensure status is in English (not Kurdish)
+        const statusMap = {
+            'چالاک': 'active',
+            'نەچالاک': 'inactive',
+            'لە پشوودا': 'on_leave',
+            'دەستلەکارکێشان': 'resigned'
+        };
+        if (statusMap[status]) {
+            status = statusMap[status];
+        }
+        
+        // Set form values
         $('#edit_employee_id').val(id);
         $('#edit_employee_name').val(name);
         $('#edit_employee_mobile').val(mobile);
@@ -17,6 +32,10 @@ $(function() {
         $('#edit_employee_salary').val(salary);
         $('#edit_employee_bonus').val(bonus);
         $('#edit_employee_status').val(status);
+        
+        // Trigger change event to ensure dropdown updates
+        $('#edit_employee_status').trigger('change');
+        
         $('#editEmployeeModal').modal('show');
     });
     // Multiple submission prevention flag
