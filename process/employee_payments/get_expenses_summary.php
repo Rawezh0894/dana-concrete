@@ -6,14 +6,25 @@ try {
     // Get filter parameters
     $month_filter = $_GET['month'] ?? '';
     $employee_filter = $_GET['employee'] ?? '';
+    $start_date = $_GET['start_date'] ?? '';
+    $end_date = $_GET['end_date'] ?? '';
     
     // Build WHERE conditions
     $where_conditions = [];
     $params = [];
     
-    if ($month_filter) {
-        $where_conditions[] = "expense_date = ?";
-        $params[] = $month_filter;
+    if ($start_date || $end_date) {
+        if ($start_date) {
+            $where_conditions[] = "expense_date >= ?";
+            $params[] = $start_date;
+        }
+        if ($end_date) {
+            $where_conditions[] = "expense_date <= ?";
+            $params[] = $end_date;
+        }
+    } elseif ($month_filter) {
+        $where_conditions[] = "expense_date LIKE ?";
+        $params[] = $month_filter . '%';
     }
     
     if ($employee_filter) {

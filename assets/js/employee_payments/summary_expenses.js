@@ -2,17 +2,21 @@
 function loadSummaryData() {
     const monthFilter = $('#month-filter').val();
     const employeeFilter = $('#employee-filter').val();
-    
+    const startDate = $('#start-date').val();
+    const endDate = $('#end-date').val();
+
     let url = '../process/employee_payments/get_expenses_summary.php';
     const params = new URLSearchParams();
-    
+
+    if (startDate) params.append('start_date', startDate);
+    if (endDate) params.append('end_date', endDate);
     if (monthFilter) params.append('month', monthFilter);
     if (employeeFilter) params.append('employee', employeeFilter);
-    
+
     if (params.toString()) {
         url += '?' + params.toString();
     }
-    
+
     fetch(url)
         .then(response => response.json())
         .then(result => {
@@ -20,21 +24,33 @@ function loadSummaryData() {
                 console.error('Error loading summary:', result.error);
                 return;
             }
-            
-            const data = result.data;
-            
+
+            const data = result.data.summary;
+            const filters = result.data.filters;
+
+            // Calculate compound values
+            const salaryAndBonus = data.total_salary + data.total_bonus;
+            const totalIncome = data.total_salary + data.total_bonus + data.total_overtime;
+            const totalDeductions = data.total_deduction + data.total_penalty;
+            const netPayable = totalIncome - totalDeductions;
+
             // Update summary cards
-            $('#total-salary').text(formatCurrency(data.summary.total_salary));
-            $('#total-bonus').text(formatCurrency(data.summary.total_bonus));
-            $('#total-overtime').text(formatCurrency(data.summary.total_overtime));
-            $('#total-advance').text(formatCurrency(data.summary.total_advance));
-            
+            $('#total-salary').text(formatCurrency(data.total_salary));
+            $('#total-bonus').text(formatCurrency(data.total_bonus));
+            $('#total-salary-bonus').text(formatCurrency(salaryAndBonus));
+            $('#net-payable').text(formatCurrency(netPayable));
+
+            $('#total-advance').text(formatCurrency(data.total_advance));
+            $('#total-deduction').text(formatCurrency(data.total_deduction));
+            $('#total-penalty').text(formatCurrency(data.total_penalty));
+
             // Populate filter dropdowns if not already populated
-            if ($('#month-filter option').length <= 1) {
-                populateMonthFilter(data.filters.months);
+            // Only populate if month filter is empty (first load)
+            if ($('#month-filter option').length <= 1 && filters && filters.months) {
+                populateMonthFilter(filters.months);
             }
-            if ($('#employee-filter option').length <= 1) {
-                populateEmployeeFilter(data.filters.employees);
+            if ($('#employee-filter option').length <= 1 && filters && filters.employees) {
+                populateEmployeeFilter(filters.employees);
             } else {
                 // Re-initialize Select2 if already populated
                 initializeEmployeeSelect2();
@@ -49,7 +65,7 @@ function loadSummaryData() {
 function populateMonthFilter(months) {
     const monthFilter = $('#month-filter');
     monthFilter.find('option:not(:first)').remove();
-    
+
     months.forEach(month => {
         const option = $('<option></option>')
             .val(month.expense_date)
@@ -62,7 +78,7 @@ function populateMonthFilter(months) {
 function initializeEmployeeSelect2() {
     const employeeFilter = $('#employee-filter');
     if (employeeFilter.length === 0) return;
-    
+
     // Destroy existing Select2 if exists
     if (employeeFilter.hasClass('select2-hidden-accessible')) {
         try {
@@ -71,7 +87,7 @@ function initializeEmployeeSelect2() {
             console.log('Error destroying select2:', e);
         }
     }
-    
+
     // Initialize Select2
     employeeFilter.select2({
         theme: 'bootstrap-5',
@@ -86,14 +102,14 @@ function initializeEmployeeSelect2() {
 function populateEmployeeFilter(employees) {
     const employeeFilter = $('#employee-filter');
     employeeFilter.find('option:not(:first)').remove();
-    
+
     employees.forEach(employee => {
         const option = $('<option></option>')
             .val(employee.id)
             .text(employee.name);
         employeeFilter.append(option);
     });
-    
+
     // Initialize Select2 after populating
     initializeEmployeeSelect2();
 }
@@ -106,24 +122,24 @@ function formatCurrency(amount) {
 // Format month display
 function formatMonth(monthString) {
     if (!monthString) return '';
-    
+
     const [year, month] = monthString.split('-');
     const monthNames = [
         'کانوونی دووەم', 'شوبات', 'ئازار', 'نیسان',
         'ئایار', 'حوزەیران', 'تەمموز', 'ئاب',
         'ئەیلوول', 'تشرینی یەکەم', 'تشرینی دووەم', 'کانوونی یەکەم'
     ];
-    
+
     return monthNames[parseInt(month) - 1] + ' ' + year;
 }
 
 // Initialize summary functionality
-$(document).ready(function() {
+$(document).ready(function () {
     // Load initial data
     loadSummaryData();
-    
+
     // Handle filter changes
-    $('#month-filter').on('change', function() {
+    $('#month-filter, #start-date, #end-date').on('change', function () {
         loadSummaryData();
         if (typeof loadExpenses === 'function') {
             loadExpenses();
@@ -132,9 +148,9 @@ $(document).ready(function() {
             loadBalances();
         }
     });
-    
+
     // Handle employee filter change - use Select2 event
-    $(document).on('change', '#employee-filter', function() {
+    $(document).on('change', '#employee-filter', function () {
         loadSummaryData();
         if (typeof loadExpenses === 'function') {
             loadExpenses();

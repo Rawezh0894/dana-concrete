@@ -2,7 +2,7 @@ $(function () {
     function formatMoney(val) {
         return Number(val).toLocaleString('en-US') + ' د.ع';
     }
-    
+
     function loadExpenses() {
         const columns = ['#', 'employee_name', 'expense_type_kurdish', 'amount', 'expense_date', 'notes', 'employee_balance', 'created_at', 'actions'];
         TableController.showLoading('#employeeExpensesTable', columns);
@@ -10,11 +10,15 @@ $(function () {
         // Get filter values
         const monthFilter = $('#month-filter').val();
         const employeeFilter = $('#employee-filter').val();
+        const startDate = $('#start-date').val();
+        const endDate = $('#end-date').val();
 
         // Build query parameters
         const params = new URLSearchParams();
         if (monthFilter) params.append('month', monthFilter);
         if (employeeFilter) params.append('employee', employeeFilter);
+        if (startDate) params.append('start_date', startDate);
+        if (endDate) params.append('end_date', endDate);
 
         const url = '../process/employee_payments/select_expenses.php' + (params.toString() ? '?' + params.toString() : '');
 
@@ -23,16 +27,16 @@ $(function () {
                 TableController.render('#employeeExpensesTable', [], columns);
                 return;
             }
-            
+
             res.forEach((row, index) => {
                 row['#'] = index + 1;
                 row.amount = formatMoney(row.amount);
-                
+
                 // Format employee balance
                 const payable = parseFloat(row.employee_payable_balance || 0);
                 const receivable = parseFloat(row.employee_receivable_balance || 0);
                 const netBalance = payable - receivable;
-                
+
                 let balanceHtml = '';
                 if (payable > 0 || receivable > 0) {
                     balanceHtml = `
@@ -53,7 +57,7 @@ $(function () {
                     balanceHtml = '<span class="text-muted">0 د.ع</span>';
                 }
                 row.employee_balance = balanceHtml;
-                
+
                 row.actions = `
                     <button class="btn btn-sm btn-primary update-expense me-1" data-id="${row.id}" title="نوێکردنەوە">
                         <i class="fa fa-edit"></i>
@@ -63,27 +67,27 @@ $(function () {
                     </button>
                 `;
             });
-            
+
             TableController.renderWithPagination('#employeeExpensesTable', res, columns);
-        }, 'json').fail(function(xhr) {
+        }, 'json').fail(function (xhr) {
             console.error('Error loading expenses:', xhr.responseText);
             TableController.render('#employeeExpensesTable', [], columns);
         });
     }
-    
+
     loadExpenses();
     window.loadExpenses = loadExpenses;
-    
+
     // Reload when filters change (handle both regular select and Select2)
-    $('#month-filter').on('change', function() {
+    $('#month-filter').on('change', function () {
         loadExpenses();
     });
-    
+
     // Handle Select2 change event for employee filter
-    $(document).on('change', '#employee-filter', function() {
+    $(document).on('change', '#employee-filter', function () {
         loadExpenses();
     });
-    
+
     // Make loadExpenses available globally
     window.loadExpenses = loadExpenses;
 });

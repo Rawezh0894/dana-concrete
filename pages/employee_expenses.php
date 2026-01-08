@@ -69,18 +69,86 @@ if ($bonusExists) {
     
     
     <!-- Filters -->
+    <!-- Filters -->
     <div class="row mb-4">
-        <div class="col-md-6 mb-3">
+        <div class="col-md-3 mb-3">
             <label for="month-filter" class="form-label">فلتەر بە مانگ:</label>
             <select class="form-select" id="month-filter">
                 <option value="">هەموو مانگەکان</option>
             </select>
         </div>
-        <div class="col-md-6 mb-3">
+        <div class="col-md-3 mb-3">
+            <label for="start-date" class="form-label">لە بەرواری:</label>
+            <input type="date" class="form-control" id="start-date">
+        </div>
+        <div class="col-md-3 mb-3">
+            <label for="end-date" class="form-label">بۆ بەرواری:</label>
+            <input type="date" class="form-control" id="end-date">
+        </div>
+        <div class="col-md-3 mb-3">
             <label for="employee-filter" class="form-label">فلتەر بە کارمەند:</label>
             <select class="form-select" id="employee-filter">
                 <option value="">هەموو کارمەندەکان</option>
             </select>
+        </div>
+    </div>
+    
+    <!-- Summary Cards -->
+    <div class="row g-3 mb-4 text-center">
+        <!-- Income Cards -->
+        <div class="col-md-3">
+            <div class="card p-3 shadow-sm border-0 d-flex flex-column align-items-center justify-content-center h-100" style="background: linear-gradient(135deg, #e3f2fd, #bbdefb);">
+                <i class="fas fa-money-bill-wave fa-2x mb-2 text-primary"></i>
+                <h6 class="text-muted fw-bold">کۆی مووچە</h6>
+                <h4 id="total-salary" class="mb-0 text-primary">0 د.ع</h4>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card p-3 shadow-sm border-0 d-flex flex-column align-items-center justify-content-center h-100" style="background: linear-gradient(135deg, #f3e5f5, #e1bee7);">
+                <i class="fas fa-gift fa-2x mb-2 text-purple" style="color: #9c27b0;"></i>
+                <h6 class="text-muted fw-bold">کۆی بەخشیش</h6>
+                <h4 id="total-bonus" class="mb-0" style="color: #9c27b0;">0 د.ع</h4>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card p-3 shadow-sm border-0 d-flex flex-column align-items-center justify-content-center h-100" style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9);">
+                <i class="fas fa-coins fa-2x mb-2 text-success"></i>
+                <h6 class="text-muted fw-bold">مووچە + بەخشیش</h6>
+                <h4 id="total-salary-bonus" class="mb-0 text-success">0 د.ع</h4>
+            </div>
+        </div>
+        
+        <!-- Net Balance Card -->
+        <div class="col-md-3">
+            <div class="card p-3 shadow-sm border-0 d-flex flex-column align-items-center justify-content-center h-100" style="background: linear-gradient(135deg, #fff3e0, #ffe0b2);">
+                <i class="fas fa-balance-scale fa-2x mb-2 text-warning"></i>
+                <h6 class="text-muted fw-bold">باڵانسی مووچە (Net Pay)</h6>
+                <h4 id="net-payable" class="mb-0 text-warning">0 د.ع</h4>
+                 <small class="text-muted" style="font-size: 0.7rem;">(مووچە+بەخشیش+کاروان) - (سزا+کەمکردنەوە)</small>
+            </div>
+        </div>
+        
+        <!-- Deduction Cards -->
+        <div class="col-md-4">
+             <div class="card p-3 shadow-sm border-0 d-flex flex-column align-items-center justify-content-center h-100" style="background: #ffebee;">
+                <i class="fas fa-hand-holding-usd fa-2x mb-2 text-danger"></i>
+                <h6 class="text-muted fw-bold">پێشەکی / قەرز</h6>
+                <h4 id="total-advance" class="mb-0 text-danger">0 د.ع</h4>
+            </div>
+        </div>
+        <div class="col-md-4">
+             <div class="card p-3 shadow-sm border-0 d-flex flex-column align-items-center justify-content-center h-100" style="background: #ffebee;">
+                <i class="fas fa-minus-circle fa-2x mb-2 text-danger"></i>
+                <h6 class="text-muted fw-bold">کەمکردنەوە</h6>
+                <h4 id="total-deduction" class="mb-0 text-danger">0 د.ع</h4>
+            </div>
+        </div>
+        <div class="col-md-4">
+             <div class="card p-3 shadow-sm border-0 d-flex flex-column align-items-center justify-content-center h-100" style="background: #ffebee;">
+                <i class="fas fa-gavel fa-2x mb-2 text-danger"></i>
+                <h6 class="text-muted fw-bold">سزا</h6>
+                <h4 id="total-penalty" class="mb-0 text-danger">0 د.ع</h4>
+            </div>
         </div>
     </div>
     
