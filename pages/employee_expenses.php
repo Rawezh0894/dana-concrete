@@ -14,7 +14,20 @@ if (!hasPermission('view_employee_payment')) {
     exit;
 }
 // Fetch employees for dropdown
-$employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')->fetchAll(PDO::FETCH_ASSOC);
+// Check if bonus column exists
+$bonusExists = false;
+try {
+    $checkColumns = $pdo->query("SHOW COLUMNS FROM employees LIKE 'bonus'");
+    $bonusExists = $checkColumns->rowCount() > 0;
+} catch (Exception $e) {
+    // Column doesn't exist
+}
+
+if ($bonusExists) {
+    $employees = $pdo->query('SELECT id, name, salary, COALESCE(bonus, 0) as bonus FROM employees ORDER BY name')->fetchAll(PDO::FETCH_ASSOC);
+} else {
+    $employees = $pdo->query('SELECT id, name, salary, 0 as bonus FROM employees ORDER BY name')->fetchAll(PDO::FETCH_ASSOC);
+}
 ?>
 <!DOCTYPE html>
 <html lang="ku">
@@ -274,7 +287,7 @@ $employees = $pdo->query('SELECT id, name, salary FROM employees ORDER BY name')
             <select class="form-select" id="income_employee_id" name="employee_id" required>
               <option value="">-- هەلبژێرە --</option>
               <?php foreach($employees as $emp): ?>
-                <option value="<?= $emp['id'] ?>" data-salary="<?= $emp['salary'] ?>"><?= htmlspecialchars($emp['name']) ?></option>
+                <option value="<?= $emp['id'] ?>" data-salary="<?= $emp['salary'] ?>" data-bonus="<?= $emp['bonus'] ?? 0 ?>"><?= htmlspecialchars($emp['name']) ?></option>
               <?php endforeach; ?>
             </select>
             <small class="form-text text-muted" id="income-employee-balance-info" style="display: none;"></small>
@@ -465,11 +478,13 @@ $(function() {
     
     $('#income_salary, #income_bonus, #income_overtime').on('input change', calcIncomeTotal);
     
-    // Auto-fill salary in Income Expense Modal and show balance
+    // Auto-fill salary and bonus in Income Expense Modal and show balance
     $('#income_employee_id').on('change', function() {
         var employeeId = $(this).val();
         var salary = $(this).find('option:selected').data('salary') || '';
+        var bonus = $(this).find('option:selected').data('bonus') || 0;
         $('#income_salary').val(salary);
+        $('#income_bonus').val(bonus);
         calcIncomeTotal();
         
         // Load and display employee balance with daily calculation
