@@ -505,15 +505,16 @@ $(function() {
                     var balanceInfo = $('#income-employee-balance-info');
                     var data = response.data;
                     var existingText = balanceInfo.html() || '';
-                    var overtimeText = '<div class="small mt-2">';
+                    var overtimeText = '<div class="small mt-2 border-top pt-2">';
                     overtimeText += '<strong>کاروانحیسابی:</strong><br>';
-                    overtimeText += 'کۆی مەتر (میکسەر): ' + data.mixer_total_meter.toFixed(2) + ' م³<br>';
-                    if (data.pump_total_meter > 0) {
-                        overtimeText += 'کۆی مەتر (پەمپ): ' + data.pump_total_meter.toFixed(2) + ' م³<br>';
+                    overtimeText += 'ژمارەی پسوڵە (میکسەر): ' + (data.mixer_receipt_count || 0) + '<br>';
+                    if ((data.pump_receipt_count || 0) > 0) {
+                        overtimeText += 'ژمارەی پسوڵە (پەمپ): ' + (data.pump_receipt_count || 0) + '<br>';
                     }
-                    overtimeText += 'کۆی گشتی: ' + data.total_meter.toFixed(2) + ' م³<br>';
-                    overtimeText += 'نرخی کاروانحیسابی: ' + data.overtime_rate.toLocaleString('en-US') + ' د.ع/م³<br>';
-                    overtimeText += '<strong>کۆی کاروانحیسابی: ' + overtimeAmount.toLocaleString('en-US') + ' د.ع</strong>';
+                    overtimeText += 'کۆی گشتی پسوڵەکان: ' + (data.total_receipts || 0) + '<br>';
+                    overtimeText += 'کۆی گشتی مەتر: ' + parseFloat(data.total_meter || 0).toFixed(2) + ' م³<br>';
+                    overtimeText += 'نرخی کاروانحیسابی: ' + parseFloat(data.overtime_rate || 0).toLocaleString('en-US') + ' د.ع/پسوڵە<br>';
+                    overtimeText += '<strong>کۆی کاروانحیسابی: ' + (data.total_receipts || 0) + ' × ' + parseFloat(data.overtime_rate || 0).toLocaleString('en-US') + ' = ' + overtimeAmount.toLocaleString('en-US') + ' د.ع</strong>';
                     overtimeText += '</div>';
                     
                     if (existingText) {
@@ -522,11 +523,13 @@ $(function() {
                         balanceInfo.html(overtimeText).show();
                     }
                 } else {
-                    // If error, set overtime to 0
+                    // If error, set overtime to 0 and log error
+                    console.error('Error loading overtime:', response.message || 'Unknown error');
                     $('#income_overtime').val(0);
                     calcIncomeTotal();
                 }
-            }, 'json').fail(function() {
+            }, 'json').fail(function(xhr, status, error) {
+                console.error('AJAX Error loading overtime:', status, error, xhr.responseText);
                 $('#income_overtime').val(0);
                 calcIncomeTotal();
             });

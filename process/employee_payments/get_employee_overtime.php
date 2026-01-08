@@ -37,42 +37,58 @@ try {
     
     $employee_name = $employee['name'];
     
-    // Build date filter for month
+    // Build date filter for month (using created_at field)
     $dateFilter = '';
     $params = [];
     if ($month && preg_match('/^\d{4}-\d{2}$/', $month)) {
-        $dateFilter = "AND DATE_FORMAT(date, '%Y-%m') = ?";
+        $dateFilter = "AND DATE_FORMAT(created_at, '%Y-%m') = ?";
         $params[] = $month;
     }
     
-    // Get total meter amount for this employee as mixer driver
-    $query = "SELECT COALESCE(SUM(meter_amount), 0) as total_meter 
+    // Get count of receipts for this employee as mixer driver
+    $query = "SELECT COUNT(*) as receipt_count 
               FROM concrete_receipts 
               WHERE mixer_driver_id = ? $dateFilter";
     $stmt = $pdo->prepare($query);
     $stmt->execute(array_merge([$employee_id], $params));
     $mixer_result = $stmt->fetch(PDO::FETCH_ASSOC);
-    $mixer_total = floatval($mixer_result['total_meter'] ?? 0);
+    $mixer_count = intval($mixer_result['receipt_count'] ?? 0);
     
-    // Get total meter amount for this employee as pump driver
-    $query = "SELECT COALESCE(SUM(meter_amount), 0) as total_meter 
+    // Get count of receipts for this employee as pump driver
+    $query = "SELECT COUNT(*) as receipt_count 
               FROM concrete_receipts 
               WHERE pump_driver_id = ? AND pump_driver_id IS NOT NULL $dateFilter";
     $stmt = $pdo->prepare($query);
     $stmt->execute(array_merge([$employee_id], $params));
     $pump_result = $stmt->fetch(PDO::FETCH_ASSOC);
-    $pump_total = floatval($pump_result['total_meter'] ?? 0);
+    $pump_count = intval($pump_result['receipt_count'] ?? 0);
     
-    // Total meter amount (mixer + pump)
-    $total_meter = $mixer_total + $pump_total;
+    // Total receipt count (mixer + pump)
+    // Note: If employee is both mixer and pump driver for same receipt, count only once
+    $query = "SELECT COUNT(DISTINCT id) as total_receipts 
+              FROM concrete_receipts 
+              WHERE (mixer_driver_id = ? OR pump_driver_id = ?) $dateFilter";
+    $stmt = $pdo->prepare($query);
+    $stmt->execute(array_merge([$employee_id, $employee_id], $params));
+    $total_result = $stmt->fetch(PDO::FETCH_ASSOC);
+    $total_receipts = intval($total_result['total_receipts'] ?? 0);
+    
+    // Also get total meter for display
+    $query = "SELECT COALESCE(SUM(meter_amount), 0) as total_meter 
+              FROM concrete_receipts 
+              WHERE (mixer_driver_id = ? OR pump_driver_id = ?) $dateFilter";
+    $stmt = $pdo->prepare($query);
+    $stmt->execute(array_merge([$employee_id, $employee_id], $params));
+    $meter_result = $stmt->fetch(PDO::FETCH_ASSOC);
+    $total_meter = floatval($meter_result['total_meter'] ?? 0);
     
     // Get overtime rate from settings
     $stmt = $pdo->query("SELECT value FROM settings WHERE name = 'overtime_rate'");
     $setting = $stmt->fetch(PDO::FETCH_ASSOC);
     $overtime_rate = floatval($setting['value'] ?? 0);
     
-    // Calculate overtime amount
-    $overtime_amount = $total_meter * $overtime_rate;
+    // Calculate overtime amount: receipt count × overtime rate
+    $overtime_amount = $total_receipts * $overtime_rate;
     
     echo json_encode([
         'success' => true,
@@ -80,8 +96,9 @@ try {
             'employee_id' => $employee_id,
             'employee_name' => $employee_name,
             'month' => $month,
-            'mixer_total_meter' => $mixer_total,
-            'pump_total_meter' => $pump_total,
+            'mixer_receipt_count' => $mixer_count,
+            'pump_receipt_count' => $pump_count,
+            'total_receipts' => $total_receipts,
             'total_meter' => $total_meter,
             'overtime_rate' => $overtime_rate,
             'overtime_amount' => $overtime_amount
