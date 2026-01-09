@@ -99,39 +99,15 @@ if (!hasPermission('view_employee')) {
             </div>
         </div>
     </div>
-    <!-- Role Filter -->
-    <div class="row mb-3">
-        <div class="col-md-12">
-            <label for="filter_role" class="form-label">فیلتەر بە ڕۆڵ</label>
-            <select class="form-select" id="filter_role" name="filter_role[]" multiple data-placeholder="هەموو ڕۆڵەکان">
-                <option value="حەرەس(پاسەوان)">حەرەس(پاسەوان)</option>
-                <option value="شۆفێری میکسەر">شۆفێری میکسەر</option>
-                <option value="شۆفێری پەمپ">شۆفێری پەمپ</option>
-                <option value="مساعید پەمپ">مساعید پەمپ</option>
-                <option value="مەسوول سایەق">مەسوول سایەق</option>
-                <option value="جۆکەر">جۆکەر</option>
-                <option value="سێنتڕاڵ">سێنتڕاڵ</option>
-                <option value="فیتەر">فیتەر</option>
-                <option value="مساعید مەعمەل">مساعید مەعمەل</option>
-                <option value="شێف (چێشتلێنەر)">شێف (چێشتلێنەر)</option>
-                <option value="بەڕێوەبەر">بەڕێوەبەر</option>
-                <option value="ژمێریار">ژمێریار</option>
-                <option value="وەکیل">وەکیل</option>
-                <option value="سایەق شۆفڵ">سایەق شۆفڵ</option>
-                <option value="موکەعيب">موکەعەب چی</option>
-            </select>
-            <small class="form-text text-muted">بۆ هەڵبژاردنی چەند ڕۆڵ، دوگمەی Ctrl (Windows) یان Cmd (Mac) بگرە و کلیک بکە</small>
-        </div>
-    </div>
     <!-- Role Statistics Cards -->
     <div class="row mb-4" id="role_stats_cards">
         <!-- Role cards will be dynamically generated here -->
     </div>
-    <!-- Role Filter -->
+    <!-- Role Filters -->
     <div class="row mb-3">
-        <div class="col-md-12">
-            <label for="filter_role" class="form-label">فیلتەر بە ڕۆڵ</label>
-            <select class="form-select" id="filter_role" name="filter_role[]" multiple data-placeholder="هەموو ڕۆڵەکان">
+        <div class="col-md-6">
+            <label for="filter_role_1" class="form-label">فیلتەر بە ڕۆڵ (یەکەم)</label>
+            <select class="form-select" id="filter_role_1" name="filter_role_1[]" multiple data-placeholder="هەموو ڕۆڵەکان">
                 <option value="حەرەس(پاسەوان)">حەرەس(پاسەوان)</option>
                 <option value="شۆفێری میکسەر">شۆفێری میکسەر</option>
                 <option value="شۆفێری پەمپ">شۆفێری پەمپ</option>
@@ -148,7 +124,28 @@ if (!hasPermission('view_employee')) {
                 <option value="سایەق شۆفڵ">سایەق شۆفڵ</option>
                 <option value="موکەعيب">موکەعەب چی</option>
             </select>
-            <small class="form-text text-muted">بۆ هەڵبژاردنی چەند ڕۆڵ، دوگمەی Ctrl (Windows) یان Cmd (Mac) بگرە و کلیک بکە</small>
+            <small class="form-text text-muted">بۆ هەڵبژاردنی چەند ڕۆڵ</small>
+        </div>
+        <div class="col-md-6">
+            <label for="filter_role_2" class="form-label">فیلتەر بە ڕۆڵ (دووەم)</label>
+            <select class="form-select" id="filter_role_2" name="filter_role_2[]" multiple data-placeholder="هەموو ڕۆڵەکان">
+                <option value="حەرەس(پاسەوان)">حەرەس(پاسەوان)</option>
+                <option value="شۆفێری میکسەر">شۆفێری میکسەر</option>
+                <option value="شۆفێری پەمپ">شۆفێری پەمپ</option>
+                <option value="مساعید پەمپ">مساعید پەمپ</option>
+                <option value="مەسوول سایەق">مەسوول سایەق</option>
+                <option value="جۆکەر">جۆکەر</option>
+                <option value="سێنتڕاڵ">سێنتڕاڵ</option>
+                <option value="فیتەر">فیتەر</option>
+                <option value="مساعید مەعمەل">مساعید مەعمەل</option>
+                <option value="شێف (چێشتلێنەر)">شێف (چێشتلێنەر)</option>
+                <option value="بەڕێوەبەر">بەڕێوەبەر</option>
+                <option value="ژمێریار">ژمێریار</option>
+                <option value="وەکیل">وەکیل</option>
+                <option value="سایەق شۆفڵ">سایەق شۆفڵ</option>
+                <option value="موکەعيب">موکەعەب چی</option>
+            </select>
+            <small class="form-text text-muted">بۆ هەڵبژاردنی چەند ڕۆڵ</small>
         </div>
     </div>
     <!-- Role Statistics Cards -->
