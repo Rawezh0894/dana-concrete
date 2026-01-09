@@ -972,50 +972,63 @@ try {
         }
     }
     
-    // Get all employees with role "شۆفێری میکسەر"
+    // Get all employees with role "شۆفێری میکسەر" (same as get_expenses_summary.php)
     $mixer_driver_ids = [];
     try {
-        $stmt = $pdo->query("SELECT id FROM employees WHERE role LIKE '%شۆفێری میکسەر%'");
+        // Check if status column exists
+        $status_exists = false;
+        try {
+            $check_status = $pdo->query("SHOW COLUMNS FROM employees LIKE 'status'");
+            $status_exists = $check_status->rowCount() > 0;
+        } catch (Exception $e) {}
+        
+        $emp_sql = "SELECT id FROM employees WHERE role LIKE '%شۆفێری میکسەر%'";
+        if ($status_exists) {
+            $emp_sql .= " AND status = 'active'";
+        }
+        
+        $stmt = $pdo->query($emp_sql);
         $mixer_drivers = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $mixer_driver_ids = array_column($mixer_drivers, 'id');
     } catch (Exception $e) {
         error_log("Error getting mixer drivers: " . $e->getMessage());
     }
     
-    // Calculate total overtime from concrete_receipts
+    // Calculate total overtime from concrete_receipts (same method as get_expenses_summary.php)
     $caravan_hisabi_iqd = 0;
     if (!empty($mixer_driver_ids)) {
         $placeholders = implode(',', array_fill(0, count($mixer_driver_ids), '?'));
         
         try {
-            // Count distinct receipts (mixer + pump) for mixer drivers
-            $overtime_sql = "SELECT COUNT(DISTINCT id) as count 
+            // Use COALESCE to fallback to created_at date if date column is NULL (same as get_expenses_summary.php)
+            // Only count mixer_driver_id (not pump_driver_id) - same as get_expenses_summary.php
+            $overtime_sql = "SELECT COUNT(*) as count 
                            FROM concrete_receipts 
-                           WHERE (mixer_driver_id IN ($placeholders) OR pump_driver_id IN ($placeholders))
-                           $caravan_hisabi_date_condition";
+                           WHERE mixer_driver_id IN ($placeholders)
+                           AND COALESCE(`date`, DATE(created_at)) BETWEEN ? AND ?";
             
-            $overtime_params = array_merge($mixer_driver_ids, $mixer_driver_ids, $caravan_hisabi_date_params);
+            $overtime_params = array_merge($mixer_driver_ids, $caravan_hisabi_date_params);
             
             $stmt = $pdo->prepare($overtime_sql);
             $stmt->execute($overtime_params);
             $overtime_result = $stmt->fetch(PDO::FETCH_ASSOC);
             $receipt_count = intval($overtime_result['count'] ?? 0);
             
-            // Calculate overtime amount: receipt count × overtime rate
+            // Calculate overtime amount: receipt count × overtime rate (same as get_expenses_summary.php)
             $caravan_hisabi_iqd = $receipt_count * $overtime_rate;
         } catch (Exception $e) {
             error_log("Error calculating caravan hisabi: " . $e->getMessage());
-            // Fallback: try with created_at only
+            // Fallback: try with created_at only (same as get_expenses_summary.php)
             try {
-                $overtime_sql = "SELECT COUNT(DISTINCT id) as count 
+                $overtime_sql = "SELECT COUNT(*) as count 
                                FROM concrete_receipts 
-                               WHERE (mixer_driver_id IN ($placeholders) OR pump_driver_id IN ($placeholders))
+                               WHERE mixer_driver_id IN ($placeholders)
                                AND created_at BETWEEN ? AND ?";
                 
                 $date_start = $caravan_hisabi_date_params[0] . ' 00:00:00';
                 $date_end = (count($caravan_hisabi_date_params) > 1 ? $caravan_hisabi_date_params[1] : $caravan_hisabi_date_params[0]) . ' 23:59:59';
                 
-                $overtime_params = array_merge($mixer_driver_ids, $mixer_driver_ids, [$date_start, $date_end]);
+                $overtime_params = array_merge($mixer_driver_ids, [$date_start, $date_end]);
                 
                 $stmt = $pdo->prepare($overtime_sql);
                 $stmt->execute($overtime_params);
@@ -1030,7 +1043,15 @@ try {
     }
     
     // Convert IQD to USD
+    // usd_iqd_rate is the rate for 100 dollars, so we need to divide by 100 to get rate per dollar
+    // Formula: amount_iqd / (usd_iqd_rate / 100) = amount_iqd / (rate_for_100_dollars / 100)
+    // Example: 555000 / (146500 / 100) = 555000 / 1465 = 378.83 USD
     $caravan_hisabi_usd = ($usd_iqd_rate > 0) ? ($caravan_hisabi_iqd / ($usd_iqd_rate / 100)) : 0;
+    
+    // Debug: Log caravan hisabi calculation
+    error_log("Debug - Caravan Hisabi: iqd=" . $caravan_hisabi_iqd . 
+              ", usd_rate=" . $usd_iqd_rate . 
+              ", usd=" . $caravan_hisabi_usd);
 
     // Debug: Log key variables
     error_log("Debug - Key variables: customer_debt_total_usd=" . $customer_debt_total_usd . 
