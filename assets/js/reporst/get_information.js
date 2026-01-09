@@ -469,40 +469,119 @@ function renderDashboardCards(data) {
 
     console.log('Cards array created:', cards);
 
-    let html = '';
-    cards.forEach(card => {
-        // Add click handler for company_debt_payments cards (both USD and IQD)
-        let clickHandler = '';
-        let cursorStyle = '';
+    // Categorize cards by section
+    const cardCategories = {
+        summary: [
+            'usd_rate',
+            'sales',
+            'purchases',
+            'total_expenses',
+            'gas_income'
+        ],
+        sales: [
+            'sales',
+            'cash_sales_usd',
+            'cash_sales_iqd',
+            'sales_discounts'
+        ],
+        purchases: [
+            'purchases',
+            'purchases_iqd',
+            'purchase_materials'
+        ],
+        debts: [
+            'customer',
+            'customer_debt_received_usd',
+            'customer_debt_received_iqd',
+            'customer_debt_discounts',
+            'company',
+            'company_debt_payments_usd',
+            'company_debt_payments_iqd',
+            'person',
+            'person_debt_payments'
+        ],
+        expenses: [
+            'total_expenses',
+            'other_expenses',
+            'purchase_materials'
+        ],
+        employees: [
+            'employee_expenses',
+            'employee_total_fixed'
+        ],
+        materials: [
+            'black_sand_consumption',
+            'brown_sand_consumption',
+            'gravel_bin3_consumption',
+            'gravel_bin4_consumption',
+            'cement_cem1_consumption',
+            'cement_cem2_consumption',
+            'additive_consumption',
+            'black_sand_cost',
+            'brown_sand_cost',
+            'gravel_bin3_cost',
+            'gravel_bin4_cost',
+            'cement_cem1_cost',
+            'cement_cem2_cost',
+            'additive_cost',
+            'total_material_usage_cost'
+        ],
+        stock: [
+            'black_sand_stock',
+            'brown_sand_stock',
+            'cement_stock'
+        ]
+    };
 
-        if (card.key === 'company_debt_payments_usd' || card.key === 'company_debt_payments_iqd') {
-            clickHandler = 'onclick="showCompanyDebtPaymentsDetails()"';
-            cursorStyle = 'style="cursor: pointer;"';
-        } else if (card.key === 'person_debt_payments') {
-            clickHandler = 'onclick="showPersonDebtPaymentsDetails()"';
-            cursorStyle = 'style="cursor: pointer;"';
+    // Function to render cards for a specific category
+    function renderCardsForCategory(category, containerId) {
+        const categoryKeys = cardCategories[category] || [];
+        const categoryCards = cards.filter(card => categoryKeys.includes(card.key));
+        
+        let html = '';
+        categoryCards.forEach(card => {
+            // Add click handler for company_debt_payments cards (both USD and IQD)
+            let clickHandler = '';
+            let cursorStyle = '';
+
+            if (card.key === 'company_debt_payments_usd' || card.key === 'company_debt_payments_iqd') {
+                clickHandler = 'onclick="showCompanyDebtPaymentsDetails()"';
+                cursorStyle = 'style="cursor: pointer;"';
+            } else if (card.key === 'person_debt_payments') {
+                clickHandler = 'onclick="showPersonDebtPaymentsDetails()"';
+                cursorStyle = 'style="cursor: pointer;"';
+            }
+
+            html += `<div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                <div class="report-card ${card.cardClass}" ${clickHandler} ${cursorStyle}>
+                    <i class="fa ${card.icon}"></i>
+                    <div class="card-title">${card.label}</div>
+                    <div class="card-value">${card.value}</div>
+                    <div class="section-label">${card.subtitle}</div>
+                </div>
+            </div>`;
+        });
+
+        const targetElement = document.getElementById(containerId);
+        if (targetElement) {
+            targetElement.innerHTML = html;
+            console.log(`Cards rendered for ${category} category`);
+        } else {
+            console.error(`Target element ${containerId} not found`);
         }
-
-        html += `<div class="col-lg-3 col-md-4 col-sm-6 mb-3">
-            <div class="report-card ${card.cardClass}" ${clickHandler} ${cursorStyle}>
-                <i class="fa ${card.icon}"></i>
-                <div class="card-title">${card.label}</div>
-                <div class="card-value">${card.value}</div>
-                <div class="section-label">${card.subtitle}</div>
-            </div>
-        </div>`;
-    });
-
-    console.log('HTML generated:', html);
-    console.log('Target element:', document.getElementById('dashboard-summary-cards'));
-
-    const targetElement = document.getElementById('dashboard-summary-cards');
-    if (targetElement) {
-        targetElement.innerHTML = html;
-        console.log('Cards rendered successfully');
-    } else {
-        console.error('Target element dashboard-summary-cards not found');
     }
+
+    // Render cards for each category
+    renderCardsForCategory('summary', 'summary-cards');
+    renderCardsForCategory('sales', 'sales-cards');
+    renderCardsForCategory('purchases', 'purchases-cards');
+    renderCardsForCategory('debts', 'debts-cards');
+    renderCardsForCategory('expenses', 'expenses-cards');
+    renderCardsForCategory('employees', 'employees-cards');
+    renderCardsForCategory('materials', 'materials-cards');
+    renderCardsForCategory('stock', 'stock-cards');
+    
+    console.log('All cards rendered successfully');
 }
 
 document.addEventListener('DOMContentLoaded', function () {

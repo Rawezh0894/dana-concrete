@@ -351,6 +351,62 @@ if (!isset($_SESSION['user_id'])) {
             opacity: 0.9;
         }
 
+        /* Report Tabs Styles */
+        .report-tabs-container {
+            background: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .report-tabs {
+            border-bottom: 2px solid #e9ecef;
+            flex-wrap: wrap;
+        }
+        
+        .report-tabs .nav-link {
+            color: #6c757d;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            margin: 0 0.25rem;
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .report-tabs .nav-link:hover {
+            color: var(--seafoam-green);
+            background: #f8f9fa;
+            border-bottom-color: rgba(0, 123, 255, 0.3);
+        }
+        
+        .report-tabs .nav-link.active {
+            color: var(--seafoam-green);
+            background: linear-gradient(135deg, #f0f8ff, #ffffff);
+            border-bottom-color: var(--seafoam-green);
+            font-weight: bold;
+        }
+        
+        .tab-content {
+            margin-top: 1rem;
+        }
+        
+        .tab-pane {
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
         
         /* Chart Section Styles */
         .chart-section {
@@ -527,8 +583,109 @@ if (!isset($_SESSION['user_id'])) {
         </div>
       </div>
     </div>
-    <div class="row" id="dashboard-summary-cards" style="margin-bottom:2rem;">
-        <!-- Cards will be rendered here by JS -->
+    <!-- Report Tabs Navigation -->
+    <div class="report-tabs-container mb-4">
+        <ul class="nav nav-tabs report-tabs" id="reportTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary-pane" type="button" role="tab" aria-controls="summary-pane" aria-selected="true">
+                    <i class="fas fa-chart-line me-2"></i>کورتەی گشتی
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="sales-tab" data-bs-toggle="tab" data-bs-target="#sales-pane" type="button" role="tab" aria-controls="sales-pane" aria-selected="false">
+                    <i class="fas fa-cash-register me-2"></i>فرۆشتن
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="purchases-tab" data-bs-toggle="tab" data-bs-target="#purchases-pane" type="button" role="tab" aria-controls="purchases-pane" aria-selected="false">
+                    <i class="fas fa-cart-plus me-2"></i>کڕین
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="debts-tab" data-bs-toggle="tab" data-bs-target="#debts-pane" type="button" role="tab" aria-controls="debts-pane" aria-selected="false">
+                    <i class="fas fa-handshake me-2"></i>قەرزەکان
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="expenses-tab" data-bs-toggle="tab" data-bs-target="#expenses-pane" type="button" role="tab" aria-controls="expenses-pane" aria-selected="false">
+                    <i class="fas fa-money-bill-wave me-2"></i>خەرجی
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="employees-tab" data-bs-toggle="tab" data-bs-target="#employees-pane" type="button" role="tab" aria-controls="employees-pane" aria-selected="false">
+                    <i class="fas fa-users me-2"></i>کارمەند
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="materials-tab" data-bs-toggle="tab" data-bs-target="#materials-pane" type="button" role="tab" aria-controls="materials-pane" aria-selected="false">
+                    <i class="fas fa-cubes me-2"></i>مەواد
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="stock-tab" data-bs-toggle="tab" data-bs-target="#stock-pane" type="button" role="tab" aria-controls="stock-pane" aria-selected="false">
+                    <i class="fas fa-warehouse me-2"></i>کۆگا
+                </button>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="reportTabContent">
+        <!-- Summary Tab -->
+        <div class="tab-pane fade show active" id="summary-pane" role="tabpanel" aria-labelledby="summary-tab">
+            <div class="row" id="summary-cards">
+                <!-- Summary cards will be rendered here by JS -->
+            </div>
+        </div>
+        
+        <!-- Sales Tab -->
+        <div class="tab-pane fade" id="sales-pane" role="tabpanel" aria-labelledby="sales-tab">
+            <div class="row" id="sales-cards">
+                <!-- Sales cards will be rendered here by JS -->
+            </div>
+        </div>
+        
+        <!-- Purchases Tab -->
+        <div class="tab-pane fade" id="purchases-pane" role="tabpanel" aria-labelledby="purchases-tab">
+            <div class="row" id="purchases-cards">
+                <!-- Purchases cards will be rendered here by JS -->
+            </div>
+        </div>
+        
+        <!-- Debts Tab -->
+        <div class="tab-pane fade" id="debts-pane" role="tabpanel" aria-labelledby="debts-tab">
+            <div class="row" id="debts-cards">
+                <!-- Debts cards will be rendered here by JS -->
+            </div>
+        </div>
+        
+        <!-- Expenses Tab -->
+        <div class="tab-pane fade" id="expenses-pane" role="tabpanel" aria-labelledby="expenses-tab">
+            <div class="row" id="expenses-cards">
+                <!-- Expenses cards will be rendered here by JS -->
+            </div>
+        </div>
+        
+        <!-- Employees Tab -->
+        <div class="tab-pane fade" id="employees-pane" role="tabpanel" aria-labelledby="employees-tab">
+            <div class="row" id="employees-cards">
+                <!-- Employees cards will be rendered here by JS -->
+            </div>
+        </div>
+        
+        <!-- Materials Tab -->
+        <div class="tab-pane fade" id="materials-pane" role="tabpanel" aria-labelledby="materials-tab">
+            <div class="row" id="materials-cards">
+                <!-- Materials cards will be rendered here by JS -->
+            </div>
+        </div>
+        
+        <!-- Stock Tab -->
+        <div class="tab-pane fade" id="stock-pane" role="tabpanel" aria-labelledby="stock-tab">
+            <div class="row" id="stock-cards">
+                <!-- Stock cards will be rendered here by JS -->
+            </div>
+        </div>
     </div>
     
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
