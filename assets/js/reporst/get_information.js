@@ -128,6 +128,14 @@ function renderDashboardCards(data) {
     // Profit & Loss Tab Cards (تابی قازانج و زەرەر)
     const profitLossCards = [
         {
+            key: 'usd_rate',
+            label: 'نرخی ١٠٠ دۆلار',
+            icon: 'fa-dollar-sign',
+            cardClass: 'dollar-rate-card',
+            value: formatCurrency(data.data?.usd_iqd_rate || 0, 'IQD'),
+            subtitle: 'نرخی دۆلار بە دینار (لە settings)'
+        },
+        {
             key: 'sales',
             label: 'کۆی نرخی فرۆشتن',
             icon: 'fa-cash-register',
