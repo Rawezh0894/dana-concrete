@@ -466,6 +466,14 @@ function renderDashboardCards(data) {
             cardClass: 'total-expenses-card',
             value: formatCurrency(data.data?.material_consumption?.total_cost_usd || 0, 'USD'),
             subtitle: 'کۆی هەموو مەوادە بەکارهاتووەکان'
+        },
+        {
+            key: 'raw_material_sales_cost',
+            label: 'کۆی تێچووی فرۆشتنی مەوادی خام',
+            icon: 'fa-dollar-sign',
+            cardClass: 'purchase-materials-card',
+            value: formatCurrency(data.data?.raw_material_sales?.cost_usd || 0, 'USD'),
+            subtitle: 'تێچووی مەوادی خامە فرۆشراوەکان (چەو، لم، چیمەنتۆ، دەرمان، گاز)'
         }
     ];
 

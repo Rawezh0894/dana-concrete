@@ -212,7 +212,7 @@ try {
     }
 
     // Raw Material Sales (فرۆشتنی مەوادی خام) - Calculate total in USD
-    // Convert IQD sales to USD using exchange rate
+    // Convert IQD sales to USD using exchange rate from card (usd_iqd_rate)
     $raw_material_sales_date_condition = "";
     if ($use_range) {
         $from = $from_date ? $from_date : '1000-01-01';
@@ -230,20 +230,50 @@ try {
         }
     }
     
-    // Get raw material sales - convert all to USD
+    // Get raw material sales - convert all to USD using usd_iqd_rate from card
     $raw_material_sales_query = "
         SELECT 
             SUM(CASE 
                 WHEN currency_type = 'دۆلار' THEN total_price 
-                WHEN currency_type = 'دینار' AND exchange_rate > 0 THEN total_price / (exchange_rate / 100)
+                WHEN currency_type = 'دینار' AND ? > 0 THEN total_price / (? / 100)
                 ELSE 0 
             END) as total_usd
         FROM raw_material_sales 
         WHERE is_deleted = 0 
         $raw_material_sales_date_condition
     ";
-    $stmt = $pdo->query($raw_material_sales_query);
+    $stmt = $pdo->prepare($raw_material_sales_query);
+    $stmt->execute([$usd_iqd_rate, $usd_iqd_rate]);
     $raw_material_sales_total_usd = floatval($stmt->fetchColumn() ?? 0);
+    
+    // Calculate cost of raw material sales (تێچووی فرۆشتنی مەوادی خام)
+    // Similar to material consumption cost calculation
+    // cost_price is stored per kg in raw_material_sales table
+    // For USD materials (چیمەنتۆ، دەرمان): cost_price is in USD per kg
+    // For IQD materials (چەو، لم، گاز): cost_price is in IQD per kg
+    // Total cost = quantity_kg × cost_price
+    $raw_material_sales_cost_query = "
+        SELECT 
+            SUM(
+                CASE 
+                    WHEN rms.currency_type = 'دۆلار' THEN rms.quantity_kg * rms.cost_price
+                    WHEN rms.currency_type = 'دینار' AND ? > 0 THEN (rms.quantity_kg * rms.cost_price) / (? / 100)
+                    ELSE 0
+                END
+            ) as total_cost_usd
+        FROM raw_material_sales rms
+        WHERE rms.is_deleted = 0 
+        $raw_material_sales_date_condition
+    ";
+    
+    $raw_material_sales_cost_total_usd = 0;
+    try {
+        $stmt = $pdo->prepare($raw_material_sales_cost_query);
+        $stmt->execute([$usd_iqd_rate, $usd_iqd_rate]);
+        $raw_material_sales_cost_total_usd = floatval($stmt->fetchColumn() ?? 0);
+    } catch (Exception $e) {
+        error_log("Error calculating raw material sales cost: " . $e->getMessage());
+    }
 
     // Cash Sales - Calculate received amounts in USD and IQD separately
     // تەنها فرۆشتن بە نەقدی (payment_type = 'نەقد') و فلتەری بەروار
@@ -948,7 +978,8 @@ try {
             'purchases' => $purchases,
             'sales' => $sales,
             'raw_material_sales' => [
-                'total_usd' => $raw_material_sales_total_usd
+                'total_usd' => $raw_material_sales_total_usd,
+                'cost_usd' => $raw_material_sales_cost_total_usd
             ],
             'discounts' => [
                 'total_usd' => $total_discount,
