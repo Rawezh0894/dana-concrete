@@ -282,12 +282,15 @@ try {
     $employee_expenses_usd = ($usd_iqd_rate > 0) ? ($employee_expenses / ($usd_iqd_rate / 100)) : 0;
 
     // Discounts (کۆی داشکاندن) - From sales + customer debt payments
+    // Convert sales discounts from IQD to USD using usd_iqd_rate from settings
     $sales_discounts_query = "SELECT SUM(discount) as total_discount FROM sales WHERE 1=1 $date_condition_sales";
     $stmt = $pdo->query($sales_discounts_query);
     $row = $stmt->fetch();
-    $sales_discounts = $row['total_discount'] ?? 0;
+    $sales_discounts_iqd = $row['total_discount'] ?? 0;
+    $sales_discounts = ($usd_iqd_rate > 0) ? ($sales_discounts_iqd / ($usd_iqd_rate / 100)) : 0;
     
 // Customer debt payments discounts (Updated to filter by Sale Date)
+    // Convert customer debt discounts from IQD to USD using usd_iqd_rate from settings
     $customer_debt_discounts_query = "
         SELECT SUM(
             CASE 
@@ -304,9 +307,10 @@ try {
     ";
     $stmt = $pdo->query($customer_debt_discounts_query);
     $row = $stmt->fetch();
-    $customer_debt_discounts = $row['total_discount'] ?? 0;
+    $customer_debt_discounts_iqd = $row['total_discount'] ?? 0;
+    $customer_debt_discounts = ($usd_iqd_rate > 0) ? ($customer_debt_discounts_iqd / ($usd_iqd_rate / 100)) : 0;
     
-    // Total discounts = sales discounts + customer debt payment discounts
+    // Total discounts = sales discounts + customer debt payment discounts (both in USD now)
     $total_discount = $sales_discounts + $customer_debt_discounts;
     
     // Debug: Log discount breakdown for first calculation
@@ -503,15 +507,16 @@ try {
     
     // Get total discounts
     $total_discounts = 0;
-    // Sales discounts
+    // Sales discounts - Convert from IQD to USD using usd_iqd_rate from settings
     $stmt = $pdo->query("SELECT SUM(discount) as total_discount FROM sales WHERE 1=1 $date_condition_sales");
     $row = $stmt->fetch();
-    $sales_discounts_total = $row['total_discount'] ?? 0;
+    $sales_discounts_total_iqd = $row['total_discount'] ?? 0;
+    $sales_discounts_total = ($usd_iqd_rate > 0) ? ($sales_discounts_total_iqd / ($usd_iqd_rate / 100)) : 0;
     
-    // Customer debt payment discounts (Reusing calculated value)
+    // Customer debt payment discounts (Reusing calculated value - already converted to USD)
     $customer_debt_discounts_total = $customer_debt_discounts;
     
-        // Total discounts = sales + customer debt payments
+        // Total discounts = sales + customer debt payments (both in USD now)
     $total_discounts = $sales_discounts_total + $customer_debt_discounts_total;
     
     // Get other expenses (expense_type = 'خەرجی تر')
