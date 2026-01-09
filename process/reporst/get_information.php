@@ -282,15 +282,15 @@ try {
     $employee_expenses_usd = ($usd_iqd_rate > 0) ? ($employee_expenses / ($usd_iqd_rate / 100)) : 0;
 
     // Discounts (کۆی داشکاندن) - From sales + customer debt payments
-    // Convert sales discounts from IQD to USD using usd_iqd_rate from settings
+    // Note: discount in sales table is already in USD
     $sales_discounts_query = "SELECT SUM(discount) as total_discount FROM sales WHERE 1=1 $date_condition_sales";
     $stmt = $pdo->query($sales_discounts_query);
     $row = $stmt->fetch();
-    $sales_discounts_iqd = $row['total_discount'] ?? 0;
-    $sales_discounts = ($usd_iqd_rate > 0) ? ($sales_discounts_iqd / ($usd_iqd_rate / 100)) : 0;
+    // Result is already in USD (discount column in sales table is in USD)
+    $sales_discounts = floatval($row['total_discount'] ?? 0);
     
 // Customer debt payments discounts (Updated to filter by Sale Date)
-    // Convert customer debt discounts from IQD to USD using usd_iqd_rate from settings
+    // Note: This calculation already returns USD (discount and allocated_amount are in USD)
     $customer_debt_discounts_query = "
         SELECT SUM(
             CASE 
@@ -307,8 +307,8 @@ try {
     ";
     $stmt = $pdo->query($customer_debt_discounts_query);
     $row = $stmt->fetch();
-    $customer_debt_discounts_iqd = $row['total_discount'] ?? 0;
-    $customer_debt_discounts = ($usd_iqd_rate > 0) ? ($customer_debt_discounts_iqd / ($usd_iqd_rate / 100)) : 0;
+    // Result is already in USD (p.discount and a.allocated_amount are in USD)
+    $customer_debt_discounts = floatval($row['total_discount'] ?? 0);
     
     // Total discounts = sales discounts + customer debt payment discounts (both in USD now)
     $total_discount = $sales_discounts + $customer_debt_discounts;
@@ -507,11 +507,10 @@ try {
     
     // Get total discounts
     $total_discounts = 0;
-    // Sales discounts - Convert from IQD to USD using usd_iqd_rate from settings
+    // Sales discounts - Already in USD (discount column in sales table is in USD)
     $stmt = $pdo->query("SELECT SUM(discount) as total_discount FROM sales WHERE 1=1 $date_condition_sales");
     $row = $stmt->fetch();
-    $sales_discounts_total_iqd = $row['total_discount'] ?? 0;
-    $sales_discounts_total = ($usd_iqd_rate > 0) ? ($sales_discounts_total_iqd / ($usd_iqd_rate / 100)) : 0;
+    $sales_discounts_total = floatval($row['total_discount'] ?? 0);
     
     // Customer debt payment discounts (Reusing calculated value - already converted to USD)
     $customer_debt_discounts_total = $customer_debt_discounts;
