@@ -125,6 +125,21 @@ function renderDashboardCards(data) {
     const salesDiscountUsd = Number(data.data?.discounts?.sales_usd) || 0;
     const debtDiscountUsd = Number(data.data?.discounts?.customer_debt_usd) || 0;
 
+    // Calculate Income, Expenses, Profit/Loss BEFORE using them in cards
+    const totalSales = (Number(data.data?.sales?.cash?.usd) || 0) + (Number(data.data?.sales?.credit?.usd) || 0);
+    const gasIncome = Number(data.data?.gas_income?.usd) || 0;
+    const totalIncome = totalSales + gasIncome;
+    
+    const totalPurchases = purchases_usd;
+    const totalEmployeeExpenses = Number(data.data?.total_expenses?.breakdown?.employee_payments) || 0;
+    const totalOtherExpenses = Number(data.data?.total_expenses?.breakdown?.other_expenses) || 0;
+    const totalPurchaseMaterials = Number(data.data?.total_expenses?.breakdown?.purchase_materials) || 0;
+    const totalDiscounts = discountsTotalUsd;
+    const totalExpenses = totalPurchases + totalEmployeeExpenses + totalOtherExpenses + totalPurchaseMaterials + totalDiscounts;
+    
+    const profitLoss = totalIncome - totalExpenses;
+    const isProfit = profitLoss >= 0;
+
     const cards = [
         {
             key: 'customer',
@@ -518,21 +533,6 @@ function renderDashboardCards(data) {
     // - Total materials = لمی کەسارە + لمی ڕەش + چەوی چاوی ٣ + چەوی چاوی ٤ + دەلتا + لاڤارج + ماس
 
     console.log('Cards array created:', cards);
-
-    // Calculate Income, Expenses, Profit/Loss
-    const totalSales = (Number(data.data?.sales?.cash?.usd) || 0) + (Number(data.data?.sales?.credit?.usd) || 0);
-    const gasIncome = Number(data.data?.gas_income?.usd) || 0;
-    const totalIncome = totalSales + gasIncome;
-    
-    const totalPurchases = purchases_usd;
-    const totalEmployeeExpenses = Number(data.data?.total_expenses?.breakdown?.employee_payments) || 0;
-    const totalOtherExpenses = Number(data.data?.total_expenses?.breakdown?.other_expenses) || 0;
-    const totalPurchaseMaterials = Number(data.data?.total_expenses?.breakdown?.purchase_materials) || 0;
-    const totalDiscounts = discountsTotalUsd;
-    const totalExpenses = totalPurchases + totalEmployeeExpenses + totalOtherExpenses + totalPurchaseMaterials + totalDiscounts;
-    
-    const profitLoss = totalIncome - totalExpenses;
-    const isProfit = profitLoss >= 0;
 
     // Categorize cards by section
     const cardCategories = {
