@@ -351,6 +351,37 @@ if (!isset($_SESSION['user_id'])) {
             opacity: 0.9;
         }
 
+        /* Discount Cards Styles */
+        .dark-card {
+            background: linear-gradient(135deg, #495057, #343a40) !important;
+            color: white;
+            border: none;
+            transition: all 0.3s ease;
+        }
+        
+        .dark-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(73, 80, 87, 0.4);
+        }
+        
+        .dark-card i {
+            color: #e9ecef;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .dark-card .card-value {
+            color: #ffffff;
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .dark-card .section-label {
+            color: #e9ecef;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
         
         /* Chart Section Styles */
         .chart-section {
