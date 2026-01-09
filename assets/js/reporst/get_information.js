@@ -458,6 +458,56 @@ function renderDashboardCards(data) {
             cardClass: 'total-expenses-card',
             value: formatCurrency(data.data?.material_consumption?.total_cost_usd || 0, 'USD'),
             subtitle: 'کۆی هەموو مەوادە بەکارهاتووەکان'
+        },
+        // Income Cards
+        {
+            key: 'total_income',
+            label: 'کۆی داهات',
+            icon: 'fa-arrow-up',
+            cardClass: 'income-card',
+            value: formatCurrency(totalIncome, 'USD'),
+            subtitle: 'کۆی فرۆشتن + داهاتی گاز'
+        },
+        {
+            key: 'total_sales_income',
+            label: 'داهات لە فرۆشتن',
+            icon: 'fa-cash-register',
+            cardClass: 'income-card',
+            value: formatCurrency(totalSales, 'USD'),
+            subtitle: 'کۆی نرخی فرۆشتن'
+        },
+        {
+            key: 'gas_income',
+            label: 'داهات لە گاز',
+            icon: 'fa-gas-pump',
+            cardClass: 'income-card',
+            value: formatCurrency(gasIncome, 'USD'),
+            subtitle: 'داهاتی گاز'
+        },
+        // Profit/Loss Cards
+        {
+            key: 'total_profit_loss',
+            label: isProfit ? 'قازانجی خاوێن' : 'زەرەری خاوێن',
+            icon: isProfit ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down',
+            cardClass: isProfit ? 'profit-card' : 'loss-card',
+            value: formatCurrency(Math.abs(profitLoss), 'USD'),
+            subtitle: isProfit ? 'داهات زیاترە لە خەرجی' : 'خەرجی زیاترە لە داهات'
+        },
+        {
+            key: 'total_income_summary',
+            label: 'کۆی داهات',
+            icon: 'fa-chart-line',
+            cardClass: 'income-summary-card',
+            value: formatCurrency(totalIncome, 'USD'),
+            subtitle: 'کۆی گشتی داهات'
+        },
+        {
+            key: 'total_expenses_summary',
+            label: 'کۆی خەرجی',
+            icon: 'fa-money-bill-wave',
+            cardClass: 'expenses-summary-card',
+            value: formatCurrency(totalExpenses, 'USD'),
+            subtitle: 'کۆی گشتی خەرجی'
         }
     ];
 
@@ -468,6 +518,21 @@ function renderDashboardCards(data) {
     // - Total materials = لمی کەسارە + لمی ڕەش + چەوی چاوی ٣ + چەوی چاوی ٤ + دەلتا + لاڤارج + ماس
 
     console.log('Cards array created:', cards);
+
+    // Calculate Income, Expenses, Profit/Loss
+    const totalSales = (Number(data.data?.sales?.cash?.usd) || 0) + (Number(data.data?.sales?.credit?.usd) || 0);
+    const gasIncome = Number(data.data?.gas_income?.usd) || 0;
+    const totalIncome = totalSales + gasIncome;
+    
+    const totalPurchases = purchases_usd;
+    const totalEmployeeExpenses = Number(data.data?.total_expenses?.breakdown?.employee_payments) || 0;
+    const totalOtherExpenses = Number(data.data?.total_expenses?.breakdown?.other_expenses) || 0;
+    const totalPurchaseMaterials = Number(data.data?.total_expenses?.breakdown?.purchase_materials) || 0;
+    const totalDiscounts = discountsTotalUsd;
+    const totalExpenses = totalPurchases + totalEmployeeExpenses + totalOtherExpenses + totalPurchaseMaterials + totalDiscounts;
+    
+    const profitLoss = totalIncome - totalExpenses;
+    const isProfit = profitLoss >= 0;
 
     // Categorize cards by section
     const cardCategories = {
@@ -530,6 +595,16 @@ function renderDashboardCards(data) {
             'black_sand_stock',
             'brown_sand_stock',
             'cement_stock'
+        ],
+        income: [
+            'total_income',
+            'total_sales_income',
+            'gas_income'
+        ],
+        profitLoss: [
+            'total_profit_loss',
+            'total_income_summary',
+            'total_expenses_summary'
         ]
     };
 
@@ -580,6 +655,8 @@ function renderDashboardCards(data) {
     renderCardsForCategory('employees', 'employees-cards');
     renderCardsForCategory('materials', 'materials-cards');
     renderCardsForCategory('stock', 'stock-cards');
+    renderCardsForCategory('income', 'income-cards');
+    renderCardsForCategory('profitLoss', 'profit-loss-cards');
     
     console.log('All cards rendered successfully');
 }

@@ -626,6 +626,16 @@ if (!isset($_SESSION['user_id'])) {
                     <i class="fas fa-warehouse me-2"></i>کۆگا
                 </button>
             </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="income-tab" data-bs-toggle="tab" data-bs-target="#income-pane" type="button" role="tab" aria-controls="income-pane" aria-selected="false">
+                    <i class="fas fa-arrow-up me-2"></i>داهات
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="profit-loss-tab" data-bs-toggle="tab" data-bs-target="#profit-loss-pane" type="button" role="tab" aria-controls="profit-loss-pane" aria-selected="false">
+                    <i class="fas fa-chart-line me-2"></i>قازانج / زەرەر
+                </button>
+            </li>
         </ul>
     </div>
 
@@ -684,6 +694,20 @@ if (!isset($_SESSION['user_id'])) {
         <div class="tab-pane fade" id="stock-pane" role="tabpanel" aria-labelledby="stock-tab">
             <div class="row" id="stock-cards">
                 <!-- Stock cards will be rendered here by JS -->
+            </div>
+        </div>
+        
+        <!-- Income Tab -->
+        <div class="tab-pane fade" id="income-pane" role="tabpanel" aria-labelledby="income-tab">
+            <div class="row" id="income-cards">
+                <!-- Income cards will be rendered here by JS -->
+            </div>
+        </div>
+        
+        <!-- Profit/Loss Tab -->
+        <div class="tab-pane fade" id="profit-loss-pane" role="tabpanel" aria-labelledby="profit-loss-tab">
+            <div class="row" id="profit-loss-cards">
+                <!-- Profit/Loss cards will be rendered here by JS -->
             </div>
         </div>
     </div>
