@@ -381,8 +381,8 @@ try {
     $total_employee_expenses_usd = ($usd_iqd_rate > 0 ? ($total_employee_expenses / ($usd_iqd_rate / 100)) : 0);
     $total_expenses_breakdown['employee_payments'] = $total_employee_expenses_usd;
 
-    // Other expenses - including all expense types with date filter - includes cash box operations
-    $other_expenses_query = "SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd FROM other_expenses WHERE expense_type IN ('خەرجی تر', 'خواردنگە', 'ئۆفیس') $date_condition_date";
+    // Other expenses - only expense_type = 'خەرجی تر' (both cash and credit) with date filter
+    $other_expenses_query = "SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd FROM other_expenses WHERE expense_type = 'خەرجی تر' $date_condition_date";
     $stmt = $pdo->query($other_expenses_query);
     $row = $stmt->fetch();
     $other_expenses_usd = $row['usd'] ?? 0;
@@ -437,13 +437,22 @@ try {
     error_log("Debug - Gas income calculation from specific cars: iqd_amount=" . $gas_income_iqd . 
               ", usd_rate=" . $usd_iqd_rate . ", usd_amount=" . $gas_income_total_usd);
 
-    // Purchases (کڕین) - only cash payments with date filter
-    $purchases_query = "SELECT SUM(amount_iqd) as iqd, SUM(amount_iqd / NULLIF(exchange_rate / 100, 0)) as iqd_converted FROM purchases WHERE payment_type = 'نەقد' AND type = 'دینار' $date_condition_date";
-    $stmt = $pdo->query($purchases_query);
+    // Purchases (کڕین) - both cash and credit payments with date filter
+    // دینار
+    $purchases_iqd_query = "SELECT SUM(amount_iqd) as iqd, SUM(amount_iqd / NULLIF(exchange_rate / 100, 0)) as iqd_converted FROM purchases WHERE type = 'دینار' $date_condition_date";
+    $stmt = $pdo->query($purchases_iqd_query);
     $row = $stmt->fetch();
-    $purchases_cash_iqd = $row['iqd'] ?? 0;
-    $purchases_cash_usd = $row['iqd_converted'] ?? 0;
-    $total_expenses_breakdown['purchases'] = $purchases_cash_usd;
+    $purchases_iqd = $row['iqd'] ?? 0;
+    $purchases_iqd_converted_usd = $row['iqd_converted'] ?? 0;
+    
+    // دۆلار
+    $purchases_usd_query = "SELECT SUM(price) as usd FROM purchases WHERE type = 'دۆلار' $date_condition_date";
+    $stmt = $pdo->query($purchases_usd_query);
+    $row = $stmt->fetch();
+    $purchases_usd = $row['usd'] ?? 0;
+    
+    // Total purchases (cash + credit) in USD
+    $total_expenses_breakdown['purchases'] = $purchases_usd + $purchases_iqd_converted_usd;
 
     // Purchase materials (کڕینی مەواد) with date filter
     $purchase_materials_query = "SELECT SUM(total_price_usd) as usd, SUM(total_price_iqd) as iqd FROM purchase_materials WHERE 1=1";
@@ -469,8 +478,9 @@ try {
     $purchase_materials_total_usd = $purchase_materials_usd + (($usd_iqd_rate > 0) ? ($purchase_materials_iqd / ($usd_iqd_rate / 100)) : 0);
     $total_expenses_breakdown['purchase_materials'] = $purchase_materials_total_usd;
 
-    // Total expenses
-    $total_expenses_usd = array_sum($total_expenses_breakdown);
+    // Total expenses for Profit & Loss tab (کۆی خەرجی)
+    // Only includes: خەرجی تر (both cash and credit) + purchases (both cash and credit) + purchase_materials
+    $total_expenses_usd = $other_expenses_total_usd + $total_expenses_breakdown['purchases'] + $purchase_materials_total_usd;
 
     // Calculate Income based on the formula:
     // داهات = کۆی نرخی فرۆشتن + کۆی داهاتی گاز - کۆی نرخی کڕین(purchase) - کۆی داشکاندن - کۆی خەرجی تر (expense_type = خەرجی تر) - کۆی نرخی کڕینی کاڵا(purchase_material) - کۆی خەرجی کارمەندان
