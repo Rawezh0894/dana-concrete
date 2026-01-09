@@ -160,12 +160,12 @@ function renderDashboardCards(data) {
             subtitle: 'مووچە + بەخشیش (بە دۆلار)'
         },
         {
-            key: 'car_expenses',
+            key: 'caravan_hisabi',
             label: 'کۆی کاروان حیسابی',
-            icon: 'fa-car',
+            icon: 'fa-truck',
             cardClass: 'purchase-materials-card',
-            value: formatCurrency(Number(data.data?.car_expenses?.total_usd) || 0, 'USD'),
-            subtitle: 'خەرجی سەیارەکان (گاز + کاڵای کۆگا)'
+            value: formatCurrency(Number(data.data?.caravan_hisabi?.total_usd) || 0, 'USD'),
+            subtitle: 'مووچەی کاروان حیسابی بۆ شۆفێرەکانی میکسەر'
         },
         {
             key: 'total_expenses',
@@ -174,6 +174,22 @@ function renderDashboardCards(data) {
             cardClass: 'total-expenses-card',
             value: formatCurrency(Number(data.data?.total_expenses?.usd) || 0, 'USD'),
             subtitle: 'کۆی خەرجی (نەقد + قەرز)'
+        },
+        {
+            key: 'sales_discounts',
+            label: 'داشکاندنی فرۆشتن',
+            icon: 'fa-percent',
+            cardClass: 'dark-card',
+            value: formatCurrency(Number(data.data?.discounts?.sales_usd) || 0, 'USD'),
+            subtitle: 'کۆی داشکاندنی فرۆشتن'
+        },
+        {
+            key: 'customer_debt_discounts',
+            label: 'داشکاندنی گەڕاندنەوەی قەرز',
+            icon: 'fa-percent',
+            cardClass: 'dark-card',
+            value: formatCurrency(Number(data.data?.discounts?.customer_debt_usd) || 0, 'USD'),
+            subtitle: 'داشکاندنی پارەی قەرز'
         },
         {
             key: 'profit_loss',

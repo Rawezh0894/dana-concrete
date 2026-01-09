@@ -961,6 +961,31 @@ try {
         'person_debt' => $person_debt_usd
     ];
 
+    // Caravan Hisabi (کاروان حیسابی) - Calculate from employee_expenses table
+    // This is overtime payment for mixer drivers based on concrete receipts
+    $caravan_hisabi_date_condition = "";
+    if ($use_range) {
+        $from = $from_date ? $from_date : '1000-01-01';
+        $to = $to_date ? $to_date : '9999-12-31';
+        $caravan_hisabi_date_condition = " AND expense_date >= '$from' AND expense_date <= '$to'";
+    } else {
+        if ($filter === 'today') {
+            $caravan_hisabi_date_condition = " AND expense_date = CURDATE()";
+        } elseif ($filter === 'week') {
+            $caravan_hisabi_date_condition = " AND YEARWEEK(expense_date, 1) = YEARWEEK(CURDATE(), 1)";
+        } elseif ($filter === 'month') {
+            $caravan_hisabi_date_condition = " AND YEAR(expense_date) = YEAR(CURDATE()) AND MONTH(expense_date) = MONTH(CURDATE())";
+        } elseif ($filter === 'year') {
+            $caravan_hisabi_date_condition = " AND YEAR(expense_date) = YEAR(CURDATE())";
+        }
+    }
+    
+    // Get caravan hisabi (overtime) from employee_expenses
+    $caravan_hisabi_query = "SELECT SUM(amount) as total_iqd FROM employee_expenses WHERE expense_type = 'overtime' $caravan_hisabi_date_condition";
+    $stmt = $pdo->query($caravan_hisabi_query);
+    $caravan_hisabi_iqd = floatval($stmt->fetchColumn() ?? 0);
+    $caravan_hisabi_usd = ($usd_iqd_rate > 0) ? ($caravan_hisabi_iqd / ($usd_iqd_rate / 100)) : 0;
+
     // Debug: Log key variables
     error_log("Debug - Key variables: customer_debt_total_usd=" . $customer_debt_total_usd . 
               ", company_debt_total_usd=" . $company_debt_total_usd . 
@@ -984,10 +1009,24 @@ try {
             'car_expenses' => [
                 'total_usd' => ($total_expenses_breakdown['material_usage'] ?? 0) + ($total_expenses_breakdown['gas_usage'] ?? 0)
             ],
+            'caravan_hisabi' => [
+                'total_usd' => $caravan_hisabi_usd,
+                'total_iqd' => $caravan_hisabi_iqd
+            ],
+                'total_usd' => $raw_material_sales_total_usd,
+                'cost_usd' => $raw_material_sales_cost_total_usd
+            ],
+            'car_expenses' => [
+                'total_usd' => ($total_expenses_breakdown['material_usage'] ?? 0) + ($total_expenses_breakdown['gas_usage'] ?? 0)
+            ],
+            'caravan_hisabi' => [
+                'total_usd' => $caravan_hisabi_usd,
+                'total_iqd' => $caravan_hisabi_iqd
+            ],
             'profit_loss' => [
                 'total_revenue' => ($sales['cash']['usd'] ?? 0) + ($sales['credit']['usd'] ?? 0) + $raw_material_sales_total_usd,
-                'total_cost' => ($total_used_material_cost_usd ?? 0) + ($employee_stats['total_fixed_usd'] ?? 0) + (($total_expenses_breakdown['material_usage'] ?? 0) + ($total_expenses_breakdown['gas_usage'] ?? 0)) + $total_expenses_usd,
-                'profit_loss' => (($sales['cash']['usd'] ?? 0) + ($sales['credit']['usd'] ?? 0) + $raw_material_sales_total_usd) - (($total_used_material_cost_usd ?? 0) + ($employee_stats['total_fixed_usd'] ?? 0) + (($total_expenses_breakdown['material_usage'] ?? 0) + ($total_expenses_breakdown['gas_usage'] ?? 0)) + $total_expenses_usd)
+                'total_cost' => ($total_used_material_cost_usd ?? 0) + ($employee_stats['total_fixed_usd'] ?? 0) + $caravan_hisabi_usd + (($total_expenses_breakdown['material_usage'] ?? 0) + ($total_expenses_breakdown['gas_usage'] ?? 0)) + $total_expenses_usd,
+                'profit_loss' => (($sales['cash']['usd'] ?? 0) + ($sales['credit']['usd'] ?? 0) + $raw_material_sales_total_usd) - (($total_used_material_cost_usd ?? 0) + ($employee_stats['total_fixed_usd'] ?? 0) + $caravan_hisabi_usd + (($total_expenses_breakdown['material_usage'] ?? 0) + ($total_expenses_breakdown['gas_usage'] ?? 0)) + $total_expenses_usd)
             ],
             'discounts' => [
                 'total_usd' => $total_discount,
