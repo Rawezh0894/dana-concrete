@@ -80,7 +80,7 @@ try {
             bs.name as bin_name,
             c.name as customer_name,
             co.name as company_name,
-            u.name as created_by_name,
+            u.username as created_by_name,
             CASE 
                 WHEN rms.buyer_type = 'کڕیار' THEN c.name
                 WHEN rms.buyer_type = 'کۆمپانیا' THEN co.name
