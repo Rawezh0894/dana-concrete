@@ -404,37 +404,13 @@ try {
     $total_expenses_breakdown['material_usage'] = $material_usage_total_usd;
 
     // Gas usage (بەکارهێنانی گاز) with date filter
-    $gas_usage_query = "SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd, SUM(gas_liters) as total_liters, SUM(gas_total_cost) as total_cost_iqd FROM other_expenses WHERE expense_type = 'بەکارهێنانی گاز' $date_condition_date";
+    $gas_usage_query = "SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd FROM other_expenses WHERE expense_type = 'بەکارهێنانی گاز' $date_condition_date";
     $stmt = $pdo->query($gas_usage_query);
     $row = $stmt->fetch();
     $gas_usage_usd = $row['usd'] ?? 0;
     $gas_usage_iqd = $row['iqd'] ?? 0;
     $gas_usage_total_usd = $gas_usage_usd + (($usd_iqd_rate > 0) ? ($gas_usage_iqd / ($usd_iqd_rate / 100)) : 0);
     $total_expenses_breakdown['gas_usage'] = $gas_usage_total_usd;
-    
-    // Gas consumption from other_expenses (liters)
-    $gas_consumption_liters = floatval($row['total_liters'] ?? 0);
-    
-    // Gas cost from other_expenses (convert IQD to USD)
-    $gas_consumption_cost_iqd = floatval($row['total_cost_iqd'] ?? 0);
-    $gas_consumption_cost_usd = ($usd_iqd_rate > 0) ? ($gas_consumption_cost_iqd / ($usd_iqd_rate / 100)) : 0;
-    
-    // Gas sold from raw_material_sales (quantity_kg for gas material)
-    // Note: raw_material_sales uses material_type column, not material_id
-    $gas_sold_query = "
-        SELECT SUM(quantity_kg) as total_kg
-        FROM raw_material_sales rms
-        WHERE rms.is_deleted = 0 
-        AND rms.material_type = 'گاز'
-        $raw_material_sales_date_condition
-    ";
-    $stmt = $pdo->query($gas_sold_query);
-    $gas_sold_kg = floatval($stmt->fetchColumn() ?? 0);
-    
-    // Total gas consumption = gas from other_expenses (liters) + gas sold (kg converted to liters)
-    // Note: 1 kg of gas ≈ 1.33 liters (approximate conversion, adjust if needed)
-    $gas_sold_liters = $gas_sold_kg * 1.33;
-    $total_gas_consumption_liters = $gas_consumption_liters + $gas_sold_liters;
     
     // Gas Income (داهاتی گاز) - Calculate based on specific cars using car_id
     $gas_income_query = "
@@ -1185,14 +1161,6 @@ try {
         'costs' => $material_costs,
         'total_cost_usd' => $total_used_material_cost_usd,
         'current_stock' => $current_stock
-    ],
-    // Gas consumption data
-    'gas_consumption' => [
-        'liters_from_expenses' => $gas_consumption_liters,
-        'liters_from_sales' => $gas_sold_liters,
-        'total_liters' => $total_gas_consumption_liters,
-        'cost_usd' => $gas_consumption_cost_usd,
-        'cost_iqd' => $gas_consumption_cost_iqd
     ]
         ]
     ];
