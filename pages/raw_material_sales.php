@@ -34,7 +34,7 @@ $bins = $pdo->query("
             WHEN bs.material_type IN ('چیمەنتۆ', 'دەرمان') THEN 'دۆلار'
             ELSE 'دینار'
         END as currency_type,
-        -- Get average price from purchases table
+        -- Get average price from purchases table (only from year 2026 onwards)
         COALESCE(
             (SELECT 
                 CASE 
@@ -45,7 +45,20 @@ $bins = $pdo->query("
                 END
             FROM purchases p
             JOIN materials m ON p.material_id = m.id
-            WHERE m.name = bs.material_type AND p.kg > 0), 
+            WHERE m.name = bs.material_type 
+            AND p.kg > 0
+            AND YEAR(p.date) >= 2026), 
+            -- Fallback: if no purchases in 2026, get all purchases
+            (SELECT 
+                CASE 
+                    WHEN bs.material_type IN ('چیمەنتۆ', 'دەرمان') THEN
+                        SUM(CASE WHEN p.type = 'دۆلار' THEN p.price ELSE p.amount_iqd / NULLIF(p.exchange_rate / 100, 0) END) / NULLIF(SUM(p.kg), 0)
+                    ELSE
+                        (SUM(CASE WHEN p.type = 'دۆلار' THEN p.price ELSE p.amount_iqd / NULLIF(p.exchange_rate / 100, 0) END) / NULLIF(SUM(p.kg), 0)) * (SELECT COALESCE(value, 150000) FROM settings WHERE name = 'exchange_rate' LIMIT 1) / 100
+                END
+            FROM purchases p
+            JOIN materials m ON p.material_id = m.id
+            WHERE m.name = bs.material_type AND p.kg > 0),
             0
         ) as average_price
     FROM bins_silos bs

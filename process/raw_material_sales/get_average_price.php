@@ -30,6 +30,7 @@ function getAveragePriceFromPurchases($pdo, $material_type) {
     
     try {
         // Get average price from purchases table
+        // Only consider purchases from year 2026 onwards
         // Similar logic to reports page but returns price per KG
         $query = "
             SELECT 
@@ -40,14 +41,16 @@ function getAveragePriceFromPurchases($pdo, $material_type) {
                 SUM(p.kg) as total_kg
             FROM purchases p
             JOIN materials m ON p.material_id = m.id
-            WHERE m.name = ? AND p.kg > 0
+            WHERE m.name = ? 
+            AND p.kg > 0
+            AND YEAR(p.date) >= 2026
         ";
         
         $stmt = $pdo->prepare($query);
         $stmt->execute([$material_type]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         
-        if ($result && $result['total_kg'] > 0) {
+        if ($result && $result['total_kg'] > 0 && $result['total_usd'] > 0) {
             // Calculate price per KG in USD
             $price_per_kg_usd = $result['total_usd'] / $result['total_kg'];
             
@@ -69,7 +72,41 @@ function getAveragePriceFromPurchases($pdo, $material_type) {
             ];
         }
         
-        // Fallback: no purchases found, return 0
+        // Fallback: If no purchases in 2026, get all purchases (without date filter)
+        $fallback_query = "
+            SELECT 
+                SUM(CASE 
+                    WHEN p.type = 'دۆلار' THEN p.price 
+                    ELSE p.amount_iqd / NULLIF(p.exchange_rate / 100, 0) 
+                END) as total_usd,
+                SUM(p.kg) as total_kg
+            FROM purchases p
+            JOIN materials m ON p.material_id = m.id
+            WHERE m.name = ? AND p.kg > 0
+        ";
+        
+        $fallback_stmt = $pdo->prepare($fallback_query);
+        $fallback_stmt->execute([$material_type]);
+        $fallback_result = $fallback_stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($fallback_result && $fallback_result['total_kg'] > 0 && $fallback_result['total_usd'] > 0) {
+            $price_per_kg_usd = $fallback_result['total_usd'] / $fallback_result['total_kg'];
+            
+            if ($currency === 'دینار') {
+                $rateStmt = $pdo->query("SELECT value FROM settings WHERE name = 'exchange_rate' LIMIT 1");
+                $exchangeRate = $rateStmt->fetchColumn() ?: 150000;
+                $price_per_kg = $price_per_kg_usd * ($exchangeRate / 100);
+            } else {
+                $price_per_kg = $price_per_kg_usd;
+            }
+            
+            return [
+                'price_per_kg' => round($price_per_kg, 6),
+                'currency' => $currency
+            ];
+        }
+        
+        // Final fallback: no purchases found at all, return 0
         return [
             'price_per_kg' => 0,
             'currency' => $currency
