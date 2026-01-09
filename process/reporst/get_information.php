@@ -961,29 +961,105 @@ try {
         'person_debt' => $person_debt_usd
     ];
 
-    // Caravan Hisabi (کاروان حیسابی) - Calculate from employee_expenses table
+    // Caravan Hisabi (کاروان حیسابی) - Calculate from concrete_receipts table
     // This is overtime payment for mixer drivers based on concrete receipts
+    // Same calculation method as in get_expenses_summary.php
+    
+    // Get Overtime Rate from settings
+    $stmt = $pdo->query("SELECT value FROM settings WHERE name = 'overtime_rate'");
+    $setting = $stmt->fetch(PDO::FETCH_ASSOC);
+    $overtime_rate = floatval($setting['value'] ?? 0);
+    
+    // Build date condition for concrete_receipts
     $caravan_hisabi_date_condition = "";
+    $caravan_hisabi_date_params = [];
+    
     if ($use_range) {
         $from = $from_date ? $from_date : '1000-01-01';
         $to = $to_date ? $to_date : '9999-12-31';
-        $caravan_hisabi_date_condition = " AND expense_date >= '$from' AND expense_date <= '$to'";
+        $caravan_hisabi_date_condition = " AND COALESCE(`date`, DATE(created_at)) BETWEEN ? AND ?";
+        $caravan_hisabi_date_params = [$from, $to];
     } else {
         if ($filter === 'today') {
-            $caravan_hisabi_date_condition = " AND expense_date = CURDATE()";
+            $today = date('Y-m-d');
+            $caravan_hisabi_date_condition = " AND COALESCE(`date`, DATE(created_at)) = ?";
+            $caravan_hisabi_date_params = [$today];
         } elseif ($filter === 'week') {
-            $caravan_hisabi_date_condition = " AND YEARWEEK(expense_date, 1) = YEARWEEK(CURDATE(), 1)";
+            $week_start = date('Y-m-d', strtotime('monday this week'));
+            $week_end = date('Y-m-d', strtotime('sunday this week'));
+            $caravan_hisabi_date_condition = " AND COALESCE(`date`, DATE(created_at)) BETWEEN ? AND ?";
+            $caravan_hisabi_date_params = [$week_start, $week_end];
         } elseif ($filter === 'month') {
-            $caravan_hisabi_date_condition = " AND YEAR(expense_date) = YEAR(CURDATE()) AND MONTH(expense_date) = MONTH(CURDATE())";
+            $month_start = date('Y-m-01');
+            $month_end = date('Y-m-t');
+            $caravan_hisabi_date_condition = " AND COALESCE(`date`, DATE(created_at)) BETWEEN ? AND ?";
+            $caravan_hisabi_date_params = [$month_start, $month_end];
         } elseif ($filter === 'year') {
-            $caravan_hisabi_date_condition = " AND YEAR(expense_date) = YEAR(CURDATE())";
+            $year_start = date('Y-01-01');
+            $year_end = date('Y-12-31');
+            $caravan_hisabi_date_condition = " AND COALESCE(`date`, DATE(created_at)) BETWEEN ? AND ?";
+            $caravan_hisabi_date_params = [$year_start, $year_end];
         }
     }
     
-    // Get caravan hisabi (overtime) from employee_expenses
-    $caravan_hisabi_query = "SELECT SUM(amount) as total_iqd FROM employee_expenses WHERE expense_type = 'overtime' $caravan_hisabi_date_condition";
-    $stmt = $pdo->query($caravan_hisabi_query);
-    $caravan_hisabi_iqd = floatval($stmt->fetchColumn() ?? 0);
+    // Get all employees with role "شۆفێری میکسەر"
+    $mixer_driver_ids = [];
+    try {
+        $stmt = $pdo->query("SELECT id FROM employees WHERE role LIKE '%شۆفێری میکسەر%'");
+        $mixer_drivers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $mixer_driver_ids = array_column($mixer_drivers, 'id');
+    } catch (Exception $e) {
+        error_log("Error getting mixer drivers: " . $e->getMessage());
+    }
+    
+    // Calculate total overtime from concrete_receipts
+    $caravan_hisabi_iqd = 0;
+    if (!empty($mixer_driver_ids)) {
+        $placeholders = implode(',', array_fill(0, count($mixer_driver_ids), '?'));
+        
+        try {
+            // Count distinct receipts (mixer + pump) for mixer drivers
+            $overtime_sql = "SELECT COUNT(DISTINCT id) as count 
+                           FROM concrete_receipts 
+                           WHERE (mixer_driver_id IN ($placeholders) OR pump_driver_id IN ($placeholders))
+                           $caravan_hisabi_date_condition";
+            
+            $overtime_params = array_merge($mixer_driver_ids, $mixer_driver_ids, $caravan_hisabi_date_params);
+            
+            $stmt = $pdo->prepare($overtime_sql);
+            $stmt->execute($overtime_params);
+            $overtime_result = $stmt->fetch(PDO::FETCH_ASSOC);
+            $receipt_count = intval($overtime_result['count'] ?? 0);
+            
+            // Calculate overtime amount: receipt count × overtime rate
+            $caravan_hisabi_iqd = $receipt_count * $overtime_rate;
+        } catch (Exception $e) {
+            error_log("Error calculating caravan hisabi: " . $e->getMessage());
+            // Fallback: try with created_at only
+            try {
+                $overtime_sql = "SELECT COUNT(DISTINCT id) as count 
+                               FROM concrete_receipts 
+                               WHERE (mixer_driver_id IN ($placeholders) OR pump_driver_id IN ($placeholders))
+                               AND created_at BETWEEN ? AND ?";
+                
+                $date_start = $caravan_hisabi_date_params[0] . ' 00:00:00';
+                $date_end = (count($caravan_hisabi_date_params) > 1 ? $caravan_hisabi_date_params[1] : $caravan_hisabi_date_params[0]) . ' 23:59:59';
+                
+                $overtime_params = array_merge($mixer_driver_ids, $mixer_driver_ids, [$date_start, $date_end]);
+                
+                $stmt = $pdo->prepare($overtime_sql);
+                $stmt->execute($overtime_params);
+                $overtime_result = $stmt->fetch(PDO::FETCH_ASSOC);
+                $receipt_count = intval($overtime_result['count'] ?? 0);
+                
+                $caravan_hisabi_iqd = $receipt_count * $overtime_rate;
+            } catch (Exception $e2) {
+                error_log("Error calculating caravan hisabi (fallback): " . $e2->getMessage());
+            }
+        }
+    }
+    
+    // Convert IQD to USD
     $caravan_hisabi_usd = ($usd_iqd_rate > 0) ? ($caravan_hisabi_iqd / ($usd_iqd_rate / 100)) : 0;
 
     // Debug: Log key variables
