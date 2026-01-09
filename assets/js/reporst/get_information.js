@@ -51,6 +51,13 @@ function formatMaterialConsumption(value, unit) {
     return `${value.toFixed(2)} ${unit}`;
 }
 
+// Function to format gas consumption values (liters)
+function formatGasConsumption(liters) {
+    if (liters === 0) return '0 لیتر';
+    if (liters < 1000) return `${liters.toFixed(0)} لیتر`;
+    return `${(liters / 1000).toFixed(2)} هەزار لیتر`;
+}
+
 // Function to get stock status text
 function getStockStatusText(currentStock) {
     if (!currentStock || Object.keys(currentStock).length === 0) {
@@ -539,6 +546,24 @@ function renderDashboardCards(data) {
             cardClass: 'purchase-materials-card',
             value: formatCurrency(data.data?.raw_material_sales?.cost_usd || 0, 'USD'),
             subtitle: 'تێچووی مەوادی خامە فرۆشراوەکان (چەو، لم، چیمەنتۆ، دەرمان، گاز)'
+        },
+        // Gas Consumption Card
+        {
+            key: 'gas_consumption',
+            label: 'بەکارهێنانی گاز',
+            icon: 'fa-gas-pump',
+            cardClass: 'material-consumption-card',
+            value: formatGasConsumption(data.data?.gas_consumption?.total_liters || 0),
+            subtitle: `گاز بەکارهاتوو لە سەیارەکان: ${formatNumber(data.data?.gas_consumption?.liters_from_expenses || 0)} لیتر + گاز فرۆشراو: ${formatNumber(data.data?.gas_consumption?.liters_from_sales || 0)} لیتر`
+        },
+        // Gas Cost Card
+        {
+            key: 'gas_consumption_cost',
+            label: 'کۆی نرخی گازی بەکارهاتوو',
+            icon: 'fa-dollar-sign',
+            cardClass: 'purchase-materials-card',
+            value: formatCurrency(data.data?.gas_consumption?.cost_usd || 0, 'USD'),
+            subtitle: 'کۆی نرخی گازی بەکارهاتوو لە سەیارەکان'
         }
     ];
 
