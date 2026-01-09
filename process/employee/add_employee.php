@@ -36,7 +36,16 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 try {
     $name = trim($_POST['name'] ?? '');
     $mobile = trim($_POST['mobile'] ?? '');
-    $role = trim($_POST['role'] ?? '');
+    
+    // Handle multiple roles - convert array to comma-separated string
+    $roles = $_POST['role'] ?? [];
+    if (is_array($roles)) {
+        $roles = array_filter(array_map('trim', $roles)); // Remove empty values
+        $role = implode(',', $roles);
+    } else {
+        $role = trim($roles ?? '');
+    }
+    
     $salary = trim($_POST['salary'] ?? '');
     $bonus = floatval($_POST['bonus'] ?? 0);
     $status = trim($_POST['status'] ?? 'active');
@@ -60,7 +69,7 @@ try {
 
     if (empty($role)) {
         error_log('Employee role is empty');
-        echo json_encode(['success' => false, 'message' => 'پۆستی کارمەند پێویستە!']);
+        echo json_encode(['success' => false, 'message' => 'تکایە لانیکەم یەک ڕۆڵ هەڵبژێرە!']);
         exit;
     }
 

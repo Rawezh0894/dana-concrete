@@ -137,15 +137,23 @@ if (!hasPermission('view_employee')) {
           </div>
           <div class="mb-3">
             <label for="employee_role" class="form-label">ڕۆڵ</label>
-            <select class="form-select" id="employee_role" name="role" required>
-              <option value="">-- هەلبژێرە --</option>
-              <option value="شۆفێر">شۆفێر</option>
-              <option value="موحاسیب">موحاسیب</option>
-              <option value="وەکیل">وەکیل</option>
-              <option value="پاسەوان">پاسەوان</option>
+            <select class="form-select" id="employee_role" name="role[]" multiple required size="8" style="min-height: 150px;">
+              <option value="حەرەس(پاسەوان)">حەرەس(پاسەوان)</option>
+              <option value="شۆفێری میکسەر">شۆفێری میکسەر</option>
+              <option value="شۆفێری پەمپ">شۆفێری پەمپ</option>
+              <option value="مساعید پەمپ">مساعید پەمپ</option>
+              <option value="مەسوول سایەق">مەسوول سایەق</option>
+              <option value="جۆکەر">جۆکەر</option>
+              <option value="سێنتڕاڵ">سێنتڕاڵ</option>
               <option value="فیتەر">فیتەر</option>
-              <option value="موساعید">موساعید</option>
+              <option value="مساعید مەعمەل">مساعید مەعمەل</option>
+              <option value="شێف (چێشتلێنەر)">شێف (چێشتلێنەر)</option>
+              <option value="بەڕێوەبەر">بەڕێوەبەر</option>
+              <option value="ژمێریار">ژمێریار</option>
+              <option value="وەکیل">وەکیل</option>
+              <option value="سایەق شۆفڵ">سایەق شۆفڵ</option>
             </select>
+            <small class="form-text text-muted">بۆ هەڵبژاردنی چەند ڕۆڵ، دوگمەی Ctrl (Windows) یان Cmd (Mac) بگرە و کلیک بکە</small>
           </div>
           <div class="mb-3">
             <label for="employee_salary" class="form-label">موچە</label>
@@ -194,14 +202,23 @@ if (!hasPermission('view_employee')) {
           </div>
           <div class="mb-3">
             <label for="edit_employee_role" class="form-label">ڕۆڵ</label>
-            <select class="form-select" id="edit_employee_role" name="role" required>
-              <option value="شۆفێر">شۆفێر</option>
-              <option value="موحاسیب">موحاسیب</option>
-              <option value="وەکیل">وەکیل</option>
-              <option value="پاسەوان">پاسەوان</option>
+            <select class="form-select" id="edit_employee_role" name="role[]" multiple required size="8" style="min-height: 150px;">
+              <option value="حەرەس(پاسەوان)">حەرەس(پاسەوان)</option>
+              <option value="شۆفێری میکسەر">شۆفێری میکسەر</option>
+              <option value="شۆفێری پەمپ">شۆفێری پەمپ</option>
+              <option value="مساعید پەمپ">مساعید پەمپ</option>
+              <option value="مەسوول سایەق">مەسوول سایەق</option>
+              <option value="جۆکەر">جۆکەر</option>
+              <option value="سێنتڕاڵ">سێنتڕاڵ</option>
               <option value="فیتەر">فیتەر</option>
-              <option value="موساعید">موساعید</option>
+              <option value="مساعید مەعمەل">مساعید مەعمەل</option>
+              <option value="شێف (چێشتلێنەر)">شێف (چێشتلێنەر)</option>
+              <option value="بەڕێوەبەر">بەڕێوەبەر</option>
+              <option value="ژمێریار">ژمێریار</option>
+              <option value="وەکیل">وەکیل</option>
+              <option value="سایەق شۆفڵ">سایەق شۆفڵ</option>
             </select>
+            <small class="form-text text-muted">بۆ هەڵبژاردنی چەند ڕۆڵ، دوگمەی Ctrl (Windows) یان Cmd (Mac) بگرە و کلیک بکە</small>
           </div>
           <div class="mb-3">
             <label for="edit_employee_salary" class="form-label">موچە</label>

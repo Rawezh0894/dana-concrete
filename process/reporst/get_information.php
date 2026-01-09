@@ -718,10 +718,12 @@ try {
     $total_fixed_iqd = $stmt->fetchColumn() ?: 0;
     $employee_stats['total_fixed_usd'] = ($usd_iqd_rate > 0) ? ($total_fixed_iqd / ($usd_iqd_rate / 100)) : 0;
 
-    $stmt = $pdo->query("SELECT COUNT(*) as drivers FROM employees WHERE role = 'شۆفێر'");
+    // Count drivers - check for any role containing 'شۆفێر' (supports multiple roles)
+    $stmt = $pdo->query("SELECT COUNT(*) as drivers FROM employees WHERE role LIKE '%شۆفێر%' OR role LIKE '%سایەق%'");
     $employee_stats['drivers'] = $stmt->fetchColumn();
     
-    $stmt = $pdo->query("SELECT COUNT(*) as accountants FROM employees WHERE role = 'موحاسیب'");
+    // Count accountants - check for 'ژمێریار' or 'موحاسیب' (supports multiple roles)
+    $stmt = $pdo->query("SELECT COUNT(*) as accountants FROM employees WHERE role LIKE '%ژمێریار%' OR role LIKE '%موحاسیب%'");
     $employee_stats['accountants'] = $stmt->fetchColumn();
     
     // Car Reports

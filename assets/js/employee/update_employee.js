@@ -28,7 +28,21 @@ $(function() {
         $('#edit_employee_id').val(id);
         $('#edit_employee_name').val(name);
         $('#edit_employee_mobile').val(mobile);
-        $('#edit_employee_role').val(role);
+        
+        // Handle multiple roles - split by comma if it's a string
+        let rolesArray = [];
+        if (typeof role === 'string' && role.includes(',')) {
+            rolesArray = role.split(',').map(r => r.trim()).filter(r => r);
+        } else if (role) {
+            rolesArray = [role];
+        }
+        // Clear previous selections
+        $('#edit_employee_role').val(null);
+        // Set multiple selected roles
+        if (rolesArray.length > 0) {
+            $('#edit_employee_role').val(rolesArray);
+        }
+        
         $('#edit_employee_salary').val(salary);
         $('#edit_employee_bonus').val(bonus);
         $('#edit_employee_status').val(status);
@@ -53,6 +67,13 @@ $(function() {
         var mobile = $('#edit_employee_mobile').val().trim();
         if (!/^07\d{9}$/.test(mobile)) {
             swalAlert('هەڵە', 'ژمارەی مۆبایل دەبێت بە 07 دەست پێبکات و 11 ژمارە بێت.', 'error');
+            return;
+        }
+        
+        // Validate that at least one role is selected
+        var selectedRoles = $('#edit_employee_role').val();
+        if (!selectedRoles || selectedRoles.length === 0) {
+            swalAlert('هەڵە', 'تکایە لانیکەم یەک ڕۆڵ هەڵبژێرە!', 'error');
             return;
         }
         

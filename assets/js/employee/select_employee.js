@@ -64,11 +64,26 @@ $(function () {
                 const rawSalary = emp.salary;
                 const rawBonus = emp.bonus || 0;
                 const rawStatus = emp.status || 'active'; // Keep original English status for data attribute
+                const rawRole = emp.role || ''; // Store original role value before modifying
+                
                 emp.salary = formatSalary(emp.salary);
                 emp.bonus = formatSalary(rawBonus);
                 emp.status = statusMap[emp.status] || emp.status; // Display Kurdish status in table
+                
+                // Handle multiple roles - display them nicely
+                let roleDisplay = rawRole;
+                if (typeof roleDisplay === 'string' && roleDisplay.includes(',')) {
+                    // If comma-separated, show with badges
+                    const roles = roleDisplay.split(',').map(r => r.trim()).filter(r => r);
+                    roleDisplay = roles.map(r => `<span class="badge bg-secondary me-1">${r}</span>`).join('');
+                } else if (roleDisplay) {
+                    // Single role - also show as badge for consistency
+                    roleDisplay = `<span class="badge bg-secondary">${roleDisplay}</span>`;
+                }
+                emp.role = roleDisplay;
+                
                 emp.actions = `
-                    <button class="btn btn-sm btn-primary edit-employee" data-id="${emp.id}" data-name="${emp.name}" data-mobile="${emp.mobile}" data-role="${emp.role}" data-salary="${rawSalary}" data-bonus="${rawBonus}" data-status="${rawStatus}"><i class="fa fa-edit"></i></button>
+                    <button class="btn btn-sm btn-primary edit-employee" data-id="${emp.id}" data-name="${emp.name}" data-mobile="${emp.mobile}" data-role="${rawRole}" data-salary="${rawSalary}" data-bonus="${rawBonus}" data-status="${rawStatus}"><i class="fa fa-edit"></i></button>
                     <button class="btn btn-sm btn-danger delete-employee" data-id="${emp.id}"><i class="fa fa-trash"></i></button>
                 `;
             });

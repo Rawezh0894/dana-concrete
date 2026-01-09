@@ -24,6 +24,13 @@ $(function() {
         submitBtn.prop('disabled', true);
         submitBtn.html('<span class="spinner-border spinner-border-sm me-2"></span>چاوەڕوان بە...');
         
+        // Validate that at least one role is selected
+        var selectedRoles = $('#employee_role').val();
+        if (!selectedRoles || selectedRoles.length === 0) {
+            swalAlert('هەڵە', 'تکایە لانیکەم یەک ڕۆڵ هەڵبژێرە!', 'error');
+            return;
+        }
+        
         var formData = $(this).serialize();
         $.post('../process/employee/add_employee.php', formData, function(response) {
             if (response.success) {

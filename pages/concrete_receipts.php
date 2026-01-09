@@ -44,7 +44,9 @@ usort($recipients, function($a, $b) {
 $cars = $pdo->query("SELECT id, name FROM cars")->fetchAll(PDO::FETCH_ASSOC);
 $employees = $pdo->query("SELECT id, name, role FROM employees")->fetchAll(PDO::FETCH_ASSOC);
 $drivers = array_filter($employees, function ($emp) {
-  return $emp['role'] === 'شۆفێر'; });
+  // Check if role contains 'شۆفێر' or 'سایەق' (supports multiple roles)
+  return strpos($emp['role'], 'شۆفێر') !== false || strpos($emp['role'], 'سایەق') !== false;
+});
 $mixer_cars = array_filter($cars, function ($car) {
   return preg_match('/^m/i', trim($car['name'])); });
 $pump_cars = array_filter($cars, function ($car) {

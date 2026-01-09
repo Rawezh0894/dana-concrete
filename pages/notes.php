@@ -45,7 +45,8 @@ usort($recipients, function($a, $b) {
 });
 $mixer_cars = $pdo->query("SELECT id, name FROM cars WHERE name LIKE 'M%' ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 $pump_cars = $pdo->query("SELECT id, name FROM cars WHERE name LIKE 'P%' ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
-$all_drivers = $pdo->query("SELECT id, name FROM employees WHERE role = 'شۆفێر' ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
+// Get all drivers - check for any role containing 'شۆفێر' or 'سایەق' (supports multiple roles)
+$all_drivers = $pdo->query("SELECT id, name FROM employees WHERE role LIKE '%شۆفێر%' OR role LIKE '%سایەق%' ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 
 // Filter drivers for pump (only: بازیان, بەرزان, شاڵاو, سەربەست)
 $pump_driver_names = ['بازیان', 'بەرزان', 'شاڵاو', 'سەربەست'];
