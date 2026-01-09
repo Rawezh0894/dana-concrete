@@ -56,13 +56,18 @@ $pump_cars = array_filter($cars, function ($car) {
 $pump_names = ['بەرزان', 'شاڵاو', 'سەربەست', 'بازیان', 'پشتیوان'];
 $mixer_names = ['بەرزان', 'شاڵاو', 'سەربەست', 'بازیان', 'طارق', 'عماد', 'علاوی', 'ئامانج', 'احمد(ابو روەیدا)', 'وشیار', 'هۆژین', 'هاوکار', 'عادل', 'ڕزگار'];
 
-// Filter employees for pump and mixer
-$pump_drivers = array_filter($employees, function ($emp) use ($pump_names) {
-  return $emp['role'] === 'شۆفێر' && in_array(trim($emp['name']), $pump_names, true);
-});
+// Filter employees for mixer drivers - only those with role "شۆفێری میکسەر" or "جۆکەر"
 $mixer_drivers = array_filter($employees, function ($emp) {
-    $excluded = ['بەرزان', 'شاڵاو', 'سەربەست'];
-    return $emp['role'] === 'شۆفێر' && !in_array(trim($emp['name']), $excluded, true);
+    $role = $emp['role'] ?? '';
+    // Check if role contains 'شۆفێری میکسەر' or 'جۆکەر' (supports multiple roles)
+    return (strpos($role, 'شۆفێری میکسەر') !== false || strpos($role, 'جۆکەر') !== false);
+});
+
+// Filter employees for pump drivers - only those with role "شۆفێری پەمپ" or "مساعید پەمپ" or "جۆکەر"
+$pump_drivers = array_filter($employees, function ($emp) {
+    $role = $emp['role'] ?? '';
+    // Check if role contains 'شۆفێری پەمپ' or 'مساعید پەمپ' or 'جۆکەر' (supports multiple roles)
+    return (strpos($role, 'شۆفێری پەمپ') !== false || strpos($role, 'مساعید پەمپ') !== false || strpos($role, 'جۆکەر') !== false);
 });
 ?>
 <!DOCTYPE html>
