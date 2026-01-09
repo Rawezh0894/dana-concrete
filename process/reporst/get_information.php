@@ -205,9 +205,31 @@ try {
     $stmt = $pdo->query($sales_query);
     while ($row = $stmt->fetch()) {
         if ($row['payment_type'] === 'نەقد') {
-            $sales['cash']['usd'] = $row['usd'] ?? 0;
+            $sales['cash']['usd'] = ($sales['cash']['usd'] ?? 0) + ($row['usd'] ?? 0);
         } elseif ($row['payment_type'] === 'قەرز') {
-            $sales['credit']['usd'] = $row['usd'] ?? 0;
+            $sales['credit']['usd'] = ($sales['credit']['usd'] ?? 0) + ($row['usd'] ?? 0);
+        }
+    }
+    
+    // Add raw material sales
+    $raw_material_sales_query = "SELECT payment_type, SUM(total_price) as usd FROM raw_material_sales WHERE order_date BETWEEN '$from_date' AND '$to_date' GROUP BY payment_type";
+    $stmt = $pdo->query($raw_material_sales_query);
+    while ($row = $stmt->fetch()) {
+        if ($row['payment_type'] === 'نەقد') {
+            $sales['cash']['usd'] = ($sales['cash']['usd'] ?? 0) + ($row['usd'] ?? 0);
+        } elseif ($row['payment_type'] === 'قەرز') {
+            $sales['credit']['usd'] = ($sales['credit']['usd'] ?? 0) + ($row['usd'] ?? 0);
+        }
+    }
+    
+    // Add other sales
+    $other_sales_query = "SELECT payment_type, SUM(total_price) as usd FROM other_sales WHERE order_date BETWEEN '$from_date' AND '$to_date' GROUP BY payment_type";
+    $stmt = $pdo->query($other_sales_query);
+    while ($row = $stmt->fetch()) {
+        if ($row['payment_type'] === 'نەقد') {
+            $sales['cash']['usd'] = ($sales['cash']['usd'] ?? 0) + ($row['usd'] ?? 0);
+        } elseif ($row['payment_type'] === 'قەرز') {
+            $sales['credit']['usd'] = ($sales['credit']['usd'] ?? 0) + ($row['usd'] ?? 0);
         }
     }
 
@@ -312,6 +334,16 @@ try {
     $stmt = $pdo->query("SELECT SUM(total_price) as total_sales FROM sales");
     $row = $stmt->fetch();
     $total_sales = $row['total_sales'] ?? 0;
+    
+    // Add raw material sales
+    $stmt = $pdo->query("SELECT SUM(total_price) as total_raw_material_sales FROM raw_material_sales");
+    $row = $stmt->fetch();
+    $total_sales += ($row['total_raw_material_sales'] ?? 0);
+    
+    // Add other sales
+    $stmt = $pdo->query("SELECT SUM(total_price) as total_other_sales FROM other_sales");
+    $row = $stmt->fetch();
+    $total_sales += ($row['total_other_sales'] ?? 0);
 
     $total_expenses = $other_expenses_usd; // already in USD
     $total_purchases = 0;
@@ -441,8 +473,36 @@ try {
     // Calculate Income based on the formula:
     // داهات = کۆی نرخی فرۆشتن + کۆی داهاتی گاز - کۆی نرخی کڕین(purchase) - کۆی داشکاندن - کۆی خەرجی تر (expense_type = خەرجی تر) - کۆی نرخی کڕینی کاڵا(purchase_material) - کۆی خەرجی کارمەندان
     
-    // Get total sales (cash + credit)
+    // Get total sales (cash + credit) - concrete sales
     $total_sales_usd = $current_period_sales;
+    
+    // Get raw material sales (cash + credit)
+    try {
+        $raw_material_sales_query = "SELECT 
+            SUM(total_price) as raw_material_sales_usd
+            FROM raw_material_sales 
+            WHERE order_date BETWEEN ? AND ?";
+        $stmt = $pdo->prepare($raw_material_sales_query);
+        $stmt->execute([$from_date, $to_date]);
+        $raw_material_sales_usd = $stmt->fetchColumn() ?: 0;
+    } catch (Exception $e) {
+        error_log("Error calculating raw material sales: " . $e->getMessage());
+        $raw_material_sales_usd = 0;
+    }
+    
+    // Get other sales (iron, leftovers, etc.) (cash + credit)
+    try {
+        $other_sales_query = "SELECT 
+            SUM(total_price) as other_sales_usd
+            FROM other_sales 
+            WHERE order_date BETWEEN ? AND ?";
+        $stmt = $pdo->prepare($other_sales_query);
+        $stmt->execute([$from_date, $to_date]);
+        $other_sales_usd = $stmt->fetchColumn() ?: 0;
+    } catch (Exception $e) {
+        error_log("Error calculating other sales: " . $e->getMessage());
+        $other_sales_usd = 0;
+    }
     
     // Get gas income (from other_expenses where expense_type = 'بەکارهێنانی گاز')
     try {
@@ -532,11 +592,13 @@ try {
         $employee_payments_usd = 0;
     }
     
-    // Calculate total income
-    $total_income_usd = $total_sales_usd + $gas_income_usd - $total_purchases_usd - $total_discounts - $other_expenses_usd - $purchase_materials_usd - $employee_payments_usd;
+    // Calculate total income (including raw material sales and other sales)
+    $total_income_usd = $total_sales_usd + $raw_material_sales_usd + $other_sales_usd + $gas_income_usd - $total_purchases_usd - $total_discounts - $other_expenses_usd - $purchase_materials_usd - $employee_payments_usd;
     
     // Debug: Log income calculation breakdown
     error_log("Debug - Income calculation: sales=" . $total_sales_usd . 
+              ", raw_material_sales=" . $raw_material_sales_usd .
+              ", other_sales=" . $other_sales_usd .
               ", gas_income=" . $gas_income_usd . 
               ", purchases=" . $total_purchases_usd . 
               ", discounts=" . $total_discounts . 
@@ -802,7 +864,7 @@ try {
         $year = date('Y', strtotime("-$i months"));
         $month = date('m', strtotime("-$i months"));
         
-        // Monthly sales - using order_date instead of date
+        // Monthly sales - using order_date instead of date (concrete sales)
         $stmt = $pdo->prepare("
             SELECT SUM(total_price) as total_sales 
         FROM sales
@@ -810,6 +872,27 @@ try {
         ");
         $stmt->execute([$date]);
         $monthly_sales = $stmt->fetchColumn() ?: 0;
+        
+        // Monthly raw material sales
+        $stmt = $pdo->prepare("
+            SELECT SUM(total_price) as total_raw_material_sales 
+            FROM raw_material_sales
+            WHERE DATE_FORMAT(order_date, '%Y-%m') = ?
+        ");
+        $stmt->execute([$date]);
+        $monthly_raw_material_sales = $stmt->fetchColumn() ?: 0;
+        
+        // Monthly other sales
+        $stmt = $pdo->prepare("
+            SELECT SUM(total_price) as total_other_sales 
+            FROM other_sales
+            WHERE DATE_FORMAT(order_date, '%Y-%m') = ?
+        ");
+        $stmt->execute([$date]);
+        $monthly_other_sales = $stmt->fetchColumn() ?: 0;
+        
+        // Total monthly sales (concrete + raw materials + other)
+        $monthly_sales = $monthly_sales + $monthly_raw_material_sales + $monthly_other_sales;
         
         // Monthly expenses - using date column
         $stmt = $pdo->prepare("
@@ -948,6 +1031,8 @@ try {
                 'usd' => $total_income_usd,
                 'breakdown' => [
                     'sales' => $total_sales_usd,
+                    'raw_material_sales' => $raw_material_sales_usd,
+                    'other_sales' => $other_sales_usd,
                     'gas_income' => $gas_income_usd,
                     'purchases' => $total_purchases_usd,
                     'discounts' => $total_discounts,
@@ -1063,14 +1148,31 @@ try {
         if ($row['payment_type'] === 'نەقد') $sales_by_payment_type['cash'] = (float)$row['total'];
         if ($row['payment_type'] === 'قەرز') $sales_by_payment_type['credit'] = (float)$row['total'];
     }
-    // 5. Income by month and year (all years, all months with sales)
+    // 5. Income by month and year (all years, all months with sales - including all types)
     $income_by_month_year = [];
+    // Concrete sales
     $stmt = $pdo->query("SELECT YEAR(order_date) as year, MONTH(order_date) as month, SUM(total_price) as income FROM sales GROUP BY year, month ORDER BY year, month");
     while ($row = $stmt->fetch()) {
         $y = $row['year'];
         $m = $row['month'];
         if (!isset($income_by_month_year[$y])) $income_by_month_year[$y] = [];
-        $income_by_month_year[$y][str_pad($m,2,'0',STR_PAD_LEFT)] = (float)$row['income'];
+        $income_by_month_year[$y][str_pad($m,2,'0',STR_PAD_LEFT)] = (float)($income_by_month_year[$y][str_pad($m,2,'0',STR_PAD_LEFT)] ?? 0) + (float)$row['income'];
+    }
+    // Raw material sales
+    $stmt = $pdo->query("SELECT YEAR(order_date) as year, MONTH(order_date) as month, SUM(total_price) as income FROM raw_material_sales GROUP BY year, month ORDER BY year, month");
+    while ($row = $stmt->fetch()) {
+        $y = $row['year'];
+        $m = $row['month'];
+        if (!isset($income_by_month_year[$y])) $income_by_month_year[$y] = [];
+        $income_by_month_year[$y][str_pad($m,2,'0',STR_PAD_LEFT)] = (float)($income_by_month_year[$y][str_pad($m,2,'0',STR_PAD_LEFT)] ?? 0) + (float)$row['income'];
+    }
+    // Other sales
+    $stmt = $pdo->query("SELECT YEAR(order_date) as year, MONTH(order_date) as month, SUM(total_price) as income FROM other_sales GROUP BY year, month ORDER BY year, month");
+    while ($row = $stmt->fetch()) {
+        $y = $row['year'];
+        $m = $row['month'];
+        if (!isset($income_by_month_year[$y])) $income_by_month_year[$y] = [];
+        $income_by_month_year[$y][str_pad($m,2,'0',STR_PAD_LEFT)] = (float)($income_by_month_year[$y][str_pad($m,2,'0',STR_PAD_LEFT)] ?? 0) + (float)$row['income'];
     }
 
     // Other expense persons breakdown by payment_type
