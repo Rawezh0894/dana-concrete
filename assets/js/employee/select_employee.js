@@ -24,7 +24,18 @@ $(function () {
         }
     }
 
-    function loadEmployees() {
+    // Store current page for pagination preservation
+    let currentEmployeePage = 1;
+    
+    function loadEmployees(preservePage = false) {
+        // Get current page from pagination if preservePage is true
+        if (preservePage) {
+            const activePageBtn = document.querySelector('.table-pagination .btn-success.active');
+            if (activePageBtn) {
+                currentEmployeePage = parseInt(activePageBtn.textContent) || 1;
+            }
+        }
+        
         TableController.showLoading('#employeeTable', ['#', 'name', 'mobile', 'role', 'salary', 'bonus', 'status', 'actions']);
         $.get('../process/employee/select_employee.php', function (res) {
             console.log('Response from select_employee.php:', res);
@@ -87,7 +98,19 @@ $(function () {
                     <button class="btn btn-sm btn-danger delete-employee" data-id="${emp.id}"><i class="fa fa-trash"></i></button>
                 `;
             });
-            TableController.renderWithPagination('#employeeTable', res.employees, ['#', 'name', 'mobile', 'role', 'salary', 'bonus', 'status', 'actions']);
+            // Preserve current page if requested
+            let paginationOptions = {};
+            if (preservePage && currentEmployeePage > 1) {
+                // Calculate if current page still exists after data changes
+                const pageSize = 10; // Default page size
+                const totalPages = Math.ceil(res.employees.length / pageSize);
+                // If current page doesn't exist anymore, go to last page
+                if (currentEmployeePage > totalPages && totalPages > 0) {
+                    currentEmployeePage = totalPages;
+                }
+                paginationOptions = { currentPage: currentEmployeePage };
+            }
+            TableController.renderWithPagination('#employeeTable', res.employees, ['#', 'name', 'mobile', 'role', 'salary', 'bonus', 'status', 'actions'], paginationOptions);
         }, 'json').fail(function(xhr, status, error) {
             console.error('AJAX Error:', status, error);
             console.error('Response:', xhr.responseText);

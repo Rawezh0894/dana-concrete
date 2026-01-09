@@ -31,7 +31,7 @@ $(function() {
                 
                 $.post('../process/employee/delete_employee.php', {id: id}, function(response) {
                     if (response.success) {
-                        if (window.loadEmployees) window.loadEmployees();
+                        if (window.loadEmployees) window.loadEmployees(true); // Preserve current page
                         swalAlert('سەرکەوتوو', 'کارمەند سڕایەوە!', 'success');
                     } else {
                         swalAlert('هەڵە', response.message || 'هەڵەیەک هەیە', 'error');

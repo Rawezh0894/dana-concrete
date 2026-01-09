@@ -88,7 +88,7 @@ $(function() {
         $.post('../process/employee/update_employee.php', formData, function(response) {
             if (response.success) {
                 $('#editEmployeeModal').modal('hide');
-                if (window.loadEmployees) window.loadEmployees();
+                if (window.loadEmployees) window.loadEmployees(true); // Preserve current page
                 swalAlert('سەرکەوتوو', 'زانیاری کارمەند نوێکرایەوە!', 'success');
             } else {
                 swalAlert('هەڵە', response.message || 'هەڵەیەک هەیە', 'error');

@@ -152,6 +152,7 @@ if (!hasPermission('view_employee')) {
               <option value="ژمێریار">ژمێریار</option>
               <option value="وەکیل">وەکیل</option>
               <option value="سایەق شۆفڵ">سایەق شۆفڵ</option>
+              <option value="موکەعيب">موکەعەب چی</option>
             </select>
             <small class="form-text text-muted">بۆ هەڵبژاردنی چەند ڕۆڵ، دوگمەی Ctrl (Windows) یان Cmd (Mac) بگرە و کلیک بکە</small>
           </div>
@@ -217,6 +218,7 @@ if (!hasPermission('view_employee')) {
               <option value="ژمێریار">ژمێریار</option>
               <option value="وەکیل">وەکیل</option>
               <option value="سایەق شۆفڵ">سایەق شۆفڵ</option>
+              <option value="موکەعيب">موکەعەب چی</option>
             </select>
             <small class="form-text text-muted">بۆ هەڵبژاردنی چەند ڕۆڵ، دوگمەی Ctrl (Windows) یان Cmd (Mac) بگرە و کلیک بکە</small>
           </div>
