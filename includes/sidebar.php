@@ -8,8 +8,11 @@ $is_materials_active = in_array($current_page, $materials_pages);
 $accounts_pages = ['add_company.php', 'list_company.php'];
 $is_accounts_active = in_array($current_page, $accounts_pages);
 // Vouchers dropdown
-$vouchers_pages = ['add_purchase.php', 'add_sale.php'];
+$vouchers_pages = ['add_purchase.php', 'add_sale.php', 'raw_material_sales.php', 'cash_sales.php', 'credit_sales.php', 'recycle_bin_purchases.php', 'recycle_bin_sales.php'];
 $is_vouchers_active = in_array($current_page, $vouchers_pages);
+// System Management dropdown
+$system_pages = ['users.php', 'notifications.php', 'settings.php'];
+$is_system_active = in_array($current_page, $system_pages);
 // Single nav-links
 $dashboard_pages = ['dashboard.php'];
 $users_pages = ['users.php'];
@@ -150,15 +153,25 @@ $logout_pages = ['logout.php'];
         <?php endif; ?>
       </ul>
     </li>
-    <!-- System Management at the end -->
-    <?php if (hasPermission('view_users')): ?>
-      <li><a href="../pages/users.php" class="sidebar-link<?php if($current_page == 'users.php') echo ' active'; ?>"><i class="bi bi-people me-2"></i> بەکارهێنەران</a></li>
-    <?php endif; ?>
-    <?php if (hasPermission('view_notifications')): ?>
-      <li><a href="../pages/notifications.php" class="sidebar-link<?php if($current_page == 'notifications.php') echo ' active'; ?>"><i class="bi bi-bell me-2"></i> ئاگادارکردنەوەکان</a></li>
-    <?php endif; ?>
-    <!-- <?php if (hasPermission('view_users')): ?>
-      <li><a href="../pages/database_backup.php" class="sidebar-link<?php if($current_page == 'database_backup.php') echo ' active'; ?>"><i class="bi bi-database me-2"></i> باک ئەپی داتابەیس</a></li>
-    <?php endif; ?> -->
+    <!-- System Management Dropdown -->
+    <li class="sidebar-group">
+      <button class="sidebar-group-toggle d-flex align-items-center w-100" data-bs-toggle="collapse" data-bs-target="#systemMenu" aria-expanded="false">
+        <i class="bi bi-gear me-2"></i> بەڕێوەبردنی سیستەم
+      </button>
+      <ul class="collapse sidebar-submenu" id="systemMenu">
+        <?php if (hasPermission('view_users')): ?>
+          <li><a href="../pages/users.php" class="sidebar-link<?php if($current_page == 'users.php') echo ' active'; ?>"><i class="bi bi-people me-2"></i> بەکارهێنەران</a></li>
+        <?php endif; ?>
+        <?php if (hasPermission('view_notifications')): ?>
+          <li><a href="../pages/notifications.php" class="sidebar-link<?php if($current_page == 'notifications.php') echo ' active'; ?>"><i class="bi bi-bell me-2"></i> ئاگادارکردنەوەکان</a></li>
+        <?php endif; ?>
+        <?php if (hasPermission('view_settings')): ?>
+          <li><a href="../pages/settings.php" class="sidebar-link<?php if($current_page == 'settings.php') echo ' active'; ?>"><i class="bi bi-sliders me-2"></i> ڕێکخستنەکان</a></li>
+        <?php endif; ?>
+        <!-- <?php if (hasPermission('view_users')): ?>
+          <li><a href="../pages/database_backup.php" class="sidebar-link<?php if($current_page == 'database_backup.php') echo ' active'; ?>"><i class="bi bi-database me-2"></i> باک ئەپی داتابەیس</a></li>
+        <?php endif; ?> -->
+      </ul>
+    </li>
   </ul>
 </aside>

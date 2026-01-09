@@ -14,7 +14,6 @@
 session_start();
 require_once '../../config/db_conected.php';
 require_once '../../config/permissions.php';
-require_once 'get_average_price.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -123,13 +122,8 @@ try {
     // Calculate total price
     $total_price = $quantity_kg * $unit_price;
 
-    // Get average cost price from PURCHASES table (not bins_silos)
-    // This follows the same logic as the reports page
-    $avgPriceData = getAveragePriceFromPurchases($pdo, $material_type);
-    $cost_price = floatval($avgPriceData['price_per_kg'] ?? 0);
-    
-    // Calculate profit - ensure same currency for comparison
-    // If material is USD type, convert cost to same basis
+    // Get average cost price from bins_silos for profit calculation
+    $cost_price = floatval($bin['average_price'] ?? 0);
     $total_cost = $quantity_kg * $cost_price;
     $profit_amount = $total_price - $total_cost;
 
