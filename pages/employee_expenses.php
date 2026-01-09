@@ -134,6 +134,14 @@ if ($bonusExists) {
                  <small class="text-muted" style="font-size: 0.7rem;">(مووچە+بەخشیش+کاروان) - (سزا+کەمکردنەوە+پێشەکی)</small>
             </div>
         </div>
+        <div class="col-12 col-md">
+            <div class="card p-3 shadow-sm border-0 d-flex flex-column align-items-center justify-content-center h-100" style="background: linear-gradient(135deg, #e1f5fe, #b3e5fc);">
+                <i class="fas fa-calendar-day fa-2x mb-2 text-primary"></i>
+                <h6 class="text-muted fw-bold">باڵانسی مووچە بە پێی ڕۆژ</h6>
+                <h4 id="daily-balance" class="mb-0 text-primary">0 د.ع</h4>
+                <small class="text-muted" style="font-size: 0.7rem;" id="daily-balance-details">هەتا ئەمڕۆ</small>
+            </div>
+        </div>
     </div>
     
     <div class="row g-3 mb-4 text-center">
