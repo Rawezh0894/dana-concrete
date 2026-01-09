@@ -11,6 +11,7 @@
 session_start();
 require_once '../../config/db_conected.php';
 require_once '../../config/permissions.php';
+require_once 'get_average_price.php';
 
 header('Content-Type: application/json; charset=utf-8');
 

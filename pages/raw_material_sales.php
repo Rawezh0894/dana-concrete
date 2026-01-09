@@ -26,16 +26,30 @@ $customers = $pdo->query("SELECT id, name FROM customers ORDER BY name")->fetchA
 // Get companies for dropdown
 $companies = $pdo->query("SELECT id, name FROM company ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 
-// Get bins/silos with available quantity
+// Get bins/silos with available quantity and average price from purchases
 $bins = $pdo->query("
     SELECT 
-        id, name, type, material_type, amount as available_quantity, average_price,
+        bs.id, bs.name, bs.type, bs.material_type, bs.amount as available_quantity,
         CASE 
-            WHEN material_type IN ('چیمەنتۆ', 'دەرمان') THEN 'دۆلار'
+            WHEN bs.material_type IN ('چیمەنتۆ', 'دەرمان') THEN 'دۆلار'
             ELSE 'دینار'
-        END as currency_type
-    FROM bins_silos 
-    ORDER BY type, name
+        END as currency_type,
+        -- Get average price from purchases table
+        COALESCE(
+            (SELECT 
+                CASE 
+                    WHEN bs.material_type IN ('چیمەنتۆ', 'دەرمان') THEN
+                        SUM(CASE WHEN p.type = 'دۆلار' THEN p.price ELSE p.amount_iqd / NULLIF(p.exchange_rate / 100, 0) END) / NULLIF(SUM(p.kg), 0)
+                    ELSE
+                        (SUM(CASE WHEN p.type = 'دۆلار' THEN p.price ELSE p.amount_iqd / NULLIF(p.exchange_rate / 100, 0) END) / NULLIF(SUM(p.kg), 0)) * (SELECT COALESCE(value, 150000) FROM settings WHERE name = 'exchange_rate' LIMIT 1) / 100
+                END
+            FROM purchases p
+            JOIN materials m ON p.material_id = m.id
+            WHERE m.name = bs.material_type AND p.kg > 0), 
+            0
+        ) as average_price
+    FROM bins_silos bs
+    ORDER BY bs.type, bs.name
 ")->fetchAll(PDO::FETCH_ASSOC);
 
 // Get exchange rate from settings

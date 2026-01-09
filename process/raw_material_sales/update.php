@@ -11,6 +11,7 @@
 session_start();
 require_once '../../config/db_conected.php';
 require_once '../../config/permissions.php';
+require_once 'get_average_price.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -143,49 +144,9 @@ try {
     // Calculate total price
     $total_price = $quantity_kg * $unit_price;
 
-    // Get average cost price from purchases table (like in reports)
-    $cost_price = 0;
-    try {
-        // Get material_id from materials table
-        $materialStmt = $pdo->prepare("SELECT id FROM materials WHERE name = ? LIMIT 1");
-        $materialStmt->execute([$material_type]);
-        $material_id = $materialStmt->fetchColumn();
-        
-        if ($material_id) {
-            // Calculate average price from purchases (same logic as reports)
-            $avgPriceQuery = "
-                SELECT 
-                    SUM(CASE 
-                        WHEN p.type = 'دۆلار' THEN p.price 
-                        ELSE p.amount_iqd / NULLIF(p.exchange_rate / 100, 0) 
-                    END) as total_usd,
-                    SUM(p.kg) as total_kg
-                FROM purchases p
-                WHERE p.material_id = ? AND p.kg > 0
-            ";
-            $avgPriceStmt = $pdo->prepare($avgPriceQuery);
-            $avgPriceStmt->execute([$material_id]);
-            $avgPriceRow = $avgPriceStmt->fetch(PDO::FETCH_ASSOC);
-            
-            if ($avgPriceRow && floatval($avgPriceRow['total_kg']) > 0) {
-                // Calculate price per kg in USD
-                $price_per_kg_usd = floatval($avgPriceRow['total_usd']) / floatval($avgPriceRow['total_kg']);
-                
-                // Convert to the currency of the material
-                if ($currency_type === 'دۆلار') {
-                    $cost_price = $price_per_kg_usd;
-                } else {
-                    // For IQD materials, convert USD to IQD using exchange rate
-                    $cost_price = $price_per_kg_usd * ($exchange_rate / 100);
-                }
-            }
-        }
-    } catch (Exception $e) {
-        error_log("Error calculating average price from purchases: " . $e->getMessage());
-        // Fallback to bins_silos average_price if purchases calculation fails
-        $cost_price = floatval($bin['average_price'] ?? 0);
-    }
-    
+    // Get average cost price from PURCHASES table (not bins_silos)
+    $avgPriceData = getAveragePriceFromPurchases($pdo, $material_type);
+    $cost_price = floatval($avgPriceData['price_per_kg'] ?? 0);
     $total_cost = $quantity_kg * $cost_price;
     $profit_amount = $total_price - $total_cost;
 
