@@ -239,6 +239,11 @@ $(document).ready(function() {
     if ($('#filter_formulas_id').length > 0) {
         enableSelect2('#filter_formulas_id', 'body');
     }
+    
+    // بۆ employee role filter - تەنها ئەگەر پەیجەکە هەبێت
+    if ($('#filter_role').length > 0) {
+        enableSelect2('#filter_role', 'body');
+    }
 });
 
 // Focus select2 search input when dropdown opens for customer select in addConcreteReceiptModal

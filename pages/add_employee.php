@@ -28,6 +28,8 @@ if (!hasPermission('view_employee')) {
     <link href="../assets/css/comon/style.css" rel="stylesheet">
     <link href="../assets/css/comon/cards.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="../assets/css/comon/select2_design.css" rel="stylesheet">
     <link href="../assets/css/kurdish-font.css" rel="stylesheet">
 </head>
 <body dir="rtl">
@@ -96,6 +98,62 @@ if (!hasPermission('view_employee')) {
                 </div>
             </div>
         </div>
+    </div>
+    <!-- Role Filter -->
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <label for="filter_role" class="form-label">فیلتەر بە ڕۆڵ</label>
+            <select class="form-select" id="filter_role" name="filter_role[]" multiple data-placeholder="هەموو ڕۆڵەکان">
+                <option value="حەرەس(پاسەوان)">حەرەس(پاسەوان)</option>
+                <option value="شۆفێری میکسەر">شۆفێری میکسەر</option>
+                <option value="شۆفێری پەمپ">شۆفێری پەمپ</option>
+                <option value="مساعید پەمپ">مساعید پەمپ</option>
+                <option value="مەسوول سایەق">مەسوول سایەق</option>
+                <option value="جۆکەر">جۆکەر</option>
+                <option value="سێنتڕاڵ">سێنتڕاڵ</option>
+                <option value="فیتەر">فیتەر</option>
+                <option value="مساعید مەعمەل">مساعید مەعمەل</option>
+                <option value="شێف (چێشتلێنەر)">شێف (چێشتلێنەر)</option>
+                <option value="بەڕێوەبەر">بەڕێوەبەر</option>
+                <option value="ژمێریار">ژمێریار</option>
+                <option value="وەکیل">وەکیل</option>
+                <option value="سایەق شۆفڵ">سایەق شۆفڵ</option>
+                <option value="موکەعيب">موکەعەب چی</option>
+            </select>
+            <small class="form-text text-muted">بۆ هەڵبژاردنی چەند ڕۆڵ، دوگمەی Ctrl (Windows) یان Cmd (Mac) بگرە و کلیک بکە</small>
+        </div>
+    </div>
+    <!-- Role Statistics Cards -->
+    <div class="row mb-4" id="role_stats_cards">
+        <!-- Role cards will be dynamically generated here -->
+    </div>
+    <!-- Role Filter -->
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <label for="filter_role" class="form-label">فیلتەر بە ڕۆڵ</label>
+            <select class="form-select" id="filter_role" name="filter_role[]" multiple data-placeholder="هەموو ڕۆڵەکان">
+                <option value="حەرەس(پاسەوان)">حەرەس(پاسەوان)</option>
+                <option value="شۆفێری میکسەر">شۆفێری میکسەر</option>
+                <option value="شۆفێری پەمپ">شۆفێری پەمپ</option>
+                <option value="مساعید پەمپ">مساعید پەمپ</option>
+                <option value="مەسوول سایەق">مەسوول سایەق</option>
+                <option value="جۆکەر">جۆکەر</option>
+                <option value="سێنتڕاڵ">سێنتڕاڵ</option>
+                <option value="فیتەر">فیتەر</option>
+                <option value="مساعید مەعمەل">مساعید مەعمەل</option>
+                <option value="شێف (چێشتلێنەر)">شێف (چێشتلێنەر)</option>
+                <option value="بەڕێوەبەر">بەڕێوەبەر</option>
+                <option value="ژمێریار">ژمێریار</option>
+                <option value="وەکیل">وەکیل</option>
+                <option value="سایەق شۆفڵ">سایەق شۆفڵ</option>
+                <option value="موکەعيب">موکەعەب چی</option>
+            </select>
+            <small class="form-text text-muted">بۆ هەڵبژاردنی چەند ڕۆڵ، دوگمەی Ctrl (Windows) یان Cmd (Mac) بگرە و کلیک بکە</small>
+        </div>
+    </div>
+    <!-- Role Statistics Cards -->
+    <div class="row mb-4" id="role_stats_cards">
+        <!-- Role cards will be dynamically generated here -->
     </div>
     <div class="table-responsive">
         <table class="table table-bordered table-hover align-middle text-center" id="employeeTable">
@@ -251,8 +309,10 @@ if (!hasPermission('view_employee')) {
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="../assets/js/swalAlert.js"></script>
 <script src="../assets/js/comon/table-controler.js"></script>
+<script src="../assets/js/comon/select2_script.js"></script>
 <script src="../assets/js/employee/add_employee.js"></script>
 <script src="../assets/js/employee/select_employee.js"></script>
 <script src="../assets/js/employee/update_employee.js"></script>

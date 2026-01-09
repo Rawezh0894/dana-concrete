@@ -116,10 +116,46 @@ try {
         ];
     }
     
+    // Calculate role statistics for active employees only
+    $role_stats = [];
+    $all_roles = [
+        'حەرەس(پاسەوان)',
+        'شۆفێری میکسەر',
+        'شۆفێری پەمپ',
+        'مساعید پەمپ',
+        'مەسوول سایەق',
+        'جۆکەر',
+        'سێنتڕاڵ',
+        'فیتەر',
+        'مساعید مەعمەل',
+        'شێف (چێشتلێنەر)',
+        'بەڕێوەبەر',
+        'ژمێریار',
+        'وەکیل',
+        'سایەق شۆفڵ',
+        'موکەعيب'
+    ];
+    
+    foreach ($all_roles as $role) {
+        $count = 0;
+        foreach ($employees as $emp) {
+            $emp_status = $emp['status'] ?? 'active';
+            if ($emp_status === 'active') {
+                $emp_roles = $emp['role'] ?? '';
+                // Check if employee has this role (supports multiple roles as comma-separated)
+                if (strpos($emp_roles, $role) !== false) {
+                    $count++;
+                }
+            }
+        }
+        $role_stats[$role] = $count;
+    }
+    
     error_log('Employees retrieved successfully: Count=' . count($employees));
     echo json_encode([
         'employees' => $employees,
-        'summary' => $summary
+        'summary' => $summary,
+        'role_stats' => $role_stats
     ]);
     
 } catch (PDOException $e) {

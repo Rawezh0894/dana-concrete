@@ -24,6 +24,72 @@ $(function () {
         }
     }
 
+    function updateRoleCards(roleStats) {
+        if (!roleStats) return;
+        
+        const roleCardsContainer = $('#role_stats_cards');
+        roleCardsContainer.empty();
+        
+        const roleColors = [
+            'card-gradient-info',
+            'card-gradient-success',
+            'card-gradient-warning',
+            'card-gradient-purple',
+            'card-gradient-info',
+            'card-gradient-success',
+            'card-gradient-warning',
+            'card-gradient-purple',
+            'card-gradient-info',
+            'card-gradient-success',
+            'card-gradient-warning',
+            'card-gradient-purple',
+            'card-gradient-info',
+            'card-gradient-success',
+            'card-gradient-warning'
+        ];
+        
+        const roleIcons = [
+            'fa-shield-alt',
+            'fa-truck',
+            'fa-truck',
+            'fa-user-tie',
+            'fa-user-cog',
+            'fa-user-friends',
+            'fa-cog',
+            'fa-tools',
+            'fa-user-tie',
+            'fa-utensils',
+            'fa-user-tie',
+            'fa-calculator',
+            'fa-gavel',
+            'fa-truck',
+            'fa-user'
+        ];
+        
+        let cardIndex = 0;
+        Object.entries(roleStats).forEach(([role, count]) => {
+            if (count > 0 || true) { // Show all roles even if count is 0
+                const colorClass = roleColors[cardIndex % roleColors.length];
+                const iconClass = roleIcons[cardIndex % roleIcons.length];
+                
+                const cardHtml = `
+                    <div class="col-md-2 mb-3">
+                        <div class="card text-center shadow ${colorClass} card-animate-hover">
+                            <div class="card-body">
+                                <i class="fas ${iconClass} card-icon"></i>
+                                <h6 class="card-title" style="font-size: 0.85rem;">${role}</h6>
+                                <div class="fs-4 fw-bold role-count" data-role="${role}">${count}</div>
+                                <small class="text-light">کارمەند</small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                roleCardsContainer.append(cardHtml);
+                cardIndex++;
+            }
+        });
+    }
+
     // Store current page for pagination preservation
     let currentEmployeePage = 1;
     
@@ -61,6 +127,34 @@ $(function () {
                 window.lastSummaryData = res.summary; // Store for reuse
                 updateSummaryCards(res.summary);
             }
+
+            // Apply role filter if any roles are selected
+            const selectedRoles = $('#filter_role').val();
+            let filteredEmployees = res.employees;
+            if (selectedRoles && selectedRoles.length > 0) {
+                filteredEmployees = res.employees.filter(emp => {
+                    const empRoles = (emp.role || '').split(',').map(r => r.trim());
+                    return selectedRoles.some(selectedRole => empRoles.includes(selectedRole));
+                });
+            }
+
+            // Calculate filtered role statistics
+            let filteredRoleStats = {};
+            if (res.role_stats) {
+                if (selectedRoles && selectedRoles.length > 0) {
+                    // Only show stats for selected roles
+                    selectedRoles.forEach(role => {
+                        filteredRoleStats[role] = res.role_stats[role] || 0;
+                    });
+                } else {
+                    // Show all role stats
+                    filteredRoleStats = res.role_stats;
+                }
+                updateRoleCards(filteredRoleStats);
+            }
+
+            // Use filtered employees for table
+            res.employees = filteredEmployees;
 
             // Translate status to Kurdish
             const statusMap = {
@@ -122,4 +216,10 @@ $(function () {
     loadEmployees();
     window.loadEmployees = loadEmployees;
     window.updateSummaryCards = updateSummaryCards;
+    window.updateRoleCards = updateRoleCards;
+
+    // Handle role filter change
+    $(document).on('change', '#filter_role', function() {
+        loadEmployees();
+    });
 });
