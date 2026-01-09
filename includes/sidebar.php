@@ -70,6 +70,9 @@ $logout_pages = ['logout.php'];
         <?php if (hasPermission('view_bins_silos')): ?>
           <li><a href="../pages/bins_silos.php" class="sidebar-link<?php if($current_page == 'bins_silos.php') echo ' active'; ?>"><i class="bi bi-box me-2"></i> بین/سایلۆکان</a></li>
         <?php endif; ?>
+        <?php if (hasPermission('view_raw_material_sales')): ?>
+          <li><a href="../pages/raw_material_sales.php" class="sidebar-link<?php if($current_page == 'raw_material_sales.php') echo ' active'; ?>"><i class="bi bi-box-arrow-up me-2"></i> فرۆشتنی مەوادی خام</a></li>
+        <?php endif; ?>
         <?php if (hasPermission('view_purchase')): ?>
           <li><a href="../pages/monthly_material_stock.php" class="sidebar-link<?php if($current_page == 'monthly_material_stock.php') echo ' active'; ?>"><i class="bi bi-clock-history me-2"></i> مێژووی بڕی مەوادەکان</a></li>
         <?php endif; ?>
@@ -105,9 +108,6 @@ $logout_pages = ['logout.php'];
           <li><a href="../pages/add_sale.php" class="sidebar-link<?php if($current_page == 'add_sale.php') echo ' active'; ?>"><i class="bi bi-cart-check me-2"></i> فرۆشتن</a></li>
           <li><a href="../pages/cash_sales.php" class="sidebar-link<?php if($current_page == 'cash_sales.php') echo ' active'; ?>"><i class="bi bi-cash-coin me-2"></i> فرۆشتنی نەقد</a></li>
           <li><a href="../pages/credit_sales.php" class="sidebar-link<?php if($current_page == 'credit_sales.php') echo ' active'; ?>"><i class="bi bi-credit-card-2-front me-2"></i> فرۆشتنی قەرز</a></li>
-        <?php endif; ?>
-        <?php if (hasPermission('view_raw_material_sales')): ?>
-          <li><a href="../pages/raw_material_sales.php" class="sidebar-link<?php if($current_page == 'raw_material_sales.php') echo ' active'; ?>"><i class="bi bi-box-seam me-2"></i> فرۆشتنی مەوادی خام</a></li>
         <?php endif; ?>
         <?php if (hasPermission('delete_purchase')): ?>
           <li><a href="../pages/recycle_bin_purchases.php" class="sidebar-link<?php if($current_page == 'recycle_bin_purchases.php') echo ' active'; ?>"><i class="bi bi-cart-x me-2"></i> کڕین سڕدراوەکان</a></li>
