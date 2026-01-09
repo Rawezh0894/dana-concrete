@@ -106,6 +106,9 @@ $logout_pages = ['logout.php'];
           <li><a href="../pages/cash_sales.php" class="sidebar-link<?php if($current_page == 'cash_sales.php') echo ' active'; ?>"><i class="bi bi-cash-coin me-2"></i> فرۆشتنی نەقد</a></li>
           <li><a href="../pages/credit_sales.php" class="sidebar-link<?php if($current_page == 'credit_sales.php') echo ' active'; ?>"><i class="bi bi-credit-card-2-front me-2"></i> فرۆشتنی قەرز</a></li>
         <?php endif; ?>
+        <?php if (hasPermission('view_raw_material_sales')): ?>
+          <li><a href="../pages/raw_material_sales.php" class="sidebar-link<?php if($current_page == 'raw_material_sales.php') echo ' active'; ?>"><i class="bi bi-box-seam me-2"></i> فرۆشتنی مەوادی خام</a></li>
+        <?php endif; ?>
         <?php if (hasPermission('delete_purchase')): ?>
           <li><a href="../pages/recycle_bin_purchases.php" class="sidebar-link<?php if($current_page == 'recycle_bin_purchases.php') echo ' active'; ?>"><i class="bi bi-cart-x me-2"></i> کڕین سڕدراوەکان</a></li>
         <?php endif; ?>
