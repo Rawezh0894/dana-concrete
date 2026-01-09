@@ -42,7 +42,8 @@ usort($recipients, function($a, $b) {
     return strcmp($a['name'], $b['name']);
 });
 $cars = $pdo->query("SELECT id, name FROM cars")->fetchAll(PDO::FETCH_ASSOC);
-$employees = $pdo->query("SELECT id, name, role FROM employees")->fetchAll(PDO::FETCH_ASSOC);
+// Get only active employees with their roles
+$employees = $pdo->query("SELECT id, name, role, COALESCE(status, 'active') as status FROM employees WHERE COALESCE(status, 'active') = 'active'")->fetchAll(PDO::FETCH_ASSOC);
 $drivers = array_filter($employees, function ($emp) {
   // Check if role contains 'شۆفێر' or 'سایەق' (supports multiple roles)
   return strpos($emp['role'], 'شۆفێر') !== false || strpos($emp['role'], 'سایەق') !== false;
@@ -56,11 +57,11 @@ $pump_cars = array_filter($cars, function ($car) {
 $pump_names = ['بەرزان', 'شاڵاو', 'سەربەست', 'بازیان', 'پشتیوان'];
 $mixer_names = ['بەرزان', 'شاڵاو', 'سەربەست', 'بازیان', 'طارق', 'عماد', 'علاوی', 'ئامانج', 'احمد(ابو روەیدا)', 'وشیار', 'هۆژین', 'هاوکار', 'عادل', 'ڕزگار'];
 
-// Filter employees for mixer drivers - only those with role "شۆفێری میکسەر" or "جۆکەر"
+// Filter employees for mixer drivers - only those with role "شۆفێری میکسەر" or "شۆفێری پەمپ" or "جۆکەر"
 $mixer_drivers = array_filter($employees, function ($emp) {
     $role = $emp['role'] ?? '';
-    // Check if role contains 'شۆفێری میکسەر' or 'جۆکەر' (supports multiple roles)
-    return (strpos($role, 'شۆفێری میکسەر') !== false || strpos($role, 'جۆکەر') !== false);
+    // Check if role contains 'شۆفێری میکسەر' or 'شۆفێری پەمپ' or 'جۆکەر' (supports multiple roles)
+    return (strpos($role, 'شۆفێری میکسەر') !== false || strpos($role, 'شۆفێری پەمپ') !== false || strpos($role, 'جۆکەر') !== false);
 });
 
 // Filter employees for pump drivers - only those with role "شۆفێری پەمپ" or "مساعید پەمپ" or "جۆکەر"
