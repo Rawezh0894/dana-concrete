@@ -253,8 +253,21 @@ try {
     $row = $stmt->fetch();
     $sales_discounts = $row['total_discount'] ?? 0;
     
-    // Customer debt payments discounts
-    $customer_debt_discounts_query = "SELECT SUM(discount) as total_discount FROM customer_debt_payments WHERE 1=1 $date_condition_date";
+// Customer debt payments discounts (Updated to filter by Sale Date)
+    $customer_debt_discounts_query = "
+        SELECT SUM(
+            CASE 
+                WHEN (p.paid_usd + (CASE WHEN p.dolar_rate > 0 THEN p.paid_iqd / (p.dolar_rate / 100) ELSE 0 END) + p.discount) > 0 
+                THEN 
+                    (p.discount / (p.paid_usd + (CASE WHEN p.dolar_rate > 0 THEN p.paid_iqd / (p.dolar_rate / 100) ELSE 0 END) + p.discount)) * a.allocated_amount
+                ELSE 0 
+            END
+        ) as total_discount 
+        FROM customer_payment_allocations a
+        JOIN customer_debt_payments p ON a.debt_payment_id = p.id
+        JOIN sales s ON a.sale_id = s.id
+        WHERE 1=1 $date_condition_sales
+    ";
     $stmt = $pdo->query($customer_debt_discounts_query);
     $row = $stmt->fetch();
     $customer_debt_discounts = $row['total_discount'] ?? 0;
@@ -461,10 +474,8 @@ try {
     $row = $stmt->fetch();
     $sales_discounts_total = $row['total_discount'] ?? 0;
     
-    // Customer debt payment discounts
-    $stmt = $pdo->query("SELECT SUM(discount) as total_discount FROM customer_debt_payments WHERE 1=1 $date_condition_date");
-    $row = $stmt->fetch();
-    $customer_debt_discounts_total = $row['total_discount'] ?? 0;
+    // Customer debt payment discounts (Reusing calculated value)
+    $customer_debt_discounts_total = $customer_debt_discounts;
     
         // Total discounts = sales + customer debt payments
     $total_discounts = $sales_discounts_total + $customer_debt_discounts_total;
