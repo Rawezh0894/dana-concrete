@@ -420,12 +420,12 @@ try {
     $gas_consumption_cost_usd = ($usd_iqd_rate > 0) ? ($gas_consumption_cost_iqd / ($usd_iqd_rate / 100)) : 0;
     
     // Gas sold from raw_material_sales (quantity_kg for gas material)
+    // Note: raw_material_sales uses material_type column, not material_id
     $gas_sold_query = "
         SELECT SUM(quantity_kg) as total_kg
         FROM raw_material_sales rms
-        JOIN materials m ON rms.material_id = m.id
         WHERE rms.is_deleted = 0 
-        AND m.name = 'گاز'
+        AND rms.material_type = 'گاز'
         $raw_material_sales_date_condition
     ";
     $stmt = $pdo->query($gas_sold_query);
