@@ -78,13 +78,24 @@ try {
         $total_bonus += floatval($emp['bonus']) * $prorate_factor;
     }
     
-    // 4. Calculate Overtime from concrete_receipts (Mixer Drivers only)
+    // 4. Calculate Overtime from concrete_receipts (Only for employees with role "شۆفێری میکسەر")
     $total_overtime = 0;
     
-    // Only calculate if we have employees
+    // Filter employees to only those with role "شۆفێری میکسەر"
+    $mixer_driver_ids = [];
     if (!empty($employee_ids)) {
-         // Build employee ID list for IN clause
         $placeholders = implode(',', array_fill(0, count($employee_ids), '?'));
+        $role_check_sql = "SELECT id FROM employees WHERE id IN ($placeholders) AND role LIKE '%شۆفێری میکسەر%'";
+        $stmt = $pdo->prepare($role_check_sql);
+        $stmt->execute($employee_ids);
+        $mixer_drivers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $mixer_driver_ids = array_column($mixer_drivers, 'id');
+    }
+    
+    // Only calculate if we have mixer driver employees
+    if (!empty($mixer_driver_ids)) {
+         // Build employee ID list for IN clause
+        $placeholders = implode(',', array_fill(0, count($mixer_driver_ids), '?'));
         
         // Check if 'date' column exists, otherwise fallback to 'created_at'
         // We assume 'date' exists based on pages/concrete_receipts.php
@@ -92,7 +103,7 @@ try {
                          WHERE mixer_driver_id IN ($placeholders) 
                          AND `date` BETWEEN ? AND ?";
                          
-        $overtime_params = array_merge($employee_ids, [$period_start, $period_end]);
+        $overtime_params = array_merge($mixer_driver_ids, [$period_start, $period_end]);
         
         try {
             // Use COALESCE to fallback to created_at date if date column is NULL
@@ -101,7 +112,7 @@ try {
                          WHERE mixer_driver_id IN ($placeholders) 
                          AND COALESCE(`date`, DATE(created_at)) BETWEEN ? AND ?";
                          
-            $overtime_params = array_merge($employee_ids, [$period_start, $period_end]);
+            $overtime_params = array_merge($mixer_driver_ids, [$period_start, $period_end]);
             
             $stmt = $pdo->prepare($overtime_sql);
             $stmt->execute($overtime_params);
@@ -113,7 +124,7 @@ try {
                          WHERE mixer_driver_id IN ($placeholders) 
                          AND created_at BETWEEN ? AND ?";
              // Adjust end date to cover the full day
-             $overtime_params = array_merge($employee_ids, [$period_start . ' 00:00:00', $period_end . ' 23:59:59']);
+             $overtime_params = array_merge($mixer_driver_ids, [$period_start . ' 00:00:00', $period_end . ' 23:59:59']);
              $stmt = $pdo->prepare($overtime_sql);
              $stmt->execute($overtime_params);
              $overtime_result = $stmt->fetch(PDO::FETCH_ASSOC);

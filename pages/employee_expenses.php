@@ -399,50 +399,76 @@ $(function() {
         $('#income_salary').val(salary);
         $('#income_bonus').val(bonus);
         
-        // Load overtime amount based on concrete receipts
+        // Load overtime amount based on concrete receipts (only for employees with role "شۆفێری میکسەر")
         if (employeeId) {
-            var selectedMonth = $('#income_expense_date').val() || '';
-            var params = {employee_id: employeeId};
-            if (selectedMonth) {
-                params.month = selectedMonth.substring(0, 7); // Extract YYYY-MM
-            }
+            // First check if employee has role "شۆفێری میکسەر"
+            var selectedEmployee = $('#income_employee_id option:selected');
+            var employeeName = selectedEmployee.text();
             
-            // Get overtime amount
-            $.get('../process/employee_payments/get_employee_overtime.php', params, function(response) {
-                if (response.success) {
-                    var overtimeAmount = parseFloat(response.data.overtime_amount) || 0;
-                    $('#income_overtime').val(overtimeAmount.toFixed(2));
-                    calcIncomeTotal();
-                    
-                    // Show overtime calculation details
-                    var balanceInfo = $('#income-employee-balance-info');
-                    var data = response.data;
-                    var existingText = balanceInfo.html() || '';
-                    var overtimeText = '<div class="small mt-2 border-top pt-2">';
-                    overtimeText += '<strong>کاروانحیسابی:</strong><br>';
-                    overtimeText += 'ژمارەی پسوڵە (میکسەر): ' + (data.mixer_receipt_count || 0) + '<br>';
-                    if ((data.pump_receipt_count || 0) > 0) {
-                        overtimeText += 'ژمارەی پسوڵە (پەمپ): ' + (data.pump_receipt_count || 0) + '<br>';
-                    }
-                    overtimeText += 'کۆی گشتی پسوڵەکان: ' + (data.total_receipts || 0) + '<br>';
-                    overtimeText += 'کۆی گشتی مەتر: ' + parseFloat(data.total_meter || 0).toFixed(2) + ' م³<br>';
-                    overtimeText += 'نرخی کاروانحیسابی: ' + parseFloat(data.overtime_rate || 0).toLocaleString('en-US') + ' د.ع/پسوڵە<br>';
-                    overtimeText += '<strong>کۆی کاروانحیسابی: ' + (data.total_receipts || 0) + ' × ' + parseFloat(data.overtime_rate || 0).toLocaleString('en-US') + ' = ' + overtimeAmount.toLocaleString('en-US') + ' د.ع</strong>';
-                    overtimeText += '</div>';
-                    
-                    if (existingText) {
-                        balanceInfo.html(existingText + overtimeText);
-                    } else {
-                        balanceInfo.html(overtimeText).show();
-                    }
-                } else {
-                    // If error, set overtime to 0 and log error
-                    console.error('Error loading overtime:', response.message || 'Unknown error');
+            // Get employee role from server
+            $.get('../process/employee/get_employee_role.php', {employee_id: employeeId}, function(roleResponse) {
+                var hasMixerRole = false;
+                if (roleResponse.success && roleResponse.role) {
+                    var role = roleResponse.role;
+                    hasMixerRole = role.includes('شۆفێری میکسەر');
+                }
+                
+                if (!hasMixerRole) {
+                    // Employee doesn't have mixer role, set overtime to 0
                     $('#income_overtime').val(0);
                     calcIncomeTotal();
+                    $('#income-employee-balance-info').html('<div class="small text-muted">کاروان حیسابی تەنها بۆ کارمەندەکانی بە ڕۆڵی "شۆفێری میکسەر" هەژمار دەکرێت.</div>').show();
+                    return;
                 }
-            }, 'json').fail(function(xhr, status, error) {
-                console.error('AJAX Error loading overtime:', status, error, xhr.responseText);
+                
+                // Employee has mixer role, proceed with overtime calculation
+                var selectedMonth = $('#income_expense_date').val() || '';
+                var params = {employee_id: employeeId};
+                if (selectedMonth) {
+                    params.month = selectedMonth.substring(0, 7); // Extract YYYY-MM
+                }
+                
+                // Get overtime amount
+                $.get('../process/employee_payments/get_employee_overtime.php', params, function(response) {
+                    if (response.success) {
+                        var overtimeAmount = parseFloat(response.data.overtime_amount) || 0;
+                        $('#income_overtime').val(overtimeAmount.toFixed(2));
+                        calcIncomeTotal();
+                        
+                        // Show overtime calculation details
+                        var balanceInfo = $('#income-employee-balance-info');
+                        var data = response.data;
+                        var existingText = balanceInfo.html() || '';
+                        var overtimeText = '<div class="small mt-2 border-top pt-2">';
+                        overtimeText += '<strong>کاروانحیسابی:</strong><br>';
+                        overtimeText += 'ژمارەی پسوڵە (میکسەر): ' + (data.mixer_receipt_count || 0) + '<br>';
+                        if ((data.pump_receipt_count || 0) > 0) {
+                            overtimeText += 'ژمارەی پسوڵە (پەمپ): ' + (data.pump_receipt_count || 0) + '<br>';
+                        }
+                        overtimeText += 'کۆی گشتی پسوڵەکان: ' + (data.total_receipts || 0) + '<br>';
+                        overtimeText += 'کۆی گشتی مەتر: ' + parseFloat(data.total_meter || 0).toFixed(2) + ' م³<br>';
+                        overtimeText += 'نرخی کاروانحیسابی: ' + parseFloat(data.overtime_rate || 0).toLocaleString('en-US') + ' د.ع/پسوڵە<br>';
+                        overtimeText += '<strong>کۆی کاروانحیسابی: ' + (data.total_receipts || 0) + ' × ' + parseFloat(data.overtime_rate || 0).toLocaleString('en-US') + ' = ' + overtimeAmount.toLocaleString('en-US') + ' د.ع</strong>';
+                        overtimeText += '</div>';
+                        
+                        if (existingText) {
+                            balanceInfo.html(existingText + overtimeText);
+                        } else {
+                            balanceInfo.html(overtimeText).show();
+                        }
+                    } else {
+                        // If error, set overtime to 0 and log error
+                        console.error('Error loading overtime:', response.message || 'Unknown error');
+                        $('#income_overtime').val(0);
+                        calcIncomeTotal();
+                    }
+                }, 'json').fail(function(xhr, status, error) {
+                    console.error('AJAX Error loading overtime:', status, error, xhr.responseText);
+                    $('#income_overtime').val(0);
+                    calcIncomeTotal();
+                });
+            }, 'json').fail(function() {
+                // If can't get role, set overtime to 0
                 $('#income_overtime').val(0);
                 calcIncomeTotal();
             });

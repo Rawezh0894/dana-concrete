@@ -25,8 +25,8 @@ if ($employee_id <= 0) {
 }
 
 try {
-    // Get employee name
-    $stmt = $pdo->prepare("SELECT name FROM employees WHERE id = ?");
+    // Get employee name and role
+    $stmt = $pdo->prepare("SELECT name, role FROM employees WHERE id = ?");
     $stmt->execute([$employee_id]);
     $employee = $stmt->fetch(PDO::FETCH_ASSOC);
     
@@ -36,6 +36,29 @@ try {
     }
     
     $employee_name = $employee['name'];
+    $employee_role = $employee['role'] ?? '';
+    
+    // Check if employee has role "شۆفێری میکسەر" (supports multiple roles)
+    $hasMixerRole = (strpos($employee_role, 'شۆفێری میکسەر') !== false);
+    
+    // If employee doesn't have mixer role, return 0 overtime
+    if (!$hasMixerRole) {
+        echo json_encode([
+            'success' => true,
+            'data' => [
+                'employee_id' => $employee_id,
+                'employee_name' => $employee_name,
+                'month' => $month,
+                'mixer_receipt_count' => 0,
+                'pump_receipt_count' => 0,
+                'total_receipts' => 0,
+                'total_meter' => 0,
+                'overtime_rate' => 0,
+                'overtime_amount' => 0
+            ]
+        ]);
+        exit;
+    }
     
     // Build date filter for month (using created_at field)
     $dateFilter = '';
