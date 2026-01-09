@@ -211,6 +211,40 @@ try {
         }
     }
 
+    // Raw Material Sales (فرۆشتنی مەوادی خام) - Calculate total in USD
+    // Convert IQD sales to USD using exchange rate
+    $raw_material_sales_date_condition = "";
+    if ($use_range) {
+        $from = $from_date ? $from_date : '1000-01-01';
+        $to = $to_date ? $to_date : '9999-12-31';
+        $raw_material_sales_date_condition = " AND sale_date >= '$from' AND sale_date <= '$to'";
+    } else {
+        if ($filter === 'today') {
+            $raw_material_sales_date_condition = " AND sale_date = CURDATE()";
+        } elseif ($filter === 'week') {
+            $raw_material_sales_date_condition = " AND YEARWEEK(sale_date, 1) = YEARWEEK(CURDATE(), 1)";
+        } elseif ($filter === 'month') {
+            $raw_material_sales_date_condition = " AND YEAR(sale_date) = YEAR(CURDATE()) AND MONTH(sale_date) = MONTH(CURDATE())";
+        } elseif ($filter === 'year') {
+            $raw_material_sales_date_condition = " AND YEAR(sale_date) = YEAR(CURDATE())";
+        }
+    }
+    
+    // Get raw material sales - convert all to USD
+    $raw_material_sales_query = "
+        SELECT 
+            SUM(CASE 
+                WHEN currency_type = 'دۆلار' THEN total_price 
+                WHEN currency_type = 'دینار' AND exchange_rate > 0 THEN total_price / (exchange_rate / 100)
+                ELSE 0 
+            END) as total_usd
+        FROM raw_material_sales 
+        WHERE is_deleted = 0 
+        $raw_material_sales_date_condition
+    ";
+    $stmt = $pdo->query($raw_material_sales_query);
+    $raw_material_sales_total_usd = floatval($stmt->fetchColumn() ?? 0);
+
     // Cash Sales - Calculate received amounts in USD and IQD separately
     // تەنها فرۆشتن بە نەقدی (payment_type = 'نەقد') و فلتەری بەروار
     $cash_sales_query = "SELECT 
@@ -913,6 +947,9 @@ try {
             'person' => ['usd' => $person_debt_usd, 'iqd' => $person_debt_iqd],
             'purchases' => $purchases,
             'sales' => $sales,
+            'raw_material_sales' => [
+                'total_usd' => $raw_material_sales_total_usd
+            ],
             'discounts' => [
                 'total_usd' => $total_discount,
                 'sales_usd' => $sales_discounts,

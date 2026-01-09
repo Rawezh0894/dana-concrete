@@ -215,6 +215,14 @@ function renderDashboardCards(data) {
             subtitle: 'کۆی فرۆشتنەکان'
         },
         {
+            key: 'raw_material_sales',
+            label: 'کۆی نرخی فرۆشتنی مەوادی خام',
+            icon: 'fa-box-seam',
+            cardClass: 'raw-material-sales-card',
+            value: formatCurrency(Number(data.data?.raw_material_sales?.total_usd) || 0, 'USD'),
+            subtitle: 'فرۆشتنی چەو، لم، چیمەنتۆ، دەرمان، گاز'
+        },
+        {
             key: 'cash_sales_usd',
             label: 'کۆی فرۆشتن بە نەقدی (دۆلار)',
             icon: 'fa-money-bill',
