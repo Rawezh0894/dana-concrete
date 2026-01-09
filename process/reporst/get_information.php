@@ -981,6 +981,14 @@ try {
                 'total_usd' => $raw_material_sales_total_usd,
                 'cost_usd' => $raw_material_sales_cost_total_usd
             ],
+            'car_expenses' => [
+                'total_usd' => ($total_expenses_breakdown['material_usage'] ?? 0) + ($total_expenses_breakdown['gas_usage'] ?? 0)
+            ],
+            'profit_loss' => [
+                'total_revenue' => ($sales['cash']['usd'] ?? 0) + ($sales['credit']['usd'] ?? 0) + $raw_material_sales_total_usd,
+                'total_cost' => ($total_used_material_cost_usd ?? 0) + ($employee_stats['total_fixed_usd'] ?? 0) + (($total_expenses_breakdown['material_usage'] ?? 0) + ($total_expenses_breakdown['gas_usage'] ?? 0)) + $total_expenses_usd,
+                'profit_loss' => (($sales['cash']['usd'] ?? 0) + ($sales['credit']['usd'] ?? 0) + $raw_material_sales_total_usd) - (($total_used_material_cost_usd ?? 0) + ($employee_stats['total_fixed_usd'] ?? 0) + (($total_expenses_breakdown['material_usage'] ?? 0) + ($total_expenses_breakdown['gas_usage'] ?? 0)) + $total_expenses_usd)
+            ],
             'discounts' => [
                 'total_usd' => $total_discount,
                 'sales_usd' => $sales_discounts,

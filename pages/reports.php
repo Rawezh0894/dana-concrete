@@ -394,6 +394,36 @@ if (!isset($_SESSION['user_id'])) {
             grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
         }
         
+        /* Tab Styles */
+        .nav-tabs {
+            border-bottom: 2px solid #dee2e6;
+            margin-bottom: 2rem;
+        }
+        
+        .nav-tabs .nav-link {
+            border: none;
+            border-bottom: 3px solid transparent;
+            color: #6c757d;
+            font-weight: 600;
+            padding: 1rem 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-tabs .nav-link:hover {
+            border-bottom-color: #007bff;
+            color: #007bff;
+        }
+        
+        .nav-tabs .nav-link.active {
+            border-bottom-color: #007bff;
+            color: #007bff;
+            background: transparent;
+        }
+        
+        .tab-content {
+            margin-top: 1rem;
+        }
+        
         @media (max-width: 768px) {
             .filter-section {
                 padding: 1.5rem;

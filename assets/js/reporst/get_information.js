@@ -125,7 +125,68 @@ function renderDashboardCards(data) {
     const salesDiscountUsd = Number(data.data?.discounts?.sales_usd) || 0;
     const debtDiscountUsd = Number(data.data?.discounts?.customer_debt_usd) || 0;
 
-    const cards = [
+    // Profit & Loss Tab Cards (تابی قازانج و زەرەر)
+    const profitLossCards = [
+        {
+            key: 'sales',
+            label: 'کۆی نرخی فرۆشتن',
+            icon: 'fa-cash-register',
+            cardClass: 'sales-card',
+            value: formatCurrency((Number(data.data?.sales?.cash?.usd) || 0) + (Number(data.data?.sales?.credit?.usd) || 0), 'USD'),
+            subtitle: 'کۆی فرۆشتنەکان (نەقد + قەرز)'
+        },
+        {
+            key: 'raw_material_sales',
+            label: 'کۆی نرخی فرۆشتنی مەوادی خام',
+            icon: 'fa-box-seam',
+            cardClass: 'raw-material-sales-card',
+            value: formatCurrency(Number(data.data?.raw_material_sales?.total_usd) || 0, 'USD'),
+            subtitle: 'فرۆشتنی چەو، لم، چیمەنتۆ، دەرمان، گاز'
+        },
+        {
+            key: 'total_material_usage_cost',
+            label: 'کۆی گشتی تێچووی مەوادەکان',
+            icon: 'fa-calculator',
+            cardClass: 'total-expenses-card',
+            value: formatCurrency(data.data?.material_consumption?.total_cost_usd || 0, 'USD'),
+            subtitle: 'کۆی نرخی کڕینی مەوادی بەکارهاتوو'
+        },
+        {
+            key: 'employee_total_fixed',
+            label: 'کۆی مووچەی کارمەندان',
+            icon: 'fa-money-check-alt',
+            cardClass: 'employee-expenses-card',
+            value: formatCurrency(Number(data.data?.employee_stats?.total_fixed_usd) || 0, 'USD'),
+            subtitle: 'مووچە + بەخشیش (بە دۆلار)'
+        },
+        {
+            key: 'car_expenses',
+            label: 'کۆی کاروان حیسابی',
+            icon: 'fa-car',
+            cardClass: 'purchase-materials-card',
+            value: formatCurrency(Number(data.data?.car_expenses?.total_usd) || 0, 'USD'),
+            subtitle: 'خەرجی سەیارەکان (گاز + کاڵای کۆگا)'
+        },
+        {
+            key: 'total_expenses',
+            label: 'کۆی نرخی خەرجی',
+            icon: 'fa-money-bill-wave',
+            cardClass: 'total-expenses-card',
+            value: formatCurrency(Number(data.data?.total_expenses?.usd) || 0, 'USD'),
+            subtitle: 'کۆی خەرجی (نەقد + قەرز)'
+        },
+        {
+            key: 'profit_loss',
+            label: 'قازانج و زەرەر',
+            icon: 'fa-chart-line',
+            cardClass: (Number(data.data?.profit_loss?.profit_loss) || 0) >= 0 ? 'success-card' : 'total-expenses-card',
+            value: formatCurrency(Number(data.data?.profit_loss?.profit_loss) || 0, 'USD'),
+            subtitle: (Number(data.data?.profit_loss?.profit_loss) || 0) >= 0 ? 'قازانج' : 'زەرەر'
+        }
+    ];
+
+    // Other Cards (کارتەکانی دیکە)
+    const otherCards = [
         {
             key: 'customer',
             label: 'کۆی قەرزی کڕیارەکان',
@@ -205,22 +266,6 @@ function renderDashboardCards(data) {
             cardClass: 'purchases-card',
             value: formatCurrency(purchases_iqd_total, 'IQD'),
             subtitle: 'کۆی کڕینەکان بە دینار'
-        },
-        {
-            key: 'sales',
-            label: 'کۆی نرخی فرۆشتن',
-            icon: 'fa-cash-register',
-            cardClass: 'sales-card',
-            value: formatCurrency((Number(data.data?.sales?.cash?.usd) || 0) + (Number(data.data?.sales?.credit?.usd) || 0), 'USD'),
-            subtitle: 'کۆی فرۆشتنەکان'
-        },
-        {
-            key: 'raw_material_sales',
-            label: 'کۆی نرخی فرۆشتنی مەوادی خام',
-            icon: 'fa-box-seam',
-            cardClass: 'raw-material-sales-card',
-            value: formatCurrency(Number(data.data?.raw_material_sales?.total_usd) || 0, 'USD'),
-            subtitle: 'فرۆشتنی چەو، لم، چیمەنتۆ، دەرمان، گاز'
         },
         {
             key: 'cash_sales_usd',
@@ -460,14 +505,6 @@ function renderDashboardCards(data) {
             subtitle: `تێکڕای نرخ: ${formatCurrency(data.data?.material_consumption?.prices?.additive || 0, 'USD')} / تۆن`
         },
         {
-            key: 'total_material_usage_cost',
-            label: 'کۆی گشتی تێچووی مەوادەکان',
-            icon: 'fa-calculator',
-            cardClass: 'total-expenses-card',
-            value: formatCurrency(data.data?.material_consumption?.total_cost_usd || 0, 'USD'),
-            subtitle: 'کۆی هەموو مەوادە بەکارهاتووەکان'
-        },
-        {
             key: 'raw_material_sales_cost',
             label: 'کۆی تێچووی فرۆشتنی مەوادی خام',
             icon: 'fa-dollar-sign',
@@ -477,6 +514,9 @@ function renderDashboardCards(data) {
         }
     ];
 
+    // Combine all cards
+    const cards = [...profitLossCards, ...otherCards];
+
     // Material consumption summary:
     // - cement_cem1: دەلتا + لاڤارج (سایلۆی یەک)
     // - cement_cem2: ماس (سایلۆی دوو)
@@ -485,8 +525,50 @@ function renderDashboardCards(data) {
 
     console.log('Cards array created:', cards);
 
-    let html = '';
-    cards.forEach(card => {
+    // Create tabs structure
+    let html = `
+        <div class="row mb-4">
+            <div class="col-12">
+                <ul class="nav nav-tabs" id="reportTabs" role="tablist" style="border-bottom: 2px solid #dee2e6;">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="profit-loss-tab" data-bs-toggle="tab" data-bs-target="#profit-loss" type="button" role="tab" aria-controls="profit-loss" aria-selected="true" style="font-weight: bold; color: #28a745;">
+                            <i class="fa fa-chart-line me-2"></i>قازانج و زەرەر
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="other-cards-tab" data-bs-toggle="tab" data-bs-target="#other-cards" type="button" role="tab" aria-controls="other-cards" aria-selected="false" style="font-weight: bold; color: #007bff;">
+                            <i class="fa fa-list me-2"></i>کارتەکانی دیکە
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="tab-content" id="reportTabContent">
+            <div class="tab-pane fade show active" id="profit-loss" role="tabpanel" aria-labelledby="profit-loss-tab">
+                <div class="row" id="profit-loss-cards">
+    `;
+
+    // Render profit & loss cards
+    profitLossCards.forEach(card => {
+        html += `<div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+            <div class="report-card ${card.cardClass}">
+                <i class="fa ${card.icon}"></i>
+                <div class="card-title">${card.label}</div>
+                <div class="card-value">${card.value}</div>
+                <div class="section-label">${card.subtitle}</div>
+            </div>
+        </div>`;
+    });
+
+    html += `
+                </div>
+            </div>
+            <div class="tab-pane fade" id="other-cards" role="tabpanel" aria-labelledby="other-cards-tab">
+                <div class="row" id="other-cards-container">
+    `;
+
+    // Render other cards
+    otherCards.forEach(card => {
         // Add click handler for company_debt_payments cards (both USD and IQD)
         let clickHandler = '';
         let cursorStyle = '';
@@ -508,6 +590,12 @@ function renderDashboardCards(data) {
             </div>
         </div>`;
     });
+
+    html += `
+                </div>
+            </div>
+        </div>
+    `;
 
     console.log('HTML generated:', html);
     console.log('Target element:', document.getElementById('dashboard-summary-cards'));
