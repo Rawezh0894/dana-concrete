@@ -128,10 +128,9 @@ $(function () {
                 updateSummaryCards(res.summary);
             }
 
-            // Apply role filters if any roles are selected
-            const selectedRoles1 = $('#filter_role_1').val() || [];
-            const selectedRoles2 = $('#filter_role_2').val() || [];
-            const allSelectedRoles = [...selectedRoles1, ...selectedRoles2];
+            // Apply role filter if any roles are selected
+            const selectedRoles = $('#filter_role').val() || [];
+            const allSelectedRoles = selectedRoles;
             
             let filteredEmployees = res.employees;
             if (allSelectedRoles.length > 0) {
@@ -221,8 +220,8 @@ $(function () {
     window.updateSummaryCards = updateSummaryCards;
     window.updateRoleCards = updateRoleCards;
 
-    // Handle role filter changes
-    $(document).on('change', '#filter_role_1, #filter_role_2', function() {
+    // Handle role filter change
+    $(document).on('change', '#filter_role', function() {
         loadEmployees();
     });
 });

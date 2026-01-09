@@ -240,12 +240,9 @@ $(document).ready(function() {
         enableSelect2('#filter_formulas_id', 'body');
     }
     
-    // بۆ employee role filters - تەنها ئەگەر پەیجەکە هەبێت
-    if ($('#filter_role_1').length > 0) {
-        enableSelect2('#filter_role_1', 'body');
-    }
-    if ($('#filter_role_2').length > 0) {
-        enableSelect2('#filter_role_2', 'body');
+    // بۆ employee role filter - تەنها ئەگەر پەیجەکە هەبێت
+    if ($('#filter_role').length > 0) {
+        enableSelect2('#filter_role', 'body');
     }
 });
 
