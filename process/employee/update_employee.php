@@ -47,7 +47,11 @@ try {
         $role = trim($roles ?? '');
     }
     
-    $salary = trim($_POST['salary'] ?? '');
+    // Salary and bonus are optional - default to 0 if empty
+    $salary = trim($_POST['salary'] ?? '0');
+    if ($salary === '' || $salary === null) {
+        $salary = '0';
+    }
     $bonus = floatval($_POST['bonus'] ?? 0);
     $status = trim($_POST['status'] ?? 'active');
 
@@ -80,10 +84,9 @@ try {
         exit;
     }
 
-    if (empty($salary)) {
-        error_log('Employee salary is empty');
-        echo json_encode(['success' => false, 'message' => 'مووچەی کارمەند پێویستە!']);
-        exit;
+    // Salary and bonus are optional - default to 0 if empty
+    if (empty($salary) || $salary === '') {
+        $salary = 0;
     }
 
     // Validate status

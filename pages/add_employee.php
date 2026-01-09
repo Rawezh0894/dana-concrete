@@ -157,7 +157,7 @@ if (!hasPermission('view_employee')) {
           </div>
           <div class="mb-3">
             <label for="employee_salary" class="form-label">موچە</label>
-            <input type="number" class="form-control" id="employee_salary" name="salary" min="0" step="0.01" required placeholder="موچە بنووسە" value="0">
+            <input type="number" class="form-control" id="employee_salary" name="salary" min="0" step="0.01" placeholder="موچە بنووسە (دڵنیا نییە)" value="0">
           </div>
           <div class="mb-3">
             <label for="employee_bonus" class="form-label">بەخشیش</label>
@@ -222,7 +222,7 @@ if (!hasPermission('view_employee')) {
           </div>
           <div class="mb-3">
             <label for="edit_employee_salary" class="form-label">موچە</label>
-            <input type="number" class="form-control" id="edit_employee_salary" name="salary" min="0" step="0.01" required>
+            <input type="number" class="form-control" id="edit_employee_salary" name="salary" min="0" step="0.01" placeholder="موچە بنووسە (دڵنیا نییە)">
           </div>
           <div class="mb-3">
             <label for="edit_employee_bonus" class="form-label">بەخشیش</label>
