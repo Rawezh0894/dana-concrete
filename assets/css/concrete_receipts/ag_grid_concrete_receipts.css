@@ -9,7 +9,79 @@
 /* Main Grid Container - تایبەت بە Concrete Receipts */
 #concreteReceiptsGrid {
     width: 100%;
-    height: 600px;
+    height: 550px;
+}
+
+/* Server-Side Pagination Container - وەک SAP/Odoo/Oracle */
+.server-pagination-container {
+    font-family: 'Rabar', 'Arial', 'Tahoma', sans-serif !important;
+    direction: rtl;
+}
+
+.server-pagination-container .pagination-info-section {
+    font-size: 14px;
+}
+
+.server-pagination-container .pagination-controls {
+    direction: ltr;
+}
+
+.server-pagination-container .btn {
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.server-pagination-container .btn:hover:not(:disabled) {
+    background: var(--seafoam-green, #20b2aa);
+    border-color: var(--seafoam-green, #20b2aa);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.server-pagination-container .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.server-pagination-container .form-select,
+.server-pagination-container .form-control {
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+    transition: all 0.2s ease;
+}
+
+.server-pagination-container .form-select:focus,
+.server-pagination-container .form-control:focus {
+    border-color: var(--seafoam-green, #20b2aa);
+    box-shadow: 0 0 0 0.2rem rgba(32, 178, 170, 0.25);
+}
+
+#pagination-page-input {
+    font-weight: 600;
+}
+
+/* Quick Search Box Styling */
+#quickSearchInput {
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 15px;
+    transition: all 0.3s ease;
+}
+
+#quickSearchInput:focus {
+    border-color: var(--seafoam-green, #20b2aa);
+    box-shadow: 0 0 0 0.3rem rgba(32, 178, 170, 0.25);
+    outline: none;
+}
+
+#quickSearchInput::placeholder {
+    color: #999;
+    font-size: 14px;
+}
+
+#clearQuickSearch {
+    border-radius: 0 8px 8px 0 !important;
 }
 
 /* Responsive Design - تایبەت بە Concrete Receipts */
@@ -17,10 +89,25 @@
     #concreteReceiptsGrid {
         height: 400px;
     }
+    
+    .server-pagination-container {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .server-pagination-container .pagination-info-section,
+    .server-pagination-container .pagination-controls {
+        width: 100%;
+        justify-content: center;
+    }
 }
 
 @media (max-width: 576px) {
     #concreteReceiptsGrid {
         height: 300px;
+    }
+    
+    .server-pagination-container .pagination-buttons {
+        flex-wrap: wrap;
     }
 }

@@ -1,11 +1,20 @@
 // AG Grid Configuration for Concrete Receipts Table
+// Server-Side Pagination - وەک سیستەمەکانی SAP, Odoo, Oracle
 // بەکارهێنانی فایلی گشتی
 // <script src="../assets/js/comon/ag_grid_base.js"></script> پێویستە لە HTML دا زیاد بکرێت
 
 let concreteReceiptsGridApi;
-window.concreteReceiptsGridApi = null; // Will be set after initialization
+window.concreteReceiptsGridApi = null;
 
-// Column Definitions - ترتیب ستونەکان بە شێوەی دروست (لە چەپ بۆ ڕاست - LTR)
+// Current pagination state
+let currentServerPage = 1;
+let currentPageSize = 25;
+let totalRecords = 0;
+let totalPages = 0;
+let currentSearchText = '';
+let cachedData = [];
+
+// Column Definitions - ستونی کردارەکان لە چەپ (pinned: 'left')
 const concreteReceiptsColumnDefs = [
     {
         field: 'actions',
@@ -16,7 +25,7 @@ const concreteReceiptsColumnDefs = [
         minWidth: 150,
         maxWidth: 200,
         flex: 0,
-        pinned: 'right',
+        pinned: 'left', // جێگیرکراوە لە چەپ - سەرەتای ڕیزبەندی
         cellStyle: { textAlign: 'center', direction: 'ltr' },
         cellRenderer: function(params) {
             if (!params.data) return '-';
@@ -34,8 +43,50 @@ const concreteReceiptsColumnDefs = [
         }
     },
     {
-        field: 'mixer_driver_name',
-        headerName: 'شۆفێری میکسەر',
+        field: 'receipt_number',
+        headerName: 'ژم.پسووڵە',
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+        sortable: true,
+        resizable: true,
+        minWidth: 120,
+        cellStyle: { textAlign: 'center', direction: 'rtl' },
+        cellRenderer: function(params) {
+            if (!params.value) return '-';
+            const isDuplicate = params.data && params.data.is_duplicate;
+            const warningIcon = isDuplicate ? '<i class="fas fa-exclamation-triangle" style="color: #ffc107; margin-left: 4px;" title="ژمارەی پسوڵە دووبارەیە"></i>' : '';
+            return warningIcon + (params.value || '-');
+        }
+    },
+    {
+        field: 'customer_name',
+        headerName: 'کڕیار',
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+        sortable: true,
+        resizable: true,
+        minWidth: 150,
+        cellStyle: { textAlign: 'center', direction: 'rtl' },
+        valueFormatter: function(params) {
+            return params.value || '-';
+        }
+    },
+    {
+        field: 'location',
+        headerName: 'شوێن',
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+        sortable: true,
+        resizable: true,
+        minWidth: 150,
+        cellStyle: { textAlign: 'center', direction: 'rtl' },
+        valueFormatter: function(params) {
+            return params.value || '-';
+        }
+    },
+    {
+        field: 'receiver_name',
+        headerName: 'وەرگر',
         filter: 'agTextColumnFilter',
         floatingFilter: true,
         sortable: true,
@@ -47,21 +98,43 @@ const concreteReceiptsColumnDefs = [
         }
     },
     {
-        field: 'mixer_car_name',
-        headerName: 'میکسەر',
-        filter: 'agTextColumnFilter',
+        field: 'created_at',
+        headerName: 'بەروار',
+        filter: 'agDateColumnFilter',
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        minWidth: 100,
+        minWidth: 150,
         cellStyle: { textAlign: 'center', direction: 'rtl' },
         valueFormatter: function(params) {
-            return params.value || '-';
+            if (!params.value) return '-';
+            const d = new Date(params.value);
+            if (isNaN(d)) return params.value;
+            return d.getFullYear() + '-' + 
+                   String(d.getMonth()+1).padStart(2,'0') + '-' + 
+                   String(d.getDate()).padStart(2,'0') + ' ' + 
+                   String(d.getHours()).padStart(2,'0') + ':' + 
+                   String(d.getMinutes()).padStart(2,'0');
         }
     },
     {
-        field: 'pump_driver_name',
-        headerName: 'شۆفێری پەمپ',
+        field: 'meter_amount',
+        headerName: 'بڕی مەتر سێجا',
+        filter: 'agNumberColumnFilter',
+        floatingFilter: true,
+        sortable: true,
+        resizable: true,
+        minWidth: 120,
+        cellStyle: { textAlign: 'center', direction: 'rtl', fontWeight: 'bold' },
+        valueFormatter: function(params) {
+            if (params.value === null || params.value === undefined || params.value === '') return '-';
+            return window.AGGridFormatters?.formatNumber(params.value) + ' m³' || '-';
+        },
+        type: 'numericColumn'
+    },
+    {
+        field: 'formula_name',
+        headerName: 'فۆرمۆلا',
         filter: 'agTextColumnFilter',
         floatingFilter: true,
         sortable: true,
@@ -86,8 +159,8 @@ const concreteReceiptsColumnDefs = [
         }
     },
     {
-        field: 'formula_name',
-        headerName: 'فۆرمۆلا',
+        field: 'pump_driver_name',
+        headerName: 'شۆفێری پەمپ',
         filter: 'agTextColumnFilter',
         floatingFilter: true,
         sortable: true,
@@ -99,43 +172,21 @@ const concreteReceiptsColumnDefs = [
         }
     },
     {
-        field: 'meter_amount',
-        headerName: 'بڕی مەتر سێجا',
-        filter: 'agNumberColumnFilter',
+        field: 'mixer_car_name',
+        headerName: 'میکسەر',
+        filter: 'agTextColumnFilter',
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        minWidth: 120,
-        cellStyle: { textAlign: 'center', direction: 'rtl', fontWeight: 'bold' },
-        valueFormatter: function(params) {
-            if (params.value === null || params.value === undefined || params.value === '') return '-';
-            return window.AGGridFormatters?.formatNumber(params.value) + ' m³' || '-';
-        },
-        type: 'numericColumn'
-    },
-    {
-        field: 'created_at',
-        headerName: 'بەروار',
-        filter: 'agDateColumnFilter',
-        floatingFilter: true,
-        sortable: true,
-        resizable: true,
-        minWidth: 150,
+        minWidth: 100,
         cellStyle: { textAlign: 'center', direction: 'rtl' },
         valueFormatter: function(params) {
-            if (!params.value) return '-';
-            const d = new Date(params.value);
-            if (isNaN(d)) return params.value;
-            return d.getFullYear() + '-' + 
-                   String(d.getMonth()+1).padStart(2,'0') + '-' + 
-                   String(d.getDate()).padStart(2,'0') + ' ' + 
-                   String(d.getHours()).padStart(2,'0') + ':' + 
-                   String(d.getMinutes()).padStart(2,'0');
+            return params.value || '-';
         }
     },
     {
-        field: 'receiver_name',
-        headerName: 'وەرگر',
+        field: 'mixer_driver_name',
+        headerName: 'شۆفێری میکسەر',
         filter: 'agTextColumnFilter',
         floatingFilter: true,
         sortable: true,
@@ -144,53 +195,11 @@ const concreteReceiptsColumnDefs = [
         cellStyle: { textAlign: 'center', direction: 'rtl' },
         valueFormatter: function(params) {
             return params.value || '-';
-        }
-    },
-    {
-        field: 'location',
-        headerName: 'شوێن',
-        filter: 'agTextColumnFilter',
-        floatingFilter: true,
-        sortable: true,
-        resizable: true,
-        minWidth: 150,
-        cellStyle: { textAlign: 'center', direction: 'rtl' },
-        valueFormatter: function(params) {
-            return params.value || '-';
-        }
-    },
-    {
-        field: 'customer_name',
-        headerName: 'کڕیار',
-        filter: 'agTextColumnFilter',
-        floatingFilter: true,
-        sortable: true,
-        resizable: true,
-        minWidth: 150,
-        cellStyle: { textAlign: 'center', direction: 'rtl' },
-        valueFormatter: function(params) {
-            return params.value || '-';
-        }
-    },
-    {
-        field: 'receipt_number',
-        headerName: 'ژم.پسووڵە',
-        filter: 'agTextColumnFilter',
-        floatingFilter: true,
-        sortable: true,
-        resizable: true,
-        minWidth: 120,
-        cellStyle: { textAlign: 'center', direction: 'rtl' },
-        cellRenderer: function(params) {
-            if (!params.value) return '-';
-            const isDuplicate = params.data && params.data.is_duplicate;
-            const warningIcon = isDuplicate ? '<i class="fas fa-exclamation-triangle" style="color: #ffc107; margin-left: 4px;" title="ژمارەی پسوڵە دووبارەیە"></i>' : '';
-            return warningIcon + (params.value || '-');
         }
     }
 ];
 
-// Grid Options
+// Grid Options - بەبێ pagination ی AG Grid (ئێمە خۆمان پاژینەیشنی سێرڤەر دەکەین)
 const concreteReceiptsGridOptions = {
     columnDefs: concreteReceiptsColumnDefs,
     rowData: [],
@@ -201,47 +210,47 @@ const concreteReceiptsGridOptions = {
         floatingFilter: true,
         minWidth: 100
     },
-    pagination: true,
-    paginationPageSize: 25,
-    paginationPageSizeSelector: [10, 25, 50, 100, 200, 500],
+    // Disable AG Grid built-in pagination - use custom server-side pagination
+    pagination: false,
     animateRows: true,
     rowSelection: 'multiple',
     suppressRowClickSelection: true,
     enableCellTextSelection: true,
     ensureDomOrder: true,
-    // Server-side pagination
-    paginationAutoPageSize: false,
-    suppressPaginationPanel: false,
-    // Enable quick filter for global search
-    quickFilterText: '',
     suppressMenuHide: false,
-    // Enable side panel for column management
-    sideBar: false
+    // Locale for Kurdish
+    localeText: {
+        noRowsToShow: 'هیچ داتایەک نەدۆزرایەوە',
+        loadingOoo: 'چاوەڕوان بە...',
+        filterOoo: 'فلتەر...',
+        equals: 'یەکسانە',
+        notEqual: 'یەکسان نییە',
+        contains: 'تێیدایە',
+        notContains: 'تێیدا نییە',
+        startsWith: 'دەست پێدەکات بە',
+        endsWith: 'کۆتایی دێت بە'
+    }
 };
 
-// Flag to prevent infinite loop in pagination
+// Loading state
 let isLoadingData = false;
-let loadTimeout = null;
 
-// Debounce function for better performance
-function debounce(func, wait) {
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(loadTimeout);
-            func(...args);
-        };
-        clearTimeout(loadTimeout);
-        loadTimeout = setTimeout(later, wait);
-    };
+// Format number helper
+function formatNumber(n) {
+    if (n === null || n === undefined || n === '') return '0';
+    return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-// Load data function with optimized performance
-async function loadConcreteReceiptsGrid() {
+// Load data from server with pagination
+async function loadConcreteReceiptsGrid(page = 1, pageSize = 25, search = '') {
     if (!concreteReceiptsGridApi || isLoadingData) {
         return;
     }
 
     isLoadingData = true;
+    currentServerPage = page;
+    currentPageSize = pageSize;
+    currentSearchText = search;
 
     // Get current filters
     const filters = {
@@ -260,36 +269,24 @@ async function loadConcreteReceiptsGrid() {
         }
     });
 
-    // Load 1000 records for performance
-    // Quick search will use server-side search to find records not in the first 1000
-    queryParams.append('page', 1);
-    queryParams.append('pageSize', 1000);
+    // Server-side pagination parameters
+    queryParams.append('page', page);
+    queryParams.append('pageSize', pageSize);
     
-    // Add quick search parameter if exists
-    const quickSearchText = document.getElementById('quickSearchInput')?.value?.trim() || '';
-    if (quickSearchText) {
-        queryParams.append('search', quickSearchText);
+    // Server-side search
+    if (search) {
+        queryParams.append('search', search);
     }
 
-    // Show loading with better visual feedback
+    // Show loading overlay
     concreteReceiptsGridApi.showLoadingOverlay();
-    
-    // Add custom loading message
-    const loadingMessage = document.createElement('div');
-    loadingMessage.id = 'concrete-receipts-loading-msg';
-    loadingMessage.style.cssText = 'text-align: center; padding: 20px; color: var(--seafoam-green); font-weight: bold;';
-    loadingMessage.innerHTML = '<i class="fas fa-spinner fa-spin"></i> چاوەڕوان بە...';
-    const gridContainer = document.getElementById('concreteReceiptsGrid');
-    if (gridContainer && !document.getElementById('concrete-receipts-loading-msg')) {
-        gridContainer.appendChild(loadingMessage);
-    }
+    updatePaginationInfo('چاوەڕوان بە...');
 
     const startTime = performance.now();
 
     try {
-        // Use AbortController for request cancellation if needed
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+        const timeoutId = setTimeout(() => controller.abort(), 30000);
 
         const res = await fetch('../process/concrete_receipts/select_concrete_receipts.php?' + queryParams.toString(), {
             signal: controller.signal,
@@ -302,87 +299,199 @@ async function loadConcreteReceiptsGrid() {
             throw new Error(`HTTP error! status: ${res.status}`);
         }
 
-        const text = await res.text();
-        let data;
-
-        try {
-            data = JSON.parse(text);
-        } catch (e) {
-            console.error('Raw response from select_concrete_receipts.php:', text);
-            concreteReceiptsGridApi.hideOverlay();
-            const loadingMsg = document.getElementById('concrete-receipts-loading-msg');
-            if (loadingMsg) loadingMsg.remove();
-            isLoadingData = false;
-            if (window.Swal) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'هەڵە',
-                    text: 'هەڵەیەک لە وەڵامەکەی سێرڤەر هەیە. زانیاری زیاتر لە console.'
-                });
-            }
-            return;
-        }
-
+        const data = await res.json();
         const loadTime = ((performance.now() - startTime) / 1000).toFixed(2);
-        console.log(`Data loaded in ${loadTime} seconds`);
+        console.log(`Data loaded in ${loadTime}s - Page ${page} of ${data.pagination?.totalPages || 1}`);
 
         if (data.success && data.data) {
-            // Set row data efficiently
+            // Cache data for client-side search within current page
+            cachedData = data.data;
+            
+            // Update pagination info
+            totalRecords = data.pagination?.total || data.data.length;
+            totalPages = data.pagination?.totalPages || 1;
+            
+            // Set row data
             concreteReceiptsGridApi.setGridOption('rowData', data.data);
             concreteReceiptsGridApi.hideOverlay();
-            
-            // Remove loading message
-            const loadingMsg = document.getElementById('concrete-receipts-loading-msg');
-            if (loadingMsg) loadingMsg.remove();
 
             // Update summary cards
             if (data.summary) {
-                function formatNumber(n) {
-                    if (n === null || n === undefined || n === '') return '0';
-                    return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-                }
-                
                 $('#summary_total_receipts').text(data.summary.total_receipts || 0);
                 $('#summary_total_meter').text(formatNumber(data.summary.total_meter || 0) + ' m³');
                 $('#summary_total_customers').text(data.summary.total_customers || 0);
             }
+
+            // Update pagination UI
+            updatePaginationUI();
         } else {
             concreteReceiptsGridApi.setGridOption('rowData', []);
             concreteReceiptsGridApi.showNoRowsOverlay();
-            const loadingMsg = document.getElementById('concrete-receipts-loading-msg');
-            if (loadingMsg) loadingMsg.remove();
+            totalRecords = 0;
+            totalPages = 0;
+            updatePaginationUI();
         }
     } catch (error) {
-        if (error.name === 'AbortError') {
-            console.error('Request timeout');
-            if (window.Swal) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'کاتی زیاد',
-                    text: 'کاتی زیاد بوو. تکایە دووبارە هەوڵ بدەوە'
-                });
-            }
-        } else {
-            console.error('Error loading data:', error);
-        }
+        console.error('Error loading data:', error);
         concreteReceiptsGridApi.setGridOption('rowData', []);
         concreteReceiptsGridApi.showNoRowsOverlay();
-        const loadingMsg = document.getElementById('concrete-receipts-loading-msg');
-        if (loadingMsg) loadingMsg.remove();
-        if (window.Swal && error.name !== 'AbortError') {
-            Swal.fire({
-                icon: 'error',
-                title: 'هەڵە',
-                text: 'نەتوانرا زانیارییەکان بخوێندرێنوە. تکایە دووبارە هەوڵ بدەوە'
-            });
+        
+        if (error.name === 'AbortError') {
+            updatePaginationInfo('کاتی زیاد بوو - تکایە دووبارە هەوڵ بدەوە');
+        } else {
+            updatePaginationInfo('هەڵە لە بارکردن - تکایە دووبارە هەوڵ بدەوە');
         }
     } finally {
         isLoadingData = false;
     }
 }
 
-// Debounced version for filter changes
-const debouncedLoadConcreteReceiptsGrid = debounce(loadConcreteReceiptsGrid, 300);
+// Update pagination info text
+function updatePaginationInfo(text) {
+    const infoEl = document.getElementById('pagination-info');
+    if (infoEl) {
+        infoEl.textContent = text;
+    }
+}
+
+// Update pagination UI
+function updatePaginationUI() {
+    const startRecord = ((currentServerPage - 1) * currentPageSize) + 1;
+    const endRecord = Math.min(currentServerPage * currentPageSize, totalRecords);
+    
+    // Update info
+    const infoText = totalRecords > 0 
+        ? `نیشاندانی ${formatNumber(startRecord)} تا ${formatNumber(endRecord)} لە ${formatNumber(totalRecords)} ڕیکۆرد`
+        : 'هیچ ڕیکۆردێک نەدۆزرایەوە';
+    updatePaginationInfo(infoText);
+
+    // Update buttons
+    const prevBtn = document.getElementById('pagination-prev');
+    const nextBtn = document.getElementById('pagination-next');
+    const firstBtn = document.getElementById('pagination-first');
+    const lastBtn = document.getElementById('pagination-last');
+    const pageInput = document.getElementById('pagination-page-input');
+    const totalPagesSpan = document.getElementById('pagination-total-pages');
+
+    if (prevBtn) prevBtn.disabled = currentServerPage <= 1;
+    if (nextBtn) nextBtn.disabled = currentServerPage >= totalPages;
+    if (firstBtn) firstBtn.disabled = currentServerPage <= 1;
+    if (lastBtn) lastBtn.disabled = currentServerPage >= totalPages;
+    if (pageInput) pageInput.value = currentServerPage;
+    if (totalPagesSpan) totalPagesSpan.textContent = totalPages;
+}
+
+// Pagination navigation functions
+function goToFirstPage() {
+    if (currentServerPage > 1) {
+        loadConcreteReceiptsGrid(1, currentPageSize, currentSearchText);
+    }
+}
+
+function goToPrevPage() {
+    if (currentServerPage > 1) {
+        loadConcreteReceiptsGrid(currentServerPage - 1, currentPageSize, currentSearchText);
+    }
+}
+
+function goToNextPage() {
+    if (currentServerPage < totalPages) {
+        loadConcreteReceiptsGrid(currentServerPage + 1, currentPageSize, currentSearchText);
+    }
+}
+
+function goToLastPage() {
+    if (currentServerPage < totalPages) {
+        loadConcreteReceiptsGrid(totalPages, currentPageSize, currentSearchText);
+    }
+}
+
+function goToPage(page) {
+    const pageNum = parseInt(page);
+    if (pageNum >= 1 && pageNum <= totalPages && pageNum !== currentServerPage) {
+        loadConcreteReceiptsGrid(pageNum, currentPageSize, currentSearchText);
+    }
+}
+
+function changePageSize(size) {
+    const newSize = parseInt(size);
+    if (newSize !== currentPageSize) {
+        currentPageSize = newSize;
+        loadConcreteReceiptsGrid(1, newSize, currentSearchText);
+    }
+}
+
+// Server-side search
+function serverSearch(searchText) {
+    currentSearchText = searchText.trim();
+    loadConcreteReceiptsGrid(1, currentPageSize, currentSearchText);
+}
+
+// Debounce function
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Debounced search
+const debouncedServerSearch = debounce(serverSearch, 500);
+
+// Create custom pagination HTML
+function createPaginationHTML() {
+    return `
+    <div class="server-pagination-container" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; padding: 12px 16px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 8px; margin-top: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <div class="pagination-info-section" style="display: flex; align-items: center; gap: 12px;">
+            <span id="pagination-info" style="font-weight: 600; color: #495057;">چاوەڕوان بە...</span>
+        </div>
+        
+        <div class="pagination-controls" style="display: flex; align-items: center; gap: 8px;">
+            <div class="page-size-selector" style="display: flex; align-items: center; gap: 6px;">
+                <label style="font-weight: 500; color: #495057;">ژمارەی ڕیز:</label>
+                <select id="pagination-page-size" class="form-select form-select-sm" style="width: auto; min-width: 80px;" onchange="changePageSize(this.value)">
+                    <option value="10">10</option>
+                    <option value="25" selected>25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="200">200</option>
+                </select>
+            </div>
+            
+            <div class="pagination-buttons" style="display: flex; align-items: center; gap: 4px; margin-right: 12px;">
+                <button id="pagination-first" class="btn btn-sm btn-outline-secondary" onclick="goToFirstPage()" title="یەکەم لاپەڕە" style="padding: 6px 10px;">
+                    <i class="fas fa-angle-double-right"></i>
+                </button>
+                <button id="pagination-prev" class="btn btn-sm btn-outline-secondary" onclick="goToPrevPage()" title="لاپەڕەی پێشوو" style="padding: 6px 10px;">
+                    <i class="fas fa-angle-right"></i>
+                </button>
+                
+                <div class="page-input-group" style="display: flex; align-items: center; gap: 6px; margin: 0 8px;">
+                    <input type="number" id="pagination-page-input" class="form-control form-control-sm" 
+                           style="width: 60px; text-align: center;" 
+                           value="1" min="1"
+                           onchange="goToPage(this.value)"
+                           onkeypress="if(event.key === 'Enter') goToPage(this.value)">
+                    <span style="color: #6c757d;">لە</span>
+                    <span id="pagination-total-pages" style="font-weight: 600; color: #495057;">1</span>
+                </div>
+                
+                <button id="pagination-next" class="btn btn-sm btn-outline-secondary" onclick="goToNextPage()" title="لاپەڕەی دواتر" style="padding: 6px 10px;">
+                    <i class="fas fa-angle-left"></i>
+                </button>
+                <button id="pagination-last" class="btn btn-sm btn-outline-secondary" onclick="goToLastPage()" title="کۆتا لاپەڕە" style="padding: 6px 10px;">
+                    <i class="fas fa-angle-double-left"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    `;
+}
 
 // Initialize Grid
 document.addEventListener('DOMContentLoaded', function() {
@@ -394,87 +503,61 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize grid
     concreteReceiptsGridApi = initAGGrid('concreteReceiptsGrid', concreteReceiptsColumnDefs, concreteReceiptsGridOptions);
-    window.concreteReceiptsGridApi = concreteReceiptsGridApi; // Make it globally accessible
+    window.concreteReceiptsGridApi = concreteReceiptsGridApi;
 
     if (!concreteReceiptsGridApi) {
         console.error('Failed to initialize grid!');
         return;
     }
 
+    // Add custom pagination UI after grid
+    const paginationContainer = document.createElement('div');
+    paginationContainer.id = 'custom-pagination-container';
+    paginationContainer.innerHTML = createPaginationHTML();
+    gridDiv.parentNode.insertBefore(paginationContainer, gridDiv.nextSibling);
+
     // Load initial data
-    loadConcreteReceiptsGrid();
+    loadConcreteReceiptsGrid(1, 25, '');
 
     // Quick search functionality - Server-side search
     const quickSearchInput = document.getElementById('quickSearchInput');
     const clearQuickSearchBtn = document.getElementById('clearQuickSearch');
     
     if (quickSearchInput) {
-        // Debounced server-side search
-        let searchTimeout = null;
         quickSearchInput.addEventListener('input', function() {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(function() {
-                // Reload grid with search parameter
-                if (concreteReceiptsGridApi) {
-                    concreteReceiptsGridApi.paginationGoToPage(0);
-                    loadConcreteReceiptsGrid();
-                }
-            }, 500); // 500ms debounce for server-side search
+            debouncedServerSearch(this.value);
         });
 
-        // Clear quick search
         if (clearQuickSearchBtn) {
             clearQuickSearchBtn.addEventListener('click', function() {
                 quickSearchInput.value = '';
-                // Reload grid without search
-                if (concreteReceiptsGridApi) {
-                    concreteReceiptsGridApi.paginationGoToPage(0);
-                    loadConcreteReceiptsGrid();
-                }
+                serverSearch('');
             });
         }
 
-        // Allow Enter key to trigger search immediately
         quickSearchInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                clearTimeout(searchTimeout);
-                // Reload grid with search parameter
-                if (concreteReceiptsGridApi) {
-                    concreteReceiptsGridApi.paginationGoToPage(0);
-                    loadConcreteReceiptsGrid();
-                }
+                serverSearch(this.value);
             }
         });
     }
 });
 
-// Global function to reload grid (overrides the old one from select_concrete_receipts.js)
+// Global function to reload grid
 window.reloadConcreteReceipts = function() {
-    if (concreteReceiptsGridApi) {
-        concreteReceiptsGridApi.paginationGoToPage(0);
-        loadConcreteReceiptsGrid();
-    } else if (window.concreteReceiptsGridApi) {
-        window.concreteReceiptsGridApi.paginationGoToPage(0);
-        if (typeof loadConcreteReceiptsGrid === 'function') {
-            loadConcreteReceiptsGrid();
-        }
-    } else {
-        // Fallback: wait a bit for grid to initialize
-        setTimeout(function() {
-            if (window.concreteReceiptsGridApi) {
-                window.concreteReceiptsGridApi.paginationGoToPage(0);
-                if (typeof loadConcreteReceiptsGrid === 'function') {
-                    loadConcreteReceiptsGrid();
-                }
-            }
-        }, 500);
-    }
+    loadConcreteReceiptsGrid(1, currentPageSize, currentSearchText);
 };
 
-// Make loadConcreteReceiptsGrid globally accessible for filter.js
+// Make functions globally accessible
 window.loadConcreteReceiptsGrid = loadConcreteReceiptsGrid;
-window.debouncedLoadConcreteReceiptsGrid = debouncedLoadConcreteReceiptsGrid;
+window.debouncedLoadConcreteReceiptsGrid = debounce(() => loadConcreteReceiptsGrid(currentServerPage, currentPageSize, currentSearchText), 300);
+window.goToFirstPage = goToFirstPage;
+window.goToPrevPage = goToPrevPage;
+window.goToNextPage = goToNextPage;
+window.goToLastPage = goToLastPage;
+window.goToPage = goToPage;
+window.changePageSize = changePageSize;
 
 // Export grid data to CSV
 window.exportConcreteReceiptsToCSV = function() {

@@ -9,30 +9,36 @@ $(document).ready(function() {
     };
   }
 
+  // Debounce function for filter inputs
+  function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }
+
   function loadFilteredReceipts() {
-    // Reset to first page when filtering and reload grid with debounce for better performance
-    if (window.concreteReceiptsGridApi) {
-      window.concreteReceiptsGridApi.paginationGoToPage(0);
-      if (typeof window.debouncedLoadConcreteReceiptsGrid === 'function') {
-        window.debouncedLoadConcreteReceiptsGrid();
-      } else if (typeof loadConcreteReceiptsGrid === 'function') {
-        loadConcreteReceiptsGrid();
-      } else if (typeof window.reloadConcreteReceipts === 'function') {
-        window.reloadConcreteReceipts();
-      }
+    // Reload grid with server-side pagination (page 1)
+    if (typeof window.loadConcreteReceiptsGrid === 'function') {
+      // Get current search text if exists
+      const searchText = $('#quickSearchInput').val() || '';
+      window.loadConcreteReceiptsGrid(1, 25, searchText);
+    } else if (typeof window.reloadConcreteReceipts === 'function') {
+      window.reloadConcreteReceipts();
     }
   }
 
+  // Debounced version for text inputs
+  const debouncedLoadFilteredReceipts = debounce(loadFilteredReceipts, 400);
+
   // Bind filter events
-  // Use debounced version for text input (location) and immediate for selects
   $('#filter_customer_id, #filter_formulas_id').on('change', loadFilteredReceipts);
-  $('#filter_location').on('input', function() {
-    if (window.debouncedLoadConcreteReceiptsGrid) {
-      window.debouncedLoadConcreteReceiptsGrid();
-    } else {
-      loadFilteredReceipts();
-    }
-  });
+  $('#filter_location').on('input', debouncedLoadFilteredReceipts);
   $('#filter_date_from, #filter_date_to').on('change', loadFilteredReceipts);
 
   // Today/Yesterday filter buttons
@@ -41,10 +47,11 @@ $(document).ready(function() {
     $('#filter_date_to').val(to);
     loadFilteredReceipts();
   }
+  
   function formatDateInput(d) {
-    // Format JS Date to yyyy-mm-dd
     return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
   }
+  
   $('#filter_today').on('click', function() {
     const today = new Date();
     const f = formatDateInput(today);
@@ -52,6 +59,7 @@ $(document).ready(function() {
     $('#filter_today').addClass('active btn-primary').removeClass('btn-outline-primary');
     $('#filter_yesterday').removeClass('active btn-secondary').addClass('btn-outline-secondary');
   });
+  
   $('#filter_yesterday').on('click', function() {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
@@ -60,15 +68,14 @@ $(document).ready(function() {
     $('#filter_yesterday').addClass('active btn-secondary').removeClass('btn-outline-secondary');
     $('#filter_today').removeClass('active btn-primary').addClass('btn-outline-primary');
   });
+  
   // Remove highlight if manual date change
   $('#filter_date_from, #filter_date_to').on('input', function() {
     $('#filter_today').removeClass('active btn-primary').addClass('btn-outline-primary');
     $('#filter_yesterday').removeClass('active btn-secondary').addClass('btn-outline-secondary');
   });
 
-  // Initial load (optional, since select_concrete_receipts.js may already do this)
-  // loadFilteredReceipts();
-
+  // Reset filters
   $('#filter_reset').on('click', function() {
     // Clear all filters
     $('#filter_customer_id').val('');
@@ -76,17 +83,16 @@ $(document).ready(function() {
     $('#filter_formulas_id').val('');
     $('#filter_date_from').val('');
     $('#filter_date_to').val('');
+    // Clear quick search
+    $('#quickSearchInput').val('');
     // Remove highlights
     $('#filter_today').removeClass('active btn-primary').addClass('btn-outline-primary');
     $('#filter_yesterday').removeClass('active btn-secondary').addClass('btn-outline-secondary');
     // Reload grid with reset filters
-    if (window.concreteReceiptsGridApi) {
-      window.concreteReceiptsGridApi.paginationGoToPage(0);
-      if (typeof loadConcreteReceiptsGrid === 'function') {
-        loadConcreteReceiptsGrid();
-      } else if (typeof window.reloadConcreteReceipts === 'function') {
-        window.reloadConcreteReceipts();
-      }
+    if (typeof window.loadConcreteReceiptsGrid === 'function') {
+      window.loadConcreteReceiptsGrid(1, 25, '');
+    } else if (typeof window.reloadConcreteReceipts === 'function') {
+      window.reloadConcreteReceipts();
     }
   });
 
@@ -96,33 +102,17 @@ $(document).ready(function() {
       return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
     
-    // Update total receipts
     const totalReceipts = summary && summary.total_receipts !== undefined ? summary.total_receipts : 0;
     $('#summary_total_receipts').text(totalReceipts);
     
-    // Update total meter
     const totalMeter = summary && summary.total_meter !== undefined ? summary.total_meter : 0;
     $('#summary_total_meter').text(formatNumber(totalMeter) + ' m³');
     
-    // Update total customers
     const totalCustomers = summary && summary.total_customers !== undefined ? summary.total_customers : 0;
     $('#summary_total_customers').text(totalCustomers);
   }
 
-  // On page load, fetch and show the real summary values
-  // loadFilteredReceipts(); // This is now handled by select_concrete_receipts.js
-
-  // Function to attach event handlers to buttons
-  function attachEventHandlers() {
-    // This function is now simplified since event handlers are attached directly
-    // in the individual files (update_concrete_receipts.js, delete_concrete_receipts.js)
-    // We keep this function for backward compatibility but it's no longer needed
-    
-    // Note: Event handlers are now attached using $(document).on() in the individual files,
-    // which means they work for dynamically created elements without needing re-attachment
-  }
-
-  // Add print receipt event handler
+  // Print receipt event handler
   $(document).on('click', '.print-receipt', function() {
     var id = $(this).data('id');
     if (typeof Swal !== 'undefined') {
@@ -145,17 +135,13 @@ $(document).ready(function() {
     }
   });
 
-  // Global function to attach event handlers (called from select_concrete_receipts.js)
-  window.attachConcreteReceiptsEventHandlers = attachEventHandlers;
-
-  // Function to reload only the summary cards (no filters)
+  // Function to reload summary cards
   window.reloadConcreteReceiptsSummary = function() {
-    if (window.concreteReceiptsGridApi) {
-      if (typeof loadConcreteReceiptsGrid === 'function') {
-        loadConcreteReceiptsGrid();
-      } else if (typeof window.reloadConcreteReceipts === 'function') {
-        window.reloadConcreteReceipts();
-      }
+    if (typeof window.loadConcreteReceiptsGrid === 'function') {
+      const searchText = $('#quickSearchInput').val() || '';
+      window.loadConcreteReceiptsGrid(1, 25, searchText);
+    } else if (typeof window.reloadConcreteReceipts === 'function') {
+      window.reloadConcreteReceipts();
     }
   };
 });

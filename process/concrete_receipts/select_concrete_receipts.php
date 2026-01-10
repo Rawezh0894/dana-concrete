@@ -21,6 +21,32 @@ try {
     // Gather filters
     $where = [];
     $params = [];
+    
+    // Server-side global search (like SAP/Odoo/Oracle)
+    if (!empty($_GET['search'])) {
+        $searchTerm = '%' . $_GET['search'] . '%';
+        $where[] = '(
+            cr.receipt_number LIKE :search_receipt OR
+            c.name LIKE :search_customer OR
+            cr.location LIKE :search_location OR
+            cr.receiver_name LIKE :search_receiver OR
+            f.name LIKE :search_formula OR
+            pump_car.name LIKE :search_pump_car OR
+            pump_driver.name LIKE :search_pump_driver OR
+            mixer_car.name LIKE :search_mixer_car OR
+            mixer_driver.name LIKE :search_mixer_driver
+        )';
+        $params[':search_receipt'] = $searchTerm;
+        $params[':search_customer'] = $searchTerm;
+        $params[':search_location'] = $searchTerm;
+        $params[':search_receiver'] = $searchTerm;
+        $params[':search_formula'] = $searchTerm;
+        $params[':search_pump_car'] = $searchTerm;
+        $params[':search_pump_driver'] = $searchTerm;
+        $params[':search_mixer_car'] = $searchTerm;
+        $params[':search_mixer_driver'] = $searchTerm;
+    }
+    
     if (!empty($_GET['customer_id'])) {
         $where[] = 'cr.customer_id = :customer_id';
         $params[':customer_id'] = $_GET['customer_id'];
@@ -41,22 +67,6 @@ try {
         $where[] = 'DATE(cr.created_at) <= :date_to';
         $params[':date_to'] = $_GET['date_to'];
     }
-    
-    // Quick search - search across multiple fields
-    if (!empty($_GET['search'])) {
-        $searchTerm = $_GET['search'];
-        $where[] = '(cr.receipt_number LIKE :search OR 
-                     c.name LIKE :search OR 
-                     cr.location LIKE :search OR 
-                     cr.receiver_name LIKE :search OR 
-                     f.name LIKE :search OR
-                     pump_car.name LIKE :search OR
-                     pump_driver.name LIKE :search OR
-                     mixer_car.name LIKE :search OR
-                     mixer_driver.name LIKE :search)';
-        $params[':search'] = '%' . $searchTerm . '%';
-    }
-    
     $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
     
     // Pagination parameters
