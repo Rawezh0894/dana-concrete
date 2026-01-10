@@ -94,27 +94,8 @@ window.AGGridDefaults = {
         csvExport: 'ئیکسپۆرتی CSV',
         excelExport: 'ئیکسپۆرتی Excel',
     },
-    sideBar: {
-        toolPanels: [
-            {
-                id: 'columns',
-                labelDefault: 'ستونەکان',
-                labelKey: 'columns',
-                iconKey: 'columns',
-                toolPanel: 'agColumnsToolPanel',
-            },
-            {
-                id: 'filters',
-                labelDefault: 'فلتەرەکان',
-                labelKey: 'filters',
-                iconKey: 'filter',
-                toolPanel: 'agFiltersToolPanel',
-            }
-        ],
-        defaultToolPanel: 'filters',
-        hiddenByDefault: false
-    },
-    suppressSizeToFit: true,
+    // sideBar removed - requires Enterprise version
+    // suppressSizeToFit removed - not valid in AG Grid v31
     suppressHorizontalScroll: false,
     suppressRowClickSelection: true,
     animateRows: true,
@@ -154,10 +135,6 @@ function initAGGrid(gridId, columnDefs, customOptions = {}) {
         localeText: {
             ...window.AGGridDefaults.localeText,
             ...(customOptions.localeText || {})
-        },
-        sideBar: {
-            ...window.AGGridDefaults.sideBar,
-            ...(customOptions.sideBar || {})
         }
     };
     

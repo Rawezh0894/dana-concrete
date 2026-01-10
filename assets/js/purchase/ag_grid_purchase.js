@@ -331,8 +331,11 @@ const gridOptions = {
     }
 };
 
-// Merge with defaults from base file
-Object.assign(gridOptions, window.AGGridDefaults || {});
+// Merge with defaults from base file (excluding sideBar and suppressSizeToFit)
+const defaults = { ...window.AGGridDefaults };
+delete defaults.sideBar;
+delete defaults.suppressSizeToFit;
+Object.assign(gridOptions, defaults);
 
 // Load Purchase Data - with pagination state preservation
 function loadPurchaseData(preservePagination = false) {
@@ -495,7 +498,13 @@ function exportPurchaseMonthlyReportToCSV() {
 document.addEventListener('DOMContentLoaded', function() {
     const gridDiv = document.querySelector('#purchaseGrid');
     if (gridDiv) {
-        new agGrid.Grid(gridDiv, gridOptions);
+        // Use createGrid instead of new Grid (AG Grid v31+)
+        if (typeof agGrid.createGrid === 'function') {
+            gridApi = agGrid.createGrid(gridDiv, gridOptions).api;
+        } else {
+            // Fallback for older versions
+            new agGrid.Grid(gridDiv, gridOptions);
+        }
         
         // Wait for grid to be ready before adding event listeners
         setTimeout(() => {
@@ -539,7 +548,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             // Handle edit and delete buttons - let existing jQuery handlers work
-            // The event delegation in update_purchase.js and delete_purchase.js will handle these
+            // The event delegation in select_purchase.js and delete_purchase.js will handle these
             // We just need to ensure the buttons are properly rendered in the grid
         }, 100);
     }
