@@ -1,5 +1,14 @@
 /* AG Grid Custom Styling for Sales Table */
 
+/* Import Rabar Font */
+@font-face {
+    font-family: 'Rabar';
+    src: url('../fonts/Rabar_021.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
 /* Main Grid Container */
 #salesGrid {
     width: 100%;
@@ -21,6 +30,7 @@
     --ag-font-family: 'Rabar', 'Arial', sans-serif;
     --ag-font-size: 14px;
     --ag-font-weight: 500;
+    direction: rtl;
 }
 
 /* Header Cells */
@@ -30,11 +40,13 @@
     color: var(--seafoam-green, #20b2aa);
     text-align: right;
     padding: 12px 8px;
-    border-right: 1px solid rgba(255, 255, 255, 0.2);
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
+    border-right: none;
+    direction: rtl;
 }
 
-.ag-theme-alpine .ag-header-cell:last-child {
-    border-right: none;
+.ag-theme-alpine .ag-header-cell:first-child {
+    border-left: none;
 }
 
 /* Header Cell Text */
@@ -103,6 +115,21 @@
     line-height: 1.5;
     display: flex;
     align-items: center;
+    direction: rtl;
+    text-align: right;
+}
+
+/* RTL Cell Alignment */
+.ag-theme-alpine .ag-cell[col-id="quantity"],
+.ag-theme-alpine .ag-cell[col-id="price_per_unit"],
+.ag-theme-alpine .ag-cell[col-id="total_price"],
+.ag-theme-alpine .ag-cell[col-id="amount_paid_iq"],
+.ag-theme-alpine .ag-cell[col-id="amount_paid_usd"],
+.ag-theme-alpine .ag-cell[col-id="remaining_amount"],
+.ag-theme-alpine .ag-cell[col-id="dolar_rate"],
+.ag-theme-alpine .ag-cell[col-id="discount"] {
+    text-align: left;
+    direction: ltr;
 }
 
 /* Numeric Columns */
@@ -228,15 +255,41 @@
     margin-right: 4px;
 }
 
-/* Resize Handle */
+/* Resize Handle - RTL */
 .ag-theme-alpine .ag-header-cell-resize {
     background-color: var(--seafoam-green, #20b2aa);
     width: 3px;
+    left: 0;
+    right: auto;
 }
 
 .ag-theme-alpine .ag-header-cell-resize:hover {
     background-color: var(--seafoam-green, #20b2aa);
     width: 5px;
+}
+
+/* RTL Direction for entire grid */
+.ag-theme-alpine .ag-root-wrapper {
+    direction: rtl;
+}
+
+.ag-theme-alpine .ag-header {
+    direction: rtl;
+}
+
+.ag-theme-alpine .ag-body-viewport {
+    direction: rtl;
+}
+
+/* Pinned column - RTL */
+.ag-theme-alpine .ag-pinned-left-cols-container {
+    right: 0;
+    left: auto;
+}
+
+.ag-theme-alpine .ag-pinned-right-cols-container {
+    left: 0;
+    right: auto;
 }
 
 /* Context Menu */

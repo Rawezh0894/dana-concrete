@@ -27,7 +27,8 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        width: 150,
+        autoSize: true,
+        minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl' }
     },
     {
@@ -37,7 +38,8 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        width: 150,
+        autoSize: true,
+        minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl' }
     },
     {
@@ -47,7 +49,8 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        width: 150,
+        autoSize: true,
+        minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl' }
     },
     {
@@ -57,7 +60,8 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        width: 130,
+        autoSize: true,
+        minWidth: 120,
         cellStyle: { textAlign: 'right', direction: 'rtl' },
         cellRenderer: function(params) {
             if (params.data && params.data.duplicate_count && params.data.duplicate_count > 1) {
@@ -73,7 +77,8 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        width: 150,
+        autoSize: true,
+        minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl' }
     },
     {
@@ -83,7 +88,8 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        width: 120,
+        autoSize: true,
+        minWidth: 110,
         cellStyle: { textAlign: 'center' },
         valueFormatter: function(params) {
             if (!params.value) return '-';
@@ -97,7 +103,8 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        width: 120,
+        autoSize: true,
+        minWidth: 120,
         cellStyle: { textAlign: 'center' },
         cellRenderer: function(params) {
             if (!params.value) return '-';
@@ -112,7 +119,8 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        width: 110,
+        autoSize: true,
+        minWidth: 100,
         cellStyle: { textAlign: 'left' },
         valueFormatter: function(params) {
             if (params.value === null || params.value === undefined || params.value === '') return '-';
@@ -127,7 +135,8 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        width: 120,
+        autoSize: true,
+        minWidth: 110,
         cellStyle: { textAlign: 'left' },
         valueFormatter: function(params) {
             return formatUSD(params.value);
@@ -141,7 +150,8 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        width: 120,
+        autoSize: true,
+        minWidth: 110,
         cellStyle: { textAlign: 'left', fontWeight: 'bold' },
         valueFormatter: function(params) {
             return formatUSD(params.value);
@@ -155,7 +165,8 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        width: 150,
+        autoSize: true,
+        minWidth: 140,
         cellStyle: { textAlign: 'left' },
         valueFormatter: function(params) {
             return formatIQD(params.value);
@@ -169,7 +180,8 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        width: 150,
+        autoSize: true,
+        minWidth: 140,
         cellStyle: { textAlign: 'left' },
         valueFormatter: function(params) {
             return formatUSD(params.value);
@@ -183,7 +195,8 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        width: 120,
+        autoSize: true,
+        minWidth: 110,
         cellStyle: { textAlign: 'left', fontWeight: 'bold', color: '#dc3545' },
         valueFormatter: function(params) {
             return formatUSD(params.value);
@@ -197,7 +210,8 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        width: 130,
+        autoSize: true,
+        minWidth: 120,
         cellStyle: { textAlign: 'left' },
         valueFormatter: function(params) {
             if (params.value === null || params.value === undefined || params.value === '') return '-';
@@ -212,7 +226,8 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        width: 200,
+        autoSize: true,
+        minWidth: 150,
         cellStyle: { textAlign: 'right', direction: 'rtl' },
         cellRenderer: function(params) {
             if (!params.value) return '-';
@@ -226,7 +241,8 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        width: 120,
+        autoSize: true,
+        minWidth: 110,
         cellStyle: { textAlign: 'left', color: '#28a745' },
         valueFormatter: function(params) {
             return formatUSD(params.value);
@@ -239,7 +255,8 @@ const columnDefs = [
         sortable: false,
         filter: false,
         resizable: true,
-        width: 120,
+        autoSize: true,
+        minWidth: 100,
         cellStyle: { textAlign: 'center' },
         cellRenderer: function(params) {
             if (!params.data) return '-';
@@ -251,7 +268,7 @@ const columnDefs = [
                 : '';
             return `${editBtn} ${deleteBtn}`.trim() || '-';
         },
-        pinned: 'right'
+        pinned: 'left'
     }
 ];
 
@@ -338,14 +355,14 @@ const gridOptions = {
         gridApi = params.api;
         gridColumnApi = params.columnApi;
         loadSalesData();
-        
-        // Auto-size columns on first load
-        setTimeout(() => {
-            gridApi.sizeColumnsToFit();
-        }, 100);
     },
     onFirstDataRendered: function(params) {
-        params.api.sizeColumnsToFit();
+        // Auto-size all columns based on content
+        const allColumnIds = [];
+        params.columnApi.getAllColumns().forEach(column => {
+            allColumnIds.push(column.getId());
+        });
+        params.columnApi.autoSizeColumns(allColumnIds, false);
     },
     suppressRowClickSelection: true,
     animateRows: true,
