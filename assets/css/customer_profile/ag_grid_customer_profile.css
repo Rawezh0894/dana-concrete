@@ -11,6 +11,26 @@
     height: 500px;
 }
 
+/* Fix extra space on the right side for customer debt grid */
+#customerDebtGrid .ag-body-horizontal-scroll-viewport {
+    width: 100% !important;
+}
+
+#customerDebtGrid .ag-center-cols-container {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+#customerDebtGrid .ag-body-viewport {
+    overflow-x: auto;
+    width: 100% !important;
+}
+
+/* Ensure columns fill the available width */
+#customerDebtGrid .ag-center-cols-clipper {
+    width: 100% !important;
+}
+
 /* Responsive Design - تایبەت بە Customer Profile */
 @media (max-width: 768px) {
     #customerSalesGrid,

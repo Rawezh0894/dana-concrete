@@ -17,6 +17,7 @@ const customerDebtColumnDefs = [
         resizable: true,
         minWidth: 150,
         maxWidth: 200,
+        flex: 0,
         cellStyle: { textAlign: 'center', direction: 'ltr' },
         cellRenderer: function(params) {
             if (!params.data) return '-';
@@ -125,7 +126,8 @@ const customerDebtGridOptions = {
         filter: true,
         resizable: true,
         floatingFilter: true,
-        minWidth: 100
+        minWidth: 100,
+        flex: 1
     },
     pagination: true,
     paginationPageSize: 25,
@@ -186,7 +188,12 @@ const customerDebtGridOptions = {
         loadCustomerDebtData();
     },
     onFirstDataRendered: function(params) {
-        params.api.sizeColumnsToFit();
+        // Auto-size all columns except actions column to prevent extra space on the right
+        const allColumnIds = params.api.getColumns()?.map(col => col.getColId()) || [];
+        const columnsToAutoSize = allColumnIds.filter(colId => colId !== 'actions');
+        if (columnsToAutoSize.length > 0) {
+            params.api.autoSizeColumns(columnsToAutoSize);
+        }
     }
 };
 
