@@ -78,7 +78,7 @@ try {
         LEFT JOIN cars mixer_car ON cr.mixer_car_id = mixer_car.id
         LEFT JOIN employees mixer_driver ON cr.mixer_driver_id = mixer_driver.id
         ' . $whereSql . '
-        ORDER BY cr.id DESC
+        ORDER BY cr.created_at DESC, cr.id DESC
         LIMIT :limit OFFSET :offset
     ';
     $stmt = $pdo->prepare($sql);

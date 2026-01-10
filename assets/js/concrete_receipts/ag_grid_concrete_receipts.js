@@ -8,6 +8,32 @@ window.concreteReceiptsGridApi = null; // Will be set after initialization
 // Column Definitions - ترتیب ستونەکان بە شێوەی دروست (لە چەپ بۆ ڕاست - LTR)
 const concreteReceiptsColumnDefs = [
     {
+        field: 'actions',
+        headerName: 'کردارەکان',
+        sortable: false,
+        filter: false,
+        resizable: true,
+        minWidth: 150,
+        maxWidth: 200,
+        flex: 0,
+        pinned: 'right',
+        cellStyle: { textAlign: 'center', direction: 'ltr' },
+        cellRenderer: function(params) {
+            if (!params.data) return '-';
+            let buttons = '';
+            if (window.userPermissions && window.userPermissions.canEdit) {
+                buttons += `<button class='btn btn-warning btn-sm edit-receipt' data-id='${params.data.id}' title='نوێکردنەوە' style='margin: 2px;'><i class='fa fa-edit'></i></button> `;
+            }
+            if (window.userPermissions && window.userPermissions.canDelete) {
+                buttons += `<button class='btn btn-danger btn-sm delete-receipt' data-id='${params.data.id}' title='سڕینەوە' style='margin: 2px;'><i class='fa fa-trash'></i></button> `;
+            }
+            if (window.userPermissions && window.userPermissions.canPrint) {
+                buttons += `<button class='btn btn-info btn-sm print-receipt' data-id='${params.data.id}' title='پرێنت' style='margin: 2px;'><i class='fa fa-print'></i></button>`;
+            }
+            return buttons.trim() || '-';
+        }
+    },
+    {
         field: 'mixer_driver_name',
         headerName: 'شۆفێری میکسەر',
         filter: 'agTextColumnFilter',
@@ -160,32 +186,6 @@ const concreteReceiptsColumnDefs = [
             const isDuplicate = params.data && params.data.is_duplicate;
             const warningIcon = isDuplicate ? '<i class="fas fa-exclamation-triangle" style="color: #ffc107; margin-left: 4px;" title="ژمارەی پسوڵە دووبارەیە"></i>' : '';
             return warningIcon + (params.value || '-');
-        }
-    },
-    {
-        field: 'actions',
-        headerName: 'کردارەکان',
-        sortable: false,
-        filter: false,
-        resizable: true,
-        minWidth: 150,
-        maxWidth: 200,
-        flex: 0,
-        pinned: 'right',
-        cellStyle: { textAlign: 'center', direction: 'ltr' },
-        cellRenderer: function(params) {
-            if (!params.data) return '-';
-            let buttons = '';
-            if (window.userPermissions && window.userPermissions.canEdit) {
-                buttons += `<button class='btn btn-warning btn-sm edit-receipt' data-id='${params.data.id}' title='نوێکردنەوە' style='margin: 2px;'><i class='fa fa-edit'></i></button> `;
-            }
-            if (window.userPermissions && window.userPermissions.canDelete) {
-                buttons += `<button class='btn btn-danger btn-sm delete-receipt' data-id='${params.data.id}' title='سڕینەوە' style='margin: 2px;'><i class='fa fa-trash'></i></button> `;
-            }
-            if (window.userPermissions && window.userPermissions.canPrint) {
-                buttons += `<button class='btn btn-info btn-sm print-receipt' data-id='${params.data.id}' title='پرێنت' style='margin: 2px;'><i class='fa fa-print'></i></button>`;
-            }
-            return buttons.trim() || '-';
         }
     }
 ];
