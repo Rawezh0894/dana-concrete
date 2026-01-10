@@ -1,8 +1,34 @@
 // AG Grid configuration for concrete receipts
 let concreteReceiptsGridApi = null;
 
-// Column definitions - ترتیب بەپێی HTML table
+// Column definitions - ترتیب RTL: actions و # لە چەپدا، بەشی دیکە لە ڕاستدا
 const concreteReceiptsColumnDefs = [
+    {
+        field: 'actions',
+        headerName: 'کردارەکان',
+        sortable: false,
+        filter: false,
+        resizable: true,
+        minWidth: 150,
+        maxWidth: 200,
+        flex: 0,
+        pinned: 'left',
+        cellStyle: { textAlign: 'center', direction: 'ltr' },
+        cellRenderer: function(params) {
+            if (!params.data) return '-';
+            let buttons = '';
+            if (window.userPermissions && window.userPermissions.canEdit) {
+                buttons += `<button class='btn btn-warning btn-sm edit-receipt' data-id='${params.data.id}' title='نوێکردنەوە' style='margin: 2px;'><i class='fa fa-edit'></i></button>`;
+            }
+            if (window.userPermissions && window.userPermissions.canDelete) {
+                buttons += `<button class='btn btn-danger btn-sm delete-receipt' data-id='${params.data.id}' title='سڕینەوە' style='margin: 2px;'><i class='fa fa-trash'></i></button>`;
+            }
+            if (window.userPermissions && window.userPermissions.canPrint) {
+                buttons += `<button class='btn btn-info btn-sm print-receipt' data-id='${params.data.id}' title='پرێنت' style='margin: 2px;'><i class='fa fa-print'></i></button>`;
+            }
+            return buttons || '-';
+        }
+    },
     {
         field: '#',
         headerName: '#',
@@ -23,12 +49,26 @@ const concreteReceiptsColumnDefs = [
         headerName: 'ژم.پسووڵە',
         flex: 1,
         minWidth: 120,
+        filter: true,
+        filterParams: {
+            filterOptions: ['contains', 'equals', 'startsWith', 'endsWith'],
+            defaultOption: 'contains'
+        },
+        // Use valueGetter to ensure filter uses the actual receipt_number value
+        valueGetter: function(params) {
+            return params.data ? params.data.receipt_number : '';
+        },
         cellRenderer: function(params) {
             if (!params.data) return '-';
             const warning = params.data.is_duplicate 
                 ? '<i class="fas fa-exclamation-triangle duplicate-warning" title="ژمارەی پسوڵە دووبارەیە"></i>' 
                 : '';
-            return warning + (params.value || '-');
+            const receiptNumber = params.data.receipt_number || '';
+            return warning + receiptNumber;
+        },
+        // For quick filter
+        getQuickFilterText: function(params) {
+            return params.data ? params.data.receipt_number : '';
         }
     },
     {
@@ -106,32 +146,6 @@ const concreteReceiptsColumnDefs = [
         headerName: 'شۆفێری میکسەر',
         flex: 1,
         minWidth: 130
-    },
-    {
-        field: 'actions',
-        headerName: 'کردارەکان',
-        sortable: false,
-        filter: false,
-        resizable: true,
-        minWidth: 150,
-        maxWidth: 200,
-        flex: 0,
-        pinned: 'left',
-        cellStyle: { textAlign: 'center', direction: 'ltr' },
-        cellRenderer: function(params) {
-            if (!params.data) return '-';
-            let buttons = '';
-            if (window.userPermissions && window.userPermissions.canEdit) {
-                buttons += `<button class='btn btn-warning btn-sm edit-receipt' data-id='${params.data.id}' title='نوێکردنەوە' style='margin: 2px;'><i class='fa fa-edit'></i></button>`;
-            }
-            if (window.userPermissions && window.userPermissions.canDelete) {
-                buttons += `<button class='btn btn-danger btn-sm delete-receipt' data-id='${params.data.id}' title='سڕینەوە' style='margin: 2px;'><i class='fa fa-trash'></i></button>`;
-            }
-            if (window.userPermissions && window.userPermissions.canPrint) {
-                buttons += `<button class='btn btn-info btn-sm print-receipt' data-id='${params.data.id}' title='پرێنت' style='margin: 2px;'><i class='fa fa-print'></i></button>`;
-            }
-            return buttons || '-';
-        }
     }
 ];
 
