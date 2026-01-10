@@ -28,7 +28,7 @@ const columnDefs = [
         resizable: true,
         minWidth: 100,
         flex: 0,
-        cellStyle: { textAlign: 'center' },
+        cellStyle: { textAlign: 'center', direction: 'ltr' },
         cellRenderer: function(params) {
             if (!params.data) return '-';
             const editBtn = window.userPermissions && window.userPermissions.canEdit
@@ -48,7 +48,7 @@ const columnDefs = [
         sortable: true,
         resizable: true,
         minWidth: 100,
-        cellStyle: { textAlign: 'center', direction: 'ltr', color: '#28a745' },
+        cellStyle: { textAlign: 'right', direction: 'rtl', color: '#28a745' },
         valueFormatter: function(params) {
             return formatUSD(params.value);
         },
@@ -62,7 +62,7 @@ const columnDefs = [
         sortable: true,
         resizable: true,
         minWidth: 100,
-        cellStyle: { textAlign: 'center', direction: 'ltr' },
+        cellStyle: { textAlign: 'right', direction: 'rtl' },
         cellRenderer: function(params) {
             if (!params.value) return '-';
             const displayText = params.value.length > 40 ? params.value.substring(0, 40) + '...' : params.value;
@@ -80,7 +80,7 @@ const columnDefs = [
         sortable: true,
         resizable: true,
         minWidth: 100,
-        cellStyle: { textAlign: 'center', direction: 'ltr' },
+        cellStyle: { textAlign: 'right', direction: 'rtl' },
         valueFormatter: function(params) {
             if (params.value === null || params.value === undefined || params.value === '') return '-';
             return formatNumber(params.value);
@@ -95,7 +95,7 @@ const columnDefs = [
         sortable: true,
         resizable: true,
         minWidth: 100,
-        cellStyle: { textAlign: 'center', direction: 'ltr', fontWeight: 'bold', color: '#dc3545' },
+        cellStyle: { textAlign: 'right', direction: 'rtl', fontWeight: 'bold', color: '#dc3545' },
         valueFormatter: function(params) {
             return formatUSD(params.value);
         },
@@ -109,7 +109,7 @@ const columnDefs = [
         sortable: true,
         resizable: true,
         minWidth: 100,
-        cellStyle: { textAlign: 'center', direction: 'ltr' },
+        cellStyle: { textAlign: 'right', direction: 'rtl' },
         valueFormatter: function(params) {
             return formatUSD(params.value);
         },
@@ -123,7 +123,7 @@ const columnDefs = [
         sortable: true,
         resizable: true,
         minWidth: 100,
-        cellStyle: { textAlign: 'center', direction: 'ltr' },
+        cellStyle: { textAlign: 'right', direction: 'rtl' },
         valueFormatter: function(params) {
             return formatIQD(params.value);
         },
@@ -137,7 +137,7 @@ const columnDefs = [
         sortable: true,
         resizable: true,
         minWidth: 100,
-        cellStyle: { textAlign: 'center', direction: 'ltr', fontWeight: 'bold' },
+        cellStyle: { textAlign: 'right', direction: 'rtl', fontWeight: 'bold' },
         valueFormatter: function(params) {
             return formatUSD(params.value);
         },
@@ -151,7 +151,7 @@ const columnDefs = [
         sortable: true,
         resizable: true,
         minWidth: 100,
-        cellStyle: { textAlign: 'center', direction: 'ltr' },
+        cellStyle: { textAlign: 'right', direction: 'rtl' },
         valueFormatter: function(params) {
             return formatUSD(params.value);
         },
@@ -165,7 +165,7 @@ const columnDefs = [
         sortable: true,
         resizable: true,
         minWidth: 100,
-        cellStyle: { textAlign: 'center', direction: 'ltr' },
+        cellStyle: { textAlign: 'right', direction: 'rtl' },
         valueFormatter: function(params) {
             if (params.value === null || params.value === undefined || params.value === '') return '-';
             return `M³ ${formatNumber(params.value)}`;
@@ -180,7 +180,7 @@ const columnDefs = [
         sortable: true,
         resizable: true,
         minWidth: 100,
-        cellStyle: { textAlign: 'center', direction: 'ltr' },
+        cellStyle: { textAlign: 'right', direction: 'rtl' },
         cellRenderer: function(params) {
             if (!params.value) return '-';
             const color = params.value === 'نەقد' ? '#28a745' : '#ffc107';
@@ -195,7 +195,7 @@ const columnDefs = [
         sortable: true,
         resizable: true,
         minWidth: 100,
-        cellStyle: { textAlign: 'center', direction: 'ltr' },
+        cellStyle: { textAlign: 'right', direction: 'rtl' },
         valueFormatter: function(params) {
             if (!params.value) return '-';
             return params.value;
@@ -209,7 +209,7 @@ const columnDefs = [
         sortable: true,
         resizable: true,
         minWidth: 100,
-        cellStyle: { textAlign: 'center', direction: 'ltr' },
+        cellStyle: { textAlign: 'right', direction: 'rtl' },
         tooltipValueGetter: function(params) {
             return params.value || '';
         }
@@ -222,7 +222,7 @@ const columnDefs = [
         sortable: true,
         resizable: true,
         minWidth: 100,
-        cellStyle: { textAlign: 'center', direction: 'ltr' },
+        cellStyle: { textAlign: 'right', direction: 'rtl' },
         cellRenderer: function(params) {
             if (params.data && params.data.duplicate_count && params.data.duplicate_count > 1) {
                 return `<span style="background: #dc3545; color: white; padding: 2px 6px; border-radius: 3px;">${params.value || '-'}</span>`;
@@ -241,7 +241,7 @@ const columnDefs = [
         sortable: true,
         resizable: true,
         minWidth: 100,
-        cellStyle: { textAlign: 'center', direction: 'ltr' },
+        cellStyle: { textAlign: 'right', direction: 'rtl' },
         tooltipValueGetter: function(params) {
             return params.value || '';
         }
@@ -254,7 +254,7 @@ const columnDefs = [
         sortable: true,
         resizable: true,
         minWidth: 100,
-        cellStyle: { textAlign: 'center', direction: 'ltr' },
+        cellStyle: { textAlign: 'right', direction: 'rtl' },
         tooltipValueGetter: function(params) {
             return params.value || '';
         }
@@ -267,7 +267,7 @@ const columnDefs = [
         sortable: true,
         resizable: true,
         minWidth: 100,
-        cellStyle: { textAlign: 'center', direction: 'ltr' },
+        cellStyle: { textAlign: 'right', direction: 'rtl' },
         tooltipValueGetter: function(params) {
             return params.value || '';
         }

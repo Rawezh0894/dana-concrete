@@ -173,12 +173,13 @@
     line-height: 1.5;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
     font-family: 'Rabar', 'Arial', 'Tahoma', sans-serif !important;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    text-align: center;
+    text-align: right;
+    direction: rtl;
 }
 
 /* Fix for long text in cells */
@@ -189,8 +190,9 @@
     width: 100%;
     display: flex;
     align-items: center;
-    justify-content: center;
-    text-align: center;
+    justify-content: flex-end;
+    text-align: right;
+    direction: rtl;
 }
 
 .ag-theme-alpine .ag-cell-value {
@@ -198,11 +200,11 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     max-width: 100%;
-    text-align: center;
-    margin: 0 auto;
+    text-align: right;
+    direction: rtl;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
 }
 
 /* Numeric Columns */
@@ -216,8 +218,9 @@
 .ag-theme-alpine .ag-cell[col-id="discount"] {
     font-family: 'Courier New', monospace;
     font-weight: 500;
-    text-align: center !important;
-    justify-content: center !important;
+    text-align: right !important;
+    direction: rtl !important;
+    justify-content: flex-end !important;
 }
 
 /* Pagination */
@@ -411,21 +414,36 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-/* Center all content in cells */
+/* RTL all content in cells */
 .ag-theme-alpine .ag-cell span,
 .ag-theme-alpine .ag-cell div {
-    text-align: center !important;
+    text-align: right !important;
+    direction: rtl !important;
     display: inline-block;
     width: 100%;
 }
 
-/* Center cell content wrapper */
+/* Actions column - keep center */
+.ag-theme-alpine .ag-cell[col-id="actions"] {
+    text-align: center !important;
+    direction: ltr !important;
+    justify-content: center !important;
+}
+
+.ag-theme-alpine .ag-cell[col-id="actions"] span,
+.ag-theme-alpine .ag-cell[col-id="actions"] div {
+    text-align: center !important;
+    direction: ltr !important;
+}
+
+/* RTL cell content wrapper */
 .ag-theme-alpine .ag-cell-inner-wrapper {
     display: flex !important;
     align-items: center !important;
-    justify-content: center !important;
+    justify-content: flex-end !important;
     width: 100%;
-    text-align: center !important;
+    text-align: right !important;
+    direction: rtl !important;
 }
 
 /* Responsive Design */
