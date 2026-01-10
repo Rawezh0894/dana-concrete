@@ -49,7 +49,7 @@
     font-weight: bold;
     font-size: 14px;
     color: var(--seafoam-green, #20b2aa);
-    text-align: center;
+    text-align: center !important;
     padding: 12px 8px;
     border-right: 1px solid rgba(255, 255, 255, 0.2);
     border-left: none;
@@ -58,6 +58,9 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .ag-theme-alpine .ag-header-cell:first-child {
@@ -73,6 +76,11 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     max-width: 100%;
+    text-align: center !important;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Floating Filter */
@@ -149,6 +157,10 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
 }
 
 .ag-theme-alpine .ag-cell-value {
@@ -156,6 +168,11 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     max-width: 100%;
+    text-align: center;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Numeric Columns */
@@ -169,6 +186,8 @@
 .ag-theme-alpine .ag-cell[col-id="discount"] {
     font-family: 'Courier New', monospace;
     font-weight: 500;
+    text-align: center !important;
+    justify-content: center !important;
 }
 
 /* Pagination */
@@ -275,6 +294,19 @@
 /* Sort Icons */
 .ag-theme-alpine .ag-header-cell-sortable .ag-header-cell-label {
     cursor: pointer;
+    text-align: center !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.ag-theme-alpine .ag-header-cell-label {
+    text-align: center !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
 }
 
 .ag-theme-alpine .ag-sort-indicator-container {
@@ -347,6 +379,23 @@
 .ag-theme-alpine .ag-cell .btn:hover {
     transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Center all content in cells */
+.ag-theme-alpine .ag-cell span,
+.ag-theme-alpine .ag-cell div {
+    text-align: center !important;
+    display: inline-block;
+    width: 100%;
+}
+
+/* Center cell content wrapper */
+.ag-theme-alpine .ag-cell-inner-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100%;
+    text-align: center !important;
 }
 
 /* Responsive Design */
