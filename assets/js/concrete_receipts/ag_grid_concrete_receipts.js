@@ -140,7 +140,8 @@ const concreteReceiptsGridOptions = {
         sortable: true,
         filter: true,
         resizable: true,
-        flex: 1
+        flex: 1,
+        minWidth: 80
     },
     pagination: true,
     paginationPageSize: 25,
@@ -198,10 +199,13 @@ const concreteReceiptsGridOptions = {
         loadConcreteReceiptsData();
     },
     onFirstDataRendered: function(params) {
+        // Don't use autoSizeColumns to avoid extra space issues
+        // Columns will use flex: 1 to distribute space evenly
         const allColumnIds = params.api.getColumns()?.map(col => col.getColId()) || [];
         const columnsToAutoSize = allColumnIds.filter(colId => colId !== 'actions' && colId !== '#');
         if (columnsToAutoSize.length > 0) {
-            params.api.autoSizeColumns(columnsToAutoSize);
+            // Use autoSizeColumns with skipHeader: true to avoid header width issues
+            params.api.autoSizeColumns(columnsToAutoSize, false);
         }
     }
 };

@@ -9,3 +9,24 @@
     color: #ffc107;
     margin-left: 5px;
 }
+
+/* Fix for right-side spacing issue in RTL with pinned columns */
+#concreteReceiptsGrid .ag-body-horizontal-scroll-viewport {
+    width: 100% !important;
+}
+
+#concreteReceiptsGrid .ag-center-cols-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    transform: translateX(0) !important; /* Reset any unwanted transform */
+}
+
+#concreteReceiptsGrid .ag-body-viewport {
+    overflow-x: auto;
+    width: 100% !important;
+}
+
+/* Ensure columns fill the available width */
+#concreteReceiptsGrid .ag-center-cols-clipper {
+    width: 100% !important;
+}
