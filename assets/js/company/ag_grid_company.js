@@ -105,12 +105,19 @@ const companyColumnDefs = [
 ];
 
 // Grid Options - بەکارهێنانی defaults لە فایلی گشتی
+// Merge with defaults from base file first
 const companyGridOptions = {
+    ...(window.AGGridDefaults || {}),
     columnDefs: companyColumnDefs,
     onGridReady: function(params) {
+        console.log('Grid ready callback called');
         companyGridApi = params.api;
         companyGridColumnApi = params.columnApi;
-        loadCompaniesData();
+        console.log('Grid API set:', companyGridApi);
+        // Wait a bit to ensure grid is fully initialized
+        setTimeout(() => {
+            loadCompaniesData();
+        }, 100);
     },
     onFirstDataRendered: function(params) {
         // Auto-size columns based on content
@@ -119,11 +126,13 @@ const companyGridOptions = {
     }
 };
 
-// Merge with defaults from base file
-Object.assign(companyGridOptions, window.AGGridDefaults || {});
-
 // Load Companies Data
 function loadCompaniesData(preservePagination = false) {
+    if (!companyGridApi) {
+        console.error('Company Grid API not initialized!');
+        return;
+    }
+    
     const url = '../process/company/select_company.php';
     
     // Use base function if available, otherwise use custom implementation
@@ -147,11 +156,17 @@ function loadCompaniesData(preservePagination = false) {
             pageSize = companyGridApi.paginationGetPageSize() || 25;
         }
         
-        companyGridApi?.showLoadingOverlay();
+        companyGridApi.showLoadingOverlay();
         
         fetch(url)
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
+                console.log('Companies data received:', data);
                 if (data.success && data.data) {
                     const rowData = data.data.map(row => ({
                         id: row.id,
@@ -161,6 +176,7 @@ function loadCompaniesData(preservePagination = false) {
                         currency_type: row.currency_type || '-'
                     }));
                     
+                    console.log('Row data prepared:', rowData);
                     companyGridApi.setGridOption('rowData', rowData);
                     companyGridApi.hideOverlay();
                     
@@ -171,6 +187,7 @@ function loadCompaniesData(preservePagination = false) {
                         }, 100);
                     }
                 } else {
+                    console.warn('No data or success=false:', data);
                     companyGridApi.setGridOption('rowData', []);
                     companyGridApi.showNoRowsOverlay();
                 }
@@ -212,14 +229,47 @@ window.reloadCompanies = function() {
 
 // Initialize Grid
 document.addEventListener('DOMContentLoaded', function() {
-    const gridDiv = document.querySelector('#companyGrid');
+    const gridDiv = document.getElementById('companyGrid');
     if (gridDiv) {
-        new agGrid.Grid(gridDiv, companyGridOptions);
+        console.log('Initializing company grid...');
+        
+        // Use createGrid for AG Grid v31+ (recommended)
+        if (agGrid && agGrid.createGrid) {
+            companyGridApi = agGrid.createGrid(gridDiv, companyGridOptions);
+            console.log('Company grid initialized with createGrid, API:', companyGridApi);
+        } else if (window.initAGGrid) {
+            // Use initAGGrid helper function
+            companyGridApi = window.initAGGrid('companyGrid', companyColumnDefs, {
+                onGridReady: function(params) {
+                    console.log('Grid ready callback called');
+                    companyGridApi = params.api;
+                    companyGridColumnApi = params.columnApi;
+                    console.log('Grid API set:', companyGridApi);
+                    // Wait a bit to ensure grid is fully initialized
+                    setTimeout(() => {
+                        loadCompaniesData();
+                    }, 100);
+                },
+                onFirstDataRendered: function(params) {
+                    // Auto-size columns based on content
+                    const allColumnIds = params.columnApi.getColumns().map(col => col.getId());
+                    params.columnApi.autoSizeColumns(allColumnIds, false);
+                }
+            });
+            console.log('Company grid initialized with initAGGrid, API:', companyGridApi);
+        } else {
+            // Fallback to old Grid constructor
+            new agGrid.Grid(gridDiv, companyGridOptions);
+            console.log('Company grid initialized with Grid constructor');
+        }
         
         // Wait for grid to be ready before adding event listeners
         setTimeout(() => {
             // Handle edit and delete buttons - let existing jQuery handlers work
             // The event delegation in update_company.js and delete_company.js will handle these
-        }, 100);
+            console.log('Company grid ready, API:', companyGridApi);
+        }, 200);
+    } else {
+        console.error('Company grid container not found!');
     }
 });
