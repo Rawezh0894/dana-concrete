@@ -102,6 +102,11 @@ if ($customer_id) {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <!-- AG Grid CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/styles/ag-grid.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/styles/ag-theme-alpine.css" rel="stylesheet">
+    <link href="../assets/css/comon/ag_grid.css" rel="stylesheet">
+    <link href="../assets/css/customer_profile/ag_grid_customer_profile.css" rel="stylesheet">
 <!-- Placeholder for customer profile JS includes -->
 <style>
 .nav-tabs .nav-link {
@@ -176,33 +181,9 @@ if ($customer_id) {
     </ul>
     <div class="tab-content" id="profileTabsContent">
         <div class="tab-pane fade show active" id="sales" role="tabpanel" aria-labelledby="sales-tab">
+            <!-- AG Grid Container for Sales -->
             <div class="table-responsive">
-                <table class="table table-bordered table-hover align-middle text-center" id="salesTable">
-                    <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
-                        <tr>
-                            <th>#</th>
-                            <th>کڕیار</th>
-                            <th>شوێن</th>
-                            <th>وەرگر</th>
-                            <th>ژمارەی پسوڵە</th>
-                            <th>فۆرمۆلا</th>
-                            <th>بەروار</th>
-                            <th>جۆری پارەدان</th>
-                            <th>بڕ</th>
-                            <th>نرخی یەکە</th>
-                            <th>کۆی نرخ</th>
-                            <th>پارەی دراو بە دینار</th>
-                            <th>پارەی دراو بە دۆلار</th>
-                            <th>پارەی ماوە</th>
-                            <th>نرخی ١٠٠ دۆلار</th>
-                            <th>داشکاندن</th>
-                            <th>تێبینی</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Sales will be loaded here by JS -->
-                    </tbody>
-                </table>
+                <div id="customerSalesGrid" class="ag-grid-container ag-theme-alpine"></div>
             </div>
         </div>
         <div class="tab-pane fade" id="debt" role="tabpanel" aria-labelledby="debt-tab">
@@ -212,24 +193,9 @@ if ($customer_id) {
                   <i class="fa fa-plus"></i> دانەوەی قەرز
                 </button>
             </div>
+            <!-- AG Grid Container for Debt Payments -->
             <div class="table-responsive">
-              <table class="table table-bordered table-hover align-middle text-center" id="customerDebtTable">
-                <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
-                  <tr>
-                    <th>#</th>
-                    <th>بەروار</th>
-                    <th>نرخی ١٠٠ دۆلار</th>
-                    <th>بڕی داوە (USD)</th>
-                    <th>بڕی داوە (IQD)</th>
-                    <th>داشکاندن</th>
-                    <th>تێبینی</th>
-                    <th>کردارەکان</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <!-- Debt payments will be loaded here by JS -->
-                </tbody>
-              </table>
+                <div id="customerDebtGrid" class="ag-grid-container ag-theme-alpine"></div>
             </div>
         </div>
     </div>
@@ -453,13 +419,17 @@ if ($customer_id) {
                 loadCustomerSummaryCards();
             }
             
-            // Refresh sales data
-            if (typeof loadCustomerSales === 'function') {
+            // Refresh sales data - use AG Grid reload if available
+            if (typeof reloadCustomerSales === 'function') {
+                reloadCustomerSales();
+            } else if (typeof loadCustomerSales === 'function') {
                 loadCustomerSales(CUSTOMER_ID);
             }
             
-            // Refresh debt payments data
-            if (typeof loadCustomerReturnDebts === 'function') {
+            // Refresh debt payments data - use AG Grid reload if available
+            if (typeof reloadCustomerDebts === 'function') {
+                reloadCustomerDebts();
+            } else if (typeof loadCustomerReturnDebts === 'function') {
                 loadCustomerReturnDebts(CUSTOMER_ID);
             }
             
@@ -976,9 +946,12 @@ if ($customer_id) {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="../assets/js/swalAlert.js"></script>
+<!-- AG Grid JS -->
+<script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/dist/ag-grid-community.min.js"></script>
+<script src="../assets/js/comon/ag_grid_base.js"></script>
 <script src="../assets/js/comon/table-controler.js"></script>
-<script src="../assets/js/customer_profile/select_sale.js"></script>
-<script src="../assets/js/customer_profile/select_return_debt.js"></script>
+<script src="../assets/js/customer_profile/ag_grid_customer_sales.js"></script>
+<script src="../assets/js/customer_profile/ag_grid_customer_debt.js"></script>
 <script src="../assets/js/customer_profile/add_return_debt.js"></script>
 <script src="../assets/js/customer_profile/customer_profile.js"></script>
 <script src="../assets/js/customer_profile/delete_return_debt.js"></script>

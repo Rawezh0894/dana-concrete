@@ -4,26 +4,28 @@ document.addEventListener('DOMContentLoaded', function() {
     if (typeof CUSTOMER_ID !== 'undefined' && CUSTOMER_ID) {
         // Initialize all functions with error handling
         try {
-            if (typeof loadCustomerReturnDebts === 'function') {
-                console.log('Loading customer return debts...');
-                loadCustomerReturnDebts(CUSTOMER_ID);
-            } else {
-                console.warn('loadCustomerReturnDebts function not available');
-            }
-            
-            if (typeof loadCustomerSales === 'function') {
-                console.log('Loading customer sales...');
-                loadCustomerSales(CUSTOMER_ID);
-            } else {
-                console.warn('loadCustomerSales function not available');
-            }
-            
+            // AG Grid will automatically load data in onGridReady
+            // But we still need to load summary cards
             if (typeof loadCustomerSummaryCards === 'function') {
                 console.log('Loading customer summary cards...');
                 loadCustomerSummaryCards();
             } else {
                 console.warn('loadCustomerSummaryCards function not available');
             }
+            
+            // AG Grid functions will be called automatically when grids are ready
+            // But we can also call them explicitly if needed
+            setTimeout(() => {
+                if (typeof loadCustomerReturnDebts === 'function') {
+                    console.log('Loading customer return debts...');
+                    loadCustomerReturnDebts(CUSTOMER_ID);
+                }
+                
+                if (typeof loadCustomerSales === 'function') {
+                    console.log('Loading customer sales...');
+                    loadCustomerSales(CUSTOMER_ID);
+                }
+            }, 500);
         } catch (error) {
             console.error('Error initializing customer profile:', error);
         }
