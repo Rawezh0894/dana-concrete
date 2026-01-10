@@ -118,7 +118,11 @@ async function editExpense(id, data) {
         if (result.success) {
             console.log('Expense updated successfully');
             Swal.fire('سەرکەوتوو!', 'خەرجیەکە نوێکرایەوە', 'success');
-            if (typeof loadOtherExpenses === 'function') loadOtherExpenses();
+            if (typeof reloadOtherExpenses === 'function') {
+                reloadOtherExpenses();
+            } else if (typeof loadOtherExpenses === 'function') {
+                loadOtherExpenses();
+            }
         } else {
             console.error('Server returned error:', result.msg);
             Swal.fire('هەڵە!', result.msg || 'هەڵەیەک ڕویدا', 'error');

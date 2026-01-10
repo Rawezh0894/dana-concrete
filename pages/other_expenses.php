@@ -29,10 +29,11 @@ if (!isset($_SESSION['user_id'])) {
     <link href="../assets/css/comon/style.css" rel="stylesheet">
     <link href="../assets/css/comon/summary_cards.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <!-- DataTables CSS -->
-    <link href="https://cdn.datatables.net/2.3.4/css/dataTables.dataTables.min.css" rel="stylesheet">
-    <!-- DataTables Buttons CSS -->
-    <link href="https://cdn.datatables.net/buttons/3.0.2/css/buttons.dataTables.min.css" rel="stylesheet">
+    <!-- AG Grid CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/styles/ag-grid.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/styles/ag-theme-alpine.css" rel="stylesheet">
+    <link href="../assets/css/comon/ag_grid.css" rel="stylesheet">
+    <link href="../assets/css/other_expenses/ag_grid_other_expenses.css" rel="stylesheet">
     
     <style>
         .export-btn {
@@ -325,9 +326,7 @@ if (!isset($_SESSION['user_id'])) {
       </div>
     </div>
     <div class="table-responsive">
-        <table class="table table-bordered table-hover align-middle text-center" id="otherExpensesTable">
-            <!-- DataTables will build the table structure -->
-        </table>
+        <div id="otherExpensesGrid" class="ag-grid-container ag-theme-alpine"></div>
     </div>
 </div>
 <!-- Add Expense Modal -->
@@ -683,23 +682,19 @@ if (!isset($_SESSION['user_id'])) {
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<!-- DataTables JS -->
-<script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
-<!-- DataTables Buttons JS -->
-<script src="https://cdn.datatables.net/buttons/3.0.2/js/dataTables.buttons.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.html5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.print.min.js"></script>
+<!-- AG Grid JS -->
+<script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/dist/ag-grid-community.min.js"></script>
+<script src="../assets/js/comon/ag_grid_base.js"></script>
 <script src="../assets/js/swalAlert.js"></script>
 <script src="../assets/js/other_expenses/error_logger.js"></script>
 <script src="../assets/js/other_expenses/debug_panel.js"></script>
 <script src="../assets/js/other_expenses/advanced_filters.js"></script>
 <script src="../assets/js/other_expenses/add_expenses.js"></script>
-<script src="../assets/js/other_expenses/select_expenses.js"></script>
+<script src="../assets/js/other_expenses/ag_grid_other_expenses.js"></script>
 <script src="../assets/js/other_expenses/other_expenses.js"></script>
 <script src="../assets/js/other_expenses/delete_expenses.js"></script>
 <script src="../assets/js/other_expenses/update_expenses.js"></script>
-    <script src="../assets/js/other_expenses/export_functions.js?v=<?= time() ?>"></script>
+<script src="../assets/js/other_expenses/export_functions.js?v=<?= time() ?>"></script>
 </body>
 </html>
 

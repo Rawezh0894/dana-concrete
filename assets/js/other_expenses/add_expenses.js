@@ -169,7 +169,11 @@ if (addExpenseForm) {
                 Swal.fire('سەرکەوتوو!', 'خەرجی تر زیادکرا', 'success');
                 var modal = bootstrap.Modal.getInstance(document.getElementById('addExpenseModal'));
                 modal.hide();
-                if (typeof loadOtherExpenses === 'function') loadOtherExpenses();
+                if (typeof reloadOtherExpenses === 'function') {
+                    reloadOtherExpenses();
+                } else if (typeof loadOtherExpenses === 'function') {
+                    loadOtherExpenses();
+                }
                 addExpenseForm.reset();
             } else {
                 console.error('Server returned error:', data.msg);

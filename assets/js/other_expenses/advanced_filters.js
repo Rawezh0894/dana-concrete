@@ -238,11 +238,11 @@ class AdvancedFilters {
                 }
             });
 
-            // Reload DataTables with filtered data
-            if (typeof loadOtherExpenses === 'function') {
-                // Call loadOtherExpenses which will fetch data with filters
-                // We need to modify loadOtherExpenses to accept filter params
-                window.currentFilters = queryParams.toString();
+            // Reload AG Grid with filtered data
+            window.currentFilters = queryParams.toString();
+            if (typeof reloadOtherExpenses === 'function') {
+                reloadOtherExpenses();
+            } else if (typeof loadOtherExpenses === 'function') {
                 await loadOtherExpenses();
             }
 
@@ -372,7 +372,9 @@ class AdvancedFilters {
 
         // Clear current filters and reload
         window.currentFilters = '';
-        if (typeof loadOtherExpenses === 'function') {
+        if (typeof reloadOtherExpenses === 'function') {
+            reloadOtherExpenses();
+        } else if (typeof loadOtherExpenses === 'function') {
             loadOtherExpenses();
         }
 

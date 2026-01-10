@@ -73,6 +73,16 @@ try {
     $stmt->execute($params);
     $expenses = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
+    // Check if AG Grid format is requested
+    if (isset($_GET['ag_grid']) && $_GET['ag_grid'] == '1') {
+        echo json_encode([
+            'success' => true,
+            'data' => $expenses,
+            'total_count' => count($expenses)
+        ]);
+        exit;
+    }
+    
     // Calculate summary including car expenses (material and gas usage)
     $summarySql = "SELECT 
         -- Other expenses (non-car expenses)

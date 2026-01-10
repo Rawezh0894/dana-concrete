@@ -46,7 +46,11 @@ async function deleteExpense(id) {
         if (data.success) {
             console.log('Expense deleted successfully');
             Swal.fire('سەرکەوتوو!', 'خەرجیەکە سڕایەوە', 'success');
-            if (typeof loadOtherExpenses === 'function') loadOtherExpenses();
+            if (typeof reloadOtherExpenses === 'function') {
+                reloadOtherExpenses();
+            } else if (typeof loadOtherExpenses === 'function') {
+                loadOtherExpenses();
+            }
         } else {
             console.error('Server returned error for delete:', data.msg);
             Swal.fire('هەڵە!', data.msg || 'هەڵەیەک ڕویدا', 'error');

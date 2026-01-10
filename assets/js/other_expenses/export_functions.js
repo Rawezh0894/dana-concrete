@@ -2,8 +2,19 @@
 // This file contains all export functionality without jQuery dependencies
 
 // Function to export other expenses detailed data to Excel
+// Try AG Grid export first, fallback to backend export
 function exportOtherExpensesToExcel() {
-    console.log('Export function called');
+    // Try AG Grid export first if available
+    if (typeof otherExpensesGridApi !== 'undefined' && otherExpensesGridApi) {
+        otherExpensesGridApi.exportDataAsCsv({
+            fileName: 'other_expenses_' + new Date().toISOString().split('T')[0] + '.csv',
+            columnSeparator: ','
+        });
+        return;
+    }
+    
+    // Fallback to backend export
+    console.log('Export function called (backend fallback)');
     
     // Get current filter values using vanilla JavaScript
     const dateFrom = document.getElementById('dateFrom')?.value || '';
