@@ -15,6 +15,17 @@
     height: 600px;
     direction: rtl;
     font-family: 'Rabar', 'Arial', 'Tahoma', sans-serif !important;
+    overflow: auto;
+}
+
+/* Enable horizontal scroll */
+.ag-theme-alpine .ag-body-horizontal-scroll {
+    display: block !important;
+}
+
+.ag-theme-alpine .ag-body-viewport {
+    overflow-x: auto;
+    overflow-y: auto;
 }
 
 /* Grid Header Styling */

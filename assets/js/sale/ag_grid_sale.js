@@ -18,7 +18,8 @@ function formatIQD(n) {
     return formatNumber(Number(n).toFixed(0)) + ' د.ع';
 }
 
-// Column Definitions - ترتیب ستونەکان بە شێوەی دروست (لە چەپ بۆ ڕاست)
+// Column Definitions - ترتیب ستونەکان بە شێوەی دروست (لە ڕاست بۆ چەپ - RTL)
+// Note: In RTL, array order is reversed - first item appears on the right
 const columnDefs = [
     {
         field: 'actions',
@@ -27,6 +28,8 @@ const columnDefs = [
         filter: false,
         resizable: true,
         width: 120,
+        minWidth: 100,
+        maxWidth: 200,
         cellStyle: { textAlign: 'center' },
         cellRenderer: function(params) {
             if (!params.data) return '-';
@@ -49,6 +52,7 @@ const columnDefs = [
         resizable: true,
         width: 150,
         minWidth: 120,
+        maxWidth: 500,
         cellStyle: { textAlign: 'right', direction: 'rtl', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
         tooltipValueGetter: function(params) {
             return params.value || '';
@@ -63,6 +67,7 @@ const columnDefs = [
         resizable: true,
         width: 150,
         minWidth: 120,
+        maxWidth: 500,
         cellStyle: { textAlign: 'right', direction: 'rtl', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
         tooltipValueGetter: function(params) {
             return params.value || '';
@@ -77,6 +82,7 @@ const columnDefs = [
         resizable: true,
         width: 150,
         minWidth: 120,
+        maxWidth: 500,
         cellStyle: { textAlign: 'right', direction: 'rtl', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
         tooltipValueGetter: function(params) {
             return params.value || '';
@@ -91,6 +97,7 @@ const columnDefs = [
         resizable: true,
         width: 130,
         minWidth: 100,
+        maxWidth: 300,
         cellStyle: { textAlign: 'right', direction: 'rtl', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
         cellRenderer: function(params) {
             if (params.data && params.data.duplicate_count && params.data.duplicate_count > 1) {
@@ -111,6 +118,7 @@ const columnDefs = [
         resizable: true,
         width: 150,
         minWidth: 120,
+        maxWidth: 500,
         cellStyle: { textAlign: 'right', direction: 'rtl', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
         tooltipValueGetter: function(params) {
             return params.value || '';
@@ -125,6 +133,7 @@ const columnDefs = [
         resizable: true,
         width: 120,
         minWidth: 100,
+        maxWidth: 200,
         cellStyle: { textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
         valueFormatter: function(params) {
             if (!params.value) return '-';
@@ -140,6 +149,7 @@ const columnDefs = [
         resizable: true,
         width: 120,
         minWidth: 100,
+        maxWidth: 200,
         cellStyle: { textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
         cellRenderer: function(params) {
             if (!params.value) return '-';
@@ -156,6 +166,7 @@ const columnDefs = [
         resizable: true,
         width: 110,
         minWidth: 90,
+        maxWidth: 200,
         cellStyle: { textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
         valueFormatter: function(params) {
             if (params.value === null || params.value === undefined || params.value === '') return '-';
@@ -172,6 +183,7 @@ const columnDefs = [
         resizable: true,
         width: 120,
         minWidth: 100,
+        maxWidth: 300,
         cellStyle: { textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
         valueFormatter: function(params) {
             return formatUSD(params.value);
@@ -187,6 +199,7 @@ const columnDefs = [
         resizable: true,
         width: 120,
         minWidth: 100,
+        maxWidth: 300,
         cellStyle: { textAlign: 'left', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
         valueFormatter: function(params) {
             return formatUSD(params.value);
@@ -202,6 +215,7 @@ const columnDefs = [
         resizable: true,
         width: 150,
         minWidth: 130,
+        maxWidth: 400,
         cellStyle: { textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
         valueFormatter: function(params) {
             return formatIQD(params.value);
@@ -217,6 +231,7 @@ const columnDefs = [
         resizable: true,
         width: 150,
         minWidth: 130,
+        maxWidth: 400,
         cellStyle: { textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
         valueFormatter: function(params) {
             return formatUSD(params.value);
@@ -232,6 +247,7 @@ const columnDefs = [
         resizable: true,
         width: 120,
         minWidth: 100,
+        maxWidth: 300,
         cellStyle: { textAlign: 'left', fontWeight: 'bold', color: '#dc3545', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
         valueFormatter: function(params) {
             return formatUSD(params.value);
@@ -247,6 +263,7 @@ const columnDefs = [
         resizable: true,
         width: 130,
         minWidth: 110,
+        maxWidth: 300,
         cellStyle: { textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
         valueFormatter: function(params) {
             if (params.value === null || params.value === undefined || params.value === '') return '-';
@@ -263,6 +280,7 @@ const columnDefs = [
         resizable: true,
         width: 200,
         minWidth: 150,
+        maxWidth: 600,
         cellStyle: { textAlign: 'right', direction: 'rtl', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
         cellRenderer: function(params) {
             if (!params.value) return '-';
@@ -282,6 +300,7 @@ const columnDefs = [
         resizable: true,
         width: 120,
         minWidth: 100,
+        maxWidth: 500,
         cellStyle: { textAlign: 'left', color: '#28a745', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
         valueFormatter: function(params) {
             return formatUSD(params.value);
@@ -373,15 +392,14 @@ const gridOptions = {
         gridApi = params.api;
         gridColumnApi = params.columnApi;
         loadSalesData();
-        
-        // Auto-size columns on first load
-        setTimeout(() => {
-            gridApi.sizeColumnsToFit();
-        }, 100);
     },
     onFirstDataRendered: function(params) {
-        params.api.sizeColumnsToFit();
+        // Don't auto-size to fit - allow horizontal scroll
+        // params.api.sizeColumnsToFit();
     },
+    // Enable horizontal scroll
+    suppressSizeToFit: true,
+    suppressHorizontalScroll: false,
     suppressRowClickSelection: true,
     animateRows: true,
     enableRangeSelection: true,
