@@ -18,7 +18,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('editCompanyModal'));
                 if (data.success) {
                     modal.hide();
-                    loadCompanies();
+                    // Reload AG Grid
+                    if (typeof window.reloadCompanies === 'function') {
+                        window.reloadCompanies();
+                    } else if (typeof loadCompanies === 'function') {
+                        loadCompanies();
+                    }
                     // Refresh summary stats
                     if (typeof loadSummaryStats === 'function') loadSummaryStats();
                     swalAlert('سەرکەوتوو', 'زانیاری کۆمپانیا نوێکرایەوە!', 'success');
