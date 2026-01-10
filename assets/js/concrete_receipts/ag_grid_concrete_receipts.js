@@ -1,7 +1,7 @@
 // AG Grid configuration for concrete receipts
 let concreteReceiptsGridApi = null;
 
-// Column definitions - ترتیب RTL: actions و # لە چەپدا، بەشی دیکە لە ڕاستدا
+// Column definitions - ڕیزبەندی دروست بۆ RTL
 const concreteReceiptsColumnDefs = [
     {
         field: 'actions',
@@ -9,9 +9,8 @@ const concreteReceiptsColumnDefs = [
         sortable: false,
         filter: false,
         resizable: true,
-        minWidth: 150,
+        width: 150,
         maxWidth: 200,
-        flex: 0,
         pinned: 'left',
         cellStyle: { textAlign: 'center', direction: 'ltr' },
         cellRenderer: function(params) {
@@ -32,14 +31,14 @@ const concreteReceiptsColumnDefs = [
     {
         field: '#',
         headerName: '#',
-        width: 80,
+        width: 70,
         pinned: 'left',
         cellStyle: { textAlign: 'center', direction: 'ltr' },
         valueGetter: function(params) {
             if (!params.node) return '';
-            const page = concreteReceiptsGridApi ? concreteReceiptsGridApi.paginationGetCurrentPage() : 0;
-            const pageSize = concreteReceiptsGridApi ? concreteReceiptsGridApi.paginationGetPageSize() : 25;
-            return (page * pageSize) + params.node.rowIndex + 1;
+            // Calculate row number based on server pagination
+            const startRow = window.currentConcreteReceiptsStartRow || 0;
+            return startRow + params.node.rowIndex + 1;
         },
         sortable: false,
         filter: false
@@ -48,52 +47,38 @@ const concreteReceiptsColumnDefs = [
         field: 'receipt_number',
         headerName: 'ژم.پسووڵە',
         flex: 1,
-        minWidth: 120,
-        filter: true,
-        filterParams: {
-            filterOptions: ['contains', 'equals', 'startsWith', 'endsWith'],
-            defaultOption: 'contains'
-        },
-        // Use valueGetter to ensure filter uses the actual receipt_number value
-        valueGetter: function(params) {
-            return params.data ? params.data.receipt_number : '';
-        },
+        minWidth: 100,
         cellRenderer: function(params) {
             if (!params.data) return '-';
             const warning = params.data.is_duplicate 
                 ? '<i class="fas fa-exclamation-triangle duplicate-warning" title="ژمارەی پسوڵە دووبارەیە"></i>' 
                 : '';
-            const receiptNumber = params.data.receipt_number || '';
-            return warning + receiptNumber;
-        },
-        // For quick filter
-        getQuickFilterText: function(params) {
-            return params.data ? params.data.receipt_number : '';
+            return warning + (params.value || '-');
         }
     },
     {
         field: 'customer_name',
         headerName: 'کڕیار',
         flex: 1,
-        minWidth: 150
+        minWidth: 120
     },
     {
         field: 'location',
         headerName: 'شوێن',
         flex: 1,
-        minWidth: 120
+        minWidth: 100
     },
     {
         field: 'receiver_name',
         headerName: 'وەرگر',
         flex: 1,
-        minWidth: 120
+        minWidth: 100
     },
     {
         field: 'created_at',
         headerName: 'بەروار',
         flex: 1,
-        minWidth: 150,
+        minWidth: 140,
         cellRenderer: function(params) {
             if (!params.value) return '-';
             const d = new Date(params.value);
@@ -108,9 +93,9 @@ const concreteReceiptsColumnDefs = [
     },
     {
         field: 'meter_amount',
-        headerName: 'بڕی مەتر سێجا',
+        headerName: 'بڕی مەتر',
         flex: 1,
-        minWidth: 130,
+        minWidth: 100,
         cellStyle: { textAlign: 'left', direction: 'ltr' },
         cellRenderer: function(params) {
             if (params.value === null || params.value === undefined || params.value === '') return '-';
@@ -121,48 +106,47 @@ const concreteReceiptsColumnDefs = [
         field: 'formula_name',
         headerName: 'فۆرمۆلا',
         flex: 1,
-        minWidth: 120
+        minWidth: 100
     },
     {
         field: 'pump_car_name',
         headerName: 'پەمپ',
         flex: 1,
-        minWidth: 100
+        minWidth: 80
     },
     {
         field: 'pump_driver_name',
         headerName: 'شۆفێری پەمپ',
         flex: 1,
-        minWidth: 130
+        minWidth: 110
     },
     {
         field: 'mixer_car_name',
         headerName: 'میکسەر',
         flex: 1,
-        minWidth: 100
+        minWidth: 80
     },
     {
         field: 'mixer_driver_name',
         headerName: 'شۆفێری میکسەر',
         flex: 1,
-        minWidth: 130
+        minWidth: 110
     }
 ];
 
-// Grid options
+// Grid options - disable AG Grid's built-in pagination (using server-side)
 const concreteReceiptsGridOptions = {
     columnDefs: concreteReceiptsColumnDefs,
     defaultColDef: {
         sortable: true,
-        filter: true,
+        filter: false, // Disable client-side filtering (using server-side)
         resizable: true,
         flex: 1
     },
-    pagination: true,
-    paginationPageSize: 25,
-    paginationPageSizeSelector: [10, 25, 50, 100],
+    pagination: false, // Disable AG Grid pagination - using server-side
     rowSelection: 'single',
     animateRows: true,
+    suppressPaginationPanel: true, // Hide AG Grid's pagination panel
     localeText: {
         page: 'پەڕە',
         of: 'لە',
@@ -211,41 +195,38 @@ const concreteReceiptsGridOptions = {
     },
     onGridReady: function(params) {
         concreteReceiptsGridApi = params.api;
-        loadConcreteReceiptsData();
+        loadConcreteReceiptsData(1, 25);
     },
     onFirstDataRendered: function(params) {
-        // Use flex columns instead of autoSizeColumns for better performance
-        // Columns will automatically distribute available space
+        const allColumnIds = params.api.getColumns()?.map(col => col.getColId()) || [];
+        const columnsToAutoSize = allColumnIds.filter(colId => colId !== 'actions' && colId !== '#');
+        if (columnsToAutoSize.length > 0) {
+            params.api.autoSizeColumns(columnsToAutoSize);
+        }
     }
 };
 
 // Merge with defaults from base file
 Object.assign(concreteReceiptsGridOptions, window.AGGridDefaults || {});
 
-// Store current row ID for restoration after update
-let currentEditingRowId = null;
+// Store current pagination state
+let currentConcreteReceiptsPage = 1;
+let currentConcreteReceiptsPageSize = 25;
+window.currentConcreteReceiptsStartRow = 0;
 
-// Load Concrete Receipts Data
-function loadConcreteReceiptsData(preservePagination = false, restoreRowId = null) {
-    // Save current pagination state and filters
-    let currentPage = 0;
-    let pageSize = 25;
-    let savedFilters = null;
-    if (preservePagination && concreteReceiptsGridApi) {
-        currentPage = concreteReceiptsGridApi.paginationGetCurrentPage() || 0;
-        pageSize = concreteReceiptsGridApi.paginationGetPageSize() || 25;
-        try {
-            savedFilters = concreteReceiptsGridApi.getFilterModel();
-        } catch (e) {
-            console.warn('Could not get filter model:', e);
-        }
-    }
+// Load Concrete Receipts Data with server-side pagination
+function loadConcreteReceiptsData(page = 1, pageSize = 25, restoreRowId = null) {
+    // Store current pagination
+    currentConcreteReceiptsPage = page;
+    currentConcreteReceiptsPageSize = pageSize;
+    window.currentConcreteReceiptsStartRow = (page - 1) * pageSize;
     
     // Show loading
-    concreteReceiptsGridApi?.showLoadingOverlay();
+    if (concreteReceiptsGridApi) {
+        concreteReceiptsGridApi.showLoadingOverlay();
+    }
     
     // Build URL with filters from form
-    let url = '../process/concrete_receipts/select_concrete_receipts.php?ag_grid=1';
     const filters = {
         customer_id: $('#filter_customer_id').val(),
         location: $('#filter_location').val(),
@@ -255,117 +236,181 @@ function loadConcreteReceiptsData(preservePagination = false, restoreRowId = nul
     };
     
     const queryParams = new URLSearchParams();
+    queryParams.append('page', page);
+    queryParams.append('pageSize', pageSize);
+    
     Object.keys(filters).forEach(key => {
         if (filters[key]) {
             queryParams.append(key, filters[key]);
         }
     });
     
-    // Add include_summary parameter to get summary in same request
-    url += '&include_summary=1';
-    if (queryParams.toString()) {
-        url += '&' + queryParams.toString();
-    }
+    const url = '../process/concrete_receipts/select_concrete_receipts.php?' + queryParams.toString();
     
-    // Single fetch - summary included in response
     fetch(url)
-        .then(response => response.json())
+        .then(r => r.json())
         .then(data => {
-            let receipts = [];
-            let summary = null;
-            
-            // Handle response format
-            if (Array.isArray(data)) {
-                receipts = data;
-            } else if (data.success && Array.isArray(data.data)) {
-                receipts = data.data;
-            } else if (Array.isArray(data.receipts)) {
-                receipts = data.receipts;
-            }
-            
-            // Get summary from response
-            if (data.summary) {
-                summary = data.summary;
-            }
-            
-            if (receipts && receipts.length > 0) {
-                // Store data globally
-                window.concreteReceiptsData = receipts;
-                
-                // Update summary cards
-                if (summary) {
-                    updateSummaryCards(summary);
-                }
-                
-                // Set row data
-                concreteReceiptsGridApi.setGridOption('rowData', receipts);
-                concreteReceiptsGridApi.hideOverlay();
-                
-                // Restore pagination state and filters if preserving
-                if (preservePagination && concreteReceiptsGridApi) {
-                    setTimeout(() => {
-                        // Restore filters first
-                        if (savedFilters && Object.keys(savedFilters).length > 0) {
-                            try {
-                                concreteReceiptsGridApi.setFilterModel(savedFilters);
-                            } catch (e) {
-                                console.warn('Could not restore filter model:', e);
-                            }
-                        }
-                        // Restore pagination
-                        concreteReceiptsGridApi.paginationGoToPage(currentPage);
-                        concreteReceiptsGridApi.paginationSetPageSize(pageSize);
-                        
-                        // Restore selected row if provided
-                        if (restoreRowId) {
-                            setTimeout(() => {
-                                let foundNode = null;
-                                concreteReceiptsGridApi.forEachNode((node) => {
-                                    if (node.data && String(node.data.id) === String(restoreRowId)) {
-                                        foundNode = node;
-                                    }
-                                });
-                                
-                                if (foundNode) {
-                                    const rowIndex = foundNode.rowIndex;
-                                    const currentPageSize = concreteReceiptsGridApi.paginationGetPageSize();
-                                    const targetPage = Math.floor(rowIndex / currentPageSize);
-                                    
-                                    concreteReceiptsGridApi.paginationGoToPage(targetPage);
-                                    
-                                    setTimeout(() => {
-                                        foundNode.setSelected(true);
-                                        concreteReceiptsGridApi.ensureNodeVisible(foundNode, 'middle');
-                                    }, 150);
-                                }
-                            }, 200);
-                        }
-                    }, 100);
-                }
-            } else {
+            if (!data.success) {
                 concreteReceiptsGridApi.setGridOption('rowData', []);
                 concreteReceiptsGridApi.showNoRowsOverlay();
-                
-                // Update summary cards with zeros or from summaryData
-                if (summary) {
-                    updateSummaryCards(summary);
-                } else {
-                    updateSummaryCards({ total_receipts: 0, total_meter: 0, total_customers: 0 });
-                }
+                updateSummaryCards({ total_receipts: 0, total_meter: 0, total_customers: 0 });
+                return;
+            }
+            
+            let receipts = data.data || [];
+            let summary = data.summary || {};
+            let pagination = data.pagination || {};
+            
+            // Store data globally
+            window.concreteReceiptsData = receipts;
+            
+            // Update summary cards
+            updateSummaryCards(summary);
+            
+            // Set row data
+            concreteReceiptsGridApi.setGridOption('rowData', receipts);
+            concreteReceiptsGridApi.hideOverlay();
+            
+            // Render server-side pagination controls
+            renderServerPagination(pagination, pageSize);
+            
+            // Restore selected row if provided
+            if (restoreRowId) {
+                setTimeout(() => {
+                    let foundNode = null;
+                    concreteReceiptsGridApi.forEachNode((node) => {
+                        if (node.data && String(node.data.id) === String(restoreRowId)) {
+                            foundNode = node;
+                        }
+                    });
+                    
+                    if (foundNode) {
+                        foundNode.setSelected(true);
+                        concreteReceiptsGridApi.ensureNodeVisible(foundNode, 'middle');
+                    }
+                }, 200);
             }
         })
         .catch(error => {
             console.error('Error loading concrete receipts:', error);
-            concreteReceiptsGridApi.setGridOption('rowData', []);
-            concreteReceiptsGridApi.showNoRowsOverlay();
-            if (window.Swal) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'هەڵە',
-                    text: 'نەتوانرا زانیارییەکان بخوێندرێنوە. تکایە دووبارە هەوڵ بدەوە'
-                });
+            if (concreteReceiptsGridApi) {
+                concreteReceiptsGridApi.setGridOption('rowData', []);
+                concreteReceiptsGridApi.showNoRowsOverlay();
             }
         });
+}
+
+// Render server-side pagination controls
+function renderServerPagination(pagination, pageSize) {
+    const gridContainer = document.querySelector('#concreteReceiptsGrid');
+    if (!gridContainer) return;
+    
+    // Remove existing pagination
+    const existingPagination = gridContainer.parentElement.querySelector('.server-pagination');
+    if (existingPagination) {
+        existingPagination.remove();
+    }
+    
+    const totalPages = pagination.totalPages || 1;
+    const currentPage = pagination.page || 1;
+    const total = pagination.total || 0;
+    
+    // Create pagination container
+    const paginationDiv = document.createElement('div');
+    paginationDiv.className = 'server-pagination d-flex justify-content-between align-items-center mt-2 p-2';
+    paginationDiv.style.background = '#f8f9fa';
+    paginationDiv.style.borderRadius = '5px';
+    
+    // Page size selector
+    const sizeSelect = document.createElement('select');
+    sizeSelect.className = 'form-select form-select-sm';
+    sizeSelect.style.width = 'auto';
+    [10, 25, 50, 100].forEach(size => {
+        const opt = document.createElement('option');
+        opt.value = size;
+        opt.textContent = size + ' / پەڕ';
+        if (size === pageSize) opt.selected = true;
+        sizeSelect.appendChild(opt);
+    });
+    sizeSelect.onchange = function() {
+        loadConcreteReceiptsData(1, parseInt(this.value));
+    };
+    
+    // Info text
+    const infoSpan = document.createElement('span');
+    infoSpan.className = 'mx-2';
+    const startRow = (currentPage - 1) * pageSize + 1;
+    const endRow = Math.min(currentPage * pageSize, total);
+    infoSpan.textContent = `پیشاندانی ${startRow} - ${endRow} لە ${total}`;
+    
+    // Pagination buttons container
+    const buttonsDiv = document.createElement('div');
+    buttonsDiv.className = 'd-flex gap-1';
+    
+    // First page button
+    const firstBtn = document.createElement('button');
+    firstBtn.className = 'btn btn-sm btn-outline-secondary';
+    firstBtn.innerHTML = '<i class="fas fa-angle-double-right"></i>';
+    firstBtn.disabled = currentPage === 1;
+    firstBtn.onclick = () => loadConcreteReceiptsData(1, pageSize);
+    buttonsDiv.appendChild(firstBtn);
+    
+    // Previous button
+    const prevBtn = document.createElement('button');
+    prevBtn.className = 'btn btn-sm btn-outline-secondary';
+    prevBtn.innerHTML = '<i class="fas fa-angle-right"></i>';
+    prevBtn.disabled = currentPage === 1;
+    prevBtn.onclick = () => loadConcreteReceiptsData(currentPage - 1, pageSize);
+    buttonsDiv.appendChild(prevBtn);
+    
+    // Page numbers
+    const startPage = Math.max(1, currentPage - 2);
+    const endPage = Math.min(totalPages, currentPage + 2);
+    
+    if (startPage > 1) {
+        const dots = document.createElement('span');
+        dots.textContent = '...';
+        dots.className = 'mx-1';
+        buttonsDiv.appendChild(dots);
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+        const pageBtn = document.createElement('button');
+        pageBtn.className = 'btn btn-sm ' + (i === currentPage ? 'btn-success' : 'btn-outline-secondary');
+        pageBtn.textContent = i;
+        pageBtn.onclick = () => loadConcreteReceiptsData(i, pageSize);
+        buttonsDiv.appendChild(pageBtn);
+    }
+    
+    if (endPage < totalPages) {
+        const dots = document.createElement('span');
+        dots.textContent = '...';
+        dots.className = 'mx-1';
+        buttonsDiv.appendChild(dots);
+    }
+    
+    // Next button
+    const nextBtn = document.createElement('button');
+    nextBtn.className = 'btn btn-sm btn-outline-secondary';
+    nextBtn.innerHTML = '<i class="fas fa-angle-left"></i>';
+    nextBtn.disabled = currentPage === totalPages;
+    nextBtn.onclick = () => loadConcreteReceiptsData(currentPage + 1, pageSize);
+    buttonsDiv.appendChild(nextBtn);
+    
+    // Last page button
+    const lastBtn = document.createElement('button');
+    lastBtn.className = 'btn btn-sm btn-outline-secondary';
+    lastBtn.innerHTML = '<i class="fas fa-angle-double-left"></i>';
+    lastBtn.disabled = currentPage === totalPages;
+    lastBtn.onclick = () => loadConcreteReceiptsData(totalPages, pageSize);
+    buttonsDiv.appendChild(lastBtn);
+    
+    // Assemble pagination
+    paginationDiv.appendChild(sizeSelect);
+    paginationDiv.appendChild(infoSpan);
+    paginationDiv.appendChild(buttonsDiv);
+    
+    gridContainer.parentElement.appendChild(paginationDiv);
 }
 
 // Update Summary Cards
@@ -387,12 +432,17 @@ function updateSummaryCards(summary) {
 
 // Reload function - preserve pagination and restore row
 window.reloadConcreteReceipts = function(restoreRowId = null) {
-    loadConcreteReceiptsData(true, restoreRowId);
+    loadConcreteReceiptsData(currentConcreteReceiptsPage, currentConcreteReceiptsPageSize, restoreRowId);
 };
 
 // Function to reload only the summary cards
 window.reloadConcreteReceiptsSummary = function() {
-    loadConcreteReceiptsData(true);
+    loadConcreteReceiptsData(currentConcreteReceiptsPage, currentConcreteReceiptsPageSize);
+};
+
+// Function to reload from first page (for filters)
+window.reloadConcreteReceiptsFromStart = function() {
+    loadConcreteReceiptsData(1, currentConcreteReceiptsPageSize);
 };
 
 // Initialize Grid

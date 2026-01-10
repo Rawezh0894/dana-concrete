@@ -1,6 +1,6 @@
 /* AG Grid specific styles for concrete receipts */
 #concreteReceiptsGrid {
-    height: 600px;
+    height: 550px;
     width: 100%;
 }
 
@@ -8,4 +8,18 @@
 .ag-cell .duplicate-warning {
     color: #ffc107;
     margin-left: 5px;
+}
+
+/* Server-side pagination styling */
+.server-pagination {
+    font-family: 'Rabar', 'Arial', 'Tahoma', sans-serif !important;
+}
+
+.server-pagination .btn {
+    min-width: 35px;
+}
+
+.server-pagination .btn-success {
+    background: var(--kelly-green) !important;
+    border-color: var(--kelly-green) !important;
 }

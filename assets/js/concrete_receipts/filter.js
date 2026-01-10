@@ -11,10 +11,12 @@ $(document).ready(function() {
 
   function loadFilteredReceipts() {
     // Use AG Grid reload function if available, otherwise fallback to old method
-    if (typeof window.reloadConcreteReceipts === 'function') {
+    if (typeof window.reloadConcreteReceiptsFromStart === 'function') {
+      // Reset to first page when filtering
+      window.reloadConcreteReceiptsFromStart();
+    } else if (typeof window.reloadConcreteReceipts === 'function') {
       window.reloadConcreteReceipts();
     } else if (typeof loadConcreteReceiptsTable === 'function') {
-      // Reset to first page when filtering
       loadConcreteReceiptsTable(1, 10);
     }
   }
@@ -69,7 +71,9 @@ $(document).ready(function() {
     $('#filter_today').removeClass('active btn-primary').addClass('btn-outline-primary');
     $('#filter_yesterday').removeClass('active btn-secondary').addClass('btn-outline-secondary');
     // Reload table with reset filters
-    if (typeof window.reloadConcreteReceipts === 'function') {
+    if (typeof window.reloadConcreteReceiptsFromStart === 'function') {
+      window.reloadConcreteReceiptsFromStart();
+    } else if (typeof window.reloadConcreteReceipts === 'function') {
       window.reloadConcreteReceipts();
     } else if (typeof loadConcreteReceiptsTable === 'function') {
       loadConcreteReceiptsTable(1, 10);

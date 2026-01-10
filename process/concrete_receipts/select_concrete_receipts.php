@@ -47,42 +47,26 @@ try {
     $isAGGrid = isset($_GET['ag_grid']) && $_GET['ag_grid'] == '1';
     $summaryOnly = isset($_GET['summary_only']) && $_GET['summary_only'] == '1';
     
-    // For AG Grid, use reasonable limit for better performance
+    // Pagination - used for both regular and AG Grid modes
+    $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+    $pageSize = isset($_GET['pageSize']) ? (int)$_GET['pageSize'] : 25;
+    $offset = ($page - 1) * $pageSize;
+    
     // For summary only, skip data query
-    if (!$isAGGrid && !$summaryOnly) {
-        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-        $pageSize = isset($_GET['pageSize']) ? (int)$_GET['pageSize'] : 10;
-        $offset = ($page - 1) * $pageSize;
-    } else if ($isAGGrid && !$summaryOnly) {
-        // AG Grid: return all data but limit to reasonable amount for performance
-        $page = 1;
-        $pageSize = 1000; // Reasonable limit - AG Grid will handle client-side pagination
-        $offset = 0;
-    } else {
-        $page = 1;
+    if ($summaryOnly) {
         $pageSize = 0;
         $offset = 0;
     }
     
-    // Get total count for pagination (only if not AG Grid and not summary only)
-    if (!$isAGGrid && !$summaryOnly) {
-        $count_sql = '
-            SELECT COUNT(*) as total
-            FROM concrete_receipts cr
-            LEFT JOIN customers c ON cr.customer_id = c.id
-            LEFT JOIN concrete_formulas f ON cr.formulas_id = f.id
-            LEFT JOIN cars pump_car ON cr.pump_car_id = pump_car.id
-            LEFT JOIN employees pump_driver ON cr.pump_driver_id = pump_driver.id
-            LEFT JOIN cars mixer_car ON cr.mixer_car_id = mixer_car.id
-            LEFT JOIN employees mixer_driver ON cr.mixer_driver_id = mixer_driver.id
-            ' . $whereSql . '
-        ';
-        $count_stmt = $pdo->prepare($count_sql);
-        $count_stmt->execute($params);
-        $total_count = $count_stmt->fetch(PDO::FETCH_ASSOC)['total'];
-    } else {
-        $total_count = 0; // Not needed for AG Grid or summary
-    }
+    // Get total count for pagination (always needed for pagination controls)
+    $count_sql = '
+        SELECT COUNT(*) as total
+        FROM concrete_receipts cr
+        ' . $whereSql . '
+    ';
+    $count_stmt = $pdo->prepare($count_sql);
+    $count_stmt->execute($params);
+    $total_count = $count_stmt->fetch(PDO::FETCH_ASSOC)['total'];
     
     // Main query - skip if summary only
     if (!$summaryOnly) {
@@ -142,26 +126,14 @@ try {
     $summary["total_customers"] = (int) ($summary["total_customers"] ?? 0);
 
     // Return format based on request type
-    $includeSummary = isset($_GET['include_summary']) && $_GET['include_summary'] == '1';
-    
     if ($summaryOnly) {
-        // Return only summary for AG Grid
+        // Return only summary
         echo json_encode([
             'success' => true,
             'summary' => $summary
         ]);
-    } else if ($isAGGrid) {
-        // AG Grid format - return array with optional summary
-        if ($includeSummary) {
-            echo json_encode([
-                'receipts' => $receipts,
-                'summary' => $summary
-            ]);
-        } else {
-            echo json_encode($receipts);
-        }
     } else {
-        // Original format with pagination and summary
+        // Return data with pagination and summary
         echo json_encode([
             'success' => true, 
             'data' => $receipts, 
@@ -170,7 +142,7 @@ try {
                 'total' => (int)$total_count,
                 'page' => $page,
                 'pageSize' => $pageSize,
-                'totalPages' => ceil($total_count / $pageSize)
+                'totalPages' => $pageSize > 0 ? ceil($total_count / $pageSize) : 1
             ]
         ]);
     }
