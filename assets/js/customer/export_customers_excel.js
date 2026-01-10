@@ -4,37 +4,26 @@ $(document).ready(function() {
         return;
     }
 
-    const originalHtml = $exportBtn.html();
-
-    function resetButton() {
-        $exportBtn.prop('disabled', false);
-        $exportBtn.html(originalHtml);
-    }
-
     $exportBtn.on('click', function() {
-        if ($exportBtn.prop('disabled')) {
-            return;
+        // Use AG Grid export if available
+        if (typeof exportCustomersToExcel === 'function') {
+            exportCustomersToExcel();
+        } else if (typeof customerGridApi !== 'undefined' && customerGridApi) {
+            const params = {
+                fileName: `کڕیارەکان_${new Date().toISOString().split('T')[0]}.csv`
+            };
+            customerGridApi.exportDataAsCsv(params);
+        } else {
+            // Fallback to old method
+            const today = new Date();
+            const formattedDate = today.toISOString().split('T')[0];
+            const downloadLink = document.createElement('a');
+            downloadLink.href = '../process/customer/export_excel.php';
+            downloadLink.download = 'customers_debt_' + formattedDate + '.xls';
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
         }
-
-        const today = new Date();
-        const formattedDate = today.toISOString().split('T')[0];
-        const downloadLink = document.createElement('a');
-
-        $exportBtn.prop('disabled', true);
-        $exportBtn.html('<i class="fas fa-spinner fa-spin me-1"></i>چاوەڕوان بە...');
-
-        downloadLink.href = '../process/customer/export_excel.php';
-        downloadLink.download = 'customers_debt_' + formattedDate + '.xls';
-
-        downloadLink.addEventListener('click', function() {
-            setTimeout(resetButton, 1200);
-        });
-
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
-
-        setTimeout(resetButton, 4000);
     });
 });
 

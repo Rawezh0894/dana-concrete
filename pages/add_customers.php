@@ -38,6 +38,11 @@ if (!hasPermission('view_customer')) {
     <link href="../assets/css/comon/cards.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="../assets/css/kurdish-font.css" rel="stylesheet">
+    <!-- AG Grid CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/styles/ag-grid.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/styles/ag-theme-alpine.css" rel="stylesheet">
+    <link href="../assets/css/comon/ag_grid.css" rel="stylesheet">
+    <link href="../assets/css/customer/ag_grid_customer.css" rel="stylesheet">
 </head>
 <body dir="rtl">
 <?php include '../includes/navbar.php'; ?>
@@ -153,24 +158,9 @@ if (!hasPermission('view_customer')) {
         </div>
     </div>
 
+    <!-- AG Grid Container -->
     <div class="table-responsive">
-        <table class="table table-bordered table-hover align-middle text-center" id="customerTable">
-            <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
-                <tr>
-                    <th>#</th>
-                    <th>ناو</th>
-                    <th>ژمارە مۆبایلی یەکەم</th>
-                    <th>ژمارە مۆبایلی دووەم</th>
-                    <th>بڕی قەرزی سەرەتایی (USD)</th>
-                    <th>بڕی قەرزی سەرەتایی (IQD)</th>
-                    <th>وەرگر</th>
-                    <th>کردارەکان</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Customers will be loaded here by JS -->
-            </tbody>
-        </table>
+        <div id="customerGrid" class="ag-grid-container ag-theme-alpine"></div>
     </div>
 </div>
 <!-- Add Customer Modal -->
@@ -276,13 +266,24 @@ if (!hasPermission('view_customer')) {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="../assets/js/swalAlert.js"></script>
+<!-- AG Grid JS -->
+<script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/dist/ag-grid-community.min.js"></script>
+<script src="../assets/js/comon/ag_grid_base.js"></script>
 <script src="../assets/js/comon/table-controler.js"></script>
 <script src="../assets/js/customer/add_customer.js"></script>
-<script src="../assets/js/customer/select_customer.js"></script>
+<script src="../assets/js/customer/ag_grid_customer.js"></script>
 <script src="../assets/js/customer/update_customer.js"></script>
 <script src="../assets/js/customer/delete_customer.js"></script>
 <script src="../assets/js/add_customers/summary_cards.js"></script>
 <script src="../assets/js/customer/customer.js"></script>
+<script>
+    // Pass permissions to JavaScript
+    window.userPermissions = {
+        canAdd: <?php echo hasPermission('add_customer') ? 'true' : 'false'; ?>,
+        canEdit: <?php echo hasPermission('update_customer') ? 'true' : 'false'; ?>,
+        canDelete: <?php echo hasPermission('delete_customer') ? 'true' : 'false'; ?>
+    };
+</script>
 <script src="../assets/js/customer/export_customers_excel.js"></script>
 <script src="../assets/js/customer/export_payment_history_excel.js"></script>
 </body>

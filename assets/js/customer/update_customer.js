@@ -77,7 +77,11 @@ $(document).ready(function () {
                     const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('editCustomerModal'));
                     if (data.success) {
                         modal.hide();
-                        loadCustomers();
+                        if (typeof reloadCustomers === 'function') {
+                            reloadCustomers();
+                        } else if (typeof loadCustomers === 'function') {
+                            loadCustomers();
+                        }
                         // Refresh summary stats
                         if (typeof loadSummaryStats === 'function') loadSummaryStats();
                         swalAlert('سەرکەوتوو', 'زانیاری کڕیار نوێکرایەوە!', 'success');

@@ -35,7 +35,11 @@ $(document).ready(function () {
                         addCustomerForm[0].reset();
                         $('#customer_is_recipient').prop('checked', false);
                         modal.hide();
-                        loadCustomers();
+                        if (typeof reloadCustomers === 'function') {
+                            reloadCustomers();
+                        } else if (typeof loadCustomers === 'function') {
+                            loadCustomers();
+                        }
                         // Refresh summary stats
                         if (typeof loadSummaryStats === 'function') loadSummaryStats();
                         swalAlert('سەرکەوتوو', 'کڕیار بەسەرکەوتوویی زیادکرا!', 'success');

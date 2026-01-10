@@ -34,7 +34,11 @@ $(document).on('click', '.delete-customer-btn', function() {
                 success: function(data) {
                     if (data.success) {
                         Swal.fire('سڕایەوە!', data.message || 'کڕیار سڕایەوە', 'success');
-                        if (typeof loadCustomers === 'function') loadCustomers();
+                        if (typeof reloadCustomers === 'function') {
+                            reloadCustomers();
+                        } else if (typeof loadCustomers === 'function') {
+                            loadCustomers();
+                        }
                         // Refresh summary stats
                         if (typeof loadSummaryStats === 'function') loadSummaryStats();
                     } else {
