@@ -118,8 +118,10 @@ async function editExpense(id, data) {
         if (result.success) {
             console.log('Expense updated successfully');
             Swal.fire('سەرکەوتوو!', 'خەرجیەکە نوێکرایەوە', 'success');
+            // Get the updated expense ID to restore position
+            const updatedId = id;
             if (typeof reloadOtherExpenses === 'function') {
-                reloadOtherExpenses();
+                reloadOtherExpenses(updatedId);
             } else if (typeof loadOtherExpenses === 'function') {
                 loadOtherExpenses();
             }

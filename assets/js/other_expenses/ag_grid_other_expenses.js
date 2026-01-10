@@ -457,14 +457,24 @@ const otherExpensesGridOptions = {
     }
 };
 
+// Store current row ID for restoration after update
+let currentEditingRowId = null;
+
 // Load Other Expenses Data
-function loadOtherExpensesData(preservePagination = false) {
-    // Save current pagination state
+function loadOtherExpensesData(preservePagination = false, restoreRowId = null) {
+    // Save current pagination state and filters
     let currentPage = 0;
     let pageSize = 25;
+    let savedFilters = null;
     if (preservePagination && otherExpensesGridApi) {
         currentPage = otherExpensesGridApi.paginationGetCurrentPage() || 0;
         pageSize = otherExpensesGridApi.paginationGetPageSize() || 25;
+        // Save current filter model
+        try {
+            savedFilters = otherExpensesGridApi.getFilterModel();
+        } catch (e) {
+            console.warn('Could not get filter model:', e);
+        }
     }
     
     // Show loading
@@ -500,11 +510,49 @@ function loadOtherExpensesData(preservePagination = false) {
                 otherExpensesGridApi.setGridOption('rowData', expenses);
                 otherExpensesGridApi.hideOverlay();
                 
-                // Restore pagination state if preserving
+                // Restore pagination state and filters if preserving
                 if (preservePagination && otherExpensesGridApi) {
                     setTimeout(() => {
+                        // Restore filters first
+                        if (savedFilters && Object.keys(savedFilters).length > 0) {
+                            try {
+                                otherExpensesGridApi.setFilterModel(savedFilters);
+                            } catch (e) {
+                                console.warn('Could not restore filter model:', e);
+                            }
+                        }
+                        // Restore pagination
                         otherExpensesGridApi.paginationGoToPage(currentPage);
                         otherExpensesGridApi.paginationSetPageSize(pageSize);
+                        
+                        // Restore selected row if provided
+                        if (restoreRowId) {
+                            setTimeout(() => {
+                                // Find row by data id
+                                let foundNode = null;
+                                otherExpensesGridApi.forEachNode((node) => {
+                                    if (node.data && String(node.data.id) === String(restoreRowId)) {
+                                        foundNode = node;
+                                    }
+                                });
+                                
+                                if (foundNode) {
+                                    // Calculate which page the row is on
+                                    const rowIndex = foundNode.rowIndex;
+                                    const currentPageSize = otherExpensesGridApi.paginationGetPageSize();
+                                    const targetPage = Math.floor(rowIndex / currentPageSize);
+                                    
+                                    // Go to the page containing the row
+                                    otherExpensesGridApi.paginationGoToPage(targetPage);
+                                    
+                                    // After page change, scroll to the row
+                                    setTimeout(() => {
+                                        foundNode.setSelected(true);
+                                        otherExpensesGridApi.ensureNodeVisible(foundNode, 'middle');
+                                    }, 150);
+                                }
+                            }, 200);
+                        }
                     }, 100);
                 }
             } else {
@@ -617,9 +665,9 @@ function updateSummaryCards(expenses) {
     }
 }
 
-// Reload function - preserve pagination
-window.reloadOtherExpenses = function() {
-    loadOtherExpensesData(true);
+// Reload function - preserve pagination and restore row
+window.reloadOtherExpenses = function(restoreRowId = null) {
+    loadOtherExpensesData(true, restoreRowId);
 };
 
 // Export function is handled in export_functions.js with AG Grid priority
@@ -632,6 +680,99 @@ document.addEventListener('DOMContentLoaded', function() {
         otherExpensesGridApi = agGrid.createGrid(gridDiv, otherExpensesGridOptions);
     }
 });
+
+// Populate select dropdown
+async function populateSelect(url, selectId, selectedId) {
+    try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        const data = await res.json();
+        const select = document.getElementById(selectId);
+        if (!select) return;
+        select.innerHTML = '<option value="">-- هەلبژێرە --</option>';
+        data.forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = item.id;
+            opt.textContent = item.name;
+            if (selectedId && String(item.id) === String(selectedId)) opt.selected = true;
+            select.appendChild(opt);
+        });
+    } catch (err) {
+        console.error('Error populating select:', err);
+    }
+}
+
+// Open edit modal by ID
+window.openEditModalById = async function (id) {
+    try {
+        // Store the row ID for restoration after update
+        currentEditingRowId = id;
+        
+        const dataSource = window.otherExpensesData || [];
+        const row = dataSource.find(r => String(r.id) === String(id));
+        if (!row) {
+            console.error('openEditModalById: row not found', { id });
+            return;
+        }
+
+        await populateSelect('../process/other_expenses/select_persons.php', 'edit_person_id', row.person_id);
+        await populateSelect('../process/other_expenses/select_employees.php', 'edit_employee_id', row.employee_id);
+        await populateSelect('../process/other_expenses/select_cars.php', 'edit_car_id', row.car_id);
+
+        document.getElementById('edit_id').value = row.id;
+        document.getElementById('edit_purpose').value = row.purpose || '';
+        document.getElementById('edit_payment_type').value = row.payment_type || 'نەقد';
+        document.getElementById('edit_currency_type').value = row.currency_type || 'دینار';
+        document.getElementById('edit_invoice_number').value = row.invoice_number || '';
+        document.getElementById('edit_amount_iqd').value = row.amount_iqd || 0;
+        document.getElementById('edit_amount_usd').value = row.amount_usd || 0;
+        document.getElementById('edit_paid_iqd').value = row.paid_iqd || 0;
+        document.getElementById('edit_paid_usd').value = row.paid_usd || 0;
+        document.getElementById('edit_exchange_rate').value = row.exchange_rate || 139250;
+        document.getElementById('edit_remaining_iqd').value = row.remaining_iqd || 0;
+        document.getElementById('edit_remaining_usd').value = row.remaining_usd || 0;
+
+        if (document.getElementById('edit_gas_liters')) {
+            document.getElementById('edit_gas_liters').value = row.gas_liters || '';
+        }
+
+        if (document.getElementById('edit_expense_type')) {
+            document.getElementById('edit_expense_type').value = row.expense_type || '';
+            const event = new Event('change');
+            document.getElementById('edit_expense_type').dispatchEvent(event);
+
+            if (row.expense_type === 'بەکارهێنانی گاز') {
+                setTimeout(() => {
+                    if (typeof populateGasPurchasePrice === 'function') populateGasPurchasePrice('edit');
+                }, 100);
+            }
+        }
+
+        if (document.getElementById('edit_material_id')) {
+            await populateSelect('../process/other_expenses/select_materials.php', 'edit_material_id', row.material_id);
+            setTimeout(() => {
+                if (row.material_id && typeof populateMaterialPrices === 'function') populateMaterialPrices(row.material_id, 'edit');
+            }, 100);
+        }
+
+        if (document.getElementById('edit_material_quantity')) document.getElementById('edit_material_quantity').value = row.material_quantity || '';
+        if (document.getElementById('edit_usage_unit_type')) document.getElementById('edit_usage_unit_type').value = row.usage_unit_type || '';
+        if (document.getElementById('edit_material_purchase_price_iqd')) document.getElementById('edit_material_purchase_price_iqd').value = row.material_purchase_price_iqd || '';
+        if (document.getElementById('edit_material_purchase_price_usd')) document.getElementById('edit_material_purchase_price_usd').value = row.material_purchase_price_usd || '';
+        if (document.getElementById('edit_material_total_cost')) document.getElementById('edit_material_total_cost').value = row.material_total_cost || '';
+        if (document.getElementById('edit_gas_purchase_price_input')) document.getElementById('edit_gas_purchase_price_input').value = row.gas_purchase_price_input || '';
+        if (document.getElementById('edit_gas_total_cost')) document.getElementById('edit_gas_total_cost').value = row.gas_total_cost || '';
+
+        document.getElementById('edit_date').value = row.date || '';
+
+        const modal = new bootstrap.Modal(document.getElementById('editExpenseModal'));
+        modal.show();
+
+        if (typeof setupEditExpenseModal === 'function') setupEditExpenseModal();
+    } catch (error) {
+        console.error('openEditModalById failed', error);
+    }
+};
 
 // Event delegation for edit and delete buttons
 $(document).on('click', '.edit-expense', function() {
