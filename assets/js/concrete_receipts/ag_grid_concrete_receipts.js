@@ -8,32 +8,6 @@ window.concreteReceiptsGridApi = null; // Will be set after initialization
 // Column Definitions - ترتیب ستونەکان بە شێوەی دروست (لە چەپ بۆ ڕاست - LTR)
 const concreteReceiptsColumnDefs = [
     {
-        field: 'actions',
-        headerName: 'کردارەکان',
-        sortable: false,
-        filter: false,
-        resizable: true,
-        minWidth: 150,
-        maxWidth: 200,
-        flex: 0,
-        pinned: 'right',
-        cellStyle: { textAlign: 'center', direction: 'ltr' },
-        cellRenderer: function(params) {
-            if (!params.data) return '-';
-            let buttons = '';
-            if (window.userPermissions && window.userPermissions.canEdit) {
-                buttons += `<button class='btn btn-warning btn-sm edit-receipt' data-id='${params.data.id}' title='نوێکردنەوە' style='margin: 2px;'><i class='fa fa-edit'></i></button> `;
-            }
-            if (window.userPermissions && window.userPermissions.canDelete) {
-                buttons += `<button class='btn btn-danger btn-sm delete-receipt' data-id='${params.data.id}' title='سڕینەوە' style='margin: 2px;'><i class='fa fa-trash'></i></button> `;
-            }
-            if (window.userPermissions && window.userPermissions.canPrint) {
-                buttons += `<button class='btn btn-info btn-sm print-receipt' data-id='${params.data.id}' title='پرێنت' style='margin: 2px;'><i class='fa fa-print'></i></button>`;
-            }
-            return buttons.trim() || '-';
-        }
-    },
-    {
         field: 'mixer_driver_name',
         headerName: 'شۆفێری میکسەر',
         filter: 'agTextColumnFilter',
@@ -187,6 +161,32 @@ const concreteReceiptsColumnDefs = [
             const warningIcon = isDuplicate ? '<i class="fas fa-exclamation-triangle" style="color: #ffc107; margin-left: 4px;" title="ژمارەی پسوڵە دووبارەیە"></i>' : '';
             return warningIcon + (params.value || '-');
         }
+    },
+    {
+        field: 'actions',
+        headerName: 'کردارەکان',
+        sortable: false,
+        filter: false,
+        resizable: true,
+        minWidth: 150,
+        maxWidth: 200,
+        flex: 0,
+        pinned: 'right',
+        cellStyle: { textAlign: 'center', direction: 'ltr' },
+        cellRenderer: function(params) {
+            if (!params.data) return '-';
+            let buttons = '';
+            if (window.userPermissions && window.userPermissions.canEdit) {
+                buttons += `<button class='btn btn-warning btn-sm edit-receipt' data-id='${params.data.id}' title='نوێکردنەوە' style='margin: 2px;'><i class='fa fa-edit'></i></button> `;
+            }
+            if (window.userPermissions && window.userPermissions.canDelete) {
+                buttons += `<button class='btn btn-danger btn-sm delete-receipt' data-id='${params.data.id}' title='سڕینەوە' style='margin: 2px;'><i class='fa fa-trash'></i></button> `;
+            }
+            if (window.userPermissions && window.userPermissions.canPrint) {
+                buttons += `<button class='btn btn-info btn-sm print-receipt' data-id='${params.data.id}' title='پرێنت' style='margin: 2px;'><i class='fa fa-print'></i></button>`;
+            }
+            return buttons.trim() || '-';
+        }
     }
 ];
 
@@ -216,8 +216,21 @@ const concreteReceiptsGridOptions = {
 
 // Flag to prevent infinite loop in pagination
 let isLoadingData = false;
+let loadTimeout = null;
 
-// Load data function
+// Debounce function for better performance
+function debounce(func, wait) {
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(loadTimeout);
+            func(...args);
+        };
+        clearTimeout(loadTimeout);
+        loadTimeout = setTimeout(later, wait);
+    };
+}
+
+// Load data function with optimized performance
 async function loadConcreteReceiptsGrid() {
     if (!concreteReceiptsGridApi || isLoadingData) {
         return;
@@ -242,16 +255,42 @@ async function loadConcreteReceiptsGrid() {
         }
     });
 
-    // Load a large page size to get all data, then let AG Grid handle pagination client-side
-    // This is simpler than implementing true server-side pagination
+    // Use reasonable page size for better performance (500 records at a time)
+    // If more data is needed, we can implement server-side pagination later
     queryParams.append('page', 1);
-    queryParams.append('pageSize', 10000); // Load a large number to get all filtered data
+    queryParams.append('pageSize', 500);
 
-    // Show loading
+    // Show loading with better visual feedback
     concreteReceiptsGridApi.showLoadingOverlay();
+    
+    // Add custom loading message
+    const loadingMessage = document.createElement('div');
+    loadingMessage.id = 'concrete-receipts-loading-msg';
+    loadingMessage.style.cssText = 'text-align: center; padding: 20px; color: var(--seafoam-green); font-weight: bold;';
+    loadingMessage.innerHTML = '<i class="fas fa-spinner fa-spin"></i> چاوەڕوان بە...';
+    const gridContainer = document.getElementById('concreteReceiptsGrid');
+    if (gridContainer && !document.getElementById('concrete-receipts-loading-msg')) {
+        gridContainer.appendChild(loadingMessage);
+    }
+
+    const startTime = performance.now();
 
     try {
-        const res = await fetch('../process/concrete_receipts/select_concrete_receipts.php?' + queryParams.toString());
+        // Use AbortController for request cancellation if needed
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
+        const res = await fetch('../process/concrete_receipts/select_concrete_receipts.php?' + queryParams.toString(), {
+            signal: controller.signal,
+            cache: 'no-cache'
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+
         const text = await res.text();
         let data;
 
@@ -260,6 +299,8 @@ async function loadConcreteReceiptsGrid() {
         } catch (e) {
             console.error('Raw response from select_concrete_receipts.php:', text);
             concreteReceiptsGridApi.hideOverlay();
+            const loadingMsg = document.getElementById('concrete-receipts-loading-msg');
+            if (loadingMsg) loadingMsg.remove();
             isLoadingData = false;
             if (window.Swal) {
                 Swal.fire({
@@ -271,10 +312,17 @@ async function loadConcreteReceiptsGrid() {
             return;
         }
 
+        const loadTime = ((performance.now() - startTime) / 1000).toFixed(2);
+        console.log(`Data loaded in ${loadTime} seconds`);
+
         if (data.success && data.data) {
-            // Set row data
+            // Set row data efficiently
             concreteReceiptsGridApi.setGridOption('rowData', data.data);
             concreteReceiptsGridApi.hideOverlay();
+            
+            // Remove loading message
+            const loadingMsg = document.getElementById('concrete-receipts-loading-msg');
+            if (loadingMsg) loadingMsg.remove();
 
             // Update summary cards
             if (data.summary) {
@@ -290,12 +338,27 @@ async function loadConcreteReceiptsGrid() {
         } else {
             concreteReceiptsGridApi.setGridOption('rowData', []);
             concreteReceiptsGridApi.showNoRowsOverlay();
+            const loadingMsg = document.getElementById('concrete-receipts-loading-msg');
+            if (loadingMsg) loadingMsg.remove();
         }
     } catch (error) {
-        console.error('Error loading data:', error);
+        if (error.name === 'AbortError') {
+            console.error('Request timeout');
+            if (window.Swal) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'کاتی زیاد',
+                    text: 'کاتی زیاد بوو. تکایە دووبارە هەوڵ بدەوە'
+                });
+            }
+        } else {
+            console.error('Error loading data:', error);
+        }
         concreteReceiptsGridApi.setGridOption('rowData', []);
         concreteReceiptsGridApi.showNoRowsOverlay();
-        if (window.Swal) {
+        const loadingMsg = document.getElementById('concrete-receipts-loading-msg');
+        if (loadingMsg) loadingMsg.remove();
+        if (window.Swal && error.name !== 'AbortError') {
             Swal.fire({
                 icon: 'error',
                 title: 'هەڵە',
@@ -306,6 +369,9 @@ async function loadConcreteReceiptsGrid() {
         isLoadingData = false;
     }
 }
+
+// Debounced version for filter changes
+const debouncedLoadConcreteReceiptsGrid = debounce(loadConcreteReceiptsGrid, 300);
 
 // Initialize Grid
 document.addEventListener('DOMContentLoaded', function() {
@@ -353,6 +419,7 @@ window.reloadConcreteReceipts = function() {
 
 // Make loadConcreteReceiptsGrid globally accessible for filter.js
 window.loadConcreteReceiptsGrid = loadConcreteReceiptsGrid;
+window.debouncedLoadConcreteReceiptsGrid = debouncedLoadConcreteReceiptsGrid;
 
 // Export grid data to CSV
 window.exportConcreteReceiptsToCSV = function() {

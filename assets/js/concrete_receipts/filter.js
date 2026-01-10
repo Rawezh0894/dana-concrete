@@ -10,10 +10,12 @@ $(document).ready(function() {
   }
 
   function loadFilteredReceipts() {
-    // Reset to first page when filtering and reload grid
+    // Reset to first page when filtering and reload grid with debounce for better performance
     if (window.concreteReceiptsGridApi) {
       window.concreteReceiptsGridApi.paginationGoToPage(0);
-      if (typeof loadConcreteReceiptsGrid === 'function') {
+      if (typeof window.debouncedLoadConcreteReceiptsGrid === 'function') {
+        window.debouncedLoadConcreteReceiptsGrid();
+      } else if (typeof loadConcreteReceiptsGrid === 'function') {
         loadConcreteReceiptsGrid();
       } else if (typeof window.reloadConcreteReceipts === 'function') {
         window.reloadConcreteReceipts();
@@ -22,8 +24,15 @@ $(document).ready(function() {
   }
 
   // Bind filter events
+  // Use debounced version for text input (location) and immediate for selects
   $('#filter_customer_id, #filter_formulas_id').on('change', loadFilteredReceipts);
-  $('#filter_location').on('input', loadFilteredReceipts);
+  $('#filter_location').on('input', function() {
+    if (window.debouncedLoadConcreteReceiptsGrid) {
+      window.debouncedLoadConcreteReceiptsGrid();
+    } else {
+      loadFilteredReceipts();
+    }
+  });
   $('#filter_date_from, #filter_date_to').on('change', loadFilteredReceipts);
 
   // Today/Yesterday filter buttons
