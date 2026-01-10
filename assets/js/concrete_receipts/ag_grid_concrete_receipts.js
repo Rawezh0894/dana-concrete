@@ -14,7 +14,7 @@ let totalPages = 0;
 let currentSearchText = '';
 let cachedData = [];
 
-// Column Definitions - ستونی کردارەکان لە چەپ (pinned: 'left')
+// Column Definitions - ستونی کردارەکان لە چەپ (pinned: 'left') - بەڵام ستونەکانی تر بە شێوەی کۆن
 const concreteReceiptsColumnDefs = [
     {
         field: 'actions',
@@ -25,7 +25,7 @@ const concreteReceiptsColumnDefs = [
         minWidth: 150,
         maxWidth: 200,
         flex: 0,
-        pinned: 'left', // جێگیرکراوە لە چەپ - سەرەتای ڕیزبەندی
+        pinned: 'left', // تەنها ستونی کردارەکان لە چەپ جێگیر دەکرێت
         cellStyle: { textAlign: 'center', direction: 'ltr' },
         cellRenderer: function(params) {
             if (!params.data) return '-';
@@ -43,124 +43,8 @@ const concreteReceiptsColumnDefs = [
         }
     },
     {
-        field: 'receipt_number',
-        headerName: 'ژم.پسووڵە',
-        filter: 'agTextColumnFilter',
-        floatingFilter: true,
-        sortable: true,
-        resizable: true,
-        minWidth: 120,
-        cellStyle: { textAlign: 'center', direction: 'rtl' },
-        cellRenderer: function(params) {
-            if (!params.value) return '-';
-            const isDuplicate = params.data && params.data.is_duplicate;
-            const warningIcon = isDuplicate ? '<i class="fas fa-exclamation-triangle" style="color: #ffc107; margin-left: 4px;" title="ژمارەی پسوڵە دووبارەیە"></i>' : '';
-            return warningIcon + (params.value || '-');
-        }
-    },
-    {
-        field: 'customer_name',
-        headerName: 'کڕیار',
-        filter: 'agTextColumnFilter',
-        floatingFilter: true,
-        sortable: true,
-        resizable: true,
-        minWidth: 150,
-        cellStyle: { textAlign: 'center', direction: 'rtl' },
-        valueFormatter: function(params) {
-            return params.value || '-';
-        }
-    },
-    {
-        field: 'location',
-        headerName: 'شوێن',
-        filter: 'agTextColumnFilter',
-        floatingFilter: true,
-        sortable: true,
-        resizable: true,
-        minWidth: 150,
-        cellStyle: { textAlign: 'center', direction: 'rtl' },
-        valueFormatter: function(params) {
-            return params.value || '-';
-        }
-    },
-    {
-        field: 'receiver_name',
-        headerName: 'وەرگر',
-        filter: 'agTextColumnFilter',
-        floatingFilter: true,
-        sortable: true,
-        resizable: true,
-        minWidth: 120,
-        cellStyle: { textAlign: 'center', direction: 'rtl' },
-        valueFormatter: function(params) {
-            return params.value || '-';
-        }
-    },
-    {
-        field: 'created_at',
-        headerName: 'بەروار',
-        filter: 'agDateColumnFilter',
-        floatingFilter: true,
-        sortable: true,
-        resizable: true,
-        minWidth: 150,
-        cellStyle: { textAlign: 'center', direction: 'rtl' },
-        valueFormatter: function(params) {
-            if (!params.value) return '-';
-            const d = new Date(params.value);
-            if (isNaN(d)) return params.value;
-            return d.getFullYear() + '-' + 
-                   String(d.getMonth()+1).padStart(2,'0') + '-' + 
-                   String(d.getDate()).padStart(2,'0') + ' ' + 
-                   String(d.getHours()).padStart(2,'0') + ':' + 
-                   String(d.getMinutes()).padStart(2,'0');
-        }
-    },
-    {
-        field: 'meter_amount',
-        headerName: 'بڕی مەتر سێجا',
-        filter: 'agNumberColumnFilter',
-        floatingFilter: true,
-        sortable: true,
-        resizable: true,
-        minWidth: 120,
-        cellStyle: { textAlign: 'center', direction: 'rtl', fontWeight: 'bold' },
-        valueFormatter: function(params) {
-            if (params.value === null || params.value === undefined || params.value === '') return '-';
-            return window.AGGridFormatters?.formatNumber(params.value) + ' m³' || '-';
-        },
-        type: 'numericColumn'
-    },
-    {
-        field: 'formula_name',
-        headerName: 'فۆرمۆلا',
-        filter: 'agTextColumnFilter',
-        floatingFilter: true,
-        sortable: true,
-        resizable: true,
-        minWidth: 120,
-        cellStyle: { textAlign: 'center', direction: 'rtl' },
-        valueFormatter: function(params) {
-            return params.value || '-';
-        }
-    },
-    {
-        field: 'pump_car_name',
-        headerName: 'پەمپ',
-        filter: 'agTextColumnFilter',
-        floatingFilter: true,
-        sortable: true,
-        resizable: true,
-        minWidth: 100,
-        cellStyle: { textAlign: 'center', direction: 'rtl' },
-        valueFormatter: function(params) {
-            return params.value || '-';
-        }
-    },
-    {
-        field: 'pump_driver_name',
-        headerName: 'شۆفێری پەمپ',
+        field: 'mixer_driver_name',
+        headerName: 'شۆفێری میکسەر',
         filter: 'agTextColumnFilter',
         floatingFilter: true,
         sortable: true,
@@ -185,8 +69,8 @@ const concreteReceiptsColumnDefs = [
         }
     },
     {
-        field: 'mixer_driver_name',
-        headerName: 'شۆفێری میکسەر',
+        field: 'pump_driver_name',
+        headerName: 'شۆفێری پەمپ',
         filter: 'agTextColumnFilter',
         floatingFilter: true,
         sortable: true,
@@ -195,6 +79,122 @@ const concreteReceiptsColumnDefs = [
         cellStyle: { textAlign: 'center', direction: 'rtl' },
         valueFormatter: function(params) {
             return params.value || '-';
+        }
+    },
+    {
+        field: 'pump_car_name',
+        headerName: 'پەمپ',
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+        sortable: true,
+        resizable: true,
+        minWidth: 100,
+        cellStyle: { textAlign: 'center', direction: 'rtl' },
+        valueFormatter: function(params) {
+            return params.value || '-';
+        }
+    },
+    {
+        field: 'formula_name',
+        headerName: 'فۆرمۆلا',
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+        sortable: true,
+        resizable: true,
+        minWidth: 120,
+        cellStyle: { textAlign: 'center', direction: 'rtl' },
+        valueFormatter: function(params) {
+            return params.value || '-';
+        }
+    },
+    {
+        field: 'meter_amount',
+        headerName: 'بڕی مەتر سێجا',
+        filter: 'agNumberColumnFilter',
+        floatingFilter: true,
+        sortable: true,
+        resizable: true,
+        minWidth: 120,
+        cellStyle: { textAlign: 'center', direction: 'rtl', fontWeight: 'bold' },
+        valueFormatter: function(params) {
+            if (params.value === null || params.value === undefined || params.value === '') return '-';
+            return window.AGGridFormatters?.formatNumber(params.value) + ' m³' || '-';
+        },
+        type: 'numericColumn'
+    },
+    {
+        field: 'created_at',
+        headerName: 'بەروار',
+        filter: 'agDateColumnFilter',
+        floatingFilter: true,
+        sortable: true,
+        resizable: true,
+        minWidth: 150,
+        cellStyle: { textAlign: 'center', direction: 'rtl' },
+        valueFormatter: function(params) {
+            if (!params.value) return '-';
+            const d = new Date(params.value);
+            if (isNaN(d)) return params.value;
+            return d.getFullYear() + '-' + 
+                   String(d.getMonth()+1).padStart(2,'0') + '-' + 
+                   String(d.getDate()).padStart(2,'0') + ' ' + 
+                   String(d.getHours()).padStart(2,'0') + ':' + 
+                   String(d.getMinutes()).padStart(2,'0');
+        }
+    },
+    {
+        field: 'receiver_name',
+        headerName: 'وەرگر',
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+        sortable: true,
+        resizable: true,
+        minWidth: 120,
+        cellStyle: { textAlign: 'center', direction: 'rtl' },
+        valueFormatter: function(params) {
+            return params.value || '-';
+        }
+    },
+    {
+        field: 'location',
+        headerName: 'شوێن',
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+        sortable: true,
+        resizable: true,
+        minWidth: 150,
+        cellStyle: { textAlign: 'center', direction: 'rtl' },
+        valueFormatter: function(params) {
+            return params.value || '-';
+        }
+    },
+    {
+        field: 'customer_name',
+        headerName: 'کڕیار',
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+        sortable: true,
+        resizable: true,
+        minWidth: 150,
+        cellStyle: { textAlign: 'center', direction: 'rtl' },
+        valueFormatter: function(params) {
+            return params.value || '-';
+        }
+    },
+    {
+        field: 'receipt_number',
+        headerName: 'ژم.پسووڵە',
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+        sortable: true,
+        resizable: true,
+        minWidth: 120,
+        cellStyle: { textAlign: 'center', direction: 'rtl' },
+        cellRenderer: function(params) {
+            if (!params.value) return '-';
+            const isDuplicate = params.data && params.data.is_duplicate;
+            const warningIcon = isDuplicate ? '<i class="fas fa-exclamation-triangle" style="color: #ffc107; margin-left: 4px;" title="ژمارەی پسوڵە دووبارەیە"></i>' : '';
+            return warningIcon + (params.value || '-');
         }
     }
 ];
