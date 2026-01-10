@@ -1,7 +1,7 @@
 // AG Grid configuration for concrete receipts
 let concreteReceiptsGridApi = null;
 
-// Column definitions - ڕیزبەندی دروست بۆ RTL
+// Column definitions - ڕیزبەندی پێچەوانە بۆ RTL (جگە لە ستوونی کردارەکان)
 const concreteReceiptsColumnDefs = [
     {
         field: 'actions',
@@ -29,50 +29,45 @@ const concreteReceiptsColumnDefs = [
         }
     },
     {
-        field: '#',
-        headerName: '#',
-        width: 70,
-        pinned: 'left',
-        cellStyle: { textAlign: 'center', direction: 'ltr' },
-        valueGetter: function(params) {
-            if (!params.node) return '';
-            // Calculate row number based on server pagination
-            const startRow = window.currentConcreteReceiptsStartRow || 0;
-            return startRow + params.node.rowIndex + 1;
-        },
-        sortable: false,
-        filter: false
+        field: 'mixer_driver_name',
+        headerName: 'شۆفێری میکسەر',
+        flex: 1,
+        minWidth: 110
     },
     {
-        field: 'receipt_number',
-        headerName: 'ژم.پسووڵە',
+        field: 'mixer_car_name',
+        headerName: 'میکسەر',
+        flex: 1,
+        minWidth: 80
+    },
+    {
+        field: 'pump_driver_name',
+        headerName: 'شۆفێری پەمپ',
+        flex: 1,
+        minWidth: 110
+    },
+    {
+        field: 'pump_car_name',
+        headerName: 'پەمپ',
+        flex: 1,
+        minWidth: 80
+    },
+    {
+        field: 'formula_name',
+        headerName: 'فۆرمۆلا',
+        flex: 1,
+        minWidth: 100
+    },
+    {
+        field: 'meter_amount',
+        headerName: 'بڕی مەتر',
         flex: 1,
         minWidth: 100,
+        cellStyle: { textAlign: 'left', direction: 'ltr' },
         cellRenderer: function(params) {
-            if (!params.data) return '-';
-            const warning = params.data.is_duplicate 
-                ? '<i class="fas fa-exclamation-triangle duplicate-warning" title="ژمارەی پسوڵە دووبارەیە"></i>' 
-                : '';
-            return warning + (params.value || '-');
+            if (params.value === null || params.value === undefined || params.value === '') return '-';
+            return window.AGGridFormatters.formatNumber(params.value) + ' m³';
         }
-    },
-    {
-        field: 'customer_name',
-        headerName: 'کڕیار',
-        flex: 1,
-        minWidth: 120
-    },
-    {
-        field: 'location',
-        headerName: 'شوێن',
-        flex: 1,
-        minWidth: 100
-    },
-    {
-        field: 'receiver_name',
-        headerName: 'وەرگر',
-        flex: 1,
-        minWidth: 100
     },
     {
         field: 'created_at',
@@ -92,45 +87,49 @@ const concreteReceiptsColumnDefs = [
         }
     },
     {
-        field: 'meter_amount',
-        headerName: 'بڕی مەتر',
-        flex: 1,
-        minWidth: 100,
-        cellStyle: { textAlign: 'left', direction: 'ltr' },
-        cellRenderer: function(params) {
-            if (params.value === null || params.value === undefined || params.value === '') return '-';
-            return window.AGGridFormatters.formatNumber(params.value) + ' m³';
-        }
-    },
-    {
-        field: 'formula_name',
-        headerName: 'فۆرمۆلا',
+        field: 'receiver_name',
+        headerName: 'وەرگر',
         flex: 1,
         minWidth: 100
     },
     {
-        field: 'pump_car_name',
-        headerName: 'پەمپ',
+        field: 'location',
+        headerName: 'شوێن',
         flex: 1,
-        minWidth: 80
+        minWidth: 100
     },
     {
-        field: 'pump_driver_name',
-        headerName: 'شۆفێری پەمپ',
+        field: 'customer_name',
+        headerName: 'کڕیار',
         flex: 1,
-        minWidth: 110
+        minWidth: 120
     },
     {
-        field: 'mixer_car_name',
-        headerName: 'میکسەر',
+        field: 'receipt_number',
+        headerName: 'ژم.پسووڵە',
         flex: 1,
-        minWidth: 80
+        minWidth: 100,
+        cellRenderer: function(params) {
+            if (!params.data) return '-';
+            const warning = params.data.is_duplicate 
+                ? '<i class="fas fa-exclamation-triangle duplicate-warning" title="ژمارەی پسوڵە دووبارەیە"></i>' 
+                : '';
+            return warning + (params.value || '-');
+        }
     },
     {
-        field: 'mixer_driver_name',
-        headerName: 'شۆفێری میکسەر',
-        flex: 1,
-        minWidth: 110
+        field: '#',
+        headerName: '#',
+        width: 70,
+        cellStyle: { textAlign: 'center', direction: 'ltr' },
+        valueGetter: function(params) {
+            if (!params.node) return '';
+            // Calculate row number based on server pagination
+            const startRow = window.currentConcreteReceiptsStartRow || 0;
+            return startRow + params.node.rowIndex + 1;
+        },
+        sortable: false,
+        filter: false
     }
 ];
 
