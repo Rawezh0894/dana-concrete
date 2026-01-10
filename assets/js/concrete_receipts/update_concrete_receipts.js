@@ -60,11 +60,7 @@ $('#editConcreteReceiptForm').on('submit', function (e) {
         if (res.success) {
             Swal.fire('سەرکەوتوو', res.message || 'پسوڵە نوێکرایەوە', 'success');
             $('#editConcreteReceiptModal').modal('hide');
-            // Get the updated receipt ID to restore position
-            const updatedId = $('#edit_receipt_id').val();
-            if (window.reloadConcreteReceipts) {
-                window.reloadConcreteReceipts(updatedId);
-            }
+            if (window.reloadConcreteReceipts) window.reloadConcreteReceipts();
         } else {
             Swal.fire('هەڵە!', res.message || 'هەڵەیەک ڕویدا', 'error');
         }
