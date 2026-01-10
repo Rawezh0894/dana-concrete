@@ -655,7 +655,8 @@ try {
         'brown_sand' => 0,
         'gravel' => 0,
         'cement' => 0,
-        'additive' => 0
+        'additive' => 0,
+        'gas' => 0  // نرخی گاز بۆ لیتر
     ];
 
     try {
@@ -679,6 +680,11 @@ try {
             elseif ($m_name == 'چەو') $material_prices['gravel'] = $price_per_ton;
             elseif ($m_name == 'چیمەنتۆ') $material_prices['cement'] = $price_per_ton;
             elseif ($m_name == 'دەرمان') $material_prices['additive'] = $price_per_ton;
+            elseif ($m_name == 'گاز') {
+                // بۆ گاز: نرخ بۆ لیتر (نەوەک تۆن)
+                $price_per_liter = ($row['total_kg'] > 0) ? ($row['total_usd'] / $row['total_kg']) : 0;
+                $material_prices['gas'] = $price_per_liter;
+            }
         }
 
         // Fallback for any material that still has 0 price (if no purchases in filtered period)
@@ -706,6 +712,11 @@ try {
                 elseif ($m_name == 'چەو' && $material_prices['gravel'] == 0) $material_prices['gravel'] = $price_per_ton;
                 elseif ($m_name == 'چیمەنتۆ' && $material_prices['cement'] == 0) $material_prices['cement'] = $price_per_ton;
                 elseif ($m_name == 'دەرمان' && $material_prices['additive'] == 0) $material_prices['additive'] = $price_per_ton;
+                elseif ($m_name == 'گاز' && $material_prices['gas'] == 0) {
+                    // بۆ گاز: نرخ بۆ لیتر (نەوەک تۆن)
+                    $price_per_liter = ($row['total_kg'] > 0) ? ($row['total_usd'] / $row['total_kg']) : 0;
+                    $material_prices['gas'] = $price_per_liter;
+                }
             }
         }
     } catch (Exception $e) {
@@ -724,6 +735,37 @@ try {
     ];
 
     $total_used_material_cost_usd = array_sum($material_costs);
+    
+    // Calculate gas consumption and cost
+    // بەکارهێنانی گاز لە other_expenses تایبڵەکەدا
+    $gas_consumption_liters = 0;
+    $gas_consumption_cost_usd = 0;
+    try {
+        $gas_consumption_query = "
+            SELECT 
+                SUM(gas_liters) as total_liters,
+                SUM(CASE 
+                    WHEN currency_type = 'دۆلار' THEN amount_usd 
+                    WHEN currency_type = 'دینار' THEN amount_iqd / NULLIF(exchange_rate / 100, 0)
+                    WHEN currency_type = 'تێکەڵ' THEN amount_usd + (amount_iqd / NULLIF(exchange_rate / 100, 0))
+                    ELSE 0 
+                END) as total_cost_usd
+            FROM other_expenses 
+            WHERE expense_type = 'بەکارهێنانی گاز' 
+            $date_condition_date
+        ";
+        $stmt = $pdo->query($gas_consumption_query);
+        $row = $stmt->fetch();
+        $gas_consumption_liters = floatval($row['total_liters'] ?? 0);
+        $gas_consumption_cost_usd = floatval($row['total_cost_usd'] ?? 0);
+        
+        // ئەگەر نرخی بەکارهێنان نەدۆزرایەوە، بەکارهێنانی نرخی average price لە purchases
+        if ($gas_consumption_cost_usd == 0 && $gas_consumption_liters > 0 && $material_prices['gas'] > 0) {
+            $gas_consumption_cost_usd = $gas_consumption_liters * $material_prices['gas'];
+        }
+    } catch (Exception $e) {
+        error_log("Error calculating gas consumption: " . $e->getMessage());
+    }
     
     // Get current stock levels for comparison
     // سایلۆی یەک: دەلتا + لاڤارج
@@ -1159,7 +1201,13 @@ try {
         'prices' => $material_prices,
         'costs' => $material_costs,
         'total_cost_usd' => $total_used_material_cost_usd,
-        'current_stock' => $current_stock
+        'current_stock' => $current_stock,
+        // Gas consumption data
+        'gas' => [
+            'liters' => $gas_consumption_liters,
+            'cost_usd' => $gas_consumption_cost_usd,
+            'price_per_liter' => $material_prices['gas']
+        ]
     ]
         ]
     ];

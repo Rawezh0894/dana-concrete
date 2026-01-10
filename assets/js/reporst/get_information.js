@@ -47,6 +47,11 @@ function fetchAndRenderReportData() {
 // Function to format material consumption values
 function formatMaterialConsumption(value, unit) {
     if (value === 0) return `0 ${unit}`;
+    // بۆ لیتر (گاز): بە شێوەیەکی ساکار نیشان بدە
+    if (unit === 'لیتر') {
+        return `${formatNumber(value)} ${unit}`;
+    }
+    // بۆ تۆن: ئەگەر کەمتر لە 1 بێت، بە کیلۆگرام نیشان بدە
     if (value < 1) return `${(value * 1000).toFixed(0)} کیلۆگرام`;
     return `${value.toFixed(2)} ${unit}`;
 }
@@ -539,6 +544,23 @@ function renderDashboardCards(data) {
             cardClass: 'purchase-materials-card',
             value: formatCurrency(data.data?.raw_material_sales?.cost_usd || 0, 'USD'),
             subtitle: 'تێچووی مەوادی خامە فرۆشراوەکان (چەو، لم، چیمەنتۆ، دەرمان، گاز)'
+        },
+        // Gas Consumption Cards
+        {
+            key: 'gas_consumption',
+            label: 'بەکارهێنانی گاز',
+            icon: 'fa-gas-pump',
+            cardClass: 'material-consumption-card',
+            value: formatMaterialConsumption(data.data?.material_consumption?.gas?.liters || 0, 'لیتر'),
+            subtitle: 'کۆی بەکارهێنانی گاز بە لیتر'
+        },
+        {
+            key: 'gas_consumption_cost',
+            label: 'کۆی نرخی بەکارهێنانی گاز',
+            icon: 'fa-dollar-sign',
+            cardClass: 'purchase-materials-card',
+            value: formatCurrency(data.data?.material_consumption?.gas?.cost_usd || 0, 'USD'),
+            subtitle: `تێکڕای نرخ: ${formatCurrency(data.data?.material_consumption?.gas?.price_per_liter || 0, 'USD')} / لیتر`
         }
     ];
 
