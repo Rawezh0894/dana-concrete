@@ -163,10 +163,11 @@ function renderDashboardCards(data) {
             cardClass: 'total-expenses-card',
             value: formatCurrency(
                 (Number(data.data?.material_consumption?.total_cost_usd) || 0) + 
-                (Number(data.data?.raw_material_sales?.cost_usd) || 0), 
+                (Number(data.data?.raw_material_sales?.cost_usd) || 0) +
+                (Number(data.data?.material_consumption?.gas?.cost_usd) || 0), 
                 'USD'
             ),
-            subtitle: 'کۆی نرخی کڕینی مەوادی بەکارهاتوو + تێچووی فرۆشتنی مەوادی خام'
+            subtitle: 'کۆی نرخی کڕینی مەوادی بەکارهاتوو + تێچووی فرۆشتنی مەوادی خام + تێچووی بەکارهێنانی گاز'
         },
         {
             key: 'employee_total_fixed',
