@@ -61,8 +61,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    word-break: break-word;
-    overflow-wrap: break-word;
 }
 
 .ag-theme-alpine .ag-header-cell:first-child {
@@ -151,8 +149,6 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     text-align: center;
-    word-break: break-word;
-    overflow-wrap: break-word;
 }
 
 /* Fix for long text in cells */

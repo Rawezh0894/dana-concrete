@@ -27,10 +27,8 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        width: 120,
         minWidth: 100,
-        maxWidth: 500,
-        cellStyle: { textAlign: 'center', direction: 'ltr', color: '#28a745', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+        cellStyle: { textAlign: 'center', direction: 'ltr', color: '#28a745' },
         valueFormatter: function(params) {
             return formatUSD(params.value);
         },
@@ -43,10 +41,8 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        width: 200,
         minWidth: 100,
-        maxWidth: 600,
-        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', wordBreak: 'break-word' },
+        cellStyle: { textAlign: 'center', direction: 'ltr' },
         cellRenderer: function(params) {
             if (!params.value) return '-';
             const displayText = params.value.length > 40 ? params.value.substring(0, 40) + '...' : params.value;
@@ -63,10 +59,8 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        width: 130,
         minWidth: 100,
-        maxWidth: 300,
-        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', wordBreak: 'break-word' },
+        cellStyle: { textAlign: 'center', direction: 'ltr' },
         valueFormatter: function(params) {
             if (params.value === null || params.value === undefined || params.value === '') return '-';
             return formatNumber(params.value);
@@ -80,10 +74,8 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        width: 120,
         minWidth: 100,
-        maxWidth: 300,
-        cellStyle: { textAlign: 'center', direction: 'ltr', fontWeight: 'bold', color: '#dc3545', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+        cellStyle: { textAlign: 'center', direction: 'ltr', fontWeight: 'bold', color: '#dc3545' },
         valueFormatter: function(params) {
             return formatUSD(params.value);
         },
@@ -96,10 +88,8 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        width: 150,
         minWidth: 100,
-        maxWidth: 400,
-        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', wordBreak: 'break-word' },
+        cellStyle: { textAlign: 'center', direction: 'ltr' },
         valueFormatter: function(params) {
             return formatUSD(params.value);
         },
@@ -112,10 +102,8 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        width: 150,
         minWidth: 100,
-        maxWidth: 400,
-        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', wordBreak: 'break-word' },
+        cellStyle: { textAlign: 'center', direction: 'ltr' },
         valueFormatter: function(params) {
             return formatIQD(params.value);
         },
@@ -128,10 +116,8 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        width: 120,
         minWidth: 100,
-        maxWidth: 300,
-        cellStyle: { textAlign: 'center', direction: 'ltr', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+        cellStyle: { textAlign: 'center', direction: 'ltr', fontWeight: 'bold' },
         valueFormatter: function(params) {
             return formatUSD(params.value);
         },
@@ -144,10 +130,8 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        width: 120,
         minWidth: 100,
-        maxWidth: 300,
-        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', wordBreak: 'break-word' },
+        cellStyle: { textAlign: 'center', direction: 'ltr' },
         valueFormatter: function(params) {
             return formatUSD(params.value);
         },
@@ -160,10 +144,8 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        width: 110,
         minWidth: 100,
-        maxWidth: 200,
-        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', wordBreak: 'break-word' },
+        cellStyle: { textAlign: 'center', direction: 'ltr' },
         valueFormatter: function(params) {
             if (params.value === null || params.value === undefined || params.value === '') return '-';
             return `M³ ${formatNumber(params.value)}`;
@@ -177,14 +159,12 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        width: 120,
         minWidth: 100,
-        maxWidth: 200,
-        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', wordBreak: 'break-word' },
+        cellStyle: { textAlign: 'center', direction: 'ltr' },
         cellRenderer: function(params) {
             if (!params.value) return '-';
             const color = params.value === 'نەقد' ? '#28a745' : '#ffc107';
-            return `<span style="background: ${color}; color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold; display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${params.value}</span>`;
+            return `<span style="background: ${color}; color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold;">${params.value}</span>`;
         }
     },
     {
@@ -194,10 +174,8 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        width: 120,
         minWidth: 100,
-        maxWidth: 200,
-        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', wordBreak: 'break-word' },
+        cellStyle: { textAlign: 'center', direction: 'ltr' },
         valueFormatter: function(params) {
             if (!params.value) return '-';
             return params.value;
@@ -210,10 +188,8 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        width: 150,
         minWidth: 100,
-        maxWidth: 500,
-        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', wordBreak: 'break-word' },
+        cellStyle: { textAlign: 'center', direction: 'ltr' },
         tooltipValueGetter: function(params) {
             return params.value || '';
         }
@@ -225,13 +201,11 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        width: 130,
         minWidth: 100,
-        maxWidth: 300,
-        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', wordBreak: 'break-word' },
+        cellStyle: { textAlign: 'center', direction: 'ltr' },
         cellRenderer: function(params) {
             if (params.data && params.data.duplicate_count && params.data.duplicate_count > 1) {
-                return `<span style="background: #dc3545; color: white; padding: 2px 6px; border-radius: 3px; display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${params.value || '-'}</span>`;
+                return `<span style="background: #dc3545; color: white; padding: 2px 6px; border-radius: 3px;">${params.value || '-'}</span>`;
             }
             return params.value || '-';
         },
@@ -246,10 +220,8 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        width: 150,
         minWidth: 100,
-        maxWidth: 500,
-        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', wordBreak: 'break-word' },
+        cellStyle: { textAlign: 'center', direction: 'ltr' },
         tooltipValueGetter: function(params) {
             return params.value || '';
         }
@@ -261,10 +233,8 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        width: 150,
         minWidth: 100,
-        maxWidth: 500,
-        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', wordBreak: 'break-word' },
+        cellStyle: { textAlign: 'center', direction: 'ltr' },
         tooltipValueGetter: function(params) {
             return params.value || '';
         }
@@ -276,10 +246,8 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        width: 150,
         minWidth: 100,
-        maxWidth: 500,
-        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', wordBreak: 'break-word' },
+        cellStyle: { textAlign: 'center', direction: 'ltr' },
         tooltipValueGetter: function(params) {
             return params.value || '';
         }
@@ -290,10 +258,9 @@ const columnDefs = [
         sortable: false,
         filter: false,
         resizable: true,
-        width: 120,
         minWidth: 100,
-        maxWidth: 200,
-        cellStyle: { textAlign: 'center', wordBreak: 'break-word' },
+        flex: 0,
+        cellStyle: { textAlign: 'center' },
         cellRenderer: function(params) {
             if (!params.data) return '-';
             const editBtn = window.userPermissions && window.userPermissions.canEdit
@@ -315,6 +282,13 @@ const gridOptions = {
         filter: true,
         resizable: true,
         floatingFilter: true,
+        autoHeight: true,
+        wrapText: true,
+        flex: 1,
+        minWidth: 100
+    },
+    autoSizeStrategy: {
+        type: 'fitCellContents'
     },
     rowData: [],
     pagination: true,
@@ -392,8 +366,9 @@ const gridOptions = {
         loadSalesData();
     },
     onFirstDataRendered: function(params) {
-        // Don't auto-size to fit - allow horizontal scroll
-        // params.api.sizeColumnsToFit();
+        // Auto-size columns based on content
+        const allColumnIds = params.columnApi.getColumns().map(col => col.getId());
+        params.columnApi.autoSizeColumns(allColumnIds, false);
     },
     // Enable horizontal scroll
     suppressSizeToFit: true,
