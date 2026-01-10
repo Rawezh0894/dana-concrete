@@ -260,10 +260,11 @@ async function loadConcreteReceiptsGrid() {
         }
     });
 
-    // Load more records to ensure all data is available for search
-    // Increased to 2000 to cover most use cases, but can be adjusted based on database size
+    // Load all records to ensure all data is available for search
+    // Using a large number to get all filtered records for client-side search
+    // If database is very large, consider implementing server-side search instead
     queryParams.append('page', 1);
-    queryParams.append('pageSize', 2000);
+    queryParams.append('pageSize', 10000); // Load up to 10000 records for comprehensive search
 
     // Show loading with better visual feedback
     concreteReceiptsGridApi.showLoadingOverlay();
@@ -397,6 +398,43 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Load initial data
     loadConcreteReceiptsGrid();
+
+    // Quick search functionality
+    const quickSearchInput = document.getElementById('quickSearchInput');
+    const clearQuickSearchBtn = document.getElementById('clearQuickSearch');
+    
+    if (quickSearchInput) {
+        // Debounced quick search
+        let searchTimeout = null;
+        quickSearchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(function() {
+                if (concreteReceiptsGridApi) {
+                    concreteReceiptsGridApi.setGridOption('quickFilterText', quickSearchInput.value);
+                }
+            }, 300);
+        });
+
+        // Clear quick search
+        if (clearQuickSearchBtn) {
+            clearQuickSearchBtn.addEventListener('click', function() {
+                quickSearchInput.value = '';
+                if (concreteReceiptsGridApi) {
+                    concreteReceiptsGridApi.setGridOption('quickFilterText', '');
+                }
+            });
+        }
+
+        // Allow Enter key to trigger search immediately
+        quickSearchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (concreteReceiptsGridApi) {
+                    concreteReceiptsGridApi.setGridOption('quickFilterText', quickSearchInput.value);
+                }
+            }
+        });
+    }
 });
 
 // Global function to reload grid (overrides the old one from select_concrete_receipts.js)
