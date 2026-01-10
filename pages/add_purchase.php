@@ -1007,20 +1007,20 @@ $(document).ready(function() {
         // Also update summary cards if the function exists
         if (typeof loadPurchaseSummary === 'function') {
             const params = new URLSearchParams();
-            const companyId = $('#filter_company').val();
-            const locationId = $('#filter_location').val();
-            const driverId = $('#filter_driver').val();
-            const materialId = $('#filter_material').val();
-            const fromDate = $('#filter_from').val();
-            const toDate = $('#filter_to').val();
-            
-            if (companyId) params.append('company_id', companyId);
-            if (locationId) params.append('location_id', locationId);
-            if (driverId) params.append('driver_id', driverId);
-            if (materialId) params.append('material_id', materialId);
-            if (fromDate) params.append('from', fromDate);
-            if (toDate) params.append('to', toDate);
-            
+        const companyId = $('#filter_company').val();
+        const locationId = $('#filter_location').val();
+        const driverId = $('#filter_driver').val();
+        const materialId = $('#filter_material').val();
+        const fromDate = $('#filter_from').val();
+        const toDate = $('#filter_to').val();
+        
+        if (companyId) params.append('company_id', companyId);
+        if (locationId) params.append('location_id', locationId);
+        if (driverId) params.append('driver_id', driverId);
+        if (materialId) params.append('material_id', materialId);
+        if (fromDate) params.append('from', fromDate);
+        if (toDate) params.append('to', toDate);
+        
             loadPurchaseSummary(params.toString());
         }
     }

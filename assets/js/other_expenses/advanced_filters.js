@@ -239,7 +239,7 @@ class AdvancedFilters {
             });
 
             // Reload AG Grid with filtered data
-            window.currentFilters = queryParams.toString();
+                window.currentFilters = queryParams.toString();
             if (typeof reloadOtherExpenses === 'function') {
                 reloadOtherExpenses();
             } else if (typeof loadOtherExpenses === 'function') {

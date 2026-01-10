@@ -38,7 +38,7 @@ $(document).ready(function () {
                         if (typeof reloadCustomers === 'function') {
                             reloadCustomers();
                         } else if (typeof loadCustomers === 'function') {
-                            loadCustomers();
+                        loadCustomers();
                         }
                         // Refresh summary stats
                         if (typeof loadSummaryStats === 'function') loadSummaryStats();

@@ -694,7 +694,7 @@ if (!isset($_SESSION['user_id'])) {
 <script src="../assets/js/other_expenses/other_expenses.js"></script>
 <script src="../assets/js/other_expenses/delete_expenses.js"></script>
 <script src="../assets/js/other_expenses/update_expenses.js"></script>
-<script src="../assets/js/other_expenses/export_functions.js?v=<?= time() ?>"></script>
+    <script src="../assets/js/other_expenses/export_functions.js?v=<?= time() ?>"></script>
 </body>
 </html>
 
