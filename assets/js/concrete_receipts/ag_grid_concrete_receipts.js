@@ -45,8 +45,6 @@ const concreteReceiptsColumnDefs = [
     {
         field: 'mixer_driver_name',
         headerName: 'شۆفێری میکسەر',
-        filter: 'agTextColumnFilter',
-        floatingFilter: true,
         sortable: true,
         resizable: true,
         minWidth: 120,
@@ -58,8 +56,6 @@ const concreteReceiptsColumnDefs = [
     {
         field: 'mixer_car_name',
         headerName: 'میکسەر',
-        filter: 'agTextColumnFilter',
-        floatingFilter: true,
         sortable: true,
         resizable: true,
         minWidth: 100,
@@ -71,8 +67,6 @@ const concreteReceiptsColumnDefs = [
     {
         field: 'pump_driver_name',
         headerName: 'شۆفێری پەمپ',
-        filter: 'agTextColumnFilter',
-        floatingFilter: true,
         sortable: true,
         resizable: true,
         minWidth: 120,
@@ -84,8 +78,6 @@ const concreteReceiptsColumnDefs = [
     {
         field: 'pump_car_name',
         headerName: 'پەمپ',
-        filter: 'agTextColumnFilter',
-        floatingFilter: true,
         sortable: true,
         resizable: true,
         minWidth: 100,
@@ -97,8 +89,6 @@ const concreteReceiptsColumnDefs = [
     {
         field: 'formula_name',
         headerName: 'فۆرمۆلا',
-        filter: 'agTextColumnFilter',
-        floatingFilter: true,
         sortable: true,
         resizable: true,
         minWidth: 120,
@@ -110,8 +100,6 @@ const concreteReceiptsColumnDefs = [
     {
         field: 'meter_amount',
         headerName: 'بڕی مەتر سێجا',
-        filter: 'agNumberColumnFilter',
-        floatingFilter: true,
         sortable: true,
         resizable: true,
         minWidth: 120,
@@ -125,8 +113,6 @@ const concreteReceiptsColumnDefs = [
     {
         field: 'created_at',
         headerName: 'بەروار',
-        filter: 'agDateColumnFilter',
-        floatingFilter: true,
         sortable: true,
         resizable: true,
         minWidth: 150,
@@ -145,8 +131,6 @@ const concreteReceiptsColumnDefs = [
     {
         field: 'receiver_name',
         headerName: 'وەرگر',
-        filter: 'agTextColumnFilter',
-        floatingFilter: true,
         sortable: true,
         resizable: true,
         minWidth: 120,
@@ -158,8 +142,6 @@ const concreteReceiptsColumnDefs = [
     {
         field: 'location',
         headerName: 'شوێن',
-        filter: 'agTextColumnFilter',
-        floatingFilter: true,
         sortable: true,
         resizable: true,
         minWidth: 150,
@@ -171,8 +153,6 @@ const concreteReceiptsColumnDefs = [
     {
         field: 'customer_name',
         headerName: 'کڕیار',
-        filter: 'agTextColumnFilter',
-        floatingFilter: true,
         sortable: true,
         resizable: true,
         minWidth: 150,
@@ -184,8 +164,6 @@ const concreteReceiptsColumnDefs = [
     {
         field: 'receipt_number',
         headerName: 'ژم.پسووڵە',
-        filter: 'agTextColumnFilter',
-        floatingFilter: true,
         sortable: true,
         resizable: true,
         minWidth: 120,
@@ -205,9 +183,9 @@ const concreteReceiptsGridOptions = {
     rowData: [],
     defaultColDef: {
         sortable: true,
-        filter: true,
+        filter: false, // فلتەرەکانی ستون ناچالاک - تەنها سێرچی گشتی بەکاردەهێنرێت
         resizable: true,
-        floatingFilter: true,
+        floatingFilter: false, // ناچالاک - بۆ ئەوەی بەکارهێنەر تەنها سێرچی گشتی بەکاربهێنێت
         minWidth: 100
     },
     // Disable AG Grid built-in pagination - use custom server-side pagination
@@ -301,14 +279,7 @@ async function loadConcreteReceiptsGrid(page = 1, pageSize = 25, search = '') {
 
         const data = await res.json();
         const loadTime = ((performance.now() - startTime) / 1000).toFixed(2);
-        
-        // Log search results
-        if (search) {
-            console.log(`Search "${search}" results: ${data.pagination?.total || 0} records found in ${loadTime}s`);
-            console.log(`Showing page ${page} of ${data.pagination?.totalPages || 1} (${data.data?.length || 0} records on this page)`);
-        } else {
-            console.log(`Data loaded in ${loadTime}s - Page ${page} of ${data.pagination?.totalPages || 1}`);
-        }
+        console.log(`Data loaded in ${loadTime}s - Page ${page} of ${data.pagination?.totalPages || 1}`);
 
         if (data.success && data.data) {
             // Cache data for client-side search within current page
@@ -317,13 +288,6 @@ async function loadConcreteReceiptsGrid(page = 1, pageSize = 25, search = '') {
             // Update pagination info
             totalRecords = data.pagination?.total || data.data.length;
             totalPages = data.pagination?.totalPages || 1;
-            
-            // Show message if search found results
-            if (search && totalRecords > 0) {
-                console.log(`✅ Search successful: Found ${totalRecords} records matching "${search}"`);
-            } else if (search && totalRecords === 0) {
-                console.log(`❌ Search found no results for "${search}"`);
-            }
             
             // Set row data
             concreteReceiptsGridApi.setGridOption('rowData', data.data);
@@ -339,12 +303,8 @@ async function loadConcreteReceiptsGrid(page = 1, pageSize = 25, search = '') {
             // Update pagination UI
             updatePaginationUI();
             
-            // Show search status if searching
-            if (search && search.trim()) {
-                showSearchStatus(search, totalRecords);
-            } else {
-                showSearchStatus('', 0);
-            }
+            // نیشاندانی پەیامی سێرچ
+            showSearchMessage(search, totalRecords);
         } else {
             concreteReceiptsGridApi.setGridOption('rowData', []);
             concreteReceiptsGridApi.showNoRowsOverlay();
@@ -352,12 +312,8 @@ async function loadConcreteReceiptsGrid(page = 1, pageSize = 25, search = '') {
             totalPages = 0;
             updatePaginationUI();
             
-            // Show search status if searching
-            if (search && search.trim()) {
-                showSearchStatus(search, 0);
-            } else {
-                showSearchStatus('', 0);
-            }
+            // نیشاندانی پەیامی سێرچ
+            showSearchMessage(search, 0);
         }
     } catch (error) {
         console.error('Error loading data:', error);
@@ -379,28 +335,6 @@ function updatePaginationInfo(text) {
     const infoEl = document.getElementById('pagination-info');
     if (infoEl) {
         infoEl.textContent = text;
-    }
-}
-
-// Show search status message
-function showSearchStatus(searchText, totalFound) {
-    if (searchText && searchText.trim()) {
-        const statusEl = document.getElementById('search-status-message');
-        if (statusEl) {
-            if (totalFound > 0) {
-                statusEl.innerHTML = `<i class="fas fa-check-circle text-success"></i> <strong>${formatNumber(totalFound)}</strong> ڕیکۆرد دۆزرایەوە بۆ "<strong>${searchText}</strong>" لە هەموو داتابەیسەکەدا`;
-                statusEl.className = 'alert alert-success alert-dismissible fade show';
-            } else {
-                statusEl.innerHTML = `<i class="fas fa-exclamation-circle text-warning"></i> هیچ ڕیکۆردێک نەدۆزرایەوە بۆ "<strong>${searchText}</strong>"`;
-                statusEl.className = 'alert alert-warning alert-dismissible fade show';
-            }
-            statusEl.style.display = 'block';
-        }
-    } else {
-        const statusEl = document.getElementById('search-status-message');
-        if (statusEl) {
-            statusEl.style.display = 'none';
-        }
     }
 }
 
@@ -471,17 +405,42 @@ function changePageSize(size) {
     }
 }
 
-// Server-side search - هەمیشە لە لاپەڕەی 1 دەست پێ دەکات
-// Search لە هەموو داتابەیسەکەدا دەگەڕێت (لە هەموو pagination ەکاندا)
+// Server-side search - سێرچ لە هەموو داتابەیسەکەدا
 function serverSearch(searchText) {
-    const trimmedSearch = searchText.trim();
-    currentSearchText = trimmedSearch;
+    currentSearchText = searchText.trim();
+    // هەمیشە لە لاپەڕەی یەکەوە دەست پێدەکات بۆ ئەوەی هەموو ئەنجامەکان ببینێت
+    loadConcreteReceiptsGrid(1, currentPageSize, currentSearchText);
+}
+
+// نیشاندانی پەیامی سێرچ
+function showSearchMessage(searchText, totalFound) {
+    let messageContainer = document.getElementById('search-result-message');
+    if (!messageContainer) {
+        messageContainer = document.createElement('div');
+        messageContainer.id = 'search-result-message';
+        messageContainer.style.cssText = 'margin-bottom: 10px; padding: 10px 15px; border-radius: 6px; font-weight: 500;';
+        const gridDiv = document.getElementById('concreteReceiptsGrid');
+        if (gridDiv) {
+            gridDiv.parentNode.insertBefore(messageContainer, gridDiv);
+        }
+    }
     
-    // کاتێک search دەکات، هەمیشە لە لاپەڕەی 1 دەست پێ دەکات
-    // بۆ ئەوەی لە هەموو pagination ەکاندا بگەڕێت
-    // Server-side search لە PHP فایلەکەدا لە هەموو داتابەیسەکەدا دەگەڕێت
-    console.log('Searching for:', trimmedSearch || '(empty - showing all)');
-    loadConcreteReceiptsGrid(1, currentPageSize, trimmedSearch);
+    if (searchText && searchText.trim()) {
+        if (totalFound > 0) {
+            messageContainer.innerHTML = `<i class="fas fa-check-circle text-success"></i> <strong>${formatNumber(totalFound)}</strong> ڕیکۆرد دۆزرایەوە بۆ "<strong>${searchText}</strong>" لە هەموو داتابەیسەکەدا`;
+            messageContainer.style.background = '#d4edda';
+            messageContainer.style.color = '#155724';
+            messageContainer.style.border = '1px solid #c3e6cb';
+        } else {
+            messageContainer.innerHTML = `<i class="fas fa-exclamation-circle"></i> هیچ ڕیکۆردێک نەدۆزرایەوە بۆ "<strong>${searchText}</strong>" لە داتابەیسەکەدا`;
+            messageContainer.style.background = '#fff3cd';
+            messageContainer.style.color = '#856404';
+            messageContainer.style.border = '1px solid #ffeeba';
+        }
+        messageContainer.style.display = 'block';
+    } else {
+        messageContainer.style.display = 'none';
+    }
 }
 
 // Debounce function
