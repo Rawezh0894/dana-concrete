@@ -47,16 +47,18 @@ try {
     $isAGGrid = isset($_GET['ag_grid']) && $_GET['ag_grid'] == '1';
     $summaryOnly = isset($_GET['summary_only']) && $_GET['summary_only'] == '1';
     
-    // For AG Grid, don't use pagination (return all data)
+    // For AG Grid, limit to reasonable amount for client-side pagination
     // For summary only, skip data query
-    if (!$isAGGrid && !$summaryOnly) {
-        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+    $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+    if ($isAGGrid) {
+        $pageSize = 500; // Reasonable limit for AG Grid client-side pagination
+        $offset = 0;
+    } else if ($summaryOnly) {
+        $pageSize = 0;
+        $offset = 0;
+    } else {
         $pageSize = isset($_GET['pageSize']) ? (int)$_GET['pageSize'] : 10;
         $offset = ($page - 1) * $pageSize;
-    } else {
-        $page = 1;
-        $pageSize = 999999; // Large number to get all records
-        $offset = 0;
     }
     
     // Get total count for pagination (only if not AG Grid and not summary only)
