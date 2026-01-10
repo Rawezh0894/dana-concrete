@@ -140,6 +140,46 @@ if ($amountMax !== null && $amountMax !== '') {
         exit;
     }
     
+    // Check if AG Grid request
+    $isAgGrid = isset($_GET['ag_grid']) && $_GET['ag_grid'] == '1';
+    
+    if ($isAgGrid) {
+        // AG Grid format - return all data with filters
+        $baseSql = "FROM sales s 
+                    LEFT JOIN customers c ON s.customer_id = c.id 
+                    LEFT JOIN concrete_formulas f ON s.formula_id = f.id
+                    LEFT JOIN recipients r ON r.name COLLATE utf8mb4_general_ci = s.recipient";
+        
+        $whereSql = '';
+        $params = $filterParams;
+        
+        if ($where) {
+            $whereSql = ' WHERE ' . implode(' AND ', $where);
+        }
+        
+        $dataSql = "SELECT s.*, 
+                           c.name AS customer_name, 
+                           f.name AS formula_name, 
+                           r.id AS recipient_id,
+                           COUNT(*) OVER (PARTITION BY s.invoice_number) AS duplicate_count
+                    $baseSql
+                    $whereSql
+                    ORDER BY s.order_date DESC";
+        
+        $dataStmt = $pdo->prepare($dataSql);
+        foreach ($params as $name => $value) {
+            $dataStmt->bindValue(':' . $name, $value);
+        }
+        $dataStmt->execute();
+        $rows = $dataStmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        echo json_encode([
+            'success' => true,
+            'data' => $rows
+        ]);
+        exit;
+    }
+    
     $sql = "SELECT s.*, c.name AS customer_name, f.name AS formula_name, r.id AS recipient_id 
             FROM sales s 
             LEFT JOIN customers c ON s.customer_id = c.id 

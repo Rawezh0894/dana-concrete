@@ -59,10 +59,10 @@ usort($recipients, function($a, $b) {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <!-- DataTables CSS -->
-    <link href="https://cdn.datatables.net/2.3.4/css/dataTables.dataTables.min.css" rel="stylesheet">
-    <!-- DataTables Buttons CSS -->
-    <link href="https://cdn.datatables.net/buttons/3.0.2/css/buttons.dataTables.min.css" rel="stylesheet">
+    <!-- AG Grid CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/styles/ag-grid.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/styles/ag-theme-alpine.css" rel="stylesheet">
+    <link href="../assets/css/sale/ag_grid_sale.css" rel="stylesheet">
     
     <style>
         .export-btn {
@@ -382,35 +382,9 @@ usort($recipients, function($a, $b) {
       <strong>تێبینی:</strong> هەر فرۆشتنێک کە ژمارەی پسووڵەکەی دووبارەیە، ڕیزەکەی بە پاشبنەمای سوور و تێکستی سپی نیشاندەدرێت.
     </div>
     
+    <!-- AG Grid Container -->
     <div class="table-responsive">
-        <table class="table table-bordered table-hover align-middle text-center" id="saleTable">
-            <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
-                <tr>
-                    <th>کڕیار</th>
-                    <th>وەرگر</th>
-                    <th>شوێن</th>
-                    <th>ژمارەی پسوڵە</th>
-                    <th>فۆرمۆلا</th>
-                    <th>بەروار</th>
-                    <th>جۆری پارەدان</th>
-                    <th>بڕ (م³)</th>
-                    <th>نرخی یەکە</th>
-                    <th>کۆی نرخ</th>
-                    <th>پارەی دراو بە دینار</th>
-                    <th>پارەی دراو بە دۆلار</th>
-                    <th>پارەی ماوە</th>
-                    <th>نرخی ١٠٠ دۆلار</th>
-                    <th>تێبینی</th>
-                    <th>داشکاندن</th>
-                    <th>کردارەکان</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td colspan="17" class="text-muted">چاوەڕوان بە...</td>
-                </tr>
-            </tbody>
-        </table>
+        <div id="salesGrid" class="ag-theme-alpine"></div>
     </div>
 </div>
 <!-- Add Sale Modal -->
@@ -675,13 +649,8 @@ usort($recipients, function($a, $b) {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="../assets/js/swalAlert.js"></script>
-<!-- DataTables JS -->
-<script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
-<!-- DataTables Buttons JS -->
-<script src="https://cdn.datatables.net/buttons/3.0.2/js/dataTables.buttons.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.html5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.print.min.js"></script>
+<!-- AG Grid JS -->
+<script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/dist/ag-grid-community.min.js"></script>
 <script src="../assets/js/comon/select2_script.js"></script>
 <script>
     // Pass permissions to JavaScript
@@ -692,7 +661,7 @@ usort($recipients, function($a, $b) {
     };
 </script>
 <script src="../assets/js/sale/add_sale.js"></script>
-<script src="../assets/js/sale/select_sale.js"></script>
+<script src="../assets/js/sale/ag_grid_sale.js"></script>
 <script src="../assets/js/sale/delete_sale.js"></script>
 <script src="../assets/js/sale/update_sale.js"></script>
 <script src="../assets/js/sale/sale.js"></script>
