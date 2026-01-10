@@ -165,9 +165,6 @@ $pump_drivers = array_filter($employees, function ($emp) {
     <!-- Filter Row -->
     <div class="row g-2 mb-3 " id="concrete-receipts-filters">
       <div class="col-md-3">
-        <input type="text" class="form-control" id="filter_search" placeholder="گەڕان لە هەموو داتاکاندا...">
-      </div>
-      <div class="col-md-2">
         <select class="form-select" id="filter_customer_id" data-placeholder="کڕیار: هەموو">
           <option value=""></option>
           <?php foreach ($customers as $c): ?>
@@ -178,7 +175,7 @@ $pump_drivers = array_filter($employees, function ($emp) {
           <?php endforeach; ?>
         </select>
       </div>
-      <div class="col-md-2">
+      <div class="col-md-3">
         <input type="text" class="form-control" id="filter_location" placeholder="شوێن...">
       </div>
       <div class="col-md-2">
@@ -189,13 +186,13 @@ $pump_drivers = array_filter($employees, function ($emp) {
           <?php endforeach; ?>
         </select>
       </div>
-      <div class="col-md-1">
+      <div class="col-md-2">
         <input type="date" class="form-control" id="filter_date_from" placeholder="لە بەرواری">
       </div>
-      <div class="col-md-1">
+      <div class="col-md-2">
         <input type="date" class="form-control" id="filter_date_to" placeholder="بۆ بەرواری">
       </div>
-      <div class="col-md-1 d-flex gap-2">
+      <div class="col-md-2 d-flex gap-2">
         <button type="button" class="btn btn-sm" id="filter_today" data-filter="today" style="background: var(--seafoam-green); color: white; font-weight: bold;">
           <i class="fas fa-calendar-day me-1"></i>ئەمڕۆ
         </button>
@@ -559,10 +556,10 @@ $pump_drivers = array_filter($employees, function ($emp) {
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="../assets/js/swalAlert.js"></script>
   <!-- AG Grid JS -->
   <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/dist/ag-grid-community.min.js"></script>
   <script src="../assets/js/comon/ag_grid_base.js"></script>
-  <script src="../assets/js/swalAlert.js"></script>
   <script src="../assets/js/comon/select2_script.js"></script>
   <script src="../assets/js/concrete_receipts/add_customer.js"></script>
   <script src="../assets/js/concrete_receipts/filter.js"></script>

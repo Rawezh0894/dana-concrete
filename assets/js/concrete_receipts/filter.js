@@ -11,10 +11,7 @@ $(document).ready(function() {
 
   function loadFilteredReceipts() {
     // Use AG Grid reload function if available, otherwise fallback to old method
-    if (typeof window.reloadConcreteReceiptsFromStart === 'function') {
-      // Reset to first page when filtering
-      window.reloadConcreteReceiptsFromStart();
-    } else if (typeof window.reloadConcreteReceipts === 'function') {
+    if (typeof window.reloadConcreteReceipts === 'function') {
       window.reloadConcreteReceipts();
     } else if (typeof loadConcreteReceiptsTable === 'function') {
       loadConcreteReceiptsTable(1, 10);
@@ -25,15 +22,6 @@ $(document).ready(function() {
   $('#filter_customer_id, #filter_formulas_id').on('change', loadFilteredReceipts);
   $('#filter_location').on('input', loadFilteredReceipts);
   $('#filter_date_from, #filter_date_to').on('change', loadFilteredReceipts);
-  
-  // Search input with debounce
-  let searchTimeout;
-  $('#filter_search').on('input', function() {
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(function() {
-      loadFilteredReceipts();
-    }, 500); // Wait 500ms after user stops typing
-  });
 
   // Today/Yesterday filter buttons
   function setDateFilter(from, to) {
@@ -70,8 +58,7 @@ $(document).ready(function() {
   // loadFilteredReceipts();
 
   $('#filter_reset').on('click', function() {
-    // Clear all filters including search
-    $('#filter_search').val('');
+    // Clear all filters
     $('#filter_customer_id').val('');
     $('#filter_location').val('');
     $('#filter_formulas_id').val('');
@@ -81,9 +68,7 @@ $(document).ready(function() {
     $('#filter_today').removeClass('active btn-primary').addClass('btn-outline-primary');
     $('#filter_yesterday').removeClass('active btn-secondary').addClass('btn-outline-secondary');
     // Reload table with reset filters
-    if (typeof window.reloadConcreteReceiptsFromStart === 'function') {
-      window.reloadConcreteReceiptsFromStart();
-    } else if (typeof window.reloadConcreteReceipts === 'function') {
+    if (typeof window.reloadConcreteReceipts === 'function') {
       window.reloadConcreteReceipts();
     } else if (typeof loadConcreteReceiptsTable === 'function') {
       loadConcreteReceiptsTable(1, 10);
@@ -149,14 +134,6 @@ $(document).ready(function() {
   window.attachConcreteReceiptsEventHandlers = attachEventHandlers;
 
   // Function to reload only the summary cards (no filters)
-  // This is now handled in ag_grid_concrete_receipts.js, but keep for backward compatibility
-  if (typeof window.reloadConcreteReceiptsSummary !== 'function') {
-    window.reloadConcreteReceiptsSummary = function() {
-      if (typeof window.reloadConcreteReceipts === 'function') {
-        window.reloadConcreteReceipts();
-      } else if (typeof loadConcreteReceiptsTable === 'function') {
-        loadConcreteReceiptsTable(1, 10);
-      }
-    };
-  }
+  // Note: This is now handled by ag_grid_concrete_receipts.js
+  // Keeping for backward compatibility - will be overridden by ag_grid_concrete_receipts.js
 });
