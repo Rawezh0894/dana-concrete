@@ -1,17 +1,12 @@
 // Summary Cards Data Loading for Add Company Page
 $(document).ready(function() {
-    loadSummaryStats();
+    loadSummaryCardsData();
     
     // Refresh summary cards when companies are updated
     $(document).on('companyAdded companyUpdated companyDeleted', function() {
-        loadSummaryStats();
+        loadSummaryCardsData();
     });
 });
-
-// Global function for summary stats
-window.loadSummaryStats = function() {
-    loadSummaryCardsData();
-};
 
 function loadSummaryCardsData() {
     $.ajax({

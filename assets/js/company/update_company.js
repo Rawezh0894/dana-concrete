@@ -18,14 +18,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('editCompanyModal'));
                 if (data.success) {
                     modal.hide();
-                    // Reload AG Grid
-                    if (typeof window.reloadCompanies === 'function') {
-                        window.reloadCompanies();
-                    } else if (typeof loadCompanies === 'function') {
-                        loadCompanies();
-                    }
-                    // Refresh summary stats
-                    if (typeof loadSummaryStats === 'function') loadSummaryStats();
+                    // Trigger event to reload grid
+                    $(document).trigger('companyUpdated');
                     swalAlert('سەرکەوتوو', 'زانیاری کۆمپانیا نوێکرایەوە!', 'success');
                     $('#editCurrencyType').val(data.currency_type);
                 } else {

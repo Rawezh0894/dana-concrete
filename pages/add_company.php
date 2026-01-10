@@ -32,6 +32,7 @@ if (!isset($_SESSION['user_id'])) {
     <link href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/styles/ag-grid.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/styles/ag-theme-alpine.css" rel="stylesheet">
     <link href="../assets/css/comon/ag_grid.css" rel="stylesheet">
+    <link href="../assets/css/company/ag_grid_company.css" rel="stylesheet">
     <link href="../assets/css/kurdish-font.css" rel="stylesheet">
 </head>
 <body dir="rtl">
@@ -79,10 +80,20 @@ if (!isset($_SESSION['user_id'])) {
         </div>
     </div>
 
-    <!-- AG Grid Container -->
-    <div class="table-responsive">
-        <div id="companyGrid" class="ag-theme-alpine"></div>
+    <!-- Quick Search -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <div class="input-group">
+                <input type="text" class="form-control" id="quickSearchInput" placeholder="گەڕانی خێرا...">
+                <button class="btn btn-outline-secondary" type="button" id="clearQuickSearch">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
     </div>
+
+    <!-- AG Grid Container -->
+    <div id="companyGrid" class="ag-theme-alpine" style="height: 600px; width: 100%;"></div>
 </div>
 <!-- Add Company Modal -->
 <div class="modal fade" id="addCompanyModal" tabindex="-1" aria-labelledby="addCompanyModalLabel" aria-hidden="true">
@@ -174,15 +185,8 @@ if (!isset($_SESSION['user_id'])) {
 <!-- AG Grid JS -->
 <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/dist/ag-grid-community.min.js"></script>
 <script src="../assets/js/comon/ag_grid_base.js"></script>
-<script>
-    // Pass permissions to JavaScript
-    window.userPermissions = {
-      canEdit: <?php echo hasPermission('update_company') ? 'true' : 'false'; ?>,
-      canDelete: <?php echo hasPermission('delete_company') ? 'true' : 'false'; ?>
-    };
-</script>
-<script src="../assets/js/company/add_company.js"></script>
 <script src="../assets/js/company/ag_grid_company.js"></script>
+<script src="../assets/js/company/add_company.js"></script>
 <script src="../assets/js/company/update_company.js"></script>
 <script src="../assets/js/company/delete_company.js"></script>
 <script src="../assets/js/add_company/summary_cards.js"></script>

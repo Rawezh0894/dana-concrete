@@ -21,14 +21,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (data.success) {
                     addCompanyForm.reset();
                     modal.hide();
-                    // Reload AG Grid
-                    if (typeof window.reloadCompanies === 'function') {
-                        window.reloadCompanies();
-                    } else if (typeof loadCompanies === 'function') {
-                        loadCompanies();
-                    }
-                    // Refresh summary stats
-                    if (typeof loadSummaryStats === 'function') loadSummaryStats();
+                    // Trigger event to reload grid
+                    $(document).trigger('companyAdded');
                     swalAlert('سەرکەوتوو', 'کۆمپانیا بەسەرکەوتوویی زیادکرا!', 'success');
                     $('#editCurrencyType').val(data.currency_type);
                 } else {

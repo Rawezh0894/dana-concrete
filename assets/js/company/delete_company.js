@@ -14,14 +14,8 @@ $(function() {
             if (result.isConfirmed) {
                 $.post('../process/company/delete_company.php', {id: id}, function(response) {
                     if (response.success) {
-                        // Reload AG Grid
-                        if (typeof window.reloadCompanies === 'function') {
-                            window.reloadCompanies();
-                        } else if (typeof window.loadCompanies === 'function') {
-                            window.loadCompanies();
-                        }
-                        // Refresh summary stats
-                        if (typeof loadSummaryStats === 'function') loadSummaryStats();
+                        // Trigger event to reload grid
+                        $(document).trigger('companyDeleted');
                         swalAlert('سەرکەوتوو', 'کۆمپانیا سڕایەوە!', 'success');
                     } else {
                         swalAlert('هەڵە', response.message || 'هەڵەیەک هەیە', 'error');
