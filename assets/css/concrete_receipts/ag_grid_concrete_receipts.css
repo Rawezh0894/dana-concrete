@@ -1,0 +1,11 @@
+/* AG Grid specific styles for concrete receipts */
+#concreteReceiptsGrid {
+    height: 600px;
+    width: 100%;
+}
+
+/* Duplicate warning icon styling */
+.ag-cell .duplicate-warning {
+    color: #ffc107;
+    margin-left: 5px;
+}
