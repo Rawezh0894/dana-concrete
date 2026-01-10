@@ -10,8 +10,15 @@ $(document).ready(function() {
   }
 
   function loadFilteredReceipts() {
-    // Reset to first page when filtering
-    loadConcreteReceiptsTable(1, 10);
+    // Reset to first page when filtering and reload grid
+    if (window.concreteReceiptsGridApi) {
+      window.concreteReceiptsGridApi.paginationGoToPage(0);
+      if (typeof loadConcreteReceiptsGrid === 'function') {
+        loadConcreteReceiptsGrid();
+      } else if (typeof window.reloadConcreteReceipts === 'function') {
+        window.reloadConcreteReceipts();
+      }
+    }
   }
 
   // Bind filter events
@@ -63,8 +70,15 @@ $(document).ready(function() {
     // Remove highlights
     $('#filter_today').removeClass('active btn-primary').addClass('btn-outline-primary');
     $('#filter_yesterday').removeClass('active btn-secondary').addClass('btn-outline-secondary');
-    // Reload table with reset filters
-    loadConcreteReceiptsTable(1, 10);
+    // Reload grid with reset filters
+    if (window.concreteReceiptsGridApi) {
+      window.concreteReceiptsGridApi.paginationGoToPage(0);
+      if (typeof loadConcreteReceiptsGrid === 'function') {
+        loadConcreteReceiptsGrid();
+      } else if (typeof window.reloadConcreteReceipts === 'function') {
+        window.reloadConcreteReceipts();
+      }
+    }
   });
 
   function updateSummaryCards(summary) {
@@ -127,6 +141,12 @@ $(document).ready(function() {
 
   // Function to reload only the summary cards (no filters)
   window.reloadConcreteReceiptsSummary = function() {
-    loadConcreteReceiptsTable(1, 10);
+    if (window.concreteReceiptsGridApi) {
+      if (typeof loadConcreteReceiptsGrid === 'function') {
+        loadConcreteReceiptsGrid();
+      } else if (typeof window.reloadConcreteReceipts === 'function') {
+        window.reloadConcreteReceipts();
+      }
+    }
   };
 });

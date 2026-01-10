@@ -89,6 +89,11 @@ $pump_drivers = array_filter($employees, function ($emp) {
   <link href="../assets/css/comon/select2_design.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <link href="../assets/css/concrete_receipts_custom.css" rel="stylesheet">
+  <!-- AG Grid CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/styles/ag-grid.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/styles/ag-theme-alpine.css" rel="stylesheet">
+  <link href="../assets/css/comon/ag_grid.css" rel="stylesheet">
+  <link href="../assets/css/concrete_receipts/ag_grid_concrete_receipts.css" rel="stylesheet">
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -200,30 +205,7 @@ $pump_drivers = array_filter($employees, function ($emp) {
       </div>
     </div>
     <div class="table-responsive">
-      <table class="table table-bordered table-hover align-middle text-center" id="concreteReceiptsTable">
-        <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
-          <tr>
-            <th style="width:1px;">#</th>
-            <th>ژم.پسووڵە</th>
-            <th>کڕیار</th>
-            <th>شوێن</th>
-            <th>وەرگر</th>
-            <th>بەروار</th>
-            <th>بڕی مەتر سێجا</th>
-            <th>فۆرمۆلا</th>
-
-            <th>پەمپ</th>
-            <th>شۆفێری پەمپ</th>
-            <th>میکسەر</th>
-            <th>شۆفێری میکسەر</th>
-            
-            <th>کردارەکان</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Receipts will be loaded here by JS -->
-        </tbody>
-      </table>
+      <div id="concreteReceiptsGrid" class="ag-grid-container ag-theme-alpine"></div>
     </div>
   </div>
   <!-- Add Concrete Receipt Modal -->
@@ -574,13 +556,15 @@ $pump_drivers = array_filter($employees, function ($emp) {
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- AG Grid JS -->
+  <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/dist/ag-grid-community.min.js"></script>
+  <script src="../assets/js/comon/ag_grid_base.js"></script>
   <script src="../assets/js/swalAlert.js"></script>
-  <script src="../assets/js/comon/table-controler.js"></script>
   <script src="../assets/js/comon/select2_script.js"></script>
   <script src="../assets/js/concrete_receipts/add_customer.js"></script>
   <script src="../assets/js/concrete_receipts/filter.js"></script>
   <script src="../assets/js/concrete_receipts/add_concerete_receipts.js"></script>
-  <script src="../assets/js/concrete_receipts/select_concrete_receipts.js"></script>
+  <script src="../assets/js/concrete_receipts/ag_grid_concrete_receipts.js"></script>
   <script src="../assets/js/concrete_receipts/delete_concrete_receipts.js"></script>
   <script src="../assets/js/concrete_receipts/update_concrete_receipts.js"></script>
   <script src="../assets/js/concrete_receipts/concrete_receipts_custom.js"></script>

@@ -1,0 +1,26 @@
+/* AG Grid Custom Styling for Concrete Receipts Table */
+/* 
+ * تێبینی: فایلی گشتی ag_grid.css پێویستە لە HTML دا زیاد بکرێت:
+ * <link href="../assets/css/comon/ag_grid.css" rel="stylesheet">
+ */
+
+@import '../comon/ag_grid.css';
+
+/* Main Grid Container - تایبەت بە Concrete Receipts */
+#concreteReceiptsGrid {
+    width: 100%;
+    height: 600px;
+}
+
+/* Responsive Design - تایبەت بە Concrete Receipts */
+@media (max-width: 768px) {
+    #concreteReceiptsGrid {
+        height: 400px;
+    }
+}
+
+@media (max-width: 576px) {
+    #concreteReceiptsGrid {
+        height: 300px;
+    }
+}
