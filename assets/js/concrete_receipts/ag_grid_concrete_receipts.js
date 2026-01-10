@@ -519,18 +519,22 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load initial data
     loadConcreteReceiptsGrid(1, 25, '');
 
-    // Quick search functionality - Server-side search
+    // Quick search functionality - Server-side search (searches across ALL pages)
     const quickSearchInput = document.getElementById('quickSearchInput');
     const clearQuickSearchBtn = document.getElementById('clearQuickSearch');
     
     if (quickSearchInput) {
+        // Server-side search - searches in entire database, not just current page
         quickSearchInput.addEventListener('input', function() {
-            debouncedServerSearch(this.value);
+            const searchValue = this.value.trim();
+            // Use debounced search to avoid too many requests
+            debouncedServerSearch(searchValue);
         });
 
         if (clearQuickSearchBtn) {
             clearQuickSearchBtn.addEventListener('click', function() {
                 quickSearchInput.value = '';
+                // Clear search and reload from page 1
                 serverSearch('');
             });
         }
@@ -538,7 +542,8 @@ document.addEventListener('DOMContentLoaded', function() {
         quickSearchInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                serverSearch(this.value);
+                // Immediate search on Enter key
+                serverSearch(this.value.trim());
             }
         });
     }
