@@ -4,21 +4,8 @@
 
 let customerSalesGridApi;
 
-// Format functions - بەکارهێنانی لە فایلی گشتی
-const agFormatNumber = window.AGGridFormatters?.formatNumber || function(n) {
-    if (n === null || n === undefined || n === '') return '';
-    return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-};
-
-const agFormatUSD = window.AGGridFormatters?.formatUSD || function(n) {
-    if (n === null || n === undefined || n === '' || isNaN(n)) return '-';
-    return agFormatNumber(Number(n).toFixed(2)) + ' $';
-};
-
-const agFormatIQD = window.AGGridFormatters?.formatIQD || function(n) {
-    if (n === null || n === undefined || n === '' || isNaN(n)) return '-';
-    return agFormatNumber(Number(n).toFixed(0)) + ' د.ع';
-};
+// Format functions - بەکارهێنانی لە فایلی گشتی (بەبێ duplicate declaration)
+// بەکارهێنانی window.AGGridFormatters بەبێ const declaration
 
 // Column Definitions - ترتیب ستونەکان بە شێوەی دروست (لە چەپ بۆ ڕاست - LTR)
 const customerSalesColumnDefs = [
@@ -50,7 +37,7 @@ const customerSalesColumnDefs = [
         minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl', color: '#28a745' },
         valueFormatter: function(params) {
-            return agFormatUSD(params.value);
+            return window.AGGridFormatters?.formatUSD(params.value) || '-';
         },
         type: 'numericColumn'
     },
@@ -65,7 +52,7 @@ const customerSalesColumnDefs = [
         cellStyle: { textAlign: 'right', direction: 'rtl' },
         valueFormatter: function(params) {
             if (params.value === null || params.value === undefined || params.value === '') return '-';
-            return agFormatNumber(params.value);
+            return window.AGGridFormatters?.formatNumber(params.value) || params.value;
         },
         type: 'numericColumn'
     },
@@ -79,7 +66,7 @@ const customerSalesColumnDefs = [
         minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl', fontWeight: 'bold', color: '#dc3545' },
         valueFormatter: function(params) {
-            return agFormatUSD(params.value);
+            return window.AGGridFormatters?.formatUSD(params.value) || '-';
         },
         type: 'numericColumn'
     },
@@ -93,7 +80,7 @@ const customerSalesColumnDefs = [
         minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl' },
         valueFormatter: function(params) {
-            return agFormatUSD(params.value);
+            return window.AGGridFormatters?.formatUSD(params.value) || '-';
         },
         type: 'numericColumn'
     },
@@ -107,7 +94,7 @@ const customerSalesColumnDefs = [
         minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl' },
         valueFormatter: function(params) {
-            return agFormatIQD(params.value);
+            return window.AGGridFormatters?.formatIQD(params.value) || '-';
         },
         type: 'numericColumn'
     },
@@ -121,7 +108,7 @@ const customerSalesColumnDefs = [
         minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl', fontWeight: 'bold' },
         valueFormatter: function(params) {
-            return agFormatUSD(params.value);
+            return window.AGGridFormatters?.formatUSD(params.value) || '-';
         },
         type: 'numericColumn'
     },
@@ -135,7 +122,7 @@ const customerSalesColumnDefs = [
         minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl' },
         valueFormatter: function(params) {
-            return agFormatUSD(params.value);
+            return window.AGGridFormatters?.formatUSD(params.value) || '-';
         },
         type: 'numericColumn'
     },
@@ -150,7 +137,7 @@ const customerSalesColumnDefs = [
         cellStyle: { textAlign: 'right', direction: 'rtl' },
         valueFormatter: function(params) {
             if (params.value === null || params.value === undefined || params.value === '') return '-';
-            return agFormatNumber(params.value) + ' m³';
+            return (window.AGGridFormatters?.formatNumber(params.value) || params.value) + ' m³';
         },
         type: 'numericColumn'
     },
