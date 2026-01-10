@@ -18,64 +18,194 @@ function formatIQD(n) {
     return formatNumber(Number(n).toFixed(0)) + ' د.ع';
 }
 
-// Column Definitions - ترتیب ستونەکان بە شێوەی دروست (لە ڕاست بۆ چەپ - RTL)
-// Note: In RTL, array order is reversed - first item appears on the right
+// Column Definitions - ترتیب ستونەکان بە شێوەی دروست (لە چەپ بۆ ڕاست - LTR)
 const columnDefs = [
     {
-        field: 'actions',
-        headerName: 'کردارەکان',
-        sortable: false,
-        filter: false,
+        field: 'discount',
+        headerName: 'داشکاندن',
+        filter: 'agNumberColumnFilter',
+        floatingFilter: true,
+        sortable: true,
+        resizable: true,
+        width: 120,
+        minWidth: 100,
+        maxWidth: 500,
+        cellStyle: { textAlign: 'left', direction: 'ltr', color: '#28a745', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+        valueFormatter: function(params) {
+            return formatUSD(params.value);
+        },
+        type: 'numericColumn'
+    },
+    {
+        field: 'notes',
+        headerName: 'تێبینی',
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+        sortable: true,
+        resizable: true,
+        width: 200,
+        minWidth: 100,
+        maxWidth: 600,
+        cellStyle: { textAlign: 'left', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+        cellRenderer: function(params) {
+            if (!params.value) return '-';
+            const displayText = params.value.length > 40 ? params.value.substring(0, 40) + '...' : params.value;
+            return `<span title="${params.value}">${displayText}</span>`;
+        },
+        tooltipValueGetter: function(params) {
+            return params.value || '';
+        }
+    },
+    {
+        field: 'dolar_rate',
+        headerName: 'نرخی ١٠٠ دۆلار',
+        filter: 'agNumberColumnFilter',
+        floatingFilter: true,
+        sortable: true,
+        resizable: true,
+        width: 130,
+        minWidth: 100,
+        maxWidth: 300,
+        cellStyle: { textAlign: 'left', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+        valueFormatter: function(params) {
+            if (params.value === null || params.value === undefined || params.value === '') return '-';
+            return formatNumber(params.value);
+        },
+        type: 'numericColumn'
+    },
+    {
+        field: 'remaining_amount',
+        headerName: 'پارەی ماوە',
+        filter: 'agNumberColumnFilter',
+        floatingFilter: true,
+        sortable: true,
+        resizable: true,
+        width: 120,
+        minWidth: 100,
+        maxWidth: 300,
+        cellStyle: { textAlign: 'left', direction: 'ltr', fontWeight: 'bold', color: '#dc3545', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+        valueFormatter: function(params) {
+            return formatUSD(params.value);
+        },
+        type: 'numericColumn'
+    },
+    {
+        field: 'amount_paid_usd',
+        headerName: 'پارەی دراو بە دۆلار',
+        filter: 'agNumberColumnFilter',
+        floatingFilter: true,
+        sortable: true,
+        resizable: true,
+        width: 150,
+        minWidth: 100,
+        maxWidth: 400,
+        cellStyle: { textAlign: 'left', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+        valueFormatter: function(params) {
+            return formatUSD(params.value);
+        },
+        type: 'numericColumn'
+    },
+    {
+        field: 'amount_paid_iq',
+        headerName: 'پارەی دراو بە دینار',
+        filter: 'agNumberColumnFilter',
+        floatingFilter: true,
+        sortable: true,
+        resizable: true,
+        width: 150,
+        minWidth: 100,
+        maxWidth: 400,
+        cellStyle: { textAlign: 'left', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+        valueFormatter: function(params) {
+            return formatIQD(params.value);
+        },
+        type: 'numericColumn'
+    },
+    {
+        field: 'total_price',
+        headerName: 'کۆی نرخ',
+        filter: 'agNumberColumnFilter',
+        floatingFilter: true,
+        sortable: true,
+        resizable: true,
+        width: 120,
+        minWidth: 100,
+        maxWidth: 300,
+        cellStyle: { textAlign: 'left', direction: 'ltr', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+        valueFormatter: function(params) {
+            return formatUSD(params.value);
+        },
+        type: 'numericColumn'
+    },
+    {
+        field: 'price_per_unit',
+        headerName: 'نرخی یەکە',
+        filter: 'agNumberColumnFilter',
+        floatingFilter: true,
+        sortable: true,
+        resizable: true,
+        width: 120,
+        minWidth: 100,
+        maxWidth: 300,
+        cellStyle: { textAlign: 'left', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+        valueFormatter: function(params) {
+            return formatUSD(params.value);
+        },
+        type: 'numericColumn'
+    },
+    {
+        field: 'quantity',
+        headerName: 'بڕ (م³)',
+        filter: 'agNumberColumnFilter',
+        floatingFilter: true,
+        sortable: true,
+        resizable: true,
+        width: 110,
+        minWidth: 100,
+        maxWidth: 200,
+        cellStyle: { textAlign: 'left', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+        valueFormatter: function(params) {
+            if (params.value === null || params.value === undefined || params.value === '') return '-';
+            return `M³ ${formatNumber(params.value)}`;
+        },
+        type: 'numericColumn'
+    },
+    {
+        field: 'payment_type',
+        headerName: 'جۆری پارەدان',
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+        sortable: true,
         resizable: true,
         width: 120,
         minWidth: 100,
         maxWidth: 200,
-        cellStyle: { textAlign: 'center' },
+        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
         cellRenderer: function(params) {
-            if (!params.data) return '-';
-            const editBtn = window.userPermissions && window.userPermissions.canEdit
-                ? `<button class='btn btn-warning btn-sm edit-sale' data-id='${params.data.id}' title='نوێکردنەوە' style='margin: 2px;'><i class='fa fa-edit'></i></button>`
-                : '';
-            const deleteBtn = window.userPermissions && window.userPermissions.canDelete
-                ? `<button class='btn btn-danger btn-sm delete-sale' data-id='${params.data.id}' title='سڕینەوە' style='margin: 2px;'><i class='fa fa-trash'></i></button>`
-                : '';
-            return `${editBtn} ${deleteBtn}`.trim() || '-';
-        },
-        pinned: 'right'
-    },
-    {
-        field: 'customer_name',
-        headerName: 'کڕیار',
-        filter: 'agTextColumnFilter',
-        floatingFilter: true,
-        sortable: true,
-        resizable: true,
-        width: 150,
-        minWidth: 100,
-        maxWidth: 500,
-        cellStyle: { textAlign: 'left', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-        tooltipValueGetter: function(params) {
-            return params.value || '';
+            if (!params.value) return '-';
+            const color = params.value === 'نەقد' ? '#28a745' : '#ffc107';
+            return `<span style="background: ${color}; color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold; display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${params.value}</span>`;
         }
     },
     {
-        field: 'recipient',
-        headerName: 'وەرگر',
-        filter: 'agTextColumnFilter',
+        field: 'order_date',
+        headerName: 'بەروار',
+        filter: 'agDateColumnFilter',
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        width: 150,
+        width: 120,
         minWidth: 100,
-        maxWidth: 500,
-        cellStyle: { textAlign: 'left', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-        tooltipValueGetter: function(params) {
-            return params.value || '';
+        maxWidth: 200,
+        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+        valueFormatter: function(params) {
+            if (!params.value) return '-';
+            return params.value;
         }
     },
     {
-        field: 'location',
-        headerName: 'شوێن',
+        field: 'formula_name',
+        headerName: 'فۆرمۆلا',
         filter: 'agTextColumnFilter',
         floatingFilter: true,
         sortable: true,
@@ -110,8 +240,8 @@ const columnDefs = [
         }
     },
     {
-        field: 'formula_name',
-        headerName: 'فۆرمۆلا',
+        field: 'location',
+        headerName: 'شوێن',
         filter: 'agTextColumnFilter',
         floatingFilter: true,
         sortable: true,
@@ -125,187 +255,56 @@ const columnDefs = [
         }
     },
     {
-        field: 'order_date',
-        headerName: 'بەروار',
-        filter: 'agDateColumnFilter',
-        floatingFilter: true,
-        sortable: true,
-        resizable: true,
-        width: 120,
-        minWidth: 100,
-        maxWidth: 200,
-        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-        valueFormatter: function(params) {
-            if (!params.value) return '-';
-            return params.value;
-        }
-    },
-    {
-        field: 'payment_type',
-        headerName: 'جۆری پارەدان',
+        field: 'recipient',
+        headerName: 'وەرگر',
         filter: 'agTextColumnFilter',
-        floatingFilter: true,
-        sortable: true,
-        resizable: true,
-        width: 120,
-        minWidth: 100,
-        maxWidth: 200,
-        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-        cellRenderer: function(params) {
-            if (!params.value) return '-';
-            const color = params.value === 'نەقد' ? '#28a745' : '#ffc107';
-            return `<span style="background: ${color}; color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold; display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${params.value}</span>`;
-        }
-    },
-    {
-        field: 'quantity',
-        headerName: 'بڕ (م³)',
-        filter: 'agNumberColumnFilter',
-        floatingFilter: true,
-        sortable: true,
-        resizable: true,
-        width: 110,
-        minWidth: 100,
-        maxWidth: 200,
-        cellStyle: { textAlign: 'left', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-        valueFormatter: function(params) {
-            if (params.value === null || params.value === undefined || params.value === '') return '-';
-            return `M³ ${formatNumber(params.value)}`;
-        },
-        type: 'numericColumn'
-    },
-    {
-        field: 'price_per_unit',
-        headerName: 'نرخی یەکە',
-        filter: 'agNumberColumnFilter',
-        floatingFilter: true,
-        sortable: true,
-        resizable: true,
-        width: 120,
-        minWidth: 100,
-        maxWidth: 300,
-        cellStyle: { textAlign: 'left', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-        valueFormatter: function(params) {
-            return formatUSD(params.value);
-        },
-        type: 'numericColumn'
-    },
-    {
-        field: 'total_price',
-        headerName: 'کۆی نرخ',
-        filter: 'agNumberColumnFilter',
-        floatingFilter: true,
-        sortable: true,
-        resizable: true,
-        width: 120,
-        minWidth: 100,
-        maxWidth: 300,
-        cellStyle: { textAlign: 'left', direction: 'ltr', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-        valueFormatter: function(params) {
-            return formatUSD(params.value);
-        },
-        type: 'numericColumn'
-    },
-    {
-        field: 'amount_paid_iq',
-        headerName: 'پارەی دراو بە دینار',
-        filter: 'agNumberColumnFilter',
         floatingFilter: true,
         sortable: true,
         resizable: true,
         width: 150,
         minWidth: 100,
-        maxWidth: 400,
+        maxWidth: 500,
         cellStyle: { textAlign: 'left', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-        valueFormatter: function(params) {
-            return formatIQD(params.value);
-        },
-        type: 'numericColumn'
-    },
-    {
-        field: 'amount_paid_usd',
-        headerName: 'پارەی دراو بە دۆلار',
-        filter: 'agNumberColumnFilter',
-        floatingFilter: true,
-        sortable: true,
-        resizable: true,
-        width: 150,
-        minWidth: 100,
-        maxWidth: 400,
-        cellStyle: { textAlign: 'left', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-        valueFormatter: function(params) {
-            return formatUSD(params.value);
-        },
-        type: 'numericColumn'
-    },
-    {
-        field: 'remaining_amount',
-        headerName: 'پارەی ماوە',
-        filter: 'agNumberColumnFilter',
-        floatingFilter: true,
-        sortable: true,
-        resizable: true,
-        width: 120,
-        minWidth: 100,
-        maxWidth: 300,
-        cellStyle: { textAlign: 'left', direction: 'ltr', fontWeight: 'bold', color: '#dc3545', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-        valueFormatter: function(params) {
-            return formatUSD(params.value);
-        },
-        type: 'numericColumn'
-    },
-    {
-        field: 'dolar_rate',
-        headerName: 'نرخی ١٠٠ دۆلار',
-        filter: 'agNumberColumnFilter',
-        floatingFilter: true,
-        sortable: true,
-        resizable: true,
-        width: 130,
-        minWidth: 100,
-        maxWidth: 300,
-        cellStyle: { textAlign: 'left', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-        valueFormatter: function(params) {
-            if (params.value === null || params.value === undefined || params.value === '') return '-';
-            return formatNumber(params.value);
-        },
-        type: 'numericColumn'
-    },
-    {
-        field: 'notes',
-        headerName: 'تێبینی',
-        filter: 'agTextColumnFilter',
-        floatingFilter: true,
-        sortable: true,
-        resizable: true,
-        width: 200,
-        minWidth: 100,
-        maxWidth: 600,
-        cellStyle: { textAlign: 'left', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-        cellRenderer: function(params) {
-            if (!params.value) return '-';
-            const displayText = params.value.length > 40 ? params.value.substring(0, 40) + '...' : params.value;
-            return `<span title="${params.value}">${displayText}</span>`;
-        },
         tooltipValueGetter: function(params) {
             return params.value || '';
         }
     },
     {
-        field: 'discount',
-        headerName: 'داشکاندن',
-        filter: 'agNumberColumnFilter',
+        field: 'customer_name',
+        headerName: 'کڕیار',
+        filter: 'agTextColumnFilter',
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        width: 120,
+        width: 150,
         minWidth: 100,
         maxWidth: 500,
-        cellStyle: { textAlign: 'left', direction: 'ltr', color: '#28a745', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-        valueFormatter: function(params) {
-            return formatUSD(params.value);
+        cellStyle: { textAlign: 'left', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+        tooltipValueGetter: function(params) {
+            return params.value || '';
+        }
+    },
+    {
+        field: 'actions',
+        headerName: 'کردارەکان',
+        sortable: false,
+        filter: false,
+        resizable: true,
+        width: 120,
+        minWidth: 100,
+        maxWidth: 200,
+        cellStyle: { textAlign: 'center' },
+        cellRenderer: function(params) {
+            if (!params.data) return '-';
+            const editBtn = window.userPermissions && window.userPermissions.canEdit
+                ? `<button class='btn btn-warning btn-sm edit-sale' data-id='${params.data.id}' title='نوێکردنەوە' style='margin: 2px;'><i class='fa fa-edit'></i></button>`
+                : '';
+            const deleteBtn = window.userPermissions && window.userPermissions.canDelete
+                ? `<button class='btn btn-danger btn-sm delete-sale' data-id='${params.data.id}' title='سڕینەوە' style='margin: 2px;'><i class='fa fa-trash'></i></button>`
+                : '';
+            return `${editBtn} ${deleteBtn}`.trim() || '-';
         },
-        type: 'numericColumn'
+        pinned: 'right'
     }
 ];
 
