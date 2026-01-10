@@ -23,18 +23,19 @@ try {
     $params = [];
     
     // Server-side global search (like SAP/Odoo/Oracle)
+    // سێرچ لە هەموو ڕیکۆردەکاندا - case insensitive
     if (!empty($_GET['search'])) {
-        $searchTerm = '%' . $_GET['search'] . '%';
+        $searchTerm = '%' . trim($_GET['search']) . '%';
         $where[] = '(
-            cr.receipt_number LIKE :search_receipt OR
-            c.name LIKE :search_customer OR
-            cr.location LIKE :search_location OR
-            cr.receiver_name LIKE :search_receiver OR
-            f.name LIKE :search_formula OR
-            pump_car.name LIKE :search_pump_car OR
-            pump_driver.name LIKE :search_pump_driver OR
-            mixer_car.name LIKE :search_mixer_car OR
-            mixer_driver.name LIKE :search_mixer_driver
+            LOWER(cr.receipt_number) LIKE LOWER(:search_receipt) OR
+            LOWER(COALESCE(c.name, \'\')) LIKE LOWER(:search_customer) OR
+            LOWER(COALESCE(cr.location, \'\')) LIKE LOWER(:search_location) OR
+            LOWER(COALESCE(cr.receiver_name, \'\')) LIKE LOWER(:search_receiver) OR
+            LOWER(COALESCE(f.name, \'\')) LIKE LOWER(:search_formula) OR
+            LOWER(COALESCE(pump_car.name, \'\')) LIKE LOWER(:search_pump_car) OR
+            LOWER(COALESCE(pump_driver.name, \'\')) LIKE LOWER(:search_pump_driver) OR
+            LOWER(COALESCE(mixer_car.name, \'\')) LIKE LOWER(:search_mixer_car) OR
+            LOWER(COALESCE(mixer_driver.name, \'\')) LIKE LOWER(:search_mixer_driver)
         )';
         $params[':search_receipt'] = $searchTerm;
         $params[':search_customer'] = $searchTerm;
@@ -125,12 +126,18 @@ try {
         $receipt['is_duplicate'] = in_array($receipt['receipt_number'], $duplicate_numbers);
     }
 
-    // Summary queries
+    // Summary queries - پێویستە هەمان JOIN ەکان هەبن بۆ سێرچ
     $summary_sql = '
         SELECT COUNT(*) as total_receipts,
                SUM(cr.meter_amount) as total_meter,
                COUNT(DISTINCT cr.customer_id) as total_customers
         FROM concrete_receipts cr
+        LEFT JOIN customers c ON cr.customer_id = c.id
+        LEFT JOIN concrete_formulas f ON cr.formulas_id = f.id
+        LEFT JOIN cars pump_car ON cr.pump_car_id = pump_car.id
+        LEFT JOIN employees pump_driver ON cr.pump_driver_id = pump_driver.id
+        LEFT JOIN cars mixer_car ON cr.mixer_car_id = mixer_car.id
+        LEFT JOIN employees mixer_driver ON cr.mixer_driver_id = mixer_driver.id
         ' . $whereSql . '
     ';
     $summary_stmt = $pdo->prepare($summary_sql);
