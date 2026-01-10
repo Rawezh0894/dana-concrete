@@ -260,11 +260,16 @@ async function loadConcreteReceiptsGrid() {
         }
     });
 
-    // Load all records to ensure all data is available for search
-    // Using a large number to get all filtered records for client-side search
-    // If database is very large, consider implementing server-side search instead
+    // Load 1000 records for performance
+    // Quick search will use server-side search to find records not in the first 1000
     queryParams.append('page', 1);
-    queryParams.append('pageSize', 10000); // Load up to 10000 records for comprehensive search
+    queryParams.append('pageSize', 1000);
+    
+    // Add quick search parameter if exists
+    const quickSearchText = document.getElementById('quickSearchInput')?.value?.trim() || '';
+    if (quickSearchText) {
+        queryParams.append('search', quickSearchText);
+    }
 
     // Show loading with better visual feedback
     concreteReceiptsGridApi.showLoadingOverlay();
@@ -399,28 +404,32 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load initial data
     loadConcreteReceiptsGrid();
 
-    // Quick search functionality
+    // Quick search functionality - Server-side search
     const quickSearchInput = document.getElementById('quickSearchInput');
     const clearQuickSearchBtn = document.getElementById('clearQuickSearch');
     
     if (quickSearchInput) {
-        // Debounced quick search
+        // Debounced server-side search
         let searchTimeout = null;
         quickSearchInput.addEventListener('input', function() {
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(function() {
+                // Reload grid with search parameter
                 if (concreteReceiptsGridApi) {
-                    concreteReceiptsGridApi.setGridOption('quickFilterText', quickSearchInput.value);
+                    concreteReceiptsGridApi.paginationGoToPage(0);
+                    loadConcreteReceiptsGrid();
                 }
-            }, 300);
+            }, 500); // 500ms debounce for server-side search
         });
 
         // Clear quick search
         if (clearQuickSearchBtn) {
             clearQuickSearchBtn.addEventListener('click', function() {
                 quickSearchInput.value = '';
+                // Reload grid without search
                 if (concreteReceiptsGridApi) {
-                    concreteReceiptsGridApi.setGridOption('quickFilterText', '');
+                    concreteReceiptsGridApi.paginationGoToPage(0);
+                    loadConcreteReceiptsGrid();
                 }
             });
         }
@@ -429,8 +438,11 @@ document.addEventListener('DOMContentLoaded', function() {
         quickSearchInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
+                clearTimeout(searchTimeout);
+                // Reload grid with search parameter
                 if (concreteReceiptsGridApi) {
-                    concreteReceiptsGridApi.setGridOption('quickFilterText', quickSearchInput.value);
+                    concreteReceiptsGridApi.paginationGoToPage(0);
+                    loadConcreteReceiptsGrid();
                 }
             }
         });

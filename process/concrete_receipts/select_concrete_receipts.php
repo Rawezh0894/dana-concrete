@@ -41,6 +41,22 @@ try {
         $where[] = 'DATE(cr.created_at) <= :date_to';
         $params[':date_to'] = $_GET['date_to'];
     }
+    
+    // Quick search - search across multiple fields
+    if (!empty($_GET['search'])) {
+        $searchTerm = $_GET['search'];
+        $where[] = '(cr.receipt_number LIKE :search OR 
+                     c.name LIKE :search OR 
+                     cr.location LIKE :search OR 
+                     cr.receiver_name LIKE :search OR 
+                     f.name LIKE :search OR
+                     pump_car.name LIKE :search OR
+                     pump_driver.name LIKE :search OR
+                     mixer_car.name LIKE :search OR
+                     mixer_driver.name LIKE :search)';
+        $params[':search'] = '%' . $searchTerm . '%';
+    }
+    
     $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
     
     // Pagination parameters
