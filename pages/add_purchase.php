@@ -38,6 +38,11 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
    
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.rtl.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- AG Grid CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/styles/ag-grid.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/styles/ag-theme-alpine.css" rel="stylesheet">
+    <link href="../assets/css/comon/ag_grid.css" rel="stylesheet">
+    <link href="../assets/css/purchase/ag_grid_purchase.css" rel="stylesheet">
     
     <style>
         /* Filter styling */
@@ -417,37 +422,9 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
         </div>
       </div>
     </div>
+    <!-- AG Grid Container -->
     <div class="table-responsive">
-        <table class="table table-bordered table-hover align-middle text-center" id="purchaseTable">
-            <thead style="background: var(--kelly-green); color: var(--seafoam-green);">
-                <tr>
-                    <th>#</th>
-                    <th>کۆمپانیا</th>
-                    <th>شوێن</th>
-                    <th>شۆفێر</th>
-                    <th>ژمارەی پسوڵە</th>
-                    <th>مەواد</th>
-                    <th>بەروار</th>
-                    <th>جۆری پارەدان</th>
-                    <th>جۆری دراو</th>
-                    <th>کیلۆگرام</th>
-                    <th>نرخی یەک کیلۆ بە دۆلار</th>
-                    <th>نرخی یەک کیلۆ بە دینار</th>
-                    <th>نرخ</th>
-                    <th>بڕی پارە بە دینار</th>
-                    <th>نرخی 100 دۆلار بە دینار</th>
-                    <th>پارەی دراو بە دۆلار</th>
-                    <th>پارەی دراو بە دینار</th>
-                    <th>پارەی ماوە بە دۆلار</th>
-                    <th>پارەی ماوە بە دینار</th>
-                    <th>چاو/سایلۆ</th>
-                    <th>کردارەکان</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Purchases will be loaded here by JS -->
-            </tbody>
-        </table>
+        <div id="purchaseGrid" class="ag-grid-container ag-theme-alpine"></div>
     </div>
 </div>
 <!-- Add Purchase Modal -->
@@ -919,6 +896,9 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="../assets/js/swalAlert.js"></script>
+<!-- AG Grid JS -->
+<script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/dist/ag-grid-community.min.js"></script>
+<script src="../assets/js/comon/ag_grid_base.js"></script>
 <script src="../assets/js/comon/table-controler.js"></script>
 <script src="../assets/js/comon/select2_script.js"></script>
 <script>
@@ -930,7 +910,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
     };
 </script>
 <script src="../assets/js/purchase/add_purchase.js"></script>
-<script src="../assets/js/purchase/select_purchase.js"></script>
+<script src="../assets/js/purchase/ag_grid_purchase.js"></script>
 <script src="../assets/js/purchase/summary.js"></script>
 <script src="../assets/js/location_driver/driver.js"></script>
 <script src="../assets/js/location_driver/location.js"></script>
@@ -1009,37 +989,38 @@ $(document).ready(function() {
     
     // Clear column filters
     $('#clearColumnFiltersBtn').on('click', function() {
-        if (typeof clearAllColumnFilters === 'function') {
-            clearAllColumnFilters();
+        if (typeof gridApi !== 'undefined' && gridApi) {
+            gridApi.setFilterModel(null);
+            if (typeof loadPurchaseData === 'function') {
+                loadPurchaseData();
+            }
         }
     });
     
     // Function to apply all filters
     function applyFilters() {
-        const companyId = $('#filter_company').val();
-        const locationId = $('#filter_location').val();
-        const driverId = $('#filter_driver').val();
-        const materialId = $('#filter_material').val();
-        const fromDate = $('#filter_from').val();
-        const toDate = $('#filter_to').val();
-        const searchTerm = $('#purchase_global_search').val();
-        
-        // Build filter parameters
-        const params = new URLSearchParams();
-        if (companyId) params.append('company_id', companyId);
-        if (locationId) params.append('location_id', locationId);
-        if (driverId) params.append('driver_id', driverId);
-        if (materialId) params.append('material_id', materialId);
-        if (fromDate) params.append('from', fromDate);
-        if (toDate) params.append('to', toDate);
-        
-        // Call the existing loadPurchases function with filters, page 1, and search term
-        if (typeof loadPurchases === 'function') {
-            loadPurchases(params.toString(), 1, searchTerm);
+        // Use AG Grid load function if available
+        if (typeof loadPurchaseData === 'function') {
+            loadPurchaseData();
         }
         
         // Also update summary cards if the function exists
         if (typeof loadPurchaseSummary === 'function') {
+            const params = new URLSearchParams();
+            const companyId = $('#filter_company').val();
+            const locationId = $('#filter_location').val();
+            const driverId = $('#filter_driver').val();
+            const materialId = $('#filter_material').val();
+            const fromDate = $('#filter_from').val();
+            const toDate = $('#filter_to').val();
+            
+            if (companyId) params.append('company_id', companyId);
+            if (locationId) params.append('location_id', locationId);
+            if (driverId) params.append('driver_id', driverId);
+            if (materialId) params.append('material_id', materialId);
+            if (fromDate) params.append('from', fromDate);
+            if (toDate) params.append('to', toDate);
+            
             loadPurchaseSummary(params.toString());
         }
     }

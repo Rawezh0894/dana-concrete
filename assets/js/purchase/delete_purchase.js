@@ -33,10 +33,12 @@ $(document).on('click', '.delete-purchase', function() {
             $.post('../process/purchase/delete_purchase.php', { id }, function(res) {
                 if (res.success) {
                     Swal.fire('سڕایەوە!', 'کڕینەکە سڕایەوە.', 'success');
-                    if (typeof refreshPurchaseTable === 'function') {
+                    if (typeof reloadPurchases === 'function') {
+                        reloadPurchases();
+                    } else if (typeof refreshPurchaseTable === 'function') {
                         refreshPurchaseTable();
-                    } else if (typeof loadPurchases === 'function') {
-                        loadPurchases(currentFilterParams || '', currentPurchasePage || 1, currentSearchTerm || '');
+                    } else if (typeof loadPurchaseData === 'function') {
+                        loadPurchaseData(true);
                     }
                     if (typeof loadPurchaseSummary === 'function') {
                         loadPurchaseSummary(typeof currentFilterParams === 'string' ? currentFilterParams : '');
