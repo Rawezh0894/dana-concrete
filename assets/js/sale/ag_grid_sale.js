@@ -18,8 +18,28 @@ function formatIQD(n) {
     return formatNumber(Number(n).toFixed(0)) + ' د.ع';
 }
 
-// Column Definitions
+// Column Definitions - ترتیب ستونەکان بە شێوەی دروست (لە چەپ بۆ ڕاست)
 const columnDefs = [
+    {
+        field: 'actions',
+        headerName: 'کردارەکان',
+        sortable: false,
+        filter: false,
+        resizable: true,
+        width: 120,
+        cellStyle: { textAlign: 'center' },
+        cellRenderer: function(params) {
+            if (!params.data) return '-';
+            const editBtn = window.userPermissions && window.userPermissions.canEdit
+                ? `<button class='btn btn-warning btn-sm edit-sale' data-id='${params.data.id}' title='نوێکردنەوە' style='margin: 2px;'><i class='fa fa-edit'></i></button>`
+                : '';
+            const deleteBtn = window.userPermissions && window.userPermissions.canDelete
+                ? `<button class='btn btn-danger btn-sm delete-sale' data-id='${params.data.id}' title='سڕینەوە' style='margin: 2px;'><i class='fa fa-trash'></i></button>`
+                : '';
+            return `${editBtn} ${deleteBtn}`.trim() || '-';
+        },
+        pinned: 'right'
+    },
     {
         field: 'customer_name',
         headerName: 'کڕیار',
@@ -27,9 +47,12 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        autoSize: true,
-        minWidth: 100,
-        cellStyle: { textAlign: 'right', direction: 'rtl' }
+        width: 150,
+        minWidth: 120,
+        cellStyle: { textAlign: 'right', direction: 'rtl', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+        tooltipValueGetter: function(params) {
+            return params.value || '';
+        }
     },
     {
         field: 'recipient',
@@ -38,9 +61,12 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        autoSize: true,
-        minWidth: 100,
-        cellStyle: { textAlign: 'right', direction: 'rtl' }
+        width: 150,
+        minWidth: 120,
+        cellStyle: { textAlign: 'right', direction: 'rtl', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+        tooltipValueGetter: function(params) {
+            return params.value || '';
+        }
     },
     {
         field: 'location',
@@ -49,9 +75,12 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        autoSize: true,
-        minWidth: 100,
-        cellStyle: { textAlign: 'right', direction: 'rtl' }
+        width: 150,
+        minWidth: 120,
+        cellStyle: { textAlign: 'right', direction: 'rtl', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+        tooltipValueGetter: function(params) {
+            return params.value || '';
+        }
     },
     {
         field: 'invoice_number',
@@ -60,14 +89,17 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        autoSize: true,
-        minWidth: 120,
-        cellStyle: { textAlign: 'right', direction: 'rtl' },
+        width: 130,
+        minWidth: 100,
+        cellStyle: { textAlign: 'right', direction: 'rtl', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
         cellRenderer: function(params) {
             if (params.data && params.data.duplicate_count && params.data.duplicate_count > 1) {
-                return `<span style="background: #dc3545; color: white; padding: 2px 6px; border-radius: 3px;">${params.value || '-'}</span>`;
+                return `<span style="background: #dc3545; color: white; padding: 2px 6px; border-radius: 3px; display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${params.value || '-'}</span>`;
             }
             return params.value || '-';
+        },
+        tooltipValueGetter: function(params) {
+            return params.value || '';
         }
     },
     {
@@ -77,9 +109,12 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        autoSize: true,
-        minWidth: 100,
-        cellStyle: { textAlign: 'right', direction: 'rtl' }
+        width: 150,
+        minWidth: 120,
+        cellStyle: { textAlign: 'right', direction: 'rtl', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+        tooltipValueGetter: function(params) {
+            return params.value || '';
+        }
     },
     {
         field: 'order_date',
@@ -88,9 +123,9 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        autoSize: true,
-        minWidth: 110,
-        cellStyle: { textAlign: 'center' },
+        width: 120,
+        minWidth: 100,
+        cellStyle: { textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
         valueFormatter: function(params) {
             if (!params.value) return '-';
             return params.value;
@@ -103,13 +138,13 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        autoSize: true,
-        minWidth: 120,
-        cellStyle: { textAlign: 'center' },
+        width: 120,
+        minWidth: 100,
+        cellStyle: { textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
         cellRenderer: function(params) {
             if (!params.value) return '-';
             const color = params.value === 'نەقد' ? '#28a745' : '#ffc107';
-            return `<span style="background: ${color}; color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold;">${params.value}</span>`;
+            return `<span style="background: ${color}; color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold; display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${params.value}</span>`;
         }
     },
     {
@@ -119,9 +154,9 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        autoSize: true,
-        minWidth: 100,
-        cellStyle: { textAlign: 'left' },
+        width: 110,
+        minWidth: 90,
+        cellStyle: { textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
         valueFormatter: function(params) {
             if (params.value === null || params.value === undefined || params.value === '') return '-';
             return `M³ ${formatNumber(params.value)}`;
@@ -135,9 +170,9 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        autoSize: true,
-        minWidth: 110,
-        cellStyle: { textAlign: 'left' },
+        width: 120,
+        minWidth: 100,
+        cellStyle: { textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
         valueFormatter: function(params) {
             return formatUSD(params.value);
         },
@@ -150,9 +185,9 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        autoSize: true,
-        minWidth: 110,
-        cellStyle: { textAlign: 'left', fontWeight: 'bold' },
+        width: 120,
+        minWidth: 100,
+        cellStyle: { textAlign: 'left', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
         valueFormatter: function(params) {
             return formatUSD(params.value);
         },
@@ -165,9 +200,9 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        autoSize: true,
-        minWidth: 140,
-        cellStyle: { textAlign: 'left' },
+        width: 150,
+        minWidth: 130,
+        cellStyle: { textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
         valueFormatter: function(params) {
             return formatIQD(params.value);
         },
@@ -180,9 +215,9 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        autoSize: true,
-        minWidth: 140,
-        cellStyle: { textAlign: 'left' },
+        width: 150,
+        minWidth: 130,
+        cellStyle: { textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
         valueFormatter: function(params) {
             return formatUSD(params.value);
         },
@@ -195,9 +230,9 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        autoSize: true,
-        minWidth: 110,
-        cellStyle: { textAlign: 'left', fontWeight: 'bold', color: '#dc3545' },
+        width: 120,
+        minWidth: 100,
+        cellStyle: { textAlign: 'left', fontWeight: 'bold', color: '#dc3545', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
         valueFormatter: function(params) {
             return formatUSD(params.value);
         },
@@ -210,9 +245,9 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        autoSize: true,
-        minWidth: 120,
-        cellStyle: { textAlign: 'left' },
+        width: 130,
+        minWidth: 110,
+        cellStyle: { textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
         valueFormatter: function(params) {
             if (params.value === null || params.value === undefined || params.value === '') return '-';
             return formatNumber(params.value);
@@ -226,12 +261,16 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        autoSize: true,
+        width: 200,
         minWidth: 150,
-        cellStyle: { textAlign: 'right', direction: 'rtl' },
+        cellStyle: { textAlign: 'right', direction: 'rtl', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
         cellRenderer: function(params) {
             if (!params.value) return '-';
-            return `<span title="${params.value}">${params.value.length > 30 ? params.value.substring(0, 30) + '...' : params.value}</span>`;
+            const displayText = params.value.length > 40 ? params.value.substring(0, 40) + '...' : params.value;
+            return `<span title="${params.value}">${displayText}</span>`;
+        },
+        tooltipValueGetter: function(params) {
+            return params.value || '';
         }
     },
     {
@@ -241,34 +280,13 @@ const columnDefs = [
         floatingFilter: true,
         sortable: true,
         resizable: true,
-        autoSize: true,
-        minWidth: 110,
-        cellStyle: { textAlign: 'left', color: '#28a745' },
+        width: 120,
+        minWidth: 100,
+        cellStyle: { textAlign: 'left', color: '#28a745', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
         valueFormatter: function(params) {
             return formatUSD(params.value);
         },
         type: 'numericColumn'
-    },
-    {
-        field: 'actions',
-        headerName: 'کردارەکان',
-        sortable: false,
-        filter: false,
-        resizable: true,
-        autoSize: true,
-        minWidth: 100,
-        cellStyle: { textAlign: 'center' },
-        cellRenderer: function(params) {
-            if (!params.data) return '-';
-            const editBtn = window.userPermissions && window.userPermissions.canEdit
-                ? `<button class='btn btn-warning btn-sm edit-sale' data-id='${params.data.id}' title='نوێکردنەوە' style='margin: 2px;'><i class='fa fa-edit'></i></button>`
-                : '';
-            const deleteBtn = window.userPermissions && window.userPermissions.canDelete
-                ? `<button class='btn btn-danger btn-sm delete-sale' data-id='${params.data.id}' title='سڕینەوە' style='margin: 2px;'><i class='fa fa-trash'></i></button>`
-                : '';
-            return `${editBtn} ${deleteBtn}`.trim() || '-';
-        },
-        pinned: 'left'
     }
 ];
 
@@ -355,14 +373,14 @@ const gridOptions = {
         gridApi = params.api;
         gridColumnApi = params.columnApi;
         loadSalesData();
+        
+        // Auto-size columns on first load
+        setTimeout(() => {
+            gridApi.sizeColumnsToFit();
+        }, 100);
     },
     onFirstDataRendered: function(params) {
-        // Auto-size all columns based on content
-        const allColumnIds = [];
-        params.columnApi.getAllColumns().forEach(column => {
-            allColumnIds.push(column.getId());
-        });
-        params.columnApi.autoSizeColumns(allColumnIds, false);
+        params.api.sizeColumnsToFit();
     },
     suppressRowClickSelection: true,
     animateRows: true,
