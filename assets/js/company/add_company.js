@@ -21,8 +21,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (data.success) {
                     addCompanyForm.reset();
                     modal.hide();
-                    // Trigger event to reload grid
-                    $(document).trigger('companyAdded');
+                    loadCompanies();
+                    // Refresh summary stats
+                    if (typeof loadSummaryStats === 'function') loadSummaryStats();
                     swalAlert('سەرکەوتوو', 'کۆمپانیا بەسەرکەوتوویی زیادکرا!', 'success');
                     $('#editCurrencyType').val(data.currency_type);
                 } else {

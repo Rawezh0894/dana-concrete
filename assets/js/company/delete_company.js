@@ -14,8 +14,9 @@ $(function() {
             if (result.isConfirmed) {
                 $.post('../process/company/delete_company.php', {id: id}, function(response) {
                     if (response.success) {
-                        // Trigger event to reload grid
-                        $(document).trigger('companyDeleted');
+                        if (window.loadCompanies) window.loadCompanies();
+                        // Refresh summary stats
+                        if (typeof loadSummaryStats === 'function') loadSummaryStats();
                         swalAlert('سەرکەوتوو', 'کۆمپانیا سڕایەوە!', 'success');
                     } else {
                         swalAlert('هەڵە', response.message || 'هەڵەیەک هەیە', 'error');

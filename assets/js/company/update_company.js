@@ -18,8 +18,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('editCompanyModal'));
                 if (data.success) {
                     modal.hide();
-                    // Trigger event to reload grid
-                    $(document).trigger('companyUpdated');
+                    loadCompanies();
+                    // Refresh summary stats
+                    if (typeof loadSummaryStats === 'function') loadSummaryStats();
                     swalAlert('سەرکەوتوو', 'زانیاری کۆمپانیا نوێکرایەوە!', 'success');
                     $('#editCurrencyType').val(data.currency_type);
                 } else {
