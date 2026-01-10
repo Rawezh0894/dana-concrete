@@ -46,7 +46,7 @@ const columnDefs = [
         width: 200,
         minWidth: 100,
         maxWidth: 600,
-        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', wordBreak: 'break-word' },
         cellRenderer: function(params) {
             if (!params.value) return '-';
             const displayText = params.value.length > 40 ? params.value.substring(0, 40) + '...' : params.value;
@@ -66,7 +66,7 @@ const columnDefs = [
         width: 130,
         minWidth: 100,
         maxWidth: 300,
-        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', wordBreak: 'break-word' },
         valueFormatter: function(params) {
             if (params.value === null || params.value === undefined || params.value === '') return '-';
             return formatNumber(params.value);
@@ -99,7 +99,7 @@ const columnDefs = [
         width: 150,
         minWidth: 100,
         maxWidth: 400,
-        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', wordBreak: 'break-word' },
         valueFormatter: function(params) {
             return formatUSD(params.value);
         },
@@ -115,7 +115,7 @@ const columnDefs = [
         width: 150,
         minWidth: 100,
         maxWidth: 400,
-        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', wordBreak: 'break-word' },
         valueFormatter: function(params) {
             return formatIQD(params.value);
         },
@@ -147,7 +147,7 @@ const columnDefs = [
         width: 120,
         minWidth: 100,
         maxWidth: 300,
-        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', wordBreak: 'break-word' },
         valueFormatter: function(params) {
             return formatUSD(params.value);
         },
@@ -163,7 +163,7 @@ const columnDefs = [
         width: 110,
         minWidth: 100,
         maxWidth: 200,
-        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', wordBreak: 'break-word' },
         valueFormatter: function(params) {
             if (params.value === null || params.value === undefined || params.value === '') return '-';
             return `M³ ${formatNumber(params.value)}`;
@@ -180,7 +180,7 @@ const columnDefs = [
         width: 120,
         minWidth: 100,
         maxWidth: 200,
-        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', wordBreak: 'break-word' },
         cellRenderer: function(params) {
             if (!params.value) return '-';
             const color = params.value === 'نەقد' ? '#28a745' : '#ffc107';
@@ -197,7 +197,7 @@ const columnDefs = [
         width: 120,
         minWidth: 100,
         maxWidth: 200,
-        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', wordBreak: 'break-word' },
         valueFormatter: function(params) {
             if (!params.value) return '-';
             return params.value;
@@ -213,7 +213,7 @@ const columnDefs = [
         width: 150,
         minWidth: 100,
         maxWidth: 500,
-        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', wordBreak: 'break-word' },
         tooltipValueGetter: function(params) {
             return params.value || '';
         }
@@ -228,7 +228,7 @@ const columnDefs = [
         width: 130,
         minWidth: 100,
         maxWidth: 300,
-        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', wordBreak: 'break-word' },
         cellRenderer: function(params) {
             if (params.data && params.data.duplicate_count && params.data.duplicate_count > 1) {
                 return `<span style="background: #dc3545; color: white; padding: 2px 6px; border-radius: 3px; display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${params.value || '-'}</span>`;
@@ -249,7 +249,7 @@ const columnDefs = [
         width: 150,
         minWidth: 100,
         maxWidth: 500,
-        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', wordBreak: 'break-word' },
         tooltipValueGetter: function(params) {
             return params.value || '';
         }
@@ -264,7 +264,7 @@ const columnDefs = [
         width: 150,
         minWidth: 100,
         maxWidth: 500,
-        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', wordBreak: 'break-word' },
         tooltipValueGetter: function(params) {
             return params.value || '';
         }
@@ -279,7 +279,7 @@ const columnDefs = [
         width: 150,
         minWidth: 100,
         maxWidth: 500,
-        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+        cellStyle: { textAlign: 'center', direction: 'ltr', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', wordBreak: 'break-word' },
         tooltipValueGetter: function(params) {
             return params.value || '';
         }
@@ -293,7 +293,7 @@ const columnDefs = [
         width: 120,
         minWidth: 100,
         maxWidth: 200,
-        cellStyle: { textAlign: 'center' },
+        cellStyle: { textAlign: 'center', wordBreak: 'break-word' },
         cellRenderer: function(params) {
             if (!params.data) return '-';
             const editBtn = window.userPermissions && window.userPermissions.canEdit
@@ -303,8 +303,7 @@ const columnDefs = [
                 ? `<button class='btn btn-danger btn-sm delete-sale' data-id='${params.data.id}' title='سڕینەوە' style='margin: 2px;'><i class='fa fa-trash'></i></button>`
                 : '';
             return `${editBtn} ${deleteBtn}`.trim() || '-';
-        },
-        pinned: 'right'
+        }
     }
 ];
 
