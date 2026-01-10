@@ -1,15 +1,121 @@
 // AG Grid configuration for concrete receipts
 let concreteReceiptsGridApi = null;
 
-// Column definitions - reversed for RTL display
+// Column definitions - ترتیب بەپێی HTML table
 const concreteReceiptsColumnDefs = [
+    {
+        field: '#',
+        headerName: '#',
+        width: 80,
+        pinned: 'left',
+        cellStyle: { textAlign: 'center', direction: 'ltr' },
+        valueGetter: function(params) {
+            if (!params.node) return '';
+            const page = concreteReceiptsGridApi ? concreteReceiptsGridApi.paginationGetCurrentPage() : 0;
+            const pageSize = concreteReceiptsGridApi ? concreteReceiptsGridApi.paginationGetPageSize() : 25;
+            return (page * pageSize) + params.node.rowIndex + 1;
+        },
+        sortable: false,
+        filter: false
+    },
+    {
+        field: 'receipt_number',
+        headerName: 'ژم.پسووڵە',
+        flex: 1,
+        minWidth: 120,
+        cellRenderer: function(params) {
+            if (!params.data) return '-';
+            const warning = params.data.is_duplicate 
+                ? '<i class="fas fa-exclamation-triangle duplicate-warning" title="ژمارەی پسوڵە دووبارەیە"></i>' 
+                : '';
+            return warning + (params.value || '-');
+        }
+    },
+    {
+        field: 'customer_name',
+        headerName: 'کڕیار',
+        flex: 1,
+        minWidth: 150
+    },
+    {
+        field: 'location',
+        headerName: 'شوێن',
+        flex: 1,
+        minWidth: 120
+    },
+    {
+        field: 'receiver_name',
+        headerName: 'وەرگر',
+        flex: 1,
+        minWidth: 120
+    },
+    {
+        field: 'created_at',
+        headerName: 'بەروار',
+        flex: 1,
+        minWidth: 150,
+        cellRenderer: function(params) {
+            if (!params.value) return '-';
+            const d = new Date(params.value);
+            if (isNaN(d)) return params.value;
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            const hours = String(d.getHours()).padStart(2, '0');
+            const minutes = String(d.getMinutes()).padStart(2, '0');
+            return `${year}-${month}-${day} ${hours}:${minutes}`;
+        }
+    },
+    {
+        field: 'meter_amount',
+        headerName: 'بڕی مەتر سێجا',
+        flex: 1,
+        minWidth: 130,
+        cellStyle: { textAlign: 'left', direction: 'ltr' },
+        cellRenderer: function(params) {
+            if (params.value === null || params.value === undefined || params.value === '') return '-';
+            return window.AGGridFormatters.formatNumber(params.value) + ' m³';
+        }
+    },
+    {
+        field: 'formula_name',
+        headerName: 'فۆرمۆلا',
+        flex: 1,
+        minWidth: 120
+    },
+    {
+        field: 'pump_car_name',
+        headerName: 'پەمپ',
+        flex: 1,
+        minWidth: 100
+    },
+    {
+        field: 'pump_driver_name',
+        headerName: 'شۆفێری پەمپ',
+        flex: 1,
+        minWidth: 130
+    },
+    {
+        field: 'mixer_car_name',
+        headerName: 'میکسەر',
+        flex: 1,
+        minWidth: 100
+    },
+    {
+        field: 'mixer_driver_name',
+        headerName: 'شۆفێری میکسەر',
+        flex: 1,
+        minWidth: 130
+    },
     {
         field: 'actions',
         headerName: 'کردارەکان',
         sortable: false,
         filter: false,
         resizable: true,
-        width: 150,
+        minWidth: 150,
+        maxWidth: 200,
+        flex: 0,
         pinned: 'left',
         cellStyle: { textAlign: 'center', direction: 'ltr' },
         cellRenderer: function(params) {
@@ -26,110 +132,6 @@ const concreteReceiptsColumnDefs = [
             }
             return buttons || '-';
         }
-    },
-    {
-        field: 'mixer_driver_name',
-        headerName: 'شۆفێری میکسەر',
-        flex: 1,
-        minWidth: 100
-    },
-    {
-        field: 'mixer_car_name',
-        headerName: 'میکسەر',
-        flex: 1,
-        minWidth: 80
-    },
-    {
-        field: 'pump_driver_name',
-        headerName: 'شۆفێری پەمپ',
-        flex: 1,
-        minWidth: 100
-    },
-    {
-        field: 'pump_car_name',
-        headerName: 'پەمپ',
-        flex: 1,
-        minWidth: 80
-    },
-    {
-        field: 'formula_name',
-        headerName: 'فۆرمۆلا',
-        flex: 1,
-        minWidth: 90
-    },
-    {
-        field: 'meter_amount',
-        headerName: 'بڕی مەتر سێجا',
-        flex: 1,
-        minWidth: 100,
-        cellStyle: { textAlign: 'center', direction: 'ltr' },
-        cellRenderer: function(params) {
-            if (params.value === null || params.value === undefined || params.value === '') return '-';
-            return window.AGGridFormatters.formatNumber(params.value) + ' m³';
-        }
-    },
-    {
-        field: 'created_at',
-        headerName: 'بەروار',
-        flex: 1,
-        minWidth: 130,
-        cellRenderer: function(params) {
-            if (!params.value) return '-';
-            const d = new Date(params.value);
-            if (isNaN(d)) return params.value;
-            const year = d.getFullYear();
-            const month = String(d.getMonth() + 1).padStart(2, '0');
-            const day = String(d.getDate()).padStart(2, '0');
-            const hours = String(d.getHours()).padStart(2, '0');
-            const minutes = String(d.getMinutes()).padStart(2, '0');
-            return `${year}-${month}-${day} ${hours}:${minutes}`;
-        }
-    },
-    {
-        field: 'receiver_name',
-        headerName: 'وەرگر',
-        flex: 1,
-        minWidth: 90
-    },
-    {
-        field: 'location',
-        headerName: 'شوێن',
-        flex: 1,
-        minWidth: 90
-    },
-    {
-        field: 'customer_name',
-        headerName: 'کڕیار',
-        flex: 1,
-        minWidth: 110
-    },
-    {
-        field: 'receipt_number',
-        headerName: 'ژم.پسووڵە',
-        flex: 1,
-        minWidth: 100,
-        cellRenderer: function(params) {
-            if (!params.data) return '-';
-            const warning = params.data.is_duplicate 
-                ? '<i class="fas fa-exclamation-triangle duplicate-warning" title="ژمارەی پسوڵە دووبارەیە"></i>' 
-                : '';
-            return warning + (params.value || '-');
-        }
-    },
-    {
-        field: '#',
-        headerName: '#',
-        width: 70,
-        pinned: 'right',
-        cellStyle: { textAlign: 'center', direction: 'ltr' },
-        valueGetter: function(params) {
-            if (!params.node) return '';
-            const page = concreteReceiptsGridApi ? concreteReceiptsGridApi.paginationGetCurrentPage() : 0;
-            const pageSize = concreteReceiptsGridApi ? concreteReceiptsGridApi.paginationGetPageSize() : 25;
-            return (page * pageSize) + params.node.rowIndex + 1;
-        },
-        sortable: false,
-        filter: false
     }
 ];
 
@@ -140,8 +142,7 @@ const concreteReceiptsGridOptions = {
         sortable: true,
         filter: true,
         resizable: true,
-        flex: 1,
-        minWidth: 80
+        flex: 1
     },
     pagination: true,
     paginationPageSize: 25,
@@ -199,14 +200,8 @@ const concreteReceiptsGridOptions = {
         loadConcreteReceiptsData();
     },
     onFirstDataRendered: function(params) {
-        // Don't use autoSizeColumns to avoid extra space issues
-        // Columns will use flex: 1 to distribute space evenly
-        const allColumnIds = params.api.getColumns()?.map(col => col.getColId()) || [];
-        const columnsToAutoSize = allColumnIds.filter(colId => colId !== 'actions' && colId !== '#');
-        if (columnsToAutoSize.length > 0) {
-            // Use autoSizeColumns with skipHeader: true to avoid header width issues
-            params.api.autoSizeColumns(columnsToAutoSize, false);
-        }
+        // Use flex columns instead of autoSizeColumns for better performance
+        // Columns will automatically distribute available space
     }
 };
 
@@ -252,25 +247,41 @@ function loadConcreteReceiptsData(preservePagination = false, restoreRowId = nul
         }
     });
     
+    // Add include_summary parameter to get summary in same request
+    url += '&include_summary=1';
     if (queryParams.toString()) {
         url += '&' + queryParams.toString();
     }
     
-    // Single fetch with summary included
+    // Single fetch - summary included in response
     fetch(url)
-        .then(r => r.json())
-        .catch(() => ({ success: false, data: [] }))
+        .then(response => response.json())
         .then(data => {
             let receipts = [];
+            let summary = null;
+            
+            // Handle response format
             if (Array.isArray(data)) {
                 receipts = data;
             } else if (data.success && Array.isArray(data.data)) {
                 receipts = data.data;
+            } else if (Array.isArray(data.receipts)) {
+                receipts = data.receipts;
+            }
+            
+            // Get summary from response
+            if (data.summary) {
+                summary = data.summary;
             }
             
             if (receipts && receipts.length > 0) {
                 // Store data globally
                 window.concreteReceiptsData = receipts;
+                
+                // Update summary cards
+                if (summary) {
+                    updateSummaryCards(summary);
+                }
                 
                 // Set row data
                 concreteReceiptsGridApi.setGridOption('rowData', receipts);
@@ -320,10 +331,14 @@ function loadConcreteReceiptsData(preservePagination = false, restoreRowId = nul
             } else {
                 concreteReceiptsGridApi.setGridOption('rowData', []);
                 concreteReceiptsGridApi.showNoRowsOverlay();
+                
+                // Update summary cards with zeros or from summaryData
+                if (summary) {
+                    updateSummaryCards(summary);
+                } else {
+                    updateSummaryCards({ total_receipts: 0, total_meter: 0, total_customers: 0 });
+                }
             }
-            
-            // Fetch summary separately (faster, smaller request)
-            fetchAndUpdateSummary(filters);
         })
         .catch(error => {
             console.error('Error loading concrete receipts:', error);
@@ -337,29 +352,6 @@ function loadConcreteReceiptsData(preservePagination = false, restoreRowId = nul
                 });
             }
         });
-}
-
-// Fetch and update summary cards
-function fetchAndUpdateSummary(filters) {
-    let summaryUrl = '../process/concrete_receipts/select_concrete_receipts.php?summary_only=1';
-    const summaryParams = new URLSearchParams();
-    Object.keys(filters).forEach(key => {
-        if (filters[key]) {
-            summaryParams.append(key, filters[key]);
-        }
-    });
-    if (summaryParams.toString()) {
-        summaryUrl += '&' + summaryParams.toString();
-    }
-    
-    fetch(summaryUrl)
-        .then(r => r.json())
-        .then(summaryData => {
-            if (summaryData && summaryData.success && summaryData.summary) {
-                updateSummaryCards(summaryData.summary);
-            }
-        })
-        .catch(err => console.warn('Could not fetch summary:', err));
 }
 
 // Update Summary Cards
