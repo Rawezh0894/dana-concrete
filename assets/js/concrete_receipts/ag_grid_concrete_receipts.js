@@ -203,7 +203,7 @@ const concreteReceiptsGridOptions = {
     },
     pagination: true,
     paginationPageSize: 25,
-    paginationPageSizeSelector: [10, 25, 50, 100],
+    paginationPageSizeSelector: [10, 25, 50, 100, 200, 500],
     animateRows: true,
     rowSelection: 'multiple',
     suppressRowClickSelection: true,
@@ -211,7 +211,12 @@ const concreteReceiptsGridOptions = {
     ensureDomOrder: true,
     // Server-side pagination
     paginationAutoPageSize: false,
-    suppressPaginationPanel: false
+    suppressPaginationPanel: false,
+    // Enable quick filter for global search
+    quickFilterText: '',
+    suppressMenuHide: false,
+    // Enable side panel for column management
+    sideBar: false
 };
 
 // Flag to prevent infinite loop in pagination
@@ -255,10 +260,10 @@ async function loadConcreteReceiptsGrid() {
         }
     });
 
-    // Use reasonable page size for better performance (500 records at a time)
-    // If more data is needed, we can implement server-side pagination later
+    // Load more records to ensure all data is available for search
+    // Increased to 2000 to cover most use cases, but can be adjusted based on database size
     queryParams.append('page', 1);
-    queryParams.append('pageSize', 500);
+    queryParams.append('pageSize', 2000);
 
     // Show loading with better visual feedback
     concreteReceiptsGridApi.showLoadingOverlay();

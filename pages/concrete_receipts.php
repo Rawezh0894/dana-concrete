@@ -162,6 +162,20 @@ $pump_drivers = array_filter($employees, function ($emp) {
         </div>
       </div>
     </div>
+    <!-- Quick Search Row -->
+    <div class="row g-2 mb-3">
+      <div class="col-md-12">
+        <div class="input-group">
+          <span class="input-group-text" style="background: var(--kelly-green); color: var(--seafoam-green); font-weight: bold;">
+            <i class="fas fa-search"></i> گەڕان
+          </span>
+          <input type="text" class="form-control" id="quickSearchInput" placeholder="گەڕان لە هەموو ستونەکاندا (ژمارەی پسوڵە، کڕیار، شوێن، وەرگر، فۆرمۆلا...)">
+          <button class="btn btn-secondary" type="button" id="clearQuickSearch" title="پاککردنەوەی گەڕان">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+    </div>
     <!-- Filter Row -->
     <div class="row g-2 mb-3 " id="concrete-receipts-filters">
       <div class="col-md-3">
