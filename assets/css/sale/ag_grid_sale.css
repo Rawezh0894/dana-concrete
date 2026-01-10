@@ -85,19 +85,49 @@
 
 /* Floating Filter */
 .ag-theme-alpine .ag-floating-filter-input {
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid #dee2e6;
-    border-radius: 4px;
-    padding: 4px 8px;
-    font-size: 12px;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 13px;
     direction: ltr;
     text-align: center;
+    font-family: 'Rabar', 'Arial', 'Tahoma', sans-serif !important;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.ag-theme-alpine .ag-floating-filter-input:hover {
+    border-color: var(--seafoam-green, #20b2aa);
+    box-shadow: 0 4px 8px rgba(32, 178, 170, 0.15);
+    transform: translateY(-1px);
 }
 
 .ag-theme-alpine .ag-floating-filter-input:focus {
     border-color: var(--seafoam-green, #20b2aa);
     outline: none;
-    box-shadow: 0 0 0 0.2rem rgba(32, 178, 170, 0.25);
+    box-shadow: 0 0 0 0.3rem rgba(32, 178, 170, 0.25), 0 4px 12px rgba(32, 178, 170, 0.2);
+    background: #ffffff;
+    transform: translateY(-2px);
+}
+
+.ag-theme-alpine .ag-floating-filter-input::placeholder {
+    color: #6c757d;
+    opacity: 0.7;
+    font-style: italic;
+}
+
+/* Filter Input Container */
+.ag-theme-alpine .ag-floating-filter {
+    padding: 8px 4px;
+}
+
+.ag-theme-alpine .ag-floating-filter-body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Row Styling */

@@ -21,6 +21,26 @@ function formatIQD(n) {
 // Column Definitions - ترتیب ستونەکان بە شێوەی دروست (لە چەپ بۆ ڕاست - LTR)
 const columnDefs = [
     {
+        field: 'actions',
+        headerName: 'کردارەکان',
+        sortable: false,
+        filter: false,
+        resizable: true,
+        minWidth: 100,
+        flex: 0,
+        cellStyle: { textAlign: 'center' },
+        cellRenderer: function(params) {
+            if (!params.data) return '-';
+            const editBtn = window.userPermissions && window.userPermissions.canEdit
+                ? `<button class='btn btn-warning btn-sm edit-sale' data-id='${params.data.id}' title='نوێکردنەوە' style='margin: 2px;'><i class='fa fa-edit'></i></button>`
+                : '';
+            const deleteBtn = window.userPermissions && window.userPermissions.canDelete
+                ? `<button class='btn btn-danger btn-sm delete-sale' data-id='${params.data.id}' title='سڕینەوە' style='margin: 2px;'><i class='fa fa-trash'></i></button>`
+                : '';
+            return `${editBtn} ${deleteBtn}`.trim() || '-';
+        }
+    },
+    {
         field: 'discount',
         headerName: 'داشکاندن',
         filter: 'agNumberColumnFilter',
@@ -250,26 +270,6 @@ const columnDefs = [
         cellStyle: { textAlign: 'center', direction: 'ltr' },
         tooltipValueGetter: function(params) {
             return params.value || '';
-        }
-    },
-    {
-        field: 'actions',
-        headerName: 'کردارەکان',
-        sortable: false,
-        filter: false,
-        resizable: true,
-        minWidth: 100,
-        flex: 0,
-        cellStyle: { textAlign: 'center' },
-        cellRenderer: function(params) {
-            if (!params.data) return '-';
-            const editBtn = window.userPermissions && window.userPermissions.canEdit
-                ? `<button class='btn btn-warning btn-sm edit-sale' data-id='${params.data.id}' title='نوێکردنەوە' style='margin: 2px;'><i class='fa fa-edit'></i></button>`
-                : '';
-            const deleteBtn = window.userPermissions && window.userPermissions.canDelete
-                ? `<button class='btn btn-danger btn-sm delete-sale' data-id='${params.data.id}' title='سڕینەوە' style='margin: 2px;'><i class='fa fa-trash'></i></button>`
-                : '';
-            return `${editBtn} ${deleteBtn}`.trim() || '-';
         }
     }
 ];
