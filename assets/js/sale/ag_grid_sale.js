@@ -383,13 +383,23 @@ const gridOptions = {
     ensureDomOrder: true
 };
 
-// Load Sales Data
-function loadSalesData() {
+// Load Sales Data - with pagination state preservation
+function loadSalesData(preservePagination = false) {
     const fromDate = document.getElementById('filter_from')?.value || '';
     const toDate = document.getElementById('filter_to')?.value || '';
     const customerId = document.getElementById('filter_customer')?.value || '';
     const minQuantity = document.getElementById('filter_quantity_min')?.value || '';
     const maxQuantity = document.getElementById('filter_quantity_max')?.value || '';
+    
+    // Save current pagination state
+    let currentPage = 0;
+    let pageSize = 25;
+    if (preservePagination && gridApi) {
+        const paginationState = gridApi.paginationGetCurrentPage();
+        const pageSizeState = gridApi.paginationGetPageSize();
+        currentPage = paginationState || 0;
+        pageSize = pageSizeState || 25;
+    }
     
     // Build URL with filters
     let url = '../process/sale/select_sale.php?ag_grid=1';
@@ -430,6 +440,14 @@ function loadSalesData() {
                 
                 gridApi.setGridOption('rowData', rowData);
                 gridApi.hideOverlay();
+                
+                // Restore pagination state if preserving
+                if (preservePagination && gridApi) {
+                    setTimeout(() => {
+                        gridApi.paginationGoToPage(currentPage);
+                        gridApi.paginationSetPageSize(pageSize);
+                    }, 100);
+                }
             } else {
                 gridApi.setGridOption('rowData', []);
                 gridApi.showNoRowsOverlay();
@@ -447,9 +465,9 @@ function loadSalesData() {
         });
 }
 
-// Reload function
+// Reload function - preserve pagination
 window.reloadSales = function() {
-    loadSalesData();
+    loadSalesData(true); // Preserve pagination state
 };
 
 // Export to Excel
@@ -492,25 +510,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
-        // Handle edit and delete buttons using event delegation
-        document.addEventListener('click', function(e) {
-            if (e.target.closest('.edit-sale')) {
-                const saleId = e.target.closest('.edit-sale').getAttribute('data-id');
-                if (typeof loadSaleForEdit === 'function') {
-                    loadSaleForEdit(saleId);
-                } else if (window.loadSaleForEdit) {
-                    window.loadSaleForEdit(saleId);
-                }
-            }
-            if (e.target.closest('.delete-sale')) {
-                const saleId = e.target.closest('.delete-sale').getAttribute('data-id');
-                if (typeof deleteSale === 'function') {
-                    deleteSale(saleId);
-                } else if (window.deleteSale) {
-                    window.deleteSale(saleId);
-                }
-            }
-        });
+        // Handle edit and delete buttons - let existing jQuery handlers work
+        // The event delegation in update_sale.js and delete_sale.js will handle these
+        // We just need to ensure the buttons are properly rendered in the grid
         }, 100);
     }
 });
