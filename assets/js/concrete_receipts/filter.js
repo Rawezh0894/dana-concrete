@@ -25,6 +25,15 @@ $(document).ready(function() {
   $('#filter_customer_id, #filter_formulas_id').on('change', loadFilteredReceipts);
   $('#filter_location').on('input', loadFilteredReceipts);
   $('#filter_date_from, #filter_date_to').on('change', loadFilteredReceipts);
+  
+  // Search input with debounce
+  let searchTimeout;
+  $('#filter_search').on('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(function() {
+      loadFilteredReceipts();
+    }, 500); // Wait 500ms after user stops typing
+  });
 
   // Today/Yesterday filter buttons
   function setDateFilter(from, to) {
@@ -61,7 +70,8 @@ $(document).ready(function() {
   // loadFilteredReceipts();
 
   $('#filter_reset').on('click', function() {
-    // Clear all filters
+    // Clear all filters including search
+    $('#filter_search').val('');
     $('#filter_customer_id').val('');
     $('#filter_location').val('');
     $('#filter_formulas_id').val('');

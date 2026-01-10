@@ -165,6 +165,9 @@ $pump_drivers = array_filter($employees, function ($emp) {
     <!-- Filter Row -->
     <div class="row g-2 mb-3 " id="concrete-receipts-filters">
       <div class="col-md-3">
+        <input type="text" class="form-control" id="filter_search" placeholder="گەڕان لە هەموو داتاکاندا...">
+      </div>
+      <div class="col-md-2">
         <select class="form-select" id="filter_customer_id" data-placeholder="کڕیار: هەموو">
           <option value=""></option>
           <?php foreach ($customers as $c): ?>
@@ -175,7 +178,7 @@ $pump_drivers = array_filter($employees, function ($emp) {
           <?php endforeach; ?>
         </select>
       </div>
-      <div class="col-md-3">
+      <div class="col-md-2">
         <input type="text" class="form-control" id="filter_location" placeholder="شوێن...">
       </div>
       <div class="col-md-2">
@@ -186,13 +189,13 @@ $pump_drivers = array_filter($employees, function ($emp) {
           <?php endforeach; ?>
         </select>
       </div>
-      <div class="col-md-2">
+      <div class="col-md-1">
         <input type="date" class="form-control" id="filter_date_from" placeholder="لە بەرواری">
       </div>
-      <div class="col-md-2">
+      <div class="col-md-1">
         <input type="date" class="form-control" id="filter_date_to" placeholder="بۆ بەرواری">
       </div>
-      <div class="col-md-2 d-flex gap-2">
+      <div class="col-md-1 d-flex gap-2">
         <button type="button" class="btn btn-sm" id="filter_today" data-filter="today" style="background: var(--seafoam-green); color: white; font-weight: bold;">
           <i class="fas fa-calendar-day me-1"></i>ئەمڕۆ
         </button>

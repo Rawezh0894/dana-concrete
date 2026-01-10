@@ -227,6 +227,7 @@ function loadConcreteReceiptsData(page = 1, pageSize = 25, restoreRowId = null) 
     
     // Build URL with filters from form
     const filters = {
+        search: $('#filter_search').val(),
         customer_id: $('#filter_customer_id').val(),
         location: $('#filter_location').val(),
         formulas_id: $('#filter_formulas_id').val(),

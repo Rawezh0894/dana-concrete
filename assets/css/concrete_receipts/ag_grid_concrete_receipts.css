@@ -4,6 +4,24 @@
     width: 100%;
 }
 
+/* Fix for right-side spacing issue in RTL with pinned columns */
+#concreteReceiptsGrid .ag-body-horizontal-scroll-viewport {
+    overflow-x: hidden !important;
+}
+
+#concreteReceiptsGrid .ag-center-cols-container {
+    width: 100% !important;
+    transform: translateX(0) !important;
+}
+
+#concreteReceiptsGrid .ag-body-viewport {
+    overflow-x: auto !important;
+}
+
+#concreteReceiptsGrid .ag-center-cols-clipper {
+    overflow: visible !important;
+}
+
 /* Duplicate warning icon styling */
 .ag-cell .duplicate-warning {
     color: #ffc107;

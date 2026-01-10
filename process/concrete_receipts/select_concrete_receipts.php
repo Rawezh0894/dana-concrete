@@ -21,6 +21,24 @@ try {
     // Gather filters
     $where = [];
     $params = [];
+    
+    // Global search - search across multiple fields
+    if (!empty($_GET['search'])) {
+        $searchTerm = trim($_GET['search']);
+        $searchConditions = [];
+        $searchConditions[] = 'cr.receipt_number LIKE :search';
+        $searchConditions[] = 'c.name LIKE :search';
+        $searchConditions[] = 'cr.location LIKE :search';
+        $searchConditions[] = 'cr.receiver_name LIKE :search';
+        $searchConditions[] = 'f.name LIKE :search';
+        $searchConditions[] = 'pump_car.name LIKE :search';
+        $searchConditions[] = 'pump_driver.name LIKE :search';
+        $searchConditions[] = 'mixer_car.name LIKE :search';
+        $searchConditions[] = 'mixer_driver.name LIKE :search';
+        $where[] = '(' . implode(' OR ', $searchConditions) . ')';
+        $params[':search'] = '%' . $searchTerm . '%';
+    }
+    
     if (!empty($_GET['customer_id'])) {
         $where[] = 'cr.customer_id = :customer_id';
         $params[':customer_id'] = $_GET['customer_id'];
