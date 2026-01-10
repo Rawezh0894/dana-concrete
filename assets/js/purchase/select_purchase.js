@@ -553,14 +553,12 @@ function setSelect2Value(selectElement, value) {
     }
 }
 
-// Use jQuery event delegation for AG Grid compatibility
-$(document).on('click', '.edit-purchase', async function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    const btn = $(this);
-    const id = btn.data('id');
-    
-    try {
+document.addEventListener('click', async function(e) {
+    if (e.target.closest('.edit-purchase')) {
+        const btn = e.target.closest('.edit-purchase');
+        const id = btn.dataset.id;
+        
+        try {
             // وەرگرتنی زانیاری رکۆرد
             const res = await fetch(`../process/purchase/select_purchase.php?id=${id}`);
             if (!res.ok) {
@@ -683,10 +681,11 @@ $(document).on('click', '.edit-purchase', async function(e) {
                 }, 300);
             });
             
-        modal.show();
-        
-    } catch (error) {
-        console.error('Error loading purchase for edit:', error);
-        Swal.fire('هەڵە!', 'هەڵەیەک لە وەرگرتنی داتاکان هەیە', 'error');
+            modal.show();
+            
+        } catch (error) {
+            console.error('Error loading purchase for edit:', error);
+            Swal.fire('هەڵە!', 'هەڵەیەک لە وەرگرتنی داتاکان هەیە', 'error');
+        }
     }
 });

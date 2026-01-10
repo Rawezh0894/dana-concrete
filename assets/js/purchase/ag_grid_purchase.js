@@ -2,35 +2,35 @@
 // بەکارهێنانی فایلی گشتی
 // <script src="../assets/js/comon/ag_grid_base.js"></script> پێویستە لە HTML دا زیاد بکرێت
 
-let gridApi;
-let gridColumnApi;
+let purchaseGridApi;
+let purchaseGridColumnApi;
 
-// Format functions - بەکارهێنانی لە فایلی گشتی
-const formatNumber = window.AGGridFormatters?.formatNumber || function(n) {
+// Format functions - بەکارهێنانی لە فایلی گشتی (ناوی جیاواز بۆ دوورکەوتنەوە لە کێشەی duplicate)
+const agFormatNumber = window.AGGridFormatters?.formatNumber || function(n) {
     if (n === null || n === undefined || n === '') return '';
     return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 };
 
-const formatUSD = window.AGGridFormatters?.formatUSD || function(n) {
+const agFormatUSD = window.AGGridFormatters?.formatUSD || function(n) {
     if (n === null || n === undefined || n === '' || isNaN(n)) return '-';
-    return formatNumber(Number(n).toFixed(2)) + ' $';
+    return agFormatNumber(Number(n).toFixed(2)) + ' $';
 };
 
-const formatIQD = window.AGGridFormatters?.formatIQD || function(n) {
+const agFormatIQD = window.AGGridFormatters?.formatIQD || function(n) {
     if (n === null || n === undefined || n === '' || isNaN(n)) return '-';
-    return formatNumber(Number(n).toFixed(0)) + ' د.ع';
+    return agFormatNumber(Number(n).toFixed(0)) + ' د.ع';
 };
 
 // Column Definitions - ترتیب ستونەکان بە شێوەی دروست (لە چەپ بۆ ڕاست - LTR)
-const columnDefs = [
+const purchaseColumnDefs = [
     {
         field: 'actions',
         headerName: 'کردارەکان',
         sortable: false,
         filter: false,
         resizable: true,
-        minWidth: 100,
-        flex: 0,
+        minWidth: 120,
+        maxWidth: 150,
         cellStyle: { textAlign: 'center', direction: 'ltr' },
         cellRenderer: function(params) {
             if (!params.data) return '-';
@@ -66,7 +66,7 @@ const columnDefs = [
         minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl', fontWeight: 'bold', color: '#dc3545' },
         valueFormatter: function(params) {
-            return formatIQD(params.value);
+            return agFormatIQD(params.value);
         },
         type: 'numericColumn'
     },
@@ -80,7 +80,7 @@ const columnDefs = [
         minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl', fontWeight: 'bold', color: '#dc3545' },
         valueFormatter: function(params) {
-            return formatUSD(params.value);
+            return agFormatUSD(params.value);
         },
         type: 'numericColumn'
     },
@@ -94,7 +94,7 @@ const columnDefs = [
         minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl' },
         valueFormatter: function(params) {
-            return formatIQD(params.value);
+            return agFormatIQD(params.value);
         },
         type: 'numericColumn'
     },
@@ -108,7 +108,7 @@ const columnDefs = [
         minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl' },
         valueFormatter: function(params) {
-            return formatUSD(params.value);
+            return agFormatUSD(params.value);
         },
         type: 'numericColumn'
     },
@@ -123,7 +123,7 @@ const columnDefs = [
         cellStyle: { textAlign: 'right', direction: 'rtl' },
         valueFormatter: function(params) {
             if (params.value === null || params.value === undefined || params.value === '') return '-';
-            return formatNumber(params.value);
+            return agFormatNumber(params.value);
         },
         type: 'numericColumn'
     },
@@ -137,7 +137,7 @@ const columnDefs = [
         minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl' },
         valueFormatter: function(params) {
-            return formatIQD(params.value);
+            return agFormatIQD(params.value);
         },
         type: 'numericColumn'
     },
@@ -154,11 +154,11 @@ const columnDefs = [
             if (!params.data) return '-';
             const type = params.data.type;
             if (type === 'دینار') {
-                return formatIQD(params.value);
+                return agFormatIQD(params.value);
             } else if (type === 'دۆلار') {
-                return formatUSD(params.value);
+                return agFormatUSD(params.value);
             }
-            return formatNumber(params.value);
+            return agFormatNumber(params.value);
         },
         type: 'numericColumn'
     },
@@ -172,7 +172,7 @@ const columnDefs = [
         minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl' },
         valueFormatter: function(params) {
-            return formatIQD(params.value);
+            return agFormatIQD(params.value);
         },
         type: 'numericColumn'
     },
@@ -186,7 +186,7 @@ const columnDefs = [
         minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl' },
         valueFormatter: function(params) {
-            return formatUSD(params.value);
+            return agFormatUSD(params.value);
         },
         type: 'numericColumn'
     },
@@ -201,7 +201,7 @@ const columnDefs = [
         cellStyle: { textAlign: 'right', direction: 'rtl' },
         valueFormatter: function(params) {
             if (params.value === null || params.value === undefined || params.value === '') return '-';
-            return formatNumber(params.value) + ' کگم';
+            return agFormatNumber(params.value) + ' کگم';
         },
         type: 'numericColumn'
     },
@@ -316,26 +316,79 @@ const columnDefs = [
     }
 ];
 
-// Grid Options - بەکارهێنانی defaults لە فایلی گشتی
-const gridOptions = {
-    columnDefs: columnDefs,
+// Grid Options - تەنها بۆ community version
+const purchaseGridOptions = {
+    columnDefs: purchaseColumnDefs,
+    defaultColDef: {
+        sortable: true,
+        filter: true,
+        resizable: true,
+        floatingFilter: true,
+        minWidth: 100
+    },
+    pagination: true,
+    paginationPageSize: 25,
+    paginationPageSizeSelector: [10, 25, 50, 100],
+    animateRows: true,
+    rowSelection: 'multiple',
+    suppressRowClickSelection: true,
+    enableCellTextSelection: true,
+    ensureDomOrder: true,
+    localeText: {
+        page: 'پەڕە',
+        of: 'لە',
+        to: 'بۆ',
+        next: 'دواتر',
+        previous: 'پێشوو',
+        loadingOoo: 'چاوەڕوان بە...',
+        noRowsToShow: 'هیچ داتایەک نییە',
+        filterOoo: 'فلتەر...',
+        equals: 'یەکسانە',
+        notEqual: 'یەکسان نییە',
+        lessThan: 'کەمتر لە',
+        greaterThan: 'زیاتر لە',
+        lessThanOrEqual: 'کەمتر یان یەکسان',
+        greaterThanOrEqual: 'زیاتر یان یەکسان',
+        inRange: 'لە نێوان',
+        contains: 'لەخۆ دەگرێت',
+        notContains: 'لەخۆ ناگرێت',
+        startsWith: 'دەست پێ دەکات بە',
+        endsWith: 'کۆتایی دێت بە',
+        blank: 'بەتاڵ',
+        notBlank: 'بەتاڵ نییە',
+        andCondition: 'و',
+        orCondition: 'یان',
+        applyFilter: 'جێبەجێکردن',
+        resetFilter: 'ڕیسێت',
+        clearFilter: 'پاککردنەوە',
+        columns: 'ستونەکان',
+        filters: 'فلتەرەکان',
+        pinColumn: 'چەسپاندنی ستون',
+        valueAggregation: 'کۆکردنەوەی نرخ',
+        autosizeThiscolumn: 'قەبارەی ئۆتۆماتیکی ئەم ستونە',
+        autosizeAllColumns: 'قەبارەی ئۆتۆماتیکی هەموو ستونەکان',
+        groupBy: 'گروپ بکە بەپێی',
+        ungroupBy: 'گروپ لابدە لە',
+        resetColumns: 'ڕیسێتی ستونەکان',
+        expandAll: 'کردنەوەی هەموو',
+        collapseAll: 'داخستنی هەموو',
+        copy: 'کۆپی',
+        ctrlC: 'Ctrl+C',
+        paste: 'پەیست',
+        ctrlV: 'Ctrl+V',
+        export: 'ئیکسپۆرت',
+        csvExport: 'ئیکسپۆرتی CSV',
+        excelExport: 'ئیکسپۆرتی Excel'
+    },
     onGridReady: function(params) {
-        gridApi = params.api;
-        gridColumnApi = params.columnApi;
+        purchaseGridApi = params.api;
         loadPurchaseData();
     },
     onFirstDataRendered: function(params) {
-        // Auto-size columns based on content
-        const allColumnIds = params.columnApi.getColumns().map(col => col.getId());
-        params.columnApi.autoSizeColumns(allColumnIds, false);
+        // Auto-size columns
+        params.api.sizeColumnsToFit();
     }
 };
-
-// Merge with defaults from base file (excluding sideBar and suppressSizeToFit)
-const defaults = { ...window.AGGridDefaults };
-delete defaults.sideBar;
-delete defaults.suppressSizeToFit;
-Object.assign(gridOptions, defaults);
 
 // Load Purchase Data - with pagination state preservation
 function loadPurchaseData(preservePagination = false) {
@@ -350,9 +403,9 @@ function loadPurchaseData(preservePagination = false) {
     // Save current pagination state
     let currentPage = 0;
     let pageSize = 25;
-    if (preservePagination && gridApi) {
-        currentPage = gridApi.paginationGetCurrentPage() || 0;
-        pageSize = gridApi.paginationGetPageSize() || 25;
+    if (preservePagination && purchaseGridApi) {
+        currentPage = purchaseGridApi.paginationGetCurrentPage() || 0;
+        pageSize = purchaseGridApi.paginationGetPageSize() || 25;
     }
     
     // Build request data
@@ -364,10 +417,10 @@ function loadPurchaseData(preservePagination = false) {
     if (driverId) requestData.append('driver_id', driverId);
     if (materialId) requestData.append('material_id', materialId);
     if (searchTerm) requestData.append('search', searchTerm);
-    requestData.append('ag_grid', '1');
+    requestData.append('limit', '500'); // Get more records for AG Grid
     
     // Show loading
-    gridApi?.showLoadingOverlay();
+    purchaseGridApi?.showLoadingOverlay();
     
     fetch('../process/purchase/select_purchase.php', {
         method: 'POST',
@@ -400,25 +453,25 @@ function loadPurchaseData(preservePagination = false) {
                     bin_name: row.bin_name || '-'
                 }));
                 
-                gridApi.setGridOption('rowData', rowData);
-                gridApi.hideOverlay();
+                purchaseGridApi.setGridOption('rowData', rowData);
+                purchaseGridApi.hideOverlay();
                 
                 // Restore pagination state if preserving
-                if (preservePagination && gridApi) {
+                if (preservePagination && purchaseGridApi) {
                     setTimeout(() => {
-                        gridApi.paginationGoToPage(currentPage);
-                        gridApi.paginationSetPageSize(pageSize);
+                        purchaseGridApi.paginationGoToPage(currentPage);
+                        purchaseGridApi.paginationSetPageSize(pageSize);
                     }, 100);
                 }
             } else {
-                gridApi.setGridOption('rowData', []);
-                gridApi.showNoRowsOverlay();
+                purchaseGridApi.setGridOption('rowData', []);
+                purchaseGridApi.showNoRowsOverlay();
             }
         })
         .catch(error => {
             console.error('Error loading purchases:', error);
-            gridApi.setGridOption('rowData', []);
-            gridApi.showNoRowsOverlay();
+            purchaseGridApi.setGridOption('rowData', []);
+            purchaseGridApi.showNoRowsOverlay();
             if (window.Swal) {
                 Swal.fire({
                     icon: 'error',
@@ -434,63 +487,53 @@ window.reloadPurchases = function() {
     loadPurchaseData(true); // Preserve pagination state
 };
 
-// Export to Excel
+// Export to Excel (CSV for community version)
 function exportPurchaseToExcel() {
-    if (window.exportAGGridToExcel && gridApi) {
-        window.exportAGGridToExcel(gridApi, `کڕینەکان_${new Date().toISOString().split('T')[0]}.xlsx`, 'کڕینەکان');
-    } else if (gridApi) {
+    if (purchaseGridApi) {
         const params = {
-            fileName: `کڕینەکان_${new Date().toISOString().split('T')[0]}.xlsx`,
-            sheetName: 'کڕینەکان'
+            fileName: `کڕینەکان_${new Date().toISOString().split('T')[0]}.csv`
         };
-        gridApi.exportDataAsExcel(params);
+        purchaseGridApi.exportDataAsCsv(params);
     }
 }
 
 // Export to CSV
 function exportPurchaseToCSV() {
-    if (gridApi) {
+    if (purchaseGridApi) {
         const params = {
             fileName: `کڕینەکان_${new Date().toISOString().split('T')[0]}.csv`
         };
-        gridApi.exportDataAsCsv(params);
+        purchaseGridApi.exportDataAsCsv(params);
     }
 }
 
-// Export Summary to Excel
+// Export Summary to CSV
 function exportPurchaseSummaryToExcel() {
-    if (window.exportAGGridToExcel && gridApi) {
-        window.exportAGGridToExcel(gridApi, `کورتەی_کڕینەکان_${new Date().toISOString().split('T')[0]}.xlsx`, 'کورتە');
-    } else if (gridApi) {
+    if (purchaseGridApi) {
         const params = {
-            fileName: `کورتەی_کڕینەکان_${new Date().toISOString().split('T')[0]}.xlsx`,
-            sheetName: 'کورتە',
-            onlySelected: false
+            fileName: `کورتەی_کڕینەکان_${new Date().toISOString().split('T')[0]}.csv`
         };
-        gridApi.exportDataAsExcel(params);
+        purchaseGridApi.exportDataAsCsv(params);
     }
 }
 
 // Export Monthly Report
 function exportPurchaseMonthlyReport() {
-    if (window.exportAGGridToExcel && gridApi) {
-        window.exportAGGridToExcel(gridApi, `ڕاپۆرتی_مانگانەی_کڕینەکان_${new Date().toISOString().split('T')[0]}.xlsx`, 'ڕاپۆرت');
-    } else if (gridApi) {
+    if (purchaseGridApi) {
         const params = {
-            fileName: `ڕاپۆرتی_مانگانەی_کڕینەکان_${new Date().toISOString().split('T')[0]}.xlsx`,
-            sheetName: 'ڕاپۆرت'
+            fileName: `ڕاپۆرتی_مانگانەی_کڕینەکان_${new Date().toISOString().split('T')[0]}.csv`
         };
-        gridApi.exportDataAsExcel(params);
+        purchaseGridApi.exportDataAsCsv(params);
     }
 }
 
 // Export Monthly Report to CSV
 function exportPurchaseMonthlyReportToCSV() {
-    if (gridApi) {
+    if (purchaseGridApi) {
         const params = {
             fileName: `ڕاپۆرتی_مانگانەی_کڕینەکان_${new Date().toISOString().split('T')[0]}.csv`
         };
-        gridApi.exportDataAsCsv(params);
+        purchaseGridApi.exportDataAsCsv(params);
     }
 }
 
@@ -498,13 +541,8 @@ function exportPurchaseMonthlyReportToCSV() {
 document.addEventListener('DOMContentLoaded', function() {
     const gridDiv = document.querySelector('#purchaseGrid');
     if (gridDiv) {
-        // Use createGrid instead of new Grid (AG Grid v31+)
-        if (typeof agGrid.createGrid === 'function') {
-            gridApi = agGrid.createGrid(gridDiv, gridOptions).api;
-        } else {
-            // Fallback for older versions
-            new agGrid.Grid(gridDiv, gridOptions);
-        }
+        // Use createGrid for AG Grid v31+
+        purchaseGridApi = agGrid.createGrid(gridDiv, purchaseGridOptions);
         
         // Wait for grid to be ready before adding event listeners
         setTimeout(() => {
@@ -513,10 +551,10 @@ document.addEventListener('DOMContentLoaded', function() {
             filterInputs.forEach(inputId => {
                 const input = document.getElementById(inputId);
                 if (input) {
-                    input.addEventListener('change', loadPurchaseData);
+                    input.addEventListener('change', function() { loadPurchaseData(); });
                     input.addEventListener('input', function() {
                         clearTimeout(this.searchTimeout);
-                        this.searchTimeout = setTimeout(loadPurchaseData, 500);
+                        this.searchTimeout = setTimeout(function() { loadPurchaseData(); }, 500);
                     });
                 }
             });
@@ -540,16 +578,62 @@ document.addEventListener('DOMContentLoaded', function() {
             const clearColumnFiltersBtn = document.getElementById('clearColumnFiltersBtn');
             if (clearColumnFiltersBtn) {
                 clearColumnFiltersBtn.addEventListener('click', function() {
-                    if (gridApi) {
-                        gridApi.setFilterModel(null);
+                    if (purchaseGridApi) {
+                        purchaseGridApi.setFilterModel(null);
                         loadPurchaseData();
                     }
                 });
             }
-            
-            // Handle edit and delete buttons - let existing jQuery handlers work
-            // The event delegation in select_purchase.js and delete_purchase.js will handle these
-            // We just need to ensure the buttons are properly rendered in the grid
         }, 100);
     }
+});
+
+// Event delegation for edit button in AG Grid
+// تێبینی: delete handler لە delete_purchase.js هەیە
+$(document).on('click', '.edit-purchase', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const id = $(this).data('id');
+    if (!id) return;
+    
+    // Fetch purchase data and populate edit modal
+    $.ajax({
+        url: `../process/purchase/select_purchase.php?id=${id}`,
+        type: 'GET',
+        dataType: 'json',
+        success: function(data) {
+            if (data && data.id) {
+                // Populate edit form
+                $('#edit_id').val(data.id);
+                $('#edit_company_id').val(data.company_id).trigger('change');
+                $('#edit_driver_id').val(data.driver_id).trigger('change');
+                $('#edit_location_id').val(data.location_id).trigger('change');
+                $('#edit_invoice_number').val(data.invoice_number);
+                $('#edit_material_id').val(data.material_id).trigger('change');
+                $('#edit_bin_id').val(data.bin_id).trigger('change');
+                $('#edit_date').val(data.date);
+                $('#edit_type').val(data.type).trigger('change');
+                $('#edit_kg').val(data.kg);
+                $('#edit_price_per_kg_iqd').val(data.price_per_kg_iqd);
+                $('#edit_price_per_kg_usd').val(data.price_per_kg_usd);
+                $('#edit_exchange_rate').val(data.exchange_rate);
+                $('#edit_payment_type').val(data.payment_type);
+                $('#edit_price').val(data.price);
+                $('#edit_amount_iqd').val(data.amount_iqd);
+                $('#edit_paid_usd').val(data.paid_usd);
+                $('#edit_paid_iqd').val(data.paid_iqd);
+                $('#edit_remaining_usd').val(data.remaining_usd);
+                $('#edit_remaining_iqd').val(data.remaining_iqd);
+                
+                // Show modal
+                $('#editPurchaseModal').modal('show');
+            } else {
+                Swal.fire('هەڵە!', 'نەتوانرا داتاکان بخوێندرێنەوە', 'error');
+            }
+        },
+        error: function() {
+            Swal.fire('هەڵە!', 'هەڵەیەک لە پەیوەندیکردن', 'error');
+        }
+    });
 });

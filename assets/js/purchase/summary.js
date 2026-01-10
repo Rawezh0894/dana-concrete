@@ -7,11 +7,8 @@ function formatCurrency(amount) {
     return num.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 }
 
-// Function to format number - using AGGridFormatters if available
-function formatNumberLocal(amount) {
-    if (window.AGGridFormatters && window.AGGridFormatters.formatNumber) {
-        return window.AGGridFormatters.formatNumber(amount);
-    }
+// Function to format number
+function formatNumber(amount) {
     if (amount === null || amount === undefined || isNaN(amount)) {
         return '0';
     }
@@ -41,10 +38,10 @@ function loadPurchaseSummary(filterParams = '') {
             $('#total-debt').text('$' + formatCurrency(data.total_debt));
             
             // Update total companies card
-            $('#total-companies').text(formatNumberLocal(data.total_companies));
+            $('#total-companies').text(formatNumber(data.total_companies));
             
             // Update indebted companies card
-            $('#indebted-companies').text(formatNumberLocal(data.indebted_companies));
+            $('#indebted-companies').text(formatNumber(data.indebted_companies));
         })
         .catch(error => {
             console.error('Error:', error);

@@ -297,11 +297,8 @@ const gridOptions = {
     }
 };
 
-// Merge with defaults from base file (excluding sideBar and suppressSizeToFit)
-const defaults = { ...window.AGGridDefaults };
-delete defaults.sideBar;
-delete defaults.suppressSizeToFit;
-Object.assign(gridOptions, defaults);
+// Merge with defaults from base file
+Object.assign(gridOptions, window.AGGridDefaults || {});
 
 // Load Sales Data - with pagination state preservation
 function loadSalesData(preservePagination = false) {
@@ -445,13 +442,7 @@ function exportSaleSummaryToExcel() {
 document.addEventListener('DOMContentLoaded', function() {
     const gridDiv = document.querySelector('#salesGrid');
     if (gridDiv) {
-        // Use createGrid instead of new Grid (AG Grid v31+)
-        if (typeof agGrid.createGrid === 'function') {
-            gridApi = agGrid.createGrid(gridDiv, gridOptions).api;
-        } else {
-            // Fallback for older versions
-            new agGrid.Grid(gridDiv, gridOptions);
-        }
+        new agGrid.Grid(gridDiv, gridOptions);
         
         // Wait for grid to be ready before adding event listeners
         setTimeout(() => {

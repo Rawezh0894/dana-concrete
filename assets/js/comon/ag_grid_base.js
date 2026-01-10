@@ -3,7 +3,9 @@
  * 
  * بەکارهێنان:
  * 1. لە HTML دا: <div id="myGrid" class="ag-grid-container ag-theme-alpine"></div>
- * 2. لە JS دا: const grid = initAGGrid('myGrid', columnDefs, options);
+ * 2. لە JS دا: const gridApi = initAGGrid('myGrid', columnDefs, options);
+ * 
+ * تێبینی: ئەم فایلە بۆ AG Grid Community v31+ ە
  */
 
 // Format functions - بۆ بەکارهێنانی لە هەموو پەیجەکاندا
@@ -35,24 +37,24 @@ window.AGGridFormatters = {
     }
 };
 
-// Default Grid Options - دەتوانرێت override بکرێت
+// Default Grid Options - بۆ Community version
+// تێبینی: sideBar, enableRangeSelection, enableCharts تەنها بۆ Enterprise version ە
 window.AGGridDefaults = {
     defaultColDef: {
         sortable: true,
         filter: true,
         resizable: true,
         floatingFilter: true,
-        autoHeight: true,
-        wrapText: true,
-        flex: 1,
         minWidth: 100
-    },
-    autoSizeStrategy: {
-        type: 'fitCellContents'
     },
     pagination: true,
     paginationPageSize: 25,
     paginationPageSizeSelector: [10, 25, 50, 100],
+    animateRows: true,
+    rowSelection: 'multiple',
+    suppressRowClickSelection: true,
+    enableCellTextSelection: true,
+    ensureDomOrder: true,
     localeText: {
         // Pagination
         page: 'لاپەڕە',
@@ -78,6 +80,10 @@ window.AGGridDefaults = {
         notContains: 'تێدا نییە',
         startsWith: 'دەست پێدەکات بە',
         endsWith: 'کۆتایی دێت بە',
+        blank: 'بەتاڵ',
+        notBlank: 'بەتاڵ نییە',
+        andCondition: 'و',
+        orCondition: 'یان',
         // Buttons
         applyFilter: 'جێبەجێکردنی فلتەر',
         resetFilter: 'دووبارەکردنەوەی فلتەر',
@@ -89,22 +95,18 @@ window.AGGridDefaults = {
         autosizeAllColumns: 'گەورەکردنی هەموو ستونەکان',
         groupBy: 'گروپکردن بەپێی',
         ungroupBy: 'لادانی گروپ',
+        resetColumns: 'ڕیسێتی ستونەکان',
+        expandAll: 'کردنەوەی هەموو',
+        collapseAll: 'داخستنی هەموو',
+        copy: 'کۆپی',
+        ctrlC: 'Ctrl+C',
+        paste: 'پەیست',
+        ctrlV: 'Ctrl+V',
         // Export
         export: 'ئیکسپۆرت',
         csvExport: 'ئیکسپۆرتی CSV',
-        excelExport: 'ئیکسپۆرتی Excel',
-    },
-    // sideBar removed - requires Enterprise version
-    // suppressSizeToFit removed - not valid in AG Grid v31
-    suppressHorizontalScroll: false,
-    suppressRowClickSelection: true,
-    animateRows: true,
-    enableRangeSelection: true,
-    enableCharts: true,
-    rowSelection: 'multiple',
-    suppressCellFocus: false,
-    enableCellTextSelection: true,
-    ensureDomOrder: true
+        excelExport: 'ئیکسپۆرتی Excel'
+    }
 };
 
 /**
@@ -112,7 +114,7 @@ window.AGGridDefaults = {
  * @param {string} gridId - ID ی div ی grid
  * @param {Array} columnDefs - لیستی ستونەکان
  * @param {Object} customOptions - گزینه‌های سفارشی (اختیاری)
- * @returns {Object} - gridApi و gridColumnApi
+ * @returns {Object} - gridApi
  */
 function initAGGrid(gridId, columnDefs, customOptions = {}) {
     const gridDiv = document.getElementById(gridId);
@@ -138,38 +140,14 @@ function initAGGrid(gridId, columnDefs, customOptions = {}) {
         }
     };
     
-    // Add default onGridReady if not provided
-    if (!gridOptions.onGridReady) {
-        gridOptions.onGridReady = function(params) {
-            if (customOptions.onGridReady) {
-                customOptions.onGridReady(params);
-            }
-        };
-    }
+    // Use createGrid for AG Grid v31+
+    const gridApi = agGrid.createGrid(gridDiv, gridOptions);
     
-    // Add default onFirstDataRendered if not provided
-    if (!gridOptions.onFirstDataRendered) {
-        gridOptions.onFirstDataRendered = function(params) {
-            // Auto-size columns based on content
-            const allColumnIds = params.columnApi.getColumns().map(col => col.getId());
-            params.columnApi.autoSizeColumns(allColumnIds, false);
-            
-            if (customOptions.onFirstDataRendered) {
-                customOptions.onFirstDataRendered(params);
-            }
-        };
-    }
-    
-    // Initialize grid
-    const grid = new agGrid.Grid(gridDiv, gridOptions);
-    
-    return {
-        grid: grid,
-        api: gridOptions.api,
-        columnApi: gridOptions.columnApi,
-        gridOptions: gridOptions
-    };
+    return gridApi;
 }
+
+// Export function globally
+window.initAGGrid = initAGGrid;
 
 /**
  * Load data into grid with pagination preservation
@@ -231,8 +209,33 @@ function loadAGGridData(gridApi, url, dataTransformer = null, preservePagination
         });
 }
 
+// Export function globally
+window.loadAGGridData = loadAGGridData;
+
 /**
- * Export grid data to Excel
+ * Export grid data to CSV (Community version)
+ * @param {Object} gridApi - AG Grid API
+ * @param {string} fileName - ناوی فایل
+ */
+function exportAGGridToCSV(gridApi, fileName) {
+    if (!gridApi) {
+        console.error('Grid API not provided!');
+        return;
+    }
+    
+    const params = {
+        fileName: fileName
+    };
+    
+    gridApi.exportDataAsCsv(params);
+}
+
+// Export function globally
+window.exportAGGridToCSV = exportAGGridToCSV;
+
+/**
+ * Export grid data to Excel (requires Enterprise version)
+ * Falls back to CSV for Community version
  * @param {Object} gridApi - AG Grid API
  * @param {string} fileName - ناوی فایل
  * @param {string} sheetName - ناوی وەرەق
@@ -243,10 +246,20 @@ function exportAGGridToExcel(gridApi, fileName, sheetName = 'Sheet1') {
         return;
     }
     
-    const params = {
-        fileName: fileName,
-        sheetName: sheetName
-    };
-    
-    gridApi.exportDataAsExcel(params);
+    // Check if exportDataAsExcel is available (Enterprise feature)
+    if (typeof gridApi.exportDataAsExcel === 'function') {
+        const params = {
+            fileName: fileName,
+            sheetName: sheetName
+        };
+        gridApi.exportDataAsExcel(params);
+    } else {
+        // Fallback to CSV for Community version
+        console.warn('Excel export requires AG Grid Enterprise. Falling back to CSV export.');
+        const csvFileName = fileName.replace('.xlsx', '.csv').replace('.xls', '.csv');
+        exportAGGridToCSV(gridApi, csvFileName);
+    }
 }
+
+// Export function globally
+window.exportAGGridToExcel = exportAGGridToExcel;
