@@ -1,13 +1,13 @@
 // AG Grid configuration for concrete receipts
 let concreteReceiptsGridApi = null;
 
-// Column definitions
+// Column definitions - matching the original HTML table order
 const concreteReceiptsColumnDefs = [
     {
         field: '#',
         headerName: '#',
         width: 80,
-        pinned: 'right',
+        pinned: 'left',
         cellStyle: { textAlign: 'center', direction: 'ltr' },
         valueGetter: function(params) {
             if (!params.node) return '';
@@ -116,6 +116,7 @@ const concreteReceiptsColumnDefs = [
         minWidth: 150,
         maxWidth: 200,
         flex: 0,
+        pinned: 'right',
         cellStyle: { textAlign: 'center', direction: 'ltr' },
         cellRenderer: function(params) {
             if (!params.data) return '-';
