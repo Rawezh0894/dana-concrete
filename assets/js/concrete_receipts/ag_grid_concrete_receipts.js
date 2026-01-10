@@ -301,7 +301,14 @@ async function loadConcreteReceiptsGrid(page = 1, pageSize = 25, search = '') {
 
         const data = await res.json();
         const loadTime = ((performance.now() - startTime) / 1000).toFixed(2);
-        console.log(`Data loaded in ${loadTime}s - Page ${page} of ${data.pagination?.totalPages || 1}`);
+        
+        // Log search results
+        if (search) {
+            console.log(`Search "${search}" results: ${data.pagination?.total || 0} records found in ${loadTime}s`);
+            console.log(`Showing page ${page} of ${data.pagination?.totalPages || 1} (${data.data?.length || 0} records on this page)`);
+        } else {
+            console.log(`Data loaded in ${loadTime}s - Page ${page} of ${data.pagination?.totalPages || 1}`);
+        }
 
         if (data.success && data.data) {
             // Cache data for client-side search within current page
@@ -310,6 +317,13 @@ async function loadConcreteReceiptsGrid(page = 1, pageSize = 25, search = '') {
             // Update pagination info
             totalRecords = data.pagination?.total || data.data.length;
             totalPages = data.pagination?.totalPages || 1;
+            
+            // Show message if search found results
+            if (search && totalRecords > 0) {
+                console.log(`✅ Search successful: Found ${totalRecords} records matching "${search}"`);
+            } else if (search && totalRecords === 0) {
+                console.log(`❌ Search found no results for "${search}"`);
+            }
             
             // Set row data
             concreteReceiptsGridApi.setGridOption('rowData', data.data);
@@ -324,12 +338,26 @@ async function loadConcreteReceiptsGrid(page = 1, pageSize = 25, search = '') {
 
             // Update pagination UI
             updatePaginationUI();
+            
+            // Show search status if searching
+            if (search && search.trim()) {
+                showSearchStatus(search, totalRecords);
+            } else {
+                showSearchStatus('', 0);
+            }
         } else {
             concreteReceiptsGridApi.setGridOption('rowData', []);
             concreteReceiptsGridApi.showNoRowsOverlay();
             totalRecords = 0;
             totalPages = 0;
             updatePaginationUI();
+            
+            // Show search status if searching
+            if (search && search.trim()) {
+                showSearchStatus(search, 0);
+            } else {
+                showSearchStatus('', 0);
+            }
         }
     } catch (error) {
         console.error('Error loading data:', error);
@@ -351,6 +379,28 @@ function updatePaginationInfo(text) {
     const infoEl = document.getElementById('pagination-info');
     if (infoEl) {
         infoEl.textContent = text;
+    }
+}
+
+// Show search status message
+function showSearchStatus(searchText, totalFound) {
+    if (searchText && searchText.trim()) {
+        const statusEl = document.getElementById('search-status-message');
+        if (statusEl) {
+            if (totalFound > 0) {
+                statusEl.innerHTML = `<i class="fas fa-check-circle text-success"></i> <strong>${formatNumber(totalFound)}</strong> ڕیکۆرد دۆزرایەوە بۆ "<strong>${searchText}</strong>" لە هەموو داتابەیسەکەدا`;
+                statusEl.className = 'alert alert-success alert-dismissible fade show';
+            } else {
+                statusEl.innerHTML = `<i class="fas fa-exclamation-circle text-warning"></i> هیچ ڕیکۆردێک نەدۆزرایەوە بۆ "<strong>${searchText}</strong>"`;
+                statusEl.className = 'alert alert-warning alert-dismissible fade show';
+            }
+            statusEl.style.display = 'block';
+        }
+    } else {
+        const statusEl = document.getElementById('search-status-message');
+        if (statusEl) {
+            statusEl.style.display = 'none';
+        }
     }
 }
 
@@ -421,10 +471,17 @@ function changePageSize(size) {
     }
 }
 
-// Server-side search
+// Server-side search - هەمیشە لە لاپەڕەی 1 دەست پێ دەکات
+// Search لە هەموو داتابەیسەکەدا دەگەڕێت (لە هەموو pagination ەکاندا)
 function serverSearch(searchText) {
-    currentSearchText = searchText.trim();
-    loadConcreteReceiptsGrid(1, currentPageSize, currentSearchText);
+    const trimmedSearch = searchText.trim();
+    currentSearchText = trimmedSearch;
+    
+    // کاتێک search دەکات، هەمیشە لە لاپەڕەی 1 دەست پێ دەکات
+    // بۆ ئەوەی لە هەموو pagination ەکاندا بگەڕێت
+    // Server-side search لە PHP فایلەکەدا لە هەموو داتابەیسەکەدا دەگەڕێت
+    console.log('Searching for:', trimmedSearch || '(empty - showing all)');
+    loadConcreteReceiptsGrid(1, currentPageSize, trimmedSearch);
 }
 
 // Debounce function
@@ -519,22 +576,18 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load initial data
     loadConcreteReceiptsGrid(1, 25, '');
 
-    // Quick search functionality - Server-side search (searches across ALL pages)
+    // Quick search functionality - Server-side search
     const quickSearchInput = document.getElementById('quickSearchInput');
     const clearQuickSearchBtn = document.getElementById('clearQuickSearch');
     
     if (quickSearchInput) {
-        // Server-side search - searches in entire database, not just current page
         quickSearchInput.addEventListener('input', function() {
-            const searchValue = this.value.trim();
-            // Use debounced search to avoid too many requests
-            debouncedServerSearch(searchValue);
+            debouncedServerSearch(this.value);
         });
 
         if (clearQuickSearchBtn) {
             clearQuickSearchBtn.addEventListener('click', function() {
                 quickSearchInput.value = '';
-                // Clear search and reload from page 1
                 serverSearch('');
             });
         }
@@ -542,8 +595,7 @@ document.addEventListener('DOMContentLoaded', function() {
         quickSearchInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                // Immediate search on Enter key
-                serverSearch(this.value.trim());
+                serverSearch(this.value);
             }
         });
     }
