@@ -62,6 +62,7 @@ usort($recipients, function($a, $b) {
     <!-- AG Grid CSS -->
     <link href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/styles/ag-grid.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/styles/ag-theme-alpine.css" rel="stylesheet">
+    <link href="../assets/css/comon/ag_grid.css" rel="stylesheet">
     <link href="../assets/css/sale/ag_grid_sale.css" rel="stylesheet">
     
     <style>
@@ -651,6 +652,7 @@ usort($recipients, function($a, $b) {
 <script src="../assets/js/swalAlert.js"></script>
 <!-- AG Grid JS -->
 <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/dist/ag-grid-community.min.js"></script>
+<script src="../assets/js/comon/ag_grid_base.js"></script>
 <script src="../assets/js/comon/select2_script.js"></script>
 <script>
     // Pass permissions to JavaScript

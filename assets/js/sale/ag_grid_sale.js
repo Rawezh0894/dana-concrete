@@ -1,22 +1,25 @@
 // AG Grid Configuration for Sales Table
+// بەکارهێنانی فایلی گشتی
+// <script src="../assets/js/comon/ag_grid_base.js"></script> پێویستە لە HTML دا زیاد بکرێت
+
 let gridApi;
 let gridColumnApi;
 
-// Format functions
-function formatNumber(n) {
+// Format functions - بەکارهێنانی لە فایلی گشتی
+const formatNumber = window.AGGridFormatters?.formatNumber || function(n) {
     if (n === null || n === undefined || n === '') return '';
     return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
+};
 
-function formatUSD(n) {
+const formatUSD = window.AGGridFormatters?.formatUSD || function(n) {
     if (n === null || n === undefined || n === '' || isNaN(n)) return '-';
     return formatNumber(Number(n).toFixed(2)) + ' $';
-}
+};
 
-function formatIQD(n) {
+const formatIQD = window.AGGridFormatters?.formatIQD || function(n) {
     if (n === null || n === undefined || n === '' || isNaN(n)) return '-';
     return formatNumber(Number(n).toFixed(0)) + ' د.ع';
-}
+};
 
 // Column Definitions - ترتیب ستونەکان بە شێوەی دروست (لە چەپ بۆ ڕاست - LTR)
 const columnDefs = [
@@ -274,87 +277,9 @@ const columnDefs = [
     }
 ];
 
-// Grid Options
+// Grid Options - بەکارهێنانی defaults لە فایلی گشتی
 const gridOptions = {
     columnDefs: columnDefs,
-    defaultColDef: {
-        sortable: true,
-        filter: true,
-        resizable: true,
-        floatingFilter: true,
-        autoHeight: true,
-        wrapText: true,
-        flex: 1,
-        minWidth: 100
-    },
-    autoSizeStrategy: {
-        type: 'fitCellContents'
-    },
-    rowData: [],
-    pagination: true,
-    paginationPageSize: 25,
-    paginationPageSizeSelector: [10, 25, 50, 100],
-    localeText: {
-        // Pagination
-        page: 'لاپەڕە',
-        more: 'زیاتر',
-        to: 'بۆ',
-        of: 'لە',
-        next: 'دواتر',
-        last: 'کۆتایی',
-        first: 'یەکەم',
-        previous: 'پێشوو',
-        loadingOoo: 'چاوەڕوان بە...',
-        noRowsToShow: 'هیچ ڕیزێک نییە',
-        // Filter
-        filterOoo: 'فلتەر...',
-        equals: 'یەکسان',
-        notEqual: 'نا یەکسان',
-        lessThan: 'کەمتر لە',
-        greaterThan: 'زیاتر لە',
-        lessThanOrEqual: 'کەمتر یان یەکسان',
-        greaterThanOrEqual: 'زیاتر یان یەکسان',
-        inRange: 'لە نێوان',
-        contains: 'تێدایە',
-        notContains: 'تێدا نییە',
-        startsWith: 'دەست پێدەکات بە',
-        endsWith: 'کۆتایی دێت بە',
-        // Buttons
-        applyFilter: 'جێبەجێکردنی فلتەر',
-        resetFilter: 'دووبارەکردنەوەی فلتەر',
-        clearFilter: 'پاککردنەوەی فلتەر',
-        // Columns
-        pinColumn: 'جێگیرکردنی ستون',
-        valueAggregation: 'کۆکردنەوە',
-        autosizeThiscolumn: 'گەورەکردنی ئەم ستونە',
-        autosizeAllColumns: 'گەورەکردنی هەموو ستونەکان',
-        groupBy: 'گروپکردن بەپێی',
-        ungroupBy: 'لادانی گروپ',
-        // Export
-        export: 'ئیکسپۆرت',
-        csvExport: 'ئیکسپۆرتی CSV',
-        excelExport: 'ئیکسپۆرتی Excel',
-    },
-    sideBar: {
-        toolPanels: [
-            {
-                id: 'columns',
-                labelDefault: 'ستونەکان',
-                labelKey: 'columns',
-                iconKey: 'columns',
-                toolPanel: 'agColumnsToolPanel',
-            },
-            {
-                id: 'filters',
-                labelDefault: 'فلتەرەکان',
-                labelKey: 'filters',
-                iconKey: 'filter',
-                toolPanel: 'agFiltersToolPanel',
-            }
-        ],
-        defaultToolPanel: 'filters',
-        hiddenByDefault: false
-    },
     rowClassRules: {
         'duplicate-invoice-row': function(params) {
             return params.data && params.data.duplicate_count && params.data.duplicate_count > 1;
@@ -369,19 +294,11 @@ const gridOptions = {
         // Auto-size columns based on content
         const allColumnIds = params.columnApi.getColumns().map(col => col.getId());
         params.columnApi.autoSizeColumns(allColumnIds, false);
-    },
-    // Enable horizontal scroll
-    suppressSizeToFit: true,
-    suppressHorizontalScroll: false,
-    suppressRowClickSelection: true,
-    animateRows: true,
-    enableRangeSelection: true,
-    enableCharts: true,
-    rowSelection: 'multiple',
-    suppressCellFocus: false,
-    enableCellTextSelection: true,
-    ensureDomOrder: true
+    }
 };
+
+// Merge with defaults from base file
+Object.assign(gridOptions, window.AGGridDefaults || {});
 
 // Load Sales Data - with pagination state preservation
 function loadSalesData(preservePagination = false) {
@@ -391,16 +308,6 @@ function loadSalesData(preservePagination = false) {
     const minQuantity = document.getElementById('filter_quantity_min')?.value || '';
     const maxQuantity = document.getElementById('filter_quantity_max')?.value || '';
     
-    // Save current pagination state
-    let currentPage = 0;
-    let pageSize = 25;
-    if (preservePagination && gridApi) {
-        const paginationState = gridApi.paginationGetCurrentPage();
-        const pageSizeState = gridApi.paginationGetPageSize();
-        currentPage = paginationState || 0;
-        pageSize = pageSizeState || 25;
-    }
-    
     // Build URL with filters
     let url = '../process/sale/select_sale.php?ag_grid=1';
     if (fromDate) url += `&from=${encodeURIComponent(fromDate)}`;
@@ -409,60 +316,94 @@ function loadSalesData(preservePagination = false) {
     if (minQuantity) url += `&min_quantity=${encodeURIComponent(minQuantity)}`;
     if (maxQuantity) url += `&max_quantity=${encodeURIComponent(maxQuantity)}`;
     
-    // Show loading
-    gridApi?.showLoadingOverlay();
-    
-    fetch(url)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success && data.data) {
-                // Transform data for AG Grid
-                const rowData = data.data.map(row => ({
-                    id: row.id,
-                    customer_name: row.customer_name || '-',
-                    recipient: row.recipient || '-',
-                    location: row.location || '-',
-                    invoice_number: row.invoice_number || '-',
-                    formula_name: row.formula_name || '-',
-                    order_date: row.order_date || '-',
-                    payment_type: row.payment_type || '-',
-                    quantity: row.quantity || 0,
-                    price_per_unit: row.price_per_unit || 0,
-                    total_price: row.total_price || 0,
-                    amount_paid_iq: row.amount_paid_iq || 0,
-                    amount_paid_usd: row.amount_paid_usd || 0,
-                    remaining_amount: row.remaining_amount || 0,
-                    dolar_rate: row.dolar_rate || 0,
-                    notes: row.notes || '-',
-                    discount: row.discount || 0,
-                    duplicate_count: row.duplicate_count || 0
-                }));
-                
-                gridApi.setGridOption('rowData', rowData);
-                gridApi.hideOverlay();
-                
-                // Restore pagination state if preserving
-                if (preservePagination && gridApi) {
-                    setTimeout(() => {
-                        gridApi.paginationGoToPage(currentPage);
-                        gridApi.paginationSetPageSize(pageSize);
-                    }, 100);
+    // Use base function if available, otherwise use custom implementation
+    if (window.loadAGGridData && gridApi) {
+        const dataTransformer = (data) => {
+            return data.map(row => ({
+                id: row.id,
+                customer_name: row.customer_name || '-',
+                recipient: row.recipient || '-',
+                location: row.location || '-',
+                invoice_number: row.invoice_number || '-',
+                formula_name: row.formula_name || '-',
+                order_date: row.order_date || '-',
+                payment_type: row.payment_type || '-',
+                quantity: row.quantity || 0,
+                price_per_unit: row.price_per_unit || 0,
+                total_price: row.total_price || 0,
+                amount_paid_iq: row.amount_paid_iq || 0,
+                amount_paid_usd: row.amount_paid_usd || 0,
+                remaining_amount: row.remaining_amount || 0,
+                dolar_rate: row.dolar_rate || 0,
+                notes: row.notes || '-',
+                discount: row.discount || 0,
+                duplicate_count: row.duplicate_count || 0
+            }));
+        };
+        window.loadAGGridData(gridApi, url, dataTransformer, preservePagination);
+    } else {
+        // Fallback to custom implementation
+        let currentPage = 0;
+        let pageSize = 25;
+        if (preservePagination && gridApi) {
+            currentPage = gridApi.paginationGetCurrentPage() || 0;
+            pageSize = gridApi.paginationGetPageSize() || 25;
+        }
+        
+        gridApi?.showLoadingOverlay();
+        
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.data) {
+                    const rowData = data.data.map(row => ({
+                        id: row.id,
+                        customer_name: row.customer_name || '-',
+                        recipient: row.recipient || '-',
+                        location: row.location || '-',
+                        invoice_number: row.invoice_number || '-',
+                        formula_name: row.formula_name || '-',
+                        order_date: row.order_date || '-',
+                        payment_type: row.payment_type || '-',
+                        quantity: row.quantity || 0,
+                        price_per_unit: row.price_per_unit || 0,
+                        total_price: row.total_price || 0,
+                        amount_paid_iq: row.amount_paid_iq || 0,
+                        amount_paid_usd: row.amount_paid_usd || 0,
+                        remaining_amount: row.remaining_amount || 0,
+                        dolar_rate: row.dolar_rate || 0,
+                        notes: row.notes || '-',
+                        discount: row.discount || 0,
+                        duplicate_count: row.duplicate_count || 0
+                    }));
+                    
+                    gridApi.setGridOption('rowData', rowData);
+                    gridApi.hideOverlay();
+                    
+                    if (preservePagination && gridApi) {
+                        setTimeout(() => {
+                            gridApi.paginationGoToPage(currentPage);
+                            gridApi.paginationSetPageSize(pageSize);
+                        }, 100);
+                    }
+                } else {
+                    gridApi.setGridOption('rowData', []);
+                    gridApi.showNoRowsOverlay();
                 }
-            } else {
+            })
+            .catch(error => {
+                console.error('Error loading sales:', error);
                 gridApi.setGridOption('rowData', []);
                 gridApi.showNoRowsOverlay();
-            }
-        })
-        .catch(error => {
-            console.error('Error loading sales:', error);
-            gridApi.setGridOption('rowData', []);
-            gridApi.showNoRowsOverlay();
-            Swal.fire({
-                icon: 'error',
-                title: 'هەڵە',
-                text: 'نەتوانرا زانیارییەکان بخوێندرێنوە. تکایە دووبارە هەوڵ بدەوە'
+                if (window.Swal) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'هەڵە',
+                        text: 'نەتوانرا زانیارییەکان بخوێندرێنوە. تکایە دووبارە هەوڵ بدەوە'
+                    });
+                }
             });
-        });
+    }
 }
 
 // Reload function - preserve pagination
@@ -472,21 +413,29 @@ window.reloadSales = function() {
 
 // Export to Excel
 function exportSaleToExcel() {
-    const params = {
-        fileName: `فرۆشتنەکان_${new Date().toISOString().split('T')[0]}.xlsx`,
-        sheetName: 'فرۆشتنەکان'
-    };
-    gridApi.exportDataAsExcel(params);
+    if (window.exportAGGridToExcel && gridApi) {
+        window.exportAGGridToExcel(gridApi, `فرۆشتنەکان_${new Date().toISOString().split('T')[0]}.xlsx`, 'فرۆشتنەکان');
+    } else if (gridApi) {
+        const params = {
+            fileName: `فرۆشتنەکان_${new Date().toISOString().split('T')[0]}.xlsx`,
+            sheetName: 'فرۆشتنەکان'
+        };
+        gridApi.exportDataAsExcel(params);
+    }
 }
 
 // Export Summary to Excel
 function exportSaleSummaryToExcel() {
-    const params = {
-        fileName: `کورتەی_فرۆشتنەکان_${new Date().toISOString().split('T')[0]}.xlsx`,
-        sheetName: 'کورتە',
-        onlySelected: false
-    };
-    gridApi.exportDataAsExcel(params);
+    if (window.exportAGGridToExcel && gridApi) {
+        window.exportAGGridToExcel(gridApi, `کورتەی_فرۆشتنەکان_${new Date().toISOString().split('T')[0]}.xlsx`, 'کورتە');
+    } else if (gridApi) {
+        const params = {
+            fileName: `کورتەی_فرۆشتنەکان_${new Date().toISOString().split('T')[0]}.xlsx`,
+            sheetName: 'کورتە',
+            onlySelected: false
+        };
+        gridApi.exportDataAsExcel(params);
+    }
 }
 
 // Initialize Grid
@@ -507,12 +456,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         clearTimeout(this.searchTimeout);
                         this.searchTimeout = setTimeout(loadSalesData, 500);
                     });
-            }
-        });
-        
-        // Handle edit and delete buttons - let existing jQuery handlers work
-        // The event delegation in update_sale.js and delete_sale.js will handle these
-        // We just need to ensure the buttons are properly rendered in the grid
+                }
+            });
+            
+            // Handle edit and delete buttons - let existing jQuery handlers work
+            // The event delegation in update_sale.js and delete_sale.js will handle these
+            // We just need to ensure the buttons are properly rendered in the grid
         }, 100);
     }
 });
