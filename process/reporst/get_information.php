@@ -675,7 +675,7 @@ try {
                     p.kg
                 FROM purchases p
                 JOIN materials m ON p.material_id = m.id
-                WHERE m.name = ? AND p.kg > 0
+                WHERE m.name = ? AND p.kg > 0 AND p.date >= '2026-01-01'
                 ORDER BY p.date DESC, p.id DESC
                 LIMIT 50
             ";
