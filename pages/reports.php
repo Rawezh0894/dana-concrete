@@ -601,6 +601,47 @@ if (!isset($_SESSION['user_id'])) {
     <div class="row" id="dashboard-summary-cards" style="margin-bottom:2rem;">
         <!-- Cards will be rendered here by JS -->
     </div>
+
+    <!-- Purchase Analysis Modal -->
+    <div class="modal fade" id="purchaseAnalysisModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header bg-gradient-info text-white">
+                    <h5 class="modal-title"><i class="fas fa-microscope me-2"></i>شیکردنەوەی وردی نرخی بەکارهاتوو</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        ئەم لیستە ئەو کڕینانە پیشان دەدات کە بەکارهاتوون بۆ هەژمارکردنی تێکڕای نرخ (Average Price) لەم ماوەیەدا.
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>بەروار</th>
+                                    <th>پسوڵە</th>
+                                    <th>مەواد</th>
+                                    <th>بڕ (کگم)</th>
+                                    <th>جۆر</th>
+                                    <th>نرخ (USD Detail)</th>
+                                    <th>نرخ (IQD Detail)</th>
+                                    <th>نرخی هەژمارکراو (USD)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="purchaseAnalysisTableBody">
+                                <!-- Data will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
+                </div>
+            </div>
+        </div>
+    </div>
     
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

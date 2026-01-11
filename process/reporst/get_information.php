@@ -723,6 +723,34 @@ try {
         error_log("Error calculating material prices: " . $e->getMessage());
     }
 
+    // Get breakdown of purchases used for average price calculation (Scientific/Accounting Evidence)
+    $purchase_breakdown = [];
+    try {
+        $breakdown_query = "
+            SELECT 
+                p.id, 
+                p.date, 
+                p.invoice_number, 
+                m.name as material_name, 
+                p.price as price_usd, 
+                p.amount_iqd, 
+                p.kg, 
+                p.type as currency_type, 
+                p.exchange_rate,
+                CASE WHEN p.type = 'دۆلار' THEN p.price ELSE p.amount_iqd / NULLIF(p.exchange_rate / 100, 0) END as calculated_usd_amount
+            FROM purchases p
+            JOIN materials m ON p.material_id = m.id
+            WHERE p.kg > 0 $date_condition_date
+            ORDER BY p.date DESC, p.id DESC
+        ";
+        $stmt_breakdown = $pdo->query($breakdown_query);
+        while ($row = $stmt_breakdown->fetch()) {
+            $purchase_breakdown[] = $row;
+        }
+    } catch (Exception $e) {
+        error_log("Error getting purchase breakdown: " . $e->getMessage());
+    }
+
     // Calculate costs for each consumption category
     $material_costs = [
         'black_sand' => $material_consumption_tons['black_sand'] * $material_prices['black_sand'],
@@ -1202,6 +1230,7 @@ try {
         'costs' => $material_costs,
         'total_cost_usd' => $total_used_material_cost_usd,
         'current_stock' => $current_stock,
+        'purchase_breakdown' => $purchase_breakdown, // Added breakdown for debugging
         // Gas consumption data
         'gas' => [
             'liters' => $gas_consumption_liters,

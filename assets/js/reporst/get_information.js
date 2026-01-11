@@ -1,4 +1,5 @@
 let currentReportFilter = 'year';
+let purchaseAnalysisData = []; // Store purchase breakdown data
 
 function fetchAndRenderReportData() {
     const fromDate = document.getElementById('from-date')?.value;
@@ -21,6 +22,7 @@ function fetchAndRenderReportData() {
             }
 
             const data = result.data;
+            purchaseAnalysisData = data.material_consumption?.purchase_breakdown || [];
             console.log('Data received:', data);
 
             // Cards will be rendered by renderDashboardCards function
@@ -162,9 +164,9 @@ function renderDashboardCards(data) {
             icon: 'fa-calculator',
             cardClass: 'total-expenses-card',
             value: formatCurrency(
-                (Number(data.data?.material_consumption?.total_cost_usd) || 0) + 
+                (Number(data.data?.material_consumption?.total_cost_usd) || 0) +
                 (Number(data.data?.raw_material_sales?.cost_usd) || 0) +
-                (Number(data.data?.material_consumption?.gas?.cost_usd) || 0), 
+                (Number(data.data?.material_consumption?.gas?.cost_usd) || 0),
                 'USD'
             ),
             subtitle: 'کۆی نرخی کڕینی مەوادی بەکارهاتوو + تێچووی فرۆشتنی مەوادی خام + تێچووی بەکارهێنانی گاز'
@@ -488,7 +490,13 @@ function renderDashboardCards(data) {
             icon: 'fa-dollar-sign',
             cardClass: 'purchase-materials-card',
             value: formatCurrency(data.data?.material_consumption?.costs?.black_sand || 0, 'USD'),
-            subtitle: `تێکڕای نرخ: ${formatCurrency(data.data?.material_consumption?.prices?.black_sand || 0, 'USD')} / تۆن`
+            value: formatCurrency(data.data?.material_consumption?.costs?.black_sand || 0, 'USD'),
+            subtitle: `<div class="d-flex justify-content-center align-items-center">
+                        <span>تێکڕای نرخ: ${formatCurrency(data.data?.material_consumption?.prices?.black_sand || 0, 'USD')} / تۆن</span>
+                        <button class="btn btn-sm btn-light ms-2 px-2 py-0" onclick="event.stopPropagation(); showPurchaseAnalysis()" title="وردەکاری" style="border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 10px; opacity: 0.8;">
+                            <i class="fas fa-info"></i>
+                        </button>
+                       </div>`
         },
         {
             key: 'brown_sand_cost',
@@ -496,7 +504,13 @@ function renderDashboardCards(data) {
             icon: 'fa-dollar-sign',
             cardClass: 'purchase-materials-card',
             value: formatCurrency(data.data?.material_consumption?.costs?.brown_sand || 0, 'USD'),
-            subtitle: `تێکڕای نرخ: ${formatCurrency(data.data?.material_consumption?.prices?.brown_sand || 0, 'USD')} / تۆن`
+            value: formatCurrency(data.data?.material_consumption?.costs?.brown_sand || 0, 'USD'),
+            subtitle: `<div class="d-flex justify-content-center align-items-center">
+                        <span>تێکڕای نرخ: ${formatCurrency(data.data?.material_consumption?.prices?.brown_sand || 0, 'USD')} / تۆن</span>
+                        <button class="btn btn-sm btn-light ms-2 px-2 py-0" onclick="event.stopPropagation(); showPurchaseAnalysis()" title="وردەکاری" style="border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 10px; opacity: 0.8;">
+                            <i class="fas fa-info"></i>
+                        </button>
+                       </div>`
         },
         {
             key: 'gravel_bin3_cost',
@@ -504,7 +518,12 @@ function renderDashboardCards(data) {
             icon: 'fa-dollar-sign',
             cardClass: 'purchase-materials-card',
             value: formatCurrency(data.data?.material_consumption?.costs?.gravel_bin3 || 0, 'USD'),
-            subtitle: `تێکڕای نرخ: ${formatCurrency(data.data?.material_consumption?.prices?.gravel || 0, 'USD')} / تۆن`
+            subtitle: `<div class="d-flex justify-content-center align-items-center">
+                        <span>تێکڕای نرخ: ${formatCurrency(data.data?.material_consumption?.prices?.gravel || 0, 'USD')} / تۆن</span>
+                        <button class="btn btn-sm btn-light ms-2 px-2 py-0" onclick="event.stopPropagation(); showPurchaseAnalysis()" title="وردەکاری" style="border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 10px; opacity: 0.8;">
+                            <i class="fas fa-info"></i>
+                        </button>
+                       </div>`
         },
         {
             key: 'gravel_bin4_cost',
@@ -512,7 +531,12 @@ function renderDashboardCards(data) {
             icon: 'fa-dollar-sign',
             cardClass: 'purchase-materials-card',
             value: formatCurrency(data.data?.material_consumption?.costs?.gravel_bin4 || 0, 'USD'),
-            subtitle: `تێکڕای نرخ: ${formatCurrency(data.data?.material_consumption?.prices?.gravel || 0, 'USD')} / تۆن`
+            subtitle: `<div class="d-flex justify-content-center align-items-center">
+                        <span>تێکڕای نرخ: ${formatCurrency(data.data?.material_consumption?.prices?.gravel || 0, 'USD')} / تۆن</span>
+                        <button class="btn btn-sm btn-light ms-2 px-2 py-0" onclick="event.stopPropagation(); showPurchaseAnalysis()" title="وردەکاری" style="border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 10px; opacity: 0.8;">
+                            <i class="fas fa-info"></i>
+                        </button>
+                       </div>`
         },
         {
             key: 'cement_cem1_cost',
@@ -520,7 +544,12 @@ function renderDashboardCards(data) {
             icon: 'fa-dollar-sign',
             cardClass: 'purchase-materials-card',
             value: formatCurrency(data.data?.material_consumption?.costs?.cement_cem1 || 0, 'USD'),
-            subtitle: `تێکڕای نرخ: ${formatCurrency(data.data?.material_consumption?.prices?.cement || 0, 'USD')} / تۆن`
+            subtitle: `<div class="d-flex justify-content-center align-items-center">
+                        <span>تێکڕای نرخ: ${formatCurrency(data.data?.material_consumption?.prices?.cement || 0, 'USD')} / تۆن</span>
+                        <button class="btn btn-sm btn-light ms-2 px-2 py-0" onclick="event.stopPropagation(); showPurchaseAnalysis()" title="وردەکاری" style="border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 10px; opacity: 0.8;">
+                            <i class="fas fa-info"></i>
+                        </button>
+                       </div>`
         },
         {
             key: 'cement_cem2_cost',
@@ -528,7 +557,12 @@ function renderDashboardCards(data) {
             icon: 'fa-dollar-sign',
             cardClass: 'purchase-materials-card',
             value: formatCurrency(data.data?.material_consumption?.costs?.cement_cem2 || 0, 'USD'),
-            subtitle: `تێکڕای نرخ: ${formatCurrency(data.data?.material_consumption?.prices?.cement || 0, 'USD')} / تۆن`
+            subtitle: `<div class="d-flex justify-content-center align-items-center">
+                        <span>تێکڕای نرخ: ${formatCurrency(data.data?.material_consumption?.prices?.cement || 0, 'USD')} / تۆن</span>
+                        <button class="btn btn-sm btn-light ms-2 px-2 py-0" onclick="event.stopPropagation(); showPurchaseAnalysis()" title="وردەکاری" style="border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 10px; opacity: 0.8;">
+                            <i class="fas fa-info"></i>
+                        </button>
+                       </div>`
         },
         {
             key: 'additive_cost',
@@ -536,7 +570,13 @@ function renderDashboardCards(data) {
             icon: 'fa-dollar-sign',
             cardClass: 'purchase-materials-card',
             value: formatCurrency(data.data?.material_consumption?.costs?.additive || 0, 'USD'),
-            subtitle: `تێکڕای نرخ: ${formatCurrency(data.data?.material_consumption?.prices?.additive || 0, 'USD')} / تۆن`
+            value: formatCurrency(data.data?.material_consumption?.costs?.additive || 0, 'USD'),
+            subtitle: `<div class="d-flex justify-content-center align-items-center">
+                        <span>تێکڕای نرخ: ${formatCurrency(data.data?.material_consumption?.prices?.additive || 0, 'USD')} / تۆن</span>
+                        <button class="btn btn-sm btn-light ms-2 px-2 py-0" onclick="event.stopPropagation(); showPurchaseAnalysis()" title="وردەکاری" style="border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 10px; opacity: 0.8;">
+                            <i class="fas fa-info"></i>
+                        </button>
+                       </div>`
         },
         {
             key: 'raw_material_sales_cost',
@@ -1011,4 +1051,48 @@ function showPersonDebtPaymentsDetails() {
                 text: 'هەڵە لە وەرگرتنی وردەکاریەکان: ' + error.message
             });
         });
+}
+
+// Function to show purchase analysis modal
+function showPurchaseAnalysis() {
+    const tbody = document.getElementById('purchaseAnalysisTableBody');
+    if (!tbody) return;
+
+    tbody.innerHTML = '';
+
+    if (!purchaseAnalysisData || purchaseAnalysisData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted">هیچ داتایەک نەدۆزرایەوە</td></tr>';
+        const modalEl = document.getElementById('purchaseAnalysisModal');
+        if (modalEl) {
+            new bootstrap.Modal(modalEl).show();
+        } else {
+            Swal.fire({
+                icon: 'info',
+                title: 'زانیاری',
+                text: 'هیچ داتایەک بۆ شیکردنەوە نییە'
+            });
+        }
+        return;
+    }
+
+    purchaseAnalysisData.forEach((item, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${item.date}</td>
+            <td>${item.invoice_number}</td>
+            <td>${item.material_name}</td>
+            <td>${parseFloat(item.kg).toLocaleString()}</td>
+            <td>${item.currency_type}</td>
+            <td>${item.price_usd ? formatCurrency(item.price_usd, 'USD') : '-'}</td>
+            <td>${item.amount_iqd ? formatCurrency(item.amount_iqd, 'IQD') : '-'}</td>
+            <td class="fw-bold" style="color: #28a745;">${formatCurrency(item.calculated_usd_amount, 'USD')}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    const modalEl = document.getElementById('purchaseAnalysisModal');
+    if (modalEl) {
+        new bootstrap.Modal(modalEl).show();
+    }
 }
