@@ -669,35 +669,25 @@ try {
         foreach ($material_names as $m_name) {
             // Fetch recent purchases for this material (FIFO basis - look back at last ~500 tons for cement/sand, less for others)
             // We use a generous limit to ensure we cover enough stock history
+            // Calculate Weighted Average Price for 2026 onwards (Explicit User Request)
+            // Formula: Sum of Total Price / Sum of Total Tons
             $query = "
                 SELECT 
-                    CASE WHEN p.type = 'دۆلار' THEN p.price ELSE p.amount_iqd / NULLIF(p.exchange_rate / 100, 0) END as total_usd,
-                    p.kg
+                    SUM(CASE WHEN p.type = 'دۆلار' THEN p.price ELSE p.amount_iqd / NULLIF(p.exchange_rate / 100, 0) END) as total_usd,
+                    SUM(p.kg) as total_kg
                 FROM purchases p
                 JOIN materials m ON p.material_id = m.id
                 WHERE m.name = ? AND p.kg > 0 AND p.date >= '2026-01-01'
-                ORDER BY p.date DESC, p.id DESC
-                LIMIT 50
             ";
             
             $stmt = $pdo->prepare($query);
             $stmt->execute([$m_name]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
             
-            $accumulated_cost = 0;
-            $accumulated_kg = 0;
-            $target_kg = 500000; // Look at last 500 tons by default to get a stable recent average
+            $total_usd = floatval($result['total_usd'] ?? 0);
+            $total_kg = floatval($result['total_kg'] ?? 0);
             
-            // For Gas, we might want a smaller window or handle differently, but recent avg is fine
-            if ($m_name == 'گاز') $target_kg = 50000; // 50,000 liters
-            
-            while ($row = $stmt->fetch()) {
-                $accumulated_cost += floatval($row['total_usd']);
-                $accumulated_kg += floatval($row['kg']);
-                
-                if ($accumulated_kg >= $target_kg) break;
-            }
-            
-            $price_per_unit = ($accumulated_kg > 0) ? ($accumulated_cost / $accumulated_kg) : 0;
+            $price_per_unit = ($total_kg > 0) ? ($total_usd / $total_kg) : 0;
             
             // Store per Ton (or per Liter for gas)
             if ($m_name == 'گاز') {
