@@ -649,61 +649,78 @@ try {
         $material_consumption_tons[$material] = round($kg_amount / 1000, 3);
     }
 
-    // Calculate average purchase prices per ton (USD) using Scientific FIFO/Replacement Cost Method
-    // This calculates the Weighted Average of the MOST RECENT purchases (representing current stock)
-    // instead of a simple average of the selected period.
+    // Calculate average purchase prices per ton (USD)
     $material_prices = [
         'black_sand' => 0,
         'brown_sand' => 0,
         'gravel' => 0,
         'cement' => 0,
         'additive' => 0,
-        'gas' => 0
+        'gas' => 0  // نرخی گاز بۆ لیتر
     ];
 
     try {
-        // Get unique material names from purchases
-        $mat_names_stmt = $pdo->query("SELECT DISTINCT m.name FROM purchases p JOIN materials m ON p.material_id = m.id WHERE p.kg > 0");
-        $material_names = $mat_names_stmt->fetchAll(PDO::FETCH_COLUMN);
+        // First try getting filtered average
+        $avg_query = "
+            SELECT 
+                m.name,
+                SUM(CASE WHEN p.type = 'دۆلار' THEN p.price ELSE p.amount_iqd / NULLIF(p.exchange_rate / 100, 0) END) as total_usd,
+                SUM(p.kg) as total_kg
+            FROM purchases p
+            JOIN materials m ON p.material_id = m.id
+            WHERE p.kg > 0 $date_condition_date
+            GROUP BY m.name
+        ";
+        $stmt_avg = $pdo->query($avg_query);
+        while ($row = $stmt_avg->fetch()) {
+            $price_per_ton = ($row['total_kg'] > 0) ? ($row['total_usd'] / $row['total_kg'] * 1000) : 0;
+            $m_name = $row['name'];
+            if ($m_name == 'لمی کەسارە') $material_prices['black_sand'] = $price_per_ton;
+            elseif ($m_name == 'لمی ڕەش') $material_prices['brown_sand'] = $price_per_ton;
+            elseif ($m_name == 'چەو') $material_prices['gravel'] = $price_per_ton;
+            elseif ($m_name == 'چیمەنتۆ') $material_prices['cement'] = $price_per_ton;
+            elseif ($m_name == 'دەرمان') $material_prices['additive'] = $price_per_ton;
+            elseif ($m_name == 'گاز') {
+                // بۆ گاز: نرخ بۆ لیتر (نەوەک تۆن)
+                $price_per_liter = ($row['total_kg'] > 0) ? ($row['total_usd'] / $row['total_kg']) : 0;
+                $material_prices['gas'] = $price_per_liter;
+            }
+        }
 
-        foreach ($material_names as $m_name) {
-            // Fetch recent purchases for this material (FIFO basis - look back at last ~500 tons for cement/sand, less for others)
-            // We use a generous limit to ensure we cover enough stock history
-            // Calculate Weighted Average Price for 2026 onwards (Explicit User Request)
-            // Formula: Sum of Total Price / Sum of Total Tons
-            $query = "
+        // Fallback for any material that still has 0 price (if no purchases in filtered period)
+        $has_zero = false;
+        foreach($material_prices as $p) { if($p == 0) { $has_zero = true; break; } }
+        
+        if ($has_zero) {
+             $global_avg_query = "
                 SELECT 
+                    m.name,
                     SUM(CASE WHEN p.type = 'دۆلار' THEN p.price ELSE p.amount_iqd / NULLIF(p.exchange_rate / 100, 0) END) as total_usd,
                     SUM(p.kg) as total_kg
                 FROM purchases p
                 JOIN materials m ON p.material_id = m.id
-                WHERE m.name = ? AND p.kg > 0 AND p.date >= '2026-01-01'
+                WHERE p.kg > 0
+                GROUP BY m.name
             ";
-            
-            $stmt = $pdo->prepare($query);
-            $stmt->execute([$m_name]);
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            
-            $total_usd = floatval($result['total_usd'] ?? 0);
-            $total_kg = floatval($result['total_kg'] ?? 0);
-            
-            $price_per_unit = ($total_kg > 0) ? ($total_usd / $total_kg) : 0;
-            
-            // Store per Ton (or per Liter for gas)
-            if ($m_name == 'گاز') {
-                 $material_prices['gas'] = $price_per_unit;
-            } else {
-                 $price_per_ton = $price_per_unit * 1000;
-                 
-                 if ($m_name == 'لمی کەسارە') $material_prices['black_sand'] = $price_per_ton;
-                 elseif ($m_name == 'لمی ڕەش') $material_prices['brown_sand'] = $price_per_ton;
-                 elseif ($m_name == 'چەو') $material_prices['gravel'] = $price_per_ton;
-                 elseif ($m_name == 'چیمەنتۆ') $material_prices['cement'] = $price_per_ton;
-                 elseif ($m_name == 'دەرمان') $material_prices['additive'] = $price_per_ton;
+            $stmt_global = $pdo->query($global_avg_query);
+            while ($row = $stmt_global->fetch()) {
+                $m_name = $row['name'];
+                $price_per_ton = ($row['total_kg'] > 0) ? ($row['total_usd'] / $row['total_kg'] * 1000) : 0;
+                
+                if ($m_name == 'لمی کەسارە' && $material_prices['black_sand'] == 0) $material_prices['black_sand'] = $price_per_ton;
+                elseif ($m_name == 'لمی ڕەش' && $material_prices['brown_sand'] == 0) $material_prices['brown_sand'] = $price_per_ton;
+                elseif ($m_name == 'چەو' && $material_prices['gravel'] == 0) $material_prices['gravel'] = $price_per_ton;
+                elseif ($m_name == 'چیمەنتۆ' && $material_prices['cement'] == 0) $material_prices['cement'] = $price_per_ton;
+                elseif ($m_name == 'دەرمان' && $material_prices['additive'] == 0) $material_prices['additive'] = $price_per_ton;
+                elseif ($m_name == 'گاز' && $material_prices['gas'] == 0) {
+                    // بۆ گاز: نرخ بۆ لیتر (نەوەک تۆن)
+                    $price_per_liter = ($row['total_kg'] > 0) ? ($row['total_usd'] / $row['total_kg']) : 0;
+                    $material_prices['gas'] = $price_per_liter;
+                }
             }
         }
     } catch (Exception $e) {
-        error_log("Error calculating scientific material prices: " . $e->getMessage());
+        error_log("Error calculating material prices: " . $e->getMessage());
     }
 
     // Calculate costs for each consumption category
