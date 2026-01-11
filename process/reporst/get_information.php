@@ -110,6 +110,7 @@ try {
     // For employee payments, filter by salary month, not payment creation date
     $date_condition_employee_payments = "";
     $date_condition_date = "";
+    $date_condition_customer_debt_payments = "";
     
     if ($use_range) {
         $from = $from_date ? $from_date : '1000-01-01';
@@ -118,25 +119,30 @@ try {
         // Filter employee payments by the selected salary month range
         $date_condition_employee_payments = " AND DATE(CONCAT(pay_month, '-01')) >= '$from' AND DATE(CONCAT(pay_month, '-01')) <= '$to'";
         $date_condition_date = " AND date >= '$from' AND date <= '$to'";
+        $date_condition_customer_debt_payments = " AND p.date >= '$from' AND p.date <= '$to'";
     } else {
         if ($filter === 'today') {
             $date_condition_sales = " AND order_date = CURDATE()";
             // Map 'today' to current month for salary-month-based filtering
             $date_condition_employee_payments = " AND YEAR(DATE(CONCAT(pay_month, '-01'))) = YEAR(CURDATE()) AND MONTH(DATE(CONCAT(pay_month, '-01'))) = MONTH(CURDATE())";
             $date_condition_date = " AND date = CURDATE()";
+            $date_condition_customer_debt_payments = " AND p.date = CURDATE()";
         } elseif ($filter === 'week') {
             $date_condition_sales = " AND YEARWEEK(order_date, 1) = YEARWEEK(CURDATE(), 1)";
             // Map 'week' to current month for salary-month-based filtering
             $date_condition_employee_payments = " AND YEAR(DATE(CONCAT(pay_month, '-01'))) = YEAR(CURDATE()) AND MONTH(DATE(CONCAT(pay_month, '-01'))) = MONTH(CURDATE())";
             $date_condition_date = " AND YEARWEEK(date, 1) = YEARWEEK(CURDATE(), 1)";
+            $date_condition_customer_debt_payments = " AND YEARWEEK(p.date, 1) = YEARWEEK(CURDATE(), 1)";
         } elseif ($filter === 'month') {
             $date_condition_sales = " AND YEAR(order_date) = YEAR(CURDATE()) AND MONTH(order_date) = MONTH(CURDATE())";
             $date_condition_employee_payments = " AND YEAR(DATE(CONCAT(pay_month, '-01'))) = YEAR(CURDATE()) AND MONTH(DATE(CONCAT(pay_month, '-01'))) = MONTH(CURDATE())";
             $date_condition_date = " AND YEAR(date) = YEAR(CURDATE()) AND MONTH(date) = MONTH(CURDATE())";
+            $date_condition_customer_debt_payments = " AND YEAR(p.date) = YEAR(CURDATE()) AND MONTH(p.date) = MONTH(CURDATE())";
         } elseif ($filter === 'year') {
             $date_condition_sales = " AND YEAR(order_date) = YEAR(CURDATE())";
             $date_condition_employee_payments = " AND YEAR(DATE(CONCAT(pay_month, '-01'))) = YEAR(CURDATE())";
             $date_condition_date = " AND YEAR(date) = YEAR(CURDATE())";
+            $date_condition_customer_debt_payments = " AND YEAR(p.date) = YEAR(CURDATE())";
         }
     }
     $purchases_query = "SELECT payment_type, SUM(price) as iqd, SUM(amount_iqd) as amount_iqd, SUM(amount_iqd / NULLIF(exchange_rate / 100, 0)) as iqd_converted FROM purchases WHERE type='دینار' $date_condition_date GROUP BY payment_type";
@@ -289,8 +295,9 @@ try {
     // Result is already in USD (discount column in sales table is in USD)
     $sales_discounts = floatval($row['total_discount'] ?? 0);
     
-// Customer debt payments discounts (Updated to filter by Sale Date)
+// Customer debt payments discounts (Updated to filter by Payment Date)
     // Note: This calculation already returns USD (discount and allocated_amount are in USD)
+    // Filter by customer_debt_payments.date instead of sales.order_date
     $customer_debt_discounts_query = "
         SELECT SUM(
             CASE 
@@ -303,7 +310,7 @@ try {
         FROM customer_payment_allocations a
         JOIN customer_debt_payments p ON a.debt_payment_id = p.id
         JOIN sales s ON a.sale_id = s.id
-        WHERE 1=1 $date_condition_sales
+        WHERE 1=1 $date_condition_customer_debt_payments
     ";
     $stmt = $pdo->query($customer_debt_discounts_query);
     $row = $stmt->fetch();
