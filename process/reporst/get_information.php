@@ -661,10 +661,28 @@ try {
 
     try {
         // First try getting filtered average
+        // ڕاستکردنەوە: بەکارهێنانی price_per_kg_usd و price_per_kg_iqd لە جیاتی price (کۆی نرخ)
+        // ئەگەر price_per_kg بەتاڵ بێت، fallback بۆ price / kg
         $avg_query = "
             SELECT 
                 m.name,
-                SUM(CASE WHEN p.type = 'دۆلار' THEN p.price ELSE p.amount_iqd / NULLIF(p.exchange_rate / 100, 0) END) as total_usd,
+                SUM(
+                    CASE 
+                        WHEN p.type = 'دۆلار' THEN 
+                            CASE 
+                                WHEN p.price_per_kg_usd > 0 THEN p.price_per_kg_usd * p.kg
+                                WHEN p.price > 0 AND p.kg > 0 THEN p.price
+                                ELSE 0
+                            END
+                        WHEN p.type = 'دینار' THEN 
+                            CASE 
+                                WHEN p.price_per_kg_iqd > 0 THEN (p.price_per_kg_iqd * p.kg) / NULLIF(p.exchange_rate / 100, 0)
+                                WHEN p.amount_iqd > 0 THEN p.amount_iqd / NULLIF(p.exchange_rate / 100, 0)
+                                ELSE 0
+                            END
+                        ELSE 0
+                    END
+                ) as total_usd,
                 SUM(p.kg) as total_kg
             FROM purchases p
             JOIN materials m ON p.material_id = m.id
@@ -695,7 +713,23 @@ try {
              $global_avg_query = "
                 SELECT 
                     m.name,
-                    SUM(CASE WHEN p.type = 'دۆلار' THEN p.price ELSE p.amount_iqd / NULLIF(p.exchange_rate / 100, 0) END) as total_usd,
+                    SUM(
+                        CASE 
+                            WHEN p.type = 'دۆلار' THEN 
+                                CASE 
+                                    WHEN p.price_per_kg_usd > 0 THEN p.price_per_kg_usd * p.kg
+                                    WHEN p.price > 0 AND p.kg > 0 THEN p.price
+                                    ELSE 0
+                                END
+                            WHEN p.type = 'دینار' THEN 
+                                CASE 
+                                    WHEN p.price_per_kg_iqd > 0 THEN (p.price_per_kg_iqd * p.kg) / NULLIF(p.exchange_rate / 100, 0)
+                                    WHEN p.amount_iqd > 0 THEN p.amount_iqd / NULLIF(p.exchange_rate / 100, 0)
+                                    ELSE 0
+                                END
+                            ELSE 0
+                        END
+                    ) as total_usd,
                     SUM(p.kg) as total_kg
                 FROM purchases p
                 JOIN materials m ON p.material_id = m.id
