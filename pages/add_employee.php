@@ -142,6 +142,8 @@ if (!hasPermission('view_employee')) {
                     <th>موچە (د.ع)</th>
                     <th>بەخشیش (د.ع)</th>
                     <th>بەرواری دەستبەکار بوون</th>
+                    <th>باڵانسی کۆتایی (Net Pay)</th>
+                    <th>کۆی ڕۆژانە</th>
                     <th>دۆخ</th>
                     <th>کردارەکان</th>
                 </tr>

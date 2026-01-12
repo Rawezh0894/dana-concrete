@@ -49,38 +49,29 @@ function loadSummaryData() {
             // For now, we'll use the filtered data but calculate based on current month days
             const totalIncomeAmount = data.total_salary + data.total_bonus + data.total_overtime;
 
+            // Calculate daily rate: total income / days in month
+            const dailyRate = daysInMonth > 0 ? totalIncomeAmount / daysInMonth : 0;
+
+            // Calculate balance up to today: daily rate × days passed
+            const balanceUpToToday = dailyRate * currentDay;
+
+            // Subtract deductions (penalty + deduction)
+            const totalDeductionsAmount = data.total_deduction + data.total_penalty;
+            const finalDailyBalance = balanceUpToToday - totalDeductionsAmount;
+
+            // Format details text
+            const detailsText = `(${formatCurrency(totalIncomeAmount)} ÷ ${daysInMonth} × ${currentDay}) - ${formatCurrency(totalDeductionsAmount)}`;
+
             // Update summary cards
             $('#total-salary').text(formatCurrency(data.total_salary));
             $('#total-bonus').text(formatCurrency(data.total_bonus));
             $('#total-salary-bonus').text(formatCurrency(salaryAndBonus));
             $('#total-overtime').text(formatCurrency(data.total_overtime));
+            $('#net-payable').text(formatCurrency(netPayable));
 
-            // Use Lifetime Net Pay (calculated from join date)
-            if (data.net_pay_lifetime !== undefined) {
-                $('#net-payable').text(formatCurrency(data.net_pay_lifetime));
-            } else {
-                $('#net-payable').text(formatCurrency(netPayable));
-            }
-
-            // Update daily balance card with Lifetime Daily Balance
-            if (data.daily_balance_lifetime !== undefined) {
-                $('#daily-balance').text(formatCurrency(data.daily_balance_lifetime));
-                $('#daily-balance-details').text('لە بەرواری دەستبەکاربوونەوە');
-            } else {
-                // Fallback to old logic if backend doesn't return lifetime data
-                // Subtract deductions (penalty + deduction)
-                const totalDeductionsAmount = data.total_deduction + data.total_penalty;
-
-                // Calculate daily rate: total income / days in month
-                const dailyRate = daysInMonth > 0 ? totalIncomeAmount / daysInMonth : 0;
-                // Calculate balance up to today: daily rate × days passed
-                const balanceUpToToday = dailyRate * currentDay;
-                const finalDailyBalance = balanceUpToToday - totalDeductionsAmount;
-                const detailsText = `(${formatCurrency(totalIncomeAmount)} ÷ ${daysInMonth} × ${currentDay}) - ${formatCurrency(totalDeductionsAmount)}`;
-
-                $('#daily-balance').text(formatCurrency(Math.max(0, finalDailyBalance)));
-                $('#daily-balance-details').text(detailsText);
-            }
+            // Update daily balance card
+            $('#daily-balance').text(formatCurrency(Math.max(0, finalDailyBalance)));
+            $('#daily-balance-details').text(detailsText);
 
             $('#total-advance').text(formatCurrency(data.total_advance));
             $('#total-deduction').text(formatCurrency(data.total_deduction));

@@ -102,7 +102,7 @@ $(function () {
             }
         }
 
-        TableController.showLoading('#employeeTable', ['#', 'name', 'mobile', 'role', 'salary', 'bonus', 'join_date', 'status', 'actions']);
+        TableController.showLoading('#employeeTable', ['#', 'name', 'mobile', 'role', 'salary', 'bonus', 'join_date', 'net_pay', 'daily_pay', 'status', 'actions']);
         $.get('../process/employee/select_employee.php', function (res) {
             console.log('Response from select_employee.php:', res);
 
@@ -110,14 +110,14 @@ $(function () {
             if (res && res.success === false) {
                 console.error('Error loading employees:', res.error);
                 swalAlert('هەڵە', res.error || 'هەڵە لە وەرگرتنی زانیاری', 'error');
-                TableController.render('#employeeTable', [], ['#', 'name', 'mobile', 'role', 'salary', 'bonus', 'join_date', 'status', 'actions']);
+                TableController.render('#employeeTable', [], ['#', 'name', 'mobile', 'role', 'salary', 'bonus', 'join_date', 'net_pay', 'daily_pay', 'status', 'actions']);
                 updateSummaryCards({ total_employees: 0, total_salary: 0 });
                 return;
             }
 
             if (!res || !res.employees || !Array.isArray(res.employees)) {
                 console.warn('Invalid response format:', res);
-                TableController.render('#employeeTable', [], ['#', 'name', 'mobile', 'role', 'salary', 'bonus', 'join_date', 'status', 'actions']);
+                TableController.render('#employeeTable', [], ['#', 'name', 'mobile', 'role', 'salary', 'bonus', 'join_date', 'net_pay', 'daily_pay', 'status', 'actions']);
                 updateSummaryCards({ total_employees: 0, total_salary: 0 });
                 return;
             }
@@ -189,6 +189,10 @@ $(function () {
                 }
                 emp.role = roleDisplay;
 
+                // Format new columns
+                emp.net_pay = formatSalary(emp.net_pay || 0);
+                emp.daily_pay = formatSalary(emp.daily_pay || 0);
+
                 emp.actions = `
                     <button class="btn btn-sm btn-primary edit-employee" data-id="${emp.id}" data-name="${emp.name}" data-mobile="${emp.mobile}" data-role="${rawRole}" data-salary="${rawSalary}" data-bonus="${rawBonus}" data-status="${rawStatus}" data-join_date="${emp.join_date || ''}"><i class="fa fa-edit"></i></button>
                     <button class="btn btn-sm btn-danger delete-employee" data-id="${emp.id}"><i class="fa fa-trash"></i></button>
@@ -206,12 +210,12 @@ $(function () {
                 }
                 paginationOptions = { currentPage: currentEmployeePage };
             }
-            TableController.renderWithPagination('#employeeTable', res.employees, ['#', 'name', 'mobile', 'role', 'salary', 'bonus', 'join_date', 'status', 'actions'], paginationOptions);
+            TableController.renderWithPagination('#employeeTable', res.employees, ['#', 'name', 'mobile', 'role', 'salary', 'bonus', 'join_date', 'net_pay', 'daily_pay', 'status', 'actions'], paginationOptions);
         }, 'json').fail(function (xhr, status, error) {
             console.error('AJAX Error:', status, error);
             console.error('Response:', xhr.responseText);
             swalAlert('هەڵە', 'هەڵەیەک هەیە لە وەرگرتنی زانیاری کارمەندەکان', 'error');
-            TableController.render('#employeeTable', [], ['#', 'name', 'mobile', 'role', 'salary', 'bonus', 'join_date', 'status', 'actions']);
+            TableController.render('#employeeTable', [], ['#', 'name', 'mobile', 'role', 'salary', 'bonus', 'join_date', 'net_pay', 'daily_pay', 'status', 'actions']);
             updateSummaryCards({ total_employees: 0, total_salary: 0 });
         });
     }
