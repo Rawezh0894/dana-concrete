@@ -133,55 +133,8 @@ try {
     }
     
     // 5. Get Expenses (Advance, Deduction, Penalty) from employee_expenses
-    $expense_conditions = ["expense_date BETWEEN ? AND ?"];
-    $expense_params = [$period_start, $period_end]; // Note: expense_date is YYYY-MM usually? 
-    // Wait, employee_expenses 'expense_date' in database is usually 'YYYY-MM-DD' or 'YYYY-MM'?
-    // In add_expense.js (previous turn), it was input type="month". 
-    // Let's check the database structure or previous code.
-    // In employee_expenses.php: <input type="month" ... name="expense_date">
-    // This implies expense_date is YYYY-MM string in DB?
-    // BUT `get_employee_current_balance.php` uses: `WHERE expense_date LIKE ?` with `month%`.
-    // And `select_expenses.php` uses `expense_date = ?` for month filter.
-    // This strongly suggests `expense_date` is stored as `YYYY-MM`.
     
-    // IF `expense_date` is YYYY-MM, we cannot filter by specific days (start/end date).
-    // The user added Start Date / End Date.
-    // If the data is only stored as YYYY-MM, we can only filter by Month.
-    // However, the `select_expenses.php` I just updated used logic `expense_date >= ?`.
-    // If `expense_date` is `2024-01`, and start date is `2024-01-15`, `2024-01 >= 2024-01-15` string comparison? 
-    // "2024-01" is NOT >= "2024-01-15".
-    // This implies my previous edit to `select_expenses.php` might be flawed if `expense_date` is YYYY-MM.
-    
-    // Let's check `process/employee_payments/select_expenses.php` line 33: `ee.expense_date`.
-    // In `add_income_expense_modal`: input type="month".
-    // It seems `expense_date` stores strings like "2024-01".
-    
-    // ISSUE: The user wants precise date range filtering.
-    // But if expenses are stored by Month, we can't filter by Day.
-    // Unless we use `created_at`.
-    // `select_expenses.php` select also has `ee.created_at`.
-    // The new requirement uses `start_date` and `end_date`.
-    // If I use `expense_date` (YYYY-MM), I can only match months.
-    
-    // But wait, "Advance/Deduction/Penalty" cards.
-    // If I select "Jan 1 to Jan 15".
-    // And I have an Advance recorded for "Jan 2024" (stored as 2024-01).
-    // Should it be included?
-    // Usually yes.
-    // But if I want to filter *transactions*, maybe `created_at` date?
-    // User Instructions: "Filter by date from - to".
-    // If the system was designed with Month-based expenses, adding Day-based filtering is tricky.
-    // However, I will check if `expense_date` can store full dates.
-    // In `employee_expenses.php`: `input type="month"`.
-    // This forces YYYY-MM.
-    // So expenses are Monthly.
-    
-    // Decision: For "Advance/Deduction/Penalty", if the requested range overlaps with the month, include it?
-    // Or just filter based on `expense_date` matching the months in the range?
-    // E.g. Start: 2024-01-15, End: 2024-02-10.
-    // Include 2024-01 and 2024-02.
-    // This is the best reasonable interpretation.
-    
+    // --- STANDARD FILTERED EXPENSES (Existing Logic) ---
     // Logic: Convert start/end to Year-Months.
     $start_month = date('Y-m', strtotime($period_start));
     $end_month = date('Y-m', strtotime($period_end));
@@ -203,6 +156,113 @@ try {
     $stmt = $pdo->prepare($expense_sql);
     $stmt->execute($expense_params);
     $expense_summary = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // --- LIFETIME / JOIN_DATE BASED CALCULATION (New Request) ---
+    // Calculate total accrued salary based on join_date for "Net Pay" and "Daily Balance"
+    
+    // Get join_date column existence
+    $join_date_exists = false;
+    try {
+        $check_join = $pdo->query("SHOW COLUMNS FROM employees LIKE 'join_date'");
+        $join_date_exists = $check_join->rowCount() > 0;
+    } catch (Exception $e) {}
+
+    $lifetime_salary = 0;
+    $lifetime_bonus = 0; // Assuming bonus is monthly? Or just sum of specific bonus entries? 
+                         // The employees table 'bonus' column is likely a fixed monthly bonus amount, same as salary. 
+                         // So we treat it like salary (accrues over time).
+    
+    // Re-fetch employees with join_date
+    $emp_lifetime_sql = "SELECT id, salary, COALESCE(bonus, 0) as bonus";
+    if ($join_date_exists) {
+        $emp_lifetime_sql .= ", join_date";
+    } else {
+        $emp_lifetime_sql .= ", NULL as join_date"; // Fallback if column missing (shouldn't happen as we just added it)
+    }
+    // Also need created_at as backup if join_date is null
+    $emp_lifetime_sql .= ", created_at FROM employees WHERE 1=1";
+    
+    if ($status_exists) {
+        $emp_lifetime_sql .= " AND status = 'active'";
+    }
+    if ($employee_filter) {
+        $emp_lifetime_sql .= " AND id = " . intval($employee_filter);
+    }
+    
+    $stmt = $pdo->query($emp_lifetime_sql);
+    $all_employees_data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    foreach ($all_employees_data as $emp) {
+        // Determine start date for calculation
+        $start_calculation_date = $emp['join_date'];
+        
+        if (empty($start_calculation_date)) {
+            // Fallback to created_at if join_date is empty
+             $start_calculation_date = date('Y-m-d', strtotime($emp['created_at']));
+        }
+        
+        // If still invalid (e.g. historical data), maybe fallback to a default? 
+        // For now, let's assume valid date or skip
+        if ($start_calculation_date) {
+            $days_worked = max(0, (time() - strtotime($start_calculation_date)) / 86400); // Days since join
+            
+            // Calculate daily rate (Salary / 30)
+            $daily_salary = floatval($emp['salary']) / 30;
+            $daily_bonus = floatval($emp['bonus']) / 30;
+            
+            $lifetime_salary += $daily_salary * $days_worked;
+            $lifetime_bonus += $daily_bonus * $days_worked;
+        }
+    }
+    
+    // Calculate Total LIFETIME Expenses (Total Advance + Deduction + Penalty EVER)
+    $lifetime_expense_where = "1=1";
+    $lifetime_expense_params = [];
+    
+    if ($employee_filter) {
+        $lifetime_expense_where .= " AND employee_id = ?";
+        $lifetime_expense_params[] = $employee_filter;
+    }
+    
+    $lifetime_expense_sql = "SELECT 
+        SUM(amount) as total_expenses
+    FROM employee_expenses WHERE $lifetime_expense_where";
+    
+    $stmt = $pdo->prepare($lifetime_expense_sql);
+    $stmt->execute($lifetime_expense_params);
+    $lifetime_expenses_result = $stmt->fetch(PDO::FETCH_ASSOC);
+    $total_lifetime_expenses = floatval($lifetime_expenses_result['total_expenses'] ?? 0);
+    
+    // Calculate Net Lifetime Balance
+    // Note: We should strictly add 'Lifetime Overtime' too if it's significant. 
+    // Calculating lifetime overtime might be heavy (scanning all receipts forever), but let's try.
+    
+    $lifetime_overtime = 0;
+    // ... logic for lifetime overtime (similar to above but without date restriction)
+    // For simplicity/speed, let's reuse the logic but with wide date range if safe, OR assume overtime is small part.
+    // However, for correctness, we should include it.
+    
+    if (!empty($mixer_driver_ids) && $employee_filter) { // Optimize: only if specific employee or we query efficiently
+         // Re-using mixer driver IDs logic from earlier
+        $placeholders = implode(',', array_fill(0, count($mixer_driver_ids), '?'));
+        // Wide range: 2000-01-01 to NOW
+        $ot_sql = "SELECT COUNT(*) as count FROM concrete_receipts WHERE mixer_driver_id IN ($placeholders)";
+        $ot_stmt = $pdo->prepare($ot_sql);
+        $ot_stmt->execute($mixer_driver_ids);
+        $ot_res = $ot_stmt->fetch(PDO::FETCH_ASSOC);
+        $lifetime_overtime = intval($ot_res['count']) * $overtime_rate;
+    } else if (!empty($mixer_driver_ids)) {
+         // All mixer drivers
+         $placeholders = implode(',', array_fill(0, count($mixer_driver_ids), '?'));
+         $ot_sql = "SELECT COUNT(*) as count FROM concrete_receipts WHERE mixer_driver_id IN ($placeholders)";
+         $ot_stmt = $pdo->prepare($ot_sql);
+         $ot_stmt->execute($mixer_driver_ids);
+         $ot_res = $ot_stmt->fetch(PDO::FETCH_ASSOC);
+         $lifetime_overtime = intval($ot_res['count']) * $overtime_rate;
+    }
+    
+    $lifetime_balance = ($lifetime_salary + $lifetime_bonus + $lifetime_overtime) - $total_lifetime_expenses;
+    $lifetime_daily_balance = $lifetime_balance; // Since it's calculated based on daily rates
     
     // 6. Return Data
     // Get filter lists
@@ -219,7 +279,9 @@ try {
                 'total_advance' => floatval($expense_summary['total_advance'] ?? 0),
                 'total_deduction' => floatval($expense_summary['total_deduction'] ?? 0),
                 'total_penalty' => floatval($expense_summary['total_penalty'] ?? 0),
-                'days_in_period' => $days_in_period
+                'days_in_period' => $days_in_period,
+                'net_pay_lifetime' => round($lifetime_balance, 2),
+                'daily_balance_lifetime' => round($lifetime_daily_balance, 2)
             ],
             'filters' => [
                 'employees' => $employees,
