@@ -27,14 +27,8 @@ try {
     $end_ts = strtotime($period_end);
     $days_in_period = max(1, ($end_ts - $start_ts) / 86400 + 1);
     
-    // For monthly salary calculation, we generally assume 30 days for normalization
-    // or use the days in the specific month if a single month is selected.
-    $days_in_month_basis = 30;
-    if ($month_filter) {
-       $days_in_month_basis = cal_days_in_month(CAL_GREGORIAN, date('m', $start_ts), date('Y', $start_ts));
-    } elseif (!$start_date && !$end_date) {
-       $days_in_month_basis = cal_days_in_month(CAL_GREGORIAN, date('m'), date('Y'));
-    }
+    // For monthly salary calculation, use the days in the specific month of the period start.
+    $days_in_month_basis = cal_days_in_month(CAL_GREGORIAN, date('m', $start_ts), date('Y', $start_ts));
     
     $prorate_factor = $days_in_period / $days_in_month_basis;
     
