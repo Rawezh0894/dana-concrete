@@ -26,7 +26,7 @@ function enableSelect2(selector, modalSelector) {
 
     if (allowNewRecipient) {
         select2Options.tags = true;
-        select2Options.createTag = function(params) {
+        select2Options.createTag = function (params) {
             const term = $.trim(params.term || '');
             if (!term) return null;
             return {
@@ -35,7 +35,7 @@ function enableSelect2(selector, modalSelector) {
                 newTag: true
             };
         };
-        select2Options.templateResult = function(data) {
+        select2Options.templateResult = function (data) {
             if (data.newTag) {
                 return $('<span class="text-success"><i class="fas fa-plus-circle me-2"></i>زیادکردنی وەرگر: ' + data.text + '</span>');
             }
@@ -57,7 +57,7 @@ function enableSelect2(selector, modalSelector) {
     $(modalSelector).off('shown.bs.modal.select2').on('shown.bs.modal.select2', function () {
         try {
             if ($element.length > 0 && $element.hasClass('select2-hidden-accessible')) {
-                setTimeout(function() {
+                setTimeout(function () {
                     $element.select2('open');
                     $element.select2('close');
                 }, 100);
@@ -132,7 +132,7 @@ function customMatcher(params, data) {
 function setupRecipientQuickAdd($select) {
     if (!$select.length) return;
     const selector = '#' + $select.attr('id');
-    $select.off('select2:select.recipientQuickAdd').on('select2:select.recipientQuickAdd', function(e) {
+    $select.off('select2:select.recipientQuickAdd').on('select2:select.recipientQuickAdd', function (e) {
         const data = e.params && e.params.data;
         if (data && data.newTag) {
             const option = $select.find('option[value="' + data.id + '"]');
@@ -161,7 +161,7 @@ function openRecipientModal(initialName, selector) {
     modal.show();
 
     if (!modalEl.dataset.quickAddHooked) {
-        modalEl.addEventListener('hidden.bs.modal', function() {
+        modalEl.addEventListener('hidden.bs.modal', function () {
             window.pendingRecipientSelectId = null;
             window.pendingRecipientInitialName = null;
         });
@@ -170,7 +170,7 @@ function openRecipientModal(initialName, selector) {
 }
 
 // چالاککردنی select2 بۆ کڕیار لە مۆداڵی زیادکردن
-$(document).ready(function() {
+$(document).ready(function () {
     // بۆ sale - تەنها ئەگەر مۆداڵەکە هەبێت
     if ($('#addSaleModal').length > 0) {
         enableSelect2('#customer_id', '#addSaleModal');
@@ -180,7 +180,7 @@ $(document).ready(function() {
         enableSelect2('#edit_customer_id', '#editSaleModal');
         enableSelect2('#edit_recipient', '#editSaleModal');
     }
-    
+
     // بۆ purchase - تەنها ئەگەر مۆداڵەکە هەبێت
     if ($('#addPurchaseModal').length > 0) {
         enableSelect2('#company_id', '#addPurchaseModal');
@@ -192,7 +192,7 @@ $(document).ready(function() {
         enableSelect2('#edit_driver_id', '#editPurchaseModal');
         enableSelect2('#edit_location_id', '#editPurchaseModal');
     }
-    
+
     // بۆ concrete receipts - تەنها ئەگەر مۆداڵەکە هەبێت
     if ($('#addConcreteReceiptModal').length > 0) {
         enableSelect2('#customer_id', '#addConcreteReceiptModal');
@@ -206,7 +206,7 @@ $(document).ready(function() {
         enableSelect2('#edit_mixer_driver_id', '#editConcreteReceiptModal');
         enableSelect2('#edit_pump_driver_id', '#editConcreteReceiptModal');
     }
-    
+
     // بۆ purchase materials - تەنها ئەگەر مۆداڵەکە هەبێت
     if ($('#addPurchaseModal').length > 0) {
         enableSelect2('#person_id', '#addPurchaseModal');
@@ -216,22 +216,26 @@ $(document).ready(function() {
         enableSelect2('#edit_person_id', '#editPurchaseModal');
         enableSelect2('#edit_currency_type', '#editPurchaseModal');
     }
-    
+
     // بۆ notes - تەنها ئەگەر مۆداڵەکە هەبێت
     if ($('#addNoteModal').length > 0) {
         enableSelect2('#customer_id', '#addNoteModal');
         enableSelect2('#recipient', '#addNoteModal');
+        enableSelect2('#mixer_driver_id', '#addNoteModal');
+        enableSelect2('#pump_driver_id', '#addNoteModal');
     }
     if ($('#editNoteModal').length > 0) {
         enableSelect2('#edit_customer_id', '#editNoteModal');
         enableSelect2('#edit_recipient', '#editNoteModal');
+        enableSelect2('#edit_mixer_driver_id', '#editNoteModal');
+        enableSelect2('#edit_pump_driver_id', '#editNoteModal');
     }
-    
+
     // بۆ notes filters - تەنها ئەگەر پەیجەکە هەبێت
     if ($('#filter_customer').length > 0) {
         enableSelect2('#filter_customer', 'body');
     }
-    
+
     // بۆ concrete receipts filters - تەنها ئەگەر پەیجەکە هەبێت
     if ($('#filter_customer_id').length > 0) {
         enableSelect2('#filter_customer_id', 'body');
@@ -239,7 +243,7 @@ $(document).ready(function() {
     if ($('#filter_formulas_id').length > 0) {
         enableSelect2('#filter_formulas_id', 'body');
     }
-    
+
     // بۆ employee role filter - تەنها ئەگەر پەیجەکە هەبێت
     if ($('#filter_role').length > 0) {
         enableSelect2('#filter_role', 'body');
@@ -247,9 +251,9 @@ $(document).ready(function() {
 });
 
 // Focus select2 search input when dropdown opens for customer select in addConcreteReceiptModal
-$(document).on('select2:open', function(e) {
+$(document).on('select2:open', function (e) {
     if (e.target && (e.target.id === 'customer_id' || e.target.id === 'edit_customer_id')) {
-        setTimeout(function() {
+        setTimeout(function () {
             let searchBox = document.querySelector('.select2-container--open .select2-search__field');
             if (searchBox) searchBox.focus();
         }, 10);

@@ -45,20 +45,11 @@ usort($recipients, function($a, $b) {
 });
 $mixer_cars = $pdo->query("SELECT id, name FROM cars WHERE name LIKE 'M%' ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 $pump_cars = $pdo->query("SELECT id, name FROM cars WHERE name LIKE 'P%' ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
-// Get all drivers - check for any role containing 'شۆفێر' or 'سایەق' (supports multiple roles)
-$all_drivers = $pdo->query("SELECT id, name FROM employees WHERE role LIKE '%شۆفێر%' OR role LIKE '%سایەق%' ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
+// Get Mixer Drivers based on roles: شۆفێری میکسەر، جۆکەر، شۆفێری پەمپ، موساعید پەمپ
+$mixer_drivers = $pdo->query("SELECT id, name FROM employees WHERE (status = 'active' OR status IS NULL) AND (role LIKE '%شۆفێری میکسەر%' OR role LIKE '%جۆکەر%' OR role LIKE '%شۆفێری پەمپ%' OR role LIKE '%موساعید پەمپ%' OR role LIKE '%مساعید پەمپ%') ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 
-// Filter drivers for pump (only: بازیان, بەرزان, شاڵاو, سەربەست)
-$pump_driver_names = ['بازیان', 'بەرزان', 'شاڵاو', 'سەربەست'];
-$pump_drivers = array_filter($all_drivers, function($driver) use ($pump_driver_names) {
-    return in_array(trim($driver['name']), $pump_driver_names, true);
-});
-
-// Filter drivers for mixer (all drivers except: شاڵاو, سەربەست, بەرزان)
-$excluded_mixer_driver_names = ['شاڵاو', 'سەربەست', 'بەرزان'];
-$mixer_drivers = array_filter($all_drivers, function($driver) use ($excluded_mixer_driver_names) {
-    return !in_array(trim($driver['name']), $excluded_mixer_driver_names, true);
-});
+// Get Pump Drivers based on roles: شۆفێری پەمپ، جۆکەر، مساعید پەمپ
+$pump_drivers = $pdo->query("SELECT id, name FROM employees WHERE (status = 'active' OR status IS NULL) AND (role LIKE '%شۆفێری پەمپ%' OR role LIKE '%جۆکەر%' OR role LIKE '%موساعید پەمپ%' OR role LIKE '%مساعید پەمپ%') ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>

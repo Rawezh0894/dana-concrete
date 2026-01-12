@@ -3,12 +3,12 @@ async function populateEditModal(noteId) {
     try {
         // Get note data from the current notes array
         const note = allNotes.find(n => n.id == noteId);
-        
+
         if (!note) {
             showAlert('error', 'زانیاری تێبینی نەدۆزرایەوە');
             return;
         }
-        
+
         const noteData = {
             id: note.id,
             date: note.date || '',
@@ -24,12 +24,12 @@ async function populateEditModal(noteId) {
             pump_car_name: note.pump_car_name || '',
             pump_driver_name: note.pump_driver_name || ''
         };
-        
+
         if (!noteData) {
             showAlert('error', 'زانیاری تێبینی نەدۆزرایەوە');
             return;
         }
-        
+
         // Populate the edit form
         document.getElementById('edit_note_id').value = noteData.id;
         document.getElementById('edit_date').value = noteData.date;
@@ -63,7 +63,7 @@ async function populateEditModal(noteId) {
             $('#edit_recipient').trigger('change');
         }
         document.getElementById('edit_meter_amount').value = noteData.meter_amount;
-        
+
         // Set customer dropdown with Select2
         const customerSelect = document.getElementById('edit_customer_id');
         for (let option of customerSelect.options) {
@@ -73,7 +73,7 @@ async function populateEditModal(noteId) {
             }
         }
         $(customerSelect).trigger('change');
-        
+
         // Set formula dropdown
         const formulaSelect = document.getElementById('edit_formula_id');
         for (let option of formulaSelect.options) {
@@ -82,7 +82,7 @@ async function populateEditModal(noteId) {
                 break;
             }
         }
-        
+
         // Set mixer car dropdown
         const mixerCarSelect = document.getElementById('edit_mixer_car_id');
         for (let option of mixerCarSelect.options) {
@@ -91,16 +91,17 @@ async function populateEditModal(noteId) {
                 break;
             }
         }
-        
+
         // Set mixer driver dropdown
         const mixerDriverSelect = document.getElementById('edit_mixer_driver_id');
         for (let option of mixerDriverSelect.options) {
-            if (option.textContent.trim() === noteData.mixer_driver_name.trim()) {
+            if (option.textContent.trim() === (noteData.mixer_driver_name || '').trim()) {
                 option.selected = true;
                 break;
             }
         }
-        
+        $(mixerDriverSelect).trigger('change');
+
         // Set pump car dropdown
         const pumpCarSelect = document.getElementById('edit_pump_car_id');
         for (let option of pumpCarSelect.options) {
@@ -109,20 +110,21 @@ async function populateEditModal(noteId) {
                 break;
             }
         }
-        
+
         // Set pump driver dropdown
         const pumpDriverSelect = document.getElementById('edit_pump_driver_id');
         for (let option of pumpDriverSelect.options) {
-            if (option.textContent.trim() === noteData.pump_driver_name.trim()) {
+            if (option.textContent.trim() === (noteData.pump_driver_name || '').trim()) {
                 option.selected = true;
                 break;
             }
         }
-        
+        $(pumpDriverSelect).trigger('change');
+
         // Show the edit modal
         const editModal = new bootstrap.Modal(document.getElementById('editNoteModal'));
         editModal.show();
-        
+
     } catch (error) {
         console.error('Error populating edit modal:', error);
         showAlert('error', 'هەڵەیەک لە بارکردنی زانیاریەکان هەیە');
@@ -130,7 +132,7 @@ async function populateEditModal(noteId) {
 }
 
 // Handle edit button clicks
-document.addEventListener('click', function(e) {
+document.addEventListener('click', function (e) {
     if (e.target.closest('.edit-note')) {
         const noteId = e.target.closest('.edit-note').getAttribute('data-id');
         populateEditModal(noteId);
@@ -138,49 +140,32 @@ document.addEventListener('click', function(e) {
 });
 
 // Handle edit form submission
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const editNoteForm = document.getElementById('editNoteForm');
     if (!editNoteForm) return;
 
     // Flag to prevent multiple submissions
     let isSubmitting = false;
-    
-    // Initialize Select2 for customer & recipient dropdowns only in the edit modal
+
+    // Initialize Select2 for all dropdowns in the edit modal
     if ($('#editNoteModal').length > 0) {
         enableSelect2('#edit_customer_id', '#editNoteModal');
         enableSelect2('#edit_recipient', '#editNoteModal');
-        
-        // Helper function to safely destroy Select2
-        function safeDestroySelect2(selector) {
-            try {
-                const element = $(selector);
-                if (element.length > 0 && element.hasClass('select2-hidden-accessible')) {
-                    element.select2('destroy');
-                }
-            } catch(e) {
-                // Silently ignore errors
-            }
-        }
-        
-        // Destroy any existing Select2 instances on other dropdowns
-        safeDestroySelect2('#edit_formula_id');
-        safeDestroySelect2('#edit_mixer_car_id');
-        safeDestroySelect2('#edit_mixer_driver_id');
-        safeDestroySelect2('#edit_pump_car_id');
-        safeDestroySelect2('#edit_pump_driver_id');
+        enableSelect2('#edit_mixer_driver_id', '#editNoteModal');
+        enableSelect2('#edit_pump_driver_id', '#editNoteModal');
     }
 
-    editNoteForm.addEventListener('submit', async function(e) {
+    editNoteForm.addEventListener('submit', async function (e) {
         e.preventDefault();
-        
+
         // Prevent multiple submissions
         if (isSubmitting) {
             showAlert('warning', 'تکایە چاوەڕوان بە...');
             return;
         }
-        
+
         const formData = new FormData(editNoteForm);
-        
+
         // Handle optional fields - convert empty strings to null
         const optionalFields = ['edit_mixer_car_id', 'edit_mixer_driver_id', 'edit_pump_car_id', 'edit_pump_driver_id'];
         optionalFields.forEach(field => {
@@ -189,7 +174,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 formData.set(field, 'null');
             }
         });
-        
+
         // Validate required fields
         const requiredFields = ['edit_date', 'edit_time', 'edit_customer_id', 'edit_location', 'edit_meter_amount', 'edit_formula_id'];
         for (let field of requiredFields) {
@@ -223,21 +208,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (result.success) {
                 showAlert('success', result.message);
-                
+
                 // Close modal
                 const modal = bootstrap.Modal.getInstance(document.getElementById('editNoteModal'));
                 if (modal) {
                     modal.hide();
                 }
-                
+
                 // Reload notes table
                 if (window.reloadNotes) {
                     window.reloadNotes();
                 }
-                
+
                 // Dispatch custom event for real-time badge update
                 document.dispatchEvent(new CustomEvent('noteMarkedAsRead'));
-                
+
                 // Also update badge immediately if we're on the concrete receipts page
                 if (window.updateUnreadNotesBadge) {
                     window.updateUnreadNotesBadge();
