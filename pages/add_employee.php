@@ -141,6 +141,7 @@ if (!hasPermission('view_employee')) {
                     <th>ڕۆڵ</th>
                     <th>موچە (د.ع)</th>
                     <th>بەخشیش (د.ع)</th>
+                    <th>بەرواری دەستبەکار بوون</th>
                     <th>دۆخ</th>
                     <th>کردارەکان</th>
                 </tr>
@@ -207,6 +208,10 @@ if (!hasPermission('view_employee')) {
               <option value="resigned">دەستلەکارکێشان</option>
             </select>
           </div>
+          <div class="mb-3">
+            <label for="employee_join_date" class="form-label">بەرواری دەستبەکار بوون</label>
+            <input type="date" class="form-control" id="employee_join_date" name="join_date" value="<?php echo date('Y-m-d'); ?>">
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
@@ -272,6 +277,10 @@ if (!hasPermission('view_employee')) {
               <option value="on_leave">لە پشوودا</option>
               <option value="resigned">دەستلەکارکێشان</option>
             </select>
+          </div>
+          <div class="mb-3">
+            <label for="edit_employee_join_date" class="form-label">بەرواری دەستبەکار بوون</label>
+            <input type="date" class="form-control" id="edit_employee_join_date" name="join_date">
           </div>
         </div>
         <div class="modal-footer">

@@ -26,10 +26,10 @@ $(function () {
 
     function updateRoleCards(roleStats) {
         if (!roleStats) return;
-        
+
         const roleCardsContainer = $('#role_stats_cards');
         roleCardsContainer.empty();
-        
+
         const roleColors = [
             'card-gradient-info',
             'card-gradient-success',
@@ -47,7 +47,7 @@ $(function () {
             'card-gradient-success',
             'card-gradient-warning'
         ];
-        
+
         const roleIcons = [
             'fa-shield-alt',
             'fa-truck',
@@ -65,13 +65,13 @@ $(function () {
             'fa-truck',
             'fa-user'
         ];
-        
+
         let cardIndex = 0;
         Object.entries(roleStats).forEach(([role, count]) => {
             if (count > 0 || true) { // Show all roles even if count is 0
                 const colorClass = roleColors[cardIndex % roleColors.length];
                 const iconClass = roleIcons[cardIndex % roleIcons.length];
-                
+
                 const cardHtml = `
                     <div class="col-md-2 mb-3">
                         <div class="card text-center shadow ${colorClass} card-animate-hover">
@@ -92,7 +92,7 @@ $(function () {
 
     // Store current page for pagination preservation
     let currentEmployeePage = 1;
-    
+
     function loadEmployees(preservePage = false) {
         // Get current page from pagination if preservePage is true
         if (preservePage) {
@@ -101,23 +101,23 @@ $(function () {
                 currentEmployeePage = parseInt(activePageBtn.textContent) || 1;
             }
         }
-        
-        TableController.showLoading('#employeeTable', ['#', 'name', 'mobile', 'role', 'salary', 'bonus', 'status', 'actions']);
+
+        TableController.showLoading('#employeeTable', ['#', 'name', 'mobile', 'role', 'salary', 'bonus', 'join_date', 'status', 'actions']);
         $.get('../process/employee/select_employee.php', function (res) {
             console.log('Response from select_employee.php:', res);
-            
+
             // Handle error response
             if (res && res.success === false) {
                 console.error('Error loading employees:', res.error);
                 swalAlert('هەڵە', res.error || 'هەڵە لە وەرگرتنی زانیاری', 'error');
-                TableController.render('#employeeTable', [], ['#', 'name', 'mobile', 'role', 'salary', 'bonus', 'status', 'actions']);
+                TableController.render('#employeeTable', [], ['#', 'name', 'mobile', 'role', 'salary', 'bonus', 'join_date', 'status', 'actions']);
                 updateSummaryCards({ total_employees: 0, total_salary: 0 });
                 return;
             }
-            
+
             if (!res || !res.employees || !Array.isArray(res.employees)) {
                 console.warn('Invalid response format:', res);
-                TableController.render('#employeeTable', [], ['#', 'name', 'mobile', 'role', 'salary', 'bonus', 'status', 'actions']);
+                TableController.render('#employeeTable', [], ['#', 'name', 'mobile', 'role', 'salary', 'bonus', 'join_date', 'status', 'actions']);
                 updateSummaryCards({ total_employees: 0, total_salary: 0 });
                 return;
             }
@@ -131,7 +131,7 @@ $(function () {
             // Apply role filter if any roles are selected
             const selectedRoles = $('#filter_role').val() || [];
             const allSelectedRoles = selectedRoles;
-            
+
             let filteredEmployees = res.employees;
             if (allSelectedRoles.length > 0) {
                 filteredEmployees = res.employees.filter(emp => {
@@ -172,11 +172,11 @@ $(function () {
                 const rawBonus = emp.bonus || 0;
                 const rawStatus = emp.status || 'active'; // Keep original English status for data attribute
                 const rawRole = emp.role || ''; // Store original role value before modifying
-                
+
                 emp.salary = formatSalary(emp.salary);
                 emp.bonus = formatSalary(rawBonus);
                 emp.status = statusMap[emp.status] || emp.status; // Display Kurdish status in table
-                
+
                 // Handle multiple roles - display them nicely
                 let roleDisplay = rawRole;
                 if (typeof roleDisplay === 'string' && roleDisplay.includes(',')) {
@@ -188,9 +188,9 @@ $(function () {
                     roleDisplay = `<span class="badge bg-secondary">${roleDisplay}</span>`;
                 }
                 emp.role = roleDisplay;
-                
+
                 emp.actions = `
-                    <button class="btn btn-sm btn-primary edit-employee" data-id="${emp.id}" data-name="${emp.name}" data-mobile="${emp.mobile}" data-role="${rawRole}" data-salary="${rawSalary}" data-bonus="${rawBonus}" data-status="${rawStatus}"><i class="fa fa-edit"></i></button>
+                    <button class="btn btn-sm btn-primary edit-employee" data-id="${emp.id}" data-name="${emp.name}" data-mobile="${emp.mobile}" data-role="${rawRole}" data-salary="${rawSalary}" data-bonus="${rawBonus}" data-status="${rawStatus}" data-join_date="${emp.join_date || ''}"><i class="fa fa-edit"></i></button>
                     <button class="btn btn-sm btn-danger delete-employee" data-id="${emp.id}"><i class="fa fa-trash"></i></button>
                 `;
             });
@@ -206,12 +206,12 @@ $(function () {
                 }
                 paginationOptions = { currentPage: currentEmployeePage };
             }
-            TableController.renderWithPagination('#employeeTable', res.employees, ['#', 'name', 'mobile', 'role', 'salary', 'bonus', 'status', 'actions'], paginationOptions);
-        }, 'json').fail(function(xhr, status, error) {
+            TableController.renderWithPagination('#employeeTable', res.employees, ['#', 'name', 'mobile', 'role', 'salary', 'bonus', 'join_date', 'status', 'actions'], paginationOptions);
+        }, 'json').fail(function (xhr, status, error) {
             console.error('AJAX Error:', status, error);
             console.error('Response:', xhr.responseText);
             swalAlert('هەڵە', 'هەڵەیەک هەیە لە وەرگرتنی زانیاری کارمەندەکان', 'error');
-            TableController.render('#employeeTable', [], ['#', 'name', 'mobile', 'role', 'salary', 'bonus', 'status', 'actions']);
+            TableController.render('#employeeTable', [], ['#', 'name', 'mobile', 'role', 'salary', 'bonus', 'join_date', 'status', 'actions']);
             updateSummaryCards({ total_employees: 0, total_salary: 0 });
         });
     }
@@ -221,7 +221,7 @@ $(function () {
     window.updateRoleCards = updateRoleCards;
 
     // Handle role filter change
-    $(document).on('change', '#filter_role', function() {
+    $(document).on('change', '#filter_role', function () {
         loadEmployees();
     });
 });

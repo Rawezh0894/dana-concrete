@@ -45,16 +45,35 @@ try {
         error_log('Error checking status column: ' . $e->getMessage());
     }
     
-    // Build query based on column existence
-    if ($bonusExists && $statusExists) {
-        $query = 'SELECT id, name, mobile, role, salary, COALESCE(bonus, 0) as bonus, COALESCE(status, "active") as status FROM employees ORDER BY id DESC';
-    } elseif ($bonusExists) {
-        $query = 'SELECT id, name, mobile, role, salary, COALESCE(bonus, 0) as bonus, "active" as status FROM employees ORDER BY id DESC';
-    } elseif ($statusExists) {
-        $query = 'SELECT id, name, mobile, role, salary, 0 as bonus, COALESCE(status, "active") as status FROM employees ORDER BY id DESC';
-    } else {
-        $query = 'SELECT id, name, mobile, role, salary, 0 as bonus, "active" as status FROM employees ORDER BY id DESC';
+    try {
+        $checkColumns = $pdo->query("SHOW COLUMNS FROM employees LIKE 'join_date'");
+        $joinDateExists = $checkColumns->rowCount() > 0;
+    } catch (Exception $e) {
+        error_log('Error checking join_date column: ' . $e->getMessage());
     }
+    
+    // Build query based on column existence
+    $columns = 'id, name, mobile, role, salary';
+    
+    if ($bonusExists) {
+        $columns .= ', COALESCE(bonus, 0) as bonus';
+    } else {
+        $columns .= ', 0 as bonus';
+    }
+    
+    if ($statusExists) {
+        $columns .= ', COALESCE(status, "active") as status';
+    } else {
+        $columns .= ', "active" as status';
+    }
+
+    if ($joinDateExists) {
+        $columns .= ', join_date';
+    } else {
+        $columns .= ', NULL as join_date';
+    }
+    
+    $query = "SELECT $columns FROM employees ORDER BY id DESC";
     
     error_log('Query: ' . $query);
     

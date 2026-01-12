@@ -106,9 +106,10 @@ try {
         exit;
     }
 
-    // Check if bonus and status columns exist
+    // Check if bonus, status, and join_date columns exist
     $bonusExists = false;
     $statusExists = false;
+    $joinDateExists = false;
     
     try {
         $checkColumns = $pdo->query("SHOW COLUMNS FROM employees LIKE 'bonus'");
@@ -125,28 +126,36 @@ try {
     } catch (Exception $e) {
         error_log('Error checking status column: ' . $e->getMessage());
     }
+
+    try {
+        $checkColumns = $pdo->query("SHOW COLUMNS FROM employees LIKE 'join_date'");
+        $joinDateExists = $checkColumns->rowCount() > 0;
+        error_log("Join Date column exists: " . ($joinDateExists ? 'YES' : 'NO'));
+    } catch (Exception $e) {
+        error_log('Error checking join_date column: ' . $e->getMessage());
+    }
+
+    $join_date = $_POST['join_date'] ?? null;
     
     // Build UPDATE query based on column existence
-    $query = '';
-    $params = [];
-    
-    if ($bonusExists && $statusExists) {
-        $query = 'UPDATE employees SET name=?, mobile=?, role=?, salary=?, bonus=?, status=? WHERE id=?';
-        $params = [$name, $mobile, $role, $salary, $bonus, $status, $id];
-        error_log("Using query with bonus and status");
-    } elseif ($bonusExists) {
-        $query = 'UPDATE employees SET name=?, mobile=?, role=?, salary=?, bonus=? WHERE id=?';
-        $params = [$name, $mobile, $role, $salary, $bonus, $id];
-        error_log("Using query with bonus only");
-    } elseif ($statusExists) {
-        $query = 'UPDATE employees SET name=?, mobile=?, role=?, salary=?, status=? WHERE id=?';
-        $params = [$name, $mobile, $role, $salary, $status, $id];
-        error_log("Using query with status only");
-    } else {
-        $query = 'UPDATE employees SET name=?, mobile=?, role=?, salary=? WHERE id=?';
-        $params = [$name, $mobile, $role, $salary, $id];
-        error_log("Using query without bonus and status");
+    $query = 'UPDATE employees SET name=?, mobile=?, role=?, salary=?';
+    $params = [$name, $mobile, $role, $salary];
+
+    if ($bonusExists) {
+        $query .= ', bonus=?';
+        $params[] = $bonus;
     }
+    if ($statusExists) {
+        $query .= ', status=?';
+        $params[] = $status;
+    }
+    if ($joinDateExists) {
+        $query .= ', join_date=?';
+        $params[] = $join_date;
+    }
+
+    $query .= ' WHERE id=?';
+    $params[] = $id;
     
     error_log("Query: $query");
     error_log("Params: " . print_r($params, true));

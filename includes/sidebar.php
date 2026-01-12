@@ -94,12 +94,6 @@ $logout_pages = ['logout.php'];
         <?php if (hasPermission('view_person_other_expenses')): ?>
           <li><a href="../pages/person_other_expenses.php" class="sidebar-link<?php if($current_page == 'person_other_expenses.php') echo ' active'; ?>"><i class="bi bi-person-lines-fill me-2"></i> خەرجی تر</a></li>
         <?php endif; ?>
-        <?php if (hasPermission('view_assets')): ?>
-          <li><a href="../pages/assets.php" class="sidebar-link<?php if($current_page == 'assets.php') echo ' active'; ?>"><i class="bi bi-tools me-2"></i> ئامێرەکان</a></li>
-        <?php endif; ?>
-        <?php if (hasPermission('view_depreciation')): ?>
-          <li><a href="../pages/depreciation.php" class="sidebar-link<?php if($current_page == 'depreciation.php') echo ' active'; ?>"><i class="bi bi-graph-down me-2"></i> داخوران</a></li>
-        <?php endif; ?>
       </ul>
     </li>
     <li class="sidebar-group">

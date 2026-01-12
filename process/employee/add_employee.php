@@ -94,9 +94,10 @@ try {
         exit;
     }
 
-    // Check if bonus and status columns exist
+    // Check if bonus, status, and join_date columns exist
     $bonusExists = false;
     $statusExists = false;
+    $joinDateExists = false;
     
     try {
         $checkColumns = $pdo->query("SHOW COLUMNS FROM employees LIKE 'bonus'");
@@ -113,28 +114,42 @@ try {
     } catch (Exception $e) {
         error_log('Error checking status column: ' . $e->getMessage());
     }
-    
-    // Build INSERT query based on column existence
-    $query = '';
-    $params = [];
-    
-    if ($bonusExists && $statusExists) {
-        $query = 'INSERT INTO employees (name, mobile, role, salary, bonus, status) VALUES (?, ?, ?, ?, ?, ?)';
-        $params = [$name, $mobile, $role, $salary, $bonus, $status];
-        error_log("Using query with bonus and status");
-    } elseif ($bonusExists) {
-        $query = 'INSERT INTO employees (name, mobile, role, salary, bonus) VALUES (?, ?, ?, ?, ?)';
-        $params = [$name, $mobile, $role, $salary, $bonus];
-        error_log("Using query with bonus only");
-    } elseif ($statusExists) {
-        $query = 'INSERT INTO employees (name, mobile, role, salary, status) VALUES (?, ?, ?, ?, ?)';
-        $params = [$name, $mobile, $role, $salary, $status];
-        error_log("Using query with status only");
-    } else {
-        $query = 'INSERT INTO employees (name, mobile, role, salary) VALUES (?, ?, ?, ?)';
-        $params = [$name, $mobile, $role, $salary];
-        error_log("Using query without bonus and status");
+
+    try {
+        $checkColumns = $pdo->query("SHOW COLUMNS FROM employees LIKE 'join_date'");
+        $joinDateExists = $checkColumns->rowCount() > 0;
+        error_log("Join Date column exists: " . ($joinDateExists ? 'YES' : 'NO'));
+    } catch (Exception $e) {
+        error_log('Error checking join_date column: ' . $e->getMessage());
     }
+    
+    $join_date = $_POST['join_date'] ?? date('Y-m-d');
+    if (empty($join_date)) {
+        $join_date = date('Y-m-d');
+    }
+
+    // Build INSERT query based on column existence
+    $query = 'INSERT INTO employees (name, mobile, role, salary';
+    $placeholders = 'VALUES (?, ?, ?, ?';
+    $params = [$name, $mobile, $role, $salary];
+
+    if ($bonusExists) {
+        $query .= ', bonus';
+        $placeholders .= ', ?';
+        $params[] = $bonus;
+    }
+    if ($statusExists) {
+        $query .= ', status';
+        $placeholders .= ', ?';
+        $params[] = $status;
+    }
+    if ($joinDateExists) {
+        $query .= ', join_date';
+        $placeholders .= ', ?';
+        $params[] = $join_date;
+    }
+
+    $query .= ') ' . $placeholders . ')';
     
     error_log("Query: $query");
     error_log("Params: " . print_r($params, true));
