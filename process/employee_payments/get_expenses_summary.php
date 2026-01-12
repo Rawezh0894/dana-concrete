@@ -53,7 +53,7 @@ try {
     } catch (Exception $e) {}
 
     $emp_params = [];
-    $emp_sql = "SELECT id, salary, COALESCE(bonus, 0) as bonus FROM employees WHERE 1=1";
+    $emp_sql = "SELECT id, salary, COALESCE(bonus, 0) as bonus, join_date FROM employees WHERE 1=1";
     
     // Filter active employees if status column exists
     if ($status_exists) {
@@ -67,15 +67,37 @@ try {
     $stmt = $pdo->prepare($emp_sql);
     $stmt->execute($emp_params);
     $employees_data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
+
     $total_salary = 0;
     $total_bonus = 0;
     $employee_ids = [];
     
     foreach ($employees_data as $emp) {
         $employee_ids[] = $emp['id'];
-        $total_salary += floatval($emp['salary']) * $prorate_factor;
-        $total_bonus += floatval($emp['bonus']) * $prorate_factor;
+        $emp_salary = floatval($emp['salary']);
+        $emp_bonus = floatval($emp['bonus']);
+        $join_date = $emp['join_date'] ?? null;
+        
+        $emp_period_start = $period_start;
+        // If employee joined after the period start, adjust their effective start date
+        if ($join_date && $join_date > $period_start) {
+            // But if join_date is after period_end, they earned 0
+            if ($join_date > $period_end) {
+                continue; 
+            }
+            $emp_period_start = $join_date;
+        }
+        
+        // Calculate days for THIS employee in the period
+        $emp_start_ts = strtotime($emp_period_start);
+        $emp_days = max(0, ($end_ts - $emp_start_ts) / 86400 + 1);
+        
+        // Final calculation: (Salary / DaysInMonth) * DaysWorked
+        $emp_salary_earned = ($emp_salary / $days_in_month_basis) * $emp_days;
+        $emp_bonus_earned = ($emp_bonus / $days_in_month_basis) * $emp_days;
+        
+        $total_salary += $emp_salary_earned;
+        $total_bonus += $emp_bonus_earned;
     }
     
     // 4. Calculate Overtime from concrete_receipts (Only for employees with role "شۆفێری میکسەر")

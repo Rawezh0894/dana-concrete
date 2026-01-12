@@ -28,7 +28,7 @@ try {
     $current_month = date('m');
     
     // Get employee info
-    $employee_query = "SELECT id, name, salary FROM employees WHERE id = ?";
+    $employee_query = "SELECT id, name, salary, join_date FROM employees WHERE id = ?";
     $stmt = $pdo->prepare($employee_query);
     $stmt->execute([$employee_id]);
     $employee = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -42,28 +42,48 @@ try {
     }
     
     $monthly_salary = floatval($employee['salary']);
+    $join_date = $employee['join_date'] ?? null;
     
     // Calculate daily balance for current month
     $month_to_calculate = $month ?: date('Y-m');
     $expense_date = $month_to_calculate . '-01';
-    $year = intval(substr($month_to_calculate, 0, 4));
-    $month_num = intval(substr($month_to_calculate, 5, 2));
     
-    // Get days in month
-    $days_in_month = cal_days_in_month(CAL_GREGORIAN, $month_num, $year);
-    
-    // Calculate days used
-    if ($year == $current_year && $month_num == $current_month) {
-        $end_date = $current_date;
+    // ADJUST START DATE BASED ON JOIN DATE
+    $calc_start_date = $expense_date;
+    if ($join_date && $join_date > $expense_date) {
+        // If employee joined in this month or later
+        if (substr($join_date, 0, 7) == $month_to_calculate) {
+            $calc_start_date = $join_date;
+        } elseif ($join_date > date('Y-m-t', strtotime($expense_date))) {
+            // Joined after this month
+            $calc_start_date = null; 
+        }
+    }
+
+    if ($calc_start_date === null) {
+        $days_used = 0;
     } else {
-        $end_date = date('Y-m-t', strtotime($expense_date));
+        $year = intval(substr($month_to_calculate, 0, 4));
+        $month_num = intval(substr($month_to_calculate, 5, 2));
+        
+        // Get days in month
+        $days_in_month = cal_days_in_month(CAL_GREGORIAN, $month_num, $year);
+        
+        // Calculate days used
+        if ($year == $current_year && $month_num == $current_month) {
+            $current_month_end = $current_date;
+        } else {
+            $current_month_end = date('Y-m-t', strtotime($expense_date));
+        }
+        
+        // Days used = (End Date - Start Date) + 1
+        $days_used = (strtotime($current_month_end) - strtotime($calc_start_date)) / (60 * 60 * 24) + 1;
+        if ($days_used < 0) $days_used = 0;
+        if ($days_used > $days_in_month) {
+            $days_used = $days_in_month;
+        }
     }
-    
-    $days_used = (strtotime($end_date) - strtotime($expense_date)) / (60 * 60 * 24) + 1;
-    if ($days_used > $days_in_month) {
-        $days_used = $days_in_month;
-    }
-    
+
     // Get expenses for this month
     $expenses_query = "
         SELECT 
