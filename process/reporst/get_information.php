@@ -105,44 +105,51 @@ try {
     $from_date = $_GET['from_date'] ?? '';
     $to_date = $_GET['to_date'] ?? '';
     $use_range = ($from_date || $to_date);
-    // Date conditions for different tables
-    $date_condition_sales = "";
-    // For employee payments, filter by salary month, not payment creation date
-    $date_condition_employee_payments = "";
-    $date_condition_date = "";
-    $date_condition_customer_debt_payments = "";
-    
+    // 1. Determine Date Range and SQL conditions
     if ($use_range) {
-        $from = $from_date ? $from_date : '1000-01-01';
-        $to = $to_date ? $to_date : '9999-12-31';
-        $date_condition_sales = " AND order_date >= '$from' AND order_date <= '$to'";
-        // Filter employee payments by the selected salary month range
-        $date_condition_employee_payments = " AND DATE(CONCAT(pay_month, '-01')) >= '$from' AND DATE(CONCAT(pay_month, '-01')) <= '$to'";
-        $date_condition_date = " AND date >= '$from' AND date <= '$to'";
-        $date_condition_customer_debt_payments = " AND p.date >= '$from' AND p.date <= '$to'";
+        $period_start = $from_date ?: '1000-01-01';
+        $period_end = $to_date ?: '9999-12-31';
+        
+        $date_condition_sales = " AND order_date >= '$period_start' AND order_date <= '$period_end'";
+        $date_condition_employee_payments = " AND DATE(CONCAT(pay_month, '-01')) >= '$period_start' AND DATE(CONCAT(pay_month, '-01')) <= '$period_end'";
+        $date_condition_date = " AND date >= '$period_start' AND date <= '$period_end'";
+        $date_condition_customer_debt_payments = " AND p.date >= '$period_start' AND p.date <= '$period_end'";
     } else {
         if ($filter === 'today') {
+            $period_start = date('Y-m-d');
+            $period_end = date('Y-m-d');
             $date_condition_sales = " AND order_date = CURDATE()";
-            // Map 'today' to current month for salary-month-based filtering
             $date_condition_employee_payments = " AND YEAR(DATE(CONCAT(pay_month, '-01'))) = YEAR(CURDATE()) AND MONTH(DATE(CONCAT(pay_month, '-01'))) = MONTH(CURDATE())";
             $date_condition_date = " AND date = CURDATE()";
             $date_condition_customer_debt_payments = " AND p.date = CURDATE()";
         } elseif ($filter === 'week') {
+            $period_start = date('Y-m-d', strtotime('monday this week'));
+            $period_end = date('Y-m-d', strtotime('sunday this week'));
             $date_condition_sales = " AND YEARWEEK(order_date, 1) = YEARWEEK(CURDATE(), 1)";
-            // Map 'week' to current month for salary-month-based filtering
             $date_condition_employee_payments = " AND YEAR(DATE(CONCAT(pay_month, '-01'))) = YEAR(CURDATE()) AND MONTH(DATE(CONCAT(pay_month, '-01'))) = MONTH(CURDATE())";
             $date_condition_date = " AND YEARWEEK(date, 1) = YEARWEEK(CURDATE(), 1)";
             $date_condition_customer_debt_payments = " AND YEARWEEK(p.date, 1) = YEARWEEK(CURDATE(), 1)";
         } elseif ($filter === 'month') {
+            $period_start = date('Y-m-01');
+            $period_end = date('Y-m-t');
             $date_condition_sales = " AND YEAR(order_date) = YEAR(CURDATE()) AND MONTH(order_date) = MONTH(CURDATE())";
             $date_condition_employee_payments = " AND YEAR(DATE(CONCAT(pay_month, '-01'))) = YEAR(CURDATE()) AND MONTH(DATE(CONCAT(pay_month, '-01'))) = MONTH(CURDATE())";
             $date_condition_date = " AND YEAR(date) = YEAR(CURDATE()) AND MONTH(date) = MONTH(CURDATE())";
             $date_condition_customer_debt_payments = " AND YEAR(p.date) = YEAR(CURDATE()) AND MONTH(p.date) = MONTH(CURDATE())";
         } elseif ($filter === 'year') {
+            $period_start = date('Y-01-01');
+            $period_end = date('Y-12-31');
             $date_condition_sales = " AND YEAR(order_date) = YEAR(CURDATE())";
             $date_condition_employee_payments = " AND YEAR(DATE(CONCAT(pay_month, '-01'))) = YEAR(CURDATE())";
             $date_condition_date = " AND YEAR(date) = YEAR(CURDATE())";
             $date_condition_customer_debt_payments = " AND YEAR(p.date) = YEAR(CURDATE())";
+        } else {
+            $period_start = date('Y-01-01');
+            $period_end = date('Y-12-31');
+            $date_condition_sales = "";
+            $date_condition_employee_payments = "";
+            $date_condition_date = "";
+            $date_condition_customer_debt_payments = "";
         }
     }
     $purchases_query = "SELECT payment_type, SUM(price) as iqd, SUM(amount_iqd) as amount_iqd, SUM(amount_iqd / NULLIF(exchange_rate / 100, 0)) as iqd_converted FROM purchases WHERE type='دینار' $date_condition_date GROUP BY payment_type";
@@ -807,14 +814,72 @@ try {
     $stmt = $pdo->query("SELECT COUNT(*) as total FROM employees");
     $employee_stats['total'] = $stmt->fetchColumn();
     
-    $stmt = $pdo->query("SELECT SUM(salary) as total_salary FROM employees");
-    $employee_stats['total_salary'] = $stmt->fetchColumn() ?: 0;
+    // Check if status column exists
+    $status_exists = false;
+    try {
+        $check_status = $pdo->query("SHOW COLUMNS FROM employees LIKE 'status'");
+        $status_exists = $check_status->rowCount() > 0;
+    } catch (Exception $e) {}
+
+    // Check if join_date column exists
+    $join_date_exists = false;
+    try {
+        $check_join = $pdo->query("SHOW COLUMNS FROM employees LIKE 'join_date'");
+        $join_date_exists = $check_join->rowCount() > 0;
+    } catch (Exception $e) {}
+
+    $col_emp = "salary, COALESCE(bonus, 0) as bonus";
+    if ($join_date_exists) $col_emp .= ", join_date";
+    else $col_emp .= ", NULL as join_date";
+
+    $sql_emp = "SELECT $col_emp FROM employees";
+    if ($status_exists) $sql_emp .= " WHERE status = 'active'";
     
-    // Calculate Total Monthly Fixed Cost (Salary + Bonus) for Active Employees
-    // کۆی مووچە + بەخشیش بۆ کارمەندە چالاکەکان
-    $stmt = $pdo->query("SELECT SUM(salary + COALESCE(bonus, 0)) as total_fixed FROM employees WHERE status = 'active'");
-    $total_fixed_iqd = $stmt->fetchColumn() ?: 0;
-    $employee_stats['total_fixed_usd'] = ($usd_iqd_rate > 0) ? ($total_fixed_iqd / ($usd_iqd_rate / 100)) : 0;
+    $stmt = $pdo->query($sql_emp);
+    $employees_for_stats = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $total_accrued_salary_iqd = 0;
+    $today = date('Y-m-d');
+    
+    foreach ($employees_for_stats as $emp) {
+        $emp_salary = floatval($emp['salary']);
+        $emp_bonus = floatval($emp['bonus']);
+        $join_date = $emp['join_date'];
+        
+        // Use the same period variables as defined earlier (lines 12-23)
+        // Cap calculation at Today
+        $calc_period_start = $period_start;
+        if ($join_date && $join_date > $period_start) {
+            $calc_period_start = $join_date;
+        }
+        
+        // If join_date is after period_end or today, they earned nothing in this window
+        if ($join_date && ($join_date > $period_end || $join_date > $today)) {
+            continue;
+        }
+        
+        $calc_period_end = $period_end;
+        if ($today < $calc_period_end) {
+            $calc_period_end = $today;
+        }
+        
+        $s_ts = strtotime($calc_period_start);
+        $e_ts = strtotime($calc_period_end);
+        
+        if ($s_ts <= $e_ts) {
+            $days = ($e_ts - $s_ts) / 86400 + 1;
+            
+            // Prorate based on month actual days or 30
+            $month_days = intval(date('t', $s_ts));
+            $basis = (date('Y-m', $s_ts) === date('Y-m', $e_ts)) ? $month_days : 30;
+            
+            $prorate = $days / $basis;
+            $total_accrued_salary_iqd += ($emp_salary + $emp_bonus) * $prorate;
+        }
+    }
+
+    $employee_stats['total_fixed_usd'] = ($usd_iqd_rate > 0) ? ($total_accrued_salary_iqd / ($usd_iqd_rate / 100)) : 0;
+    $employee_stats['total_salary'] = $total_accrued_salary_iqd; // Keeping IQD for internal ref if needed
 
     // Count drivers - check for any role containing 'شۆفێر' (supports multiple roles)
     $stmt = $pdo->query("SELECT COUNT(*) as drivers FROM employees WHERE role LIKE '%شۆفێر%' OR role LIKE '%سایەق%'");
@@ -1135,8 +1200,23 @@ try {
             ],
             'profit_loss' => [
                 'total_revenue' => ($sales['cash']['usd'] ?? 0) + ($sales['credit']['usd'] ?? 0) + $raw_material_sales_total_usd,
-                'total_cost' => ($total_used_material_cost_usd ?? 0) + ($employee_stats['total_fixed_usd'] ?? 0) + $caravan_hisabi_usd + (($total_expenses_breakdown['material_usage'] ?? 0) + ($total_expenses_breakdown['gas_usage'] ?? 0)) + $total_expenses_usd + ($total_discount ?? 0),
-                'profit_loss' => (($sales['cash']['usd'] ?? 0) + ($sales['credit']['usd'] ?? 0) + $raw_material_sales_total_usd) - (($total_used_material_cost_usd ?? 0) + ($employee_stats['total_fixed_usd'] ?? 0) + $caravan_hisabi_usd + (($total_expenses_breakdown['material_usage'] ?? 0) + ($total_expenses_breakdown['gas_usage'] ?? 0)) + $total_expenses_usd + ($total_discount ?? 0))
+                'total_cost' => ($total_used_material_cost_usd ?? 0) + 
+                               ($raw_material_sales_cost_total_usd ?? 0) + 
+                               ($employee_stats['total_fixed_usd'] ?? 0) + 
+                               ($caravan_hisabi_usd ?? 0) + 
+                               ($total_expenses_breakdown['other_expenses'] ?? 0) + 
+                               ($total_expenses_breakdown['purchases'] ?? 0) + 
+                               ($total_expenses_breakdown['purchase_materials'] ?? 0) + 
+                               ($total_discount ?? 0),
+                'profit_loss' => (($sales['cash']['usd'] ?? 0) + ($sales['credit']['usd'] ?? 0) + $raw_material_sales_total_usd) - 
+                                (($total_used_material_cost_usd ?? 0) + 
+                                 ($raw_material_sales_cost_total_usd ?? 0) + 
+                                 ($employee_stats['total_fixed_usd'] ?? 0) + 
+                                 ($caravan_hisabi_usd ?? 0) + 
+                                 ($total_expenses_breakdown['other_expenses'] ?? 0) + 
+                                 ($total_expenses_breakdown['purchases'] ?? 0) + 
+                                 ($total_expenses_breakdown['purchase_materials'] ?? 0) + 
+                                 ($total_discount ?? 0))
             ],
             'discounts' => [
                 'total_usd' => $total_discount,

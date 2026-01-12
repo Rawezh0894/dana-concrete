@@ -175,7 +175,7 @@ function renderDashboardCards(data) {
             icon: 'fa-money-check-alt',
             cardClass: 'employee-expenses-card',
             value: formatCurrency(Number(data.data?.employee_stats?.total_fixed_usd) || 0, 'USD'),
-            subtitle: 'مووچە + بەخشیش (بە دۆلار)'
+            subtitle: 'هەژمارکراوە لە بەرواری دەستبەکاربوونەوە بەپێی ڕۆژ'
         },
         {
             key: 'caravan_hisabi',
@@ -357,7 +357,7 @@ function renderDashboardCards(data) {
             icon: 'fa-money-check-alt',
             cardClass: 'employee-expenses-card',
             value: formatCurrency(Number(data.data?.employee_stats?.total_fixed_usd) || 0, 'USD'),
-            subtitle: 'مووچە + بەخشیش (بە دۆلار)'
+            subtitle: 'هەژمارکراوە لە بەرواری دەستبەکاربوونەوە بەپێی ڕۆژ'
         },
         {
             key: 'other_expenses',
