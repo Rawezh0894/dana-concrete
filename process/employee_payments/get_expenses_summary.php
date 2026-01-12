@@ -10,6 +10,7 @@ try {
     $end_date = $_GET['end_date'] ?? '';
     
     // 1. Determine Date Range
+    $current_date = date('Y-m-d');
     if ($start_date && $end_date) {
         $period_start = $start_date;
         $period_end = $end_date;
@@ -21,22 +22,25 @@ try {
         $period_start = date('Y-m-01');
         $period_end = date('Y-m-t');
     }
+
+    // For calculation of accrued salary, we cap the period end at today if it's in the future
+    $calculation_end = $period_end;
+    if ($calculation_end > $current_date) {
+        $calculation_end = $current_date;
+    }
     
-    // Calculate days in period
     $start_ts = strtotime($period_start);
-    $end_ts = strtotime($period_end);
-    $days_in_period = max(1, ($end_ts - $start_ts) / 86400 + 1);
+    $end_ts = strtotime($calculation_end);
+    $days_in_period = max(0, ($end_ts - $start_ts) / 86400 + 1);
     
-    // For monthly salary calculation, we generally assume 30 days for normalization
-    // or use the days in the specific month if a single month is selected.
+    // For monthly salary calculation, we use the days in the specific month
     $days_in_month_basis = 30;
     if ($month_filter) {
        $days_in_month_basis = cal_days_in_month(CAL_GREGORIAN, date('m', $start_ts), date('Y', $start_ts));
-    } elseif (!$start_date && !$end_date) {
-       $days_in_month_basis = cal_days_in_month(CAL_GREGORIAN, date('m'), date('Y'));
+    } else {
+       // Use days in the month of the period_start
+       $days_in_month_basis = cal_days_in_month(CAL_GREGORIAN, date('m', $start_ts), date('Y', $start_ts));
     }
-    
-    $prorate_factor = $days_in_period / $days_in_month_basis;
     
     // 2. Get Overtime Rate
     $stmt = $pdo->query("SELECT value FROM settings WHERE name = 'overtime_rate'");
@@ -81,8 +85,8 @@ try {
         $emp_period_start = $period_start;
         // If employee joined after the period start, adjust their effective start date
         if ($join_date && $join_date > $period_start) {
-            // But if join_date is after period_end, they earned 0
-            if ($join_date > $period_end) {
+            // But if join_date is after calculation_end, they earned 0
+            if ($join_date > $calculation_end) {
                 continue; 
             }
             $emp_period_start = $join_date;
@@ -119,11 +123,14 @@ try {
          // Build employee ID list for IN clause
         $placeholders = implode(',', array_fill(0, count($mixer_driver_ids), '?'));
         
-        // Check if 'date' column exists, otherwise fallback to 'created_at'
-        // We assume 'date' exists based on pages/concrete_receipts.php
+        // We calculate overtime up to the period end (not calculation_end)
+        // Because receipts are historical facts, not daily salary liability.
+        // Wait, if no end_date is provided, period_end is Jan 31.
+        // BUT receipts for the future won't exist anyway.
+        // So period_end is fine here.
         $overtime_sql = "SELECT COUNT(*) as count FROM concrete_receipts 
                          WHERE mixer_driver_id IN ($placeholders) 
-                         AND `date` BETWEEN ? AND ?";
+                         AND COALESCE(`date`, DATE(created_at)) BETWEEN ? AND ?";
                          
         $overtime_params = array_merge($mixer_driver_ids, [$period_start, $period_end]);
         
