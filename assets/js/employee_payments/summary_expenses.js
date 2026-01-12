@@ -29,23 +29,21 @@ function loadSummaryData() {
             const filters = result.data.filters;
 
             // Calculate compound values
-            const salaryAndBonus = data.total_salary + data.total_bonus;
             const totalIncome = data.total_salary + data.total_bonus + data.total_overtime;
             const totalDeductions = data.total_deduction + data.total_penalty;
             const netPayable = totalIncome - totalDeductions;
 
-            // Use backend calculated earned to date
-            const earnedToDate = data.total_earned_to_date || 0;
-            const totalDeductionsAmount = data.total_deduction + data.total_penalty;
-            const finalDailyBalance = earnedToDate - totalDeductionsAmount;
+            // Daily balance is now effectively the same as netPayable for the current period 
+            // since the backend caps the salary/bonus accrual at "today"
+            const finalDailyBalance = netPayable;
 
             // Format details text
-            const detailsText = `هەژمارکراوە لە بەرواری دەستبەکار بوونەوە تا ئەمڕۆ`;
+            const detailsText = `هەژمارکراوە لە بەرواری دەستبەکار بوونەوە تا ئەمڕۆ (یان کۆتایی فلتەر)`;
 
             // Update summary cards
             $('#total-salary').text(formatCurrency(data.total_salary));
             $('#total-bonus').text(formatCurrency(data.total_bonus));
-            $('#total-salary-bonus').text(formatCurrency(salaryAndBonus));
+            $('#total-salary-bonus').text(formatCurrency(data.total_salary_bonus || (data.total_salary + data.total_bonus)));
             $('#total-overtime').text(formatCurrency(data.total_overtime));
             $('#net-payable').text(formatCurrency(netPayable));
 

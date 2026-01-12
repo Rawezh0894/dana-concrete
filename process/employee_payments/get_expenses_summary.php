@@ -27,11 +27,6 @@ try {
     $end_ts = strtotime($period_end);
     $days_in_period = max(1, ($end_ts - $start_ts) / 86400 + 1);
     
-    // For monthly salary calculation, use the days in the specific month of the period start.
-    $days_in_month_basis = cal_days_in_month(CAL_GREGORIAN, date('m', $start_ts), date('Y', $start_ts));
-    
-    $prorate_factor = $days_in_period / $days_in_month_basis;
-    
     // 2. Get Overtime Rate
     $stmt = $pdo->query("SELECT value FROM settings WHERE name = 'overtime_rate'");
     $setting = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -89,21 +84,22 @@ try {
         $join_date = $emp['join_date'];
         
         // Calculate work days for THIS employee in THIS period
+        // Real-time accrual: from max(period_start, join_date) to min(period_end, today)
         $work_start = $period_start;
         if ($join_date && $join_date > $period_start) {
             $work_start = $join_date;
         }
         
-        // If join_date is after period_end, they earned 0
-        if ($join_date && $join_date > $period_end) {
+        // If join_date is after period_end or after today, they earned 0 in this context
+        if ($join_date && ($join_date > $period_end || $join_date > $today)) {
             continue;
         }
         
+        // End date for calculation is min of period_end and today
         $work_end = $period_end;
-        // If it's the current month and we want "earned so far", we might want to cap at today?
-        // But usually "Monthly Summary" means full month expectation if looking at future.
-        // However, the user's "Daily Balance" request suggests they want real-time accrual.
-        // For the main "Total Salary" card, let's keep it for the whole selected period.
+        if ($today < $work_end) {
+            $work_end = $today;
+        }
         
         $emp_start_ts = strtotime($work_start);
         $emp_end_ts = strtotime($work_end);
@@ -111,13 +107,22 @@ try {
         if ($emp_start_ts <= $emp_end_ts) {
             $emp_days = ($emp_end_ts - $emp_start_ts) / 86400 + 1;
             
-            // Daily rate based on month basis (already calculated $days_in_month_basis)
-            $emp_prorate = $emp_days / $days_in_month_basis;
+            // For monthly salary calculation, use the month's actual days for better precision
+            // If the range spans multiple months, we use the average (30)
+            $emp_month_days = cal_days_in_month(CAL_GREGORIAN, date('m', $emp_start_ts), date('Y', $emp_start_ts));
+            
+            // If the work period is within one month, use that month's days
+            // Otherwise fall back to a standard 30-day month basis for prorating
+            $basis = (date('Y-m', $emp_start_ts) === date('Y-m', $emp_end_ts)) ? $emp_month_days : 30;
+            
+            $emp_prorate = $emp_days / $basis;
             
             $total_salary += $emp_salary * $emp_prorate;
             $total_bonus += $emp_bonus * $emp_prorate;
         }
     }
+    
+    $total_salary_plus_bonus = $total_salary + $total_bonus;
     
     // 4. Calculate Overtime from concrete_receipts (Only for employees with role "شۆفێری میکسەر")
     $total_overtime = 0;
@@ -245,42 +250,6 @@ try {
     $stmt->execute($expense_params);
     $expense_summary = $stmt->fetch(PDO::FETCH_ASSOC);
     
-    // 6. Calculate Daily Balance (Earned so far this month/period)
-    $total_earned_to_date = 0;
-    foreach ($employees_data as $emp) {
-        $emp_salary = floatval($emp['salary']);
-        $emp_bonus = floatval($emp['bonus']);
-        $join_date = $emp['join_date'];
-        
-        $month_start = date('Y-m-01', $start_ts);
-        $month_end_actual = date('Y-m-t', $start_ts);
-        $calc_until = min($today, $month_end_actual);
-        
-        $work_start = $month_start;
-        if ($join_date && $join_date > $month_start) {
-            $work_start = $join_date;
-        }
-        
-        if ($join_date && $join_date > $calc_until) {
-            continue;
-        }
-        
-        $emp_start_ts = strtotime($work_start);
-        $emp_end_ts = strtotime($calc_until);
-        
-        if ($emp_start_ts <= $emp_end_ts) {
-            $emp_days = ($emp_end_ts - $emp_start_ts) / 86400 + 1;
-            $month_days = cal_days_in_month(CAL_GREGORIAN, date('m', $start_ts), date('Y', $start_ts));
-            
-            $rate = ($emp_salary + $emp_bonus) / $month_days;
-            $total_earned_to_date += $rate * $emp_days;
-        }
-    }
-    // Add overtime to earned to date? Yes, overtime is usually earned per task.
-    // The $total_overtime is already filtered by date range.
-    // If range is current month, it might include future? No, receipts are in past/present.
-    $total_earned_to_date += $total_overtime;
-
     // 7. Return Data
     // Get filter lists
     $employees = $pdo->query("SELECT id, name FROM employees ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
@@ -292,11 +261,11 @@ try {
             'summary' => [
                 'total_salary' => round($total_salary, 2),
                 'total_bonus' => round($total_bonus, 2),
+                'total_salary_bonus' => round($total_salary_plus_bonus, 2),
                 'total_overtime' => round($total_overtime, 2),
                 'total_advance' => floatval($expense_summary['total_advance'] ?? 0),
                 'total_deduction' => floatval($expense_summary['total_deduction'] ?? 0),
                 'total_penalty' => floatval($expense_summary['total_penalty'] ?? 0),
-                'total_earned_to_date' => round($total_earned_to_date, 2),
                 'days_in_period' => $days_in_period
             ],
             'filters' => [
