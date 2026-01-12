@@ -375,6 +375,17 @@ $(document).ready(function() {
             submitBtn.html(originalBtnText);
             return false;
         }
+        if (paymentType === 'قەرز' && remaining !== 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'هەڵە',
+                text: 'کاتێک پارەی ماوە 0 نییە، نابێت جۆری پارەدان قەرز بێت!'
+            });
+            submitting = false;
+            submitBtn.prop('disabled', false);
+            submitBtn.html(originalBtnText);
+            return false;
+        }
         if (paidIQD_inUSD > total) {
             Swal.fire({
                 icon: 'error',
