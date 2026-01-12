@@ -16,6 +16,7 @@ function enableSelect2(selector, modalSelector) {
     // Check if select has an empty option (for allowing "none" selection)
     const hasEmptyOption = $element.find('option[value=""]').length > 0;
     const select2Options = {
+        theme: 'bootstrap-5',
         dropdownParent: $(modalSelector),
         width: '100%',
         placeholder: $element.attr('data-placeholder') || "هەڵبژێرە",
@@ -43,7 +44,7 @@ function enableSelect2(selector, modalSelector) {
         };
     }
 
-    // Initialize select2 (no theme for max compatibility)
+    // Initialize select2
     try {
         $element.select2(select2Options);
     } catch (e) {
@@ -53,8 +54,9 @@ function enableSelect2(selector, modalSelector) {
     if (allowNewRecipient) {
         setupRecipientQuickAdd($element);
     }
-    // Fix: Only initialize once per modal show
-    $(modalSelector).off('shown.bs.modal.select2').on('shown.bs.modal.select2', function () {
+    // Fix: Only initialize once per modal show using unique namespace
+    const elementId = $element.attr('id') || Math.random().toString(36).substring(7);
+    $(modalSelector).off('shown.bs.modal.select2_' + elementId).on('shown.bs.modal.select2_' + elementId, function () {
         try {
             if ($element.length > 0 && $element.hasClass('select2-hidden-accessible')) {
                 setTimeout(function () {
