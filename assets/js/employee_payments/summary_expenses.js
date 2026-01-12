@@ -28,21 +28,20 @@ function loadSummaryData() {
             const data = result.data.summary;
             const filters = result.data.filters;
 
-            // Calculate compound values
+            // Calculate compound values for the FULL PERIOD (Main Cards)
             const salaryAndBonus = data.total_salary + data.total_bonus;
             const totalIncome = data.total_salary + data.total_bonus + data.total_overtime;
             const totalDeductions = data.total_deduction + data.total_penalty;
             const netPayable = totalIncome - totalDeductions;
 
-            // The PHP now returns accrued salary up to today (for current/future months)
-            // or for the full period (for past months).
-            // So we can simplify the daily balance to be the net payable 
-            // but we'll show the breakdown clearly.
-
-            const finalDailyBalance = netPayable;
+            // Calculate compound values for ACCRUED (Daily Balance)
+            const accrued = result.data.accrued_summary;
+            const accruedIncome = accrued.total_salary + accrued.total_bonus + accrued.total_overtime;
+            const accruedDeductions = accrued.total_advance + accrued.total_deduction + accrued.total_penalty;
+            const finalDailyBalance = accruedIncome - accruedDeductions;
 
             // Format details text
-            const detailsText = `(مووچە + بەخشیش + کاروان) - (سزا + کەمکردنەوە)`;
+            const detailsText = `(${formatCurrency(accrued.total_salary)} مووچە + ${formatCurrency(accrued.total_bonus)} بەخشیش + ${formatCurrency(accrued.total_overtime)} کاروان) - ${formatCurrency(accruedDeductions)} کەمکردنەوە`;
 
             // Update summary cards
             $('#total-salary').text(formatCurrency(data.total_salary));
@@ -52,7 +51,7 @@ function loadSummaryData() {
             $('#net-payable').text(formatCurrency(netPayable));
 
             // Update daily balance card
-            $('#daily-balance').text(formatCurrency(Math.max(0, finalDailyBalance)));
+            $('#daily-balance').text(formatCurrency(finalDailyBalance));
             $('#daily-balance-details').text(detailsText);
 
             $('#total-advance').text(formatCurrency(data.total_advance));

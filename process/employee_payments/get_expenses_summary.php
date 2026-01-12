@@ -23,24 +23,17 @@ try {
         $period_end = date('Y-m-t');
     }
 
-    // For calculation of accrued salary, we cap the period end at today if it's in the future
-    $calculation_end = $period_end;
-    if ($calculation_end > $current_date) {
-        $calculation_end = $current_date;
-    }
-    
     $start_ts = strtotime($period_start);
-    $end_ts = strtotime($calculation_end);
+    $end_ts = strtotime($period_end);
     $days_in_period = max(0, ($end_ts - $start_ts) / 86400 + 1);
+    
+    // For accrued calculation (Daily Balance)
+    $today_ts = strtotime($current_date);
+    $accrued_end_ts = min($end_ts, $today_ts);
     
     // For monthly salary calculation, we use the days in the specific month
     $days_in_month_basis = 30;
-    if ($month_filter) {
-       $days_in_month_basis = cal_days_in_month(CAL_GREGORIAN, date('m', $start_ts), date('Y', $start_ts));
-    } else {
-       // Use days in the month of the period_start
-       $days_in_month_basis = cal_days_in_month(CAL_GREGORIAN, date('m', $start_ts), date('Y', $start_ts));
-    }
+    $days_in_month_basis = cal_days_in_month(CAL_GREGORIAN, date('m', $start_ts), date('Y', $start_ts));
     
     // 2. Get Overtime Rate
     $stmt = $pdo->query("SELECT value FROM settings WHERE name = 'overtime_rate'");
@@ -74,6 +67,10 @@ try {
 
     $total_salary = 0;
     $total_bonus = 0;
+    
+    $accrued_salary = 0;
+    $accrued_bonus = 0;
+    
     $employee_ids = [];
     
     foreach ($employees_data as $emp) {
@@ -82,30 +79,44 @@ try {
         $emp_bonus = floatval($emp['bonus']);
         $join_date = $emp['join_date'] ?? null;
         
+        // --- Full Period Calculation ---
         $emp_period_start = $period_start;
-        // If employee joined after the period start, adjust their effective start date
         if ($join_date && $join_date > $period_start) {
-            // But if join_date is after calculation_end, they earned 0
-            if ($join_date > $calculation_end) {
-                continue; 
+            if ($join_date > $period_end) {
+                $emp_days = 0;
+            } else {
+                $emp_period_start = $join_date;
+                $emp_days = max(0, ($end_ts - strtotime($emp_period_start)) / 86400 + 1);
             }
-            $emp_period_start = $join_date;
+        } else {
+            $emp_days = $days_in_period;
         }
         
-        // Calculate days for THIS employee in the period
-        $emp_start_ts = strtotime($emp_period_start);
-        $emp_days = max(0, ($end_ts - $emp_start_ts) / 86400 + 1);
+        $total_salary += ($emp_salary / $days_in_month_basis) * $emp_days;
+        $total_bonus += ($emp_bonus / $days_in_month_basis) * $emp_days;
         
-        // Final calculation: (Salary / DaysInMonth) * DaysWorked
-        $emp_salary_earned = ($emp_salary / $days_in_month_basis) * $emp_days;
-        $emp_bonus_earned = ($emp_bonus / $days_in_month_basis) * $emp_days;
-        
-        $total_salary += $emp_salary_earned;
-        $total_bonus += $emp_bonus_earned;
+        // --- Accrued Calculation (Up to Today) ---
+        if ($accrued_end_ts >= $start_ts) {
+            $emp_accrued_start = $period_start;
+            if ($join_date && $join_date > $period_start) {
+                if ($join_date > $current_date) {
+                    $emp_accrued_days = 0;
+                } else {
+                    $emp_accrued_start = $join_date;
+                    $emp_accrued_days = max(0, ($accrued_end_ts - strtotime($emp_accrued_start)) / 86400 + 1);
+                }
+            } else {
+                $emp_accrued_days = max(0, ($accrued_end_ts - $start_ts) / 86400 + 1);
+            }
+            
+            $accrued_salary += ($emp_salary / $days_in_month_basis) * $emp_accrued_days;
+            $accrued_bonus += ($emp_bonus / $days_in_month_basis) * $emp_accrued_days;
+        }
     }
     
     // 4. Calculate Overtime from concrete_receipts (Only for employees with role "شۆفێری میکسەر")
     $total_overtime = 0;
+    $accrued_overtime = 0;
     
     // Filter employees to only those with role "شۆفێری میکسەر"
     $mixer_driver_ids = [];
@@ -120,97 +131,30 @@ try {
     
     // Only calculate if we have mixer driver employees
     if (!empty($mixer_driver_ids)) {
-         // Build employee ID list for IN clause
         $placeholders = implode(',', array_fill(0, count($mixer_driver_ids), '?'));
         
-        // We calculate overtime up to the period end (not calculation_end)
-        // Because receipts are historical facts, not daily salary liability.
-        // Wait, if no end_date is provided, period_end is Jan 31.
-        // BUT receipts for the future won't exist anyway.
-        // So period_end is fine here.
+        // Full Period Overtime
         $overtime_sql = "SELECT COUNT(*) as count FROM concrete_receipts 
                          WHERE mixer_driver_id IN ($placeholders) 
                          AND COALESCE(`date`, DATE(created_at)) BETWEEN ? AND ?";
-                         
         $overtime_params = array_merge($mixer_driver_ids, [$period_start, $period_end]);
+        $stmt = $pdo->prepare($overtime_sql);
+        $stmt->execute($overtime_params);
+        $overtime_result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $total_overtime = intval($overtime_result['count']) * $overtime_rate;
         
-        try {
-            // Use COALESCE to fallback to created_at date if date column is NULL
-            // This handles cases where receipts are added without an explicit date (defaulting to created_at)
-            $overtime_sql = "SELECT COUNT(*) as count FROM concrete_receipts 
+        // Accrued Overtime (Up to Today)
+        $accrued_overtime_sql = "SELECT COUNT(*) as count FROM concrete_receipts 
                          WHERE mixer_driver_id IN ($placeholders) 
                          AND COALESCE(`date`, DATE(created_at)) BETWEEN ? AND ?";
-                         
-            $overtime_params = array_merge($mixer_driver_ids, [$period_start, $period_end]);
-            
-            $stmt = $pdo->prepare($overtime_sql);
-            $stmt->execute($overtime_params);
-            $overtime_result = $stmt->fetch(PDO::FETCH_ASSOC);
-            $total_overtime = intval($overtime_result['count']) * $overtime_rate;
-        } catch (Exception $e) {
-            // Fallback to created_at if date column fails
-             $overtime_sql = "SELECT COUNT(*) as count FROM concrete_receipts 
-                         WHERE mixer_driver_id IN ($placeholders) 
-                         AND created_at BETWEEN ? AND ?";
-             // Adjust end date to cover the full day
-             $overtime_params = array_merge($mixer_driver_ids, [$period_start . ' 00:00:00', $period_end . ' 23:59:59']);
-             $stmt = $pdo->prepare($overtime_sql);
-             $stmt->execute($overtime_params);
-             $overtime_result = $stmt->fetch(PDO::FETCH_ASSOC);
-             $total_overtime = intval($overtime_result['count']) * $overtime_rate;
-        }
+        $accrued_overtime_params = array_merge($mixer_driver_ids, [$period_start, $current_date]);
+        $stmt = $pdo->prepare($accrued_overtime_sql);
+        $stmt->execute($accrued_overtime_params);
+        $accrued_overtime_result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $accrued_overtime = intval($accrued_overtime_result['count']) * $overtime_rate;
     }
     
     // 5. Get Expenses (Advance, Deduction, Penalty) from employee_expenses
-    $expense_conditions = ["expense_date BETWEEN ? AND ?"];
-    $expense_params = [$period_start, $period_end]; // Note: expense_date is YYYY-MM usually? 
-    // Wait, employee_expenses 'expense_date' in database is usually 'YYYY-MM-DD' or 'YYYY-MM'?
-    // In add_expense.js (previous turn), it was input type="month". 
-    // Let's check the database structure or previous code.
-    // In employee_expenses.php: <input type="month" ... name="expense_date">
-    // This implies expense_date is YYYY-MM string in DB?
-    // BUT `get_employee_current_balance.php` uses: `WHERE expense_date LIKE ?` with `month%`.
-    // And `select_expenses.php` uses `expense_date = ?` for month filter.
-    // This strongly suggests `expense_date` is stored as `YYYY-MM`.
-    
-    // IF `expense_date` is YYYY-MM, we cannot filter by specific days (start/end date).
-    // The user added Start Date / End Date.
-    // If the data is only stored as YYYY-MM, we can only filter by Month.
-    // However, the `select_expenses.php` I just updated used logic `expense_date >= ?`.
-    // If `expense_date` is `2024-01`, and start date is `2024-01-15`, `2024-01 >= 2024-01-15` string comparison? 
-    // "2024-01" is NOT >= "2024-01-15".
-    // This implies my previous edit to `select_expenses.php` might be flawed if `expense_date` is YYYY-MM.
-    
-    // Let's check `process/employee_payments/select_expenses.php` line 33: `ee.expense_date`.
-    // In `add_income_expense_modal`: input type="month".
-    // It seems `expense_date` stores strings like "2024-01".
-    
-    // ISSUE: The user wants precise date range filtering.
-    // But if expenses are stored by Month, we can't filter by Day.
-    // Unless we use `created_at`.
-    // `select_expenses.php` select also has `ee.created_at`.
-    // The new requirement uses `start_date` and `end_date`.
-    // If I use `expense_date` (YYYY-MM), I can only match months.
-    
-    // But wait, "Advance/Deduction/Penalty" cards.
-    // If I select "Jan 1 to Jan 15".
-    // And I have an Advance recorded for "Jan 2024" (stored as 2024-01).
-    // Should it be included?
-    // Usually yes.
-    // But if I want to filter *transactions*, maybe `created_at` date?
-    // User Instructions: "Filter by date from - to".
-    // If the system was designed with Month-based expenses, adding Day-based filtering is tricky.
-    // However, I will check if `expense_date` can store full dates.
-    // In `employee_expenses.php`: `input type="month"`.
-    // This forces YYYY-MM.
-    // So expenses are Monthly.
-    
-    // Decision: For "Advance/Deduction/Penalty", if the requested range overlaps with the month, include it?
-    // Or just filter based on `expense_date` matching the months in the range?
-    // E.g. Start: 2024-01-15, End: 2024-02-10.
-    // Include 2024-01 and 2024-02.
-    // This is the best reasonable interpretation.
-    
     // Logic: Convert start/end to Year-Months.
     $start_month = date('Y-m', strtotime($period_start));
     $end_month = date('Y-m', strtotime($period_end));
@@ -232,6 +176,26 @@ try {
     $stmt = $pdo->prepare($expense_sql);
     $stmt->execute($expense_params);
     $expense_summary = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Accrued Deductions (Up to current month)
+    $current_month_str = date('Y-m');
+    $accrued_expense_where = "expense_date BETWEEN ? AND ?";
+    $accrued_expense_params = [$start_month, min($end_month, $current_month_str)];
+    
+    if ($employee_filter) {
+        $accrued_expense_where .= " AND employee_id = ?";
+        $accrued_expense_params[] = $employee_filter;
+    }
+
+    $accrued_expense_sql = "SELECT 
+        SUM(CASE WHEN expense_type = 'advance' THEN amount ELSE 0 END) as total_advance,
+        SUM(CASE WHEN expense_type = 'deduction' THEN amount ELSE 0 END) as total_deduction,
+        SUM(CASE WHEN expense_type = 'penalty' THEN amount ELSE 0 END) as total_penalty
+    FROM employee_expenses WHERE $accrued_expense_where";
+    
+    $stmt = $pdo->prepare($accrued_expense_sql);
+    $stmt->execute($accrued_expense_params);
+    $accrued_expense_summary = $stmt->fetch(PDO::FETCH_ASSOC);
     
     // 6. Return Data
     // Get filter lists
@@ -249,6 +213,14 @@ try {
                 'total_deduction' => floatval($expense_summary['total_deduction'] ?? 0),
                 'total_penalty' => floatval($expense_summary['total_penalty'] ?? 0),
                 'days_in_period' => $days_in_period
+            ],
+            'accrued_summary' => [
+                'total_salary' => round($accrued_salary, 2),
+                'total_bonus' => round($accrued_bonus, 2),
+                'total_overtime' => round($accrued_overtime, 2),
+                'total_advance' => floatval($accrued_expense_summary['total_advance'] ?? 0),
+                'total_deduction' => floatval($accrued_expense_summary['total_deduction'] ?? 0),
+                'total_penalty' => floatval($accrued_expense_summary['total_penalty'] ?? 0)
             ],
             'filters' => [
                 'employees' => $employees,
