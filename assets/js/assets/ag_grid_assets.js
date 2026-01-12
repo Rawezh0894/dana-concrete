@@ -275,33 +275,6 @@ const gridOptions = {
         andCondition: 'و',
         orCondition: 'یان'
     },
-    sideBar: {
-        toolPanels: [
-            {
-                id: 'columns',
-                labelDefault: 'ستونەکان',
-                labelKey: 'columns',
-                iconKey: 'columns',
-                toolPanel: 'agColumnsToolPanel',
-                toolPanelParams: {
-                    suppressRowGroups: true,
-                    suppressValues: true,
-                    suppressPivots: true,
-                    suppressPivotMode: true
-                }
-            },
-            {
-                id: 'filters',
-                labelDefault: 'فلتەرەکان',
-                labelKey: 'filters',
-                iconKey: 'filter',
-                toolPanel: 'agFiltersToolPanel'
-            }
-        ],
-        defaultToolPanel: 'filters',
-        hiddenByDefault: false
-    },
-    enableRangeSelection: true,
     suppressRowClickSelection: true,
     rowSelection: 'multiple',
     animateRows: true,
@@ -314,6 +287,11 @@ const gridOptions = {
 
 // Load assets data
 function loadAssets(filterParams = '') {
+    if (!gridApi) {
+        console.error('Grid API not initialized');
+        return;
+    }
+    
     const params = new URLSearchParams(filterParams);
     
     // Get filter values
@@ -323,16 +301,27 @@ function loadAssets(filterParams = '') {
     if (categoryId) params.set('category_id', categoryId);
     if (status) params.set('status', status);
     
+    // Show loading overlay
+    gridApi.showLoadingOverlay();
+    
     $.ajax({
         url: '../process/assets/select_assets.php?' + params.toString(),
         type: 'GET',
         dataType: 'json',
         success: function(data) {
-            gridApi.setRowData(data);
+            if (Array.isArray(data) && data.length >= 0) {
+                gridApi.setGridOption('rowData', data);
+                gridApi.hideOverlay();
+            } else {
+                console.error('Invalid data format:', data);
+                gridApi.setGridOption('rowData', []);
+                gridApi.showNoRowsOverlay();
+            }
         },
         error: function(xhr) {
             console.error('Error loading assets:', xhr);
-            gridApi.setRowData([]);
+            gridApi.setGridOption('rowData', []);
+            gridApi.showNoRowsOverlay();
         }
     });
 }
@@ -346,7 +335,8 @@ window.reloadAssets = function() {
 $(document).ready(function() {
     const gridDiv = document.querySelector('#assetsGrid');
     if (gridDiv) {
-        new agGrid.Grid(gridDiv, gridOptions);
+        // Create grid - API will be available in onGridReady callback
+        agGrid.createGrid(gridDiv, gridOptions);
     }
     
     // Event handlers for edit and delete buttons

@@ -230,33 +230,6 @@ const gridOptions = {
         andCondition: 'و',
         orCondition: 'یان'
     },
-    sideBar: {
-        toolPanels: [
-            {
-                id: 'columns',
-                labelDefault: 'ستونەکان',
-                labelKey: 'columns',
-                iconKey: 'columns',
-                toolPanel: 'agColumnsToolPanel',
-                toolPanelParams: {
-                    suppressRowGroups: true,
-                    suppressValues: true,
-                    suppressPivots: true,
-                    suppressPivotMode: true
-                }
-            },
-            {
-                id: 'filters',
-                labelDefault: 'فلتەرەکان',
-                labelKey: 'filters',
-                iconKey: 'filter',
-                toolPanel: 'agFiltersToolPanel'
-            }
-        ],
-        defaultToolPanel: 'filters',
-        hiddenByDefault: false
-    },
-    enableRangeSelection: true,
     suppressRowClickSelection: true,
     rowSelection: 'multiple',
     animateRows: true,
@@ -269,6 +242,11 @@ const gridOptions = {
 
 // Load depreciation schedules
 function loadDepreciationSchedules(filterParams = '') {
+    if (!gridApi) {
+        console.error('Grid API not initialized');
+        return;
+    }
+    
     const params = new URLSearchParams(filterParams);
     
     // Get filter values
@@ -278,16 +256,27 @@ function loadDepreciationSchedules(filterParams = '') {
     if (assetId) params.set('asset_id', assetId);
     if (isPosted !== '') params.set('is_posted', isPosted);
     
+    // Show loading overlay
+    gridApi.showLoadingOverlay();
+    
     $.ajax({
         url: '../process/depreciation/select_depreciation_schedules.php?' + params.toString(),
         type: 'GET',
         dataType: 'json',
         success: function(data) {
-            gridApi.setRowData(data);
+            if (Array.isArray(data) && data.length >= 0) {
+                gridApi.setGridOption('rowData', data);
+                gridApi.hideOverlay();
+            } else {
+                console.error('Invalid data format:', data);
+                gridApi.setGridOption('rowData', []);
+                gridApi.showNoRowsOverlay();
+            }
         },
         error: function(xhr) {
             console.error('Error loading depreciation schedules:', xhr);
-            gridApi.setRowData([]);
+            gridApi.setGridOption('rowData', []);
+            gridApi.showNoRowsOverlay();
         }
     });
 }
@@ -301,7 +290,8 @@ window.reloadDepreciation = function() {
 $(document).ready(function() {
     const gridDiv = document.querySelector('#depreciationGrid');
     if (gridDiv) {
-        new agGrid.Grid(gridDiv, gridOptions);
+        // Create grid - API will be available in onGridReady callback
+        agGrid.createGrid(gridDiv, gridOptions);
     }
     
     // Event handlers for post and delete buttons
