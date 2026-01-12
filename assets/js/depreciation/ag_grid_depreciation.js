@@ -232,12 +232,7 @@ const gridOptions = {
     },
     suppressRowClickSelection: true,
     rowSelection: 'multiple',
-    animateRows: true,
-    onGridReady: function(params) {
-        gridApi = params.api;
-        gridColumnApi = params.columnApi;
-        loadDepreciationSchedules();
-    }
+    animateRows: true
 };
 
 // Load depreciation schedules
@@ -290,8 +285,14 @@ window.reloadDepreciation = function() {
 $(document).ready(function() {
     const gridDiv = document.querySelector('#depreciationGrid');
     if (gridDiv) {
-        // Create grid - API will be available in onGridReady callback
-        agGrid.createGrid(gridDiv, gridOptions);
+        // Create grid - createGrid returns the API directly in v31+
+        gridApi = agGrid.createGrid(gridDiv, gridOptions);
+        gridColumnApi = gridApi;
+        
+        // Load data after grid is created
+        if (gridApi) {
+            loadDepreciationSchedules();
+        }
     }
     
     // Event handlers for post and delete buttons

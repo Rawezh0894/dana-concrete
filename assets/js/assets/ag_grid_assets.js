@@ -277,12 +277,7 @@ const gridOptions = {
     },
     suppressRowClickSelection: true,
     rowSelection: 'multiple',
-    animateRows: true,
-    onGridReady: function(params) {
-        gridApi = params.api;
-        gridColumnApi = params.columnApi;
-        loadAssets();
-    }
+    animateRows: true
 };
 
 // Load assets data
@@ -335,8 +330,14 @@ window.reloadAssets = function() {
 $(document).ready(function() {
     const gridDiv = document.querySelector('#assetsGrid');
     if (gridDiv) {
-        // Create grid - API will be available in onGridReady callback
-        agGrid.createGrid(gridDiv, gridOptions);
+        // Create grid - createGrid returns the API directly in v31+
+        gridApi = agGrid.createGrid(gridDiv, gridOptions);
+        gridColumnApi = gridApi;
+        
+        // Load data after grid is created
+        if (gridApi) {
+            loadAssets();
+        }
     }
     
     // Event handlers for edit and delete buttons
