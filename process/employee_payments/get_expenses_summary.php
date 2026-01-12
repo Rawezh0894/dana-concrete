@@ -136,7 +136,7 @@ try {
         // Full Period Overtime
         $overtime_sql = "SELECT COUNT(*) as count FROM concrete_receipts 
                          WHERE mixer_driver_id IN ($placeholders) 
-                         AND COALESCE(`date`, DATE(created_at)) BETWEEN ? AND ?";
+                         AND DATE(created_at) BETWEEN ? AND ?";
         $overtime_params = array_merge($mixer_driver_ids, [$period_start, $period_end]);
         $stmt = $pdo->prepare($overtime_sql);
         $stmt->execute($overtime_params);
@@ -146,7 +146,7 @@ try {
         // Accrued Overtime (Up to Today)
         $accrued_overtime_sql = "SELECT COUNT(*) as count FROM concrete_receipts 
                          WHERE mixer_driver_id IN ($placeholders) 
-                         AND COALESCE(`date`, DATE(created_at)) BETWEEN ? AND ?";
+                         AND DATE(created_at) BETWEEN ? AND ?";
         $accrued_overtime_params = array_merge($mixer_driver_ids, [$period_start, $current_date]);
         $stmt = $pdo->prepare($accrued_overtime_sql);
         $stmt->execute($accrued_overtime_params);
