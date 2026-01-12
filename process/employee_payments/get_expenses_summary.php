@@ -167,20 +167,32 @@ try {
         $join_date_exists = $check_join->rowCount() > 0;
     } catch (Exception $e) {}
 
+    // Get created_at column existence
+    $created_at_exists = false;
+    try {
+        $check_created = $pdo->query("SHOW COLUMNS FROM employees LIKE 'created_at'");
+        $created_at_exists = $check_created->rowCount() > 0;
+    } catch (Exception $e) {}
+
     $lifetime_salary = 0;
-    $lifetime_bonus = 0; // Assuming bonus is monthly? Or just sum of specific bonus entries? 
-                         // The employees table 'bonus' column is likely a fixed monthly bonus amount, same as salary. 
-                         // So we treat it like salary (accrues over time).
+    $lifetime_bonus = 0;
     
     // Re-fetch employees with join_date
     $emp_lifetime_sql = "SELECT id, salary, COALESCE(bonus, 0) as bonus";
+    
     if ($join_date_exists) {
         $emp_lifetime_sql .= ", join_date";
     } else {
-        $emp_lifetime_sql .= ", NULL as join_date"; // Fallback if column missing (shouldn't happen as we just added it)
+        $emp_lifetime_sql .= ", NULL as join_date";
     }
-    // Also need created_at as backup if join_date is null
-    $emp_lifetime_sql .= ", created_at FROM employees WHERE 1=1";
+
+    if ($created_at_exists) {
+        $emp_lifetime_sql .= ", created_at";
+    } else {
+        $emp_lifetime_sql .= ", NULL as created_at";
+    }
+    
+    $emp_lifetime_sql .= " FROM employees WHERE 1=1";
     
     if ($status_exists) {
         $emp_lifetime_sql .= " AND status = 'active'";
@@ -196,13 +208,11 @@ try {
         // Determine start date for calculation
         $start_calculation_date = $emp['join_date'];
         
-        if (empty($start_calculation_date)) {
-            // Fallback to created_at if join_date is empty
+        if (empty($start_calculation_date) && !empty($emp['created_at'])) {
+            // Fallback to created_at if join_date is empty and created_at exists
              $start_calculation_date = date('Y-m-d', strtotime($emp['created_at']));
         }
         
-        // If still invalid (e.g. historical data), maybe fallback to a default? 
-        // For now, let's assume valid date or skip
         if ($start_calculation_date) {
             $days_worked = max(0, (time() - strtotime($start_calculation_date)) / 86400); // Days since join
             
