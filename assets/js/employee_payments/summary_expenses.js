@@ -34,33 +34,13 @@ function loadSummaryData() {
             const totalDeductions = data.total_deduction + data.total_penalty;
             const netPayable = totalIncome - totalDeductions;
 
-            // Calculate daily balance (always for current month, regardless of filters)
-            // Get current date info
-            const today = new Date();
-            const currentYear = today.getFullYear();
-            const currentMonth = today.getMonth() + 1;
-            const currentDay = today.getDate();
-
-            // Get days in current month
-            const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
-
-            // Calculate total income (salary + bonus + overtime) for current month
-            // Note: This should be calculated from current month data, not filtered data
-            // For now, we'll use the filtered data but calculate based on current month days
-            const totalIncomeAmount = data.total_salary + data.total_bonus + data.total_overtime;
-
-            // Calculate daily rate: total income / days in month
-            const dailyRate = daysInMonth > 0 ? totalIncomeAmount / daysInMonth : 0;
-
-            // Calculate balance up to today: daily rate × days passed
-            const balanceUpToToday = dailyRate * currentDay;
-
-            // Subtract deductions (penalty + deduction)
+            // Use backend calculated earned to date
+            const earnedToDate = data.total_earned_to_date || 0;
             const totalDeductionsAmount = data.total_deduction + data.total_penalty;
-            const finalDailyBalance = balanceUpToToday - totalDeductionsAmount;
+            const finalDailyBalance = earnedToDate - totalDeductionsAmount;
 
             // Format details text
-            const detailsText = `(${formatCurrency(totalIncomeAmount)} ÷ ${daysInMonth} × ${currentDay}) - ${formatCurrency(totalDeductionsAmount)}`;
+            const detailsText = `هەژمارکراوە لە بەرواری دەستبەکار بوونەوە تا ئەمڕۆ`;
 
             // Update summary cards
             $('#total-salary').text(formatCurrency(data.total_salary));

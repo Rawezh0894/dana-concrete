@@ -36,20 +36,8 @@ try {
         $end_date = $current_date;
     }
     
-    // Get days in month
-    $days_in_month = cal_days_in_month(CAL_GREGORIAN, $month_num, $year);
-    
-    // Calculate days used (from first day of month to end_date)
-    $start_date = $expense_date;
-    $days_used = (strtotime($end_date) - strtotime($start_date)) / (60 * 60 * 24) + 1;
-    
-    // Ensure days_used doesn't exceed days_in_month
-    if ($days_used > $days_in_month) {
-        $days_used = $days_in_month;
-    }
-    
     // Get employee info
-    $employee_query = "SELECT id, name, salary FROM employees WHERE id = ?";
+    $employee_query = "SELECT id, name, salary, COALESCE(bonus, 0) as bonus, join_date FROM employees WHERE id = ?";
     $stmt = $pdo->prepare($employee_query);
     $stmt->execute([$employee_id]);
     $employee = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -63,6 +51,34 @@ try {
     }
     
     $monthly_salary = floatval($employee['salary']);
+    $monthly_bonus = floatval($employee['bonus']);
+    $join_date = $employee['join_date'];
+    
+    // Calculate days used
+    $calc_start_date = $expense_date; // This is the first of the month
+    if ($join_date && $join_date > $expense_date) {
+        $calc_start_date = $join_date;
+    }
+    
+    // If join_date is after end_date, they haven't started yet in this period
+    if ($join_date && $join_date > $end_date) {
+        $days_used = 0;
+    } else {
+        $days_used = (strtotime($end_date) - strtotime($calc_start_date)) / (60 * 60 * 24) + 1;
+        if ($days_used < 0) $days_used = 0;
+    }
+    
+    // Ensure days_used doesn't exceed days_in_month
+    if ($days_used > $days_in_month) {
+        $days_used = $days_in_month;
+    }
+    // Get days in month
+    $days_in_month = cal_days_in_month(CAL_GREGORIAN, $month_num, $year);
+
+    // Ensure days_used doesn't exceed days_in_month
+    if ($days_used > $days_in_month) {
+        $days_used = $days_in_month;
+    }
     
     // Get expenses for this month
     $expenses_query = "
@@ -82,28 +98,32 @@ try {
     
     // Calculate daily rates
     $daily_salary_rate = $days_in_month > 0 ? $monthly_salary / $days_in_month : 0;
+    $daily_bonus_rate = $days_in_month > 0 ? $monthly_bonus / $days_in_month : 0;
     
     // Initialize totals
     $total_earned_salary = 0;
-    $total_bonus = 0;
+    $total_earned_bonus = 0;
     $total_overtime = 0;
     $total_advance = 0;
     $total_deduction = 0;
     $total_penalty = 0;
     
-    // Check if salary exists in expenses for this month
+    // Check if salary and bonus exist in expenses for this month
     $has_salary_in_expenses = false;
+    $has_bonus_in_expenses = false;
     foreach ($expenses as $expense) {
-        if ($expense['expense_type'] == 'salary') {
-            $has_salary_in_expenses = true;
-            break;
-        }
+        if ($expense['expense_type'] == 'salary') $has_salary_in_expenses = true;
+        if ($expense['expense_type'] == 'bonus') $has_bonus_in_expenses = true;
     }
     
     // If no salary in expenses, use monthly salary from employees table
     if (!$has_salary_in_expenses && $monthly_salary > 0) {
-        // Calculate salary based on days used in current month
         $total_earned_salary = $daily_salary_rate * $days_used;
+    }
+    
+    // If no bonus in expenses, use monthly bonus from employees table
+    if (!$has_bonus_in_expenses && $monthly_bonus > 0) {
+        $total_earned_bonus = $daily_bonus_rate * $days_used;
     }
     
     // Process expenses
@@ -133,34 +153,31 @@ try {
         switch ($expense_type) {
             case 'salary':
                 // Calculate proportional salary based on days used
-                // مووچە بە شێوەی ڕۆژانە هەژمار دەکرێت
                 $daily_amount = ($amount / $expense_days_in_month) * $expense_days_used;
                 $total_earned_salary += $daily_amount;
                 break;
             case 'bonus':
-                $total_bonus += $amount;
+                // Calculate proportional bonus based on days used
+                $daily_amount = ($amount / $expense_days_in_month) * $expense_days_used;
+                $total_earned_bonus += $daily_amount;
                 break;
             case 'overtime':
                 $total_overtime += $amount;
                 break;
             case 'advance':
-                // وەرگرتن/پێشەکی بە تەواوی وەردەگیرێت (نەک بە شێوەی ڕۆژانە)
-                // چونکە وەرگرتن بە تەواوی دەدرێت بە کارمەند
                 $total_advance += $amount;
                 break;
             case 'deduction':
-                // کەمکردنەوە بە تەواوی
                 $total_deduction += $amount;
                 break;
             case 'penalty':
-                // سزا بە تەواوی
                 $total_penalty += $amount;
                 break;
         }
     }
     
     // Calculate totals
-    $total_income = $total_earned_salary + $total_bonus + $total_overtime;
+    $total_income = $total_earned_salary + $total_earned_bonus + $total_overtime;
     $total_deductions = $total_advance + $total_deduction + $total_penalty;
     $net_balance = $total_income - $total_deductions;
     
@@ -175,11 +192,13 @@ try {
             'employee_name' => $employee['name'],
             'month' => $month ?: date('Y-m'),
             'monthly_salary' => $monthly_salary,
+            'monthly_bonus' => $monthly_bonus,
             'days_in_month' => $days_in_month,
             'days_used' => intval($days_used),
             'daily_salary_rate' => round($daily_salary_rate, 2),
+            'daily_bonus_rate' => round($daily_bonus_rate, 2),
             'total_earned_salary' => round($total_earned_salary, 2),
-            'total_bonus' => round($total_bonus, 2),
+            'total_earned_bonus' => round($total_earned_bonus, 2),
             'total_overtime' => round($total_overtime, 2),
             'total_advance' => round($total_advance, 2),
             'total_deduction' => round($total_deduction, 2),
@@ -195,6 +214,9 @@ try {
             'calculation_details' => [
                 'salary_calculation' => $total_earned_salary > 0 
                     ? number_format($monthly_salary, 2) . ' د.ع ÷ ' . $days_in_month . ' ڕۆژ × ' . intval($days_used) . ' ڕۆژ = ' . number_format($total_earned_salary, 2) . ' د.ع'
+                    : '0 د.ع',
+                'bonus_calculation' => $total_earned_bonus > 0
+                    ? number_format($monthly_bonus, 2) . ' د.ع ÷ ' . $days_in_month . ' ڕۆژ × ' . intval($days_used) . ' ڕۆژ = ' . number_format($total_earned_bonus, 2) . ' د.ع'
                     : '0 د.ع',
                 'advance_calculation' => $total_advance > 0
                     ? 'وەرگرتن/پێشەکی بە تەواوی: ' . number_format($total_advance, 2) . ' د.ع (نەک بە شێوەی ڕۆژانە)'
