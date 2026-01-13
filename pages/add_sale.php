@@ -437,7 +437,7 @@ usort($recipients, function($a, $b) {
           <div class="row">
             <div class="col-md-4 mb-3">
               <label for="invoice_number" class="form-label">ژمارەی پسوڵە</label>
-              <input type="text" class="form-control" id="invoice_number" name="invoice_number" required>
+              <textarea class="form-control" id="invoice_number" name="invoice_number" rows="1" required style="resize: none;"></textarea>
             </div>
             <div class="col-md-4 mb-3">
               <label for="formula_id" class="form-label">فۆرمۆلا</label>
@@ -567,7 +567,7 @@ usort($recipients, function($a, $b) {
           <div class="row">
             <div class="col-md-4 mb-3">
               <label for="edit_invoice_number" class="form-label">ژمارەی پسوڵە</label>
-              <input type="text" class="form-control" id="edit_invoice_number" name="edit_invoice_number" required>
+              <textarea class="form-control" id="edit_invoice_number" name="edit_invoice_number" rows="1" required style="resize: none;"></textarea>
             </div>
             <div class="col-md-4 mb-3">
               <label for="edit_formula_id" class="form-label">فۆرمۆلا</label>
