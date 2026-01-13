@@ -655,51 +655,6 @@ try {
         error_log("Error calculating material consumption: " . $e->getMessage());
     }
     
-    // Include Raw Material Sales in Material Consumption
-    try {
-        $raw_consumption_query = "
-            SELECT 
-                rms.material_type, 
-                rms.quantity_kg,
-                b.name as bin_name
-            FROM raw_material_sales rms
-            LEFT JOIN bins_silos b ON rms.bin_id = b.id
-            WHERE rms.is_deleted = 0
-            $raw_material_sales_date_condition
-        ";
-        
-        $stmt_raw = $pdo->query($raw_consumption_query);
-        while ($row = $stmt_raw->fetch()) {
-            $qty = floatval($row['quantity_kg']);
-            $type = $row['material_type'];
-            $bin_name = $row['bin_name'] ?? '';
-            
-            if ($type === 'دەرمان') {
-                $material_consumption['additive'] += $qty;
-            } elseif ($type === 'لمی کەسارە') {
-                $material_consumption['black_sand'] += $qty;
-            } elseif ($type === 'لمی ڕەش') {
-                $material_consumption['brown_sand'] += $qty;
-            } elseif ($type === 'چەو') {
-                // If bin 3
-                if (strpos($bin_name, '3') !== false) {
-                    $material_consumption['gravel_bin3'] += $qty;
-                } else {
-                    $material_consumption['gravel_bin4'] += $qty;
-                }
-            } elseif ($type === 'چیمەنتۆ') {
-                // If bin 2 (Mass)
-                if (strpos($bin_name, '2') !== false || strpos($bin_name, 'ماس') !== false) {
-                    $material_consumption['cement_cem2'] += $qty;
-                } else {
-                    $material_consumption['cement_cem1'] += $qty;
-                }
-            }
-        }
-    } catch (Exception $e) {
-        error_log("Error calculating raw material sales consumption: " . $e->getMessage());
-    }
-
     // Convert kg to tons for better readability (1 ton = 1000 kg)
     // cement_cem1_tons = دەلتا + لاڤارج (تۆن)
     // cement_cem2_tons = ماس (تۆن)

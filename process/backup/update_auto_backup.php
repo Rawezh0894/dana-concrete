@@ -348,15 +348,17 @@ try {
         \'--single-transaction\',
         \'--routines\',
         \'--triggers\',
-        \'--add-drop-database\',
         \'--add-drop-table\',
         \'--create-options\',
-        \'--disable-keys\',
         \'--extended-insert\',
         \'--quick\',
-        \'--lock-tables=false\',
         \'--set-charset\',
         \'--default-character-set=utf8mb4\',
+        \'--no-tablespaces\',
+        \'--hex-blob\',
+        \'--complete-insert\',
+        \'--quote-names\',
+        \'--max-allowed-packet=512M\',
         escapeshellarg($database)
     ];
     
@@ -410,6 +412,8 @@ function cleanOldBackups($backup_dir) {
 }
 
 function fixCollationIssues($file_path) {
+    if (!file_exists($file_path)) return false;
+    
     $content = file_get_contents($file_path);
     if ($content === false) {
         throw new Exception(\'Unable to read backup file for collation fixes\');
@@ -421,7 +425,8 @@ function fixCollationIssues($file_path) {
         \'utf8mb4_0900_as_ci\' => \'utf8mb4_unicode_ci\',
         \'utf8mb4_0900_bin\' => \'utf8mb4_bin\',
         \'utf8mb4_ja_0900_as_cs\' => \'utf8mb4_unicode_ci\',
-        \'utf8mb4_ja_0900_as_cs_ks\' => \'utf8mb4_unicode_ci\'
+        \'utf8mb4_ja_0900_as_cs_ks\' => \'utf8mb4_unicode_ci\',
+        \'utf8mb4_general_ci\' => \'utf8mb4_unicode_ci\'
     ];
 
     $fixed_content = $content;
@@ -431,7 +436,16 @@ function fixCollationIssues($file_path) {
 
     $fixed_content = preg_replace(\'/SET NAMES utf8mb4 COLLATE utf8mb4_0900_[^;]+;/\', \'SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;\', $fixed_content);
 
-    if (file_put_contents($file_path, $fixed_content) === false) {
+    // Add safety wrappers if missing
+    $prefix = "SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;\\n" .
+              "SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE=\'NO_AUTO_VALUE_ON_ZERO\';\\n" .
+              "SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;\\n\\n";
+    
+    $suffix = "\\n\\nSET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;\\n" .
+              "SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;\\n" .
+              "SET SQL_MODE=@OLD_SQL_MODE;\\n";
+
+    if (file_put_contents($file_path, $prefix . $fixed_content . $suffix) === false) {
         throw new Exception(\'Unable to write fixed backup file\');
     }
 }

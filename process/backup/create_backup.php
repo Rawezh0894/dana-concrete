@@ -37,6 +37,8 @@ if ($action !== 'create_backup') {
 }
 
 function validateBackupFile($file_path) {
+    if (!file_exists($file_path)) return false;
+    
     // Read first few lines of the backup file
     $handle = fopen($file_path, 'r');
     if (!$handle) {
@@ -47,16 +49,18 @@ function validateBackupFile($file_path) {
     fclose($handle);
     
     // Check if the first line contains mysqldump warnings or errors
-    if (strpos($first_line, 'mysqldump:') !== false || 
+    if ($first_line === false || 
+        strpos($first_line, 'mysqldump:') !== false || 
         strpos($first_line, 'Warning:') !== false ||
         strpos($first_line, 'Error:') !== false) {
         return false;
     }
     
-    // Check if it starts with proper SQL comment or SET statement
+    // Check if it starts with proper SQL comment, SET statement, or safety wrapper we added
     $valid_starts = ['--', '/*!', 'SET ', 'DROP ', 'CREATE '];
+    $trimmed_line = trim($first_line);
     foreach ($valid_starts as $start) {
-        if (strpos(trim($first_line), $start) === 0) {
+        if (strpos($trimmed_line, $start) === 0) {
             return true;
         }
     }
@@ -65,6 +69,43 @@ function validateBackupFile($file_path) {
 }
 
 function fixCollationIssues($file_path) {
+    if (!file_exists($file_path)) return false;
+    
+    // For large files, we should process line-by-line to avoid memory issues
+    // But for simplicity and current scale, we'll use a slightly safer memory-limited approach
+    // or just ensure we don't crash on medium files.
+    $size = filesize($file_path);
+    if ($size > 50 * 1024 * 1024) { // If > 50MB, use line-by-line
+        $temp_path = $file_path . '.tmp';
+        $reading = fopen($file_path, 'r');
+        $writing = fopen($temp_path, 'w');
+        
+        $replacements = [
+            'utf8mb4_0900_ai_ci' => 'utf8mb4_unicode_ci',
+            'utf8mb4_0900_as_cs' => 'utf8mb4_unicode_ci',
+            'utf8mb4_0900_as_ci' => 'utf8mb4_unicode_ci',
+            'utf8mb4_0900_bin' => 'utf8mb4_bin',
+            'utf8mb4_general_ci' => 'utf8mb4_unicode_ci' // Standardization
+        ];
+        
+        if ($reading && $writing) {
+            while (($line = fgets($reading)) !== false) {
+                foreach ($replacements as $old => $new) {
+                    $line = str_replace($old, $new, $line);
+                }
+                // Also remove problematic SET statements for collation
+                $line = preg_replace('/SET NAMES utf8mb4 COLLATE utf8mb4_0900_[^;]+;/', 'SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;', $line);
+                fputs($writing, $line);
+            }
+            fclose($reading);
+            fclose($writing);
+            unlink($file_path);
+            rename($temp_path, $file_path);
+            return true;
+        }
+        return false;
+    }
+
     $content = file_get_contents($file_path);
     if ($content === false) {
         return false;
@@ -77,7 +118,8 @@ function fixCollationIssues($file_path) {
         'utf8mb4_0900_as_ci' => 'utf8mb4_unicode_ci',
         'utf8mb4_0900_bin' => 'utf8mb4_bin',
         'utf8mb4_ja_0900_as_cs' => 'utf8mb4_unicode_ci',
-        'utf8mb4_ja_0900_as_cs_ks' => 'utf8mb4_unicode_ci'
+        'utf8mb4_ja_0900_as_cs_ks' => 'utf8mb4_unicode_ci',
+        'utf8mb4_general_ci' => 'utf8mb4_unicode_ci'
     ];
     
     $fixed_content = $content;
@@ -88,7 +130,16 @@ function fixCollationIssues($file_path) {
     // Also remove problematic SET statements
     $fixed_content = preg_replace('/SET NAMES utf8mb4 COLLATE utf8mb4_0900_[^;]+;/', 'SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;', $fixed_content);
     
-    return file_put_contents($file_path, $fixed_content);
+    // Add safety wrappers if missing
+    $prefix = "SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;\n" .
+              "SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO';\n" .
+              "SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;\n\n";
+    
+    $suffix = "\n\nSET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;\n" .
+              "SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;\n" .
+              "SET SQL_MODE=@OLD_SQL_MODE;\n";
+              
+    return file_put_contents($file_path, $prefix . $fixed_content . $suffix);
 }
 
 function findMysqldumpPath() {
@@ -180,20 +231,17 @@ try {
         '--single-transaction',
         '--routines',
         '--triggers',
-        '--add-drop-database',
         '--add-drop-table',
         '--create-options',
-        '--disable-keys',
         '--extended-insert',
         '--quick',
-        '--lock-tables=false',
         '--set-charset',
         '--default-character-set=utf8mb4',
         '--no-tablespaces',
-        '--skip-comments',
-        '--skip-add-locks',
-        '--skip-disable-keys',
-        '--skip-set-charset',
+        '--hex-blob',
+        '--complete-insert',
+        '--quote-names',
+        '--max-allowed-packet=512M',
         escapeshellarg($database)
     ];
     
