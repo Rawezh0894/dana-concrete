@@ -17314,3 +17314,253 @@
 )
 
 [27-Nov-2025 11:41:26 Asia/Baghdad] Customer remaining sales retrieved: Customer=70, Count=11
+[14-Jan-2026 10:04:59 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1768374299
+    [user_id] => 2
+    [username] => rawezh
+    [role] => admin
+)
+
+[14-Jan-2026 10:04:59 Asia/Baghdad] Dashboard data loaded successfully for user: 2
+[14-Jan-2026 10:22:36 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1768375356
+    [user_id] => 2
+    [username] => rawezh
+    [role] => admin
+)
+
+[14-Jan-2026 10:22:36 Asia/Baghdad] delete_sale.php POST: Array
+(
+    [id] => 1616
+)
+
+[14-Jan-2026 10:22:36 Asia/Baghdad] Found sale for deletion: Array
+(
+    [id] => 1616
+    [customer_id] => 199
+    [recipient] => 
+    [location] => سلێمانی ستیل
+    [quantity] => 5.00
+    [price_per_unit] => 47.00
+    [total_price] => 235.00
+    [payment_type] => قەرز
+    [amount_paid_usd] => 0.00
+    [amount_paid_iq] => 0.00
+    [dolar_rate] => 150000.00
+    [remaining_amount] => 235.00
+    [invoice_number] => A-5071
+    [order_date] => 2026-01-13
+    [notes] => 
+    [formula_id] => 22
+    [discount] => 0.00
+)
+
+[14-Jan-2026 10:22:36 Asia/Baghdad] Sale successfully deleted: ID=1616, Invoice=A-5071, Customer=کاک محمود سلێمانی ستیل
+[14-Jan-2026 10:23:38 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1768375418
+    [user_id] => 2
+    [username] => rawezh
+    [role] => admin
+)
+
+[14-Jan-2026 10:23:38 Asia/Baghdad] update_sale.php POST: Array
+(
+    [edit_sale_id] => 1613
+    [edit_customer_id] => 332
+    [edit_recipient_id] => 
+    [edit_location] => تاسڵوجە
+    [edit_invoice_number] => A-4954
+    [edit_formula_id] => 42
+    [edit_order_date] => 2026-01-12
+    [edit_quantity] => 7.00
+    [edit_price_per_unit] => 44.70
+    [edit_total_price] => 312.93
+    [edit_payment_type] => نەقد
+    [edit_amount_paid_iq] => 460000.00
+    [edit_amount_paid_usd] => 0.00
+    [edit_remaining_amount] => 0.00
+    [edit_dolar_rate] => 146950
+    [edit_discount] => 0.00
+    [edit_notes] => 460,000 واسڵ ڕاوێژ
+)
+
+[14-Jan-2026 10:23:38 Asia/Baghdad] Parsed vars: id='1613', customer_id='332', recipient='', location='تاسڵوجە', quantity='7.00', price_per_unit='44.70', total_price='312.93', payment_type='نەقد', amount_paid_usd='0.00', amount_paid_iq='460000.00', dolar_rate='146950', remaining_amount='0.00', invoice_number='A-4954', order_date='2026-01-12', notes='460,000 واسڵ ڕاوێژ', formula_id='42', discount='0.00'
+[14-Jan-2026 10:23:38 Asia/Baghdad] Found sale for update: Array
+(
+    [id] => 1613
+    [customer_id] => 332
+    [payment_type] => نەقد
+    [remaining_amount] => 0.00
+    [invoice_number] => A-4954
+)
+
+[14-Jan-2026 10:23:38 Asia/Baghdad] PDOException in update_sale.php: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'black_sand_kg' in 'field list'
+[14-Jan-2026 10:31:58 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1768375918
+    [user_id] => 2
+    [username] => rawezh
+    [role] => admin
+)
+
+[14-Jan-2026 10:31:58 Asia/Baghdad] update_sale.php POST: Array
+(
+    [edit_sale_id] => 1613
+    [edit_customer_id] => 332
+    [edit_recipient_id] => 
+    [edit_location] => تاسڵوجە
+    [edit_invoice_number] => A-4954
+    [edit_formula_id] => 42
+    [edit_order_date] => 2026-01-12
+    [edit_quantity] => 7.00
+    [edit_price_per_unit] => 44.70
+    [edit_total_price] => 312.93
+    [edit_payment_type] => نەقد
+    [edit_amount_paid_iq] => 460000.00
+    [edit_amount_paid_usd] => 0.00
+    [edit_remaining_amount] => 0.00
+    [edit_dolar_rate] => 146950
+    [edit_discount] => 0.00
+    [edit_notes] => 460,000 واسڵ ڕاوێژ
+)
+
+[14-Jan-2026 10:31:58 Asia/Baghdad] Parsed vars: id='1613', customer_id='332', recipient='', location='تاسڵوجە', quantity='7.00', price_per_unit='44.70', total_price='312.93', payment_type='نەقد', amount_paid_usd='0.00', amount_paid_iq='460000.00', dolar_rate='146950', remaining_amount='0.00', invoice_number='A-4954', order_date='2026-01-12', notes='460,000 واسڵ ڕاوێژ', formula_id='42', discount='0.00'
+[14-Jan-2026 10:31:58 Asia/Baghdad] Found sale for update: Array
+(
+    [id] => 1613
+    [customer_id] => 332
+    [payment_type] => نەقد
+    [remaining_amount] => 0.00
+    [invoice_number] => A-4954
+)
+
+[14-Jan-2026 10:31:58 Asia/Baghdad] Sale successfully updated: ID=1613, Invoice=A-4954, Customer=وەستا نوری
+[14-Jan-2026 10:42:11 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1768376531
+    [user_id] => 2
+    [username] => rawezh
+    [role] => admin
+)
+
+[14-Jan-2026 10:42:11 Asia/Baghdad] add_sale.php POST: Array
+(
+    [customer_id] => 199
+    [recipient_id] => 
+    [location] => سلێمانی ستیل
+    [invoice_number] => A-5071
+    [formula_id] => 22
+    [order_date] => 2026-01-13
+    [quantity] => 5
+    [price_per_unit] => 47
+    [total_price] => 235.0000
+    [payment_type] => قەرز
+    [amount_paid_iq] => 0
+    [amount_paid_usd] => 0
+    [remaining_amount] => 235.0000
+    [dolar_rate] => 150000
+    [discount] => 0
+    [notes] => 
+)
+
+[14-Jan-2026 10:48:37 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1768376917
+    [user_id] => 2
+    [username] => rawezh
+    [role] => admin
+)
+
+[14-Jan-2026 10:48:37 Asia/Baghdad] delete_sale.php POST: Array
+(
+    [id] => 1563
+)
+
+[14-Jan-2026 10:48:37 Asia/Baghdad] Found sale for deletion: Array
+(
+    [id] => 1563
+    [customer_id] => 49
+    [recipient] => 
+    [location] => کانی مەنم
+    [quantity] => 7.00
+    [price_per_unit] => 45.00
+    [total_price] => 315.00
+    [payment_type] => قەرز
+    [amount_paid_usd] => 0.00
+    [amount_paid_iq] => 0.00
+    [dolar_rate] => 150000.00
+    [remaining_amount] => 315.00
+    [invoice_number] => A-4769
+    [order_date] => 2026-01-05
+    [notes] => 
+    [formula_id] => 42
+    [discount] => 0.00
+)
+
+[14-Jan-2026 10:48:37 Asia/Baghdad] Sale successfully deleted: ID=1563, Invoice=A-4769, Customer=و.دلێر
+[14-Jan-2026 10:49:23 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1768376963
+    [user_id] => 2
+    [username] => rawezh
+    [role] => admin
+)
+
+[14-Jan-2026 10:49:23 Asia/Baghdad] add_sale.php POST: Array
+(
+    [customer_id] => 49
+    [recipient_id] => 
+    [location] => کانی مەنم
+    [invoice_number] => A-4769
+    [formula_id] => 42
+    [order_date] => 2026-01-05
+    [quantity] => 7
+    [price_per_unit] => 45
+    [total_price] => 315.0000
+    [payment_type] => قەرز
+    [amount_paid_iq] => 0
+    [amount_paid_usd] => 0
+    [remaining_amount] => 315.0000
+    [dolar_rate] => 150000
+    [discount] => 0
+    [notes] => 
+)
+
+[14-Jan-2026 10:51:21 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1768377081
+    [user_id] => 2
+    [username] => rawezh
+    [role] => admin
+)
+
+[14-Jan-2026 10:51:21 Asia/Baghdad] delete_sale.php POST: Array
+(
+    [id] => 1619
+)
+
+[14-Jan-2026 10:51:21 Asia/Baghdad] Found sale for deletion: Array
+(
+    [id] => 1619
+    [customer_id] => 49
+    [recipient] => 
+    [location] => کانی مەنم
+    [quantity] => 7.00
+    [price_per_unit] => 45.00
+    [total_price] => 315.00
+    [payment_type] => قەرز
+    [amount_paid_usd] => 0.00
+    [amount_paid_iq] => 0.00
+    [dolar_rate] => 150000.00
+    [remaining_amount] => 315.00
+    [invoice_number] => A-4769
+    [order_date] => 2026-01-05
+    [notes] => 
+    [formula_id] => 42
+    [discount] => 0.00
+)
+
+[14-Jan-2026 10:51:21 Asia/Baghdad] Sale successfully deleted: ID=1619, Invoice=A-4769, Customer=و.دلێر

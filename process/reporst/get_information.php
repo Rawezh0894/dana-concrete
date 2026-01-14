@@ -2,6 +2,34 @@
 require_once '../../config/db_conected.php';
 header('Content-Type: application/json');
 
+// Ensure the endpoint ALWAYS returns valid JSON (no HTML warnings/notices)
+ini_set('display_errors', 0);
+ini_set('html_errors', 0);
+error_reporting(E_ALL);
+
+// Convert PHP warnings/notices into exceptions so they can be caught and returned as JSON
+set_error_handler(function ($severity, $message, $file, $line) {
+    // Respect error_reporting level (if suppressed with @)
+    if (!(error_reporting() & $severity)) {
+        return false;
+    }
+    throw new ErrorException($message, 0, $severity, $file, $line);
+});
+
+register_shutdown_function(function () {
+    $err = error_get_last();
+    if ($err && in_array($err['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR], true)) {
+        // Avoid sending partial output; always return JSON
+        if (!headers_sent()) {
+            header('Content-Type: application/json');
+        }
+        echo json_encode([
+            'success' => false,
+            'error' => 'Fatal error: ' . ($err['message'] ?? 'Unknown') . ' in ' . ($err['file'] ?? '') . ':' . ($err['line'] ?? 0),
+        ]);
+    }
+});
+
 try {
     // Get exchange rate from settings table (نرخی ١٠٠ دۆلار بە دینار)
     $rate_query = "SELECT value FROM settings WHERE name = 'usd_iqd_rate' LIMIT 1";
@@ -493,8 +521,8 @@ try {
     // Calculate Income based on the formula:
     // داهات = کۆی نرخی فرۆشتن + کۆی داهاتی گاز - کۆی نرخی کڕین(purchase) - کۆی داشکاندن - کۆی خەرجی تر (expense_type = خەرجی تر) - کۆی نرخی کڕینی کاڵا(purchase_material) - کۆی خەرجی کارمەندان
     
-    // Get total sales (cash + credit)
-    $total_sales_usd = $current_period_sales;
+    // Get total sales (cash + credit) for current period
+    $total_sales_usd = ($sales['cash']['usd'] ?? 0) + ($sales['credit']['usd'] ?? 0);
     
     // Get gas income (from other_expenses where expense_type = 'بەکارهێنانی گاز')
     try {
@@ -516,8 +544,8 @@ try {
         $gas_income_usd = 0;
     }
     
-    // Get total purchases (cash + credit)
-    $total_purchases_usd = $current_period_purchases;
+    // Get total purchases (cash + credit) for current period (USD + IQD converted to USD)
+    $total_purchases_usd = ($total_usd ?? 0) + ($total_iqd_converted ?? 0);
     
     // Get total discounts
     $total_discounts = 0;
@@ -618,41 +646,53 @@ try {
         'additive' => 0         // زیادکراو (دەرمان)
     ];
     
-    // Get material consumption from sales based on formulas used
-    // cement_cem1_kg = دەلتا + لاڤارج (لە سایلۆی یەکدا)
-    // cement_cem2_kg = ماس (لە سایلۆی دوودا)
-    // Total cement = دەلتا + لاڤارج + ماس
+    /**
+     * هەژمارکردنی بەکارهێنانی ماتریاڵ بە شێوەی SAP/Odoo/Oracle
+     * ⬅️ لێرەدا بە snapshot ـی فۆرمۆلا لە کاتی داخڵکردنی فرۆشتن پشتیوانی دەکەین
+     * بۆ ئەمەش تابلێکی نوێی دیتابەیس پێویستە:
+     *
+     *   CREATE TABLE `sale_materials` (
+     *     `id` INT NOT NULL AUTO_INCREMENT,
+     *     `sale_id` INT NOT NULL,
+     *     `material_type` ENUM('black_sand','brown_sand','gravel_bin3','gravel_bin4','cement_cem1','cement_cem2','additive') NOT NULL,
+     *     `kg` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+     *     PRIMARY KEY (`id`),
+     *     KEY `sale_id` (`sale_id`),
+     *     CONSTRAINT `sale_materials_ibfk_1` FOREIGN KEY (`sale_id`) REFERENCES `sales` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+     *   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+     *
+     * TRIGGER ـەکانی دیتابەیس (AFTER INSERT/UPDATE لەسەر `sales`) دەبێت ئەم تابلە پڕ بکات،
+     * بۆیە لێرە تەنیا کۆکردنەوەی snapshot ـەکان دەکەین.
+     */
     $material_consumption_query = "
         SELECT 
-            s.quantity as cubic_meters,
-            cf.black_sand_kg,
-            cf.brown_sand_kg,
-            cf.gravel_bin3_kg,
-            cf.gravel_bin4_kg,
-            cf.cement_cem1_kg,
-            cf.cement_cem2_kg,
-            cf.additive_kg
-        FROM sales s
-        JOIN concrete_formulas cf ON s.formula_id = cf.id
+            SUM(CASE WHEN sm.material_type = 'black_sand'   THEN sm.kg ELSE 0 END) AS black_sand_kg,
+            SUM(CASE WHEN sm.material_type = 'brown_sand'   THEN sm.kg ELSE 0 END) AS brown_sand_kg,
+            SUM(CASE WHEN sm.material_type = 'gravel_bin3'  THEN sm.kg ELSE 0 END) AS gravel_bin3_kg,
+            SUM(CASE WHEN sm.material_type = 'gravel_bin4'  THEN sm.kg ELSE 0 END) AS gravel_bin4_kg,
+            SUM(CASE WHEN sm.material_type = 'cement_cem1'  THEN sm.kg ELSE 0 END) AS cement_cem1_kg,
+            SUM(CASE WHEN sm.material_type = 'cement_cem2'  THEN sm.kg ELSE 0 END) AS cement_cem2_kg,
+            SUM(CASE WHEN sm.material_type = 'additive'     THEN sm.kg ELSE 0 END) AS additive_kg
+        FROM sale_materials sm
+        JOIN sales s ON sm.sale_id = s.id
         WHERE 1=1 $date_condition_sales
     ";
     
     try {
         $stmt = $pdo->query($material_consumption_query);
-        while ($row = $stmt->fetch()) {
-            $cubic_meters = floatval($row['cubic_meters']);
-            
-            // Calculate material consumption for this sale
-            $material_consumption['black_sand'] += floatval($row['black_sand_kg']) * $cubic_meters;
-            $material_consumption['brown_sand'] += floatval($row['brown_sand_kg']) * $cubic_meters;
-            $material_consumption['gravel_bin3'] += floatval($row['gravel_bin3_kg']) * $cubic_meters;
-            $material_consumption['gravel_bin4'] += floatval($row['gravel_bin4_kg']) * $cubic_meters;
-            $material_consumption['cement_cem1'] += floatval($row['cement_cem1_kg']) * $cubic_meters;
-            $material_consumption['cement_cem2'] += floatval($row['cement_cem2_kg']) * $cubic_meters;
-            $material_consumption['additive'] += floatval($row['additive_kg']) * $cubic_meters;
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($row) {
+            $material_consumption['black_sand'] = floatval($row['black_sand_kg'] ?? 0);
+            $material_consumption['brown_sand'] = floatval($row['brown_sand_kg'] ?? 0);
+            $material_consumption['gravel_bin3'] = floatval($row['gravel_bin3_kg'] ?? 0);
+            $material_consumption['gravel_bin4'] = floatval($row['gravel_bin4_kg'] ?? 0);
+            $material_consumption['cement_cem1'] = floatval($row['cement_cem1_kg'] ?? 0);
+            $material_consumption['cement_cem2'] = floatval($row['cement_cem2_kg'] ?? 0);
+            $material_consumption['additive']    = floatval($row['additive_kg'] ?? 0);
         }
     } catch (Exception $e) {
-        error_log("Error calculating material consumption: " . $e->getMessage());
+        // ئەگەر تابلێکی snapshot هەموو جار نەبێت (بۆ داتابەیسە کۆنەکان)، هەڵەکە تەنیا لۆگ بکە
+        error_log("Error calculating material consumption from sale_materials: " . $e->getMessage());
     }
     
     // Convert kg to tons for better readability (1 ton = 1000 kg)
