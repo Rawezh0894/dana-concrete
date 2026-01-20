@@ -157,6 +157,14 @@ function renderDashboardCards(data) {
             subtitle: 'فرۆشتنی چەو، لم، چیمەنتۆ، دەرمان، گاز'
         },
         {
+            key: 'material_sales',
+            label: 'کۆی نرخی فرۆشتنی کاڵا',
+            icon: 'fa-shopping-cart',
+            cardClass: 'raw-material-sales-card',
+            value: formatCurrency(Number(data.data?.material_sales?.total_usd) || 0, 'USD'),
+            subtitle: 'فرۆشتنی کاڵاکانی کۆگا'
+        },
+        {
             key: 'total_material_usage_cost',
             label: 'کۆی گشتی تێچووی مەوادەکان',
             icon: 'fa-calculator',

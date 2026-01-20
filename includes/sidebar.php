@@ -150,6 +150,7 @@ $logout_pages = ['logout.php'];
         <?php endif; ?>
         <?php if (hasPermission('view_materials')): ?>
           <li><a href="../pages/purchase_materila.php" class="sidebar-link<?php if($current_page == 'purchase_materila.php') echo ' active'; ?>"><i class="bi bi-list-ul me-2"></i> کڕینی کاڵا</a></li>
+          <li><a href="../pages/material_sales.php" class="sidebar-link<?php if($current_page == 'material_sales.php') echo ' active'; ?>"><i class="bi bi-clock-history me-2"></i> مێژووی فرۆشتنی کاڵا</a></li>
         <?php endif; ?>
       </ul>
     </li>

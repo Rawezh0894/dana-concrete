@@ -256,6 +256,39 @@ try {
     $stmt = $pdo->prepare($raw_material_sales_query);
     $stmt->execute([$usd_iqd_rate, $usd_iqd_rate]);
     $raw_material_sales_total_usd = floatval($stmt->fetchColumn() ?? 0);
+
+    // Material Sales (فرۆشتنی کاڵاکان) - Calculate total in USD
+    $material_sales_date_condition = "";
+    if ($use_range) {
+        $start = $from_date ? $from_date : '1000-01-01';
+        $end = $to_date ? $to_date : '9999-12-31';
+        $material_sales_date_condition = " AND date >= '$start' AND date <= '$end'";
+    } else {
+        if ($filter === 'today') {
+            $material_sales_date_condition = " AND date = CURDATE()";
+        } elseif ($filter === 'week') {
+            $material_sales_date_condition = " AND YEARWEEK(date, 1) = YEARWEEK(CURDATE(), 1)";
+        } elseif ($filter === 'month') {
+            $material_sales_date_condition = " AND YEAR(date) = YEAR(CURDATE()) AND MONTH(date) = MONTH(CURDATE())";
+        } elseif ($filter === 'year') {
+            $material_sales_date_condition = " AND YEAR(date) = YEAR(CURDATE())";
+        }
+    }
+
+    $material_sales_query = "
+        SELECT 
+            SUM(CASE 
+                WHEN currency = 'USD' THEN total_price 
+                WHEN currency = 'IQD' AND ? > 0 THEN total_price / (? / 100)
+                ELSE 0 
+            END) as total_usd
+        FROM material_sales 
+        WHERE 1=1 
+        $material_sales_date_condition
+    ";
+    $stmt = $pdo->prepare($material_sales_query);
+    $stmt->execute([$usd_iqd_rate, $usd_iqd_rate]);
+    $material_sales_total_usd = floatval($stmt->fetchColumn() ?? 0);
     
     // Calculate cost of raw material sales (تێچووی فرۆشتنی مەوادی خام)
     // Similar to material consumption cost calculation
@@ -613,7 +646,7 @@ try {
     }
     
     // Calculate total income
-    $total_income_usd = $total_sales_usd + $gas_income_usd - $total_purchases_usd - $total_discounts - $other_expenses_usd - $purchase_materials_usd - $employee_payments_usd;
+    $total_income_usd = $total_sales_usd + $gas_income_usd + $material_sales_total_usd - $total_purchases_usd - $total_discounts - $other_expenses_usd - $purchase_materials_usd - $employee_payments_usd;
     
     // Debug: Log income calculation breakdown
     error_log("Debug - Income calculation: sales=" . $total_sales_usd . 
@@ -1227,6 +1260,9 @@ try {
             'person' => ['usd' => $person_debt_usd, 'iqd' => $person_debt_iqd],
             'purchases' => $purchases,
             'sales' => $sales,
+            'material_sales' => [
+                'total_usd' => $material_sales_total_usd
+            ],
             'raw_material_sales' => [
                 'total_usd' => $raw_material_sales_total_usd,
                 'cost_usd' => $raw_material_sales_cost_total_usd
@@ -1239,7 +1275,7 @@ try {
                 'total_iqd' => $caravan_hisabi_iqd
             ],
             'profit_loss' => [
-                'total_revenue' => ($sales['cash']['usd'] ?? 0) + ($sales['credit']['usd'] ?? 0) + $raw_material_sales_total_usd,
+                'total_revenue' => ($sales['cash']['usd'] ?? 0) + ($sales['credit']['usd'] ?? 0) + $raw_material_sales_total_usd + $material_sales_total_usd,
                 'total_cost' => ($total_used_material_cost_usd ?? 0) + 
                                ($raw_material_sales_cost_total_usd ?? 0) + 
                                ($employee_stats['total_fixed_usd'] ?? 0) + 
@@ -1248,7 +1284,7 @@ try {
                                ($total_expenses_breakdown['purchases'] ?? 0) + 
                                ($total_expenses_breakdown['purchase_materials'] ?? 0) + 
                                ($total_discount ?? 0),
-                'profit_loss' => (($sales['cash']['usd'] ?? 0) + ($sales['credit']['usd'] ?? 0) + $raw_material_sales_total_usd) - 
+                'profit_loss' => (($sales['cash']['usd'] ?? 0) + ($sales['credit']['usd'] ?? 0) + $raw_material_sales_total_usd + $material_sales_total_usd) - 
                                 (($total_used_material_cost_usd ?? 0) + 
                                  ($raw_material_sales_cost_total_usd ?? 0) + 
                                  ($employee_stats['total_fixed_usd'] ?? 0) + 

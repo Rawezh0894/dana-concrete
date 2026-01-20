@@ -347,6 +347,106 @@ $mostUsedMaterials = $pdo->query("
     </div>
   </div>
 </div>
+
+<!-- Sell Material Modal -->
+<div class="modal fade" id="sellMaterialModal" tabindex="-1" aria-labelledby="sellMaterialModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form id="sellMaterialForm">
+        <input type="hidden" name="material_id" id="sell_material_id">
+        <div class="modal-header">
+          <h5 class="modal-title" id="sellMaterialModalLabel">فرۆشتنی کاڵا</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="alert alert-info" id="sell_material_info">
+            <!-- Material info will be displayed here -->
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="buyer_type" class="form-label">جۆری کڕیار</label>
+              <select class="form-select" id="buyer_type" name="buyer_type" required>
+                <option value="" selected disabled>-- هەڵبژێرە --</option>
+                <option value="customer">کڕیار</option>
+                <option value="company">کۆمپانیا</option>
+                <option value="outsider">کەسی دەرەوە</option>
+              </select>
+            </div>
+            
+            <div class="col-md-6 mb-3" id="customer_select_group" style="display:none;">
+              <label for="sell_customer_id" class="form-label">ناوی کڕیار</label>
+              <select class="form-select" id="sell_customer_id" name="customer_id">
+                <option value="">-- هەڵبژێرە --</option>
+                <!-- Options populated by JS -->
+              </select>
+            </div>
+            
+            <div class="col-md-6 mb-3" id="company_select_group" style="display:none;">
+              <label for="sell_company_id" class="form-label">ناوی کۆمپانیا</label>
+              <select class="form-select" id="sell_company_id" name="company_id">
+                <option value="">-- هەڵبژێرە --</option>
+                <!-- Options populated by JS -->
+              </select>
+            </div>
+            
+            <div class="col-md-6 mb-3" id="outsider_name_group" style="display:none;">
+              <label for="outsider_name" class="form-label">ناوی کڕیار (دەرەوە)</label>
+              <input type="text" class="form-control" id="outsider_name" name="outsider_name">
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="sell_unit_type" class="form-label">یەکەی فرۆشتن</label>
+              <select class="form-select" id="sell_unit_type" name="unit_type" required>
+                <!-- Options populated based on material -->
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="sell_quantity" class="form-label">بڕی فرۆشتن</label>
+              <input type="number" class="form-control" id="sell_quantity" name="quantity" min="0.01" step="0.01" required>
+              <small class="text-danger" id="stock_error" style="display:none;">بڕی پێویست بەردەست نییە!</small>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label for="sell_currency" class="form-label">جۆری دراو</label>
+              <select class="form-select" id="sell_currency" name="currency" required>
+                <option value="USD">دۆلار</option>
+                <option value="IQD">دینار</option>
+              </select>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="sell_price_per_unit" class="form-label">نرخی تاک</label>
+              <input type="number" class="form-control" id="sell_price_per_unit" name="price" min="0" step="0.01" required>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="sell_total_price" class="form-label">کۆی گشتی نرخ</label>
+              <input type="number" class="form-control" id="sell_total_price" name="total_price" readonly>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="sell_date" class="form-label">بەروار</label>
+              <input type="date" class="form-control" id="sell_date" name="date" value="<?php echo date('Y-m-d'); ?>" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="sell_note" class="form-label">تێبینی</label>
+              <textarea class="form-control" id="sell_note" name="note" rows="1"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
+          <button type="submit" class="btn btn-success">فرۆشتن</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="../assets/js/swalAlert.js"></script>
@@ -359,6 +459,7 @@ window.hasDeletePermission = <?= hasPermission('delete_material') ? 'true' : 'fa
 <script src="../assets/js/add_material/add.js"></script>
 <script src="../assets/js/add_material/delete.js"></script>
 <script src="../assets/js/add_material/update.js"></script>
+<script src="../assets/js/add_material/sell.js"></script>
 <script src="../assets/js/add_material/summary_cards.js"></script>
 <script src="../assets/js/add_material/table_loader.js"></script>
 <script>

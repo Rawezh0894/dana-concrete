@@ -17564,3 +17564,12 @@
 )
 
 [14-Jan-2026 10:51:21 Asia/Baghdad] Sale successfully deleted: ID=1619, Invoice=A-4769, Customer=و.دلێر
+[20-Jan-2026 12:14:50 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1768900490
+    [user_id] => 2
+    [username] => rawezh
+    [role] => admin
+)
+
+[20-Jan-2026 12:14:51 Asia/Baghdad] Dashboard data loaded successfully for user: 2
