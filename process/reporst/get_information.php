@@ -1391,34 +1391,34 @@ try {
     $total_meters = floatval($stmt->fetchColumn() ?? 0);
     
     if ($total_meters > 0) {
-        $total_revenue_val = ($sales['cash']['usd'] ?? 0) + ($sales['credit']['usd'] ?? 0); // Total Sales Revenue
+        $total_revenue_val = ($sales['cash']['usd'] ?? 0) + ($sales['credit']['usd'] ?? 0) + ($raw_material_sales_total_usd ?? 0) + ($material_sales_total_usd ?? 0); // Total Revenue (Sales + Raw + Material)
         
-        $total_material_cost_val = ($total_used_material_cost_usd ?? 0) + ($raw_material_sales_cost_total_usd ?? 0) + ($material_sales_total_usd ?? 0); // Material + Raw Material Sales Cost + Material Sales Cost (Using sales value as cost for simplify if cost not available, but here we used sales value earlier, let's stick to user request: "کۆی گشتی تێچووی مەوادەکان")
+        $total_material_cost_val = ($total_used_material_cost_usd ?? 0) + ($raw_material_sales_cost_total_usd ?? 0); // Material + Raw Material Sales Cost
         // User requested formula components:
-        // 1. Total Sales / Total Meters
+        // 1. Total Revenue / Total Meters
         $revenue_per_meter = $total_revenue_val / $total_meters;
         
         // 2. Costs per meter:
-        // a. (کۆی گشتی تێچووی مەوادەکان/کۆی بڕی مەتری فرۆشراو) -> Total Material Cost (Consumption + Raw Sales Cost + Gas Cost)
-        $cost_material_total = ($total_used_material_cost_usd ?? 0) + ($raw_material_sales_cost_total_usd ?? 0) + ($gas_consumption_cost_usd ?? 0);
-        $cost_material_per_meter = $cost_material_total / $total_meters;
+        // a. Material Costs
+        $cost_material_per_meter = $total_material_cost_val / $total_meters;
         
-        // b. (کۆی مووچەی کارمەندان / کۆی بڕی مەتری فرۆشراو)
+        // b. Salary
         $cost_salary_per_meter = ($employee_stats['total_fixed_usd'] ?? 0) / $total_meters;
         
-        // c. (کۆی کاروان حیسابی/کۆی بڕی مەتری فرۆشراو)
+        // c. Caravan
         $cost_caravan_per_meter = ($caravan_hisabi_usd ?? 0) / $total_meters;
         
-        // d. (کۆی نرخی خەرجی/کۆی بڕی مەتری فرۆشراو) -> Total of other_expenses + purchases + purchase_materials
+        // d. Expenses (Other + Purchases + PurchaseMaterials + Gas)
         $cost_expenses_total = ($total_expenses_breakdown['other_expenses'] ?? 0) + 
                                ($total_expenses_breakdown['purchases'] ?? 0) + 
-                               ($total_expenses_breakdown['purchase_materials'] ?? 0);
+                               ($total_expenses_breakdown['purchase_materials'] ?? 0) +
+                               ($total_expenses_breakdown['gas_usage'] ?? 0);
         $cost_expenses_per_meter = $cost_expenses_total / $total_meters;
         
-        // e. (داشکاندنی فرۆشتن / کۆی بڕی مەتری فرۆشراو)
+        // e. Sales Discount
         $cost_discount_sales_per_meter = ($sales_discounts ?? 0) / $total_meters;
         
-        // f. (داشکاندنی گەڕاندنەوەی قەرز/کۆی بڕی مەتری فرۆشراو)
+        // f. Debt Return Discount
         $cost_discount_debt_per_meter = ($customer_debt_discounts ?? 0) / $total_meters;
         
         // Calculate Net Profit Per Meter
