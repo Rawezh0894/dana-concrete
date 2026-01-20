@@ -224,6 +224,14 @@ function renderDashboardCards(data) {
             cardClass: (Number(data.data?.profit_loss?.profit_loss) || 0) >= 0 ? 'success-card' : 'total-expenses-card',
             value: formatCurrency(Number(data.data?.profit_loss?.profit_loss) || 0, 'USD'),
             subtitle: (Number(data.data?.profit_loss?.profit_loss) || 0) >= 0 ? 'قازانج' : 'زەرەر'
+        },
+        {
+            key: 'net_profit_per_m3',
+            label: 'قازانجی پوختی یەک مەتر سێجا',
+            icon: 'fa-cube',
+            cardClass: (Number(data.data?.net_profit_per_m3?.value) || 0) >= 0 ? 'success-card' : 'total-expenses-card',
+            value: formatCurrency(Number(data.data?.net_profit_per_m3?.value) || 0, 'USD'),
+            subtitle: (Number(data.data?.net_profit_per_m3?.value) || 0) >= 0 ? 'قازانج بۆ هەر مەترێک' : 'زەرەر بۆ هەر مەترێک'
         }
     ];
 

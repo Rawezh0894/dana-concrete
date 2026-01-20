@@ -1355,25 +1355,93 @@ try {
                 ],
                 'debt_analysis' => $debt_analysis
             ],
-                // Material consumption data
-    // cement_cem1: دەلتا + لاڤارج (سایلۆی یەک)
-    // cement_cem2: ماس (سایلۆی دوو)
-    'material_consumption' => [
-        'kg' => $material_consumption,
-        'tons' => $material_consumption_tons,
-        'prices' => $material_prices,
-        'costs' => $material_costs,
-        'total_cost_usd' => $total_used_material_cost_usd,
-        'current_stock' => $current_stock,
-        // Gas consumption data
-        'gas' => [
-            'liters' => $gas_consumption_liters,
-            'cost_usd' => $gas_consumption_cost_usd,
-            'price_per_liter' => $material_prices['gas']
-        ]
-    ]
+            // Calculate Net Profit Per Cumulative Meter (قازانجی پوختی یەک مەتر سێجا)
+            // 1. Get total meters sold
+            'net_profit_per_m3' => [
+                'value' => 0,
+                'total_meters' => 0,
+                'revenue_per_m' => 0,
+                'cost_per_m' => 0
+            ],
+            // Material consumption data
+            // cement_cem1: دەلتا + لاڤارج (سایلۆی یەک)
+            // cement_cem2: ماس (سایلۆی دوو)
+            'material_consumption' => [
+                'kg' => $material_consumption,
+                'tons' => $material_consumption_tons,
+                'prices' => $material_prices,
+                'costs' => $material_costs,
+                'total_cost_usd' => $total_used_material_cost_usd,
+                'current_stock' => $current_stock,
+                // Gas consumption data
+                'gas' => [
+                    'liters' => $gas_consumption_liters,
+                    'cost_usd' => $gas_consumption_cost_usd,
+                    'price_per_liter' => $material_prices['gas']
+                ]
+            ]
         ]
     ];
+    
+    // Perform the Net Profit/m3 Calculation
+    
+    // 1. Get Total Sold Meters (quantity)
+    $total_meters_query = "SELECT SUM(quantity) as total_meters FROM sales WHERE 1=1 $date_condition_sales";
+    $stmt = $pdo->query($total_meters_query);
+    $total_meters = floatval($stmt->fetchColumn() ?? 0);
+    
+    if ($total_meters > 0) {
+        $total_revenue_val = ($sales['cash']['usd'] ?? 0) + ($sales['credit']['usd'] ?? 0); // Total Sales Revenue
+        
+        $total_material_cost_val = ($total_used_material_cost_usd ?? 0) + ($raw_material_sales_cost_total_usd ?? 0) + ($material_sales_total_usd ?? 0); // Material + Raw Material Sales Cost + Material Sales Cost (Using sales value as cost for simplify if cost not available, but here we used sales value earlier, let's stick to user request: "کۆی گشتی تێچووی مەوادەکان")
+        // User requested formula components:
+        // 1. Total Sales / Total Meters
+        $revenue_per_meter = $total_revenue_val / $total_meters;
+        
+        // 2. Costs per meter:
+        // a. (کۆی گشتی تێچووی مەوادەکان/کۆی بڕی مەتری فرۆشراو) -> Total Material Cost (Consumption + Raw Sales Cost + Gas Cost)
+        $cost_material_total = ($total_used_material_cost_usd ?? 0) + ($raw_material_sales_cost_total_usd ?? 0) + ($gas_consumption_cost_usd ?? 0);
+        $cost_material_per_meter = $cost_material_total / $total_meters;
+        
+        // b. (کۆی مووچەی کارمەندان / کۆی بڕی مەتری فرۆشراو)
+        $cost_salary_per_meter = ($employee_stats['total_fixed_usd'] ?? 0) / $total_meters;
+        
+        // c. (کۆی کاروان حیسابی/کۆی بڕی مەتری فرۆشراو)
+        $cost_caravan_per_meter = ($caravan_hisabi_usd ?? 0) / $total_meters;
+        
+        // d. (کۆی نرخی خەرجی/کۆی بڕی مەتری فرۆشراو) -> Total of other_expenses + purchases + purchase_materials
+        $cost_expenses_total = ($total_expenses_breakdown['other_expenses'] ?? 0) + 
+                               ($total_expenses_breakdown['purchases'] ?? 0) + 
+                               ($total_expenses_breakdown['purchase_materials'] ?? 0);
+        $cost_expenses_per_meter = $cost_expenses_total / $total_meters;
+        
+        // e. (داشکاندنی فرۆشتن / کۆی بڕی مەتری فرۆشراو)
+        $cost_discount_sales_per_meter = ($sales_discounts ?? 0) / $total_meters;
+        
+        // f. (داشکاندنی گەڕاندنەوەی قەرز/کۆی بڕی مەتری فرۆشراو)
+        $cost_discount_debt_per_meter = ($customer_debt_discounts ?? 0) / $total_meters;
+        
+        // Calculate Net Profit Per Meter
+        $total_cost_per_meter = $cost_material_per_meter + $cost_salary_per_meter + $cost_caravan_per_meter + $cost_expenses_per_meter + $cost_discount_sales_per_meter + $cost_discount_debt_per_meter;
+        
+        $net_profit_per_m3 = $revenue_per_meter - $total_cost_per_meter;
+        
+        // Update response data
+        $response_data['data']['net_profit_per_m3'] = [
+            'value' => $net_profit_per_m3,
+            'total_meters' => $total_meters,
+            'revenue_per_m' => $revenue_per_meter,
+            'cost_per_m' => $total_cost_per_meter,
+            'breakdown' => [
+                'material' => $cost_material_per_meter,
+                'salary' => $cost_salary_per_meter,
+                'caravan' => $cost_caravan_per_meter,
+                'expenses' => $cost_expenses_per_meter,
+                'discount_sales' => $cost_discount_sales_per_meter,
+                'discount_debt' => $cost_discount_debt_per_meter
+            ]
+        ];
+    }
     
     // Debug: Log material consumption data
     // Note: cement_cem1 includes both دەلتا and لاڤارج from سایلۆی ١
