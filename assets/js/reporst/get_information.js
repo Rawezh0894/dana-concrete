@@ -141,6 +141,14 @@ function renderDashboardCards(data) {
             subtitle: 'نرخی دۆلار بە دینار (لە settings)'
         },
         {
+            key: 'total_sold_meters',
+            label: 'کۆی بڕی مەتر سێجای فرۆشراو',
+            icon: 'fa-ruler-vertical',
+            cardClass: 'sales-card',
+            value: formatNumber(data.data?.net_profit_per_m3?.total_meters || 0) + ' م³',
+            subtitle: 'کۆی گشتی مەترە فرۆشراوەکان'
+        },
+        {
             key: 'sales',
             label: 'کۆی نرخی فرۆشتن',
             icon: 'fa-cash-register',
