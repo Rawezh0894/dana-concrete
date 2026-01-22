@@ -13,34 +13,31 @@ function updateEditDebtSummaryFields() {
     const amountIQD = parseFloat($('#edit_debt_amount_iqd').val()) || 0;
     const discountIQD = parseFloat($('#edit_debt_discount_iqd').val()) || 0;
 
-    // The rate is for 100 USD
-    const ratePerDollar = (USD_IQD_RATE || 150000) / 100;
+    // Get exchange rate (Price of $100 in IQD)
+    let rate = parseFloat($('#edit_exchange_rate').val()) || 0;
+    if (rate <= 0) rate = window.DEFAULT_USD_RATE || 150000;
 
-    // First, handle USD debt
-    let netUSD = editDebtBaseUSD - (amountUSD + discountUSD);
-    // Finally, handle IQD debt
-    let netIQD = editDebtBaseIQD - (amountIQD + discountIQD);
+    // Rate per 1 USD
+    const ratePerUSD = rate / 100;
 
-    // crossover logic:
-    if (netUSD < 0) {
-        // Surplus USD reduces IQD debt
-        const surplusIQD = Math.abs(netUSD) * ratePerDollar;
-        netIQD -= surplusIQD;
-        netUSD = 0;
+    let remainingUSD = editDebtBaseUSD - amountUSD - discountUSD;
+    let remainingIQD = editDebtBaseIQD - amountIQD - discountIQD;
+
+    // Cross-currency settlement logic
+    if (remainingUSD < 0) {
+        const excessUSD = Math.abs(remainingUSD);
+        const equivalentIQD = excessUSD * ratePerUSD;
+        remainingIQD -= equivalentIQD;
+        remainingUSD = 0;
+    } else if (remainingIQD < 0) {
+        const excessIQD = Math.abs(remainingIQD);
+        const equivalentUSD = excessIQD / ratePerUSD;
+        remainingUSD -= equivalentUSD;
+        remainingIQD = 0;
     }
 
-    if (netIQD < 0) {
-        // Surplus IQD reduces USD debt
-        const surplusUSD = Math.abs(netIQD) / ratePerDollar;
-        netUSD -= surplusUSD;
-        netIQD = 0;
-    }
-
-    const remainingUSD = Math.max(netUSD, 0);
-    const remainingIQD = Math.max(netIQD, 0);
-
-    $('#edit_debt_remaining_usd').val(formatNumber(remainingUSD));
-    $('#edit_debt_remaining_iqd').val(formatNumber(remainingIQD));
+    $('#edit_debt_remaining_usd').val(formatNumber(Math.max(remainingUSD, 0)));
+    $('#edit_debt_remaining_iqd').val(formatNumber(Math.max(remainingIQD, 0)));
 }
 
 function fetchDebtTotalsForEditModal(oldValues) {
@@ -73,6 +70,8 @@ function fetchDebtTotalsForEditModal(oldValues) {
 }
 
 window.setupEditDebtModal = function (oldValues) {
+    // Set default rate if available
+    $('#edit_exchange_rate').val(window.DEFAULT_USD_RATE || 150000);
     fetchDebtTotalsForEditModal(oldValues || {});
 };
 
@@ -117,6 +116,6 @@ $('#editDebtModal').on('hidden.bs.modal', function () {
     $('#edit_debt_remaining_iqd').val('0.00');
 });
 
-$('#edit_debt_amount_usd, #edit_debt_discount_usd, #edit_debt_amount_iqd, #edit_debt_discount_iqd').on('input', function () {
+$('#edit_debt_amount_usd, #edit_debt_discount_usd, #edit_debt_amount_iqd, #edit_debt_discount_iqd, #edit_exchange_rate').on('input', function () {
     updateEditDebtSummaryFields();
 });

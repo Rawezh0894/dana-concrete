@@ -22,10 +22,10 @@ if ($person_id) {
     $person_name = $row ? $row['name'] : '';
 }
 
-// Fetch exchange rate
-$stmt = $pdo->prepare("SELECT value FROM settings WHERE name = 'usd_iqd_rate' LIMIT 1");
-$stmt->execute();
-$usd_iqd_rate = $stmt->fetchColumn() ?: 150000;
+// Fetch default exchange rate
+$stmt = $pdo->query("SELECT value FROM settings WHERE name = 'usd_iqd_rate'");
+$rate = $stmt->fetchColumn();
+$default_rate = $rate ? $rate : 150000;
 ?>
 <!DOCTYPE html>
 <html lang="ku">
@@ -228,6 +228,10 @@ $usd_iqd_rate = $stmt->fetchColumn() ?: 150000;
                                 <input type="date" class="form-control" id="debt_date" name="date" required
                                     value="<?php echo date('Y-m-d'); ?>">
                             </div>
+                            <div class="mb-3">
+                                <label for="exchange_rate" class="form-label">نرخی ١٠٠ دۆلار (د.ع)</label>
+                                <input type="number" class="form-control" id="exchange_rate" name="exchange_rate" min="1" step="0.01" required>
+                            </div>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label for="debt_amount_usd" class="form-label">بڕی دۆلار</label>
@@ -292,6 +296,10 @@ $usd_iqd_rate = $stmt->fetchColumn() ?: 150000;
                                 <label for="edit_debt_date" class="form-label">بەروار</label>
                                 <input type="date" class="form-control" id="edit_debt_date" name="date" required>
                             </div>
+                            <div class="mb-3">
+                                <label for="edit_exchange_rate" class="form-label">نرخی ١٠٠ دۆلار (د.ع)</label>
+                                <input type="number" class="form-control" id="edit_exchange_rate" name="exchange_rate" min="1" step="0.01" required>
+                            </div><!-- added rate input -->
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label for="edit_debt_amount_usd" class="form-label">بڕی دۆلار</label>
@@ -343,7 +351,7 @@ $usd_iqd_rate = $stmt->fetchColumn() ?: 150000;
     </div>
     <script>
         const PERSON_ID = <?php echo $person_id; ?>;
-        const USD_IQD_RATE = <?php echo $usd_iqd_rate; ?>;
+        const DEFAULT_USD_RATE = <?php echo floatval($default_rate); ?>;
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

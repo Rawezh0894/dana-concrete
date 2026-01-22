@@ -53,21 +53,35 @@ try {
     restorePersonCurrencyAmount($pdo, $person_id, 'iqd', floatval($payment['amount_iqd'] ?? 0));
     restorePersonCurrencyAmount($pdo, $person_id, 'iqd', floatval($payment['discount_iqd'] ?? 0));
 
-    // Fetch exchange rate
-    $stmt_rate = $pdo->prepare("SELECT value FROM settings WHERE name = 'usd_iqd_rate' LIMIT 1");
-    $stmt_rate->execute();
-    $usd_iqd_rate = floatval($stmt_rate->fetchColumn() ?: 150000);
-    $rate_per_dollar = $usd_iqd_rate / 100;
-
-    // Total debt in USD terms for validation
-    $combined_debt_usd = $total_usd_available + ($total_iqd_available / $rate_per_dollar);
+    $snapshot = getPersonDebtSnapshot($pdo, $person_id);
+    $total_usd_available = $snapshot['total_debt_usd'];
+    $total_iqd_available = $snapshot['total_debt_iqd'];
     
-    $paid_usd_total = $amount_usd + $discount_usd;
-    $paid_iqd_total = $amount_iqd + $discount_iqd;
-    $combined_paid_usd = $paid_usd_total + ($paid_iqd_total / $rate_per_dollar);
+    $rate = floatval($_POST['exchange_rate'] ?? 150000);
+    if ($rate <= 0) $rate = 150000;
+    $rate_per_usd = $rate / 100;
 
-    if ($combined_paid_usd - $combined_debt_usd > $tolerance) {
-        throw new RuntimeException('بڕی پارەی دیاریکراو زیاترە لە کۆی گشتی قەرزەکان!');
+    $payment_usd = $amount_usd + $discount_usd;
+    $payment_iqd = $amount_iqd + $discount_iqd;
+
+    // Calculate excesses
+    $excess_usd = max(0, $payment_usd - $total_usd_available);
+    $excess_iqd = max(0, $payment_iqd - $total_iqd_available);
+
+    // Calculate cross-currency values
+    $cross_usd_to_iqd = $excess_usd * $rate_per_usd;
+    $cross_iqd_to_usd = $excess_iqd / $rate_per_usd;
+
+    // Calculate final effective reductions
+    $final_usd_reduction = min($payment_usd, $total_usd_available) + $cross_iqd_to_usd;
+    $final_iqd_reduction = min($payment_iqd, $total_iqd_available) + $cross_usd_to_iqd;
+
+    // Validate Total Value
+    $total_payment_value_usd = $payment_usd + ($payment_iqd / $rate_per_usd);
+    $total_debt_value_usd = $total_usd_available + ($total_iqd_available / $rate_per_usd);
+
+    if ($total_payment_value_usd - $total_debt_value_usd > 1.0) { // Allow $1 tolerance
+        throw new RuntimeException('بڕی پارەی دراو زیاترە لە کۆی گشتی قەرز! (لە کاتی نوێکردنەوە)');
     }
 
     // Check if discount columns exist
@@ -104,29 +118,12 @@ try {
         ]);
     }
 
-    $remaining_usd_to_apply = $amount_usd + $discount_usd;
-    $remaining_iqd_to_apply = $amount_iqd + $discount_iqd;
-
-    // First apply USD payments to USD debt
-    $usd_to_deduct = min($total_usd_available, $remaining_usd_to_apply);
-    applyPersonCurrencyReduction($pdo, $person_id, 'usd', $usd_to_deduct);
-    $remaining_usd_to_apply -= $usd_to_deduct;
-
-    // Then apply IQD payments to IQD debt
-    $iqd_to_deduct = min($total_iqd_available, $remaining_iqd_to_apply);
-    applyPersonCurrencyReduction($pdo, $person_id, 'iqd', $iqd_to_deduct);
-    $remaining_iqd_to_apply -= $iqd_to_deduct;
-
-    // Handle Surplus USD (apply to IQD debt)
-    if ($remaining_usd_to_apply > 0) {
-        $surplus_as_iqd = $remaining_usd_to_apply * $rate_per_dollar;
-        applyPersonCurrencyReduction($pdo, $person_id, 'iqd', $surplus_as_iqd);
+    // Apply reductions using calculated effective amounts
+    if ($final_usd_reduction > 0) {
+        applyPersonCurrencyReduction($pdo, $person_id, 'usd', $final_usd_reduction);
     }
-
-    // Handle Surplus IQD (apply to USD debt)
-    if ($remaining_iqd_to_apply > 0) {
-        $surplus_as_usd = $remaining_iqd_to_apply / $rate_per_dollar;
-        applyPersonCurrencyReduction($pdo, $person_id, 'usd', $surplus_as_usd);
+    if ($final_iqd_reduction > 0) {
+        applyPersonCurrencyReduction($pdo, $person_id, 'iqd', $final_iqd_reduction);
     }
 
     require_once __DIR__ . '/../../includes/notify.php';

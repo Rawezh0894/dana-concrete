@@ -13,34 +13,40 @@ function updateAddDebtSummaryFields() {
     const amountIQD = parseFloat($('#debt_amount_iqd').val()) || 0;
     const discountIQD = parseFloat($('#debt_discount_iqd').val()) || 0;
 
-    // The rate is for 100 USD
-    const ratePerDollar = (USD_IQD_RATE || 150000) / 100;
+    // Get exchange rate (Price of $100 in IQD)
+    // Default to 1 if invalid or 0 to avoid division by zero issues, though typically it's ~150000
+    let rate = parseFloat($('#exchange_rate').val()) || 0;
+    if (rate <= 0) rate = window.DEFAULT_USD_RATE || 150000;
 
-    // First, handle USD debt
-    let netUSD = totalDebtUSD - (amountUSD + discountUSD);
-    // Finally, handle IQD debt
-    let netIQD = totalDebtIQD - (amountIQD + discountIQD);
+    // Rate per 1 USD
+    const ratePerUSD = rate / 100;
 
-    // crossover logic:
-    if (netUSD < 0) {
-        // Surplus USD reduces IQD debt
-        const surplusIQD = Math.abs(netUSD) * ratePerDollar;
-        netIQD -= surplusIQD;
-        netUSD = 0;
+    let remainingUSD = totalDebtUSD - amountUSD - discountUSD;
+    let remainingIQD = totalDebtIQD - amountIQD - discountIQD;
+
+    // Cross-currency settlement logic
+    // If excess USD payment, apply to IQD debt
+    if (remainingUSD < 0) {
+        const excessUSD = Math.abs(remainingUSD);
+        const equivalentIQD = excessUSD * ratePerUSD;
+        remainingIQD -= equivalentIQD;
+        remainingUSD = 0;
+    }
+    // If excess IQD payment, apply to USD debt
+    else if (remainingIQD < 0) {
+        const excessIQD = Math.abs(remainingIQD);
+        const equivalentUSD = excessIQD / ratePerUSD;
+        remainingUSD -= equivalentUSD;
+        remainingIQD = 0;
     }
 
-    if (netIQD < 0) {
-        // Surplus IQD reduces USD debt
-        const surplusUSD = Math.abs(netIQD) / ratePerDollar;
-        netUSD -= surplusUSD;
-        netIQD = 0;
-    }
+    // Ensure we don't show negative remaining (unless they are actually overpaying total value)
+    // Actually, showing negative means they are paying MORE than total debt, which is fine to show as negative (credit) or zero. 
+    // The previous code used Math.max(..., 0). Let's stick to that for "Remaining Debt".
+    // If it's negative, it means they overpaid.
 
-    const remainingUSD = Math.max(netUSD, 0);
-    const remainingIQD = Math.max(netIQD, 0);
-
-    $('#debt_remaining_usd').val(formatNumber(remainingUSD));
-    $('#debt_remaining_iqd').val(formatNumber(remainingIQD));
+    $('#debt_remaining_usd').val(formatNumber(Math.max(remainingUSD, 0)));
+    $('#debt_remaining_iqd').val(formatNumber(Math.max(remainingIQD, 0)));
 }
 
 function fetchDebtTotalsForAddModal() {
@@ -107,6 +113,7 @@ $('#addDebtForm').on('submit', function (e) {
 });
 
 $('#addDebtModal').on('shown.bs.modal', function () {
+    $('#exchange_rate').val(window.DEFAULT_USD_RATE || 150000);
     fetchDebtTotalsForAddModal();
 });
 
@@ -117,6 +124,6 @@ $('#addDebtModal').on('hidden.bs.modal', function () {
     $('#debt_remaining_iqd').val('0.00');
 });
 
-$('#debt_amount_usd, #debt_discount_usd, #debt_amount_iqd, #debt_discount_iqd').on('input', function () {
+$('#debt_amount_usd, #debt_discount_usd, #debt_amount_iqd, #debt_discount_iqd, #exchange_rate').on('input', function () {
     updateAddDebtSummaryFields();
 });
