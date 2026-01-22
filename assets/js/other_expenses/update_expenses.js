@@ -203,7 +203,7 @@ function setupEditExpenseModal() {
                 if (remainingUsd) remainingUsd.value = (amountUsdVal - paidUsdVal).toFixed(2);
             }
         }
-        currencyType.addEventListener('change', handleCurrencyChange);
+        $(currencyType).on('change', handleCurrencyChange);
         [amountIqd, paidIqd, amountUsd, paidUsd, exchangeRate].forEach(input => {
             if (input) input.addEventListener('input', updateRemaining);
         });

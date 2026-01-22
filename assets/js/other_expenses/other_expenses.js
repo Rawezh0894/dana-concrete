@@ -283,7 +283,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (remainingUsd) remainingUsd.value = (amountUsdVal - paidUsdVal).toFixed(2);
             }
         }
-        currencyType.addEventListener('change', handleCurrencyChange);
+        $(currencyType).on('change', handleCurrencyChange);
         [amountIqd, paidIqd, amountUsd, paidUsd, exchangeRate].forEach(input => {
             if (input) input.addEventListener('input', updateRemaining);
         });
@@ -293,7 +293,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Handle expense type change for add form
     const expenseType = document.getElementById('expense_type');
     if (expenseType) {
-        expenseType.addEventListener('change', function () {
+        $(expenseType).on('change', function () {
             toggleGasMaterialFields(this.value, 'add');
         });
     }
@@ -301,7 +301,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Handle expense type change for edit form
     const editExpenseType = document.getElementById('edit_expense_type');
     if (editExpenseType) {
-        editExpenseType.addEventListener('change', function () {
+        $(editExpenseType).on('change', function () {
             toggleGasMaterialFields(this.value, 'edit');
         });
     }
@@ -311,7 +311,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const editMaterialSelect = document.getElementById('edit_material_id');
 
     if (addMaterialSelect) {
-        addMaterialSelect.addEventListener('change', function () {
+        $(addMaterialSelect).on('change', function () {
             const materialId = this.value;
             if (materialId) {
                 populateMaterialPrices(materialId, 'add');
@@ -360,7 +360,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (editMaterialSelect) {
-        editMaterialSelect.addEventListener('change', function () {
+        $(editMaterialSelect).on('change', function () {
             const materialId = this.value;
             if (materialId) {
                 populateMaterialPrices(materialId, 'edit');
@@ -1464,13 +1464,13 @@ document.addEventListener('DOMContentLoaded', function () {
     const editExpenseTypeSelect = document.getElementById('edit_expense_type');
 
     if (addExpenseTypeSelect) {
-        addExpenseTypeSelect.addEventListener('change', function () {
+        $(addExpenseTypeSelect).on('change', function () {
             handleExpenseTypeChange('add');
         });
     }
 
     if (editExpenseTypeSelect) {
-        editExpenseTypeSelect.addEventListener('change', function () {
+        $(editExpenseTypeSelect).on('change', function () {
             handleExpenseTypeChange('edit');
         });
     }
@@ -1503,7 +1503,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const editUsageUnitSelect = document.getElementById('edit_usage_unit_type');
 
     if (addUsageUnitSelect) {
-        addUsageUnitSelect.addEventListener('change', function () {
+        $(addUsageUnitSelect).on('change', function () {
             // Recalculate base quantity when usage unit changes
             calculateAndDisplayBaseQuantity('add');
             // Check material availability with new unit
@@ -1514,7 +1514,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (editUsageUnitSelect) {
-        editUsageUnitSelect.addEventListener('change', function () {
+        $(editUsageUnitSelect).on('change', function () {
             // Recalculate base quantity when usage unit changes
             calculateAndDisplayBaseQuantity('edit');
             // Check material availability with new unit
