@@ -198,22 +198,48 @@ if (addExpenseForm) {
     }
 }
 
-function populateSelect(url, selectId) {
-    fetch(url)
-        .then(res => res.json())
-        .then(data => {
-            const select = document.getElementById(selectId);
-            select.innerHTML = '<option value="">-- هەلبژێرە --</option>';
-            data.forEach(item => {
-                select.innerHTML += `<option value="${item.id}">${item.name}</option>`;
-            });
-            // Update Select2 if initialized
-            if ($(select).hasClass('select2-hidden-accessible')) {
-                $(select).trigger('change');
-            }
-            // Trigger native change event for any vanilla listeners
-            select.dispatchEvent(new Event('change'));
+async function populateSelect(url, selectId, selectedId) {
+    try {
+        console.log(`Populating select ${selectId} from ${url}`);
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        const result = await res.json();
+
+        let data = [];
+        if (Array.isArray(result)) {
+            data = result;
+        } else if (result && result.success && Array.isArray(result.data)) {
+            data = result.data;
+        } else if (result && result.success && Array.isArray(result.materials)) {
+            data = result.materials;
+        }
+
+        const select = document.getElementById(selectId);
+        if (!select) {
+            console.warn(`Select element #${selectId} not found`);
+            return;
+        }
+
+        select.innerHTML = '<option value="">-- هەلبژێرە --</option>';
+        data.forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = item.id;
+            opt.textContent = item.name;
+            if (selectedId && String(item.id) === String(selectedId)) opt.selected = true;
+            select.appendChild(opt);
         });
+
+        console.log(`Populated ${selectId} with ${data.length} options`);
+
+        // Update Select2 if initialized
+        if ($(select).hasClass('select2-hidden-accessible')) {
+            $(select).trigger('change');
+        }
+        // Trigger native change event for any vanilla listeners
+        select.dispatchEvent(new Event('change'));
+    } catch (err) {
+        console.error(`Error populating select ${selectId}:`, err);
+    }
 }
 
 // Function to fetch and set USD exchange rate

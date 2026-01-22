@@ -268,11 +268,26 @@ document.addEventListener('DOMContentLoaded', function () {
 
 async function populateSelect(url, selectId, selectedId) {
     try {
+        console.log(`Populating select ${selectId} from ${url}`);
         const res = await fetch(url);
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-        const data = await res.json();
+        const result = await res.json();
+
+        let data = [];
+        if (Array.isArray(result)) {
+            data = result;
+        } else if (result && result.success && Array.isArray(result.data)) {
+            data = result.data;
+        } else if (result && result.success && Array.isArray(result.materials)) {
+            data = result.materials;
+        }
+
         const select = document.getElementById(selectId);
-        if (!select) return;
+        if (!select) {
+            console.warn(`Select element #${selectId} not found`);
+            return;
+        }
+
         select.innerHTML = '<option value="">-- هەلبژێرە --</option>';
         data.forEach(item => {
             const opt = document.createElement('option');
@@ -281,8 +296,17 @@ async function populateSelect(url, selectId, selectedId) {
             if (selectedId && String(item.id) === String(selectedId)) opt.selected = true;
             select.appendChild(opt);
         });
+
+        console.log(`Populated ${selectId} with ${data.length} options`);
+
+        // Trigger Select2 change event if initialized
+        if ($(select).hasClass('select2-hidden-accessible')) {
+            $(select).trigger('change');
+        }
+        // Trigger native change event for any vanilla listeners
+        select.dispatchEvent(new Event('change'));
     } catch (err) {
-        console.error('Error populating select:', err);
+        console.error(`Error populating select ${selectId}:`, err);
     }
 }
 
