@@ -55,22 +55,22 @@ class AdvancedFilters {
 
 
         // Entity filters - auto apply with debouncing
-        document.getElementById('carFilter')?.addEventListener('change', (e) => {
+        $('#carFilter').on('change', (e) => {
             this.filters.car = e.target.value;
             this.debouncedApplyFilters();
         });
 
-        document.getElementById('employeeFilter')?.addEventListener('change', (e) => {
+        $('#employeeFilter').on('change', (e) => {
             this.filters.employee = e.target.value;
             this.debouncedApplyFilters();
         });
 
-        document.getElementById('personFilter')?.addEventListener('change', (e) => {
+        $('#personFilter').on('change', (e) => {
             this.filters.person = e.target.value;
             this.debouncedApplyFilters();
         });
 
-        document.getElementById('paymentTypeFilter')?.addEventListener('change', (e) => {
+        $('#paymentTypeFilter').on('change', (e) => {
             this.filters.paymentType = e.target.value;
             this.debouncedApplyFilters();
         });

@@ -311,8 +311,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const editMaterialSelect = document.getElementById('edit_material_id');
 
     if (addMaterialSelect) {
-        addMaterialSelect.addEventListener('change', function () {
-            const materialId = this.value;
+        $(addMaterialSelect).on('change', function () {
+            const materialId = $(this).val();
             if (materialId) {
                 populateMaterialPrices(materialId, 'add');
                 // Clear any existing quantity and recalculate
@@ -360,8 +360,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (editMaterialSelect) {
-        editMaterialSelect.addEventListener('change', function () {
-            const materialId = this.value;
+        $(editMaterialSelect).on('change', function () {
+            const materialId = $(this).val();
             if (materialId) {
                 populateMaterialPrices(materialId, 'edit');
                 // Clear any existing quantity and recalculate
