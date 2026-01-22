@@ -306,108 +306,107 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Add event listeners for material selection (jQuery style for Select2 compatibility)
-    $(document).on('change', '#material_id', function () {
-        const materialId = this.value;
-        if (materialId) {
-            populateMaterialPrices(materialId, 'add');
-            // Clear any existing quantity and recalculate
-            const quantityField = document.getElementById('material_quantity');
-            if (quantityField) {
-                quantityField.value = '';
+    // Add event listeners for material selection
+    const addMaterialSelect = document.getElementById('material_id');
+    const editMaterialSelect = document.getElementById('edit_material_id');
+
+    if (addMaterialSelect) {
+        addMaterialSelect.addEventListener('change', function () {
+            const materialId = this.value;
+            if (materialId) {
+                populateMaterialPrices(materialId, 'add');
+                // Clear any existing quantity and recalculate
+                const quantityField = document.getElementById('material_quantity');
+                if (quantityField) {
+                    quantityField.value = '';
+                    clearMaterialAvailabilityMessage('add');
+                    clearMaterialUnitInfo('add');
+                    clearBaseQuantityDisplay('add');
+                }
+                // Clear usage unit selection when material changes
+                const usageUnitField = document.getElementById('usage_unit_type');
+                if (usageUnitField) {
+                    usageUnitField.value = '';
+                }
+                // Clear material unit info
+                clearMaterialUnitInfo('add');
+            } else {
                 clearMaterialAvailabilityMessage('add');
                 clearMaterialUnitInfo('add');
                 clearBaseQuantityDisplay('add');
-            }
-            // Clear usage unit selection when material changes
-            const usageUnitField = document.getElementById('usage_unit_type');
-            if (usageUnitField) {
-                usageUnitField.value = '';
-                // If it's a select2, trigger change
-                if ($(usageUnitField).hasClass('select2-hidden-accessible')) {
-                    $(usageUnitField).trigger('change');
+                // Clear usage unit and reset prices when material is cleared
+                const usageUnitField = document.getElementById('usage_unit_type');
+                if (usageUnitField) {
+                    usageUnitField.value = '';
+                    usageUnitField.innerHTML = '<option value="">یەکەی بەکارهێنان هەڵبژێرە</option>';
+                }
+                // Clear material unit info
+                clearMaterialUnitInfo('add');
+                // Clear price fields
+                const iqdPriceField = document.getElementById('material_purchase_price_iqd');
+                const usdPriceField = document.getElementById('material_purchase_price_usd');
+                const totalCostField = document.getElementById('material_total_cost');
+                if (iqdPriceField) iqdPriceField.value = '';
+                if (usdPriceField) usdPriceField.value = '';
+                if (totalCostField) {
+                    totalCostField.value = '';
+                    // Reset placeholder
+                    if (totalCostField.hasAttribute('data-original-placeholder')) {
+                        totalCostField.placeholder = totalCostField.getAttribute('data-original-placeholder');
+                    }
                 }
             }
-            // Clear material unit info
-            clearMaterialUnitInfo('add');
-        } else {
-            clearMaterialAvailabilityMessage('add');
-            clearMaterialUnitInfo('add');
-            clearBaseQuantityDisplay('add');
-            // Clear usage unit and reset prices when material is cleared
-            const usageUnitField = document.getElementById('usage_unit_type');
-            if (usageUnitField) {
-                usageUnitField.value = '';
-                usageUnitField.innerHTML = '<option value="">یەکەی بەکارهێنان هەڵبژێرە</option>';
-            }
-            // Clear material unit info
-            clearMaterialUnitInfo('add');
-            // Clear price fields
-            const iqdPriceField = document.getElementById('material_purchase_price_iqd');
-            const usdPriceField = document.getElementById('material_purchase_price_usd');
-            const totalCostField = document.getElementById('material_total_cost');
-            if (iqdPriceField) iqdPriceField.value = '';
-            if (usdPriceField) usdPriceField.value = '';
-            if (totalCostField) {
-                totalCostField.value = '';
-                // Reset placeholder
-                if (totalCostField.hasAttribute('data-original-placeholder')) {
-                    totalCostField.placeholder = totalCostField.getAttribute('data-original-placeholder');
-                }
-            }
-        }
-    });
+        });
+    }
 
-    $(document).on('change', '#edit_material_id', function () {
-        const materialId = this.value;
-        if (materialId) {
-            populateMaterialPrices(materialId, 'edit');
-            // Clear any existing quantity and recalculate
-            const quantityField = document.getElementById('edit_material_quantity');
-            if (quantityField) {
-                quantityField.value = '';
+    if (editMaterialSelect) {
+        editMaterialSelect.addEventListener('change', function () {
+            const materialId = this.value;
+            if (materialId) {
+                populateMaterialPrices(materialId, 'edit');
+                // Clear any existing quantity and recalculate
+                const quantityField = document.getElementById('edit_material_quantity');
+                if (quantityField) {
+                    quantityField.value = '';
+                    clearMaterialAvailabilityMessage('edit');
+                    clearMaterialUnitInfo('edit');
+                    clearBaseQuantityDisplay('edit');
+                }
+                // Clear usage unit selection when material changes
+                const usageUnitField = document.getElementById('edit_usage_unit_type');
+                if (usageUnitField) {
+                    usageUnitField.value = '';
+                }
+                // Clear material unit info
+                clearMaterialUnitInfo('edit');
+            } else {
                 clearMaterialAvailabilityMessage('edit');
                 clearMaterialUnitInfo('edit');
                 clearBaseQuantityDisplay('edit');
-            }
-            // Clear usage unit selection when material changes
-            const usageUnitField = document.getElementById('edit_usage_unit_type');
-            if (usageUnitField) {
-                usageUnitField.value = '';
-                // If it's a select2, trigger change
-                if ($(usageUnitField).hasClass('select2-hidden-accessible')) {
-                    $(usageUnitField).trigger('change');
+                // Clear usage unit and reset prices when material is cleared
+                const usageUnitField = document.getElementById('edit_usage_unit_type');
+                if (usageUnitField) {
+                    usageUnitField.value = '';
+                    usageUnitField.innerHTML = '<option value="">یەکەی بەکارهێنان هەڵبژێرە</option>';
+                }
+                // Clear material unit info
+                clearMaterialUnitInfo('edit');
+                // Clear price fields
+                const iqdPriceField = document.getElementById('edit_material_purchase_price_iqd');
+                const usdPriceField = document.getElementById('edit_material_purchase_price_usd');
+                const totalCostField = document.getElementById('edit_material_total_cost');
+                if (iqdPriceField) iqdPriceField.value = '';
+                if (usdPriceField) usdPriceField.value = '';
+                if (totalCostField) {
+                    totalCostField.value = '';
+                    // Reset placeholder
+                    if (totalCostField.hasAttribute('data-original-placeholder')) {
+                        totalCostField.placeholder = totalCostField.getAttribute('data-original-placeholder');
+                    }
                 }
             }
-            // Clear material unit info
-            clearMaterialUnitInfo('edit');
-        } else {
-            clearMaterialAvailabilityMessage('edit');
-            clearMaterialUnitInfo('edit');
-            clearBaseQuantityDisplay('edit');
-            // Clear usage unit and reset prices when material is cleared
-            const usageUnitField = document.getElementById('edit_usage_unit_type');
-            if (usageUnitField) {
-                usageUnitField.value = '';
-                usageUnitField.innerHTML = '<option value="">یەکەی بەکارهێنان هەڵبژێرە</option>';
-            }
-            // Clear material unit info
-            clearMaterialUnitInfo('edit');
-            // Clear price fields
-            const iqdPriceField = document.getElementById('edit_material_purchase_price_iqd');
-            const usdPriceField = document.getElementById('edit_material_purchase_price_usd');
-            const totalCostField = document.getElementById('edit_material_total_cost');
-            if (iqdPriceField) iqdPriceField.value = '';
-            if (usdPriceField) usdPriceField.value = '';
-            if (totalCostField) {
-                totalCostField.value = '';
-                // Reset placeholder
-                if (totalCostField.hasAttribute('data-original-placeholder')) {
-                    totalCostField.placeholder = totalCostField.getAttribute('data-original-placeholder');
-                }
-            }
-        }
-    });
+        });
+    }
 
     // Add event listeners for automatic total cost calculation
     const addQuantityField = document.getElementById('material_quantity');
@@ -628,14 +627,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 calculateMaterialTotalCost(formType);
             }
 
-            // Normalize strings for comparison
-            const materialUnitType = (material.unit_type || '').trim();
+            const materialUnitType = material.unit_type;
             const piecesPerCarton = material.pieces_per_carton;
             const litersPerBarrel = material.liters_per_barrel;
             const litersPerBucket = material.liters_per_bucket;
 
-            // Add options based on material unit type (with normalized comparison)
-            if (materialUnitType === 'کارتۆن' || materialUnitType === 'کارتن') {
+            // Add options based on material unit type
+            if (materialUnitType === 'کارتۆن') {
                 usageUnitSelect.innerHTML += '<option value="کارتۆن">کارتۆن</option>';
                 if (piecesPerCarton && piecesPerCarton > 0) {
                     usageUnitSelect.innerHTML += '<option value="دانە">دانە</option>';

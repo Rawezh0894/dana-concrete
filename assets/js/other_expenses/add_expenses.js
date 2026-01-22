@@ -203,13 +203,10 @@ function populateSelect(url, selectId) {
         .then(res => res.json())
         .then(data => {
             const select = document.getElementById(selectId);
-            if (!select) return;
             select.innerHTML = '<option value="">-- هەلبژێرە --</option>';
             data.forEach(item => {
                 select.innerHTML += `<option value="${item.id}">${item.name}</option>`;
             });
-            // Trigger change event for Select2 to update
-            $(select).trigger('change');
         });
 }
 
@@ -291,7 +288,6 @@ if (addPersonForm) {
                 option.textContent = data.name;
                 option.selected = true;
                 personSelect.appendChild(option);
-                $(personSelect).trigger('change');
                 addPersonForm.reset();
             } else {
                 Swal.fire('هەڵە!', data.msg || 'هەڵەیەک ڕویدا', 'error');

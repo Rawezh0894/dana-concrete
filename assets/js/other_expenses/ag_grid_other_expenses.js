@@ -697,8 +697,6 @@ async function populateSelect(url, selectId, selectedId) {
             if (selectedId && String(item.id) === String(selectedId)) opt.selected = true;
             select.appendChild(opt);
         });
-        // Trigger change event for Select2 to update
-        $(select).trigger('change');
     } catch (err) {
         console.error('Error populating select:', err);
     }
