@@ -19,7 +19,7 @@ const otherExpensesColumnDefs = [
         maxWidth: 200,
         flex: 0,
         cellStyle: { textAlign: 'center', direction: 'ltr' },
-        cellRenderer: function(params) {
+        cellRenderer: function (params) {
             if (!params.data) return '-';
             const editBtn = `<button class='btn btn-warning btn-sm edit-expense' data-id='${params.data.id}' title='نوێکردنەوە' style='margin: 2px;'><i class='fa fa-edit'></i></button>`;
             const deleteBtn = `<button class='btn btn-danger btn-sm delete-expense' data-id='${params.data.id}' title='سڕینەوە' style='margin: 2px;'><i class='fa fa-trash'></i></button>`;
@@ -35,7 +35,7 @@ const otherExpensesColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'center', direction: 'rtl' },
-        valueFormatter: function(params) {
+        valueFormatter: function (params) {
             if (!params.value) return '-';
             return params.value;
         }
@@ -49,7 +49,7 @@ const otherExpensesColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'center', direction: 'rtl', fontWeight: 'bold', color: '#dc3545' },
-        valueFormatter: function(params) {
+        valueFormatter: function (params) {
             return window.AGGridFormatters?.formatUSD(params.value) || '-';
         },
         type: 'numericColumn'
@@ -63,7 +63,7 @@ const otherExpensesColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'center', direction: 'rtl', fontWeight: 'bold', color: '#dc3545' },
-        valueFormatter: function(params) {
+        valueFormatter: function (params) {
             return window.AGGridFormatters?.formatIQD(params.value) || '-';
         },
         type: 'numericColumn'
@@ -77,7 +77,7 @@ const otherExpensesColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'center', direction: 'rtl' },
-        valueFormatter: function(params) {
+        valueFormatter: function (params) {
             if (params.value === null || params.value === undefined || params.value === '') return '-';
             return window.AGGridFormatters?.formatNumber(params.value) || params.value;
         },
@@ -92,7 +92,7 @@ const otherExpensesColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'center', direction: 'rtl' },
-        valueFormatter: function(params) {
+        valueFormatter: function (params) {
             return window.AGGridFormatters?.formatUSD(params.value) || '-';
         },
         type: 'numericColumn'
@@ -106,7 +106,7 @@ const otherExpensesColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'center', direction: 'rtl' },
-        valueFormatter: function(params) {
+        valueFormatter: function (params) {
             return window.AGGridFormatters?.formatIQD(params.value) || '-';
         },
         type: 'numericColumn'
@@ -120,7 +120,7 @@ const otherExpensesColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'center', direction: 'rtl', fontWeight: 'bold' },
-        valueFormatter: function(params) {
+        valueFormatter: function (params) {
             return window.AGGridFormatters?.formatUSD(params.value) || '-';
         },
         type: 'numericColumn'
@@ -134,7 +134,7 @@ const otherExpensesColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'center', direction: 'rtl', fontWeight: 'bold' },
-        valueFormatter: function(params) {
+        valueFormatter: function (params) {
             return window.AGGridFormatters?.formatIQD(params.value) || '-';
         },
         type: 'numericColumn'
@@ -148,7 +148,7 @@ const otherExpensesColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'center', direction: 'rtl' },
-        tooltipValueGetter: function(params) {
+        tooltipValueGetter: function (params) {
             return params.value || '';
         }
     },
@@ -161,7 +161,7 @@ const otherExpensesColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'center', direction: 'rtl' },
-        cellRenderer: function(params) {
+        cellRenderer: function (params) {
             if (!params.value) return '-';
             const color = params.value === 'دۆلار' ? '#28a745' : params.value === 'دینار' ? '#ffc107' : '#17a2b8';
             return `<span style="background: ${color}; color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold;">${params.value}</span>`;
@@ -176,7 +176,7 @@ const otherExpensesColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'center', direction: 'rtl' },
-        cellRenderer: function(params) {
+        cellRenderer: function (params) {
             if (!params.value) return '-';
             const color = params.value === 'نەقد' ? '#28a745' : '#ffc107';
             return `<span style="background: ${color}; color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold;">${params.value}</span>`;
@@ -191,7 +191,7 @@ const otherExpensesColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'center', direction: 'rtl' },
-        valueFormatter: function(params) {
+        valueFormatter: function (params) {
             if (params.value === null || params.value === undefined || params.value === '') return '-';
             return window.AGGridFormatters?.formatNumber(params.value) || params.value;
         },
@@ -206,7 +206,7 @@ const otherExpensesColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'center', direction: 'rtl' },
-        valueFormatter: function(params) {
+        valueFormatter: function (params) {
             return window.AGGridFormatters?.formatIQD(params.value) || '-';
         },
         type: 'numericColumn'
@@ -220,7 +220,7 @@ const otherExpensesColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'center', direction: 'rtl' },
-        valueFormatter: function(params) {
+        valueFormatter: function (params) {
             if (params.value === null || params.value === undefined || params.value === '') return '-';
             return window.AGGridFormatters?.formatNumber(params.value) || params.value;
         },
@@ -235,7 +235,7 @@ const otherExpensesColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'center', direction: 'rtl' },
-        valueFormatter: function(params) {
+        valueFormatter: function (params) {
             return window.AGGridFormatters?.formatUSD(params.value) || '-';
         },
         type: 'numericColumn'
@@ -249,7 +249,7 @@ const otherExpensesColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'center', direction: 'rtl' },
-        valueFormatter: function(params) {
+        valueFormatter: function (params) {
             return window.AGGridFormatters?.formatIQD(params.value) || '-';
         },
         type: 'numericColumn'
@@ -263,7 +263,7 @@ const otherExpensesColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'center', direction: 'rtl' },
-        valueFormatter: function(params) {
+        valueFormatter: function (params) {
             if (params.value === null || params.value === undefined || params.value === '') return '-';
             return window.AGGridFormatters?.formatNumber(params.value) || params.value;
         },
@@ -278,7 +278,7 @@ const otherExpensesColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'center', direction: 'rtl' },
-        tooltipValueGetter: function(params) {
+        tooltipValueGetter: function (params) {
             return params.value || '';
         }
     },
@@ -291,7 +291,7 @@ const otherExpensesColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'center', direction: 'rtl' },
-        cellRenderer: function(params) {
+        cellRenderer: function (params) {
             if (!params.value) return '-';
             const colors = {
                 'خەرجی تر': '#6c757d',
@@ -313,7 +313,7 @@ const otherExpensesColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'center', direction: 'rtl' },
-        valueFormatter: function(params) {
+        valueFormatter: function (params) {
             if (params.value === null || params.value === undefined || params.value === '') return '-';
             return window.AGGridFormatters?.formatNumber(params.value) + ' L' || '-';
         },
@@ -328,7 +328,7 @@ const otherExpensesColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'center', direction: 'rtl' },
-        tooltipValueGetter: function(params) {
+        tooltipValueGetter: function (params) {
             return params.value || '';
         }
     },
@@ -341,7 +341,7 @@ const otherExpensesColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'center', direction: 'rtl' },
-        tooltipValueGetter: function(params) {
+        tooltipValueGetter: function (params) {
             return params.value || '';
         }
     },
@@ -354,7 +354,7 @@ const otherExpensesColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'center', direction: 'rtl' },
-        tooltipValueGetter: function(params) {
+        tooltipValueGetter: function (params) {
             return params.value || '';
         }
     },
@@ -367,12 +367,12 @@ const otherExpensesColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'center', direction: 'rtl' },
-        cellRenderer: function(params) {
+        cellRenderer: function (params) {
             if (!params.value) return '-';
             const displayText = params.value.length > 50 ? params.value.substring(0, 50) + '...' : params.value;
             return `<span title="${params.value}">${displayText}</span>`;
         },
-        tooltipValueGetter: function(params) {
+        tooltipValueGetter: function (params) {
             return params.value || '';
         }
     }
@@ -443,11 +443,11 @@ const otherExpensesGridOptions = {
         csvExport: 'ئیکسپۆرتی CSV',
         excelExport: 'ئیکسپۆرتی Excel'
     },
-    onGridReady: function(params) {
+    onGridReady: function (params) {
         otherExpensesGridApi = params.api;
         loadOtherExpensesData();
     },
-    onFirstDataRendered: function(params) {
+    onFirstDataRendered: function (params) {
         // Auto-size all columns except actions column to prevent extra space on the right
         const allColumnIds = params.api.getColumns()?.map(col => col.getColId()) || [];
         const columnsToAutoSize = allColumnIds.filter(colId => colId !== 'actions');
@@ -476,16 +476,16 @@ function loadOtherExpensesData(preservePagination = false, restoreRowId = null) 
             console.warn('Could not get filter model:', e);
         }
     }
-    
+
     // Show loading
     otherExpensesGridApi?.showLoadingOverlay();
-    
+
     // Build URL with filters
     let url = '../process/other_expenses/select_expenses.php?ag_grid=1';
     if (window.currentFilters && window.currentFilters.length > 0) {
         url += '&' + window.currentFilters;
     }
-    
+
     fetch(url)
         .then(response => response.json())
         .then(data => {
@@ -498,18 +498,18 @@ function loadOtherExpensesData(preservePagination = false, restoreRowId = null) 
             } else if (data.success && Array.isArray(data.data)) {
                 expenses = data.data;
             }
-            
+
             if (expenses && expenses.length > 0) {
                 // Store data globally for calculations
                 window.otherExpensesData = expenses;
-                
+
                 // Update summary cards
                 updateSummaryCards(expenses);
-                
+
                 // Set row data
                 otherExpensesGridApi.setGridOption('rowData', expenses);
                 otherExpensesGridApi.hideOverlay();
-                
+
                 // Restore pagination state and filters if preserving
                 if (preservePagination && otherExpensesGridApi) {
                     setTimeout(() => {
@@ -524,7 +524,7 @@ function loadOtherExpensesData(preservePagination = false, restoreRowId = null) 
                         // Restore pagination
                         otherExpensesGridApi.paginationGoToPage(currentPage);
                         otherExpensesGridApi.paginationSetPageSize(pageSize);
-                        
+
                         // Restore selected row if provided
                         if (restoreRowId) {
                             setTimeout(() => {
@@ -535,16 +535,16 @@ function loadOtherExpensesData(preservePagination = false, restoreRowId = null) 
                                         foundNode = node;
                                     }
                                 });
-                                
+
                                 if (foundNode) {
                                     // Calculate which page the row is on
                                     const rowIndex = foundNode.rowIndex;
                                     const currentPageSize = otherExpensesGridApi.paginationGetPageSize();
                                     const targetPage = Math.floor(rowIndex / currentPageSize);
-                                    
+
                                     // Go to the page containing the row
                                     otherExpensesGridApi.paginationGoToPage(targetPage);
-                                    
+
                                     // After page change, scroll to the row
                                     setTimeout(() => {
                                         foundNode.setSelected(true);
@@ -583,25 +583,25 @@ function updateSummaryCards(expenses) {
         if (exchangeRateInput && exchangeRateInput.value) {
             usdRate = parseFloat(exchangeRateInput.value);
         }
-        
+
         function iqdToUsd(iqd) {
             return usdRate && iqd ? (parseFloat(iqd) / (usdRate / 100)) : 0;
         }
-        
+
         // Calculate totals
         let totalCarMaterialCostIQD = 0, totalCarMaterialCostUSD = 0, totalCarGasCost = 0;
         let totalOtherExpensesIQD = 0, totalOtherExpensesUSD = 0;
-        
+
         expenses.forEach(row => {
             if (row.car_id && row.expense_type === 'بەکارهێنانی کاڵای کۆگا') {
                 totalCarMaterialCostIQD += parseFloat(row.material_purchase_price_iqd || 0) * parseFloat(row.material_quantity || 0);
                 totalCarMaterialCostUSD += parseFloat(row.material_purchase_price_usd || 0) * parseFloat(row.material_quantity || 0);
             }
-            
+
             if (row.car_id && row.expense_type === 'بەکارهێنانی گاز') {
                 totalCarGasCost += parseFloat(row.gas_total_cost || 0);
             }
-            
+
             if (!row.car_id || (row.expense_type !== 'بەکارهێنانی کاڵای کۆگا' && row.expense_type !== 'بەکارهێنانی گاز')) {
                 if (row.currency_type === 'دۆلار') {
                     totalOtherExpensesUSD += parseFloat(row.amount_usd || 0);
@@ -616,29 +616,29 @@ function updateSummaryCards(expenses) {
                 }
             }
         });
-        
+
         const totalCarMaterialCostUSDConverted = totalCarMaterialCostIQD / (usdRate / 100) + totalCarMaterialCostUSD;
         const totalCarGasCostUSD = totalCarGasCost / (usdRate / 100);
         const totalOtherExpensesUSDConverted = totalOtherExpensesIQD / (usdRate / 100) + totalOtherExpensesUSD;
         const totalCarExpensesUSD = totalCarMaterialCostUSDConverted + totalCarGasCostUSD;
         const totalAllExpensesUSD = totalOtherExpensesUSDConverted + totalCarExpensesUSD;
-        
+
         // Calculate total IQD and USD expenses
         const totalExpensesIQD = totalCarMaterialCostIQD + totalCarGasCost + totalOtherExpensesIQD;
         const totalExpensesUSD = totalCarMaterialCostUSD + totalOtherExpensesUSD;
-        
+
         function formatNumber(num) {
             return Number(num).toLocaleString('en-US');
         }
-        
+
         function formatUSD(num) {
             return num ? `$${formatNumber(num)}` : '$0';
         }
-        
+
         function formatIQD(num) {
             return num ? `${formatNumber(num)} د.ع` : '0 د.ع';
         }
-        
+
         if (document.getElementById('totalCarMaterialCost')) {
             document.getElementById('totalCarMaterialCost').innerHTML = `${formatUSD(totalCarMaterialCostUSDConverted)}`;
         }
@@ -666,14 +666,14 @@ function updateSummaryCards(expenses) {
 }
 
 // Reload function - preserve pagination and restore row
-window.reloadOtherExpenses = function(restoreRowId = null) {
+window.reloadOtherExpenses = function (restoreRowId = null) {
     loadOtherExpensesData(true, restoreRowId);
 };
 
 // Export function is handled in export_functions.js with AG Grid priority
 
 // Initialize Grid
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const gridDiv = document.querySelector('#otherExpensesGrid');
     if (gridDiv) {
         // Use createGrid for AG Grid v31+
@@ -697,6 +697,8 @@ async function populateSelect(url, selectId, selectedId) {
             if (selectedId && String(item.id) === String(selectedId)) opt.selected = true;
             select.appendChild(opt);
         });
+        // Trigger change event for Select2 to update
+        $(select).trigger('change');
     } catch (err) {
         console.error('Error populating select:', err);
     }
@@ -707,7 +709,7 @@ window.openEditModalById = async function (id) {
     try {
         // Store the row ID for restoration after update
         currentEditingRowId = id;
-        
+
         const dataSource = window.otherExpensesData || [];
         const row = dataSource.find(r => String(r.id) === String(id));
         if (!row) {
@@ -775,14 +777,14 @@ window.openEditModalById = async function (id) {
 };
 
 // Event delegation for edit and delete buttons
-$(document).on('click', '.edit-expense', function() {
+$(document).on('click', '.edit-expense', function () {
     const expenseId = $(this).data('id');
     if (typeof openEditModalById === 'function') {
         openEditModalById(expenseId);
     }
 });
 
-$(document).on('click', '.delete-expense', function() {
+$(document).on('click', '.delete-expense', function () {
     const expenseId = $(this).data('id');
     if (typeof deleteExpense === 'function') {
         deleteExpense(expenseId);

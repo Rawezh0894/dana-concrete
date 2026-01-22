@@ -250,6 +250,20 @@ $(document).ready(function () {
     if ($('#filter_role').length > 0) {
         enableSelect2('#filter_role', 'body');
     }
+
+    // بۆ other expenses - تەنها ئەگەر مۆداڵەکە هەبێت
+    if ($('#addExpenseModal').length > 0) {
+        enableSelect2('#person_id', '#addExpenseModal');
+        enableSelect2('#material_id', '#addExpenseModal');
+        enableSelect2('#employee_id', '#addExpenseModal');
+        enableSelect2('#car_id', '#addExpenseModal');
+    }
+    if ($('#editExpenseModal').length > 0) {
+        enableSelect2('#edit_person_id', '#editExpenseModal');
+        enableSelect2('#edit_material_id', '#editExpenseModal');
+        enableSelect2('#edit_employee_id', '#editExpenseModal');
+        enableSelect2('#edit_car_id', '#editExpenseModal');
+    }
 });
 
 // Focus select2 search input when dropdown opens for customer select in addConcreteReceiptModal
