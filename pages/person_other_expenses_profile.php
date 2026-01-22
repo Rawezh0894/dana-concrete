@@ -21,6 +21,11 @@ if ($person_id) {
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
     $person_name = $row ? $row['name'] : '';
 }
+
+// Fetch exchange rate
+$stmt = $pdo->prepare("SELECT value FROM settings WHERE name = 'usd_iqd_rate' LIMIT 1");
+$stmt->execute();
+$usd_iqd_rate = $stmt->fetchColumn() ?: 150000;
 ?>
 <!DOCTYPE html>
 <html lang="ku">
@@ -338,6 +343,7 @@ if ($person_id) {
     </div>
     <script>
         const PERSON_ID = <?php echo $person_id; ?>;
+        const USD_IQD_RATE = <?php echo $usd_iqd_rate; ?>;
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

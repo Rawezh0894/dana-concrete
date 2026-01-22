@@ -13,8 +13,31 @@ function updateAddDebtSummaryFields() {
     const amountIQD = parseFloat($('#debt_amount_iqd').val()) || 0;
     const discountIQD = parseFloat($('#debt_discount_iqd').val()) || 0;
 
-    const remainingUSD = Math.max(totalDebtUSD - amountUSD - discountUSD, 0);
-    const remainingIQD = Math.max(totalDebtIQD - amountIQD - discountIQD, 0);
+    // The rate is for 100 USD
+    const ratePerDollar = (USD_IQD_RATE || 150000) / 100;
+
+    // First, handle USD debt
+    let netUSD = totalDebtUSD - (amountUSD + discountUSD);
+    // Finally, handle IQD debt
+    let netIQD = totalDebtIQD - (amountIQD + discountIQD);
+
+    // crossover logic:
+    if (netUSD < 0) {
+        // Surplus USD reduces IQD debt
+        const surplusIQD = Math.abs(netUSD) * ratePerDollar;
+        netIQD -= surplusIQD;
+        netUSD = 0;
+    }
+
+    if (netIQD < 0) {
+        // Surplus IQD reduces USD debt
+        const surplusUSD = Math.abs(netIQD) / ratePerDollar;
+        netUSD -= surplusUSD;
+        netIQD = 0;
+    }
+
+    const remainingUSD = Math.max(netUSD, 0);
+    const remainingIQD = Math.max(netIQD, 0);
 
     $('#debt_remaining_usd').val(formatNumber(remainingUSD));
     $('#debt_remaining_iqd').val(formatNumber(remainingIQD));
@@ -29,7 +52,7 @@ function fetchDebtTotalsForAddModal() {
     }
 
     $.getJSON('../process/person_other_expenses_profile/get_debt_totals.php', { person_id: PERSON_ID })
-        .done(function(response) {
+        .done(function (response) {
             if (response && response.success && response.data) {
                 totalDebtUSD = parseFloat(response.data.total_debt_usd) || 0;
                 totalDebtIQD = parseFloat(response.data.total_debt_iqd) || 0;
@@ -38,33 +61,33 @@ function fetchDebtTotalsForAddModal() {
                 totalDebtIQD = 0;
             }
         })
-        .fail(function() {
+        .fail(function () {
             totalDebtUSD = 0;
             totalDebtIQD = 0;
         })
-        .always(function() {
+        .always(function () {
             updateAddDebtSummaryFields();
         });
 }
 
-$('#addDebtForm').on('submit', function(e) {
+$('#addDebtForm').on('submit', function (e) {
     e.preventDefault();
-    
+
     // Prevent multiple submissions
     if (submitting) {
         showAlert('warning', 'تکایە چاوەڕوان بە...');
         return false;
     }
-    
+
     // Set submitting flag and disable submit button
     submitting = true;
     const submitBtn = $(this).find('button[type="submit"]');
     const originalBtnText = submitBtn.html();
     submitBtn.prop('disabled', true);
     submitBtn.html('<span class="spinner-border spinner-border-sm me-2"></span>چاوەڕوان بە...');
-    
+
     const formData = $(this).serialize() + '&person_id=' + PERSON_ID;
-    $.post('../process/person_other_expenses_profile/add_debt.php', formData, function(res) {
+    $.post('../process/person_other_expenses_profile/add_debt.php', formData, function (res) {
         if (res.success) {
             Swal.fire('سەرکەوتوو!', 'دانەوە زیادکرا.', 'success');
             $('#addDebtModal').modal('hide');
@@ -73,9 +96,9 @@ $('#addDebtForm').on('submit', function(e) {
         } else {
             Swal.fire('هەڵە!', res.msg || 'هەڵەیەک ڕویدا.', 'error');
         }
-    }, 'json').fail(function() {
+    }, 'json').fail(function () {
         Swal.fire('هەڵە!', 'هەڵەیەک لە پەیوەندی بە سێرڤەرەوە هەیە', 'error');
-    }).always(function() {
+    }).always(function () {
         // Reset submitting flag and restore submit button
         submitting = false;
         submitBtn.prop('disabled', false);
@@ -83,17 +106,17 @@ $('#addDebtForm').on('submit', function(e) {
     });
 });
 
-$('#addDebtModal').on('shown.bs.modal', function() {
+$('#addDebtModal').on('shown.bs.modal', function () {
     fetchDebtTotalsForAddModal();
 });
 
-$('#addDebtModal').on('hidden.bs.modal', function() {
+$('#addDebtModal').on('hidden.bs.modal', function () {
     totalDebtUSD = 0;
     totalDebtIQD = 0;
     $('#debt_remaining_usd').val('0.00');
     $('#debt_remaining_iqd').val('0.00');
 });
 
-$('#debt_amount_usd, #debt_discount_usd, #debt_amount_iqd, #debt_discount_iqd').on('input', function() {
+$('#debt_amount_usd, #debt_discount_usd, #debt_amount_iqd, #debt_discount_iqd').on('input', function () {
     updateAddDebtSummaryFields();
 });

@@ -13,8 +13,31 @@ function updateEditDebtSummaryFields() {
     const amountIQD = parseFloat($('#edit_debt_amount_iqd').val()) || 0;
     const discountIQD = parseFloat($('#edit_debt_discount_iqd').val()) || 0;
 
-    const remainingUSD = Math.max(editDebtBaseUSD - amountUSD - discountUSD, 0);
-    const remainingIQD = Math.max(editDebtBaseIQD - amountIQD - discountIQD, 0);
+    // The rate is for 100 USD
+    const ratePerDollar = (USD_IQD_RATE || 150000) / 100;
+
+    // First, handle USD debt
+    let netUSD = editDebtBaseUSD - (amountUSD + discountUSD);
+    // Finally, handle IQD debt
+    let netIQD = editDebtBaseIQD - (amountIQD + discountIQD);
+
+    // crossover logic:
+    if (netUSD < 0) {
+        // Surplus USD reduces IQD debt
+        const surplusIQD = Math.abs(netUSD) * ratePerDollar;
+        netIQD -= surplusIQD;
+        netUSD = 0;
+    }
+
+    if (netIQD < 0) {
+        // Surplus IQD reduces USD debt
+        const surplusUSD = Math.abs(netIQD) / ratePerDollar;
+        netUSD -= surplusUSD;
+        netIQD = 0;
+    }
+
+    const remainingUSD = Math.max(netUSD, 0);
+    const remainingIQD = Math.max(netIQD, 0);
 
     $('#edit_debt_remaining_usd').val(formatNumber(remainingUSD));
     $('#edit_debt_remaining_iqd').val(formatNumber(remainingIQD));
@@ -29,7 +52,7 @@ function fetchDebtTotalsForEditModal(oldValues) {
     }
 
     $.getJSON('../process/person_other_expenses_profile/get_debt_totals.php', { person_id: PERSON_ID })
-        .done(function(response) {
+        .done(function (response) {
             if (response && response.success && response.data) {
                 const currentUSD = parseFloat(response.data.total_debt_usd) || 0;
                 const currentIQD = parseFloat(response.data.total_debt_iqd) || 0;
@@ -40,37 +63,37 @@ function fetchDebtTotalsForEditModal(oldValues) {
                 editDebtBaseIQD = (oldValues.amount_iqd || 0) + (oldValues.discount_iqd || 0);
             }
         })
-        .fail(function() {
+        .fail(function () {
             editDebtBaseUSD = (oldValues.amount_usd || 0) + (oldValues.discount_usd || 0);
             editDebtBaseIQD = (oldValues.amount_iqd || 0) + (oldValues.discount_iqd || 0);
         })
-        .always(function() {
+        .always(function () {
             updateEditDebtSummaryFields();
         });
 }
 
-window.setupEditDebtModal = function(oldValues) {
+window.setupEditDebtModal = function (oldValues) {
     fetchDebtTotalsForEditModal(oldValues || {});
 };
 
-$('#editDebtForm').on('submit', function(e) {
+$('#editDebtForm').on('submit', function (e) {
     e.preventDefault();
-    
+
     // Prevent multiple submissions
     if (isUpdating) {
         showAlert('warning', 'تکایە چاوەڕوان بە...');
         return false;
     }
-    
+
     // Set updating flag and disable submit button
     isUpdating = true;
     const submitBtn = $(this).find('button[type="submit"]');
     const originalBtnText = submitBtn.html();
     submitBtn.prop('disabled', true);
     submitBtn.html('<span class="spinner-border spinner-border-sm me-2"></span>چاوەڕوان بە...');
-    
+
     const formData = $(this).serialize() + '&person_id=' + PERSON_ID + '&debt_id=' + $('#edit_debt_id').val();
-    $.post('../process/person_other_expenses_profile/update_debt.php', formData, function(res) {
+    $.post('../process/person_other_expenses_profile/update_debt.php', formData, function (res) {
         if (res.success) {
             Swal.fire('سەرکەوتوو!', 'نوێکردنەوەی قەرزەکە کرا.', 'success');
             $('#editDebtModal').modal('hide');
@@ -79,7 +102,7 @@ $('#editDebtForm').on('submit', function(e) {
         } else {
             Swal.fire('هەڵە!', res.msg || 'هەڵەیەک ڕوویدا.', 'error');
         }
-    }, 'json').always(function() {
+    }, 'json').always(function () {
         // Reset updating flag and restore submit button
         isUpdating = false;
         submitBtn.prop('disabled', false);
@@ -87,13 +110,13 @@ $('#editDebtForm').on('submit', function(e) {
     });
 });
 
-$('#editDebtModal').on('hidden.bs.modal', function() {
+$('#editDebtModal').on('hidden.bs.modal', function () {
     editDebtBaseUSD = 0;
     editDebtBaseIQD = 0;
     $('#edit_debt_remaining_usd').val('0.00');
     $('#edit_debt_remaining_iqd').val('0.00');
 });
 
-$('#edit_debt_amount_usd, #edit_debt_discount_usd, #edit_debt_amount_iqd, #edit_debt_discount_iqd').on('input', function() {
+$('#edit_debt_amount_usd, #edit_debt_discount_usd, #edit_debt_amount_iqd, #edit_debt_discount_iqd').on('input', function () {
     updateEditDebtSummaryFields();
 });
