@@ -95,10 +95,10 @@ class AdvancedFilters {
     setDefaultDates() {
         const today = new Date();
         const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-        
+
         document.getElementById('dateFrom').value = this.formatDate(firstDayOfMonth);
         document.getElementById('dateTo').value = this.formatDate(today);
-        
+
         this.filters.dateFrom = this.formatDate(firstDayOfMonth);
         this.filters.dateTo = this.formatDate(today);
     }
@@ -107,10 +107,10 @@ class AdvancedFilters {
         this.filters.expenseTypes = [];
         const checkboxes = [
             'expenseTypeOther',
-            'expenseTypeMaterial', 
+            'expenseTypeMaterial',
             'expenseTypeGas'
         ];
-        
+
         checkboxes.forEach(id => {
             const checkbox = document.getElementById(id);
             if (checkbox && checkbox.checked) {
@@ -124,7 +124,7 @@ class AdvancedFilters {
         if (this.debounceTimer) {
             clearTimeout(this.debounceTimer);
         }
-        
+
         // Set new timer
         this.debounceTimer = setTimeout(() => {
             this.applyFilters();
@@ -180,15 +180,17 @@ class AdvancedFilters {
             option.textContent = item[textKey];
             select.appendChild(option);
         });
+        // Trigger change event for Select2
+        $(select).trigger('change');
     }
 
     updateMonthFilter() {
         if (this.filters.dateFrom && this.filters.dateTo) {
             const fromDate = new Date(this.filters.dateFrom);
             const toDate = new Date(this.filters.dateTo);
-            
+
             // If both dates are in the same month, set month filter
-            if (fromDate.getFullYear() === toDate.getFullYear() && 
+            if (fromDate.getFullYear() === toDate.getFullYear() &&
                 fromDate.getMonth() === toDate.getMonth()) {
                 const monthValue = `${fromDate.getFullYear()}-${String(fromDate.getMonth() + 1).padStart(2, '0')}`;
                 document.getElementById('monthFilter').value = monthValue;
@@ -205,10 +207,10 @@ class AdvancedFilters {
             const [year, month] = this.filters.month.split('-');
             const firstDay = new Date(parseInt(year), parseInt(month) - 1, 1);
             const lastDay = new Date(parseInt(year), parseInt(month), 0);
-            
+
             document.getElementById('dateFrom').value = this.formatDate(firstDay);
             document.getElementById('dateTo').value = this.formatDate(lastDay);
-            
+
             this.filters.dateFrom = this.formatDate(firstDay);
             this.filters.dateTo = this.formatDate(lastDay);
         }
@@ -223,7 +225,7 @@ class AdvancedFilters {
     async applyFilters() {
         try {
             console.log('Applying filters:', this.filters);
-            
+
             // Build query string
             const queryParams = new URLSearchParams();
             Object.entries(this.filters).forEach(([key, value]) => {
@@ -239,7 +241,7 @@ class AdvancedFilters {
             });
 
             // Reload AG Grid with filtered data
-                window.currentFilters = queryParams.toString();
+            window.currentFilters = queryParams.toString();
             if (typeof reloadOtherExpenses === 'function') {
                 reloadOtherExpenses();
             } else if (typeof loadOtherExpenses === 'function') {
@@ -278,35 +280,35 @@ class AdvancedFilters {
             }
 
             function formatUSD(num) {
-                return num ? `$${Number(num).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : '$0.00';
+                return num ? `$${Number(num).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '$0.00';
             }
 
             function iqdToUsd(iqd) {
                 return usdRate && iqd ? (parseFloat(iqd) / (usdRate / 100)) : 0;
             }
-            
+
             // Calculate totals using the same logic as select_expenses.js
             const totalCarMaterialCostIQD = parseFloat(summary.total_car_material_cost_iqd || 0);
             const totalCarMaterialCostUSD = parseFloat(summary.total_car_material_cost_usd || 0);
             const totalCarGasCost = parseFloat(summary.total_car_gas_cost || 0);
             const totalOtherExpensesIQD = parseFloat(summary.total_other_expenses_iqd || 0);
             const totalOtherExpensesUSD = parseFloat(summary.total_other_expenses_usd || 0);
-            
+
             // Convert IQD to USD for display (same formula as select_expenses.js)
             const totalCarMaterialCostUSDConverted = iqdToUsd(totalCarMaterialCostIQD) + totalCarMaterialCostUSD;
             const totalCarGasCostUSD = iqdToUsd(totalCarGasCost);
             const totalOtherExpensesUSDConverted = iqdToUsd(totalOtherExpensesIQD) + totalOtherExpensesUSD;
             const totalCarExpensesUSD = totalCarMaterialCostUSDConverted + totalCarGasCostUSD;
             const totalAllExpensesUSD = totalOtherExpensesUSDConverted + totalCarExpensesUSD;
-            
+
             // Calculate total IQD and USD expenses
             const totalExpensesIQD = totalCarMaterialCostIQD + totalCarGasCost + totalOtherExpensesIQD;
             const totalExpensesUSD = totalCarMaterialCostUSD + totalOtherExpensesUSD;
-            
+
             function formatIQD(num) {
                 return num ? `${Number(num).toLocaleString('en-US')} د.ع` : '0 د.ع';
             }
-            
+
             // Update car expense cards (including new IQD and USD total cards)
             const elements = {
                 'totalCarMaterialCost': formatUSD(totalCarMaterialCostUSDConverted),
@@ -316,7 +318,7 @@ class AdvancedFilters {
                 'totalExpensesIQD': formatIQD(totalExpensesIQD),
                 'totalExpensesUSD': formatUSD(totalExpensesUSD)
             };
-            
+
             // Safely update each element
             Object.entries(elements).forEach(([id, value]) => {
                 const element = document.getElementById(id);
@@ -324,7 +326,7 @@ class AdvancedFilters {
                     element.textContent = value;
                 }
             });
-            
+
             // Update USD exchange rate card
             const usdRateElement = document.getElementById('usdExchangeRate');
             if (usdRateElement) {
@@ -347,19 +349,23 @@ class AdvancedFilters {
         const formElements = [
             'dateFrom', 'dateTo', 'monthFilter', 'carFilter', 'employeeFilter', 'personFilter', 'paymentTypeFilter'
         ];
-        
+
         formElements.forEach(id => {
             const element = document.getElementById(id);
             if (element) {
                 element.value = '';
+                // Trigger change event for Select2 if it's a select element
+                if (element.tagName === 'SELECT') {
+                    $(element).trigger('change');
+                }
             }
         });
-        
+
         // Clear expense type checkboxes
         const checkboxes = [
             'expenseTypeOther', 'expenseTypeMaterial', 'expenseTypeGas'
         ];
-        
+
         checkboxes.forEach(id => {
             const element = document.getElementById(id);
             if (element) {
@@ -399,7 +405,7 @@ class AdvancedFilters {
 
             const response = await fetch(`../process/other_expenses/export_report.php?${queryParams}`);
             const blob = await response.blob();
-            
+
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
