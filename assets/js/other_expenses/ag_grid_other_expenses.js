@@ -701,6 +701,8 @@ async function populateSelect(url, selectId, selectedId) {
         if ($(select).hasClass('select2-hidden-accessible')) {
             $(select).trigger('change');
         }
+        // Trigger native change event for any vanilla listeners
+        select.dispatchEvent(new Event('change'));
     } catch (err) {
         console.error('Error populating select:', err);
     }

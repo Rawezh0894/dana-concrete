@@ -185,6 +185,8 @@ class AdvancedFilters {
         if ($(select).hasClass('select2-hidden-accessible')) {
             $(select).trigger('change');
         }
+        // Trigger native change event for any vanilla listeners
+        select.dispatchEvent(new Event('change'));
     }
 
     updateMonthFilter() {

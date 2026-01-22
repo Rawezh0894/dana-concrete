@@ -211,6 +211,8 @@ function populateSelect(url, selectId) {
             if ($(select).hasClass('select2-hidden-accessible')) {
                 $(select).trigger('change');
             }
+            // Trigger native change event for any vanilla listeners
+            select.dispatchEvent(new Event('change'));
         });
 }
 
@@ -296,6 +298,8 @@ if (addPersonForm) {
                 if ($(personSelect).hasClass('select2-hidden-accessible')) {
                     $(personSelect).trigger('change');
                 }
+                // Trigger native change event
+                personSelect.dispatchEvent(new Event('change'));
                 addPersonForm.reset();
             } else {
                 Swal.fire('هەڵە!', data.msg || 'هەڵەیەک ڕویدا', 'error');
