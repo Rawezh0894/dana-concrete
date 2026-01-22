@@ -180,6 +180,11 @@ class AdvancedFilters {
             option.textContent = item[textKey];
             select.appendChild(option);
         });
+
+        // Trigger Select2 change event if initialized
+        if ($(select).hasClass('select2-hidden-accessible')) {
+            $(select).trigger('change');
+        }
     }
 
     updateMonthFilter() {
@@ -352,6 +357,10 @@ class AdvancedFilters {
             const element = document.getElementById(id);
             if (element) {
                 element.value = '';
+                // Trigger Select2 change event
+                if ($(element).hasClass('select2-hidden-accessible')) {
+                    $(element).trigger('change');
+                }
             }
         });
 

@@ -697,6 +697,10 @@ async function populateSelect(url, selectId, selectedId) {
             if (selectedId && String(item.id) === String(selectedId)) opt.selected = true;
             select.appendChild(opt);
         });
+        // Trigger Select2 change event if initialized
+        if ($(select).hasClass('select2-hidden-accessible')) {
+            $(select).trigger('change');
+        }
     } catch (err) {
         console.error('Error populating select:', err);
     }

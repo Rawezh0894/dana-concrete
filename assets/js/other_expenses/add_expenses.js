@@ -207,6 +207,10 @@ function populateSelect(url, selectId) {
             data.forEach(item => {
                 select.innerHTML += `<option value="${item.id}">${item.name}</option>`;
             });
+            // Update Select2 if initialized
+            if ($(select).hasClass('select2-hidden-accessible')) {
+                $(select).trigger('change');
+            }
         });
 }
 
@@ -288,6 +292,10 @@ if (addPersonForm) {
                 option.textContent = data.name;
                 option.selected = true;
                 personSelect.appendChild(option);
+                // Update Select2
+                if ($(personSelect).hasClass('select2-hidden-accessible')) {
+                    $(personSelect).trigger('change');
+                }
                 addPersonForm.reset();
             } else {
                 Swal.fire('هەڵە!', data.msg || 'هەڵەیەک ڕویدا', 'error');

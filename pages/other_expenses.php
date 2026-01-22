@@ -35,6 +35,11 @@ if (!isset($_SESSION['user_id'])) {
     <link href="../assets/css/comon/ag_grid.css" rel="stylesheet">
     <link href="../assets/css/other_expenses/ag_grid_other_expenses.css" rel="stylesheet">
     
+    <!-- Select2 -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.rtl.min.css" />
+    <link href="../assets/css/comon/select2_design.css" rel="stylesheet">
+    
     <style>
         .export-btn {
             background: var(--warning) !important;
@@ -680,6 +685,7 @@ if (!isset($_SESSION['user_id'])) {
   </div>
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <!-- AG Grid JS -->
@@ -694,6 +700,7 @@ if (!isset($_SESSION['user_id'])) {
 <script src="../assets/js/other_expenses/other_expenses.js"></script>
 <script src="../assets/js/other_expenses/delete_expenses.js"></script>
 <script src="../assets/js/other_expenses/update_expenses.js"></script>
+<script src="../assets/js/comon/select2_script.js"></script>
     <script src="../assets/js/other_expenses/export_functions.js?v=<?= time() ?>"></script>
 </body>
 </html>
