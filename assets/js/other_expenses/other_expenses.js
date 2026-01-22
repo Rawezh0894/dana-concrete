@@ -1480,8 +1480,6 @@ document.addEventListener('DOMContentLoaded', function () {
         addExpenseModal.addEventListener('show.bs.modal', function () {
             // Hide all gas and material fields initially
             toggleGasMaterialFields('', 'add');
-            // Populate material dropdown
-            populateSelect('../process/other_expenses/select_materials.php', 'material_id');
         });
     }
 
@@ -1490,8 +1488,6 @@ document.addEventListener('DOMContentLoaded', function () {
         editExpenseModal.addEventListener('show.bs.modal', function () {
             // Hide all gas and material fields initially
             toggleGasMaterialFields('', 'edit');
-            // Populate material dropdown
-            populateSelect('../process/other_expenses/select_materials.php', 'edit_material_id');
         });
     }
 

@@ -683,10 +683,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
 async function populateSelect(url, selectId, selectedId) {
     try {
-        console.log(`Populating select ${selectId} from ${url}`);
+        console.log(`[populateSelect] Initializing for #${selectId} using URL: ${url}`);
         const res = await fetch(url);
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+
         const result = await res.json();
+        console.log(`[populateSelect] Received data for #${selectId}:`, result);
 
         let data = [];
         if (Array.isArray(result)) {
@@ -695,33 +697,52 @@ async function populateSelect(url, selectId, selectedId) {
             data = result.data;
         } else if (result && result.success && Array.isArray(result.materials)) {
             data = result.materials;
+        } else if (result && typeof result === 'object' && !Array.isArray(result)) {
+            const keys = Object.keys(result);
+            if (keys.length > 0 && !isNaN(keys[0])) {
+                data = Object.values(result);
+            }
         }
 
         const select = document.getElementById(selectId);
         if (!select) {
-            console.warn(`Select element #${selectId} not found`);
+            console.error(`[populateSelect] Element #${selectId} NOT FOUND in DOM`);
             return;
         }
 
-        select.innerHTML = '<option value="">-- هەلبژێرە --</option>';
-        data.forEach(item => {
-            const opt = document.createElement('option');
-            opt.value = item.id;
-            opt.textContent = item.name;
-            if (selectedId && String(item.id) === String(selectedId)) opt.selected = true;
-            select.appendChild(opt);
-        });
+        select.innerHTML = '';
+        const placeholderOpt = document.createElement('option');
+        placeholderOpt.value = '';
+        placeholderOpt.textContent = '-- هەلبژێرە --';
+        select.appendChild(placeholderOpt);
 
-        console.log(`Populated ${selectId} with ${data.length} options`);
+        if (!data || data.length === 0) {
+            console.warn(`[populateSelect] No data items found for #${selectId}`);
+        } else {
+            data.forEach(item => {
+                if (item && (item.id !== undefined || item.value !== undefined)) {
+                    const opt = document.createElement('option');
+                    opt.value = item.id || item.value;
+                    opt.textContent = item.name || item.text || item.label;
+                    if (selectedId && String(opt.value) === String(selectedId)) {
+                        opt.selected = true;
+                    }
+                    select.appendChild(opt);
+                }
+            });
+        }
 
-        // Trigger Select2 change event if initialized
+        console.log(`[populateSelect] Successfully added ${data ? data.length : 0} options to #${selectId}`);
+
         if ($(select).hasClass('select2-hidden-accessible')) {
+            console.log(`[populateSelect] Triggering Select2 update for #${selectId}`);
             $(select).trigger('change');
         }
-        // Trigger native change event for any vanilla listeners
+
+        console.log(`[populateSelect] Dispatching native change event for #${selectId}`);
         select.dispatchEvent(new Event('change'));
     } catch (err) {
-        console.error(`Error populating select ${selectId}:`, err);
+        console.error(`[populateSelect] SEVERE ERROR for #${selectId}:`, err);
     }
 }
 
