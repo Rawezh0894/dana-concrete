@@ -281,8 +281,6 @@ async function populateSelect(url, selectId, selectedId) {
             if (selectedId && String(item.id) === String(selectedId)) opt.selected = true;
             select.appendChild(opt);
         });
-        // Trigger change event for Select2
-        $(select).trigger('change');
     } catch (err) {
         console.error('Error populating select:', err);
     }
@@ -304,9 +302,7 @@ window.openEditModalById = async function (id) {
         document.getElementById('edit_id').value = row.id;
         document.getElementById('edit_purpose').value = row.purpose;
         document.getElementById('edit_payment_type').value = row.payment_type;
-        $(document.getElementById('edit_payment_type')).trigger('change');
         document.getElementById('edit_currency_type').value = row.currency_type;
-        $(document.getElementById('edit_currency_type')).trigger('change');
         document.getElementById('edit_invoice_number').value = row.invoice_number;
         document.getElementById('edit_amount_iqd').value = row.amount_iqd;
         document.getElementById('edit_amount_usd').value = row.amount_usd;
@@ -322,7 +318,6 @@ window.openEditModalById = async function (id) {
 
         if (document.getElementById('edit_expense_type')) {
             document.getElementById('edit_expense_type').value = row.expense_type || '';
-            $(document.getElementById('edit_expense_type')).trigger('change');
             const event = new Event('change');
             document.getElementById('edit_expense_type').dispatchEvent(event);
 

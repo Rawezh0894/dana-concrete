@@ -34,9 +34,6 @@ if (!isset($_SESSION['user_id'])) {
     <link href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/styles/ag-theme-alpine.css" rel="stylesheet">
     <link href="../assets/css/comon/ag_grid.css" rel="stylesheet">
     <link href="../assets/css/other_expenses/ag_grid_other_expenses.css" rel="stylesheet">
-    <link href="../assets/css/comon/select2_design.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.rtl.min.css" />
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     
     <style>
         .export-btn {
@@ -687,9 +684,7 @@ if (!isset($_SESSION['user_id'])) {
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <!-- AG Grid JS -->
 <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/dist/ag-grid-community.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="../assets/js/comon/ag_grid_base.js"></script>
-<script src="../assets/js/comon/select2_script.js"></script>
 <script src="../assets/js/swalAlert.js"></script>
 <script src="../assets/js/other_expenses/error_logger.js"></script>
 <script src="../assets/js/other_expenses/debug_panel.js"></script>

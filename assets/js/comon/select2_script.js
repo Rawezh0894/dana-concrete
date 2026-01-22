@@ -250,48 +250,6 @@ $(document).ready(function () {
     if ($('#filter_role').length > 0) {
         enableSelect2('#filter_role', 'body');
     }
-
-    // بۆ other expenses - تەنها ئەگەر مۆداڵەکە هەبێت
-    if ($('#addExpenseModal').length > 0) {
-        const selectors = [
-            '#employee_id',
-            '#car_id',
-            '#expense_type',
-            '#material_id',
-            '#usage_unit_type',
-            '#person_id',
-            '#payment_type',
-            '#currency_type'
-        ];
-        selectors.forEach(selector => enableSelect2(selector, '#addExpenseModal'));
-    }
-    if ($('#editExpenseModal').length > 0) {
-        const editSelectors = [
-            '#edit_employee_id',
-            '#edit_car_id',
-            '#edit_expense_type',
-            '#edit_material_id',
-            '#edit_usage_unit_type',
-            '#edit_person_id',
-            '#edit_payment_type',
-            '#edit_currency_type'
-        ];
-        editSelectors.forEach(selector => enableSelect2(selector, '#editExpenseModal'));
-    }
-
-    // بۆ other expenses filters - تەنها ئەگەر پەیجەکە هەبێت
-    if ($('#carFilter').length > 0) {
-        enableSelect2('#carFilter', 'body');
-    }
-    if ($('#employeeFilter').length > 0) {
-        enableSelect2('#employeeFilter', 'body');
-    }
-    if ($('#personFilter').length > 0) {
-        enableSelect2('#personFilter', 'body');
-    }
-    if ($('#paymentTypeFilter').length > 0) {
-        enableSelect2('#paymentTypeFilter', 'body');
-    }
 });
 
 // Focus select2 search input when dropdown opens for customer select in addConcreteReceiptModal

@@ -180,8 +180,6 @@ class AdvancedFilters {
             option.textContent = item[textKey];
             select.appendChild(option);
         });
-        // Trigger change event for Select2
-        $(select).trigger('change');
     }
 
     updateMonthFilter() {
@@ -354,10 +352,6 @@ class AdvancedFilters {
             const element = document.getElementById(id);
             if (element) {
                 element.value = '';
-                // Trigger change event for Select2 if it's a select element
-                if (element.tagName === 'SELECT') {
-                    $(element).trigger('change');
-                }
             }
         });
 
