@@ -18091,3 +18091,43 @@
 [23-Jan-2026 10:49:40 Asia/Baghdad] Query: SELECT id, name, mobile, role, salary, COALESCE(bonus, 0) as bonus, COALESCE(status, "active") as status, join_date FROM employees ORDER BY id DESC
 [23-Jan-2026 10:49:40 Asia/Baghdad] Employees fetched: 40
 [23-Jan-2026 10:49:40 Asia/Baghdad] Employees retrieved successfully: Count=40
+[23-Jan-2026 13:29:38 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1769164178
+    [user_id] => 2
+    [username] => rawezh
+    [role] => admin
+)
+
+[23-Jan-2026 13:29:38 Asia/Baghdad] Cars retrieved successfully: Count=43
+[23-Jan-2026 13:29:40 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1769164180
+    [user_id] => 2
+    [username] => rawezh
+    [role] => admin
+)
+
+[23-Jan-2026 13:29:40 Asia/Baghdad] Query: SELECT id, name, mobile, role, salary, COALESCE(bonus, 0) as bonus, COALESCE(status, "active") as status, join_date FROM employees ORDER BY id DESC
+[23-Jan-2026 13:29:40 Asia/Baghdad] Employees fetched: 40
+[23-Jan-2026 13:29:40 Asia/Baghdad] Employees retrieved successfully: Count=40
+[23-Jan-2026 13:29:40 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1769164180
+    [user_id] => 2
+    [username] => rawezh
+    [role] => admin
+)
+
+[23-Jan-2026 13:29:40 Asia/Baghdad] Cars retrieved successfully: Count=43
+[23-Jan-2026 13:29:41 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1769164181
+    [user_id] => 2
+    [username] => rawezh
+    [role] => admin
+)
+
+[23-Jan-2026 13:29:41 Asia/Baghdad] Query: SELECT id, name, mobile, role, salary, COALESCE(bonus, 0) as bonus, COALESCE(status, "active") as status, join_date FROM employees ORDER BY id DESC
+[23-Jan-2026 13:29:41 Asia/Baghdad] Employees fetched: 40
+[23-Jan-2026 13:29:41 Asia/Baghdad] Employees retrieved successfully: Count=40
