@@ -1,188 +1,73 @@
-# # Enable URL rewriting
-# RewriteEngine On
-
-# # Allow direct access to process files (for AJAX calls)
-# RewriteCond %{REQUEST_URI} ^/process/.*\.php$ [NC]
-# RewriteRule ^ - [L]
-
-# # Allow direct access to includes files
-# RewriteCond %{REQUEST_URI} ^/includes/.*\.php$ [NC]
-# RewriteRule ^ - [L]
-
-# # Allow direct access to core files
-# RewriteCond %{REQUEST_URI} ^/core/.*\.php$ [NC]
-# RewriteRule ^ - [L]
-
-# # Allow direct access to config files
-# RewriteCond %{REQUEST_URI} ^/config/.*\.php$ [NC]
-# RewriteRule ^ - [L]
-
-# # Allow direct access to database files
-# RewriteCond %{REQUEST_URI} ^/database/.*\.php$ [NC]
-# RewriteRule ^ - [L]
-
-# # Allow direct access to assets (CSS, JS, images)
-# RewriteRule ^assets/ - [L]
-
-# # Allow direct access to vendor directory
-# RewriteRule ^vendor/ - [L]
-
-# # Allow direct access to .env file (for environment loading)
-# RewriteCond %{REQUEST_URI} ^/\.env$ [NC]
-# RewriteRule ^ - [L]
-
-# # Redirect .php URLs to clean URLs (removes .php from browser address bar)
-# RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s([^.]+)\.php [NC]
-# RewriteRule ^ %1 [R=301,L]
-
-# # Remove .php extension from URLs (internal rewrite)
-# RewriteCond %{REQUEST_FILENAME} !-d
-# RewriteCond %{REQUEST_FILENAME} !-f
-# RewriteRule ^([^\.]+)$ $1.php [NC,L]
-
-# # Handle pages directory without .php extension
-# RewriteCond %{REQUEST_FILENAME} !-d
-# RewriteCond %{REQUEST_FILENAME} !-f
-# RewriteRule ^pages/([^\.]+)$ pages/$1.php [NC,L]
-
-# # If the requested path is dashboard.php, redirect to the new location
-# RewriteRule ^dashboard\.php$ pages/dashboard.php [R=301,L]
-
-# # Fix for other top-level pages
-# RewriteRule ^users\.php$ pages/users.php [R=301,L]
-# RewriteRule ^reports\.php$ pages/reports.php [R=301,L]
-# RewriteRule ^profile\.php$ pages/profile.php [R=301,L]
-
-# # Prevent directory listing
-# Options -Indexes
-
-# # Deny access to hidden files
-# <FilesMatch "^\.">
-#     Order allow,deny
-#     Deny from all
-# </FilesMatch>
-
-# # Protect sensitive files (but allow .env for internal use)
-# <FilesMatch "\.(json|log|yml|yaml|config|ini|htaccess|htpasswd)$">
-#     Order allow,deny
-#     Deny from all
-# </FilesMatch>
-
-# # Block direct browser access to sensitive directories, but allow internal application access
-# # Only block if accessed directly from a browser, not from within the application
-# # Database directory is now allowed above
-
-# # Includes directory is now allowed above
-
-# # Config directory is now allowed above
-
-# # Core directory is now allowed above
-
-# # Increase upload limits
-# php_value upload_max_filesize 100M
-# php_value post_max_size 100M
-# php_value max_execution_time 300
-# php_value max_input_time 300
-
-
-
-
-# **********
-
-# # Enable URL rewriting
-# RewriteEngine On
-
-# # If the requested path is dashboard.php, redirect to the new location
-# RewriteRule ^dashboard\.php$ pages/dashboard.php [R=301,L]
-
-# # Fix for other top-level pages
-# RewriteRule ^users\.php$ pages/users.php [R=301,L]
-# RewriteRule ^reports\.php$ pages/reports.php [R=301,L]
-# RewriteRule ^profile\.php$ pages/profile.php [R=301,L]
-
-# # Prevent directory listing
-# Options -Indexes
-
-# # Deny access to hidden files
-# <FilesMatch "^\.">
-#     Order allow,deny
-#     Deny from all
-# </FilesMatch>
-
-# # Protect sensitive files
-# <FilesMatch "\.(json|log|yml|yaml|config|ini|env|htaccess|htpasswd)$">
-#     Order allow,deny
-#     Deny from all
-# </FilesMatch>
-
-# # Block direct browser access to sensitive directories, but allow internal application access
-# # Only block if accessed directly from a browser, not from within the application
-# RewriteCond %{THE_REQUEST} ^(GET|POST|HEAD)\ /database/.*\ HTTP/
-# RewriteRule ^database/ - [F,L]
-
-# RewriteCond %{THE_REQUEST} ^(GET|POST|HEAD)\ /includes/.*\ HTTP/
-# RewriteRule ^includes/ - [F,L]
-
-# RewriteCond %{THE_REQUEST} ^(GET|POST|HEAD)\ /config/.*\ HTTP/
-# RewriteRule ^config/ - [F,L]
-
-# RewriteCond %{THE_REQUEST} ^(GET|POST|HEAD)\ /process/.*\ HTTP/
-# RewriteRule ^process/ - [F,L]
-
-# RewriteCond %{THE_REQUEST} ^(GET|POST|HEAD)\ /core/.*\ HTTP/
-# RewriteRule ^core/ - [F,L]
-
-# # Increase upload limits
-# php_value upload_max_filesize 100M
-# php_value post_max_size 100M
-# php_value max_execution_time 300
-# php_value max_input_time 300
-
-
-# Enable URL rewriting
+# ----------------------------------------------------------------------
+# 1. URL Rewriting & Clean URLs
+# ----------------------------------------------------------------------
 RewriteEngine On
 
-# 1. بلۆککردنی فایلی .env و فۆڵدەری .git و هەموو فایلە شاراوەکان
-# بە شێوازێکی گونجاو بۆ Apache 2.4
-<FilesMatch "^\.">
-    Require all denied
-</FilesMatch>
-
-# 2. بلۆککردنی فۆڵدەری .git بە تایبەتی (ئەگەر یەکەمیان کاری نەکرد)
-RewriteRule ^\.git - [F,L]
-
-# 3. ڕێگەدان بە پرۆسێسە ناوخۆییەکان
-RewriteCond %{REQUEST_URI} ^/(process|includes|core|config|database)/.*\.php$ [NC]
-RewriteRule ^ - [L]
-
-# Allow direct access to assets and vendor
+# ڕێگەدان بە دەستگەیشتن بە فۆڵدەرەکانی ئەسێت و ڤێندۆر
 RewriteRule ^assets/ - [L]
 RewriteRule ^vendor/ - [L]
 
-# 4. پاککردنەوەی بەستەرەکان (لابردنی .php)
+# ڕێگەدان بە پرۆسێسە ناوخۆییەکانی وێب ئەپەکە
+RewriteCond %{REQUEST_URI} ^/(process|includes|core|config|database)/.*\.php$ [NC]
+RewriteRule ^ - [L]
+
+# لابردنی پاشگری .php لە بەستەرەکان (Redirect)
 RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s([^.]+)\.php [NC]
 RewriteRule ^ %1 [R=301,L]
 
+# ناوخۆیی نیشاندانی فایلەکان بەبێ پاشگری .php (Rewrite)
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^([^\.]+)$ $1.php [NC,L]
 
-# 5. ڕێکخستنی لاپەڕەکانی ناو فۆڵدەری pages
+# ڕێکخستنی لاپەڕەکانی ناو فۆڵدەری pages
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^pages/([^\.]+)$ pages/$1.php [NC,L]
 
+# ڕێڕەوکردنی لاپەڕە سەرەکییەکانی داشبۆرد و یوزەر بۆ ناو فۆڵدەری pages
 RewriteRule ^(dashboard|users|reports|profile)$ pages/$1.php [L]
 
-# 6. پاراستنی فایلە هەستیارەکان
+# ----------------------------------------------------------------------
+# 2. Security & Directory Protection
+# ----------------------------------------------------------------------
+# قەدەغەکردنی بینینی لیستەی فۆڵدەرەکان
+Options -Indexes
+
+# بلۆککردنی فایلی .env و فۆڵدەری .git و هەموو فایلە شاراوەکان (.)
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+# دڵنیابوونەوە لە بلۆککردنی فۆڵدەری .git بە تایبەتی
+RewriteRule ^\.git - [F,L]
+
+# پاراستنی فایلە هەستیارەکانی وەک لۆگ و کۆنفێگ
 <FilesMatch "\.(json|log|yml|yaml|config|ini|htaccess|htpasswd)$">
     Require all denied
 </FilesMatch>
 
-# 7. قەدەغەکردنی بینینی لیستەی فۆڵدەرەکان
-Options -Indexes
+# ----------------------------------------------------------------------
+# 3. Security Headers (CSP, HSTS, Referrer, etc.)
+# ----------------------------------------------------------------------
+<IfModule mod_headers.c>
+    # Content Security Policy - چارەسەری XSS و unsafe-inline
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'self'; img-src 'self' data:; font-src 'self' data:; frame-ancestors 'self';"
 
-# PHP Settings (ئەگەر ئەم بەشە کێشەی دروست کرد، بە # دەستپێکیان بگرە)
+    # Strict Transport Security (HSTS) - بۆ ماوەی ٦ مانگ
+    Header always set Strict-Transport-Security "max-age=15768000; includeSubDomains; preload"
+
+    # Referrer Policy - چارەسەری کێشەی دزەکردنی سەرچاوەی بەستەر
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+    # پاراستن لە Clickjacking و Sniffing
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-Content-Type-Options "nosniff"
+</IfModule>
+
+# ----------------------------------------------------------------------
+# 4. PHP Settings (Upload Limits)
+# ----------------------------------------------------------------------
 <IfModule mod_php7.c>
     php_value upload_max_filesize 100M
     php_value post_max_size 100M
@@ -194,21 +79,4 @@ Options -Indexes
     php_value post_max_size 100M
     php_value max_execution_time 300
     php_value max_input_time 300
-</IfModule>
-# 8. چارەسەرکردنی کێشەی Security Headers و Clickjacking
-<IfModule mod_headers.c>
-    # زیادکردنی frame-ancestors 'self' بۆ ناو CSP (ئەمە داواکاری دووەمی سکانەرەکەیە)
-    Header set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'self'; img-src 'self' data:; font-src 'self' data:; frame-ancestors 'self';"
-
-    # جێبەجێکردنی X-Frame-Options (ئەمە داواکاری یەکەمی سکانەرەکەیە)
-    Header set X-Frame-Options "SAMEORIGIN"
-
-    # پاراستنی زیاتر
-    Header set Referrer-Policy "strict-origin-when-cross-origin"
-    Header set Strict-Transport-Security "max-age=15768000; includeSubDomains; preload"
-    Header set X-Content-Type-Options "nosniff"
-</IfModule>
-<IfModule mod_headers.c>
-    # دڵنیابە تەنها ئەم هێڵە لێرە بێت و هیچی تر ناوی Referrer-Policy نەبێت
-    Header always set Referrer-Policy "strict-origin-when-cross-origin"
 </IfModule>
