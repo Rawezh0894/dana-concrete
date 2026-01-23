@@ -45,10 +45,10 @@
     </button> -->
   </div>
 </nav>
-<script src="../assets/js/nav/nav.js"></script>
-<script src="../assets/js/nav/sidebar.js"></script>
-<script src="../assets/js/global_notifications.js"></script>
-<script>
+<script src="../assets/js/nav/nav.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/nav/sidebar.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/global_notifications.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script nonce="<?php echo $csp_nonce; ?>">
 // User dropdown logic
 (function() {
   const toggle = document.getElementById('userDropdownToggle');

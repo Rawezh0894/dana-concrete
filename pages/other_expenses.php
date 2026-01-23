@@ -717,23 +717,23 @@ if (!isset($_SESSION['user_id'])) {
   </div>
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" nonce="<?php echo $csp_nonce; ?>"></script>
 <!-- AG Grid JS -->
-<script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/dist/ag-grid-community.min.js"></script>
-<script src="../assets/js/comon/ag_grid_base.js"></script>
-<script src="../assets/js/swalAlert.js"></script>
-<script src="../assets/js/other_expenses/error_logger.js"></script>
-<script src="../assets/js/other_expenses/debug_panel.js"></script>
-<script src="../assets/js/other_expenses/advanced_filters.js"></script>
-<script src="../assets/js/other_expenses/add_expenses.js"></script>
-<script src="../assets/js/other_expenses/ag_grid_other_expenses.js"></script>
-<script src="../assets/js/other_expenses/other_expenses.js"></script>
-<script src="../assets/js/other_expenses/delete_expenses.js"></script>
-<script src="../assets/js/other_expenses/update_expenses.js"></script>
-<script src="../assets/js/comon/select2_script.js"></script>
-    <script src="../assets/js/other_expenses/export_functions.js?v=<?= time() ?>"></script>
+<script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/dist/ag-grid-community.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/comon/ag_grid_base.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/swalAlert.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/other_expenses/error_logger.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/other_expenses/debug_panel.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/other_expenses/advanced_filters.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/other_expenses/add_expenses.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/other_expenses/ag_grid_other_expenses.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/other_expenses/other_expenses.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/other_expenses/delete_expenses.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/other_expenses/update_expenses.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/comon/select2_script.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/other_expenses/export_functions.js?v=<?= time() ?>" nonce="<?php echo $csp_nonce; ?>"></script>
 </body>
 </html>
 
