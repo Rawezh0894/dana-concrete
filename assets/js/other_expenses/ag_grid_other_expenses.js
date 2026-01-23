@@ -523,7 +523,7 @@ function loadOtherExpensesData(preservePagination = false, restoreRowId = null) 
                         }
                         // Restore pagination
                         otherExpensesGridApi.paginationGoToPage(currentPage);
-                        otherExpensesGridApi.paginationSetPageSize(pageSize);
+                        otherExpensesGridApi.setGridOption('paginationPageSize', pageSize);
 
                         // Restore selected row if provided
                         if (restoreRowId) {
@@ -742,7 +742,7 @@ async function populateSelect(url, selectId, selectedId) {
         // console.log(`[populateSelect] Dispatching native change event for #${selectId}`);
         select.dispatchEvent(new Event('change'));
     } catch (err) {
-        console.error(`[populateSelect] SEVERE ERROR for #${selectId}:`, err);
+        // console.error(`[populateSelect] SEVERE ERROR for #${selectId}:`, err);
     }
 }
 
@@ -755,7 +755,7 @@ window.openEditModalById = async function (id) {
         const dataSource = window.otherExpensesData || [];
         const row = dataSource.find(r => String(r.id) === String(id));
         if (!row) {
-            console.error('openEditModalById: row not found', { id });
+            // console.error('openEditModalById: row not found', { id });
             return;
         }
 
@@ -814,7 +814,7 @@ window.openEditModalById = async function (id) {
 
         if (typeof setupEditExpenseModal === 'function') setupEditExpenseModal();
     } catch (error) {
-        console.error('openEditModalById failed', error);
+        // console.error('openEditModalById failed', error);
     }
 };
 

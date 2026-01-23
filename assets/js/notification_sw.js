@@ -1,53 +1,46 @@
 // Service Worker for Background Notifications
-const CACHE_NAME = 'dana-concrete-notifications-v1';
+const CACHE_NAME = 'dana-concrete-notifications-v2'; // Increment version to clear old caches
 
 // Install event
 self.addEventListener('install', (event) => {
-    console.log('🔧 Service Worker installing...');
+    // console.log('🔧 Service Worker installing...');
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then((cache) => {
-                console.log('✅ Cache opened');
+                // console.log('✅ Cache opened');
                 return cache.addAll([
-                    '../assets/sounds/notification.mp3'
+                    // Assets to cache if needed
                 ]);
             })
+            .then(() => self.skipWaiting())
     );
 });
 
 // Activate event
 self.addEventListener('activate', (event) => {
-    console.log('🚀 Service Worker activating...');
+    // console.log('🚀 Service Worker activating...');
     event.waitUntil(
         caches.keys().then((cacheNames) => {
             return Promise.all(
                 cacheNames.map((cacheName) => {
                     if (cacheName !== CACHE_NAME) {
-                        console.log('🗑️ Deleting old cache:', cacheName);
+                        // console.log('🗑️ Deleting old cache:', cacheName);
                         return caches.delete(cacheName);
                     }
                 })
             );
-        })
+        }).then(() => self.clients.claim())
     );
 });
 
 // Fetch event
 self.addEventListener('fetch', (event) => {
-    if (event.request.url.includes('notification.mp3')) {
-        event.respondWith(
-            caches.match(event.request)
-                .then((response) => {
-                    return response || fetch(event.request);
-                })
-        );
-    }
+    // Simplified fetch handler
 });
 
 // Background sync for notifications
 self.addEventListener('sync', (event) => {
     if (event.tag === 'background-notification-sync') {
-        console.log('🔄 Background notification sync triggered');
         event.waitUntil(checkForNewNotes());
     }
 });
@@ -74,7 +67,6 @@ async function checkForNewNotes() {
 
             // Only show notification if not on notes page
             if (!isOnNotesPage) {
-                console.log('📱 Showing background notification - user not on notes page');
                 self.registration.showNotification('تێبینی نوێ', {
                     body: `تێبینی نوێ هەیە (${data.unread_count})`,
                     icon: '../assets/images/logo.png',
@@ -92,19 +84,15 @@ async function checkForNewNotes() {
                         }
                     ]
                 });
-            } else {
-                console.log('📱 Not showing notification - user is on notes page');
             }
         }
     } catch (error) {
-        console.error('❌ Error checking for new notes in background:', error);
+        // Silent fail for background check
     }
 }
 
 // Handle notification clicks
 self.addEventListener('notificationclick', (event) => {
-    console.log('🖱️ Notification clicked:', event.action);
-
     event.notification.close();
 
     if (event.action === 'view') {
@@ -116,8 +104,6 @@ self.addEventListener('notificationclick', (event) => {
 
 // Handle push notifications
 self.addEventListener('push', (event) => {
-    console.log('📱 Push notification received');
-
     const options = {
         body: 'تێبینی نوێ هەیە',
         icon: '../assets/images/logo.png',
@@ -144,7 +130,6 @@ self.addEventListener('push', (event) => {
 // Periodic background sync (if supported)
 self.addEventListener('periodicsync', (event) => {
     if (event.tag === 'check-notes') {
-        console.log('⏰ Periodic sync triggered');
         event.waitUntil(checkForNewNotes());
     }
 }); 

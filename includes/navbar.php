@@ -5,11 +5,8 @@
 <link href="../assets/css/nav.css" rel="stylesheet">
 <link href="../assets/css/sidebar.css" rel="stylesheet">
 
-<!-- Global Notification Sound -->
-<audio id="notificationSound" preload="auto">
-  <source src="../assets/sounds/notification.mp3" type="audio/mpeg">
-  Your browser does not support the audio element.
-</audio>
+
+<!-- Global Notification System Initialized via global_notifications.js -->
 
 <nav class="navbar navbar-expand-lg sticky-top" style="background: var(--seafoam-green); border-radius: 2rem; box-shadow: 0 2px 16px 0 var(--spearmint, #94c973); margin: 1rem;">
   <div class="container-fluid d-flex align-items-center justify-content-between">
