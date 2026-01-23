@@ -733,7 +733,7 @@ if (!isset($_SESSION['user_id'])) {
 <script src="../assets/js/other_expenses/delete_expenses.js" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/other_expenses/update_expenses.js" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/comon/select2_script.js" nonce="<?php echo $csp_nonce; ?>"></script>
-<script src="../assets/js/other_expenses/export_functions.js?v=<?= time() ? nonce="<?php echo $csp_nonce; ?>">" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/other_expenses/export_functions.js?v=<?= time() ?>" nonce="<?php echo $csp_nonce; ?>"></script>
 </body>
 </html>
 
