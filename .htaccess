@@ -208,3 +208,7 @@ Options -Indexes
     Header set Strict-Transport-Security "max-age=15768000; includeSubDomains; preload"
     Header set X-Content-Type-Options "nosniff"
 </IfModule>
+<IfModule mod_headers.c>
+    # دڵنیابە تەنها ئەم هێڵە لێرە بێت و هیچی تر ناوی Referrer-Policy نەبێت
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
