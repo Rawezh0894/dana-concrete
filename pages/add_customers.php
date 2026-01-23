@@ -262,21 +262,21 @@ if (!hasPermission('view_customer')) {
     </div>
   </div>
 </div>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="../assets/js/swalAlert.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/swalAlert.js" nonce="<?php echo $csp_nonce; ?>"></script>
 <!-- AG Grid JS -->
-<script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/dist/ag-grid-community.min.js"></script>
-<script src="../assets/js/comon/ag_grid_base.js"></script>
-<script src="../assets/js/comon/table-controler.js"></script>
-<script src="../assets/js/customer/add_customer.js"></script>
-<script src="../assets/js/customer/ag_grid_customer.js"></script>
-<script src="../assets/js/customer/update_customer.js"></script>
-<script src="../assets/js/customer/delete_customer.js"></script>
-<script src="../assets/js/add_customers/summary_cards.js"></script>
-<script src="../assets/js/customer/customer.js"></script>
-<script>
+<script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/dist/ag-grid-community.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/comon/ag_grid_base.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/comon/table-controler.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/customer/add_customer.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/customer/ag_grid_customer.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/customer/update_customer.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/customer/delete_customer.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/add_customers/summary_cards.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/customer/customer.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script nonce="<?php echo $csp_nonce; ?>">
     // Pass permissions to JavaScript
     window.userPermissions = {
         canAdd: <?php echo hasPermission('add_customer') ? 'true' : 'false'; ?>,
@@ -284,7 +284,7 @@ if (!hasPermission('view_customer')) {
         canDelete: <?php echo hasPermission('delete_customer') ? 'true' : 'false'; ?>
     };
 </script>
-<script src="../assets/js/customer/export_customers_excel.js"></script>
-<script src="../assets/js/customer/export_payment_history_excel.js"></script>
+<script src="../assets/js/customer/export_customers_excel.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/customer/export_payment_history_excel.js" nonce="<?php echo $csp_nonce; ?>"></script>
 </body>
 </html>

@@ -110,11 +110,11 @@ if (!hasPermission('view_car')) {
     </div>
   </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="../assets/js/comon/table-controler.js"></script>
-<script src="../assets/js/swalAlert.js"></script>
-<script src="../assets/js/car/add_car.js"></script>
-<script src="../assets/js/car/select_car.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/comon/table-controler.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/swalAlert.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/car/add_car.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/car/select_car.js" nonce="<?php echo $csp_nonce; ?>"></script>
 </body>
 </html>

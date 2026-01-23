@@ -274,17 +274,17 @@ if (!hasPermission('view_concrete_formulas')) {
     </div>
   </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="../assets/js/swalAlert.js"></script>
-<script src="../assets/js/concrete_fomulas/select_formulas.js"></script>
-<script src="../assets/js/comon/table-controler.js"></script>
-<script src="../assets/js/concrete_fomulas/concrete_formulas.js"></script>
-<script src="../assets/js/concrete_fomulas/add_formulas.js"></script>
-<script src="../assets/js/concrete_fomulas/delete_formulas.js"></script>
-<script src="../assets/js/concrete_fomulas/update_formulas.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/swalAlert.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/concrete_fomulas/select_formulas.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/comon/table-controler.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/concrete_fomulas/concrete_formulas.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/concrete_fomulas/add_formulas.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/concrete_fomulas/delete_formulas.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/concrete_fomulas/update_formulas.js" nonce="<?php echo $csp_nonce; ?>"></script>
 
-<script>
+<script nonce="<?php echo $csp_nonce; ?>">
 document.getElementById('addFormulaBtn').onclick = function() {
     var modal = new bootstrap.Modal(document.getElementById('addFormulaModal'));
     modal.show();

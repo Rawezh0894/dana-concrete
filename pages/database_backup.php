@@ -97,7 +97,7 @@ function formatFileSize($bytes) {
     <link href="../assets/css/database_backup.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
     <link href="../assets/css/kurdish-font.css" rel="stylesheet">
 </head>
 <body dir="rtl">
@@ -407,6 +407,6 @@ function formatFileSize($bytes) {
 <!-- Alert Container -->
 <div id="alertContainer" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
 
-<script src="../assets/js/database_backup.js"></script>
+<script src="../assets/js/database_backup.js" nonce="<?php echo $csp_nonce; ?>"></script>
 </body>
 </html>

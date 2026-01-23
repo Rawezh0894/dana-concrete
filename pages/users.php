@@ -215,16 +215,16 @@ if (!hasPermission('view_users')) {
     </div>
   </div>
 </div>
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="../assets/js/swalAlert.js"></script>
-<script src="../assets/js/comon/table-controler.js"></script>
-<script src="../assets/js/user/add_user.js"></script>
-<script src="../assets/js/user/select_user.js"></script>
-<script src="../assets/js/user/update_user.js"></script>
-<script src="../assets/js/user/delete_user.js"></script>
-<script src="../assets/js/user/summary_cards.js"></script>
-<script src="../assets/js/permissions/permissions.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/swalAlert.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/comon/table-controler.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/user/add_user.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/user/select_user.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/user/update_user.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/user/delete_user.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/user/summary_cards.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/permissions/permissions.js" nonce="<?php echo $csp_nonce; ?>"></script>
 </body>
 </html>

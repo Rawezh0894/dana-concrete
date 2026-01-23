@@ -173,24 +173,24 @@ if (!hasPermission('view_recipient')) {
 </div>
 <?php endif; ?>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="../assets/js/swalAlert.js"></script>
-<script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/swalAlert.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script nonce="<?php echo $csp_nonce; ?>">
     window.recipientPermissions = {
         canAdd: <?php echo hasPermission('add_recipient') ? 'true' : 'false'; ?>,
         canEdit: <?php echo hasPermission('edit_recipient') ? 'true' : 'false'; ?>,
         canDelete: <?php echo hasPermission('delete_recipient') ? 'true' : 'false'; ?>
     };
 </script>
-<script src="../assets/js/comon/table-controler.js"></script>
-<script src="../assets/js/recipients/summary_cards.js"></script>
-<script src="../assets/js/recipients/add.js"></script>
-<script src="../assets/js/recipients/select.js"></script>
-<script src="../assets/js/recipients/edit.js"></script>
-<script src="../assets/js/recipients/delete.js"></script>
-<script src="../assets/js/recipients/recipients.js"></script>
+<script src="../assets/js/comon/table-controler.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/recipients/summary_cards.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/recipients/add.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/recipients/select.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/recipients/edit.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/recipients/delete.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/recipients/recipients.js" nonce="<?php echo $csp_nonce; ?>"></script>
 </body>
 </html>
 

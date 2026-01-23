@@ -93,8 +93,8 @@ $pump_drivers = array_filter($employees, function ($emp) {
   <link href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/styles/ag-theme-alpine.css" rel="stylesheet">
   <link href="../assets/css/comon/ag_grid.css" rel="stylesheet">
   <link href="../assets/css/concrete_receipts/ag_grid_concrete_receipts.css" rel="stylesheet">
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
   <link href="../assets/css/comon/select2_design.css" rel="stylesheet">
     <link href="../assets/css/kurdish-font.css" rel="stylesheet">
@@ -568,23 +568,23 @@ $pump_drivers = array_filter($employees, function ($emp) {
       </div>
     </div>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" nonce="<?php echo $csp_nonce; ?>"></script>
   <!-- AG Grid JS -->
-  <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/dist/ag-grid-community.min.js"></script>
-  <script src="../assets/js/comon/ag_grid_base.js"></script>
-  <script src="../assets/js/swalAlert.js"></script>
-  <script src="../assets/js/comon/select2_script.js"></script>
-  <script src="../assets/js/concrete_receipts/add_customer.js"></script>
-  <script src="../assets/js/concrete_receipts/filter.js"></script>
-  <script src="../assets/js/concrete_receipts/add_concerete_receipts.js"></script>
-  <script src="../assets/js/concrete_receipts/ag_grid_concrete_receipts.js"></script>
-  <script src="../assets/js/concrete_receipts/delete_concrete_receipts.js"></script>
-  <script src="../assets/js/concrete_receipts/update_concrete_receipts.js"></script>
-  <script src="../assets/js/concrete_receipts/concrete_receipts_custom.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/dist/ag-grid-community.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+  <script src="../assets/js/comon/ag_grid_base.js" nonce="<?php echo $csp_nonce; ?>"></script>
+  <script src="../assets/js/swalAlert.js" nonce="<?php echo $csp_nonce; ?>"></script>
+  <script src="../assets/js/comon/select2_script.js" nonce="<?php echo $csp_nonce; ?>"></script>
+  <script src="../assets/js/concrete_receipts/add_customer.js" nonce="<?php echo $csp_nonce; ?>"></script>
+  <script src="../assets/js/concrete_receipts/filter.js" nonce="<?php echo $csp_nonce; ?>"></script>
+  <script src="../assets/js/concrete_receipts/add_concerete_receipts.js" nonce="<?php echo $csp_nonce; ?>"></script>
+  <script src="../assets/js/concrete_receipts/ag_grid_concrete_receipts.js" nonce="<?php echo $csp_nonce; ?>"></script>
+  <script src="../assets/js/concrete_receipts/delete_concrete_receipts.js" nonce="<?php echo $csp_nonce; ?>"></script>
+  <script src="../assets/js/concrete_receipts/update_concrete_receipts.js" nonce="<?php echo $csp_nonce; ?>"></script>
+  <script src="../assets/js/concrete_receipts/concrete_receipts_custom.js" nonce="<?php echo $csp_nonce; ?>"></script>
   <?php if (hasPermission('add_recipient')): ?>
-  <script src="../assets/js/recipients/add.js"></script>
-  <script>
+  <script src="../assets/js/recipients/add.js" nonce="<?php echo $csp_nonce; ?>"></script>
+  <script nonce="<?php echo $csp_nonce; ?>">
   (function() {
     const selectSelectors = ['#receiver_name', '#edit_receiver_name'];
 
@@ -660,7 +660,7 @@ $pump_drivers = array_filter($employees, function ($emp) {
   </script>
   <?php endif; ?>
 
-  <script>
+  <script nonce="<?php echo $csp_nonce; ?>">
     // Pass permissions to JavaScript
     window.userPermissions = {
       canAdd: <?php echo hasPermission('add_concrete_receipts') ? 'true' : 'false'; ?>,

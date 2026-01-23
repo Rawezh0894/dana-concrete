@@ -46,6 +46,6 @@ require_once 'config/db_conected.php';
             </form>
         </div>
     </div>
-    <script src="assets/js/login/show_hide_pass.js"></script>
+    <script src="assets/js/login/show_hide_pass.js" nonce="<?php echo $csp_nonce; ?>"></script>
 </body>
 </html>

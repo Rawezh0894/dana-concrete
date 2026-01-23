@@ -564,14 +564,14 @@ $exchangeRate = $exchangeRateStmt->fetchColumn() ?: 150000;
 </div>
 
 <!-- Scripts -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
-<script src="../assets/js/swalAlert.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/swalAlert.js" nonce="<?php echo $csp_nonce; ?>"></script>
 
-<script>
+<script nonce="<?php echo $csp_nonce; ?>">
     // Pass permissions to JavaScript
     window.userPermissions = {
         canAdd: <?= hasPermission('add_raw_material_sales') ? 'true' : 'false' ?>,
@@ -579,6 +579,6 @@ $exchangeRate = $exchangeRateStmt->fetchColumn() ?: 150000;
         canDelete: <?= hasPermission('delete_raw_material_sales') ? 'true' : 'false' ?>
     };
 </script>
-<script src="../assets/js/raw_material_sales/main.js"></script>
+<script src="../assets/js/raw_material_sales/main.js" nonce="<?php echo $csp_nonce; ?>"></script>
 </body>
 </html>

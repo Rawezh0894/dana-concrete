@@ -713,7 +713,7 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
     </div>
    
 </div>
-<script>
+<script nonce="<?php echo $csp_nonce; ?>">
     const CUSTOMER_ID = <?php echo $customer_id; ?>;
     document.addEventListener('DOMContentLoaded', function() {
         var printBtn = document.getElementById('print-btn');
@@ -1328,10 +1328,10 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         }
     });
 </script>
-<script src="../assets/js/receipts/receipts.js"></script>
-<script src="../assets/js/receipts/select_sale.js"></script>
-<script src="../assets/js/receipts/select_return_debt.js"></script>
-<script src="../assets/js/receipts/load_locations.js"></script>
-<script src="../assets/js/receipts/load_recipients.js"></script>
+<script src="../assets/js/receipts/receipts.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/receipts/select_sale.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/receipts/select_return_debt.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/receipts/load_locations.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/receipts/load_recipients.js" nonce="<?php echo $csp_nonce; ?>"></script>
 </body>
 </html>

@@ -263,9 +263,9 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
         }
     </style>
     <!-- jQuery (پێش هەموو شت) -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
     <!-- select2 -->
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     <link href="../assets/css/kurdish-font.css" rel="stylesheet">
@@ -893,15 +893,15 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
     </div>
   </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="../assets/js/swalAlert.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/swalAlert.js" nonce="<?php echo $csp_nonce; ?>"></script>
 <!-- AG Grid JS -->
-<script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/dist/ag-grid-community.min.js"></script>
-<script src="../assets/js/comon/ag_grid_base.js"></script>
-<script src="../assets/js/comon/table-controler.js"></script>
-<script src="../assets/js/comon/select2_script.js"></script>
-<script>
+<script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/dist/ag-grid-community.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/comon/ag_grid_base.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/comon/table-controler.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/comon/select2_script.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script nonce="<?php echo $csp_nonce; ?>">
     // Pass permissions to JavaScript
     window.userPermissions = {
       canAdd: <?php echo hasPermission('add_purchase') ? 'true' : 'false'; ?>,
@@ -909,18 +909,18 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
       canDelete: <?php echo hasPermission('delete_purchase') ? 'true' : 'false'; ?>
     };
 </script>
-<script src="../assets/js/purchase/add_purchase.js"></script>
-<script src="../assets/js/purchase/ag_grid_purchase.js"></script>
-<script src="../assets/js/purchase/summary.js"></script>
-<script src="../assets/js/location_driver/driver.js"></script>
-<script src="../assets/js/location_driver/location.js"></script>
-<script src="../assets/js/location_driver/load_locations.js"></script>
-<script src="../assets/js/location_driver/delete_location.js"></script>
-<script src="../assets/js/purchase/delete_purchase.js"></script>
-<script src="../assets/js/purchase/purchase.js"></script>
-<script src="../assets/js/purchase/update_purchase.js"></script>
-<script src="../assets/js/drivers/drivers_management.js"></script>
-<script>
+<script src="../assets/js/purchase/add_purchase.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/purchase/ag_grid_purchase.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/purchase/summary.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/location_driver/driver.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/location_driver/location.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/location_driver/load_locations.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/location_driver/delete_location.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/purchase/delete_purchase.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/purchase/purchase.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/purchase/update_purchase.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/drivers/drivers_management.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script nonce="<?php echo $csp_nonce; ?>">
 // Add modal: dynamic price per kg fields
 $(function() {
     function handleAddTypeChange() {

@@ -39,7 +39,7 @@ if (!hasPermission('view_cash_box')) {
     <link href="../assets/css/comon/summary_cards.css" rel="stylesheet" />
     <link href="../assets/css/cash_box_custom.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
 
     <link href="../assets/css/kurdish-font.css" rel="stylesheet">
 </head>
@@ -249,16 +249,16 @@ if (!hasPermission('view_cash_box')) {
     </div>
   </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="../assets/js/swalAlert.js"></script>
-<script src="../assets/js/comon/table-controler.js"></script>
-<script src="../assets/js/cash_box/add.js"></script>
-<script src="../assets/js/cash_box/select.js"></script>
-<script src="../assets/js/cash_box/delete.js"></script>
-<script src="../assets/js/cash_box/update.js"></script>
-<script src="../assets/js/cash_box/summary.js"></script>
-<script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/swalAlert.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/comon/table-controler.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/cash_box/add.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/cash_box/select.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/cash_box/delete.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/cash_box/update.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/cash_box/summary.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script nonce="<?php echo $csp_nonce; ?>">
 // JS logic for dynamic updates can be added here
 </script>
 </body>

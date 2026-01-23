@@ -99,8 +99,8 @@ if ($customer_id) {
     <link href="../assets/css/comon/style.css" rel="stylesheet">
     <link href="../assets/css/comon/cards.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <!-- AG Grid CSS -->
     <link href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/styles/ag-grid.css" rel="stylesheet">
@@ -353,7 +353,7 @@ if ($customer_id) {
       </div>
     </div>
 </div>
-<script>
+<script nonce="<?php echo $csp_nonce; ?>">
     const CUSTOMER_ID = <?php echo $customer_id; ?>;
     
     // Debug: Log the customer ID
@@ -410,7 +410,7 @@ if ($customer_id) {
     $(function() { loadCustomerSummaryCards(); });
 </script>
 
-<script>
+<script nonce="<?php echo $csp_nonce; ?>">
     // Function to refresh all customer data after any activity
     function refreshCustomerData() {
         if (typeof CUSTOMER_ID !== 'undefined' && CUSTOMER_ID && CUSTOMER_ID > 0) {
@@ -441,7 +441,7 @@ if ($customer_id) {
     window.refreshCustomerData = refreshCustomerData;
 </script>
 
-<script>
+<script nonce="<?php echo $csp_nonce; ?>">
     // Modal improvement functions
     window.editPaymentAllocations = window.editPaymentAllocations || [];
 
@@ -943,21 +943,21 @@ if ($customer_id) {
 
 
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="../assets/js/swalAlert.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/swalAlert.js" nonce="<?php echo $csp_nonce; ?>"></script>
 <!-- AG Grid JS -->
-<script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/dist/ag-grid-community.min.js"></script>
-<script src="../assets/js/comon/ag_grid_base.js"></script>
-<script src="../assets/js/comon/table-controler.js"></script>
-<script src="../assets/js/customer_profile/ag_grid_customer_sales.js"></script>
-<script src="../assets/js/customer_profile/ag_grid_customer_debt.js"></script>
-<script src="../assets/js/customer_profile/add_return_debt.js"></script>
-<script src="../assets/js/customer_profile/customer_profile.js"></script>
-<script src="../assets/js/customer_profile/delete_return_debt.js"></script>
-<script src="../assets/js/customer_profile/update_return_debt.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/dist/ag-grid-community.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/comon/ag_grid_base.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/comon/table-controler.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/customer_profile/ag_grid_customer_sales.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/customer_profile/ag_grid_customer_debt.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/customer_profile/add_return_debt.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/customer_profile/customer_profile.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/customer_profile/delete_return_debt.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/customer_profile/update_return_debt.js" nonce="<?php echo $csp_nonce; ?>"></script>
 
-<script>
+<script nonce="<?php echo $csp_nonce; ?>">
     // Debugging script to help identify issues
     document.addEventListener('DOMContentLoaded', function() {
         console.log('=== Customer Profile Debug Info ===');

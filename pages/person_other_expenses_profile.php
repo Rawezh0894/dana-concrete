@@ -47,8 +47,8 @@ $default_rate = $rate ? $rate : 150000;
     <link href="https://cdn.datatables.net/2.3.4/css/dataTables.dataTables.min.css" rel="stylesheet">
     <!-- DataTables Buttons CSS -->
     <link href="https://cdn.datatables.net/buttons/3.0.2/css/buttons.dataTables.min.css" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
         .nav-tabs .nav-link {
@@ -349,29 +349,29 @@ $default_rate = $rate ? $rate : 150000;
             </div>
         </div>
     </div>
-    <script>
+    <script nonce="<?php echo $csp_nonce; ?>">
         const PERSON_ID = <?php echo $person_id; ?>;
         const DEFAULT_USD_RATE = <?php echo floatval($default_rate); ?>;
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="../assets/js/swalAlert.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" nonce="<?php echo $csp_nonce; ?>"></script>
+    <script src="../assets/js/swalAlert.js" nonce="<?php echo $csp_nonce; ?>"></script>
     <!-- DataTables JS -->
-    <script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
     <!-- DataTables Buttons JS -->
-    <script src="https://cdn.datatables.net/buttons/3.0.2/js/dataTables.buttons.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.html5.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.print.min.js"></script>
-    <script src="../assets/js/person_other_expenses_profile/select_other_expenses.js"></script>
-    <script src="../assets/js/person_other_expenses_profile/select_purchases.js"></script>
-    <script src="../assets/js/person_other_expenses_profile/select_debt.js"></script>
-    <script src="../assets/js/person_other_expenses_profile/add_debt.js"></script>
-    <script src="../assets/js/person_other_expenses_profile/update_debt.js"></script>
-    <script src="../assets/js/person_other_expenses_profile/delete_debt.js"></script>
-    <script src="../assets/js/person_other_expenses_profile/summary_cards.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.0.2/js/dataTables.buttons.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+    <script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.html5.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+    <script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.print.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+    <script src="../assets/js/person_other_expenses_profile/select_other_expenses.js" nonce="<?php echo $csp_nonce; ?>"></script>
+    <script src="../assets/js/person_other_expenses_profile/select_purchases.js" nonce="<?php echo $csp_nonce; ?>"></script>
+    <script src="../assets/js/person_other_expenses_profile/select_debt.js" nonce="<?php echo $csp_nonce; ?>"></script>
+    <script src="../assets/js/person_other_expenses_profile/add_debt.js" nonce="<?php echo $csp_nonce; ?>"></script>
+    <script src="../assets/js/person_other_expenses_profile/update_debt.js" nonce="<?php echo $csp_nonce; ?>"></script>
+    <script src="../assets/js/person_other_expenses_profile/delete_debt.js" nonce="<?php echo $csp_nonce; ?>"></script>
+    <script src="../assets/js/person_other_expenses_profile/summary_cards.js" nonce="<?php echo $csp_nonce; ?>"></script>
     
-    <script>
+    <script nonce="<?php echo $csp_nonce; ?>">
         // Check summary card remaining amounts function
         function checkSummaryCardRemaining() {
             $.ajax({

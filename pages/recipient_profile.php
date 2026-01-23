@@ -192,16 +192,16 @@ $recipient_name = $recipient['name'];
         </table>
     </div>
 </div>
-<script>
+<script nonce="<?php echo $csp_nonce; ?>">
     const RECIPIENT_ID = <?php echo (int)$recipient_id; ?>;
 </script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="../assets/js/swalAlert.js"></script>
-<script src="../assets/js/comon/table-controler.js"></script>
-<script src="../assets/js/recipient_profile/recipient_profile.js"></script>
-<script src="../assets/js/recipient_profile/select.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/swalAlert.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/comon/table-controler.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/recipient_profile/recipient_profile.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/recipient_profile/select.js" nonce="<?php echo $csp_nonce; ?>"></script>
 </body>
 </html>
 

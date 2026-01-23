@@ -39,7 +39,7 @@ $bins = $pdo->query("SELECT * FROM bins_silos")->fetchAll(PDO::FETCH_ASSOC);
     <link href="../assets/css/comon/select2_design.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.rtl.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
     <link href="../assets/css/kurdish-font.css" rel="stylesheet">
 </head>
 <body dir="rtl">
@@ -184,14 +184,14 @@ $bins = $pdo->query("SELECT * FROM bins_silos")->fetchAll(PDO::FETCH_ASSOC);
     </div>
   </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="../assets/js/swalAlert.js"></script>
-<script src="../assets/js/comon/table-controler.js"></script>
-<script src="../assets/js/bins_silos/add.js"></script>
-<script src="../assets/js/bins_silos/select.js"></script>
-<script src="../assets/js/bins_silos/update.js"></script>
-<script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/swalAlert.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/comon/table-controler.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/bins_silos/add.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/bins_silos/select.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/bins_silos/update.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script nonce="<?php echo $csp_nonce; ?>">
 // Fill edit modal with data
 $(document).on('click', '.edit-btn', function() {
     $('#edit_id').val($(this).data('id'));

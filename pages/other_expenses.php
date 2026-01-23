@@ -716,7 +716,7 @@ if (!isset($_SESSION['user_id'])) {
     </div>
   </div>
 </div>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" nonce="<?php echo $csp_nonce; ?>"></script>
@@ -733,7 +733,7 @@ if (!isset($_SESSION['user_id'])) {
 <script src="../assets/js/other_expenses/delete_expenses.js" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/other_expenses/update_expenses.js" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/comon/select2_script.js" nonce="<?php echo $csp_nonce; ?>"></script>
-<script src="../assets/js/other_expenses/export_functions.js?v=<?= time() ?>" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/other_expenses/export_functions.js?v=<?= time() ? nonce="<?php echo $csp_nonce; ?>">" nonce="<?php echo $csp_nonce; ?>"></script>
 </body>
 </html>
 

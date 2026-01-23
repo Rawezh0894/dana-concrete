@@ -48,9 +48,9 @@ $expense_types = [
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" nonce="<?php echo $csp_nonce; ?>"></script>
     <link href="../assets/css/kurdish-font.css" rel="stylesheet">
 </head>
 
@@ -279,11 +279,11 @@ $expense_types = [
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="../assets/js/summery_car_expenses/get_informations.js"></script>
-  <script src="../assets/js/summery_car_expenses/filter.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+  <script src="../assets/js/summery_car_expenses/get_informations.js" nonce="<?php echo $csp_nonce; ?>"></script>
+  <script src="../assets/js/summery_car_expenses/filter.js" nonce="<?php echo $csp_nonce; ?>"></script>
   
-  <script>
+  <script nonce="<?php echo $csp_nonce; ?>">
     // Initialize Select2
     $(document).ready(function() {
       $('#filter_car_id, #filter_employee_id, #filter_expense_type, #filter_payment_type').select2({

@@ -108,13 +108,13 @@ $company_name = $company_row ? $company_row['name'] : '';
         </div>
     </div>
 </div>
-<script>
+<script nonce="<?php echo $csp_nonce; ?>">
     const COMPANY_ID = <?php echo $company_id; ?>;
 </script>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="../assets/js/company_receipts/select_return_debt.js"></script>
-<script src="../assets/js/company_receipts/select_purchase.js"></script>
-<script>window.onload = function() { window.print(); };</script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/company_receipts/select_return_debt.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/company_receipts/select_purchase.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script nonce="<?php echo $csp_nonce; ?>">window.onload = function() { window.print(); };</script>
 </body>
 </html> 

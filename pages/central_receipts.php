@@ -184,7 +184,7 @@ $receipt_id = isset($_GET['id']) ? $_GET['id'] : null;
     <?php endif; ?>
     
     <!-- Include the external JavaScript file -->
-    <script src="../assets/js/central_receipts/get_information.js"></script>
+    <script src="../assets/js/central_receipts/get_information.js" nonce="<?php echo $csp_nonce; ?>"></script>
     <style>
     .loading-overlay {
         position: fixed;
@@ -203,7 +203,7 @@ $receipt_id = isset($_GET['id']) ? $_GET['id'] : null;
     <div id="print-loading-overlay" class="loading-overlay" style="display:none;">
         <span>تکایە چاوەڕێ بکە ...</span>
     </div>
-    <script>
+    <script nonce="<?php echo $csp_nonce; ?>">
     function printInPortrait() {
         var overlay = document.getElementById('print-loading-overlay');
         overlay.style.display = 'flex';
@@ -252,7 +252,7 @@ $receipt_id = isset($_GET['id']) ? $_GET['id'] : null;
     });
     </script>
 <?php if (isset($_GET['auto_print'])): ?>
-    <script>
+    <script nonce="<?php echo $csp_nonce; ?>">
     window.addEventListener('DOMContentLoaded', function() {
         printInPortrait();
     });
