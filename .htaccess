@@ -191,7 +191,7 @@ RewriteRule ^\.git - [F,L]
 <IfModule mod_headers.c>
     # لێرەدا ڕێگەمان داوە بە unsafe-inline بۆ هەردووکیان تاوەکو سایتەکەت تێکنەچێت
     # بەڵام object-src و داتای ترمان قفڵ کردووە بۆ پاراستن
-    Header always set Content-Security-Policy "default-src 'self' https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' data: https:; object-src 'none'; base-uri 'self';"
+    # Header always set Content-Security-Policy "default-src 'self' https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' data: https:; object-src 'none'; base-uri 'self';"
     
     Header always set Referrer-Policy "strict-origin-when-cross-origin"
     Header always set X-Frame-Options "SAMEORIGIN"

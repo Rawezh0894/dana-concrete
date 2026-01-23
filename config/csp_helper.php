@@ -16,14 +16,21 @@ if (!isset($csp_nonce)) {
  * You can adjust the policy as needed.
  */
 function sendCSPHeader($nonce) {
-    $policy = "default-src 'self'; ";
+    $policy = "default-src 'none'; ";
+    // Scripts: Remove unsafe-inline, use nonce for allowed sources
     $policy .= "script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://code.jquery.com 'nonce-$nonce'; ";
+    // Styles: Keep self and common CDNs (Note: inline styles are often needed for dynamic UI components)
     $policy .= "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; ";
-    $policy .= "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; ";
-    $policy .= "img-src 'self' data:; ";
+    // Fonts and images
+    $policy .= "font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; ";
+    $policy .= "img-src 'self' data: https:; ";
+    // Connection and frame protection
     $policy .= "connect-src 'self'; ";
     $policy .= "media-src 'self'; ";
-    $policy .= "frame-src 'self';";
+    $policy .= "frame-src 'self'; ";
+    $policy .= "frame-ancestors 'self'; ";
+    $policy .= "base-uri 'self'; ";
+    $policy .= "form-action 'self';";
 
     header("Content-Security-Policy: $policy");
 }
