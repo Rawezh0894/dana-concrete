@@ -188,23 +188,16 @@ RewriteRule ^\.git - [F,L]
     Require all denied
 </FilesMatch>
 
-# ----------------------------------------------------------------------
-# 3. Security Headers (CSP, HSTS, Referrer, etc.)
-# ----------------------------------------------------------------------
 <IfModule mod_headers.c>
-    # Content Security Policy - چارەسەری XSS و unsafe-inline
-    Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'self'; img-src 'self' data:; font-src 'self' data:; frame-ancestors 'self';"
-
-    # Strict Transport Security (HSTS) - بۆ ماوەی ٦ مانگ
-    Header always set Strict-Transport-Security "max-age=15768000; includeSubDomains; preload"
-
-    # Referrer Policy - چارەسەری کێشەی دزەکردنی سەرچاوەی بەستەر
-    Header always set Referrer-Policy "strict-origin-when-cross-origin"
-
-    # پاراستن لە Clickjacking و Sniffing
+    # لێرەدا ڕێگەمان داوە بە unsafe-inline بۆ هەردووکیان تاوەکو سایتەکەت تێکنەچێت
+    # بەڵام object-src و داتای ترمان قفڵ کردووە بۆ پاراستن
+    Header always set Content-Security-Policy "default-src 'self' https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' data: https:; object-src 'none'; base-uri 'self';"
+    
+    Header always set Referrer-Policy "no-referrer-when-downgrade"
     Header always set X-Frame-Options "SAMEORIGIN"
     Header always set X-Content-Type-Options "nosniff"
 </IfModule>
+
 
 # ----------------------------------------------------------------------
 # 4. PHP Settings (Upload Limits)
