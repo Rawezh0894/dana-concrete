@@ -159,7 +159,7 @@ class AdvancedFilters {
 
         // Ensure data is an array
         if (!Array.isArray(data)) {
-            console.warn(`Data for ${selectId} is not an array:`, data);
+            // console.warn(`Data for ${selectId} is not an array:`, data);
             return;
         }
 
@@ -221,7 +221,7 @@ class AdvancedFilters {
 
     async applyFilters() {
         try {
-            console.log('Applying filters:', this.filters);
+            // console.log('Applying filters:', this.filters);
 
             // Build query string
             const queryParams = new URLSearchParams();
@@ -260,7 +260,7 @@ class AdvancedFilters {
             const exchangeRateInput = document.getElementById('exchange_rate');
             if (exchangeRateInput && exchangeRateInput.value) {
                 usdRate = parseFloat(exchangeRateInput.value);
-                console.log('Using exchange rate from input field:', usdRate);
+                // console.log('Using exchange rate from input field:', usdRate);
             } else {
                 // Fallback to API if input field is empty
                 try {
