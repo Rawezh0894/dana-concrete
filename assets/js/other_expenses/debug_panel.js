@@ -4,12 +4,12 @@
 // Create debug panel object
 window.OtherExpensesDebug = {
     // Show debug information
-    info: function() {
+    info: function () {
         console.group('🔍 Other Expenses Debug Info');
         console.log('📄 Current URL:', window.location.href);
         console.log('🕒 Page Load Time:', new Date().toLocaleString());
         console.log('🌐 User Agent:', navigator.userAgent);
-        
+
         // Check if error logger is available
         if (window.ErrorLogger) {
             console.log('✅ Error Logger: Available');
@@ -18,48 +18,48 @@ window.OtherExpensesDebug = {
         } else {
             console.log('❌ Error Logger: Not Available');
         }
-        
+
         // Check forms
         const forms = ['addExpenseForm', 'editExpenseForm'];
         forms.forEach(formId => {
             const form = document.getElementById(formId);
             console.log(`📋 ${formId}:`, form ? 'Found' : 'Not Found');
         });
-        
+
         // Check modals
         const modals = ['addExpenseModal', 'editExpenseModal'];
         modals.forEach(modalId => {
             const modal = document.getElementById(modalId);
             console.log(`🪟 ${modalId}:`, modal ? 'Found' : 'Not Found');
         });
-        
+
         // Check table
         const table = document.getElementById('otherExpensesTable');
         console.log('📊 Table:', table ? `Found (${table.rows.length} rows)` : 'Not Found');
-        
+
         console.groupEnd();
     },
 
     // Test all functionality
-    testAll: function() {
+    testAll: function () {
         console.group('🧪 Testing All Functionality');
-        
+
         // Test API endpoints
         this.testAPIs();
-        
+
         // Test forms
         this.testForms();
-        
+
         // Test calculations
         this.testCalculations();
-        
+
         console.groupEnd();
     },
 
     // Test API endpoints
-    testAPIs: function() {
+    testAPIs: function () {
         console.group('🌐 Testing API Endpoints');
-        
+
         const endpoints = [
             '../process/other_expenses/select_expenses.php',
             '../process/other_expenses/select_materials.php',
@@ -77,14 +77,14 @@ window.OtherExpensesDebug = {
                     console.error(`❌ ${endpoint}:`, error.message);
                 });
         });
-        
+
         console.groupEnd();
     },
 
     // Test forms
-    testForms: function() {
+    testForms: function () {
         console.group('📋 Testing Forms');
-        
+
         const forms = ['addExpenseForm', 'editExpenseForm'];
         forms.forEach(formId => {
             const form = document.getElementById(formId);
@@ -96,40 +96,40 @@ window.OtherExpensesDebug = {
                 console.log(`❌ ${formId}: Not Found`);
             }
         });
-        
+
         console.groupEnd();
     },
 
     // Test calculations
-    testCalculations: function() {
+    testCalculations: function () {
         console.group('🧮 Testing Calculations');
-        
+
         // Test material total cost calculation
         if (typeof window.calculateMaterialTotalCost === 'function') {
             console.log('✅ calculateMaterialTotalCost: Available');
         } else {
             console.log('❌ calculateMaterialTotalCost: Not Available');
         }
-        
+
         // Test gas total cost calculation
         if (typeof window.calculateGasTotalCost === 'function') {
             console.log('✅ calculateGasTotalCost: Available');
         } else {
             console.log('❌ calculateGasTotalCost: Not Available');
         }
-        
+
         // Test material availability check
         if (typeof window.checkMaterialAvailability === 'function') {
             console.log('✅ checkMaterialAvailability: Available');
         } else {
             console.log('❌ checkMaterialAvailability: Not Available');
         }
-        
+
         console.groupEnd();
     },
 
     // Show form data
-    showFormData: function(formId) {
+    showFormData: function (formId) {
         const form = document.getElementById(formId);
         if (!form) {
             console.error(`Form ${formId} not found`);
@@ -148,7 +148,7 @@ window.OtherExpensesDebug = {
     },
 
     // Show all form data
-    showAllFormData: function() {
+    showAllFormData: function () {
         const forms = ['addExpenseForm', 'editExpenseForm'];
         forms.forEach(formId => {
             this.showFormData(formId);
@@ -156,7 +156,7 @@ window.OtherExpensesDebug = {
     },
 
     // Simulate form submission
-    simulateSubmit: function(formId) {
+    simulateSubmit: function (formId) {
         const form = document.getElementById(formId);
         if (!form) {
             console.error(`Form ${formId} not found`);
@@ -169,9 +169,9 @@ window.OtherExpensesDebug = {
     },
 
     // Test foreign key constraint handling
-    testForeignKeyHandling: function() {
+    testForeignKeyHandling: function () {
         console.group('🔗 Testing Foreign Key Constraint Handling');
-        
+
         const form = document.getElementById('addExpenseForm');
         if (!form) {
             console.error('Add expense form not found');
@@ -181,7 +181,7 @@ window.OtherExpensesDebug = {
 
         // Test with empty foreign key fields
         console.log('Testing with empty foreign key fields...');
-        
+
         // Set required field
         const expenseType = document.getElementById('expense_type');
         if (expenseType) {
@@ -212,13 +212,13 @@ window.OtherExpensesDebug = {
     },
 
     // Test field visibility
-    testFieldVisibility: function() {
+    testFieldVisibility: function () {
         console.group('👁️ Testing Field Visibility');
-        
+
         const expenseType = document.getElementById('expense_type');
         if (expenseType) {
             console.log('Current expense type:', expenseType.value);
-            
+
             // Test visibility for each expense type
             const types = ['', 'بەکارهێنانی کاڵای کۆگا', 'بەکارهێنانی گاز', 'خەرجی تر'];
             types.forEach(type => {
@@ -229,12 +229,12 @@ window.OtherExpensesDebug = {
         } else {
             console.log('❌ expense_type field not found');
         }
-        
+
         console.groupEnd();
     },
 
     // Show logs
-    showLogs: function() {
+    showLogs: function () {
         if (window.ErrorLogger) {
             const logs = ErrorLogger.getLogs();
             console.group('📝 Recent Logs');
@@ -248,7 +248,7 @@ window.OtherExpensesDebug = {
     },
 
     // Clear logs
-    clearLogs: function() {
+    clearLogs: function () {
         if (window.ErrorLogger) {
             ErrorLogger.clearLogs();
             console.log('✅ Logs cleared');
@@ -258,7 +258,7 @@ window.OtherExpensesDebug = {
     },
 
     // Export logs
-    exportLogs: function() {
+    exportLogs: function () {
         if (window.ErrorLogger) {
             ErrorLogger.exportLogs();
             console.log('✅ Logs exported');
@@ -268,7 +268,7 @@ window.OtherExpensesDebug = {
     },
 
     // Set log level
-    setLogLevel: function(level) {
+    setLogLevel: function (level) {
         if (window.ErrorLogger) {
             ErrorLogger.setLevel(level);
             console.log(`✅ Log level set to: ${level}`);
@@ -278,7 +278,7 @@ window.OtherExpensesDebug = {
     },
 
     // Help function
-    help: function() {
+    help: function () {
         console.group('❓ Other Expenses Debug Help');
         console.log('Available commands:');
         console.log('  OtherExpensesDebug.info() - Show basic info');
@@ -301,22 +301,22 @@ window.OtherExpensesDebug = {
 };
 
 // Initialize debug panel
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Make debug panel available globally
     window.debug = OtherExpensesDebug;
-    
+
     // Log initialization
-    if (window.ErrorLogger) {
+    /* if (window.ErrorLogger) {
         ErrorLogger.info('Debug panel initialized');
     }
     
     // Show help in console
     console.log('🔧 Other Expenses Debug Panel loaded!');
-    console.log('Type OtherExpensesDebug.help() or debug.help() for available commands');
+    console.log('Type OtherExpensesDebug.help() or debug.help() for available commands'); */
 });
 
 // Add keyboard shortcut for quick access (Ctrl+Shift+D)
-document.addEventListener('keydown', function(event) {
+document.addEventListener('keydown', function (event) {
     if (event.ctrlKey && event.shiftKey && event.key === 'D') {
         event.preventDefault();
         console.log('🔧 Debug panel activated via keyboard shortcut');

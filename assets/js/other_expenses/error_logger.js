@@ -13,10 +13,10 @@ window.ErrorLogger = {
     },
 
     // Current log level (can be changed dynamically)
-    currentLevel: 1, // INFO level by default
+    currentLevel: 2, // WARN level by default
 
     // Log a message with specified level
-    log: function(level, message, data = null) {
+    log: function (level, message, data = null) {
         if (level >= this.currentLevel) {
             const timestamp = new Date().toISOString();
             const logEntry = {
@@ -53,7 +53,7 @@ window.ErrorLogger = {
     },
 
     // Get level name
-    getLevelName: function(level) {
+    getLevelName: function (level) {
         for (let [name, value] of Object.entries(this.LEVELS)) {
             if (value === level) return name;
         }
@@ -61,16 +61,16 @@ window.ErrorLogger = {
     },
 
     // Store log entry in localStorage
-    storeLog: function(logEntry) {
+    storeLog: function (logEntry) {
         try {
             const logs = JSON.parse(localStorage.getItem('otherExpensesLogs') || '[]');
             logs.push(logEntry);
-            
+
             // Keep only last 100 entries
             if (logs.length > 100) {
                 logs.splice(0, logs.length - 100);
             }
-            
+
             localStorage.setItem('otherExpensesLogs', JSON.stringify(logs));
         } catch (error) {
             console.error('Failed to store log entry:', error);
@@ -78,28 +78,28 @@ window.ErrorLogger = {
     },
 
     // Convenience methods
-    debug: function(message, data = null) {
+    debug: function (message, data = null) {
         this.log(this.LEVELS.DEBUG, message, data);
     },
 
-    info: function(message, data = null) {
+    info: function (message, data = null) {
         this.log(this.LEVELS.INFO, message, data);
     },
 
-    warn: function(message, data = null) {
+    warn: function (message, data = null) {
         this.log(this.LEVELS.WARN, message, data);
     },
 
-    error: function(message, data = null) {
+    error: function (message, data = null) {
         this.log(this.LEVELS.ERROR, message, data);
     },
 
-    fatal: function(message, data = null) {
+    fatal: function (message, data = null) {
         this.log(this.LEVELS.FATAL, message, data);
     },
 
     // Get all stored logs
-    getLogs: function() {
+    getLogs: function () {
         try {
             return JSON.parse(localStorage.getItem('otherExpensesLogs') || '[]');
         } catch (error) {
@@ -109,7 +109,7 @@ window.ErrorLogger = {
     },
 
     // Clear all stored logs
-    clearLogs: function() {
+    clearLogs: function () {
         try {
             localStorage.removeItem('otherExpensesLogs');
             console.info('Logs cleared successfully');
@@ -119,7 +119,7 @@ window.ErrorLogger = {
     },
 
     // Export logs as JSON
-    exportLogs: function() {
+    exportLogs: function () {
         const logs = this.getLogs();
         const blob = new Blob([JSON.stringify(logs, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
@@ -133,7 +133,7 @@ window.ErrorLogger = {
     },
 
     // Set log level
-    setLevel: function(level) {
+    setLevel: function (level) {
         if (typeof level === 'string') {
             level = this.LEVELS[level.toUpperCase()];
         }
@@ -145,7 +145,7 @@ window.ErrorLogger = {
 };
 
 // Global error handler for uncaught exceptions
-window.addEventListener('error', function(event) {
+window.addEventListener('error', function (event) {
     ErrorLogger.fatal('Uncaught JavaScript error', {
         message: event.message,
         filename: event.filename,
@@ -156,7 +156,7 @@ window.addEventListener('error', function(event) {
 });
 
 // Global promise rejection handler
-window.addEventListener('unhandledrejection', function(event) {
+window.addEventListener('unhandledrejection', function (event) {
     ErrorLogger.fatal('Unhandled promise rejection', {
         reason: event.reason,
         promise: event.promise
@@ -165,7 +165,7 @@ window.addEventListener('unhandledrejection', function(event) {
 
 // AJAX error interceptor
 const originalFetch = window.fetch;
-window.fetch = function(...args) {
+window.fetch = function (...args) {
     return originalFetch.apply(this, args)
         .then(response => {
             if (!response.ok) {
@@ -188,7 +188,7 @@ window.fetch = function(...args) {
 };
 
 // Form validation error logger
-window.logFormValidationError = function(formId, fieldName, errorMessage) {
+window.logFormValidationError = function (formId, fieldName, errorMessage) {
     ErrorLogger.warn('Form validation error', {
         formId: formId,
         fieldName: fieldName,
@@ -197,7 +197,7 @@ window.logFormValidationError = function(formId, fieldName, errorMessage) {
 };
 
 // Database operation error logger
-window.logDatabaseError = function(operation, table, error) {
+window.logDatabaseError = function (operation, table, error) {
     ErrorLogger.error('Database operation failed', {
         operation: operation,
         table: table,
@@ -207,7 +207,7 @@ window.logDatabaseError = function(operation, table, error) {
 };
 
 // User action logger
-window.logUserAction = function(action, details = {}) {
+window.logUserAction = function (action, details = {}) {
     ErrorLogger.info('User action performed', {
         action: action,
         details: details,
@@ -216,18 +216,18 @@ window.logUserAction = function(action, details = {}) {
 };
 
 // Initialize error logger
-document.addEventListener('DOMContentLoaded', function() {
-    ErrorLogger.info('Error logger initialized', {
+document.addEventListener('DOMContentLoaded', function () {
+    /* ErrorLogger.info('Error logger initialized', {
         currentLevel: ErrorLogger.getLevelName(ErrorLogger.currentLevel),
         userAgent: navigator.userAgent,
         url: window.location.href
-    });
+    }); */
 });
 
 // Debug utilities
 window.debugOtherExpenses = {
     // Show current form state
-    showFormState: function(formId) {
+    showFormState: function (formId) {
         const form = document.getElementById(formId);
         if (!form) {
             ErrorLogger.warn('Form not found', { formId: formId });
@@ -245,7 +245,7 @@ window.debugOtherExpenses = {
     },
 
     // Show all form states
-    showAllFormStates: function() {
+    showAllFormStates: function () {
         const forms = ['addExpenseForm', 'editExpenseForm'];
         forms.forEach(formId => {
             this.showFormState(formId);
@@ -253,9 +253,9 @@ window.debugOtherExpenses = {
     },
 
     // Test API endpoints
-    testAPI: function(endpoint) {
+    testAPI: function (endpoint) {
         ErrorLogger.info('Testing API endpoint', { endpoint: endpoint });
-        
+
         fetch(endpoint)
             .then(response => {
                 ErrorLogger.info('API test response', {
@@ -274,7 +274,7 @@ window.debugOtherExpenses = {
     },
 
     // Test all API endpoints
-    testAllAPIs: function() {
+    testAllAPIs: function () {
         const endpoints = [
             '../process/other_expenses/select_expenses.php',
             '../process/other_expenses/select_materials.php',
@@ -289,7 +289,7 @@ window.debugOtherExpenses = {
     },
 
     // Show current page state
-    showPageState: function() {
+    showPageState: function () {
         const state = {
             url: window.location.href,
             forms: {},

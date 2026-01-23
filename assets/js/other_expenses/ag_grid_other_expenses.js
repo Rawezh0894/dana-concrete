@@ -683,12 +683,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
 async function populateSelect(url, selectId, selectedId) {
     try {
-        console.log(`[populateSelect] Initializing for #${selectId} using URL: ${url}`);
+        // console.log(`[populateSelect] Initializing for #${selectId} using URL: ${url}`);
         const res = await fetch(url);
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
 
         const result = await res.json();
-        console.log(`[populateSelect] Received data for #${selectId}:`, result);
+        // console.log(`[populateSelect] Received data for #${selectId}:`, result);
 
         let data = [];
         if (Array.isArray(result)) {
@@ -732,14 +732,14 @@ async function populateSelect(url, selectId, selectedId) {
             });
         }
 
-        console.log(`[populateSelect] Successfully added ${data ? data.length : 0} options to #${selectId}`);
+        // console.log(`[populateSelect] Successfully added ${data ? data.length : 0} options to #${selectId}`);
 
         if ($(select).hasClass('select2-hidden-accessible')) {
-            console.log(`[populateSelect] Triggering Select2 update for #${selectId}`);
+            // console.log(`[populateSelect] Triggering Select2 update for #${selectId}`);
             $(select).trigger('change');
         }
 
-        console.log(`[populateSelect] Dispatching native change event for #${selectId}`);
+        // console.log(`[populateSelect] Dispatching native change event for #${selectId}`);
         select.dispatchEvent(new Event('change'));
     } catch (err) {
         console.error(`[populateSelect] SEVERE ERROR for #${selectId}:`, err);

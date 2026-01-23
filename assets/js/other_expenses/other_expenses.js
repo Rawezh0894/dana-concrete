@@ -40,7 +40,7 @@ async function updateUsdRateDisplay() {
         if (usdRateElement) {
             if (data.success && data.rate) {
                 usdRateElement.textContent = data.rate.toLocaleString() + ' د.ع';
-                console.log('USD rate display updated:', data.rate);
+                // console.log('USD rate display updated:', data.rate);
 
                 // Show success notification
                 Swal.fire({
@@ -56,7 +56,7 @@ async function updateUsdRateDisplay() {
                 console.warn('Failed to fetch USD rate for display:', data.error || 'Unknown error');
                 if (data.default_rate) {
                     usdRateElement.textContent = data.default_rate.toLocaleString() + ' د.ع';
-                    console.log('Using default USD rate for display:', data.default_rate);
+                    // console.log('Using default USD rate for display:', data.default_rate);
                 } else {
                     usdRateElement.textContent = '139250 د.ع';
                 }

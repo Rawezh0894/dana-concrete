@@ -94,29 +94,29 @@ async function editExpense(id, data) {
     formData.append('id', id);
 
     try {
-        console.log('Updating expense with ID:', id);
+        /* console.log('Updating expense with ID:', id);
         console.log('Form data entries:');
         for (let [key, value] of formData.entries()) {
             console.log(`${key}: ${value}`);
-        }
+        } */
 
         const res = await fetch('../process/other_expenses/update_expenses.php', {
             method: 'POST',
             body: formData
         });
 
-        console.log('Response status:', res.status);
-        console.log('Response headers:', res.headers);
+        // console.log('Response status:', res.status);
+        // console.log('Response headers:', res.headers);
 
         if (!res.ok) {
             throw new Error(`HTTP error! status: ${res.status}`);
         }
 
         const result = await res.json();
-        console.log('Response data:', result);
+        // console.log('Response data:', result);
 
         if (result.success) {
-            console.log('Expense updated successfully');
+            // console.log('Expense updated successfully');
             Swal.fire('سەرکەوتوو!', 'خەرجیەکە نوێکرایەوە', 'success');
             // Get the updated expense ID to restore position
             const updatedId = id;
@@ -227,7 +227,7 @@ async function fetchAndSetUsdRateForEdit() {
 
                 if (data.success && data.rate) {
                     editExchangeRateInput.value = data.rate;
-                    console.log('Exchange rate populated for edit from backend API:', data.rate);
+                    // console.log('Exchange rate populated for edit from backend API:', data.rate);
                     return;
                 }
             }
