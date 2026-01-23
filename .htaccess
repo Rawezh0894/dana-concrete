@@ -195,3 +195,7 @@ Options -Indexes
     php_value max_execution_time 300
     php_value max_input_time 300
 </IfModule>
+<IfModule mod_headers.c>
+    # ئەمە سیاسەتێکی توندوتۆڵە بۆ ڕێگری لە XSS و هێرشەکانی تر
+    Header set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'self'; img-src 'self' data:; font-src 'self' data:;"
+</IfModule>
