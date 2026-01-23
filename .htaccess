@@ -195,8 +195,13 @@ Options -Indexes
     php_value max_execution_time 300
     php_value max_input_time 300
 </IfModule>
-
+# 8. چارەسەرکردنی کێشەی Security Headers و CSP
 <IfModule mod_headers.c>
-    # ئەمە سیاسەتێکی توندوتۆڵە بۆ ڕێگری لە XSS و هێرشەکانی تر
+    # ئەمە کێشەی unsafe-inline و مەترسی XSS کەم دەکاتەوە
     Header set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'self'; img-src 'self' data:; font-src 'self' data:;"
+    
+    # زیادکردنی پاراستنی زیاتر بۆ ڕێگری لە Clickjacking و Sniffing
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-Content-Type-Options "nosniff"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
 </IfModule>
