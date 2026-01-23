@@ -196,18 +196,13 @@ Options -Indexes
     php_value max_input_time 300
 </IfModule>
 
-# 8. چارەسەرکردنی کێشەی Security Headers، HSTS و Referrer-Policy
+# 8. چارەسەرکردنی کێشەی Security Headers و CSP
 <IfModule mod_headers.c>
-    # چارەسەری کێشەی CSP (ئەوەی پێشتر باسمان کرد)
+    # ئەمە کێشەی unsafe-inline و مەترسی XSS کەم دەکاتەوە
     Header set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'self'; img-src 'self' data:; font-src 'self' data:;"
     
-    # چارەسەری Referrer Policy (بۆ ئەوەی سکانەرەکە نمرەی تەواوت بداتێ)
-    Header set Referrer-Policy "strict-origin-when-cross-origin"
-    
-    # چارەسەری HSTS (بۆ ماوەی ٦ مانگ - 15768000 چرکە)
-    Header set Strict-Transport-Security "max-age=15768000; includeSubDomains; preload"
-    
-    # پاراستنی زیاتر
+    # زیادکردنی پاراستنی زیاتر بۆ ڕێگری لە Clickjacking و Sniffing
     Header set X-Frame-Options "SAMEORIGIN"
     Header set X-Content-Type-Options "nosniff"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
 </IfModule>
