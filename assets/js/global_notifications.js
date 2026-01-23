@@ -32,7 +32,7 @@ function initializeAudioContext() {
 // Load audio file into buffer
 function loadAudioBuffer() {
     if (!audioContext) return;
-    
+
     fetch('../assets/sounds/notification.mp3')
         .then(response => {
             if (!response.ok) {
@@ -59,7 +59,7 @@ function loadAlternativeAudio() {
         '/assets/sounds/notification.mp3',
         'assets/sounds/notification.mp3'
     ];
-    
+
     for (let i = 1; i < alternativePaths.length; i++) {
         const path = alternativePaths[i];
         fetch(path)
@@ -84,23 +84,23 @@ function loadAlternativeAudio() {
 // Create beep sound as fallback
 function createBeepSound() {
     if (!audioContext) return false;
-    
+
     try {
         const oscillator = audioContext.createOscillator();
         const gainNode = audioContext.createGain();
-        
+
         oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
         oscillator.type = 'sine';
-        
+
         gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
         gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-        
+
         oscillator.connect(gainNode);
         gainNode.connect(audioContext.destination);
-        
+
         oscillator.start(audioContext.currentTime);
         oscillator.stop(audioContext.currentTime + 0.5);
-        
+
         console.log('🔊 Global beep sound played as fallback');
         return true;
     } catch (error) {
@@ -115,18 +115,18 @@ function playNotificationSoundWebAudio() {
         console.log('⚠️ Global Web Audio API not available, falling back to HTML5 Audio');
         return false;
     }
-    
+
     try {
         if (audioContext.state === 'suspended') {
             audioContext.resume();
         }
-        
+
         if (audioBuffer) {
             const source = audioContext.createBufferSource();
             source.buffer = audioBuffer;
             source.connect(audioContext.destination);
             source.start(0);
-            
+
             console.log('✅ Global notification sound played using Web Audio API');
             return true;
         } else {
@@ -142,16 +142,16 @@ function playNotificationSoundWebAudio() {
 // Play notification sound using HTML5 Audio
 function playNotificationSoundHTML5() {
     const audio = document.getElementById('notificationSound');
-    
+
     if (!audio) {
         console.error('❌ Global audio element not found!');
         return false;
     }
-    
+
     audio.currentTime = 0;
-    
+
     const playPromise = audio.play();
-    
+
     if (playPromise !== undefined) {
         playPromise
             .then(() => {
@@ -163,7 +163,7 @@ function playNotificationSoundHTML5() {
                 return false;
             });
     }
-    
+
     return false;
 }
 
@@ -172,12 +172,12 @@ function playGlobalNotificationSound() {
     console.log('🎵 Attempting to play global notification sound...');
     console.log('User has interacted:', userHasInteracted);
     console.log('Page visible:', isPageVisible);
-    
+
     if (!userHasInteracted) {
         console.log('⚠️ User has not interacted with the page yet. Audio will not play.');
         return;
     }
-    
+
     // Ensure audio context is resumed
     if (audioContext && audioContext.state === 'suspended') {
         audioContext.resume().then(() => {
@@ -202,11 +202,11 @@ function playGlobalNotificationSound() {
 function forceEnableGlobalAudio() {
     userHasInteracted = true;
     console.log('🔧 Global audio forcefully enabled');
-    
+
     if (!audioContext) {
         initializeAudioContext();
     }
-    
+
     if (audioContext && audioContext.state === 'suspended') {
         audioContext.resume().then(() => {
             console.log('✅ Global audio context resumed successfully');
@@ -214,7 +214,7 @@ function forceEnableGlobalAudio() {
             console.warn('⚠️ Could not resume global audio context:', error);
         });
     }
-    
+
     // Try to play a silent sound to unlock audio
     try {
         if (audioContext && audioContext.state === 'running') {
@@ -236,11 +236,11 @@ function forceEnableGlobalAudio() {
 function markGlobalUserInteraction() {
     userHasInteracted = true;
     console.log('✅ Global user interaction detected - audio can now play');
-    
+
     if (!audioContext) {
         initializeAudioContext();
     }
-    
+
     if (audioContext && audioContext.state === 'suspended') {
         audioContext.resume().then(() => {
             console.log('✅ Global audio context resumed on user interaction');
@@ -248,7 +248,7 @@ function markGlobalUserInteraction() {
             console.warn('⚠️ Could not resume global audio context:', error);
         });
     }
-    
+
     // Try to play a silent sound to unlock audio
     try {
         if (audioContext && audioContext.state === 'running') {
@@ -268,9 +268,9 @@ function markGlobalUserInteraction() {
 
 // Check if current page is notes page
 function isNotesPage() {
-    return window.location.pathname.includes('notes.php') || 
-           window.location.pathname.includes('/notes') ||
-           document.title.includes('تێبینیەکان');
+    return window.location.pathname.includes('notes.php') ||
+        window.location.pathname.includes('/notes') ||
+        document.title.includes('تێبینیەکان');
 }
 
 // Update unread notes badge globally
@@ -283,17 +283,17 @@ function updateGlobalUnreadNotesBadge() {
                 if (badge) {
                     const count = data.unread_count;
                     const previousCount = parseInt(badge.textContent) || 0;
-                    
+
                     if (count > 0) {
                         badge.textContent = count;
                         badge.style.display = 'inline';
-                        
+
                         // Play sound if count increased (new note added) AND not on notes page
                         if (count > previousCount && !isNotesPage()) {
                             console.log('📈 Global note count increased, playing notification sound...');
                             console.log('📍 Current page is notes page:', isNotesPage());
                             forceEnableGlobalAudio();
-                            
+
                             // Try to play sound with multiple attempts
                             setTimeout(() => {
                                 playGlobalNotificationSound();
@@ -321,13 +321,13 @@ function updateGlobalUnreadNotesBadge() {
 // Initialize global notification system
 function initializeGlobalNotifications() {
     console.log('🚀 Initializing global notification system...');
-    
+
     // Register service worker for background notifications
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('../assets/js/notification_sw.js')
             .then((registration) => {
                 console.log('✅ Service Worker registered successfully:', registration);
-                
+
                 // Request notification permission
                 if ('Notification' in window) {
                     Notification.requestPermission().then((permission) => {
@@ -339,30 +339,30 @@ function initializeGlobalNotifications() {
                 console.error('❌ Service Worker registration failed:', error);
             });
     }
-    
+
     // Check page visibility
     checkPageVisibility();
-    
+
     // Add visibility change listener
     document.addEventListener('visibilitychange', checkPageVisibility);
-    
+
     // Add user interaction listeners
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
         console.log('🖱️ Global click detected on:', e.target);
         markGlobalUserInteraction();
     });
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', function (e) {
         console.log('⌨️ Global keydown detected');
         markGlobalUserInteraction();
     });
-    document.addEventListener('touchstart', function(e) {
+    document.addEventListener('touchstart', function (e) {
         console.log('👆 Global touch detected');
         markGlobalUserInteraction();
     });
-    
+
     // Automatically enable audio on page load
     forceEnableGlobalAudio();
-    
+
     // Try to unlock audio immediately
     setTimeout(() => {
         forceEnableGlobalAudio();
@@ -370,53 +370,53 @@ function initializeGlobalNotifications() {
             audioContext.resume();
         }
     }, 100);
-    
+
     setTimeout(() => {
         forceEnableGlobalAudio();
         if (audioContext && audioContext.state === 'suspended') {
             audioContext.resume();
         }
     }, 1000);
-    
+
     // Update badge every 10 seconds
     updateGlobalUnreadNotesBadge();
     notificationInterval = setInterval(updateGlobalUnreadNotesBadge, 10000);
-    
+
     // Log current page status
     console.log('📍 Current page detection:', isNotesPage() ? 'Notes page' : 'Other page');
-    
+
     console.log('✅ Global notification system initialized');
 }
 
 // Listen for custom events
-document.addEventListener('noteAdded', function() {
+document.addEventListener('noteAdded', function () {
     console.log('📝 Global note added event received');
     updateGlobalUnreadNotesBadge();
 });
 
-document.addEventListener('noteMarkedAsRead', function() {
+document.addEventListener('noteMarkedAsRead', function () {
     console.log('👁️ Global note marked as read event received');
     updateGlobalUnreadNotesBadge();
 });
 
-document.addEventListener('noteDeleted', function() {
+document.addEventListener('noteDeleted', function () {
     console.log('🗑️ Global note deleted event received');
     updateGlobalUnreadNotesBadge();
 });
 
-document.addEventListener('noteUpdated', function() {
+document.addEventListener('noteUpdated', function () {
     console.log('✏️ Global note updated event received');
     updateGlobalUnreadNotesBadge();
 });
 
-document.addEventListener('noteAddedWithSound', function() {
+document.addEventListener('noteAddedWithSound', function () {
     console.log('🔊 Global note added with sound event received');
-    
+
     // Only play sound if not on notes page
     if (!isNotesPage()) {
         console.log('📍 Not on notes page - playing sound');
         forceEnableGlobalAudio();
-        
+
         // Try to play sound with multiple attempts
         setTimeout(() => {
             playGlobalNotificationSound();
@@ -443,13 +443,13 @@ window.updateGlobalUnreadNotesBadge = updateGlobalUnreadNotesBadge;
 window.isNotesPage = isNotesPage;
 
 // Test function for debugging
-window.testNotesPageDetection = function() {
+window.testNotesPageDetection = function () {
     console.log('🧪 Testing notes page detection...');
     console.log('Current URL:', window.location.href);
     console.log('Current pathname:', window.location.pathname);
     console.log('Current title:', document.title);
     console.log('Is notes page:', isNotesPage());
-    
+
     if (isNotesPage()) {
         console.log('📍 Currently on notes page - notifications will be disabled');
     } else {

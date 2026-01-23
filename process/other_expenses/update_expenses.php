@@ -458,14 +458,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             getUserIP()
                         );
 
+                        $pdo->commit();
                         echo json_encode(['success' => true]);
                     } else {
+                        $pdo->rollBack();
                         echo json_encode(['success' => false, 'msg' => 'هەڵە لە نوێکردنەوە']);
                     }
     exit;
 }
 echo json_encode(['success' => false, 'msg' => 'POST تەنها ڕێگەپێدراوە']);
     } catch (Exception $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
         error_log('Error in update_expenses.php: ' . $e->getMessage());
         error_log('Stack trace: ' . $e->getTraceAsString());
         

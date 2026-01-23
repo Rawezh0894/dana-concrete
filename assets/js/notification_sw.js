@@ -57,21 +57,21 @@ async function checkForNewNotes() {
     try {
         const response = await fetch('../process/notes/get_unread_count.php');
         const data = await response.json();
-        
+
         if (data.success && data.unread_count > 0) {
             // Check if user is currently on notes page
             const clients = await self.clients.matchAll();
             let isOnNotesPage = false;
-            
+
             for (const client of clients) {
-                if (client.url.includes('notes.php') || 
+                if (client.url.includes('notes.php') ||
                     client.url.includes('/notes') ||
                     client.title.includes('تێبینیەکان')) {
                     isOnNotesPage = true;
                     break;
                 }
             }
-            
+
             // Only show notification if not on notes page
             if (!isOnNotesPage) {
                 console.log('📱 Showing background notification - user not on notes page');
@@ -104,9 +104,9 @@ async function checkForNewNotes() {
 // Handle notification clicks
 self.addEventListener('notificationclick', (event) => {
     console.log('🖱️ Notification clicked:', event.action);
-    
+
     event.notification.close();
-    
+
     if (event.action === 'view') {
         event.waitUntil(
             clients.openWindow('../pages/notes.php')
@@ -117,7 +117,7 @@ self.addEventListener('notificationclick', (event) => {
 // Handle push notifications
 self.addEventListener('push', (event) => {
     console.log('📱 Push notification received');
-    
+
     const options = {
         body: 'تێبینی نوێ هەیە',
         icon: '../assets/images/logo.png',
@@ -135,7 +135,7 @@ self.addEventListener('push', (event) => {
             }
         ]
     };
-    
+
     event.waitUntil(
         self.registration.showNotification('دانا کۆنکرێت', options)
     );

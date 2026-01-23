@@ -10,27 +10,27 @@
 
 // Format functions - بۆ بەکارهێنانی لە هەموو پەیجەکاندا
 window.AGGridFormatters = {
-    formatNumber: function(n) {
+    formatNumber: function (n) {
         if (n === null || n === undefined || n === '') return '';
         return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     },
-    
-    formatUSD: function(n) {
+
+    formatUSD: function (n) {
         if (n === null || n === undefined || n === '' || isNaN(n)) return '-';
         return window.AGGridFormatters.formatNumber(Number(n).toFixed(2)) + ' $';
     },
-    
-    formatIQD: function(n) {
+
+    formatIQD: function (n) {
         if (n === null || n === undefined || n === '' || isNaN(n)) return '-';
         return window.AGGridFormatters.formatNumber(Number(n).toFixed(0)) + ' د.ع';
     },
-    
-    formatDate: function(dateStr) {
+
+    formatDate: function (dateStr) {
         if (!dateStr) return '-';
         return dateStr;
     },
-    
-    truncateText: function(text, maxLength = 40) {
+
+    truncateText: function (text, maxLength = 40) {
         if (!text) return '-';
         if (text.length <= maxLength) return text;
         return text.substring(0, maxLength) + '...';
@@ -122,7 +122,7 @@ function initAGGrid(gridId, columnDefs, customOptions = {}) {
         console.error(`Grid container with ID "${gridId}" not found!`);
         return null;
     }
-    
+
     // Merge default options with custom options
     const gridOptions = {
         ...window.AGGridDefaults,
@@ -139,10 +139,10 @@ function initAGGrid(gridId, columnDefs, customOptions = {}) {
             ...(customOptions.localeText || {})
         }
     };
-    
+
     // Use createGrid for AG Grid v31+
     const gridApi = agGrid.createGrid(gridDiv, gridOptions);
-    
+
     return gridApi;
 }
 
@@ -161,7 +161,7 @@ function loadAGGridData(gridApi, url, dataTransformer = null, preservePagination
         console.error('Grid API not provided!');
         return;
     }
-    
+
     // Save current pagination state
     let currentPage = 0;
     let pageSize = 25;
@@ -169,20 +169,20 @@ function loadAGGridData(gridApi, url, dataTransformer = null, preservePagination
         currentPage = gridApi.paginationGetCurrentPage() || 0;
         pageSize = gridApi.paginationGetPageSize() || 25;
     }
-    
+
     // Show loading
     gridApi.showLoadingOverlay();
-    
+
     fetch(url)
         .then(response => response.json())
         .then(data => {
             if (data.success && data.data) {
                 // Transform data if transformer function provided
                 let rowData = dataTransformer ? dataTransformer(data.data) : data.data;
-                
+
                 gridApi.setGridOption('rowData', rowData);
                 gridApi.hideOverlay();
-                
+
                 // Restore pagination state if preserving
                 if (preservePagination) {
                     setTimeout(() => {
@@ -222,11 +222,11 @@ function exportAGGridToCSV(gridApi, fileName) {
         console.error('Grid API not provided!');
         return;
     }
-    
+
     const params = {
         fileName: fileName
     };
-    
+
     gridApi.exportDataAsCsv(params);
 }
 
@@ -245,7 +245,7 @@ function exportAGGridToExcel(gridApi, fileName, sheetName = 'Sheet1') {
         console.error('Grid API not provided!');
         return;
     }
-    
+
     // Check if exportDataAsExcel is available (Enterprise feature)
     if (typeof gridApi.exportDataAsExcel === 'function') {
         const params = {
