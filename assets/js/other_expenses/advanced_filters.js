@@ -76,17 +76,11 @@ class AdvancedFilters {
         });
 
         // Expense type checkboxes - auto apply with debouncing
-        document.getElementById('expenseTypeOther')?.addEventListener('change', (e) => {
-            this.updateExpenseTypeFilters();
-            this.debouncedApplyFilters();
-        });
-        document.getElementById('expenseTypeMaterial')?.addEventListener('change', (e) => {
-            this.updateExpenseTypeFilters();
-            this.debouncedApplyFilters();
-        });
-        document.getElementById('expenseTypeGas')?.addEventListener('change', (e) => {
-            this.updateExpenseTypeFilters();
-            this.debouncedApplyFilters();
+        document.querySelectorAll('input[id^="expenseType"], input[id^="filter_expense_type"]').forEach(cb => {
+            cb.addEventListener('change', () => {
+                this.updateExpenseTypeFilters();
+                this.debouncedApplyFilters();
+            });
         });
 
 
@@ -105,15 +99,10 @@ class AdvancedFilters {
 
     updateExpenseTypeFilters() {
         this.filters.expenseTypes = [];
-        const checkboxes = [
-            'expenseTypeOther',
-            'expenseTypeMaterial',
-            'expenseTypeGas'
-        ];
+        const checkboxes = document.querySelectorAll('input[id^="expenseType"], input[id^="filter_expense_type"]');
 
-        checkboxes.forEach(id => {
-            const checkbox = document.getElementById(id);
-            if (checkbox && checkbox.checked) {
+        checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
                 this.filters.expenseTypes.push(checkbox.value);
             }
         });
@@ -224,7 +213,10 @@ class AdvancedFilters {
 
 
     formatDate(date) {
-        return date.toISOString().split('T')[0];
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
     }
 
     async applyFilters() {

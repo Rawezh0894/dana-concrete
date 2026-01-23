@@ -247,7 +247,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             updateRemaining();
         }
-        function updateRemaining() {
+        window.updateRemaining = function () {
             let amountIqdVal = parseFloat(amountIqd.value) || 0;
             let amountUsdVal = parseFloat(amountUsd.value) || 0;
             let paidIqdVal = parseFloat(paidIqd.value) || 0;
@@ -1348,6 +1348,28 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Populate gas purchase price from bins_silos
             populateGasPurchasePrice(formType);
+        } else if (expenseType === 'کڕینی کاڵا بۆ کۆگا') {
+            // Show material fields for "Stock purchase"
+            gasMaterialFields.forEach(field => {
+                const fieldId = field.querySelector('input, select')?.id || '';
+                if (fieldId.includes('material_') || fieldId.includes('usage_unit_type')) {
+                    field.style.display = 'block';
+                    field.classList.add('show');
+                } else {
+                    field.style.display = 'none';
+                    field.classList.remove('show');
+                }
+            });
+            // Ensure payment/person fields are visible for purchase
+            fieldsToHideForWarehouse.forEach(fieldName => {
+                const field = document.getElementById(fieldName) || document.getElementById(prefix + fieldName);
+                if (field) {
+                    const container = field.closest('.warehouse-hidden-field');
+                    if (container) {
+                        container.classList.remove('hide');
+                    }
+                }
+            });
         } else if (expenseType === 'خواردنگە' || expenseType === 'ئۆفیس') {
             // Show all fields for "خواردنگە" and "ئۆفیس" (same as "خەرجی تر")
             gasMaterialFields.forEach(field => {
@@ -1593,6 +1615,38 @@ document.addEventListener('DOMContentLoaded', function () {
                             }
                         });
                 }
+            }
+        });
+    }
+});
+
+// Function to generate a unique invoice number based on timestamp
+function generateUniqueInvoiceNumber() {
+    const now = new Date();
+    const timestamp = now.getTime().toString().slice(-8); // Get last 8 digits of timestamp
+    const random = Math.floor(Math.random() * 100); // Add 2 random digits
+    return 'INV-' + timestamp + random;
+}
+
+// Add event listeners for the generate invoice buttons
+document.addEventListener('DOMContentLoaded', function () {
+    const generateBtn = document.getElementById('generateInvoiceBtn');
+    const editGenerateBtn = document.getElementById('editGenerateInvoiceBtn');
+
+    if (generateBtn) {
+        generateBtn.addEventListener('click', function () {
+            const invoiceInput = document.getElementById('invoice_number');
+            if (invoiceInput) {
+                invoiceInput.value = generateUniqueInvoiceNumber();
+            }
+        });
+    }
+
+    if (editGenerateBtn) {
+        editGenerateBtn.addEventListener('click', function () {
+            const invoiceInput = document.getElementById('edit_invoice_number');
+            if (invoiceInput) {
+                invoiceInput.value = generateUniqueInvoiceNumber();
             }
         });
     }

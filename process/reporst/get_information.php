@@ -461,7 +461,7 @@ try {
     $total_expenses_breakdown['employee_payments'] = $total_employee_expenses_usd;
 
     // Other expenses - including all expense types with date filter - includes cash box operations
-    $other_expenses_query = "SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd FROM other_expenses WHERE expense_type IN ('خەرجی تر', 'خواردنگە', 'ئۆفیس') $date_condition_date";
+    $other_expenses_query = "SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd FROM other_expenses WHERE expense_type IN ('خەرجی تر', 'خواردنگە', 'ئۆفیس', 'کڕینی کاڵا بۆ کۆگا') $date_condition_date";
     $stmt = $pdo->query($other_expenses_query);
     $row = $stmt->fetch();
     $other_expenses_usd = $row['usd'] ?? 0;
@@ -603,7 +603,7 @@ try {
                 ELSE 0 
             END) as other_expenses_usd
             FROM other_expenses 
-            WHERE expense_type = 'خەرجی تر' 
+            WHERE expense_type IN ('خەرجی تر', 'خواردنگە', 'ئۆفیس', 'کڕینی کاڵا بۆ کۆگا') 
             AND date BETWEEN ? AND ?";
         $stmt = $pdo->prepare($other_expenses_query);
         $stmt->execute([$from_date, $to_date]);

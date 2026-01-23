@@ -106,6 +106,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $update->execute([$row['remaining_usd'], $row['remaining_iqd'], $row['person_id']]);
         }
 
+        // Reverse stock increment if it was a warehouse purchase
+        if ($row['expense_type'] === 'کڕینی کاڵا بۆ کۆگا' && $row['material_id'] && $row['base_material_quantity'] > 0) {
+            $update_stock = $pdo->prepare("UPDATE list_materials SET quantity = quantity - ? WHERE id = ?");
+            $update_stock->execute([$row['base_material_quantity'], $row['material_id']]);
+        }
+
         createDetailedNotification(
             $pdo,
             $_SESSION['user_id'],

@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
      $gas_liters = isset($_POST['gas_liters']) ? floatval($_POST['gas_liters']) : null;
     $expense_type = $_POST['expense_type'] ?? 'خەرجی تر'; // Default to خەرجی تر if empty
     // Ensure expense_type is valid
-    if (!in_array($expense_type, ['بەکارهێنانی کاڵای کۆگا', 'بەکارهێنانی گاز', 'خەرجی تر', 'خواردنگە', 'ئۆفیس'])) {
+    if (!in_array($expense_type, ['بەکارهێنانی کاڵای کۆگا', 'بەکارهێنانی گاز', 'خەرجی تر', 'خواردنگە', 'ئۆفیس', 'کڕینی کاڵا بۆ کۆگا'])) {
         $expense_type = 'خەرجی تر';
     }
     $material_id = $_POST['material_id'] ?? null;
@@ -191,14 +191,86 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Check for duplicate invoice_number
-    if ($invoice_number) {
-        $stmt = $pdo->prepare('SELECT COUNT(*) FROM other_expenses WHERE invoice_number = ?');
-        $stmt->execute([$invoice_number]);
-        if ($stmt->fetchColumn() > 0) {
-            echo json_encode(['success' => false, 'msg' => 'ئەم ژمارەی پسوڵەیە پێشتر تۆمارکراوە!']);
-            exit;
+    // Check for invoice_number
+    if (empty($invoice_number)) {
+        echo json_encode(['success' => false, 'msg' => 'تکایە ژمارەی وەسڵ بنووسە']);
+        exit;
+    }
+
+    // Check for duplicate invoice_number on the same date
+    $stmt = $pdo->prepare('SELECT COUNT(*) FROM other_expenses WHERE invoice_number = ? AND date = ?');
+    $stmt->execute([$invoice_number, $date]);
+    if ($stmt->fetchColumn() > 0) {
+        echo json_encode(['success' => false, 'msg' => 'ئەم ژمارەی پسوڵەیە پێشتر لەم بەروارەدا تۆمارکراوە!']);
+        exit;
+    }
+
+    $invoice_splits_json = $_POST['invoice_splits'] ?? null;
+    $splits = [];
+    if ($invoice_splits_json) {
+        $splits = json_decode($invoice_splits_json, true);
+    }
+
+    $pdo->beginTransaction();
+
+    // Prepare objects for multi-insertion
+    $insert_objects = [];
+
+    if (!empty($splits)) {
+        // Mixed split mode
+        foreach ($splits as $split) {
+            $split_row_type = $split['type']; // 'car' or 'stock'
+            $split_car_id = ($split_row_type === 'car') ? $split['car_id'] : null;
+            $split_material_id = ($split_row_type === 'stock') ? $split['material_id'] : null;
+            $split_material_quantity = ($split_row_type === 'stock') ? floatval($split['quantity']) : null;
+            $split_usage_unit_type = ($split_row_type === 'stock') ? ($split['usage_unit_type'] ?? 'دانە') : null;
+            $split_amount_iqd = floatval($split['amount_iqd']);
+            $split_amount_usd = floatval($split['amount_usd']);
+            
+            // Proportional distribution of payment
+            $split_paid_iqd = 0;
+            if ($amount_iqd > 0) {
+                $split_paid_iqd = ($split_amount_iqd / $amount_iqd) * $paid_iqd;
+            }
+            $split_paid_usd = 0;
+            if ($amount_usd > 0) {
+                $split_paid_usd = ($split_amount_usd / $amount_usd) * $paid_usd;
+            }
+            
+            $split_remaining_iqd = $split_amount_iqd - $split_paid_iqd;
+            $split_remaining_usd = $split_amount_usd - $split_paid_usd;
+
+            $insert_objects[] = [
+                'type' => $split_row_type,
+                'car_id' => $split_car_id,
+                'material_id' => $split_material_id,
+                'material_quantity' => $split_material_quantity,
+                'usage_unit_type' => $split_usage_unit_type,
+                'amount_iqd' => $split_amount_iqd,
+                'amount_usd' => $split_amount_usd,
+                'paid_iqd' => $split_paid_iqd,
+                'paid_usd' => $split_paid_usd,
+                'remaining_iqd' => $split_remaining_iqd,
+                'remaining_usd' => $split_remaining_usd,
+                'expense_type' => ($split_row_type === 'stock') ? 'کڕینی کاڵا بۆ کۆگا' : $expense_type
+            ];
         }
+    } else {
+        // Single mode (could be car or material usage or general)
+        $insert_objects[] = [
+            'type' => ($car_id ? 'car' : ($material_id ? 'stock' : 'general')),
+            'car_id' => $car_id ?: null,
+            'material_id' => $material_id ?: null,
+            'material_quantity' => $material_quantity,
+            'usage_unit_type' => $usage_unit_type,
+            'amount_iqd' => $amount_iqd,
+            'amount_usd' => $amount_usd,
+            'paid_iqd' => $paid_iqd,
+            'paid_usd' => $paid_usd,
+            'remaining_iqd' => $remaining_iqd,
+            'remaining_usd' => $remaining_usd,
+            'expense_type' => $expense_type
+        ];
     }
 
     $sql = "INSERT INTO other_expenses (
@@ -206,116 +278,132 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         amount_iqd, amount_usd, paid_iqd, paid_usd, exchange_rate, remaining_iqd, remaining_usd, date, base_material_quantity, usage_unit_type
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     $stmt = $pdo->prepare($sql);
-    $ok = $stmt->execute([
-        $purpose,
-        $person_id,
-        $employee_id ?: null,
-        $car_id ?: null,
-        $gas_liters,
-        $expense_type,
-        $material_id,
-        $material_quantity,
-        $material_purchase_price_iqd,
-        $material_purchase_price_usd,
-        $material_total_cost,
-        $gas_purchase_price_input,
-        $gas_total_cost,
-        $payment_type,
-        $currency_type,
-        $invoice_number,
-        $amount_iqd,
-        $amount_usd,
-        $paid_iqd,
-        $paid_usd,
-        $exchange_rate,
-        $remaining_iqd,
-        $remaining_usd,
-        $date,
-        $base_material_quantity,
-        $usage_unit_type
-    ]);
-    if ($ok) {
-                            // Update person expense if person_id is set
-                    if ($person_id) {
-                        $update = $pdo->prepare('UPDATE other_expense_persons SET expense_usd = expense_usd + ?, expense_iqd = expense_iqd + ? WHERE id = ?');
-                        $update->execute([$remaining_usd, $remaining_iqd, $person_id]);
-                    }
-                    // Note: Gas consumption is now handled automatically by database triggers
-                    // when expense_type = 'بەکارهێنانی گاز' and gas_liters > 0
+
+    foreach ($insert_objects as $obj) {
+        // Calculate base_material_quantity if it's a stock-related row
+        $current_base_qty = $obj['material_quantity'];
+        if ($obj['material_id'] && $obj['material_quantity'] > 0 && $obj['usage_unit_type']) {
+            $m_sql = "SELECT unit_type, pieces_per_carton, buckets_per_barrel, liters_per_bucket, liters_per_barrel FROM list_materials WHERE id = ?";
+            $m_stmt = $pdo->prepare($m_sql);
+            $m_stmt->execute([$obj['material_id']]);
+            $m_data = $m_stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($m_data) {
+                $pieces_per_carton = floatval($m_data['pieces_per_carton'] ?? 0);
+                $liters_per_barrel = floatval($m_data['liters_per_barrel'] ?? 0);
+                $liters_per_bucket = floatval($m_data['liters_per_bucket'] ?? 0);
+                $mat_unit = $m_data['unit_type'];
+                $row_unit = $obj['usage_unit_type'];
+                $qty = $obj['material_quantity'];
+
+                if ($row_unit === 'کارتۆن' && $mat_unit === 'کارتۆن' && $pieces_per_carton > 0) {
+                    $current_base_qty = $qty * $pieces_per_carton;
+                } elseif ($row_unit === 'بەرمیل' && $mat_unit === 'بەرمیل' && $liters_per_barrel > 0) {
+                    $current_base_qty = $qty * $liters_per_barrel;
+                } elseif ($row_unit === 'دەبە' && ($mat_unit === 'بەرمیل' || $mat_unit === 'دەبە') && $liters_per_bucket > 0) {
+                    $current_base_qty = $qty * $liters_per_bucket;
+                } else {
+                    $current_base_qty = $qty;
+                }
+            }
+        }
+
+        $ok = $stmt->execute([
+            $purpose,
+            $person_id,
+            $employee_id ?: null,
+            $obj['car_id'],
+            $gas_liters,
+            $obj['expense_type'],
+            $obj['material_id'],
+            $obj['material_quantity'],
+            $material_purchase_price_iqd,
+            $material_purchase_price_usd,
+            $material_total_cost,
+            $gas_purchase_price_input,
+            $gas_total_cost,
+            $payment_type,
+            $currency_type,
+            $invoice_number,
+            $obj['amount_iqd'],
+            $obj['amount_usd'],
+            $obj['paid_iqd'],
+            $obj['paid_usd'],
+            $exchange_rate,
+            $obj['remaining_iqd'],
+            $obj['remaining_usd'],
+            $date,
+            $current_base_qty,
+            $obj['usage_unit_type']
+        ]);
+
+        if (!$ok) {
+            $pdo->rollBack();
+            echo json_encode(['success' => false, 'msg' => 'هەڵە لە زیادکردن']);
+            exit;
+        }
+
         $expense_id = $pdo->lastInsertId();
 
-        // Get related information for notification
-        $person_name = 'هیچ کەسێک نییە';
-        $employee_name = 'هیچ کارمەندێک نییە';
-        $car_name = 'هیچ سەیارەیەک نییە';
-        $material_name = 'هیچ مادەیەک نییە';
+        // Increment stock if it's a purchase
+        if ($obj['expense_type'] === 'کڕینی کاڵا بۆ کۆگا' && $obj['material_id'] && $current_base_qty > 0) {
+            $update_stock = $pdo->prepare("UPDATE list_materials SET quantity = quantity + ? WHERE id = ?");
+            $update_stock->execute([$current_base_qty, $obj['material_id']]);
+        }
 
+        // Update person expense if person_id is set
         if ($person_id) {
-            $stmt = $pdo->prepare("SELECT name FROM other_expense_persons WHERE id = ?");
-            $stmt->execute([$person_id]);
-            $person = $stmt->fetch();
-            $person_name = $person['name'] ?? 'Unknown';
+            $update = $pdo->prepare('UPDATE other_expense_persons SET expense_usd = expense_usd + ?, expense_iqd = expense_iqd + ? WHERE id = ?');
+            $update->execute([$obj['remaining_usd'], $obj['remaining_iqd'], $person_id]);
+        }
+        
+        // Notifications
+        $car_name = 'هیچ سەیارەیەک نییە';
+        if ($obj['car_id']) {
+            $c_stmt = $pdo->prepare("SELECT name FROM cars WHERE id = ?");
+            $c_stmt->execute([$obj['car_id']]);
+            $car_name = $c_stmt->fetch()['name'] ?? 'Unknown';
         }
 
-        if ($employee_id) {
-            $stmt = $pdo->prepare("SELECT name FROM employees WHERE id = ?");
-            $stmt->execute([$employee_id]);
-            $employee = $stmt->fetch();
-            $employee_name = $employee['name'] ?? 'Unknown';
+        $material_name_split = 'هیچ مادەیەک نییە';
+        if ($obj['material_id']) {
+            $m_stmt = $pdo->prepare("SELECT name FROM list_materials WHERE id = ?");
+            $m_stmt->execute([$obj['material_id']]);
+            $material_name_split = $m_stmt->fetch()['name'] ?? 'Unknown';
         }
 
-        if ($car_id) {
-            $stmt = $pdo->prepare("SELECT name FROM cars WHERE id = ?");
-            $stmt->execute([$car_id]);
-            $car = $stmt->fetch();
-            $car_name = $car['name'] ?? 'Unknown';
+        // ... (rest of notification logic simplified for brevity or keep as is)
+        static $cached_person_name = null;
+        static $cached_employee_name = null;
+        if ($cached_person_name === null && $person_id) {
+            $p_stmt = $pdo->prepare("SELECT name FROM other_expense_persons WHERE id = ?");
+            $p_stmt->execute([$person_id]);
+            $cached_person_name = $p_stmt->fetch()['name'] ?? 'Unknown';
+        }
+        if ($cached_employee_name === null && $employee_id) {
+            $e_stmt = $pdo->prepare("SELECT name FROM employees WHERE id = ?");
+            $e_stmt->execute([$employee_id]);
+            $cached_employee_name = $e_stmt->fetch()['name'] ?? 'Unknown';
         }
 
-        if ($material_id) {
-            $stmt = $pdo->prepare("SELECT name FROM materials WHERE id = ?");
-            $stmt->execute([$material_id]);
-            $material = $stmt->fetch();
-            $material_name = $material['name'] ?? 'Unknown';
-        }
-
-        // Create detailed notification
         $new_values = [
             'person_id' => $person_id,
-            'person_name' => $person_name,
+            'person_name' => $cached_person_name,
             'employee_id' => $employee_id,
-            'employee_name' => $employee_name,
-            'car_id' => $car_id,
+            'employee_name' => $cached_employee_name,
+            'car_id' => $obj['car_id'],
             'car_name' => $car_name,
-            'gas_liters' => $gas_liters,
-            'expense_type' => $expense_type,
-            'material_id' => $material_id,
-            'material_name' => $material_name,
-            'material_quantity' => $material_quantity,
-            'material_purchase_price_iqd' => $material_purchase_price_iqd,
-            'material_purchase_price_usd' => $material_purchase_price_usd,
-            'material_total_cost' => $material_total_cost,
-            'gas_purchase_price_input' => $gas_purchase_price_input,
-            'gas_total_cost' => $gas_total_cost,
-            'payment_type' => $payment_type,
-            'currency_type' => $currency_type,
+            'material_id' => $obj['material_id'],
+            'material_name' => $material_name_split,
+            'expense_type' => $obj['expense_type'],
+            'amount_iqd' => $obj['amount_iqd'],
+            'amount_usd' => $obj['amount_usd'],
+            'paid_iqd' => $obj['paid_iqd'],
+            'paid_usd' => $obj['paid_usd'],
+            'remaining_iqd' => $obj['remaining_iqd'],
+            'remaining_usd' => $obj['remaining_usd'],
             'invoice_number' => $invoice_number,
-            'amount_iqd' => $amount_iqd,
-            'amount_usd' => $amount_usd,
-            'paid_iqd' => $paid_iqd,
-            'paid_usd' => $paid_usd,
-            'exchange_rate' => $exchange_rate,
-            'remaining_iqd' => $remaining_iqd,
-            'remaining_usd' => $remaining_usd,
             'date' => $date
-        ];
-
-        $additional_info = [
-            'action_type' => 'other_expense_creation',
-            'payment_status' => $payment_type === 'نەقد' ? 'paid' : 'credit',
-            'currency_used' => $paid_usd > 0 ? 'USD' : ($paid_iqd > 0 ? 'IQD' : 'none'),
-            'total_paid' => $paid_usd + $paid_iqd,
-            'remaining_debt' => $remaining_usd + $remaining_iqd,
-            'expense_category' => $expense_type
         ];
 
         createDetailedNotification(
@@ -324,18 +412,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'insert',
             'other_expenses',
             $expense_id,
-            "خەرجی تر زیادکرا (invoice: $invoice_number, جۆر: $expense_type, کەس: $person_name, کارمەند: $employee_name, سەیارە: $car_name)",
-            null, // No old values for insert
+            "خەرجی تر زیادکرا ({$obj['expense_type']}, invoice: $invoice_number)",
+            null,
             $new_values,
-            $additional_info,
+            [],
             getUserIP()
         );
-
-        echo json_encode(['success' => true]);
-    } else {
-        echo json_encode(['success' => false, 'msg' => 'هەڵە لە زیادکردن']);
     }
+
+    $pdo->commit();
+    echo json_encode(['success' => true]);
     exit;
+
 }
 echo json_encode(['success' => false, 'msg' => 'POST تەنها ڕێگەپێدراوە']);
     } catch (Exception $e) {

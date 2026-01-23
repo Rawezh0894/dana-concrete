@@ -1,5 +1,9 @@
 // Multiple submission prevention flag
 let submittingExpense = false;
+let isSplitMode = false;
+let carOptionsHtml = '';
+let materialOptionsHtml = ''; // For storing material selections
+
 const addExpenseForm = document.getElementById('addExpenseForm');
 if (addExpenseForm) {
     addExpenseForm.onsubmit = async function (e) {
@@ -60,6 +64,51 @@ if (addExpenseForm) {
             }
         }
         const formData = new FormData(addExpenseForm);
+
+        // If split mode is active, collect split data
+        if (isSplitMode) {
+            const splits = [];
+            document.querySelectorAll('.invoice-split-row').forEach(row => {
+                const rowType = row.querySelector('.split-row-type').value;
+                const carId = row.querySelector('.split-car-id')?.value;
+                const materialId = row.querySelector('.split-material-id')?.value;
+                const quantity = row.querySelector('.split-quantity')?.value || 0;
+                const amountIqd = row.querySelector('.split-amount-iqd').value;
+                const amountUsd = row.querySelector('.split-amount-usd').value;
+
+                if (rowType === 'car' && carId) {
+                    splits.push({
+                        type: 'car',
+                        car_id: carId,
+                        amount_iqd: amountIqd || 0,
+                        amount_usd: amountUsd || 0
+                    });
+                } else if (rowType === 'stock' && materialId) {
+                    splits.push({
+                        type: 'stock',
+                        material_id: materialId,
+                        quantity: quantity,
+                        usage_unit_type: row.querySelector('.split-unit-type')?.value || '',
+                        amount_iqd: amountIqd || 0,
+                        amount_usd: amountUsd || 0
+                    });
+                }
+            });
+
+            if (splits.length === 0) {
+                Swal.fire('هەڵە!', 'تکایە لانیکەم بڕگەیەک هەڵبژێرە لە دابەشکردنەکەدا!', 'error');
+                submittingExpense = false;
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
+                }
+                return;
+            }
+            formData.append('invoice_splits', JSON.stringify(splits));
+            formData.set('car_id', ''); // Clear main car_id
+            formData.set('material_id', '');
+        }
+
         // Add gas_liters if present in the form
         if (document.getElementById('gas_liters')) {
             formData.append('gas_liters', document.getElementById('gas_liters').value);
@@ -301,12 +350,167 @@ if (addExpenseModal) {
     addExpenseModal.addEventListener('show.bs.modal', function () {
         populateSelect('../process/other_expenses/select_persons.php', 'person_id');
         populateSelect('../process/other_expenses/select_employees.php', 'employee_id');
-        populateSelect('../process/other_expenses/select_cars.php', 'car_id');
-        populateSelect('../process/other_expenses/select_materials.php', 'material_id');
+        populateSelect('../process/other_expenses/select_cars.php', 'car_id').then(() => {
+            // Save car options for future rows
+            const carSelect = document.getElementById('car_id');
+            carOptionsHtml = carSelect.innerHTML;
+        });
+        populateSelect('../process/other_expenses/select_materials.php', 'material_id').then(() => {
+            // Save material options for future rows
+            const materialSelect = document.getElementById('material_id');
+            materialOptionsHtml = materialSelect.innerHTML;
+        });
+
+        // Reset split mode
+        isSplitMode = false;
+        document.getElementById('splitItemsContainer').style.display = 'none';
+        document.getElementById('singleCarContainer').style.display = 'block';
+        document.getElementById('invoiceSplitsList').innerHTML = '';
+        document.getElementById('toggleSplitCars').innerText = 'دابەشکردن';
 
         // Fetch and set USD exchange rate when modal opens
         fetchAndSetUsdRate();
     });
+}
+
+// Split Mode Toggling
+document.getElementById('toggleSplitCars')?.addEventListener('click', function () {
+    isSplitMode = !isSplitMode;
+    const splitContainer = document.getElementById('splitItemsContainer');
+    const singleContainer = document.getElementById('singleCarContainer');
+
+    if (isSplitMode) {
+        splitContainer.style.display = 'block';
+        singleContainer.style.display = 'none';
+        this.innerText = 'گەڕانەوە';
+        this.classList.replace('btn-outline-primary', 'btn-outline-secondary');
+
+        // Add first row if empty
+        if (document.getElementById('invoiceSplitsList').children.length === 0) {
+            addInvoiceSplitRow();
+        }
+    } else {
+        splitContainer.style.display = 'none';
+        singleContainer.style.display = 'block';
+        this.innerText = 'دابەشکردن';
+        this.classList.replace('btn-outline-secondary', 'btn-outline-primary');
+    }
+});
+
+document.getElementById('addSplitRow')?.addEventListener('click', addInvoiceSplitRow);
+
+function addInvoiceSplitRow() {
+    const list = document.getElementById('invoiceSplitsList');
+    const rowId = Date.now();
+    const row = document.createElement('div');
+    row.className = 'invoice-split-row row g-2 mb-2 align-items-end border-bottom pb-2';
+    row.innerHTML = `
+        <div class="col-md-2">
+            <label class="form-label small">جۆر</label>
+            <select class="form-control form-control-sm split-row-type">
+                <option value="car">خەرجی سەیارە</option>
+                <option value="stock">کڕینی کۆگا</option>
+            </select>
+        </div>
+        <div class="col-md-3 entity-container">
+            <label class="form-label small">سەیارە</label>
+            <select class="form-control form-control-sm split-car-id select2-dynamic">
+                ${carOptionsHtml}
+            </select>
+        </div>
+        <div class="col-md-2 qty-container" style="display: none;">
+            <div class="row g-1">
+                <div class="col-6">
+                    <label class="form-label small">بڕ (Qty)</label>
+                    <input type="number" step="0.01" class="form-control form-control-sm split-quantity" value="0">
+                </div>
+                <div class="col-6">
+                    <label class="form-label small">یەکە</label>
+                    <select class="form-control form-control-sm split-unit-type">
+                        <option value="دانە">دانە</option>
+                        <option value="کارتۆن">کارتۆن</option>
+                        <option value="بەرمیل">بەرمیل</option>
+                        <option value="دەبە">دەبە</option>
+                        <option value="لیتر">لیتر</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small">دینار</label>
+            <input type="number" step="0.01" class="form-control form-control-sm split-amount-iqd" value="0">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small">دۆلار</label>
+            <input type="number" step="0.01" class="form-control form-control-sm split-amount-usd" value="0">
+        </div>
+        <div class="col-md-1">
+            <button type="button" class="btn btn-sm btn-danger remove-split-row"><i class="fas fa-trash"></i></button>
+        </div>
+    `;
+    list.appendChild(row);
+
+    // Switch between Car/Material
+    const typeSelect = row.querySelector('.split-row-type');
+    const entityContainer = row.querySelector('.entity-container');
+    const qtyContainer = row.querySelector('.qty-container');
+
+    typeSelect.addEventListener('change', function () {
+        if (this.value === 'car') {
+            entityContainer.innerHTML = `<label class="form-label small">سەیارە</label><select class="form-control form-control-sm split-car-id select2-dynamic">${carOptionsHtml}</select>`;
+            qtyContainer.style.display = 'none';
+        } else {
+            entityContainer.innerHTML = `<label class="form-label small">کاڵا</label><select class="form-control form-control-sm split-material-id select2-dynamic">${materialOptionsHtml}</select>`;
+            qtyContainer.style.display = 'block';
+        }
+        initSelect2InRow(row);
+    });
+
+    initSelect2InRow(row);
+
+    // Attach removal logic
+    row.querySelector('.remove-split-row').addEventListener('click', function () {
+        row.remove();
+        updateTotalsFromSplits();
+    });
+
+    // Attach update totals logic
+    row.querySelectorAll('input').forEach(input => {
+        input.addEventListener('input', updateTotalsFromSplits);
+    });
+}
+
+function initSelect2InRow(row) {
+    const selects = row.querySelectorAll('.select2-dynamic');
+    selects.forEach(select => {
+        if (typeof $ !== 'undefined' && $.fn.select2) {
+            $(select).select2({
+                theme: 'bootstrap-5',
+                dropdownParent: $('#addExpenseModal'),
+                dir: 'rtl'
+            });
+        }
+    });
+}
+
+function updateTotalsFromSplits() {
+    if (!isSplitMode) return;
+
+    let totalIqd = 0;
+    let totalUsd = 0;
+
+    document.querySelectorAll('.invoice-split-row').forEach(row => {
+        totalIqd += parseFloat(row.querySelector('.split-amount-iqd').value || 0);
+        totalUsd += parseFloat(row.querySelector('.split-amount-usd').value || 0);
+    });
+
+    document.getElementById('amount_iqd').value = totalIqd.toFixed(2);
+    document.getElementById('amount_usd').value = totalUsd.toFixed(2);
+
+    // Trigger updateRemaining if it exists in other_expenses.js
+    if (typeof updateRemaining === 'function') {
+        updateRemaining();
+    }
 }
 
 // Multiple submission prevention flag for add person

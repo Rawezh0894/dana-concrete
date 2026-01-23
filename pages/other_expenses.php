@@ -213,6 +213,10 @@ if (!isset($_SESSION['user_id'])) {
                   <input class="form-check-input" type="checkbox" id="filter_expense_type_office" name="expenseTypes[]" value="ئۆفیس">
                   <label class="form-check-label" for="filter_expense_type_office">ئۆفیس</label>
                 </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="filter_expense_type_stock_purchase" name="expenseTypes[]" value="کڕینی کاڵا بۆ کۆگا">
+                  <label class="form-check-label" for="filter_expense_type_stock_purchase">کڕینی کاڵا بۆ کۆگا</label>
+                </div>
               </div>
               <div class="auto-filter-indicator mt-1">
                 <i class="fas fa-check-square me-1"></i>
@@ -356,16 +360,33 @@ if (!isset($_SESSION['user_id'])) {
               </select>
             </div>
             <div class="col-md-4">
-              <label for="car_id" class="form-label">سەیارە</label>
-              <select class="form-control" id="car_id" name="car_id">
-                <option value="">-- هەلبژێرە --</option>
-              </select>
+              <label for="car_id" class="form-label d-flex justify-content-between">
+                سەیارە
+                <button type="button" id="toggleSplitCars" class="btn btn-sm btn-outline-primary" style="font-size: 0.7rem; padding: 2px 5px;">دابەشکردن</button>
+              </label>
+              <div id="singleCarContainer">
+                <select class="form-control" id="car_id" name="car_id">
+                  <option value="">-- هەلبژێرە --</option>
+                </select>
+              </div>
             </div>
             <div class="col-md-4 gas-material-field">
               <label for="gas_liters" class="form-label">بڕی گاز (لیتر)</label>
               <input type="number" step="0.01" class="form-control" id="gas_liters" name="gas_liters" placeholder="0">
             </div>
           </div>
+
+          <!-- Multiple Items Split Container (Hidden by default) -->
+          <div id="splitItemsContainer" class="mb-3 border p-3 rounded bg-light" style="display: none;">
+            <h6 class="mb-3">دابەشکردنی پسووڵە (سەیارە + کۆگا)</h6>
+            <div id="invoiceSplitsList">
+              <!-- Split rows will be added here -->
+            </div>
+            <button type="button" id="addSplitRow" class="btn btn-sm btn-primary mt-2">
+              <i class="fas fa-plus me-1"></i>زیادکردنی بڕگە
+            </button>
+          </div>
+
           <div class="mb-3 row">
             <div class="col-md-4">
               <label for="expense_type" class="form-label">جۆری خەرجی</label>
@@ -447,7 +468,12 @@ if (!isset($_SESSION['user_id'])) {
           <div class="mb-3 row">
             <div class="col-md-4 warehouse-hidden-field">
               <label for="invoice_number" class="form-label">ژمارەی وەسڵ</label>
-              <input type="text" class="form-control" id="invoice_number" name="invoice_number">
+              <div class="input-group">
+                <input type="text" class="form-control" id="invoice_number" name="invoice_number" required>
+                <button class="btn btn-outline-secondary" type="button" id="generateInvoiceBtn" title="دروستکردنی ژمارەی وەسڵ">
+                  <i class="fas fa-sync-alt"></i>
+                </button>
+              </div>
             </div>
             <div class="col-md-4 warehouse-hidden-field">
               <label for="amount_iqd" class="form-label">بڕی پارە بە دینار</label>
@@ -569,6 +595,7 @@ if (!isset($_SESSION['user_id'])) {
                 <option value="بەکارهێنانی گاز">بەکارهێنانی گاز</option>
                 <option value="خواردنگە">خواردنگە</option>
                 <option value="ئۆفیس">ئۆفیس</option>
+                <option value="کڕینی کاڵا بۆ کۆگا">کڕینی کاڵا بۆ کۆگا</option>
               </select>
             </div>
             <div class="col-md-4 gas-material-field">
@@ -636,7 +663,12 @@ if (!isset($_SESSION['user_id'])) {
           <div class="mb-3 row">
             <div class="col-md-4 warehouse-hidden-field">
               <label for="edit_invoice_number" class="form-label">ژمارەی وەسڵ</label>
-              <input type="text" class="form-control" id="edit_invoice_number" name="invoice_number">
+              <div class="input-group">
+                <input type="text" class="form-control" id="edit_invoice_number" name="invoice_number" required>
+                <button class="btn btn-outline-secondary" type="button" id="editGenerateInvoiceBtn" title="دروستکردنی ژمارەی وەسڵ">
+                  <i class="fas fa-sync-alt"></i>
+                </button>
+              </div>
             </div>
             <div class="col-md-4 warehouse-hidden-field">
               <label for="edit_amount_iqd" class="form-label">بڕی پارە بە دینار</label>

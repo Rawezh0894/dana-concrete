@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $gas_liters = isset($_POST['gas_liters']) ? floatval($_POST['gas_liters']) : null;
     $expense_type = $_POST['expense_type'] ?? 'خەرجی تر'; // Default to خەرجی تر if empty
     // Ensure expense_type is valid
-    if (!in_array($expense_type, ['بەکارهێنانی کاڵای کۆگا', 'بەکارهێنانی گاز', 'خەرجی تر', 'خواردنگە', 'ئۆفیس'])) {
+    if (!in_array($expense_type, ['بەکارهێنانی کاڵای کۆگا', 'بەکارهێنانی گاز', 'خەرجی تر', 'خواردنگە', 'ئۆفیس', 'کڕینی کاڵا بۆ کۆگا'])) {
         $expense_type = 'خەرجی تر';
     }
     $material_id = $_POST['material_id'] ?? null;
@@ -205,14 +205,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Check for duplicate invoice_number (except for this record)
-    if ($invoice_number) {
-        $stmt = $pdo->prepare('SELECT COUNT(*) FROM other_expenses WHERE invoice_number = ? AND id != ?');
-        $stmt->execute([$invoice_number, $id]);
-        if ($stmt->fetchColumn() > 0) {
-            echo json_encode(['success' => false, 'msg' => 'ئەم ژمارەی پسوڵەیە پێشتر تۆمارکراوە!']);
-            exit;
-        }
+    // Check for invoice_number
+    if (empty($invoice_number)) {
+        echo json_encode(['success' => false, 'msg' => 'تکایە ژمارەی وەسڵ بنووسە']);
+        exit;
+    }
+
+    // Check for duplicate invoice_number on the same date (except for this record)
+    $stmt = $pdo->prepare('SELECT COUNT(*) FROM other_expenses WHERE invoice_number = ? AND date = ? AND id != ?');
+    $stmt->execute([$invoice_number, $date, $id]);
+    if ($stmt->fetchColumn() > 0) {
+        echo json_encode(['success' => false, 'msg' => 'ئەم ژمارەی پسوڵەیە پێشتر لەم بەروارەدا تۆمارکراوە!']);
+        exit;
     }
 
     // Fetch old gas_liters value for this expense
@@ -289,6 +293,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'date' => $old_record['date']
     ];
 
+    // For updates, we need to consider the current expense values
+    $stmt = $pdo->prepare("SELECT expense_type, material_id, base_material_quantity FROM other_expenses WHERE id = ?");
+    $stmt->execute([$id]);
+    $old_record = $stmt->fetch();
+
+    $current_base_qty = $material_quantity;
+    if (($expense_type === 'کڕینی کاڵا بۆ کۆگا' || $expense_type === 'بەکارهێنانی کاڵای کۆگا') && $material_id && $material_quantity && $usage_unit_type) {
+        $stock_sql = "SELECT unit_type, pieces_per_carton, buckets_per_barrel, liters_per_bucket, liters_per_barrel FROM list_materials WHERE id = ?";
+        $stock_stmt = $pdo->prepare($stock_sql);
+        $stock_stmt->execute([$material_id]);
+        $material_stock = $stock_stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($material_stock) {
+            $pieces_per_carton = floatval($material_stock['pieces_per_carton'] ?? 0);
+            $liters_per_barrel = floatval($material_stock['liters_per_barrel'] ?? 0);
+            $liters_per_bucket = floatval($material_stock['liters_per_bucket'] ?? 0);
+            $mat_unit = $material_stock['unit_type'];
+            
+            if ($usage_unit_type === 'کارتۆن' && $mat_unit === 'کارتۆن' && $pieces_per_carton > 0) {
+                $current_base_qty = $material_quantity * $pieces_per_carton;
+            } elseif ($usage_unit_type === 'بەرمیل' && $mat_unit === 'بەرمیل' && $liters_per_barrel > 0) {
+                $current_base_qty = $material_quantity * $liters_per_barrel;
+            } elseif ($usage_unit_type === 'دەبە' && ($mat_unit === 'بەرمیل' || $mat_unit === 'دەبە') && $liters_per_bucket > 0) {
+                $current_base_qty = $material_quantity * $liters_per_bucket;
+            } else {
+                $current_base_qty = $material_quantity;
+            }
+        }
+    }
+
+    $pdo->beginTransaction();
+
     // Now perform the update
     $sql = "UPDATE other_expenses SET
         purpose=?, person_id=?, employee_id=?, car_id=?, gas_liters=?, expense_type=?, material_id=?, material_quantity=?, material_purchase_price_iqd=?, material_purchase_price_usd=?, material_total_cost=?, gas_purchase_price_input=?, gas_total_cost=?, payment_type=?, currency_type=?, invoice_number=?,
@@ -320,11 +356,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $remaining_iqd,
         $remaining_usd,
         $date,
-        $base_material_quantity,
+        $current_base_qty,
         $usage_unit_type,
         $id
     ]);
-                    if ($ok) {
+
+    if ($ok) {
+        // Stock adjustment for purchases
+        if ($old_record['expense_type'] === 'کڕینی کاڵا بۆ کۆگا' && $old_record['material_id']) {
+            $pdo->prepare("UPDATE list_materials SET quantity = quantity - ? WHERE id = ?")->execute([$old_record['base_material_quantity'], $old_record['material_id']]);
+        }
+        if ($expense_type === 'کڕینی کاڵا بۆ کۆگا' && $material_id) {
+            $pdo->prepare("UPDATE list_materials SET quantity = quantity + ? WHERE id = ?")->execute([$current_base_qty, $material_id]);
+        }
                         // Note: Gas consumption is now handled automatically by database triggers
                         // when expense_type = 'بەکارهێنانی گاز' and gas_liters > 0
 
