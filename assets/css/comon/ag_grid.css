@@ -67,6 +67,16 @@
     border-right: none;
 }
 
+/* Column Width Settings - زیادکردنی پانی ستوونەکان */
+.ag-theme-alpine {
+    --ag-column-min-width: 150px;
+}
+
+.ag-theme-alpine .ag-header-cell,
+.ag-theme-alpine .ag-cell {
+    min-width: 150px;
+}
+
 /* Header Cell Text */
 .ag-theme-alpine .ag-header-cell-text {
     color: var(--seafoam-green, #20b2aa);
@@ -421,12 +431,12 @@
     .ag-grid-container {
         height: 500px;
     }
-    
+
     .ag-theme-alpine .ag-header-cell {
         font-size: 12px;
         padding: 8px 4px;
     }
-    
+
     .ag-theme-alpine .ag-cell {
         font-size: 12px;
         padding: 6px 4px;
@@ -437,7 +447,7 @@
     .ag-grid-container {
         height: 400px;
     }
-    
+
     .ag-theme-alpine {
         --ag-header-height: 40px;
         --ag-font-size: 11px;
