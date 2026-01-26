@@ -5,17 +5,17 @@
 let customerGridApi;
 
 // Format functions - بەکارهێنانی لە فایلی گشتی (ناوی جیاواز بۆ دوورکەوتنەوە لە کێشەی duplicate)
-const agFormatNumber = window.AGGridFormatters?.formatNumber || function(n) {
+const agFormatNumber = window.AGGridFormatters?.formatNumber || function (n) {
     if (n === null || n === undefined || n === '') return '';
     return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 };
 
-const agFormatUSD = window.AGGridFormatters?.formatUSD || function(n) {
+const agFormatUSD = window.AGGridFormatters?.formatUSD || function (n) {
     if (n === null || n === undefined || n === '' || isNaN(n)) return '-';
     return agFormatNumber(Number(n).toFixed(2)) + ' $';
 };
 
-const agFormatIQD = window.AGGridFormatters?.formatIQD || function(n) {
+const agFormatIQD = window.AGGridFormatters?.formatIQD || function (n) {
     if (n === null || n === undefined || n === '' || isNaN(n)) return '-';
     return agFormatNumber(Number(n).toFixed(0)) + ' د.ع';
 };
@@ -31,7 +31,7 @@ const customerColumnDefs = [
         minWidth: 150,
         maxWidth: 200,
         cellStyle: { textAlign: 'center', direction: 'ltr' },
-        cellRenderer: function(params) {
+        cellRenderer: function (params) {
             if (!params.data) return '-';
             const editBtn = window.userPermissions && window.userPermissions.canEdit
                 ? `<button class='btn btn-warning btn-sm edit-customer-btn' data-id='${params.data.id}' title='نوێکردنەوە' style='margin: 2px;'><i class='fa fa-edit'></i></button>`
@@ -52,11 +52,11 @@ const customerColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'center', direction: 'rtl' },
-        cellRenderer: function(params) {
+        cellRenderer: function (params) {
             if (!params.value) return '<span class="badge bg-secondary"><i class="fas fa-times"></i> نەخێر</span>';
             const isRecipient = parseInt(params.value) === 1;
-            return isRecipient 
-                ? '<span class="badge bg-success"><i class="fas fa-check"></i> بەڵێ</span>' 
+            return isRecipient
+                ? '<span class="badge bg-success"><i class="fas fa-check"></i> بەڵێ</span>'
                 : '<span class="badge bg-secondary"><i class="fas fa-times"></i> نەخێر</span>';
         }
     },
@@ -69,7 +69,7 @@ const customerColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl' },
-        valueFormatter: function(params) {
+        valueFormatter: function (params) {
             return agFormatIQD(params.value);
         },
         type: 'numericColumn'
@@ -83,7 +83,7 @@ const customerColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl' },
-        valueFormatter: function(params) {
+        valueFormatter: function (params) {
             return agFormatUSD(params.value);
         },
         type: 'numericColumn'
@@ -97,7 +97,7 @@ const customerColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl' },
-        tooltipValueGetter: function(params) {
+        tooltipValueGetter: function (params) {
             return params.value || '';
         }
     },
@@ -110,7 +110,7 @@ const customerColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl' },
-        tooltipValueGetter: function(params) {
+        tooltipValueGetter: function (params) {
             return params.value || '';
         }
     },
@@ -123,7 +123,7 @@ const customerColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl' },
-        tooltipValueGetter: function(params) {
+        tooltipValueGetter: function (params) {
             return params.value || '';
         }
     }
@@ -193,13 +193,14 @@ const customerGridOptions = {
         csvExport: 'ئیکسپۆرتی CSV',
         excelExport: 'ئیکسپۆرتی Excel'
     },
-    onGridReady: function(params) {
+    onGridReady: function (params) {
         customerGridApi = params.api;
         loadCustomerData();
     },
-    onFirstDataRendered: function(params) {
-        // Auto-size columns
-        params.api.sizeColumnsToFit();
+    onFirstDataRendered: function (params) {
+        // Don't auto-size columns to fit - let them maintain their minWidth
+        // This prevents columns from overlapping when there are many columns
+        params.api.autoSizeAllColumns(false);
     }
 };
 
@@ -212,10 +213,10 @@ function loadCustomerData(preservePagination = false) {
         currentPage = customerGridApi.paginationGetCurrentPage() || 0;
         pageSize = customerGridApi.paginationGetPageSize() || 25;
     }
-    
+
     // Show loading
     customerGridApi?.showLoadingOverlay();
-    
+
     fetch('../process/customer/select_customer.php')
         .then(response => response.json())
         .then(data => {
@@ -230,10 +231,10 @@ function loadCustomerData(preservePagination = false) {
                     opening_debt_iqd: row.opening_debt_iqd || 0,
                     is_recipient: row.is_recipient || 0
                 }));
-                
+
                 customerGridApi.setGridOption('rowData', rowData);
                 customerGridApi.hideOverlay();
-                
+
                 // Restore pagination state if preserving
                 if (preservePagination && customerGridApi) {
                     setTimeout(() => {
@@ -261,7 +262,7 @@ function loadCustomerData(preservePagination = false) {
 }
 
 // Reload function - preserve pagination
-window.reloadCustomers = function() {
+window.reloadCustomers = function () {
     loadCustomerData(true); // Preserve pagination state
 };
 
@@ -279,12 +280,12 @@ function exportCustomersToExcel() {
 window.exportCustomersToExcel = exportCustomersToExcel;
 
 // Initialize Grid
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const gridDiv = document.querySelector('#customerGrid');
     if (gridDiv) {
         // Use createGrid for AG Grid v31+
         customerGridApi = agGrid.createGrid(gridDiv, customerGridOptions);
-        
+
         // Wait for grid to be ready before adding event listeners
         setTimeout(() => {
             // Add event listeners for filters if they exist
@@ -292,22 +293,22 @@ document.addEventListener('DOMContentLoaded', function() {
             filterInputs.forEach(inputId => {
                 const input = document.getElementById(inputId);
                 if (input) {
-                    input.addEventListener('change', function() { loadCustomerData(); });
+                    input.addEventListener('change', function () { loadCustomerData(); });
                 }
             });
-            
+
             // Apply filters button
             const applyFiltersBtn = document.getElementById('apply_filters');
             if (applyFiltersBtn) {
-                applyFiltersBtn.addEventListener('click', function() {
+                applyFiltersBtn.addEventListener('click', function () {
                     loadCustomerData();
                 });
             }
-            
+
             // Clear filters button
             const clearFiltersBtn = document.getElementById('clear_filters');
             if (clearFiltersBtn) {
-                clearFiltersBtn.addEventListener('click', function() {
+                clearFiltersBtn.addEventListener('click', function () {
                     document.getElementById('filter_year').value = '';
                     document.getElementById('filter_month').value = '';
                     document.getElementById('filter_from_date').value = '';
@@ -321,19 +322,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Event delegation for edit button in AG Grid
 // تێبینی: delete handler لە delete_customer.js هەیە
-$(document).on('click', '.edit-customer-btn', function(e) {
+$(document).on('click', '.edit-customer-btn', function (e) {
     e.preventDefault();
     e.stopPropagation();
-    
+
     const id = $(this).data('id');
     if (!id) return;
-    
+
     // Fetch customer data and populate edit modal
     $.ajax({
         url: `../process/customer/get_customer.php?id=${id}`,
         type: 'GET',
         dataType: 'json',
-        success: function(response) {
+        success: function (response) {
             if (response.success && response.data) {
                 const data = response.data;
                 // Populate edit form
@@ -341,18 +342,18 @@ $(document).on('click', '.edit-customer-btn', function(e) {
                 $('#editCustomerName').val(data.name || '');
                 $('#editCustomerMobile1').val(data.mobile1 || '');
                 $('#editCustomerMobile2').val(data.mobile2 || '');
-                
+
                 // Handle numeric values properly
                 const usdValue = parseFloat(data.opening_debt_usd || 0);
                 const iqdValue = parseFloat(data.opening_debt_iqd || 0);
-                
+
                 $('#editCustomerOpeningDebtUsd').val(usdValue > 0 ? usdValue : '');
                 $('#editCustomerOpeningDebtIqd').val(iqdValue > 0 ? iqdValue : '');
-                
+
                 // Set is_recipient checkbox
                 const isRecipient = parseInt(data.is_recipient || 0);
                 $('#editCustomerIsRecipient').prop('checked', isRecipient === 1);
-                
+
                 // Enable/disable fields based on values
                 if (usdValue > 0) {
                     $('#editCustomerOpeningDebtIqd').prop('disabled', true);
@@ -361,14 +362,14 @@ $(document).on('click', '.edit-customer-btn', function(e) {
                 } else {
                     $('#editCustomerOpeningDebtUsd, #editCustomerOpeningDebtIqd').prop('disabled', false);
                 }
-                
+
                 // Show modal
                 $('#editCustomerModal').modal('show');
             } else {
                 Swal.fire('هەڵە!', response.error || 'نەتوانرا داتاکان بخوێندرێنەوە', 'error');
             }
         },
-        error: function() {
+        error: function () {
             Swal.fire('هەڵە!', 'هەڵەیەک لە پەیوەندیکردن', 'error');
         }
     });
