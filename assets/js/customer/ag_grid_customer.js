@@ -198,9 +198,9 @@ const customerGridOptions = {
         loadCustomerData();
     },
     onFirstDataRendered: function (params) {
-        // Don't auto-size columns to fit - let them maintain their minWidth
-        // This prevents columns from overlapping when there are many columns
-        params.api.autoSizeAllColumns(false);
+        // Auto-size all columns based on content while respecting minWidth
+        // This prevents both overlap and excessive white space
+        params.api.autoSizeAllColumns(true);
     }
 };
 
