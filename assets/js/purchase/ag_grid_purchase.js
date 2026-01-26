@@ -6,17 +6,17 @@ let purchaseGridApi;
 let purchaseGridColumnApi;
 
 // Format functions - بەکارهێنانی لە فایلی گشتی (ناوی جیاواز بۆ دوورکەوتنەوە لە کێشەی duplicate)
-const agFormatNumber = window.AGGridFormatters?.formatNumber || function(n) {
+const agFormatNumber = window.AGGridFormatters?.formatNumber || function (n) {
     if (n === null || n === undefined || n === '') return '';
     return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 };
 
-const agFormatUSD = window.AGGridFormatters?.formatUSD || function(n) {
+const agFormatUSD = window.AGGridFormatters?.formatUSD || function (n) {
     if (n === null || n === undefined || n === '' || isNaN(n)) return '-';
     return agFormatNumber(Number(n).toFixed(2)) + ' $';
 };
 
-const agFormatIQD = window.AGGridFormatters?.formatIQD || function(n) {
+const agFormatIQD = window.AGGridFormatters?.formatIQD || function (n) {
     if (n === null || n === undefined || n === '' || isNaN(n)) return '-';
     return agFormatNumber(Number(n).toFixed(0)) + ' د.ع';
 };
@@ -32,7 +32,7 @@ const purchaseColumnDefs = [
         minWidth: 120,
         maxWidth: 150,
         cellStyle: { textAlign: 'center', direction: 'ltr' },
-        cellRenderer: function(params) {
+        cellRenderer: function (params) {
             if (!params.data) return '-';
             const editBtn = window.userPermissions && window.userPermissions.canEdit
                 ? `<button class='btn btn-warning btn-sm edit-purchase' data-id='${params.data.id}' title='نوێکردنەوە' style='margin: 2px;'><i class='fa fa-edit'></i></button>`
@@ -52,7 +52,7 @@ const purchaseColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl' },
-        tooltipValueGetter: function(params) {
+        tooltipValueGetter: function (params) {
             return params.value || '';
         }
     },
@@ -65,7 +65,7 @@ const purchaseColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl', fontWeight: 'bold', color: '#dc3545' },
-        valueFormatter: function(params) {
+        valueFormatter: function (params) {
             return agFormatIQD(params.value);
         },
         type: 'numericColumn'
@@ -79,7 +79,7 @@ const purchaseColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl', fontWeight: 'bold', color: '#dc3545' },
-        valueFormatter: function(params) {
+        valueFormatter: function (params) {
             return agFormatUSD(params.value);
         },
         type: 'numericColumn'
@@ -93,7 +93,7 @@ const purchaseColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl' },
-        valueFormatter: function(params) {
+        valueFormatter: function (params) {
             return agFormatIQD(params.value);
         },
         type: 'numericColumn'
@@ -107,7 +107,7 @@ const purchaseColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl' },
-        valueFormatter: function(params) {
+        valueFormatter: function (params) {
             return agFormatUSD(params.value);
         },
         type: 'numericColumn'
@@ -121,7 +121,7 @@ const purchaseColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl' },
-        valueFormatter: function(params) {
+        valueFormatter: function (params) {
             if (params.value === null || params.value === undefined || params.value === '') return '-';
             return agFormatNumber(params.value);
         },
@@ -136,7 +136,7 @@ const purchaseColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl' },
-        valueFormatter: function(params) {
+        valueFormatter: function (params) {
             return agFormatIQD(params.value);
         },
         type: 'numericColumn'
@@ -150,7 +150,7 @@ const purchaseColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl', fontWeight: 'bold' },
-        valueFormatter: function(params) {
+        valueFormatter: function (params) {
             if (!params.data) return '-';
             const type = params.data.type;
             if (type === 'دینار') {
@@ -171,7 +171,7 @@ const purchaseColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl' },
-        valueFormatter: function(params) {
+        valueFormatter: function (params) {
             return agFormatIQD(params.value);
         },
         type: 'numericColumn'
@@ -185,7 +185,7 @@ const purchaseColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl' },
-        valueFormatter: function(params) {
+        valueFormatter: function (params) {
             return agFormatUSD(params.value);
         },
         type: 'numericColumn'
@@ -199,7 +199,7 @@ const purchaseColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl' },
-        valueFormatter: function(params) {
+        valueFormatter: function (params) {
             if (params.value === null || params.value === undefined || params.value === '') return '-';
             return agFormatNumber(params.value) + ' کگم';
         },
@@ -214,7 +214,7 @@ const purchaseColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl' },
-        cellRenderer: function(params) {
+        cellRenderer: function (params) {
             if (!params.value) return '-';
             const color = params.value === 'دۆلار' ? '#007bff' : '#ffc107';
             return `<span style="background: ${color}; color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold;">${params.value}</span>`;
@@ -229,7 +229,7 @@ const purchaseColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl' },
-        cellRenderer: function(params) {
+        cellRenderer: function (params) {
             if (!params.value) return '-';
             const color = params.value === 'نەقد' ? '#28a745' : '#ffc107';
             return `<span style="background: ${color}; color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold;">${params.value}</span>`;
@@ -244,7 +244,7 @@ const purchaseColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl' },
-        valueFormatter: function(params) {
+        valueFormatter: function (params) {
             if (!params.value) return '-';
             return params.value;
         }
@@ -258,7 +258,7 @@ const purchaseColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl' },
-        tooltipValueGetter: function(params) {
+        tooltipValueGetter: function (params) {
             return params.value || '';
         }
     },
@@ -271,7 +271,7 @@ const purchaseColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl' },
-        tooltipValueGetter: function(params) {
+        tooltipValueGetter: function (params) {
             return params.value || '';
         }
     },
@@ -284,7 +284,7 @@ const purchaseColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl' },
-        tooltipValueGetter: function(params) {
+        tooltipValueGetter: function (params) {
             return params.value || '';
         }
     },
@@ -297,7 +297,7 @@ const purchaseColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl' },
-        tooltipValueGetter: function(params) {
+        tooltipValueGetter: function (params) {
             return params.value || '';
         }
     },
@@ -310,7 +310,7 @@ const purchaseColumnDefs = [
         resizable: true,
         minWidth: 100,
         cellStyle: { textAlign: 'right', direction: 'rtl' },
-        tooltipValueGetter: function(params) {
+        tooltipValueGetter: function (params) {
             return params.value || '';
         }
     }
@@ -380,13 +380,14 @@ const purchaseGridOptions = {
         csvExport: 'ئیکسپۆرتی CSV',
         excelExport: 'ئیکسپۆرتی Excel'
     },
-    onGridReady: function(params) {
+    onGridReady: function (params) {
         purchaseGridApi = params.api;
         loadPurchaseData();
     },
-    onFirstDataRendered: function(params) {
-        // Auto-size columns
-        params.api.sizeColumnsToFit();
+    onFirstDataRendered: function (params) {
+        // Don't auto-size columns to fit - let them maintain their minWidth
+        // This prevents columns from overlapping when there are many columns
+        params.api.autoSizeAllColumns(false);
     }
 };
 
@@ -399,7 +400,7 @@ function loadPurchaseData(preservePagination = false) {
     const driverId = document.getElementById('filter_driver')?.value || '';
     const materialId = document.getElementById('filter_material')?.value || '';
     const searchTerm = document.getElementById('purchase_global_search')?.value || '';
-    
+
     // Save current pagination state
     let currentPage = 0;
     let pageSize = 25;
@@ -407,7 +408,7 @@ function loadPurchaseData(preservePagination = false) {
         currentPage = purchaseGridApi.paginationGetCurrentPage() || 0;
         pageSize = purchaseGridApi.paginationGetPageSize() || 25;
     }
-    
+
     // Build request data
     const requestData = new FormData();
     if (fromDate) requestData.append('from', fromDate);
@@ -418,10 +419,10 @@ function loadPurchaseData(preservePagination = false) {
     if (materialId) requestData.append('material_id', materialId);
     if (searchTerm) requestData.append('search', searchTerm);
     requestData.append('limit', '500'); // Get more records for AG Grid
-    
+
     // Show loading
     purchaseGridApi?.showLoadingOverlay();
-    
+
     fetch('../process/purchase/select_purchase.php', {
         method: 'POST',
         body: requestData
@@ -452,10 +453,10 @@ function loadPurchaseData(preservePagination = false) {
                     remaining_iqd: row.remaining_iqd || 0,
                     bin_name: row.bin_name || '-'
                 }));
-                
+
                 purchaseGridApi.setGridOption('rowData', rowData);
                 purchaseGridApi.hideOverlay();
-                
+
                 // Restore pagination state if preserving
                 if (preservePagination && purchaseGridApi) {
                     setTimeout(() => {
@@ -483,7 +484,7 @@ function loadPurchaseData(preservePagination = false) {
 }
 
 // Reload function - preserve pagination
-window.reloadPurchases = function() {
+window.reloadPurchases = function () {
     loadPurchaseData(true); // Preserve pagination state
 };
 
@@ -536,14 +537,39 @@ function exportPurchaseMonthlyReportToCSV() {
         purchaseGridApi.exportDataAsCsv(params);
     }
 }
+// Function to set default date range to current month
+function setDefaultDateFilter() {
+    const today = new Date();
+    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+    const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+    // Format dates as YYYY-MM-DD
+    const formatDate = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    const filterFrom = document.getElementById('filter_from');
+    const filterTo = document.getElementById('filter_to');
+
+    if (filterFrom && filterTo) {
+        filterFrom.value = formatDate(firstDay);
+        filterTo.value = formatDate(lastDay);
+    }
+}
 
 // Initialize Grid
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const gridDiv = document.querySelector('#purchaseGrid');
     if (gridDiv) {
+        // Set default date filter to current month
+        setDefaultDateFilter();
+
         // Use createGrid for AG Grid v31+
         purchaseGridApi = agGrid.createGrid(gridDiv, purchaseGridOptions);
-        
+
         // Wait for grid to be ready before adding event listeners
         setTimeout(() => {
             // Add event listeners for filters
@@ -551,18 +577,18 @@ document.addEventListener('DOMContentLoaded', function() {
             filterInputs.forEach(inputId => {
                 const input = document.getElementById(inputId);
                 if (input) {
-                    input.addEventListener('change', function() { loadPurchaseData(); });
-                    input.addEventListener('input', function() {
+                    input.addEventListener('change', function () { loadPurchaseData(); });
+                    input.addEventListener('input', function () {
                         clearTimeout(this.searchTimeout);
-                        this.searchTimeout = setTimeout(function() { loadPurchaseData(); }, 500);
+                        this.searchTimeout = setTimeout(function () { loadPurchaseData(); }, 500);
                     });
                 }
             });
-            
+
             // Clear filters button
             const clearFilterBtn = document.getElementById('clearFilterBtn');
             if (clearFilterBtn) {
-                clearFilterBtn.addEventListener('click', function() {
+                clearFilterBtn.addEventListener('click', function () {
                     document.getElementById('filter_company').value = '';
                     document.getElementById('filter_location').value = '';
                     document.getElementById('filter_driver').value = '';
@@ -573,11 +599,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     loadPurchaseData();
                 });
             }
-            
+
             // Clear column filters button
             const clearColumnFiltersBtn = document.getElementById('clearColumnFiltersBtn');
             if (clearColumnFiltersBtn) {
-                clearColumnFiltersBtn.addEventListener('click', function() {
+                clearColumnFiltersBtn.addEventListener('click', function () {
                     if (purchaseGridApi) {
                         purchaseGridApi.setFilterModel(null);
                         loadPurchaseData();
@@ -590,19 +616,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Event delegation for edit button in AG Grid
 // تێبینی: delete handler لە delete_purchase.js هەیە
-$(document).on('click', '.edit-purchase', function(e) {
+$(document).on('click', '.edit-purchase', function (e) {
     e.preventDefault();
     e.stopPropagation();
-    
+
     const id = $(this).data('id');
     if (!id) return;
-    
+
     // Fetch purchase data and populate edit modal
     $.ajax({
         url: `../process/purchase/select_purchase.php?id=${id}`,
         type: 'GET',
         dataType: 'json',
-        success: function(data) {
+        success: function (data) {
             if (data && data.id) {
                 // Populate edit form
                 $('#edit_id').val(data.id);
@@ -625,14 +651,14 @@ $(document).on('click', '.edit-purchase', function(e) {
                 $('#edit_paid_iqd').val(data.paid_iqd);
                 $('#edit_remaining_usd').val(data.remaining_usd);
                 $('#edit_remaining_iqd').val(data.remaining_iqd);
-                
+
                 // Show modal
                 $('#editPurchaseModal').modal('show');
             } else {
                 Swal.fire('هەڵە!', 'نەتوانرا داتاکان بخوێندرێنەوە', 'error');
             }
         },
-        error: function() {
+        error: function () {
             Swal.fire('هەڵە!', 'هەڵەیەک لە پەیوەندیکردن', 'error');
         }
     });
