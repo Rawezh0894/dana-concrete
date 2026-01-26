@@ -110,10 +110,11 @@ if ($amountMax !== null && $amountMax !== '') {
                            c.name AS customer_name, 
                            f.name AS formula_name, 
                            r.id AS recipient_id,
-                           COUNT(*) OVER (PARTITION BY s.invoice_number) AS duplicate_count
-                    $baseSql
-                    $whereSql
-                    ORDER BY $orderColumn $orderDir";
+                            COUNT(*) OVER (PARTITION BY s.invoice_number) AS duplicate_count
+                     $baseSql
+                     $whereSql
+                     GROUP BY s.id
+                     ORDER BY $orderColumn $orderDir";
         
         if ($length > -1) {
             $dataSql .= " LIMIT :start, :length";
@@ -150,11 +151,9 @@ if ($amountMax !== null && $amountMax !== '') {
                     LEFT JOIN concrete_formulas f ON s.formula_id = f.id
                     LEFT JOIN recipients r ON r.name COLLATE utf8mb4_general_ci = s.recipient";
         
-        $whereSql = '';
-        $params = $filterParams;
-        
+        $whereSql = "WHERE 1=1";
         if ($where) {
-            $whereSql = ' WHERE ' . implode(' AND ', $where);
+            $whereSql .= " AND " . implode(' AND ', $where);
         }
         
         $dataSql = "SELECT s.*, 
@@ -164,6 +163,7 @@ if ($amountMax !== null && $amountMax !== '') {
                            COUNT(*) OVER (PARTITION BY s.invoice_number) AS duplicate_count
                     $baseSql
                     $whereSql
+                    GROUP BY s.id
                     ORDER BY s.order_date DESC";
         
         $dataStmt = $pdo->prepare($dataSql);
@@ -184,11 +184,12 @@ if ($amountMax !== null && $amountMax !== '') {
             FROM sales s 
             LEFT JOIN customers c ON s.customer_id = c.id 
             LEFT JOIN concrete_formulas f ON s.formula_id = f.id
-            LEFT JOIN recipients r ON r.name COLLATE utf8mb4_general_ci = s.recipient";
+            LEFT JOIN recipients r ON r.name COLLATE utf8mb4_general_ci = s.recipient
+            WHERE 1=1";
     if ($where) {
-        $sql .= " WHERE " . implode(" AND ", $where);
+        $sql .= " AND " . implode(" AND ", $where);
     }
-    $sql .= " ORDER BY s.order_date ASC";
+    $sql .= " GROUP BY s.id ORDER BY s.order_date ASC";
     
         $stmt = $pdo->prepare($sql);
         foreach ($filterParams as $name => $value) {
