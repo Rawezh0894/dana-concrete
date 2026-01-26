@@ -164,6 +164,9 @@ try {
             case 'penalty':
                 $total_penalty += $amount;
                 break;
+            case 'overtime_payment':
+                $total_deduction += $amount;
+                break;
         }
     }
     

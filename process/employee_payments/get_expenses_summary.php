@@ -243,12 +243,17 @@ try {
     $expense_sql = "SELECT 
         SUM(CASE WHEN expense_type = 'advance' THEN amount ELSE 0 END) as total_advance,
         SUM(CASE WHEN expense_type = 'deduction' THEN amount ELSE 0 END) as total_deduction,
-        SUM(CASE WHEN expense_type = 'penalty' THEN amount ELSE 0 END) as total_penalty
+        SUM(CASE WHEN expense_type = 'penalty' THEN amount ELSE 0 END) as total_penalty,
+        SUM(CASE WHEN expense_type = 'overtime_payment' THEN amount ELSE 0 END) as total_overtime_payment
     FROM employee_expenses WHERE $expense_where";
     
     $stmt = $pdo->prepare($expense_sql);
     $stmt->execute($expense_params);
     $expense_summary = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Subtract paid overtime from total overtime earnings
+    $total_overtime_payment = floatval($expense_summary['total_overtime_payment'] ?? 0);
+    $net_overtime = max(0, $total_overtime - $total_overtime_payment);
     
     // 7. Return Data
     // Get filter lists
@@ -262,7 +267,7 @@ try {
                 'total_salary' => round($total_salary, 2),
                 'total_bonus' => round($total_bonus, 2),
                 'total_salary_bonus' => round($total_salary_plus_bonus, 2),
-                'total_overtime' => round($total_overtime, 2),
+                'total_overtime' => round($net_overtime, 2),
                 'total_advance' => floatval($expense_summary['total_advance'] ?? 0),
                 'total_deduction' => floatval($expense_summary['total_deduction'] ?? 0),
                 'total_penalty' => floatval($expense_summary['total_penalty'] ?? 0),

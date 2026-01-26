@@ -289,6 +289,7 @@ if ($bonusExists) {
               <option value="advance">پێشەکی/قەرز</option>
               <option value="deduction">کەمکردنەوە</option>
               <option value="penalty">سزا</option>
+              <option value="overtime_payment">کاروان حیسابی (پێدان)</option>
             </select>
           </div>
           

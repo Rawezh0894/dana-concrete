@@ -28,6 +28,7 @@ $overtime = floatval($_POST['overtime'] ?? 0);
 $advance = floatval($_POST['advance'] ?? 0);
 $deduction = floatval($_POST['deduction'] ?? 0);
 $penalty = floatval($_POST['penalty'] ?? 0);
+$overtime_payment = floatval($_POST['overtime_payment'] ?? 0);
 
 if ($employee_id <= 0 || $expense_date === '') {
     echo json_encode(['success' => false, 'message' => 'کارمەند و بەروار پێویستە']);
@@ -35,7 +36,7 @@ if ($employee_id <= 0 || $expense_date === '') {
 }
 
 // Check if at least one expense type has a value
-$total_expenses = $salary + $bonus + $overtime + $advance + $deduction + $penalty;
+$total_expenses = $salary + $bonus + $overtime + $advance + $deduction + $penalty + $overtime_payment;
 if ($total_expenses <= 0) {
     echo json_encode(['success' => false, 'message' => 'لانیکەم یەک جۆری خەرجی پێویستە']);
     exit;
@@ -97,6 +98,13 @@ try {
         $stmt->execute([$employee_id, 'penalty', $penalty, $notes, $_SESSION['user_id'], $expense_date]);
         $expense_ids[] = ['type' => 'penalty', 'id' => $pdo->lastInsertId(), 'amount' => $penalty];
     }
+
+    // Insert overtime_payment (reduces payable_balance - specifically used to reduce displayed overtime)
+    if ($overtime_payment > 0) {
+        $stmt = $pdo->prepare('INSERT INTO employee_expenses (employee_id, expense_type, amount, notes, created_by, expense_date) VALUES (?, ?, ?, ?, ?, ?)');
+        $stmt->execute([$employee_id, 'overtime_payment', $overtime_payment, $notes, $_SESSION['user_id'], $expense_date]);
+        $expense_ids[] = ['type' => 'overtime_payment', 'id' => $pdo->lastInsertId(), 'amount' => $overtime_payment];
+    }
     
     // Create notification
     $expense_types_kurdish = [
@@ -105,7 +113,8 @@ try {
         'overtime' => 'کاروانحیسابی',
         'advance' => 'پێشەکی',
         'deduction' => 'کەمکردنەوە',
-        'penalty' => 'سزا'
+        'penalty' => 'سزا',
+        'overtime_payment' => 'پێدانی کاروانحیسابی'
     ];
     
     $expense_details = [];
