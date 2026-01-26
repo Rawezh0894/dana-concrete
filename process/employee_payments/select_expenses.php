@@ -72,7 +72,8 @@ try {
         'overtime' => 'کاروانحیسابی',
         'advance' => 'پێشەکی',
         'deduction' => 'کەمکردنەوە',
-        'penalty' => 'سزا'
+        'penalty' => 'سزا',
+        'overtime_payment' => 'کاروان حیسابی (پێدان)'
     ];
     
     // Group expenses by employee_id and expense_date to calculate cumulative balance
@@ -201,6 +202,9 @@ try {
                     break;
                 case 'penalty':
                     $total_penalty += $amount;
+                    break;
+                case 'overtime_payment':
+                    $total_deduction += $amount;
                     break;
             }
         }
