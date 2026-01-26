@@ -156,6 +156,8 @@ if ($amountMax !== null && $amountMax !== '') {
             $whereSql .= " AND " . implode(' AND ', $where);
         }
         
+        $params = $filterParams;
+        
         $dataSql = "SELECT s.*, 
                            c.name AS customer_name, 
                            f.name AS formula_name, 
@@ -208,6 +210,7 @@ if ($amountMax !== null && $amountMax !== '') {
             'error' => $e->getMessage()
         ]);
     } else {
+        error_log("Select Sale Error: " . $e->getMessage());
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }
 }
