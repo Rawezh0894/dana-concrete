@@ -18131,3 +18131,160 @@
 [23-Jan-2026 13:29:41 Asia/Baghdad] Query: SELECT id, name, mobile, role, salary, COALESCE(bonus, 0) as bonus, COALESCE(status, "active") as status, join_date FROM employees ORDER BY id DESC
 [23-Jan-2026 13:29:41 Asia/Baghdad] Employees fetched: 40
 [23-Jan-2026 13:29:41 Asia/Baghdad] Employees retrieved successfully: Count=40
+[28-Jan-2026 09:56:11 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1769583371
+    [user_id] => 2
+    [username] => rawezh
+    [role] => admin
+)
+
+[28-Jan-2026 09:56:11 Asia/Baghdad] Dashboard data loaded successfully for user: 2
+[28-Jan-2026 10:47:34 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1769586454
+    [user_id] => 2
+    [username] => rawezh
+    [role] => admin
+)
+
+[28-Jan-2026 10:47:34 Asia/Baghdad] get_customer_debt.php GET: Array
+(
+    [customer_id] => 24
+)
+
+[28-Jan-2026 10:47:34 Asia/Baghdad] Customer debt retrieved: Customer=24, Debt=0
+[28-Jan-2026 10:47:34 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1769586454
+    [user_id] => 2
+    [username] => rawezh
+    [role] => admin
+)
+
+[28-Jan-2026 10:47:34 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 24
+    [stats] => 1
+)
+
+[28-Jan-2026 10:47:34 Asia/Baghdad] Customer stats retrieved: Customer=24, Total Debt USD=0, Total Debt IQD=0, Sales Count=4
+[28-Jan-2026 10:47:34 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1769586454
+    [user_id] => 2
+    [username] => rawezh
+    [role] => admin
+)
+
+[28-Jan-2026 10:47:34 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 24
+)
+
+[28-Jan-2026 10:47:34 Asia/Baghdad] Customer sales retrieved: Customer=24, Count=4
+[28-Jan-2026 10:47:34 Asia/Baghdad] Debt payments retrieved: Customer=24, Count=2
+[28-Jan-2026 10:47:34 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1769586454
+    [user_id] => 2
+    [username] => rawezh
+    [role] => admin
+)
+
+[28-Jan-2026 10:47:34 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 24
+    [stats] => 1
+)
+
+[28-Jan-2026 10:47:34 Asia/Baghdad] Customer stats retrieved: Customer=24, Total Debt USD=0, Total Debt IQD=0, Sales Count=4
+[28-Jan-2026 10:47:35 Asia/Baghdad] Debt payments retrieved: Customer=24, Count=2
+[28-Jan-2026 10:47:35 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1769586455
+    [user_id] => 2
+    [username] => rawezh
+    [role] => admin
+)
+
+[28-Jan-2026 10:47:35 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 24
+)
+
+[28-Jan-2026 10:47:35 Asia/Baghdad] Customer sales retrieved: Customer=24, Count=4
+[28-Jan-2026 10:57:05 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1769587025
+    [user_id] => 2
+    [username] => rawezh
+    [role] => admin
+)
+
+[28-Jan-2026 10:57:05 Asia/Baghdad] get_customer_debt.php GET: Array
+(
+    [customer_id] => 24
+)
+
+[28-Jan-2026 10:57:05 Asia/Baghdad] Customer debt retrieved: Customer=24, Debt=0
+[28-Jan-2026 10:57:05 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1769587025
+    [user_id] => 2
+    [username] => rawezh
+    [role] => admin
+)
+
+[28-Jan-2026 10:57:05 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 24
+    [stats] => 1
+)
+
+[28-Jan-2026 10:57:05 Asia/Baghdad] Customer stats retrieved: Customer=24, Total Debt USD=0, Total Debt IQD=0, Sales Count=4
+[28-Jan-2026 10:57:05 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1769587025
+    [user_id] => 2
+    [username] => rawezh
+    [role] => admin
+)
+
+[28-Jan-2026 10:57:05 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 24
+)
+
+[28-Jan-2026 10:57:05 Asia/Baghdad] Customer sales retrieved: Customer=24, Count=4
+[28-Jan-2026 10:57:05 Asia/Baghdad] Debt payments retrieved: Customer=24, Count=2
+[28-Jan-2026 10:57:05 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1769587025
+    [user_id] => 2
+    [username] => rawezh
+    [role] => admin
+)
+
+[28-Jan-2026 10:57:05 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 24
+    [stats] => 1
+)
+
+[28-Jan-2026 10:57:05 Asia/Baghdad] Customer stats retrieved: Customer=24, Total Debt USD=0, Total Debt IQD=0, Sales Count=4
+[28-Jan-2026 10:57:05 Asia/Baghdad] Debt payments retrieved: Customer=24, Count=2
+[28-Jan-2026 10:57:05 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1769587025
+    [user_id] => 2
+    [username] => rawezh
+    [role] => admin
+)
+
+[28-Jan-2026 10:57:05 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 24
+)
+
+[28-Jan-2026 10:57:05 Asia/Baghdad] Customer sales retrieved: Customer=24, Count=4

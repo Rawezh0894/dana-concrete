@@ -209,6 +209,24 @@ $(document).ready(function () {
         enableSelect2('#edit_pump_driver_id', '#editConcreteReceiptModal');
     }
 
+    // بۆ service receipts - تەنها ئەگەر مۆداڵەکە هەبێت
+    if ($('#addServiceReceiptModal').length > 0) {
+        enableSelect2('#customer_id', '#addServiceReceiptModal');
+        enableSelect2('#receiver_name', '#addServiceReceiptModal');
+        enableSelect2('#mixer_car_id', '#addServiceReceiptModal');
+        enableSelect2('#mixer_driver_id', '#addServiceReceiptModal');
+        enableSelect2('#pump_car_id', '#addServiceReceiptModal');
+        enableSelect2('#pump_driver_id', '#addServiceReceiptModal');
+    }
+    if ($('#editServiceReceiptModal').length > 0) {
+        enableSelect2('#edit_customer_id', '#editServiceReceiptModal');
+        enableSelect2('#edit_receiver_name', '#editServiceReceiptModal');
+        enableSelect2('#edit_mixer_car_id', '#editServiceReceiptModal');
+        enableSelect2('#edit_mixer_driver_id', '#editServiceReceiptModal');
+        enableSelect2('#edit_pump_car_id', '#editServiceReceiptModal');
+        enableSelect2('#edit_pump_driver_id', '#editServiceReceiptModal');
+    }
+
     // بۆ purchase materials - تەنها ئەگەر مۆداڵەکە هەبێت
     if ($('#addPurchaseModal').length > 0) {
         enableSelect2('#person_id', '#addPurchaseModal');
