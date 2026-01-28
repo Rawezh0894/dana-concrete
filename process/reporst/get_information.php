@@ -142,6 +142,8 @@ try {
         $date_condition_employee_payments = " AND DATE(CONCAT(pay_month, '-01')) >= '$period_start' AND DATE(CONCAT(pay_month, '-01')) <= '$period_end'";
         $date_condition_date = " AND date >= '$period_start' AND date <= '$period_end'";
         $date_condition_customer_debt_payments = " AND p.date >= '$period_start' AND p.date <= '$period_end'";
+        // Service receipts use created_at timestamp
+        $date_condition_service_receipts = " AND DATE(created_at) >= '$period_start' AND DATE(created_at) <= '$period_end'";
     } else {
         if ($filter === 'today') {
             $period_start = date('Y-m-d');
@@ -150,6 +152,7 @@ try {
             $date_condition_employee_payments = " AND YEAR(DATE(CONCAT(pay_month, '-01'))) = YEAR(CURDATE()) AND MONTH(DATE(CONCAT(pay_month, '-01'))) = MONTH(CURDATE())";
             $date_condition_date = " AND date = CURDATE()";
             $date_condition_customer_debt_payments = " AND p.date = CURDATE()";
+            $date_condition_service_receipts = " AND DATE(created_at) = CURDATE()";
         } elseif ($filter === 'week') {
             $period_start = date('Y-m-d', strtotime('monday this week'));
             $period_end = date('Y-m-d', strtotime('sunday this week'));
@@ -157,6 +160,7 @@ try {
             $date_condition_employee_payments = " AND YEAR(DATE(CONCAT(pay_month, '-01'))) = YEAR(CURDATE()) AND MONTH(DATE(CONCAT(pay_month, '-01'))) = MONTH(CURDATE())";
             $date_condition_date = " AND YEARWEEK(date, 1) = YEARWEEK(CURDATE(), 1)";
             $date_condition_customer_debt_payments = " AND YEARWEEK(p.date, 1) = YEARWEEK(CURDATE(), 1)";
+            $date_condition_service_receipts = " AND DATE(created_at) >= '$period_start' AND DATE(created_at) <= '$period_end'";
         } elseif ($filter === 'month') {
             $period_start = date('Y-m-01');
             $period_end = date('Y-m-t');
@@ -164,6 +168,7 @@ try {
             $date_condition_employee_payments = " AND YEAR(DATE(CONCAT(pay_month, '-01'))) = YEAR(CURDATE()) AND MONTH(DATE(CONCAT(pay_month, '-01'))) = MONTH(CURDATE())";
             $date_condition_date = " AND YEAR(date) = YEAR(CURDATE()) AND MONTH(date) = MONTH(CURDATE())";
             $date_condition_customer_debt_payments = " AND YEAR(p.date) = YEAR(CURDATE()) AND MONTH(p.date) = MONTH(CURDATE())";
+            $date_condition_service_receipts = " AND YEAR(created_at) = YEAR(CURDATE()) AND MONTH(created_at) = MONTH(CURDATE())";
         } elseif ($filter === 'year') {
             $period_start = date('Y-01-01');
             $period_end = date('Y-12-31');
@@ -171,6 +176,7 @@ try {
             $date_condition_employee_payments = " AND YEAR(DATE(CONCAT(pay_month, '-01'))) = YEAR(CURDATE())";
             $date_condition_date = " AND YEAR(date) = YEAR(CURDATE())";
             $date_condition_customer_debt_payments = " AND YEAR(p.date) = YEAR(CURDATE())";
+            $date_condition_service_receipts = " AND YEAR(created_at) = YEAR(CURDATE())";
         } else {
             $period_start = date('Y-01-01');
             $period_end = date('Y-12-31');
@@ -178,6 +184,7 @@ try {
             $date_condition_employee_payments = "";
             $date_condition_date = "";
             $date_condition_customer_debt_payments = "";
+            $date_condition_service_receipts = "";
         }
     }
     $purchases_query = "SELECT payment_type, SUM(price) as iqd, SUM(amount_iqd) as amount_iqd, SUM(amount_iqd / NULLIF(exchange_rate / 100, 0)) as iqd_converted FROM purchases WHERE type='دینار' $date_condition_date GROUP BY payment_type";
@@ -220,6 +227,31 @@ try {
         } elseif ($row['payment_type'] === 'قەرز') {
             $sales['credit']['usd'] = $row['usd'] ?? 0;
         }
+    }
+
+    // Service receipts (داهاتی خزمەتگوزاری: میکسەر/پەمپ) - USD only
+    $service_receipts_total_usd = 0;
+    $service_receipts_cash_usd = 0;
+    $service_receipts_credit_usd = 0;
+
+    try {
+        $service_sql = "
+            SELECT 
+                SUM(total_price_computed) AS total_usd,
+                SUM(CASE WHEN payment_type = 'cash' THEN total_price_computed ELSE 0 END) AS cash_usd,
+                SUM(CASE WHEN payment_type = 'credit' THEN total_price_computed ELSE 0 END) AS credit_usd
+            FROM service_receipts
+            WHERE 1=1 $date_condition_service_receipts
+        ";
+        $stmt = $pdo->query($service_sql);
+        $row = $stmt->fetch();
+        if ($row) {
+            $service_receipts_total_usd = floatval($row['total_usd'] ?? 0);
+            $service_receipts_cash_usd = floatval($row['cash_usd'] ?? 0);
+            $service_receipts_credit_usd = floatval($row['credit_usd'] ?? 0);
+        }
+    } catch (Exception $e) {
+        error_log("Error calculating service receipts totals: " . $e->getMessage());
     }
 
     // Raw Material Sales (فرۆشتنی مەوادی خام) - Calculate total in USD
@@ -646,7 +678,17 @@ try {
     }
     
     // Calculate total income
-    $total_income_usd = $total_sales_usd + $gas_income_usd + $material_sales_total_usd - $total_purchases_usd - $total_discounts - $other_expenses_usd - $purchase_materials_usd - $employee_payments_usd;
+    // داهات = فرۆشتن + خزمەتگوزاری + داهاتی گاز + داهاتی کاڵا - (کڕین + داشکاندن + خەرجی تر + کڕینی کاڵا + مووچە)
+    $total_income_usd = 
+        $total_sales_usd +
+        $service_receipts_total_usd +
+        $gas_income_usd +
+        $material_sales_total_usd -
+        $total_purchases_usd -
+        $total_discounts -
+        $other_expenses_usd -
+        $purchase_materials_usd -
+        $employee_payments_usd;
     
     // Debug: Log income calculation breakdown
     error_log("Debug - Income calculation: sales=" . $total_sales_usd . 
@@ -1260,6 +1302,11 @@ try {
             'person' => ['usd' => $person_debt_usd, 'iqd' => $person_debt_iqd],
             'purchases' => $purchases,
             'sales' => $sales,
+            'service_receipts' => [
+                'total_usd' => $service_receipts_total_usd,
+                'cash_usd' => $service_receipts_cash_usd,
+                'credit_usd' => $service_receipts_credit_usd
+            ],
             'material_sales' => [
                 'total_usd' => $material_sales_total_usd
             ],
@@ -1275,7 +1322,12 @@ try {
                 'total_iqd' => $caravan_hisabi_iqd
             ],
             'profit_loss' => [
-                'total_revenue' => ($sales['cash']['usd'] ?? 0) + ($sales['credit']['usd'] ?? 0) + $raw_material_sales_total_usd + $material_sales_total_usd,
+                'total_revenue' => 
+                    ($sales['cash']['usd'] ?? 0) + 
+                    ($sales['credit']['usd'] ?? 0) + 
+                    $service_receipts_total_usd +
+                    $raw_material_sales_total_usd + 
+                    $material_sales_total_usd,
                 'total_cost' => ($total_used_material_cost_usd ?? 0) + 
                                ($raw_material_sales_cost_total_usd ?? 0) + 
                                ($employee_stats['total_fixed_usd'] ?? 0) + 
@@ -1284,7 +1336,13 @@ try {
                                ($total_expenses_breakdown['purchases'] ?? 0) + 
                                ($total_expenses_breakdown['purchase_materials'] ?? 0) + 
                                ($total_discount ?? 0),
-                'profit_loss' => (($sales['cash']['usd'] ?? 0) + ($sales['credit']['usd'] ?? 0) + $raw_material_sales_total_usd + $material_sales_total_usd) - 
+                'profit_loss' => (
+                                   ($sales['cash']['usd'] ?? 0) + 
+                                   ($sales['credit']['usd'] ?? 0) + 
+                                   $service_receipts_total_usd +
+                                   $raw_material_sales_total_usd + 
+                                   $material_sales_total_usd
+                                 ) - 
                                 (($total_used_material_cost_usd ?? 0) + 
                                  ($raw_material_sales_cost_total_usd ?? 0) + 
                                  ($employee_stats['total_fixed_usd'] ?? 0) + 

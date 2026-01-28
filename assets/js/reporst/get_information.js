@@ -157,6 +157,14 @@ function renderDashboardCards(data) {
             subtitle: 'کۆی فرۆشتنەکان (نەقد + قەرز)'
         },
         {
+            key: 'service_receipts',
+            label: 'کۆی نرخی خزمەتگوزاریەکان (نەقد + قەرز)',
+            icon: 'fa-truck',
+            cardClass: 'sales-card',
+            value: formatCurrency(Number(data.data?.service_receipts?.total_usd) || 0, 'USD'),
+            subtitle: 'داهاتی میکسەر و پەمپ (service_receipts)'
+        },
+        {
             key: 'raw_material_sales',
             label: 'کۆی نرخی فرۆشتنی مەوادی خام',
             icon: 'fa-box-seam',
