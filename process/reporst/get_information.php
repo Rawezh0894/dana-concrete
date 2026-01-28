@@ -1449,7 +1449,13 @@ try {
     $total_meters = floatval($stmt->fetchColumn() ?? 0);
     
     if ($total_meters > 0) {
-        $total_revenue_val = ($sales['cash']['usd'] ?? 0) + ($sales['credit']['usd'] ?? 0) + ($raw_material_sales_total_usd ?? 0) + ($material_sales_total_usd ?? 0); // Total Revenue (Sales + Raw + Material)
+        // Total Revenue (Sales + Service Receipts + Raw Material Sales + Material Sales)
+        $total_revenue_val =
+            ($sales['cash']['usd'] ?? 0) +
+            ($sales['credit']['usd'] ?? 0) +
+            ($service_receipts_total_usd ?? 0) +
+            ($raw_material_sales_total_usd ?? 0) +
+            ($material_sales_total_usd ?? 0);
         
         $total_material_cost_val = ($total_used_material_cost_usd ?? 0) + ($raw_material_sales_cost_total_usd ?? 0); // Material + Raw Material Sales Cost
         // User requested formula components:
