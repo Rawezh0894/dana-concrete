@@ -4,7 +4,7 @@ require_once 'config/db_conected.php';
 
 // ڕێڕەوکردن بۆ داشبۆرد ئەگەر بەکارهێنەر پێشتر چووبێتە ژوورەوە
 if (isset($_SESSION['user_id'])) {
-    header('Location: pages/dashboard.php');
+    header('Location: ' . $project_root . '/pages/dashboard.php');
     exit;
 }
 ?>

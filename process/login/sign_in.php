@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
             $_SESSION['role'] = $user['role'];
-            header('Location: ../../pages/dashboard.php');
+            header('Location: ' . $project_root . '/pages/dashboard.php');
             exit;
         } else {
             $_SESSION['login_error'] = 'ناوی بەکارهێنەر یان وشەی نهێنی هەڵەیە!';

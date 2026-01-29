@@ -21,7 +21,8 @@ $session_timeout = env('SESSION_TIMEOUT', 86400);
 // دۆزینەوەی ناوی بوخچەی پرۆژە (بۆ دروستکردنی بەستەری تەواو بۆ Clean URLs)
 $script_dir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
 $project_root = preg_replace('/(\/(pages|process|includes|config|core|database).*)?$/i', '', $script_dir);
-if ($project_root == '') $project_root = '/';
+// لادانی فۆڕوارد سلاشی زیادە بۆ ئەوەی لە کاتی بەکارهێناندا نەبێتە // چونکە براوسەر وەک دۆمەین دەیبینێت
+$project_root = rtrim($project_root, '/');
 
 // هەرکات session هاتەوە، کاتی دوا جووڵەی بەکارهێنەر نوێ بکەوە
 if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > $session_timeout)) {
