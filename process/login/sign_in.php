@@ -24,5 +24,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 } else {
     $_SESSION['login_error'] = 'داواکاری نادروست!';
 }
-header('Location: ../../index.php');
+redirectToLogin();
 exit;

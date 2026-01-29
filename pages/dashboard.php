@@ -3,8 +3,7 @@ session_start();
 require_once '../config/db_conected.php';
 require_once '../config/permissions.php';
 if (!isset($_SESSION['user_id'])) {
-    header('Location: ../index.php');
-    exit;
+    redirectToLogin();
 }
 ?>
 <!DOCTYPE html>
@@ -29,12 +28,9 @@ if (!isset($_SESSION['user_id'])) {
 <?php include '../includes/navbar.php'; ?>
 <?php include '../includes/sidebar.php'; ?>
 
-<?php if (!hasPermission('view_dashboard')): ?>
-    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;">
-        <i class="bi bi-lock-fill" style="font-size:5rem;color:#ccc;"></i>
-        <h2 style="color:#888;">توانای دەست گەیشتنت نییە بەم پەیجە</h2>
-    </div>
-<?php else: ?>
+<?php if (!hasPermission('view_dashboard')) {
+    redirectToLogin();
+} ?>
     <div class="container-fluid py-4">
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
             <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">داشبۆرد</h2>
@@ -110,7 +106,7 @@ if (!isset($_SESSION['user_id'])) {
             </div>
         </div>
     </div>
-<?php endif; ?>
+
 
 <script nonce="<?php echo $csp_nonce; ?>">
     // Pass permissions to JavaScript

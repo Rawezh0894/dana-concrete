@@ -2,7 +2,7 @@
 session_start();
 require_once '../config/db_conected.php';
 if (!isset($_SESSION['user_id'])) {
-    header('Location: ../index.php');
+    redirectToLogin();
     exit;
 }
 $company_id = isset($_GET['id']) ? intval($_GET['id']) : 0;

@@ -10,7 +10,7 @@ if (!hasPermission('view_person_other_expenses')) {
     exit;
 }
 if (!isset($_SESSION['user_id'])) {
-    header('Location: ../index.php');
+    redirectToLogin();
     exit;
 }
 ?>

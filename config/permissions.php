@@ -2,7 +2,12 @@
 // Helper function to check if the current user has a specific permission
 function hasPermission($perm) {
     global $pdo;
-    if (!isset($_SESSION['role'])) return false;
+    if (!isset($_SESSION['role'])) {
+        if (function_exists('redirectToLogin')) {
+            redirectToLogin();
+        }
+        return false;
+    }
     $role = $_SESSION['role'];
     // Always allow admin
     if ($role === 'admin') return true;

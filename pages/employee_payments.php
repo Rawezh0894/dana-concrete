@@ -3,7 +3,7 @@ session_start();
 require_once '../config/db_conected.php';
 require_once '../config/permissions.php';
 if (!isset($_SESSION['user_id'])) {
-    header('Location: ../index.php');
+    redirectToLogin();
     exit;
 }
 if (!hasPermission('view_employee_payment')) {

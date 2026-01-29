@@ -18,15 +18,30 @@ if (session_status() === PHP_SESSION_NONE) {
 // ماوەی بەسەرچوونی سێشن (بە چرکە) - 24 کاتژمێر = 86400
 $session_timeout = env('SESSION_TIMEOUT', 86400);
 
+// دۆزینەوەی ناوی بوخچەی پرۆژە (بۆ دروستکردنی بەستەری تەواو بۆ Clean URLs)
+$script_dir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
+$project_root = preg_replace('/(\/(pages|process|includes|config|core|database).*)?$/i', '', $script_dir);
+if ($project_root == '') $project_root = '/';
+
 // هەرکات session هاتەوە، کاتی دوا جووڵەی بەکارهێنەر نوێ بکەوە
 if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > $session_timeout)) {
     // سێشن بەسەرچووە
     session_unset();
     session_destroy();
-    header('Location: ../index.php');
+    header("Location: " . $project_root . "/index.php");
     exit;
 }
 $_SESSION['LAST_ACTIVITY'] = time();
+
+/**
+ * Helper function to redirect to index/login
+ */
+function redirectToLogin() {
+    global $project_root;
+    header("Location: " . $project_root . "/index.php");
+    exit;
+}
+
 
 // Database connection settings
 $host = env('DB_HOST', 'localhost');

@@ -10,7 +10,7 @@ if (!hasPermission('view_company')) {
     exit;
 }
 if (!isset($_SESSION['user_id'])) {
-    header('Location: ../index.php');
+    redirectToLogin();
     exit;
 }
 ?>

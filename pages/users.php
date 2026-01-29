@@ -3,15 +3,10 @@ session_start();
 require_once '../config/db_conected.php';
 require_once '../config/permissions.php';
 if (!isset($_SESSION['user_id'])) {
-    header('Location: ../index.php');
-    exit;
+    redirectToLogin();
 }
 if (!hasPermission('view_users')) {
-    echo '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;">'
-        .'<i class="bi bi-lock-fill" style="font-size:5rem;color:#ccc;"></i>'
-        .'<h2 style="color:#888;">توانای دەست گەیشتنت نییە بەم پەیجە</h2>'
-        .'</div>';
-    exit;
+    redirectToLogin();
 }
 ?>
 <!DOCTYPE html>
