@@ -108,12 +108,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Check for duplicate invoice_number for the same company except current record
-    $dup_stmt = $pdo->prepare("SELECT COUNT(*) FROM purchases WHERE invoice_number = ? AND company_id = ? AND id != ?");
-    $dup_stmt->execute([$invoice_number, $company_id, $id]);
+    // Check for duplicate invoice_number for the same company on the same date except current record
+    $dup_stmt = $pdo->prepare("SELECT COUNT(*) FROM purchases WHERE invoice_number = ? AND company_id = ? AND date = ? AND id != ?");
+    $dup_stmt->execute([$invoice_number, $company_id, $date, $id]);
     if ($dup_stmt->fetchColumn() > 0) {
-        error_log('Duplicate invoice number for company: ' . $invoice_number . ', company_id: ' . $company_id);
-        echo json_encode(['success' => false, 'msg' => 'ژمارەی پسوڵە بۆ ئەم کۆمپانیا دووبارەیە!']);
+        error_log('Duplicate invoice number for company on date: ' . $invoice_number . ', company_id: ' . $company_id . ', date: ' . $date);
+        echo json_encode(['success' => false, 'msg' => 'ئەم ژمارە پسووڵەیە بۆ ئەم کۆمپانیایە لەم بەروارە تۆمارکراوە']);
         exit;
     }
 

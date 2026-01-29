@@ -89,11 +89,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo json_encode(['success' => false, 'msg' => 'بڕی پارەی ماوە نابێت بێت کاتێک جۆری پارەدان نەقدە!']);
         exit;
     }
-    // Check for duplicate invoice_number for the same company
-    $dup_stmt = $pdo->prepare("SELECT COUNT(*) FROM purchases WHERE invoice_number = ? AND company_id = ?");
-    $dup_stmt->execute([$invoice_number, $company_id]);
+    // Check for duplicate invoice_number for the same company on the same date
+    $dup_stmt = $pdo->prepare("SELECT COUNT(*) FROM purchases WHERE invoice_number = ? AND company_id = ? AND date = ?");
+    $dup_stmt->execute([$invoice_number, $company_id, $date]);
     if ($dup_stmt->fetchColumn() > 0) {
-        echo json_encode(['success' => false, 'msg' => 'ژمارەی پسوڵە بۆ ئەم کۆمپانیا دووبارەیە!']);
+        echo json_encode(['success' => false, 'msg' => 'ئەم ژمارە پسووڵەیە بۆ ئەم کۆمپانیایە لەم بەروارە تۆمارکراوە']);
         exit;
     }
     // Get driver and location names
