@@ -386,7 +386,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
       <div class="row">
         <div class="col-md-3">
           <label for="filter_company">کۆمپانیا:</label>
-          <select class="form-select" id="filter_company">
+          <select class="form-select select2" id="filter_company">
             <option value="">هەموو کۆمپانیاکان</option>
             <?php foreach ($companies as $comp): ?>
               <option value="<?= $comp['id'] ?>"><?= htmlspecialchars($comp['name']) ?></option>
@@ -395,7 +395,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
         </div>
         <div class="col-md-3">
           <label for="filter_location">شوێن:</label>
-          <select class="form-select" id="filter_location">
+          <select class="form-select select2" id="filter_location">
             <option value="">هەموو شوێنەکان</option>
             <?php foreach ($locations as $loc): ?>
               <option value="<?= $loc['id'] ?>"><?= htmlspecialchars($loc['name']) ?></option>
@@ -404,7 +404,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
         </div>
         <div class="col-md-3">
           <label for="filter_driver">شۆفێر:</label>
-          <select class="form-select" id="filter_driver">
+          <select class="form-select select2" id="filter_driver">
             <option value="">هەموو شۆفێرەکان</option>
             <?php foreach ($drivers as $drv): ?>
               <option value="<?= $drv['id'] ?>"><?= htmlspecialchars($drv['name']) ?></option>
@@ -413,7 +413,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
         </div>
         <div class="col-md-3">
           <label for="filter_material">مەواد:</label>
-          <select class="form-select" id="filter_material">
+          <select class="form-select select2" id="filter_material">
             <option value="">هەموو مەوادەکان</option>
             <?php foreach ($materials as $mat): ?>
               <option value="<?= $mat['id'] ?>"><?= htmlspecialchars($mat['name']) ?></option>
@@ -440,7 +440,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
           <div class="row">
           <div class="col-md-6 mb-3">
               <label for="company_id" class="form-label">کۆمپانیا</label>
-              <select class="form-select" id="company_id" name="company_id" required>
+              <select class="form-select select2" id="company_id" name="company_id" required>
                 <option value="">کۆمپانیا</option>
                 <?php foreach ($companies as $comp): ?>
                   <option value="<?= $comp['id'] ?>"><?= htmlspecialchars($comp['name']) ?></option>
@@ -486,7 +486,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
            
             <div class="col-md-6 mb-3">
               <label for="material_id" class="form-label">مەواد</label>
-              <select class="form-select" id="material_id" name="material_id" required>
+              <select class="form-select select2" id="material_id" name="material_id" required>
                 <option value="">هەڵبژێرە</option>
                 <?php foreach ($materials as $mat): ?>
                   <option value="<?= $mat['id'] ?>"><?= htmlspecialchars($mat['name']) ?></option>
@@ -758,7 +758,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
           <div class="row">
             <div class="col-md-6 mb-3">
               <label for="edit_company_id" class="form-label">کۆمپانیا</label>
-              <select class="form-select" id="edit_company_id" name="company_id" required>
+              <select class="form-select select2" id="edit_company_id" name="company_id" required>
                 <option value="">کۆمپانیا</option>
                 <?php foreach ($companies as $comp): ?>
                   <option value="<?= $comp['id'] ?>"><?= htmlspecialchars($comp['name']) ?></option>
@@ -793,7 +793,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
           <div class="row">
             <div class="col-md-6 mb-3">
               <label for="edit_material_id" class="form-label">مەواد</label>
-              <select class="form-select" id="edit_material_id" name="material_id" required>
+              <select class="form-select select2" id="edit_material_id" name="material_id" required>
                 <option value="">هەڵبژێرە</option>
                 <?php foreach ($materials as $mat): ?>
                   <option value="<?= $mat['id'] ?>"><?= htmlspecialchars($mat['name']) ?></option>

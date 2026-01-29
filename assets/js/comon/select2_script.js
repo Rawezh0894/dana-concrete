@@ -188,11 +188,27 @@ $(document).ready(function () {
         enableSelect2('#company_id', '#addPurchaseModal');
         enableSelect2('#driver_id', '#addPurchaseModal');
         enableSelect2('#location_id', '#addPurchaseModal');
+        enableSelect2('#material_id', '#addPurchaseModal');
     }
     if ($('#editPurchaseModal').length > 0) {
         enableSelect2('#edit_company_id', '#editPurchaseModal');
         enableSelect2('#edit_driver_id', '#editPurchaseModal');
         enableSelect2('#edit_location_id', '#editPurchaseModal');
+        enableSelect2('#edit_material_id', '#editPurchaseModal');
+    }
+
+    // بۆ purchase filters
+    if ($('#filter_company').length > 0) {
+        enableSelect2('#filter_company', 'body');
+    }
+    if ($('#filter_location').length > 0) {
+        enableSelect2('#filter_location', 'body');
+    }
+    if ($('#filter_driver').length > 0) {
+        enableSelect2('#filter_driver', 'body');
+    }
+    if ($('#filter_material').length > 0) {
+        enableSelect2('#filter_material', 'body');
     }
 
     // بۆ concrete receipts - تەنها ئەگەر مۆداڵەکە هەبێت
