@@ -12,10 +12,23 @@ function loadPermissions() {
 
             // 1. Update Table Header
             const thead = document.querySelector('#permissionsTable thead tr');
+            const coreRoles = ['admin', 'user', 'accountant', 'manager'];
+
             thead.innerHTML = `
                 <th>ناوی دەسەڵات</th>
                 <th>ڕوونکردنەوە</th>
-                ${roles.map(role => `<th class="text-capitalize">${role}</th>`).join('')}
+                ${roles.map(role => `
+                    <th class="text-capitalize">
+                        <div class="d-flex flex-column align-items-center">
+                            <span>${role}</span>
+                            ${!coreRoles.includes(role) ? `
+                                <button class="btn btn-sm text-danger mt-1 delete-role-btn" data-role="${role}" title="سڕینەوەی دەسەڵات">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            ` : '<div style="height:31px;"></div>'}
+                        </div>
+                    </th>
+                `).join('')}
             `;
 
             // 2. Transform data for TableController
@@ -110,5 +123,41 @@ document.body.addEventListener('change', function (e) {
                 swalAlert('error', 'هەڵەیەک ڕویدا!');
                 e.target.checked = !e.target.checked; // Revert checkbox
             });
+    }
+});
+
+document.body.addEventListener('click', function (e) {
+    const deleteBtn = e.target.closest('.delete-role-btn');
+    if (deleteBtn) {
+        const role = deleteBtn.getAttribute('data-role');
+
+        Swal.fire({
+            title: 'ئایا دڵنیایت؟',
+            text: `تۆ دەتەوێت دەسەڵاتی "${role}" بسڕیتەوە، ئەمە هەموو پێوەرەکانی ئەم دەسەڵاتەش دەسڕێتەوە!`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'بەڵێ، بیسڕەوە',
+            cancelButtonText: 'پاشگەزبوونەوە'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('../process/users/delete_role.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `role=${role}`
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            swalAlert('success', data.message);
+                            loadPermissions();
+                        } else {
+                            swalAlert('error', data.message);
+                        }
+                    })
+                    .catch(() => swalAlert('error', 'هەڵەیەک ڕوویدا!'));
+            }
+        });
     }
 });
