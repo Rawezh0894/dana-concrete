@@ -18,7 +18,15 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 try {
-    $roles = ['admin', 'user', 'accountant', 'manager'];
+    // Fetch all roles from dynamic roles table
+    $rolesStmt = $pdo->query('SELECT name FROM roles ORDER BY id ASC');
+    $roles = $rolesStmt->fetchAll(PDO::FETCH_COLUMN);
+    
+    // If no roles found in table, use default set to ensure system doesn't break
+    if (empty($roles)) {
+        $roles = ['admin', 'user', 'accountant', 'manager'];
+    }
+
     $perms = $pdo->query('SELECT * FROM permissions ORDER BY id ASC')->fetchAll(PDO::FETCH_ASSOC);
 
     foreach ($perms as &$perm) {
@@ -29,8 +37,13 @@ try {
         }
     }
     
-    error_log('Permissions retrieved successfully: Count=' . count($perms));
-    echo json_encode($perms);
+    $result = [
+        'roles' => $roles,
+        'permissions' => $perms
+    ];
+    
+    error_log('Permissions and roles retrieved successfully');
+    echo json_encode($result);
     
 } catch (PDOException $e) {
     error_log('PDOException in select_permissions.php: ' . $e->getMessage());

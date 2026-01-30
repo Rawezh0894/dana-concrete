@@ -61,6 +61,7 @@ if (!hasPermission('view_users')) {
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">بەکارهێنەران</h2>
                 <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addUserModal" style="background: var(--seafoam-green); font-weight: bold;">+ زیادکردنی بەکارهێنەر</button>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRoleModal" style="font-weight: bold;">+ زیادکردنی دەسەڵات</button>
             </div>
 
             <!-- Summary Cards -->
@@ -158,10 +159,7 @@ if (!hasPermission('view_users')) {
           <div class="mb-3">
             <label for="addRole" class="form-label">دەسەڵات</label>
             <select class="form-select" id="addRole" name="role" required>
-              <option value="user">بەکارهێنەر</option>
-              <option value="admin">ئەدمین</option>
-              <option value="accountant">موحاسیب</option>
-              <option value="manager">بەڕێوەبەر</option>
+              <!-- Roles will be loaded here by JS -->
             </select>
           </div>
         </div>
@@ -173,6 +171,10 @@ if (!hasPermission('view_users')) {
     </div>
   </div>
 </div>
+    </div>
+  </div>
+</div>
+
 <!-- Edit User Modal (to be filled by JS) -->
 <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -195,16 +197,37 @@ if (!hasPermission('view_users')) {
           <div class="mb-3">
             <label for="editRole" class="form-label">دەسەڵات</label>
             <select class="form-select" id="editRole" name="role" required>
-              <option value="user">بەکارهێنەر</option>
-              <option value="admin">ئەدمین</option>
-              <option value="accountant">موحاسیب</option>
-              <option value="manager">بەڕێوەبەر</option>
+               <!-- Roles will be loaded here by JS -->
             </select>
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
           <button type="submit" class="btn" style="background: var(--seafoam-green); color:white;">نوێکردنەوە</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Add Role Modal -->
+<div class="modal fade" id="addRoleModal" tabindex="-1" aria-labelledby="addRoleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="addRoleForm">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addRoleModalLabel">زیادکردنی دەسەڵات (Role)</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="newRoleName" class="form-label">ناوی دەسەڵات (بە ئینگلیزی - نمونە: operator)</label>
+            <input type="text" class="form-control" id="newRoleName" name="name" required pattern="[a-z0-9_]+">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
+          <button type="submit" class="btn btn-success" style="background: var(--seafoam-green); font-weight: bold;">زیادکردن</button>
         </div>
       </form>
     </div>

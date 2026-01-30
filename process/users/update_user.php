@@ -47,7 +47,10 @@ try {
         exit;
     }
 
-    if (!in_array($role, ['admin', 'user', 'accountant', 'manager'])) {
+    // Check if role exists in database
+    $roleStmt = $pdo->prepare('SELECT COUNT(*) FROM roles WHERE name = ?');
+    $roleStmt->execute([$role]);
+    if ($roleStmt->fetchColumn() == 0) {
         error_log('Invalid role provided: ' . $role);
         echo json_encode(['success' => false, 'message' => 'دەسەڵاتی نادروست!']);
         exit;

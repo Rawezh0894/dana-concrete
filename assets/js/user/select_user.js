@@ -9,12 +9,11 @@ function loadUsers() {
                 tr.innerHTML = `
                     <td>${idx + 1}</td>
                     <td>${user.username}</td>
-                    <td>${
-                        user.role === 'admin' ? 'ئەدمین' :
+                    <td>${user.role === 'admin' ? 'ئەدمین' :
                         user.role === 'user' ? 'بەکارهێنەر' :
-                        user.role === 'accountant' ? 'موحاسیب' :
-                        user.role === 'manager' ? 'بەڕێوەبەر' :
-                        user.role // fallback to raw role
+                            user.role === 'accountant' ? 'موحاسیب' :
+                                user.role === 'manager' ? 'بەڕێوەبەر' :
+                                    user.role.charAt(0).toUpperCase() + user.role.slice(1)
                     }</td>
                     <td>
                         <button class="btn btn-sm btn-primary me-1 edit-user-btn" data-id="${user.id}" data-username="${user.username}" data-role="${user.role}" title="دەستکاری">
