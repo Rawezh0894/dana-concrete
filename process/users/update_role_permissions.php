@@ -6,20 +6,14 @@ ini_set('error_log', __DIR__ . '/../../php-error.log');
 
 require_once '../../config/db_conected.php';
 
-// Log session and POST data for debugging
-error_log('SESSION: ' . print_r($_SESSION, true));
-error_log('update_role_permissions.php POST: ' . print_r($_POST, true));
-
 header('Content-Type: application/json; charset=utf-8');
 
 if (!isset($_SESSION['user_id'])) {
-    error_log('User not logged in for role permissions update');
     echo json_encode(['success' => false, 'message' => 'سێشن نییە! تکایە بچۆ ژوورەوە.']);
     exit;
 }
 
 if ($_SESSION['role'] !== 'admin') {
-    error_log('Permission denied for user: ' . $_SESSION['user_id'] . ' to update role permissions (not admin)');
     echo json_encode(['success' => false, 'message' => 'ڕێگەت پێنەدراوە!']);
     exit;
 }
@@ -29,27 +23,15 @@ try {
     $permission_id = intval($_POST['permission_id'] ?? 0);
     $value = intval($_POST['value'] ?? 0);
 
-    // Log parsed variables for debugging
-    error_log("Parsed vars: role='$role', permission_id='$permission_id', value='$value'");
-
-    // Validate required fields
-    if (empty($role)) {
-        error_log('Role is empty');
-        echo json_encode(['success' => false, 'message' => 'دەسەڵات پێویستە!']);
+    if (empty($role) || !$permission_id) {
+        echo json_encode(['success' => false, 'message' => 'زانیاری ناتەواو!']);
         exit;
     }
 
-    if (!$permission_id) {
-        error_log('Permission ID is invalid: ' . $permission_id);
-        echo json_encode(['success' => false, 'message' => 'ناسنامەی دەسەڵات پێویستە!']);
-        exit;
-    }
-
-    // Check if role exists in database instead of hardcoded list
+    // Check if role exists
     $rolesStmt = $pdo->prepare('SELECT COUNT(*) FROM roles WHERE name = ?');
     $rolesStmt->execute([$role]);
     if ($rolesStmt->fetchColumn() == 0) {
-        error_log('Invalid role provided: ' . $role);
         echo json_encode(['success' => false, 'message' => 'دەسەڵاتی نادروست!']);
         exit;
     }
@@ -57,27 +39,13 @@ try {
     if ($value) {
         // Add permission using ON DUPLICATE KEY UPDATE to be safe
         $stmt = $pdo->prepare('INSERT INTO role_permissions (role, permission_id) VALUES (?, ?) ON DUPLICATE KEY UPDATE role = role');
-        $ok = $stmt->execute([$role, $permission_id]);
-        
-        if ($ok) {
-            error_log('Permission assigned: Role=' . $role . ', Permission ID=' . $permission_id);
-            echo json_encode(['success' => true, 'message' => 'دەسەڵات درا بەم ڕۆڵە!']);
-        } else {
-            error_log('Failed to assign permission: Role=' . $role . ', Permission ID=' . $permission_id);
-            echo json_encode(['success' => false, 'message' => 'هەڵە لە پێدانی دەسەڵات!']);
-        }
+        $stmt->execute([$role, $permission_id]);
+        echo json_encode(['success' => true, 'message' => 'دەسەڵات درا بەم ڕۆڵە!']);
     } else {
         // Remove permission
         $stmt = $pdo->prepare('DELETE FROM role_permissions WHERE role = ? AND permission_id = ?');
-        $ok = $stmt->execute([$role, $permission_id]);
-        
-        if ($ok) {
-            error_log('Permission removed: Role=' . $role . ', Permission ID=' . $permission_id);
-            echo json_encode(['success' => true, 'message' => 'دەسەڵات لەم ڕۆڵە لابرا!']);
-        } else {
-            error_log('Failed to remove permission: Role=' . $role . ', Permission ID=' . $permission_id);
-            echo json_encode(['success' => false, 'message' => 'هەڵە لە لابردنی دەسەڵات!']);
-        }
+        $stmt->execute([$role, $permission_id]);
+        echo json_encode(['success' => true, 'message' => 'دەسەڵات لەم ڕۆڵە لابرا!']);
     }
 
 } catch (PDOException $e) {
