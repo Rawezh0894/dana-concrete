@@ -82,7 +82,8 @@ function loadPermissions() {
             // Use TableController with pagination and search
             TableController.renderWithPagination('#permissionsTable', tableData, columns, {
                 pageSize: 15,
-                currentPage: 1
+                currentPage: 1,
+                excludeSearch: roles
             });
 
             // 3. Populate User Modals while we have the roles
@@ -138,22 +139,30 @@ document.body.addEventListener('change', function (e) {
         const role = e.target.getAttribute('data-role');
         const permission_id = e.target.getAttribute('data-id');
         const value = e.target.checked ? 1 : 0;
+
+        const params = new URLSearchParams();
+        params.append('role', role);
+        params.append('permission_id', permission_id);
+        params.append('value', value);
+
         fetch('../process/users/update_role_permissions.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `role=${role}&permission_id=${permission_id}&value=${value}`
+            body: params.toString()
         })
             .then(res => res.json())
             .then(data => {
                 if (!data.success) {
-                    swalAlert('error', data.message);
+                    swalAlert('error', data.message || 'هەڵەیەک ڕوویدا لە نوێکردنەوەی دەسەڵات');
                     e.target.checked = !e.target.checked; // Revert checkbox
                 } else {
-                    // Optional: success toast
+                    // Success! No need for alert for every checkbox toggle unless requested
+                    console.log('Permission updated:', data.message);
                 }
             })
-            .catch(() => {
-                swalAlert('error', 'هەڵەیەک ڕویدا!');
+            .catch(err => {
+                console.error('Fetch error:', err);
+                swalAlert('error', 'پەیوەندی لەگەڵ سێرڤەر پچڕا!');
                 e.target.checked = !e.target.checked; // Revert checkbox
             });
     }

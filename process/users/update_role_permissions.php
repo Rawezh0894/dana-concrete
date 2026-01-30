@@ -55,16 +55,16 @@ try {
     }
 
     if ($value) {
-        // Add permission
-        $stmt = $pdo->prepare('INSERT IGNORE INTO role_permissions (role, permission_id) VALUES (?, ?)');
+        // Add permission using ON DUPLICATE KEY UPDATE to be safe
+        $stmt = $pdo->prepare('INSERT INTO role_permissions (role, permission_id) VALUES (?, ?) ON DUPLICATE KEY UPDATE role = role');
         $ok = $stmt->execute([$role, $permission_id]);
         
         if ($ok) {
-            error_log('Permission added successfully: Role=' . $role . ', Permission ID=' . $permission_id);
-            echo json_encode(['success' => true, 'message' => 'دەسەڵات زیادکرا!']);
+            error_log('Permission assigned: Role=' . $role . ', Permission ID=' . $permission_id);
+            echo json_encode(['success' => true, 'message' => 'دەسەڵات درا بەم ڕۆڵە!']);
         } else {
-            error_log('Failed to add permission: Role=' . $role . ', Permission ID=' . $permission_id);
-            echo json_encode(['success' => false, 'message' => 'هەڵە لە زیادکردنی دەسەڵات!']);
+            error_log('Failed to assign permission: Role=' . $role . ', Permission ID=' . $permission_id);
+            echo json_encode(['success' => false, 'message' => 'هەڵە لە پێدانی دەسەڵات!']);
         }
     } else {
         // Remove permission
@@ -72,8 +72,8 @@ try {
         $ok = $stmt->execute([$role, $permission_id]);
         
         if ($ok) {
-            error_log('Permission removed successfully: Role=' . $role . ', Permission ID=' . $permission_id);
-            echo json_encode(['success' => true, 'message' => 'دەسەڵات لابرا!']);
+            error_log('Permission removed: Role=' . $role . ', Permission ID=' . $permission_id);
+            echo json_encode(['success' => true, 'message' => 'دەسەڵات لەم ڕۆڵە لابرا!']);
         } else {
             error_log('Failed to remove permission: Role=' . $role . ', Permission ID=' . $permission_id);
             echo json_encode(['success' => false, 'message' => 'هەڵە لە لابردنی دەسەڵات!']);

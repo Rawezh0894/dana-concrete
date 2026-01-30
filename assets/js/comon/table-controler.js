@@ -2,7 +2,7 @@
 // Usage: TableController.render(tableSelector, data, columns)
 
 const TableController = {
-    showError: function(tableSelector, message) {
+    showError: function (tableSelector, message) {
         const table = document.querySelector(tableSelector);
         const tbody = table ? table.querySelector('tbody') : null;
         const columnCount = table ? table.querySelectorAll('thead th').length || 1 : 1;
@@ -16,7 +16,7 @@ const TableController = {
         tr.appendChild(td);
         tbody.appendChild(tr);
     },
-    render: function(tableSelector, data, columns, options = {}) {
+    render: function (tableSelector, data, columns, options = {}) {
         const tbody = document.querySelector(tableSelector + ' tbody');
         if (!tbody) return;
         tbody.innerHTML = '';
@@ -32,7 +32,7 @@ const TableController = {
         }
         data.forEach((row, idx) => {
             const tr = document.createElement('tr');
-            
+
             // Apply custom row class if provided
             if (options.rowClass && typeof options.rowClass === 'function') {
                 const rowClass = options.rowClass(row);
@@ -40,33 +40,32 @@ const TableController = {
                     tr.classList.add(rowClass);
                 }
             }
-            
+
             // Apply duplicate styling if row is marked as duplicate (legacy support)
             if (row.is_duplicate) {
                 tr.classList.add('duplicate-row');
             }
-            
+
             columns.forEach(col => {
                 const td = document.createElement('td');
                 td.setAttribute('data-col', col);
-                
+
+                const isExcluded = options.excludeSearch && options.excludeSearch.includes(col);
+                const isLegacyRole = ["admin", "user", "accountant", "manager"].includes(col);
+
                 if (col === '#') {
                     td.textContent = (options.rowOffset ? options.rowOffset : 0) + idx + 1;
-                } else if (col === 'actions') {
-                    td.innerHTML = row[col] !== undefined ? row[col] : '';
-                } else if (col === 'select') {
-                    td.innerHTML = row[col] !== undefined ? row[col] : '';
-                } else if (["admin", "user", "accountant", "manager"].includes(col)) {
+                } else if (col === 'actions' || col === 'select' || isLegacyRole || isExcluded) {
                     td.innerHTML = row[col] !== undefined ? row[col] : '';
                 } else if (col === 'price_usd') {
                     const val = parseFloat(row[col]);
-                    td.textContent = (val && val !== 0) ? ('$' + val.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})) : '-';
+                    td.textContent = (val && val !== 0) ? ('$' + val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })) : '-';
                 } else if (col === 'price_iqd') {
                     const val = parseFloat(row[col]);
-                    td.textContent = (val && val !== 0) ? (val.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0}) + ' د.ع') : '-';
+                    td.textContent = (val && val !== 0) ? (val.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' د.ع') : '-';
                 } else if (col === 'adjustment') {
                     const val = parseFloat(row[col]);
-                    td.textContent = (val && val !== 0) ? (val.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' Kg') : '-';
+                    td.textContent = (val && val !== 0) ? (val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' Kg') : '-';
                 } else if (col === 'total_prices') {
                     td.innerHTML = (row[col] !== undefined && row[col] !== null && row[col] !== '') ? row[col] : '-';
                 } else {
@@ -75,14 +74,14 @@ const TableController = {
                 tr.appendChild(td);
             });
             // Row select highlight
-            tr.onclick = function() {
+            tr.onclick = function () {
                 tbody.querySelectorAll('tr').forEach(row => row.classList.remove('selected'));
                 tr.classList.add('selected');
             };
             tbody.appendChild(tr);
         });
     },
-    showLoading: function(tableSelector, columns) {
+    showLoading: function (tableSelector, columns) {
         const tbody = document.querySelector(tableSelector + ' tbody');
         if (!tbody) return;
         tbody.innerHTML = '';
@@ -94,7 +93,7 @@ const TableController = {
         tr.appendChild(td);
         tbody.appendChild(tr);
     },
-    renderWithColumnSearch: function(tableSelector, data, columns) {
+    renderWithColumnSearch: function (tableSelector, data, columns) {
         const table = document.querySelector(tableSelector);
         if (!table) return;
         const thead = table.querySelector('thead');
@@ -112,7 +111,11 @@ const TableController = {
             if (!th) return;
             // Remove all old <br> and .table-search-input from th
             Array.from(th.querySelectorAll('br, .table-search-input')).forEach(e => e.remove());
-            if (col !== 'actions' && col !== '#' && col !== 'select' && !["admin", "user", "accountant", "manager"].includes(col)) {
+
+            const isExcluded = options.excludeSearch && options.excludeSearch.includes(col);
+            const isLegacyRole = ["admin", "user", "accountant", "manager"].includes(col);
+
+            if (col !== 'actions' && col !== '#' && col !== 'select' && !isLegacyRole && !isExcluded) {
                 const input = document.createElement('input');
                 input.type = 'text';
                 input.className = 'form-control form-control-sm table-search-input';
@@ -143,10 +146,10 @@ const TableController = {
         // Initial render
         TableController.render(tableSelector, data, columns);
     },
-    renderWithPagination: function(tableSelector, data, columns, options = {}) {
+    renderWithPagination: function (tableSelector, data, columns, options = {}) {
         const table = document.querySelector(tableSelector);
         if (!table) return;
-        
+
         const thead = table.querySelector('thead');
         const tbody = table.querySelector('tbody');
         if (!thead || !tbody) return;
@@ -182,7 +185,7 @@ const TableController = {
         }
 
         // Handle page size change
-        sizeSelect.onchange = function() {
+        sizeSelect.onchange = function () {
             pageSize = parseInt(this.value);
             currentPage = 1; // Reset to first page when changing size
             renderPage(currentPage);
@@ -197,7 +200,11 @@ const TableController = {
             if (!th) return;
             // Remove all old <br> and .table-search-input from th
             Array.from(th.querySelectorAll('br, .table-search-input')).forEach(e => e.remove());
-            if (col !== 'actions' && col !== '#' && col !== 'select' && !["admin", "user", "accountant", "manager"].includes(col)) {
+
+            const isExcluded = options.excludeSearch && options.excludeSearch.includes(col);
+            const isLegacyRole = ["admin", "user", "accountant", "manager"].includes(col);
+
+            if (col !== 'actions' && col !== '#' && col !== 'select' && !isLegacyRole && !isExcluded) {
                 const input = document.createElement('input');
                 input.type = 'text';
                 input.className = 'form-control form-control-sm table-search-input';
@@ -231,7 +238,7 @@ const TableController = {
             const start = (currentPage - 1) * pageSize;
             const end = start + pageSize;
             const pageData = filtered.slice(start, end);
-            
+
             // Show "no data" message if filtered data is empty
             if (filtered.length === 0) {
                 tbody.innerHTML = '';
@@ -242,7 +249,7 @@ const TableController = {
                 td.innerHTML = '<i class="bi bi-inbox"></i><br>هیچ زانیارییەک نەدۆزرایەوە';
                 tr.appendChild(td);
                 tbody.appendChild(tr);
-                
+
                 // Clear pagination - سڕینەوەی تەواوی pagination
                 const existingPagination = controlsContainer.querySelector('.table-pagination');
                 if (existingPagination) {
@@ -250,13 +257,13 @@ const TableController = {
                 }
                 return;
             }
-            
-            TableController.render(tableSelector, pageData, columns, { 
-                rowOffset: start,
-                rowClass: options.rowClass 
+
+            TableController.render(tableSelector, pageData, columns, {
+                ...options,
+                rowOffset: start
             });
             renderPaginationControls(totalPages);
-            
+
             // Call onRenderComplete callback if provided
             if (options.onRenderComplete && typeof options.onRenderComplete === 'function') {
                 options.onRenderComplete();
@@ -268,23 +275,23 @@ const TableController = {
             if (existingPagination) {
                 existingPagination.remove();
             }
-            
+
             // دروستکردنی pagination نوێ
             const pagination = document.createElement('div');
             pagination.className = 'table-pagination mt-3';
             controlsContainer.appendChild(pagination);
-            
+
             // Show total records info
             const filtered = getFilteredData();
             const infoDiv = document.createElement('div');
             infoDiv.className = 'text-muted mb-2';
             const startIdx = filtered.length === 0 ? 0 : ((currentPage - 1) * pageSize) + 1;
             const endIdx = Math.min(currentPage * pageSize, filtered.length);
-            infoDiv.textContent = filtered.length === 0 
+            infoDiv.textContent = filtered.length === 0
                 ? 'هیچ تۆمارێک بوونی نییە'
                 : `نیشاندراوە: ${startIdx}-${endIdx} لە ${filtered.length} تۆمار`;
             pagination.appendChild(infoDiv);
-            
+
             // Prev button with SVG
             const prev = document.createElement('button');
             prev.className = 'btn btn-sm btn-outline-secondary mx-1';
@@ -293,7 +300,7 @@ const TableController = {
             prev.disabled = currentPage === 1;
             prev.onclick = () => renderPage(currentPage - 1);
             pagination.appendChild(prev);
-            
+
             for (let i = 1; i <= totalPages; i++) {
                 if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 2) {
                     const btn = document.createElement('button');
@@ -312,7 +319,7 @@ const TableController = {
                     pagination.appendChild(span);
                 }
             }
-            
+
             // Next button with SVG
             const next = document.createElement('button');
             next.className = 'btn btn-sm btn-outline-secondary mx-1';
@@ -327,10 +334,10 @@ const TableController = {
         thead.querySelectorAll('.table-search-input').forEach(input => {
             input.oninput = () => renderPage(1);
         });
-        
+
         // Initial render
         renderPage(currentPage);
-        
+
         // Call onRenderComplete callback for initial render if provided
         if (options.onRenderComplete && typeof options.onRenderComplete === 'function') {
             options.onRenderComplete();
