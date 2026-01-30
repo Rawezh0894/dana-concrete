@@ -1,7 +1,35 @@
 document.addEventListener('DOMContentLoaded', function () {
     loadPermissions();
     setupAddRole();
+    setupEditRole();
 });
+
+function setupEditRole() {
+    const form = document.getElementById('editRoleForm');
+    if (!form) return;
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const formData = new FormData(form);
+
+        fetch('../process/users/update_role.php', {
+            method: 'POST',
+            body: formData
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    swalAlert('success', data.message);
+                    bootstrap.Modal.getInstance(document.getElementById('editRoleModal')).hide();
+                    form.reset();
+                    loadPermissions();
+                } else {
+                    swalAlert('error', data.message);
+                }
+            })
+            .catch(() => swalAlert('error', 'هەڵەیەک ڕوویدا!'));
+    });
+}
 
 function loadPermissions() {
     fetch('../process/users/select_permissions.php')
@@ -22,9 +50,14 @@ function loadPermissions() {
                         <div class="d-flex flex-column align-items-center">
                             <span>${role}</span>
                             ${!coreRoles.includes(role) ? `
-                                <button class="btn btn-sm text-danger mt-1 delete-role-btn" data-role="${role}" title="سڕینەوەی دەسەڵات">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
+                                <div class="d-flex gap-1 mt-1">
+                                    <button class="btn btn-sm text-primary edit-role-btn" data-role="${role}" title="دەستکاری ناوی دەسەڵات">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm text-danger delete-role-btn" data-role="${role}" title="سڕینەوەی دەسەڵات">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
                             ` : '<div style="height:31px;"></div>'}
                         </div>
                     </th>
@@ -127,6 +160,15 @@ document.body.addEventListener('change', function (e) {
 });
 
 document.body.addEventListener('click', function (e) {
+    const editBtn = e.target.closest('.edit-role-btn');
+    if (editBtn) {
+        const role = editBtn.getAttribute('data-role');
+        document.getElementById('editOldRoleName').value = role;
+        document.getElementById('editNewRoleName').value = role;
+        const modal = new bootstrap.Modal(document.getElementById('editRoleModal'));
+        modal.show();
+    }
+
     const deleteBtn = e.target.closest('.delete-role-btn');
     if (deleteBtn) {
         const role = deleteBtn.getAttribute('data-role');

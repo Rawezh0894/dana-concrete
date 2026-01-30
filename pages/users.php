@@ -233,6 +233,31 @@ if (!hasPermission('view_users')) {
     </div>
   </div>
 </div>
+
+<!-- Edit Role Modal -->
+<div class="modal fade" id="editRoleModal" tabindex="-1" aria-labelledby="editRoleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="editRoleForm">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editRoleModalLabel">دەستکاری ناوی دەسەڵات</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="editOldRoleName" name="old_name">
+          <div class="mb-3">
+            <label for="editNewRoleName" class="form-label">ناوی نوێ</label>
+            <input type="text" class="form-control" id="editNewRoleName" name="new_name" required pattern="[a-z0-9_]+">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
+          <button type="submit" class="btn btn-primary">نوێکردنەوە</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" nonce="<?php echo $csp_nonce; ?>"></script>
