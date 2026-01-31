@@ -191,10 +191,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Check for invoice_number
-    if (empty($invoice_number)) {
+    // material_lines: چەند کاڵا بۆ هەمان سەیارە (بەکارهێنانی کاڵای کۆگا)
+    $material_lines_json = $_POST['material_lines'] ?? null;
+    $material_lines = [];
+    if ($material_lines_json && $expense_type === 'بەکارهێنانی کاڵای کۆگا') {
+        $material_lines = json_decode($material_lines_json, true);
+        if (!is_array($material_lines)) {
+            $material_lines = [];
+        }
+    }
+
+    // Check for invoice_number (with material_lines allow auto-generate)
+    if (empty($material_lines) && empty($invoice_number)) {
         echo json_encode(['success' => false, 'msg' => 'تکایە ژمارەی وەسڵ بنووسە']);
         exit;
+    }
+    if (!empty($material_lines) && empty($invoice_number)) {
+        $invoice_number = 'WH-' . str_replace('-', '', $date) . '-' . str_pad((string) mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);
     }
 
     // Check for duplicate invoice_number on the same date
@@ -212,6 +225,148 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $pdo->beginTransaction();
+
+    // ----- چەند کاڵا بۆ هەمان سەیارە (material_lines) -----
+    if (!empty($material_lines) && $expense_type === 'بەکارهێنانی کاڵای کۆگا' && $car_id) {
+        $helper_sql = "SELECT unit_type, pieces_per_carton, buckets_per_barrel, liters_per_bucket, liters_per_barrel, quantity FROM list_materials WHERE id = ?";
+        $helper_stmt = $pdo->prepare($helper_sql);
+
+        $lines_with_base = [];
+        foreach ($material_lines as $line) {
+            $mid = (int) ($line['material_id'] ?? 0);
+            $qty = (float) ($line['material_quantity'] ?? 0);
+            $unit = $line['usage_unit_type'] ?? null;
+            if (!$mid || $qty <= 0) {
+                continue;
+            }
+            $helper_stmt->execute([$mid]);
+            $mat = $helper_stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$mat) {
+                $pdo->rollBack();
+                echo json_encode(['success' => false, 'msg' => 'کاڵا نەدۆزرایەوە (ID: ' . $mid . ')']);
+                exit;
+            }
+            $available = (float) $mat['quantity'];
+            $base_qty = $qty;
+            $ut = $mat['unit_type'];
+            $ppc = (float) ($mat['pieces_per_carton'] ?? 0);
+            $lpb = (float) ($mat['liters_per_barrel'] ?? 0);
+            $lpbucket = (float) ($mat['liters_per_bucket'] ?? 0);
+            if ($unit === 'کارتۆن' && $ut === 'کارتۆن' && $ppc > 0) {
+                $base_qty = $qty * $ppc;
+            } elseif ($unit === 'بەرمیل' && $ut === 'بەرمیل' && $lpb > 0) {
+                $base_qty = $qty * $lpb;
+            } elseif ($unit === 'دەبە' && ($ut === 'بەرمیل' || $ut === 'دەبە') && $lpbucket > 0) {
+                $base_qty = $qty * $lpbucket;
+            }
+            if ($available < $base_qty) {
+                $pdo->rollBack();
+                echo json_encode([
+                    'success' => false,
+                    'msg' => "بڕی پێویست لە کۆگا نەماوە (کاڵا ID: {$mid}). بەردەست: {$available}، پێویست: {$base_qty}"
+                ]);
+                exit;
+            }
+            $lines_with_base[] = [
+                'material_id' => $mid,
+                'material_quantity' => $qty,
+                'usage_unit_type' => $unit,
+                'material_purchase_price_iqd' => (float) ($line['material_purchase_price_iqd'] ?? 0),
+                'material_purchase_price_usd' => (float) ($line['material_purchase_price_usd'] ?? 0),
+                'material_total_cost' => (float) ($line['material_total_cost'] ?? 0),
+                'base_material_quantity' => $base_qty
+            ];
+        }
+
+        if (empty($lines_with_base)) {
+            $pdo->rollBack();
+            echo json_encode(['success' => false, 'msg' => 'تکایە لانیکەم یەک کاڵا بە بڕی دروست زیاد بکە']);
+            exit;
+        }
+
+        $total_iqd = 0;
+        $total_usd = 0;
+        foreach ($lines_with_base as $l) {
+            $total_iqd += $l['material_total_cost'];
+            $total_usd += $l['material_total_cost'];
+        }
+        if ($currency_type === 'دۆلار') {
+            $amount_iqd_multi = 0;
+            $amount_usd_multi = $total_usd;
+        } else {
+            $amount_iqd_multi = $total_iqd;
+            $amount_usd_multi = 0;
+        }
+
+        $ins_exp = "INSERT INTO other_expenses (
+            purpose, person_id, employee_id, car_id, gas_liters, expense_type, material_id, material_quantity,
+            material_purchase_price_iqd, material_purchase_price_usd, material_total_cost, gas_purchase_price_input, gas_total_cost,
+            payment_type, currency_type, invoice_number, amount_iqd, amount_usd, paid_iqd, paid_usd, exchange_rate,
+            remaining_iqd, remaining_usd, date, base_material_quantity, usage_unit_type, is_split_invoice
+        ) VALUES (?, ?, ?, ?, ?, ?, NULL, NULL, NULL, NULL, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL, 1)";
+        $stmt_exp = $pdo->prepare($ins_exp);
+        $stmt_exp->execute([
+            $purpose, $person_id, $employee_id ?: null, $car_id, $gas_liters, $expense_type,
+            $gas_purchase_price_input, $gas_total_cost, $payment_type, $currency_type, $invoice_number,
+            $amount_iqd_multi, $amount_usd_multi, $amount_iqd_multi, $amount_usd_multi, $exchange_rate, 0, 0, $date
+        ]);
+        $expense_id = (int) $pdo->lastInsertId();
+
+        $ins_line = "INSERT INTO expense_line_items (
+            expense_id, line_number, car_id, account_assignment, expense_type, material_id, material_quantity,
+            usage_unit_type, base_material_quantity, material_purchase_price_iqd, material_purchase_price_usd,
+            material_total_cost, amount_iqd, amount_usd
+        ) VALUES (?, ?, ?, 'سەیارە', 'بەکارهێنانی کاڵای کۆگا', ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $stmt_line = $pdo->prepare($ins_line);
+        $line_num = 0;
+        foreach ($lines_with_base as $l) {
+            $line_num++;
+            $stmt_line->execute([
+                $expense_id, $line_num, $car_id, $l['material_id'], $l['material_quantity'], $l['usage_unit_type'],
+                $l['base_material_quantity'], $l['material_purchase_price_iqd'], $l['material_purchase_price_usd'],
+                $l['material_total_cost'], $l['material_total_cost'], 0
+            ]);
+            $update_stock = $pdo->prepare("UPDATE list_materials SET quantity = quantity - ? WHERE id = ?");
+            $update_stock->execute([$l['base_material_quantity'], $l['material_id']]);
+        }
+
+        if ($person_id) {
+            $update = $pdo->prepare('UPDATE other_expense_persons SET expense_usd = expense_usd + ?, expense_iqd = expense_iqd + ? WHERE id = ?');
+            $update->execute([0, 0, $person_id]);
+        }
+
+        $c_stmt = $pdo->prepare("SELECT name FROM cars WHERE id = ?");
+        $c_stmt->execute([$car_id]);
+        $car_name = $c_stmt->fetch()['name'] ?? 'هیچ سەیارەیەک نییە';
+        $new_values = [
+            'person_id' => $person_id,
+            'employee_id' => $employee_id,
+            'car_id' => $car_id,
+            'car_name' => $car_name,
+            'expense_type' => $expense_type,
+            'amount_iqd' => $amount_iqd_multi,
+            'amount_usd' => $amount_usd_multi,
+            'invoice_number' => $invoice_number,
+            'date' => $date,
+            'material_lines_count' => count($lines_with_base)
+        ];
+        createDetailedNotification(
+            $pdo,
+            $_SESSION['user_id'],
+            'insert',
+            'other_expenses',
+            $expense_id,
+            "خەرجی تر زیادکرا (چەند کاڵا بۆ سەیارە, invoice: $invoice_number)",
+            null,
+            $new_values,
+            [],
+            getUserIP()
+        );
+
+        $pdo->commit();
+        echo json_encode(['success' => true]);
+        exit;
+    }
 
     // Prepare objects for multi-insertion
     $insert_objects = [];
@@ -348,6 +503,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Increment stock if it's a purchase
         if ($obj['expense_type'] === 'کڕینی کاڵا بۆ کۆگا' && $obj['material_id'] && $current_base_qty > 0) {
             $update_stock = $pdo->prepare("UPDATE list_materials SET quantity = quantity + ? WHERE id = ?");
+            $update_stock->execute([$current_base_qty, $obj['material_id']]);
+        }
+        // Deduct stock if it's warehouse material usage (single material)
+        if ($obj['expense_type'] === 'بەکارهێنانی کاڵای کۆگا' && $obj['material_id'] && $current_base_qty > 0) {
+            $update_stock = $pdo->prepare("UPDATE list_materials SET quantity = quantity - ? WHERE id = ?");
             $update_stock->execute([$current_base_qty, $obj['material_id']]);
         }
 

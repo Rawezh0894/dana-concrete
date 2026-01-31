@@ -97,9 +97,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'expense_category' => $row['expense_type']
     ];
 
+    // If expense has line items (چەند کاڵا بۆ هەمان سەیارە), restore stock from each line and delete line items first
+    $line_items_stmt = $pdo->prepare('SELECT id, material_id, base_material_quantity FROM expense_line_items WHERE expense_id = ?');
+    $line_items_stmt->execute([$id]);
+    $line_items = $line_items_stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    if (!empty($line_items)) {
+        foreach ($line_items as $li) {
+            if ($li['material_id'] && $li['base_material_quantity'] > 0) {
+                $update_stock = $pdo->prepare("UPDATE list_materials SET quantity = quantity + ? WHERE id = ?");
+                $update_stock->execute([$li['base_material_quantity'], $li['material_id']]);
+            }
+        }
+        $pdo->prepare('DELETE FROM expense_line_items WHERE expense_id = ?')->execute([$id]);
+    }
+
     $stmt = $pdo->prepare('DELETE FROM other_expenses WHERE id = ?');
     $ok = $stmt->execute([$id]);
-    
+
     if ($ok) {
         if ($row['person_id']) {
             $update = $pdo->prepare('UPDATE other_expense_persons SET expense_usd = expense_usd - ?, expense_iqd = expense_iqd - ? WHERE id = ?');
@@ -109,6 +124,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Reverse stock increment if it was a warehouse purchase
         if ($row['expense_type'] === 'کڕینی کاڵا بۆ کۆگا' && $row['material_id'] && $row['base_material_quantity'] > 0) {
             $update_stock = $pdo->prepare("UPDATE list_materials SET quantity = quantity - ? WHERE id = ?");
+            $update_stock->execute([$row['base_material_quantity'], $row['material_id']]);
+        }
+
+        // Reverse stock deduction if it was warehouse material usage (single material, no line items)
+        if (empty($line_items) && $row['expense_type'] === 'بەکارهێنانی کاڵای کۆگا' && $row['material_id'] && $row['base_material_quantity'] > 0) {
+            $update_stock = $pdo->prepare("UPDATE list_materials SET quantity = quantity + ? WHERE id = ?");
             $update_stock->execute([$row['base_material_quantity'], $row['material_id']]);
         }
 
