@@ -1313,7 +1313,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (field) {
                     const container = field.closest('.warehouse-hidden-field');
                     if (container) {
-                        container.classList.add('hide');
+                        // Special case: don't hide invoice_number for warehouse usage
+                        if (fieldName === 'invoice_number') {
+                            container.classList.remove('hide');
+                        } else {
+                            container.classList.add('hide');
+                        }
                     }
                 }
             });
