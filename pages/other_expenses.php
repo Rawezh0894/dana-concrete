@@ -466,7 +466,7 @@ if (!isset($_SESSION['user_id'])) {
             </div>
           </div>
           <div class="mb-3 row">
-            <div class="col-md-4 warehouse-hidden-field">
+            <div class="col-md-4">
               <label for="invoice_number" class="form-label">ژمارەی وەسڵ</label>
               <div class="input-group">
                 <input type="text" class="form-control" id="invoice_number" name="invoice_number" required>
@@ -661,7 +661,7 @@ if (!isset($_SESSION['user_id'])) {
             </div>
           </div>
           <div class="mb-3 row">
-            <div class="col-md-4 warehouse-hidden-field">
+            <div class="col-md-4">
               <label for="edit_invoice_number" class="form-label">ژمارەی وەسڵ</label>
               <div class="input-group">
                 <input type="text" class="form-control" id="edit_invoice_number" name="invoice_number" required>

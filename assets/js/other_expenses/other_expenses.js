@@ -1271,7 +1271,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Get all form fields that should be hidden for warehouse material usage
         const fieldsToHideForWarehouse = [
-            'person_id', 'payment_type', 'currency_type', 'invoice_number',
+            'person_id', 'payment_type', 'currency_type',
             'amount_iqd', 'amount_usd', 'paid_iqd', 'paid_usd', 'exchange_rate',
             'remaining_iqd', 'remaining_usd'
         ];
@@ -1313,12 +1313,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (field) {
                     const container = field.closest('.warehouse-hidden-field');
                     if (container) {
-                        // Special case: don't hide invoice_number for warehouse usage
-                        if (fieldName === 'invoice_number') {
-                            container.classList.remove('hide');
-                        } else {
-                            container.classList.add('hide');
-                        }
+                        container.classList.add('hide');
                     }
                 }
             });
@@ -1336,7 +1331,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
             // Hide specified fields for gas usage
             const fieldsToHideForGas = [
-                'person_id', 'payment_type', 'currency_type', 'invoice_number',
+                'person_id', 'payment_type', 'currency_type',
                 'amount_iqd', 'amount_usd', 'paid_iqd', 'paid_usd', 'exchange_rate',
                 'remaining_iqd', 'remaining_usd', 'material_id', 'material_quantity',
                 'material_purchase_price_iqd', 'material_purchase_price_usd', 'material_total_cost'
