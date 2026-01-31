@@ -92,6 +92,16 @@ if (addExpenseForm) {
                         amount_iqd: amountIqd || 0,
                         amount_usd: amountUsd || 0
                     });
+                } else if (rowType === 'usage' && carId && materialId) {
+                    splits.push({
+                        type: 'usage',
+                        car_id: carId,
+                        material_id: materialId,
+                        quantity: quantity,
+                        usage_unit_type: row.querySelector('.split-unit-type')?.value || '',
+                        amount_iqd: amountIqd || 0,
+                        amount_usd: amountUsd || 0
+                    });
                 }
             });
 
@@ -409,13 +419,20 @@ function addInvoiceSplitRow() {
             <label class="form-label small">جۆر</label>
             <select class="form-control form-control-sm split-row-type">
                 <option value="car">خەرجی سەیارە</option>
+                <option value="usage">بەکارهێنانی کاڵا بۆ سەیارە</option>
                 <option value="stock">کڕینی کۆگا</option>
             </select>
         </div>
-        <div class="col-md-3 entity-container">
+        <div class="col-md-3 car-container">
             <label class="form-label small">سەیارە</label>
             <select class="form-control form-control-sm split-car-id select2-dynamic">
                 ${carOptionsHtml}
+            </select>
+        </div>
+        <div class="col-md-3 material-container" style="display: none;">
+            <label class="form-label small">کاڵا</label>
+            <select class="form-control form-control-sm split-material-id select2-dynamic">
+                ${materialOptionsHtml}
             </select>
         </div>
         <div class="col-md-2 qty-container" style="display: none;">
@@ -450,21 +467,56 @@ function addInvoiceSplitRow() {
     `;
     list.appendChild(row);
 
-    // Switch between Car/Material
+    // Toggle fields based on type
     const typeSelect = row.querySelector('.split-row-type');
-    const entityContainer = row.querySelector('.entity-container');
+    const carContainer = row.querySelector('.car-container');
+    const materialContainer = row.querySelector('.material-container');
     const qtyContainer = row.querySelector('.qty-container');
 
     typeSelect.addEventListener('change', function () {
-        if (this.value === 'car') {
-            entityContainer.innerHTML = `<label class="form-label small">سەیارە</label><select class="form-control form-control-sm split-car-id select2-dynamic">${carOptionsHtml}</select>`;
+        const type = this.value;
+        if (type === 'car') {
+            carContainer.style.display = 'block';
+            materialContainer.style.display = 'none';
             qtyContainer.style.display = 'none';
-        } else {
-            entityContainer.innerHTML = `<label class="form-label small">کاڵا</label><select class="form-control form-control-sm split-material-id select2-dynamic">${materialOptionsHtml}</select>`;
+        } else if (type === 'stock') {
+            carContainer.style.display = 'none';
+            materialContainer.style.display = 'block';
+            qtyContainer.style.display = 'block';
+        } else if (type === 'usage') {
+            carContainer.style.display = 'block';
+            materialContainer.style.display = 'block';
             qtyContainer.style.display = 'block';
         }
         initSelect2InRow(row);
     });
+
+    // Add listener for material price fetching in splits
+    const materialSelect = row.querySelector('.split-material-id');
+    if (materialSelect) {
+        $(materialSelect).on('change', function () {
+            const materialId = $(this).val();
+            const type = typeSelect.value;
+            if (materialId && (type === 'usage' || type === 'stock')) {
+                fetch(`../process/other_expenses/get_material_details.php?material_id=${materialId}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            const iqdInput = row.querySelector('.split-amount-iqd');
+                            const usdInput = row.querySelector('.split-amount-usd');
+                            if (data.data.currency_type === 'دۆلار') {
+                                usdInput.value = data.data.purchase_price_usd || 0;
+                                iqdInput.value = 0;
+                            } else {
+                                iqdInput.value = data.data.purchase_price_iqd || 0;
+                                usdInput.value = 0;
+                            }
+                            updateTotalsFromSplits();
+                        }
+                    });
+            }
+        });
+    }
 
     initSelect2InRow(row);
 
