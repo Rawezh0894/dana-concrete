@@ -55,13 +55,8 @@ try {
     
 
     
-    // Build SQL query (material_name: single from oe or concatenated from expense_line_items when چەند کاڵا)
-    $sql = "SELECT oe.*, p.name AS person_name, e.name AS employee_name, c.name AS car_name,
-        COALESCE(
-            (SELECT GROUP_CONCAT(lm2.name ORDER BY eli.line_number SEPARATOR '، ') FROM expense_line_items eli JOIN list_materials lm2 ON eli.material_id = lm2.id WHERE eli.expense_id = oe.id),
-            lm.name
-        ) AS material_name,
-        oe.car_id, oe.gas_liters
+    // Build SQL query
+    $sql = "SELECT oe.*, p.name AS person_name, e.name AS employee_name, c.name AS car_name, lm.name AS material_name, oe.car_id, oe.gas_liters
         FROM other_expenses oe
         LEFT JOIN other_expense_persons p ON oe.person_id = p.id
         LEFT JOIN employees e ON oe.employee_id = e.id
@@ -93,9 +88,9 @@ try {
         -- Other expenses (non-car expenses)
         SUM(CASE WHEN (car_id IS NULL OR (expense_type NOT IN ('بەکارهێنانی کاڵای کۆگا', 'بەکارهێنانی گاز'))) AND currency_type = 'دینار' THEN amount_iqd ELSE 0 END) as total_other_expenses_iqd,
         SUM(CASE WHEN (car_id IS NULL OR (expense_type NOT IN ('بەکارهێنانی کاڵای کۆگا', 'بەکارهێنانی گاز'))) AND currency_type = 'دۆلار' THEN amount_usd ELSE 0 END) as total_other_expenses_usd,
-        -- Car material expenses (single or multi-line: use amount_iqd/amount_usd when set, else material cost)
-        SUM(CASE WHEN car_id IS NOT NULL AND expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN COALESCE(oe.amount_iqd, oe.material_purchase_price_iqd * oe.material_quantity, 0) ELSE 0 END) as total_car_material_cost_iqd,
-        SUM(CASE WHEN car_id IS NOT NULL AND expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN COALESCE(oe.amount_usd, oe.material_purchase_price_usd * oe.material_quantity, 0) ELSE 0 END) as total_car_material_cost_usd,
+        -- Car material expenses (has both IQD and USD)
+        SUM(CASE WHEN car_id IS NOT NULL AND expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN material_purchase_price_iqd * material_quantity ELSE 0 END) as total_car_material_cost_iqd,
+        SUM(CASE WHEN car_id IS NOT NULL AND expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN material_purchase_price_usd * material_quantity ELSE 0 END) as total_car_material_cost_usd,
         -- Car gas expenses (only IQD)
         SUM(CASE WHEN car_id IS NOT NULL AND expense_type = 'بەکارهێنانی گاز' THEN gas_total_cost ELSE 0 END) as total_car_gas_cost
         FROM other_expenses oe";

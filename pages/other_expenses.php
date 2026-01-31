@@ -428,17 +428,6 @@ if (!isset($_SESSION['user_id'])) {
               <input type="number" step="0.01" class="form-control" id="material_total_cost" name="material_total_cost" placeholder="0" readonly>
             </div>
           </div>
-          <!-- چەند کاڵا بۆ هەمان سەیارە (تەنها بۆ بەکارهێنانی کاڵای کۆگا) -->
-          <div id="multiMaterialLinesContainer" class="mb-3 border p-3 rounded bg-light" style="display: none;">
-            <h6 class="mb-3">چەند کاڵا بۆ هەمان سەیارە</h6>
-            <p class="small text-muted mb-2">دەتوانیت چەند کاڵایەک بۆ یەک سەیارە لە یەک خەرجیدا تۆمار بکەیت.</p>
-            <div id="materialLinesList">
-              <!-- دێڕەکانی کاڵای زیادکراو لێرە زیاد دەبن -->
-            </div>
-            <button type="button" id="addMaterialLineBtn" class="btn btn-sm btn-primary mt-2">
-              <i class="fas fa-plus me-1"></i>زیادکردنی کاڵای تر
-            </button>
-          </div>
           <div class="mb-3 row">
             <div class="col-md-4 gas-material-field">
               <label for="gas_purchase_price_input" class="form-label">ئینپوتی نرخی کڕینی گاز</label>

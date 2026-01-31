@@ -109,62 +109,6 @@ if (addExpenseForm) {
             formData.set('material_id', '');
         }
 
-        // Collect multiple material lines when expense type is "بەکارهێنانی کاڵای کۆگا"
-        const expenseTypeVal = document.getElementById('expense_type')?.value;
-        if (expenseTypeVal === 'بەکارهێنانی کاڵای کۆگا' && !isSplitMode) {
-            const materialLines = [];
-            const mainMaterialId = document.getElementById('material_id')?.value;
-            if (mainMaterialId && mainMaterialId.trim() !== '') {
-                const qty = parseFloat(document.getElementById('material_quantity')?.value || 0);
-                const priceIqd = parseFloat(document.getElementById('material_purchase_price_iqd')?.value || 0);
-                const priceUsd = parseFloat(document.getElementById('material_purchase_price_usd')?.value || 0);
-                const totalCost = parseFloat(document.getElementById('material_total_cost')?.value || 0);
-                if (qty > 0) {
-                    materialLines.push({
-                        material_id: mainMaterialId,
-                        material_quantity: qty,
-                        usage_unit_type: document.getElementById('usage_unit_type')?.value || '',
-                        material_purchase_price_iqd: priceIqd,
-                        material_purchase_price_usd: priceUsd,
-                        material_total_cost: totalCost
-                    });
-                }
-            }
-            document.querySelectorAll('.material-line-row').forEach(row => {
-                const mid = row.querySelector('.line-material-id')?.value;
-                const qty = parseFloat(row.querySelector('.line-quantity')?.value || 0);
-                const priceIqd = parseFloat(row.querySelector('.line-price-iqd')?.value || 0);
-                const priceUsd = parseFloat(row.querySelector('.line-price-usd')?.value || 0);
-                const totalCost = parseFloat(row.querySelector('.line-total-cost')?.value || 0);
-                if (mid && mid.trim() !== '' && qty > 0) {
-                    materialLines.push({
-                        material_id: mid,
-                        material_quantity: qty,
-                        usage_unit_type: row.querySelector('.line-unit-type')?.value || '',
-                        material_purchase_price_iqd: priceIqd,
-                        material_purchase_price_usd: priceUsd,
-                        material_total_cost: totalCost
-                    });
-                }
-            });
-            if (materialLines.length > 0) {
-                formData.append('material_lines', JSON.stringify(materialLines));
-                const totalCostSum = materialLines.reduce((s, l) => s + (parseFloat(l.material_total_cost) || 0), 0);
-                const currencyType = document.getElementById('currency_type')?.value || 'دینار';
-                if (currencyType === 'دۆلار') {
-                    formData.set('amount_usd', totalCostSum);
-                    formData.set('amount_iqd', '0');
-                } else {
-                    formData.set('amount_iqd', totalCostSum);
-                    formData.set('amount_usd', '0');
-                }
-                formData.set('paid_iqd', formData.get('amount_iqd'));
-                formData.set('paid_usd', formData.get('amount_usd'));
-                formData.set('remaining_iqd', '0');
-                formData.set('remaining_usd', '0');
-            }
-        }
-
         // Add gas_liters if present in the form
         if (document.getElementById('gas_liters')) {
             formData.append('gas_liters', document.getElementById('gas_liters').value);
@@ -424,102 +368,9 @@ if (addExpenseModal) {
         document.getElementById('invoiceSplitsList').innerHTML = '';
         document.getElementById('toggleSplitCars').innerText = 'دابەشکردن';
 
-        // Reset multi-material lines (بەکارهێنانی کاڵای کۆگا)
-        const multiMatContainer = document.getElementById('multiMaterialLinesContainer');
-        if (multiMatContainer) multiMatContainer.style.display = 'none';
-        const materialLinesList = document.getElementById('materialLinesList');
-        if (materialLinesList) materialLinesList.innerHTML = '';
-
         // Fetch and set USD exchange rate when modal opens
         fetchAndSetUsdRate();
     });
-}
-
-// Show/hide multi-material section when expense type is "بەکارهێنانی کاڵای کۆگا"
-document.getElementById('expense_type')?.addEventListener('change', function () {
-    const container = document.getElementById('multiMaterialLinesContainer');
-    if (!container) return;
-    if (this.value === 'بەکارهێنانی کاڵای کۆگا') {
-        container.style.display = 'block';
-    } else {
-        container.style.display = 'none';
-        document.getElementById('materialLinesList').innerHTML = '';
-    }
-});
-
-// Add extra material line row (چەند کاڵا بۆ هەمان سەیارە)
-document.getElementById('addMaterialLineBtn')?.addEventListener('click', addMaterialLineRow);
-
-function addMaterialLineRow() {
-    const list = document.getElementById('materialLinesList');
-    if (!list) return;
-    const row = document.createElement('div');
-    row.className = 'material-line-row row g-2 mb-2 align-items-end border-bottom pb-2';
-    row.innerHTML = `
-        <div class="col-md-2">
-            <label class="form-label small">کاڵا</label>
-            <select class="form-control form-control-sm line-material-id select2-dynamic">
-                ${materialOptionsHtml || '<option value="">-- هەلبژێرە --</option>'}
-            </select>
-        </div>
-        <div class="col-md-1">
-            <label class="form-label small">بڕ</label>
-            <input type="number" step="0.01" class="form-control form-control-sm line-quantity" value="0" min="0">
-        </div>
-        <div class="col-md-1">
-            <label class="form-label small">یەکە</label>
-            <select class="form-control form-control-sm line-unit-type">
-                <option value="دانە">دانە</option>
-                <option value="کارتۆن">کارتۆن</option>
-                <option value="بەرمیل">بەرمیل</option>
-                <option value="دەبە">دەبە</option>
-                <option value="لیتر">لیتر</option>
-            </select>
-        </div>
-        <div class="col-md-1">
-            <label class="form-label small">نرخ د.ع</label>
-            <input type="number" step="0.01" class="form-control form-control-sm line-price-iqd" value="0" min="0">
-        </div>
-        <div class="col-md-1">
-            <label class="form-label small">نرخ $</label>
-            <input type="number" step="0.01" class="form-control form-control-sm line-price-usd" value="0" min="0">
-        </div>
-        <div class="col-md-2">
-            <label class="form-label small">کۆی نرخ</label>
-            <input type="number" step="0.01" class="form-control form-control-sm line-total-cost" value="0" readonly>
-        </div>
-        <div class="col-md-1">
-            <button type="button" class="btn btn-sm btn-danger remove-material-line"><i class="fas fa-trash"></i></button>
-        </div>
-    `;
-    list.appendChild(row);
-
-    const qtyInput = row.querySelector('.line-quantity');
-    const priceIqdInput = row.querySelector('.line-price-iqd');
-    const priceUsdInput = row.querySelector('.line-price-usd');
-    const totalInput = row.querySelector('.line-total-cost');
-    const updateTotal = () => {
-        const qty = parseFloat(qtyInput?.value || 0);
-        const priceIqd = parseFloat(priceIqdInput?.value || 0);
-        const priceUsd = parseFloat(priceUsdInput?.value || 0);
-        const total = qty * (priceIqd > 0 ? priceIqd : priceUsd);
-        if (totalInput) totalInput.value = total.toFixed(2);
-    };
-    row.querySelectorAll('.line-quantity, .line-price-iqd, .line-price-usd').forEach(input => {
-        input.addEventListener('input', updateTotal);
-    });
-
-    row.querySelector('.remove-material-line').addEventListener('click', function () {
-        row.remove();
-    });
-
-    if (typeof $ !== 'undefined' && $.fn.select2 && row.querySelector('.select2-dynamic')) {
-        $(row.querySelector('.select2-dynamic')).select2({
-            theme: 'bootstrap-5',
-            dropdownParent: $('#addExpenseModal'),
-            dir: 'rtl'
-        });
-    }
 }
 
 // Split Mode Toggling
