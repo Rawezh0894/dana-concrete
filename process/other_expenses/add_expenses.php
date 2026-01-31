@@ -211,47 +211,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $splits = json_decode($invoice_splits_json, true);
     }
 
-    // Check stock availability for splits if present
-    if (!empty($splits)) {
-        foreach ($splits as $split) {
-            if ($split['type'] === 'usage' && isset($split['material_id']) && isset($split['quantity'])) {
-                $s_mid = $split['material_id'];
-                $s_qty = floatval($split['quantity']);
-                $s_unit = $split['usage_unit_type'] ?? 'دانە';
-
-                $s_sql = "SELECT quantity, name, unit_type, pieces_per_carton, buckets_per_barrel, liters_per_bucket, liters_per_barrel FROM list_materials WHERE id = ?";
-                $s_stmt = $pdo->prepare($s_sql);
-                $s_stmt->execute([$s_mid]);
-                $s_mat = $s_stmt->fetch(PDO::FETCH_ASSOC);
-
-                if ($s_mat) {
-                    $s_avail = floatval($s_mat['quantity']);
-                    $s_base_qty = $s_qty;
-                    $s_pieces = floatval($s_mat['pieces_per_carton'] ?? 0);
-                    $s_liters_barrel = floatval($s_mat['liters_per_barrel'] ?? 0);
-                    $s_liters_bucket = floatval($s_mat['liters_per_bucket'] ?? 0);
-                    $s_m_unit = $s_mat['unit_type'];
-
-                    if ($s_unit === 'کارتۆن' && $s_m_unit === 'کارتۆن' && $s_pieces > 0) {
-                        $s_base_qty = $s_qty * $s_pieces;
-                    } elseif ($s_unit === 'بەرمیل' && $s_m_unit === 'بەرمیل' && $s_liters_barrel > 0) {
-                        $s_base_qty = $s_qty * $s_liters_barrel;
-                    } elseif ($s_unit === 'دەبە' && ($s_m_unit === 'بەرمیل' || $s_m_unit === 'دەبە') && $s_liters_bucket > 0) {
-                        $s_base_qty = $s_qty * $s_liters_bucket;
-                    }
-
-                    if ($s_avail < $s_base_qty) {
-                        echo json_encode([
-                            'success' => false,
-                            'msg' => "بڕی پێویست بۆ کاڵای ({$s_mat['name']}) لە کۆگا نەماوە. بڕی بەردەست: {$s_avail}, بڕی پێویست: {$s_base_qty}"
-                        ]);
-                        exit;
-                    }
-                }
-            }
-        }
-    }
-
     $pdo->beginTransaction();
 
     // Prepare objects for multi-insertion
@@ -260,11 +219,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!empty($splits)) {
         // Mixed split mode
         foreach ($splits as $split) {
-            $split_row_type = $split['type']; // 'car', 'stock', or 'usage'
-            $split_car_id = ($split_row_type === 'car' || $split_row_type === 'usage') ? $split['car_id'] : null;
-            $split_material_id = ($split_row_type === 'stock' || $split_row_type === 'usage') ? $split['material_id'] : null;
-            $split_material_quantity = ($split_row_type === 'stock' || $split_row_type === 'usage') ? floatval($split['quantity']) : null;
-            $split_usage_unit_type = ($split_row_type === 'stock' || $split_row_type === 'usage') ? ($split['usage_unit_type'] ?? 'دانە') : null;
+            $split_row_type = $split['type']; // 'car' or 'stock'
+            $split_car_id = ($split_row_type === 'car') ? $split['car_id'] : null;
+            $split_material_id = ($split_row_type === 'stock') ? $split['material_id'] : null;
+            $split_material_quantity = ($split_row_type === 'stock') ? floatval($split['quantity']) : null;
+            $split_usage_unit_type = ($split_row_type === 'stock') ? ($split['usage_unit_type'] ?? 'دانە') : null;
             $split_amount_iqd = floatval($split['amount_iqd']);
             $split_amount_usd = floatval($split['amount_usd']);
             
@@ -293,7 +252,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'paid_usd' => $split_paid_usd,
                 'remaining_iqd' => $split_remaining_iqd,
                 'remaining_usd' => $split_remaining_usd,
-                'expense_type' => ($split_row_type === 'stock') ? 'کڕینی کاڵا بۆ کۆگا' : (($split_row_type === 'usage') ? 'بەکارهێنانی کاڵای کۆگا' : $expense_type)
+                'expense_type' => ($split_row_type === 'stock') ? 'کڕینی کاڵا بۆ کۆگا' : $expense_type
             ];
         }
     } else {
