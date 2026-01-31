@@ -1,7 +1,6 @@
 // Multiple submission prevention flag
 let submittingExpense = false;
 let isSplitMode = false;
-let isMultiMaterialMode = false;
 let carOptionsHtml = '';
 let materialOptionsHtml = ''; // For storing material selections
 
@@ -108,34 +107,6 @@ if (addExpenseForm) {
             formData.append('invoice_splits', JSON.stringify(splits));
             formData.set('car_id', ''); // Clear main car_id
             formData.set('material_id', '');
-        } else if (isMultiMaterialMode) {
-            const materials = [];
-            document.querySelectorAll('#multiMaterialTable tbody tr').forEach(row => {
-                const materialId = row.querySelector('.multi-material-id')?.value;
-                const unit = row.querySelector('.multi-unit-type')?.value;
-                const qty = row.querySelector('.multi-quantity')?.value;
-
-                if (materialId && qty) {
-                    materials.push({
-                        material_id: materialId,
-                        quantity: qty,
-                        usage_unit_type: unit,
-                        material_purchase_price_iqd: row.querySelector('.multi-price-iqd')?.value || 0,
-                        material_purchase_price_usd: row.querySelector('.multi-price-usd')?.value || 0
-                    });
-                }
-            });
-
-            if (materials.length === 0) {
-                Swal.fire('هەڵە!', 'تکایە لانیکەم کاڵایەک زیاد بکە!', 'error');
-                submittingExpense = false;
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = originalBtnText;
-                }
-                return;
-            }
-            formData.append('multi_materials', JSON.stringify(materials));
         }
 
         // Add gas_liters if present in the form
@@ -397,18 +368,6 @@ if (addExpenseModal) {
         document.getElementById('invoiceSplitsList').innerHTML = '';
         document.getElementById('toggleSplitCars').innerText = 'دابەشکردن';
 
-        // Reset multi material mode
-        isMultiMaterialMode = false;
-        document.getElementById('multiMaterialContainer').style.display = 'none';
-        document.querySelectorAll('.single-material-field').forEach(el => el.style.display = 'block'); // Restore single fields
-        const multiTableBody = document.querySelector('#multiMaterialTable tbody');
-        if (multiTableBody) multiTableBody.innerHTML = '';
-        const toggleMultiBtn = document.getElementById('toggleMultiMaterials');
-        if (toggleMultiBtn) {
-            toggleMultiBtn.innerText = '+ فرە کاڵا';
-            toggleMultiBtn.classList.replace('btn-outline-secondary', 'btn-outline-primary');
-        }
-
         // Fetch and set USD exchange rate when modal opens
         fetchAndSetUsdRate();
     });
@@ -615,91 +574,4 @@ if (addPersonForm) {
             }
         }
     }
-}
-// Multi Material Mode Toggling
-document.getElementById('toggleMultiMaterials')?.addEventListener('click', function () {
-    isMultiMaterialMode = !isMultiMaterialMode;
-    const multiContainer = document.getElementById('multiMaterialContainer');
-    const singleFields = document.querySelectorAll('.single-material-field');
-    const materialSelectWrapper = document.getElementById('material_id').closest('.col-md-4'); // The wrapper for single material select
-
-    if (isMultiMaterialMode) {
-        multiContainer.style.display = 'block';
-        singleFields.forEach(el => el.style.display = 'none');
-        // Hide single material select as well, but keep the label/button visible?
-        // Actually the button is inside the label of material_id.
-        // We should just hide the SELECT element of material_id, but keep the label.
-        // But the label is associated with the select.
-        // Let's just hide the SELECT input itself.
-        // document.getElementById('material_id').nextSibling... Select2 container.
-        $('#material_id').next('.select2-container').hide();
-        document.getElementById('material_id').style.display = 'none';
-
-        this.innerText = 'گەڕانەوە (تاک)';
-        this.classList.replace('btn-outline-primary', 'btn-outline-secondary');
-
-        // Add first row if empty
-        if (document.querySelector('#multiMaterialTable tbody').children.length === 0) {
-            addMultiMaterialRow();
-        }
-    } else {
-        multiContainer.style.display = 'none';
-        singleFields.forEach(el => el.style.display = 'block');
-        $('#material_id').next('.select2-container').show();
-        document.getElementById('material_id').style.display = 'block';
-
-        this.innerText = '+ فرە کاڵا';
-        this.classList.replace('btn-outline-secondary', 'btn-outline-primary');
-    }
-});
-
-document.getElementById('addMultiMaterialRow')?.addEventListener('click', addMultiMaterialRow);
-
-function addMultiMaterialRow() {
-    const tbody = document.querySelector('#multiMaterialTable tbody');
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-        <td>
-            <select class="form-control form-control-sm multi-material-id select2-dynamic">
-                ${materialOptionsHtml}
-            </select>
-        </td>
-        <td>
-            <select class="form-control form-control-sm multi-unit-type">
-                <option value="دانە">دانە</option>
-                <option value="کارتۆن">کارتۆن</option>
-                <option value="بەرمیل">بەرمیل</option>
-                <option value="دەبە">دەبە</option>
-                <option value="لیتر">لیتر</option>
-            </select>
-        </td>
-        <td>
-            <input type="number" step="0.01" class="form-control form-control-sm multi-quantity" placeholder="0">
-        </td>
-        <td>
-            <input type="number" step="0.01" class="form-control form-control-sm multi-price-iqd" placeholder="0">
-        </td>
-        <td>
-            <input type="number" step="0.01" class="form-control form-control-sm multi-price-usd" placeholder="0">
-        </td>
-        <td class="text-center">
-            <button type="button" class="btn btn-sm btn-danger remove-multi-row"><i class="fas fa-trash"></i></button>
-        </td>
-    `;
-    tbody.appendChild(tr);
-
-    // Initialize Select2
-    if (typeof $ !== 'undefined' && $.fn.select2) {
-        $(tr.querySelector('.select2-dynamic')).select2({
-            theme: 'bootstrap-5',
-            dropdownParent: $('#addExpenseModal'),
-            dir: 'rtl',
-            width: '100%'
-        });
-    }
-
-    // Attach removal logic
-    tr.querySelector('.remove-multi-row').addEventListener('click', function () {
-        tr.remove();
-    });
 }

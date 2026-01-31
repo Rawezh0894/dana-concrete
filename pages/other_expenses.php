@@ -400,59 +400,34 @@ if (!isset($_SESSION['user_id'])) {
               </select>
             </div>
             <div class="col-md-4 gas-material-field">
-              <label for="material_id" class="form-label d-flex justify-content-between">
-                کاڵا لە کۆگا
-                <button type="button" id="toggleMultiMaterials" class="btn btn-sm btn-outline-primary" style="font-size: 0.7rem; padding: 2px 5px;">+ فرە کاڵا</button>
-              </label>
+              <label for="material_id" class="form-label">کاڵا لە کۆگا</label>
               <select class="form-control" id="material_id" name="material_id">
                 <option value="">-- هەلبژێرە --</option>
               </select>
             </div>
-            <div class="col-md-4 gas-material-field single-material-field">
+            <div class="col-md-4 gas-material-field">
               <label for="usage_unit_type" class="form-label">یەکەی بەکارهێنان</label>
               <select class="form-control" id="usage_unit_type" name="usage_unit_type">
                 <option value="">یەکەی بەکارهێنان هەڵبژێرە</option>
               </select>
             </div>
-            <div class="col-md-4 gas-material-field single-material-field">
+            <div class="col-md-4 gas-material-field">
               <label for="material_quantity" class="form-label">بڕی عەدەدی کاڵا</label>
               <input type="number" step="0.01" class="form-control" id="material_quantity" name="material_quantity" placeholder="0">
             </div>
-            <div class="col-md-4 gas-material-field single-material-field">
+            <div class="col-md-4 gas-material-field">
               <label for="material_purchase_price_iqd" class="form-label">نرخی کڕینی کاڵا بە دینار</label>
               <input type="number" step="0.01" class="form-control" id="material_purchase_price_iqd" name="material_purchase_price_iqd" placeholder="0">
             </div>
-            <div class="col-md-4 gas-material-field single-material-field">
+            <div class="col-md-4 gas-material-field">
               <label for="material_purchase_price_usd" class="form-label">نرخی کڕینی کاڵا بە دۆلار</label>
               <input type="number" step="0.01" class="form-control" id="material_purchase_price_usd" name="material_purchase_price_usd" placeholder="0">
             </div>
-            <div class="col-md-4 gas-material-field single-material-field">
+            <div class="col-md-4 gas-material-field">
               <label for="material_total_cost" class="form-label">کۆی نرخی کاڵای بەکارهاتوو</label>
               <input type="number" step="0.01" class="form-control" id="material_total_cost" name="material_total_cost" placeholder="0" readonly>
             </div>
           </div>
-          
-          <!-- Multi Material Container -->
-          <div id="multiMaterialContainer" class="gas-material-field mb-3 border p-3 rounded bg-light" style="display: none;">
-             <div class="d-flex justify-content-between align-items-center mb-2">
-                <h6 class="mb-0">لیستی کاڵاکان</h6>
-                <button type="button" id="addMultiMaterialRow" class="btn btn-sm btn-success">+ زیادکردن</button>
-             </div>
-             <div class="table-responsive">
-                <table class="table table-bordered table-sm bg-white" id="multiMaterialTable">
-                   <thead>
-                      <tr>
-                         <th style="min-width: 200px;">کاڵا</th>
-                         <th style="width: 100px;">یەکە</th>
-                         <th style="width: 80px;">بڕ</th>
-                         <th style="width: 100px;">نرخ (دینار)</th>
-                         <th style="width: 100px;">نرخ (دۆلار)</th>
-                         <th style="width: 50px;"></th>
-                      </tr>
-                   </thead>
-                   <tbody></tbody>
-                </table>
-             </div>
           <div class="mb-3 row">
             <div class="col-md-4 gas-material-field">
               <label for="gas_purchase_price_input" class="form-label">ئینپوتی نرخی کڕینی گاز</label>
