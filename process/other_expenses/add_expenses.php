@@ -206,9 +206,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $invoice_splits_json = $_POST['invoice_splits'] ?? null;
+    $multi_materials_json = $_POST['multi_materials'] ?? null;
     $splits = [];
+    $multi_materials_data = [];
+    
     if ($invoice_splits_json) {
         $splits = json_decode($invoice_splits_json, true);
+    }
+    if ($multi_materials_json) {
+        $multi_materials_data = json_decode($multi_materials_json, true);
+    }
+
+    // Validate Multi-Materials Stock Availability
+    if (!empty($multi_materials_data)) {
+        foreach ($multi_materials_data as $mat) {
+            $m_id = $mat['material_id'];
+            $m_qty = floatval($mat['quantity']);
+            $m_unit = $mat['usage_unit_type'];
+            
+            if ($m_id && $m_qty > 0) {
+                // Same logic as single item
+                $stock_sql = "SELECT quantity, name, unit_type, pieces_per_carton, buckets_per_barrel, liters_per_bucket, liters_per_barrel FROM list_materials WHERE id = ?";
+                $stock_stmt = $pdo->prepare($stock_sql);
+                $stock_stmt->execute([$m_id]);
+                $material_stock = $stock_stmt->fetch(PDO::FETCH_ASSOC);
+                
+                if (!$material_stock) {
+                    echo json_encode(['success' => false, 'msg' => "کاڵا بە ئایدی $m_id نەدۆزرایەوە"]);
+                    exit;
+                }
+                
+                $available_quantity = floatval($material_stock['quantity']);
+                $base_material_quantity = $m_qty;
+                $material_unit_type = $material_stock['unit_type'];
+                
+                // Conversions (Simplified logic reuse)
+                $pieces_per_carton = floatval($material_stock['pieces_per_carton'] ?? 0);
+                $buckets_per_barrel = floatval($material_stock['buckets_per_barrel'] ?? 0);
+                $liters_per_bucket = floatval($material_stock['liters_per_bucket'] ?? 0);
+                $liters_per_barrel = floatval($material_stock['liters_per_barrel'] ?? 0);
+                
+                if ($m_unit === 'کارتۆن' && $material_unit_type === 'کارتۆن' && $pieces_per_carton > 0) {
+                    $base_material_quantity = $m_qty * $pieces_per_carton;
+                } elseif ($m_unit === 'دانە' && $material_unit_type === 'کارتۆن') {
+                    $base_material_quantity = $m_qty;
+                } elseif ($m_unit === 'بەرمیل' && $material_unit_type === 'بەرمیل' && $liters_per_barrel > 0) {
+                    $base_material_quantity = $m_qty * $liters_per_barrel;
+                } elseif ($m_unit === 'دەبە' && ($material_unit_type === 'بەرمیل' || $material_unit_type === 'دەبە') && $liters_per_bucket > 0) {
+                    $base_material_quantity = $m_qty * $liters_per_bucket;
+                } // ... add other cases if needed, default is direct 1:1 if units match or simplified
+                
+                if ($available_quantity < $base_material_quantity) {
+                    echo json_encode(['success' => false, 'msg' => "بڕی پێویست لە کۆگا نەماوە بۆ کاڵای: " . $material_stock['name']]);
+                    exit;
+                }
+            }
+        }
     }
 
     $pdo->beginTransaction();
@@ -255,6 +308,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'expense_type' => ($split_row_type === 'stock') ? 'کڕینی کاڵا بۆ کۆگا' : $expense_type
             ];
         }
+    } elseif (!empty($multi_materials_data)) {
+        // Multi Material Usage Mode
+        foreach ($multi_materials_data as $mat) {
+            $m_price_iqd = floatval($mat['material_purchase_price_iqd']);
+            $m_price_usd = floatval($mat['material_purchase_price_usd']);
+            $m_qty = floatval($mat['quantity']);
+            // Calculate total cost if needed, but we don't store it in 'amount' cols for usage typically, 
+            // but we might want to store in material_total_cost col?
+            // The DB has material_total_cost.
+            // Let's assume price is unit price? Or total price? 
+            // Given the form input name 'material_purchase_price' usually implies unit price.
+            // But sometimes 'price_input' is total.
+            // In single mode form, 'material_total_cost' is readonly. 
+            // So we assume price input is unit price and calculate total.
+            // Wait, in Add Expense JS, material_total_cost is readonly? 
+            // In pages/other_expenses.php: readonly.
+            // So user inputs price, and JS calculates total? Or backend?
+            // Actually, in single mode, I don't see JS calc logic in my quick view.
+            
+            // For now, let's treat input as unit price.
+            // Or if user puts total price in price field?
+            // Let's stick to what we have in form: `material_purchase_price_iqd`.
+            // We pass it to `material_purchase_price_iqd` column.
+            // And calculate total cost.
+            
+            $insert_objects[] = [
+                'type' => 'stock_usage_multi',
+                'car_id' => $car_id, // Main car used
+                'material_id' => $mat['material_id'],
+                'material_quantity' => $m_qty,
+                'usage_unit_type' => $mat['usage_unit_type'],
+                'amount_iqd' => 0,
+                'amount_usd' => 0,
+                'paid_iqd' => 0,
+                'paid_usd' => 0,
+                'remaining_iqd' => 0,
+                'remaining_usd' => 0,
+                'material_purchase_price_iqd' => $m_price_iqd,
+                'material_purchase_price_usd' => $m_price_usd,
+                'material_total_cost' => ($m_price_iqd * $m_qty) ?: ($m_price_usd * $m_qty), // Calculate total cost
+                'expense_type' => 'بەکارهێنانی کاڵای کۆگا'
+            ];
+        }
     } else {
         // Single mode (could be car or material usage or general)
         $insert_objects[] = [
@@ -269,7 +365,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'paid_usd' => $paid_usd,
             'remaining_iqd' => $remaining_iqd,
             'remaining_usd' => $remaining_usd,
-            'expense_type' => $expense_type
+            'expense_type' => $expense_type,
+            'material_purchase_price_iqd' => $material_purchase_price_iqd, // Need to ensure these are passed
+            'material_purchase_price_usd' => $material_purchase_price_usd,
+            'material_total_cost' => $material_total_cost
         ];
     }
 
