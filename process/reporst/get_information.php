@@ -1361,6 +1361,8 @@ try {
                                ($total_expenses_breakdown['other_expenses'] ?? 0) + 
                                ($total_expenses_breakdown['purchases'] ?? 0) + 
                                ($total_expenses_breakdown['purchase_materials'] ?? 0) + 
+                               ($total_expenses_breakdown['gas_usage'] ?? 0) + 
+                               ($total_expenses_breakdown['material_usage'] ?? 0) + 
                                ($total_discount ?? 0),
                 'profit_loss' => (
                                    ($sales['cash']['usd'] ?? 0) + 
@@ -1377,6 +1379,8 @@ try {
                                  ($total_expenses_breakdown['other_expenses'] ?? 0) + 
                                  ($total_expenses_breakdown['purchases'] ?? 0) + 
                                  ($total_expenses_breakdown['purchase_materials'] ?? 0) + 
+                                 ($total_expenses_breakdown['gas_usage'] ?? 0) + 
+                                 ($total_expenses_breakdown['material_usage'] ?? 0) + 
                                  ($total_discount ?? 0))
             ],
             'discounts' => [
@@ -1505,7 +1509,8 @@ try {
         $cost_expenses_total = ($total_expenses_breakdown['other_expenses'] ?? 0) + 
                                ($total_expenses_breakdown['purchases'] ?? 0) + 
                                ($total_expenses_breakdown['purchase_materials'] ?? 0) +
-                               ($total_expenses_breakdown['gas_usage'] ?? 0);
+                               ($total_expenses_breakdown['gas_usage'] ?? 0) +
+                               ($total_expenses_breakdown['material_usage'] ?? 0);
         $cost_expenses_per_meter = $cost_expenses_total / $total_meters;
         
         // e. Sales Discount
