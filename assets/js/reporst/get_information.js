@@ -226,6 +226,14 @@ function renderDashboardCards(data) {
             subtitle: 'کۆی خەرجی (نەقد + قەرز)'
         },
         {
+            key: 'asset_depreciation',
+            label: 'داخورانی ئامێرەکان',
+            icon: 'fa-arrow-trend-down',
+            cardClass: 'depreciation-card',
+            value: formatCurrency(Number(data.data?.asset_depreciation?.usd) || 0, 'USD'),
+            subtitle: 'داخوران (Straight-Line Method)'
+        },
+        {
             key: 'sales_discounts',
             label: 'داشکاندنی فرۆشتن',
             icon: 'fa-percent',

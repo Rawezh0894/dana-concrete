@@ -328,6 +328,21 @@
   background: #e0f7fa;
 }
 
+/* Depreciation Card */
+.report-card.depreciation-card {
+  border-top: 6px solid #e91e63;
+  background: linear-gradient(135deg, #fce4ec 0%, #f8fffa 100%);
+  height: 280px; /* Same height as base */
+}
+.report-card.depreciation-card .card-title,
+.report-card.depreciation-card .fa,
+.report-card.depreciation-card .section-label {
+  color: #e91e63;
+}
+.report-card.depreciation-card .section-label {
+  background: #fce4ec;
+}
+
 /* Cash Sales Card - پارەی وەرگیراو لە فرۆشتن بە نەقدی */
 .report-card.cash-sales-card {
   border-top: 6px solid #007bff;

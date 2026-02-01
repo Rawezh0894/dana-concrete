@@ -1392,7 +1392,8 @@ try {
                                  ($total_expenses_breakdown['purchases'] ?? 0) + 
                                  ($total_expenses_breakdown['purchase_materials'] ?? 0) + 
                                  ($gas_consumption_cost_usd ?? 0) + 
-                                 ($total_discount ?? 0))
+                                 ($total_discount ?? 0) +
+                                 ($asset_depreciation_usd ?? 0))
             ],
             'discounts' => [
                 'total_usd' => $total_discount,
@@ -1417,6 +1418,9 @@ try {
                 'iqd' => $debt_payments_iqd,
                 'usd_amount' => $debt_payments_usd
             ],
+            'asset_depreciation' => [
+                'usd' => $asset_depreciation_usd
+            ],
             'cash_sales' => [
                 'paid_usd' => $cash_sales_paid_usd,
                 'paid_iqd' => $cash_sales_paid_iqd
@@ -1435,7 +1439,8 @@ try {
                     'discounts' => $total_discounts,
                     'other_expenses' => $other_expenses_usd,
                     'purchase_materials' => $purchase_materials_usd,
-                    'employee_payments' => $employee_payments_usd
+                    'employee_payments' => $employee_payments_usd,
+                    'asset_depreciation' => $asset_depreciation_usd
                 ]
             ],
             // Additional professional reports data
