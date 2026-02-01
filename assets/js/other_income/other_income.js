@@ -8,14 +8,13 @@ function initGrid() {
     const gridDiv = document.querySelector('#otherIncomeGrid');
 
     const columnDefs = [
-        { headerName: "#", field: "id", width: 70, maxWidth: 100, sortable: true, filter: true },
-        { headerName: "بەروار", field: "date", width: 120, maxWidth: 150, sortable: true, filter: "agDateColumnFilter" },
-        { headerName: "وەسف", field: "description", width: 300, maxWidth: 450, filter: true, wrapText: true, autoHeight: true },
+        { headerName: "#", field: "id", width: 70, sortable: true, filter: true },
+        { headerName: "بەروار", field: "date", width: 120, sortable: true, filter: "agDateColumnFilter" },
+        { headerName: "وەسف", field: "description", flex: 2, minWidth: 200, filter: true, wrapText: true, autoHeight: true },
         {
             headerName: "بڕ (دینار)",
             field: "amount_iqd",
-            width: 150,
-            maxWidth: 150,
+            width: 130,
             sortable: true,
             filter: "agNumberColumnFilter",
             valueFormatter: params => formatCurrency(params.value, 'IQD')
@@ -23,21 +22,18 @@ function initGrid() {
         {
             headerName: "بڕ (دۆلار)",
             field: "amount_usd",
-            width: 150,
-            maxWidth: 150,
+            width: 130,
             sortable: true,
             filter: "agNumberColumnFilter",
             valueFormatter: params => formatCurrency(params.value, 'USD')
         },
-        { headerName: "جۆری دراو", field: "currency", width: 100, maxWidth: 120, filter: true },
+        { headerName: "جۆری دراو", field: "currency", width: 100, filter: true },
         {
             headerName: "کردارەکان",
             field: "id",
-            width: 150,
-            maxWidth: 150,
+            width: 120,
             sortable: false,
             filter: false,
-            pinned: 'right',
             cellRenderer: params => {
                 return `
                     <div class="d-flex gap-2">
@@ -59,13 +55,15 @@ function initGrid() {
         defaultColDef: {
             resizable: true,
             sortable: true,
-            filter: true,
-            maxWidth: 150
+            filter: true
         },
         pagination: true,
         paginationPageSize: 20,
         enableRtl: true,
-        rowData: []
+        rowData: [],
+        onGridReady: (params) => {
+            params.api.sizeColumnsToFit();
+        }
     };
 
     new agGrid.Grid(gridDiv, gridOptions);
@@ -83,6 +81,9 @@ function refreshIncomeGrid() {
             gridOptions.api.setRowData(data);
             calculateTotals(data);
             gridOptions.api.hideOverlay();
+            setTimeout(() => {
+                gridOptions.api.sizeColumnsToFit();
+            }, 100);
         })
         .catch(error => {
             console.error('Error fetching data:', error);
