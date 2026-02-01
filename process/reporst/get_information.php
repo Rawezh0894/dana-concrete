@@ -531,13 +531,33 @@ try {
     $total_expenses_breakdown['material_usage'] = $material_usage_total_usd;
 
     // Gas usage (بەکارهێنانی گاز) with date filter
-    $gas_usage_query = "SELECT SUM(amount_usd) as usd, SUM(amount_iqd) as iqd FROM other_expenses WHERE expense_type = 'بەکارهێنانی گاز' $date_condition_date";
-    $stmt = $pdo->query($gas_usage_query);
-    $row = $stmt->fetch();
-    $gas_usage_usd = $row['usd'] ?? 0;
-    $gas_usage_iqd = $row['iqd'] ?? 0;
-    $gas_usage_total_usd = $gas_usage_usd + (($usd_iqd_rate > 0) ? ($gas_usage_iqd / ($usd_iqd_rate / 100)) : 0);
-    $total_expenses_breakdown['gas_usage'] = $gas_usage_total_usd;
+    $gas_consumption_liters = 0;
+    $gas_consumption_cost_usd = 0;
+    try {
+        $gas_consumption_query = "
+            SELECT 
+                SUM(gas_liters) as total_liters,
+                SUM(CASE 
+                    WHEN currency_type = 'دۆلار' THEN amount_usd 
+                    WHEN currency_type = 'دینار' AND exchange_rate > 0 THEN amount_iqd / (exchange_rate / 100)
+                    WHEN currency_type = 'تێکەڵ' AND exchange_rate > 0 THEN amount_usd + (amount_iqd / (exchange_rate / 100))
+                    ELSE 0 
+                END) as total_cost_usd
+            FROM other_expenses 
+            WHERE expense_type = 'بەکارهێنانی گاز' 
+            $date_condition_date
+        ";
+        $stmt = $pdo->query($gas_consumption_query);
+        $row = $stmt->fetch();
+        $gas_consumption_liters = floatval($row['total_liters'] ?? 0);
+        $gas_consumption_cost_usd = floatval($row['total_cost_usd'] ?? 0);
+        
+        // If specific cost not found, we'll try to use average price later (after material_prices is calculated)
+        // But for total_expenses_breakdown, we'll use this value for now
+    } catch (Exception $e) {
+        error_log("Error calculating gas consumption: " . $e->getMessage());
+    }
+    $total_expenses_breakdown['gas_usage'] = $gas_consumption_cost_usd;
     
     // Gas Income (داهاتی گاز) - Calculate based on specific cars using car_id
     $gas_income_query = "
@@ -874,6 +894,13 @@ try {
         error_log("Error calculating material prices: " . $e->getMessage());
     }
 
+    // Get average gas price fallback if cost was 0
+    if ($gas_consumption_cost_usd == 0 && $gas_consumption_liters > 0 && $material_prices['gas'] > 0) {
+        $gas_consumption_cost_usd = $gas_consumption_liters * $material_prices['gas'];
+        // Update breakdown as well
+        $total_expenses_breakdown['gas_usage'] = $gas_consumption_cost_usd;
+    }
+
     // Calculate costs for each consumption category
     $material_costs = [
         'black_sand' => $material_consumption_tons['black_sand'] * $material_prices['black_sand'],
@@ -887,36 +914,6 @@ try {
 
     $total_used_material_cost_usd = array_sum($material_costs);
     
-    // Calculate gas consumption and cost
-    // بەکارهێنانی گاز لە other_expenses تایبڵەکەدا
-    $gas_consumption_liters = 0;
-    $gas_consumption_cost_usd = 0;
-    try {
-        $gas_consumption_query = "
-            SELECT 
-                SUM(gas_liters) as total_liters,
-                SUM(CASE 
-                    WHEN currency_type = 'دۆلار' THEN amount_usd 
-                    WHEN currency_type = 'دینار' THEN amount_iqd / NULLIF(exchange_rate / 100, 0)
-                    WHEN currency_type = 'تێکەڵ' THEN amount_usd + (amount_iqd / NULLIF(exchange_rate / 100, 0))
-                    ELSE 0 
-                END) as total_cost_usd
-            FROM other_expenses 
-            WHERE expense_type = 'بەکارهێنانی گاز' 
-            $date_condition_date
-        ";
-        $stmt = $pdo->query($gas_consumption_query);
-        $row = $stmt->fetch();
-        $gas_consumption_liters = floatval($row['total_liters'] ?? 0);
-        $gas_consumption_cost_usd = floatval($row['total_cost_usd'] ?? 0);
-        
-        // ئەگەر نرخی بەکارهێنان نەدۆزرایەوە، بەکارهێنانی نرخی average price لە purchases
-        if ($gas_consumption_cost_usd == 0 && $gas_consumption_liters > 0 && $material_prices['gas'] > 0) {
-            $gas_consumption_cost_usd = $gas_consumption_liters * $material_prices['gas'];
-        }
-    } catch (Exception $e) {
-        error_log("Error calculating gas consumption: " . $e->getMessage());
-    }
     
     // Get current stock levels for comparison
     // سایلۆی یەک: دەلتا + لاڤارج
@@ -1361,8 +1358,7 @@ try {
                                ($total_expenses_breakdown['other_expenses'] ?? 0) + 
                                ($total_expenses_breakdown['purchases'] ?? 0) + 
                                ($total_expenses_breakdown['purchase_materials'] ?? 0) + 
-                               ($total_expenses_breakdown['gas_usage'] ?? 0) + 
-                               ($total_expenses_breakdown['material_usage'] ?? 0) + 
+                               ($gas_consumption_cost_usd ?? 0) + 
                                ($total_discount ?? 0),
                 'profit_loss' => (
                                    ($sales['cash']['usd'] ?? 0) + 
@@ -1379,8 +1375,7 @@ try {
                                  ($total_expenses_breakdown['other_expenses'] ?? 0) + 
                                  ($total_expenses_breakdown['purchases'] ?? 0) + 
                                  ($total_expenses_breakdown['purchase_materials'] ?? 0) + 
-                                 ($total_expenses_breakdown['gas_usage'] ?? 0) + 
-                                 ($total_expenses_breakdown['material_usage'] ?? 0) + 
+                                 ($gas_consumption_cost_usd ?? 0) + 
                                  ($total_discount ?? 0))
             ],
             'discounts' => [
@@ -1490,7 +1485,7 @@ try {
             ($material_sales_total_usd ?? 0) +
             ($other_income_total_usd ?? 0);
         
-        $total_material_cost_val = ($total_used_material_cost_usd ?? 0) + ($raw_material_sales_cost_total_usd ?? 0); // Material + Raw Material Sales Cost
+        $total_material_cost_val = ($total_used_material_cost_usd ?? 0) + ($raw_material_sales_cost_total_usd ?? 0) + ($gas_consumption_cost_usd ?? 0); // Material + Raw Material Sales Cost + Gas Cost
         // User requested formula components:
         // 1. Total Revenue / Total Meters
         $revenue_per_meter = $total_revenue_val / $total_meters;
@@ -1505,12 +1500,10 @@ try {
         // c. Caravan
         $cost_caravan_per_meter = ($caravan_hisabi_usd ?? 0) / $total_meters;
         
-        // d. Expenses (Other + Purchases + PurchaseMaterials + Gas)
+        // d. Expenses (Other + Purchases + PurchaseMaterials)
         $cost_expenses_total = ($total_expenses_breakdown['other_expenses'] ?? 0) + 
                                ($total_expenses_breakdown['purchases'] ?? 0) + 
-                               ($total_expenses_breakdown['purchase_materials'] ?? 0) +
-                               ($total_expenses_breakdown['gas_usage'] ?? 0) +
-                               ($total_expenses_breakdown['material_usage'] ?? 0);
+                               ($total_expenses_breakdown['purchase_materials'] ?? 0);
         $cost_expenses_per_meter = $cost_expenses_total / $total_meters;
         
         // e. Sales Discount
