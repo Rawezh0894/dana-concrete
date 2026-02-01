@@ -8,13 +8,13 @@ function initGrid() {
     const gridDiv = document.querySelector('#otherIncomeGrid');
 
     const columnDefs = [
-        { headerName: "#", field: "id", width: 70, sortable: true, filter: true },
-        { headerName: "بەروار", field: "date", width: 120, sortable: true, filter: "agDateColumnFilter" },
-        { headerName: "وەسف", field: "description", flex: 2, filter: true, wrapText: true, autoHeight: true },
+        { headerName: "#", field: "id", width: 60, sortable: true, filter: true },
+        { headerName: "بەروار", field: "date", width: 110, sortable: true, filter: "agDateColumnFilter" },
+        { headerName: "وەسف", field: "description", flex: 2, minWidth: 200, filter: true, wrapText: true, autoHeight: true },
         {
             headerName: "بڕ (دینار)",
             field: "amount_iqd",
-            width: 150,
+            width: 130,
             sortable: true,
             filter: "agNumberColumnFilter",
             valueFormatter: params => formatCurrency(params.value, 'IQD')
@@ -22,13 +22,13 @@ function initGrid() {
         {
             headerName: "بڕ (دۆلار)",
             field: "amount_usd",
-            width: 150,
+            width: 130,
             sortable: true,
             filter: "agNumberColumnFilter",
             valueFormatter: params => formatCurrency(params.value, 'USD')
         },
         { headerName: "جۆری دراو", field: "currency", width: 100, filter: true },
-        { headerName: "دیبەیت", field: "created_at", width: 180, sortable: true, hide: true }
+        { headerName: "دیبەیت", field: "created_at", width: 150, sortable: true, hide: true }
     ];
 
     gridOptions = {
@@ -36,12 +36,19 @@ function initGrid() {
         defaultColDef: {
             resizable: true,
             sortable: true,
-            filter: true
+            filter: true,
+            suppressMovable: true
         },
         pagination: true,
         paginationPageSize: 20,
         enableRtl: true,
-        rowData: []
+        rowData: [],
+        onGridReady: (params) => {
+            params.api.sizeColumnsToFit();
+        },
+        onFirstDataRendered: (params) => {
+            params.api.sizeColumnsToFit();
+        }
     };
 
     new agGrid.Grid(gridDiv, gridOptions);
