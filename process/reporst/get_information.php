@@ -321,6 +321,26 @@ try {
     $stmt = $pdo->prepare($material_sales_query);
     $stmt->execute([$usd_iqd_rate, $usd_iqd_rate]);
     $material_sales_total_usd = floatval($stmt->fetchColumn() ?? 0);
+
+    // Other Income (داهاتی تر)
+    $other_income_total_usd = 0;
+    try {
+        $other_income_query = "
+            SELECT 
+                SUM(CASE 
+                    WHEN currency = 'دۆلار' THEN amount_usd 
+                    WHEN (currency = 'دینار' OR currency = 'IQD') AND ? > 0 THEN amount_iqd / (? / 100)
+                    ELSE 0 
+                END) as total_usd
+            FROM other_income 
+            WHERE 1=1 $date_condition_date
+        ";
+        $stmt = $pdo->prepare($other_income_query);
+        $stmt->execute([$usd_iqd_rate, $usd_iqd_rate]);
+        $other_income_total_usd = floatval($stmt->fetchColumn() ?? 0);
+    } catch (Exception $e) {
+        error_log("Error calculating other income: " . $e->getMessage());
+    }
     
     // Calculate cost of raw material sales (تێچووی فرۆشتنی مەوادی خام)
     // Similar to material consumption cost calculation
@@ -678,11 +698,12 @@ try {
     }
     
     // Calculate total income
-    // داهات = فرۆشتن + خزمەتگوزاری + داهاتی گاز + داهاتی کاڵا - (کڕین + داشکاندن + خەرجی تر + کڕینی کاڵا + مووچە)
+    // داهات = فرۆشتن + خزمەتگوزاری + داهاتی گاز + داهاتی کاڵا + داهاتی تر - (کڕین + داشکاندن + خەرجی تر + کڕینی کاڵا + مووچە)
     $total_income_usd = 
         $total_sales_usd +
         $service_receipts_total_usd +
         $gas_income_usd +
+        $other_income_total_usd +
         $material_sales_total_usd -
         $total_purchases_usd -
         $total_discounts -
@@ -693,6 +714,7 @@ try {
     // Debug: Log income calculation breakdown
     error_log("Debug - Income calculation: sales=" . $total_sales_usd . 
               ", gas_income=" . $gas_income_usd . 
+              ", other_income=" . $other_income_total_usd . 
               ", purchases=" . $total_purchases_usd . 
               ", discounts=" . $total_discounts . 
               ", other_expenses=" . $other_expenses_usd . 
@@ -1310,6 +1332,9 @@ try {
             'material_sales' => [
                 'total_usd' => $material_sales_total_usd
             ],
+            'other_income' => [
+                'total_usd' => $other_income_total_usd
+            ],
             'raw_material_sales' => [
                 'total_usd' => $raw_material_sales_total_usd,
                 'cost_usd' => $raw_material_sales_cost_total_usd
@@ -1327,7 +1352,8 @@ try {
                     ($sales['credit']['usd'] ?? 0) + 
                     $service_receipts_total_usd +
                     $raw_material_sales_total_usd + 
-                    $material_sales_total_usd,
+                    $material_sales_total_usd +
+                    $other_income_total_usd,
                 'total_cost' => ($total_used_material_cost_usd ?? 0) + 
                                ($raw_material_sales_cost_total_usd ?? 0) + 
                                ($employee_stats['total_fixed_usd'] ?? 0) + 
@@ -1341,7 +1367,8 @@ try {
                                    ($sales['credit']['usd'] ?? 0) + 
                                    $service_receipts_total_usd +
                                    $raw_material_sales_total_usd + 
-                                   $material_sales_total_usd
+                                   $material_sales_total_usd +
+                                   $other_income_total_usd
                                  ) - 
                                 (($total_used_material_cost_usd ?? 0) + 
                                  ($raw_material_sales_cost_total_usd ?? 0) + 
@@ -1388,6 +1415,7 @@ try {
                 'breakdown' => [
                     'sales' => $total_sales_usd,
                     'gas_income' => $gas_income_usd,
+                    'other_income' => $other_income_total_usd,
                     'purchases' => $total_purchases_usd,
                     'discounts' => $total_discounts,
                     'other_expenses' => $other_expenses_usd,
@@ -1455,7 +1483,8 @@ try {
             ($sales['credit']['usd'] ?? 0) +
             ($service_receipts_total_usd ?? 0) +
             ($raw_material_sales_total_usd ?? 0) +
-            ($material_sales_total_usd ?? 0);
+            ($material_sales_total_usd ?? 0) +
+            ($other_income_total_usd ?? 0);
         
         $total_material_cost_val = ($total_used_material_cost_usd ?? 0) + ($raw_material_sales_cost_total_usd ?? 0); // Material + Raw Material Sales Cost
         // User requested formula components:

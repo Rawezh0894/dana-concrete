@@ -181,6 +181,14 @@ function renderDashboardCards(data) {
             subtitle: 'فرۆشتنی کاڵاکانی کۆگا'
         },
         {
+            key: 'other_income',
+            label: 'داهاتی تر',
+            icon: 'fa-hand-holding-usd',
+            cardClass: 'success-card',
+            value: formatCurrency(Number(data.data?.other_income?.total_usd) || 0, 'USD'),
+            subtitle: 'داهاتە جۆراوجۆرەکان (Other Income)'
+        },
+        {
             key: 'total_material_usage_cost',
             label: 'کۆی گشتی تێچووی مەوادەکان',
             icon: 'fa-calculator',
