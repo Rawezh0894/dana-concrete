@@ -35,16 +35,6 @@ if (!isset($_SESSION['user_id'])) {
     <link href="../assets/css/comon/ag_grid.css" rel="stylesheet">
 
     <link href="../assets/css/kurdish-font.css" rel="stylesheet">
-    <style>
-        /* Override global min-width from ag_grid.css */
-        #otherIncomeGrid .ag-cell, 
-        #otherIncomeGrid .ag-header-cell {
-            min-width: 50px !important;
-        }
-        .ag-theme-alpine {
-            --ag-column-min-width: 50px !important;
-        }
-    </style>
 </head>
 <body dir="rtl">
 <?php include '../includes/navbar.php'; ?>
