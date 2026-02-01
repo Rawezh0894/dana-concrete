@@ -119,6 +119,52 @@ if (!isset($_SESSION['user_id'])) {
   </div>
 </div>
 
+<!-- Edit Income Modal -->
+<div class="modal fade" id="editIncomeModal" tabindex="-1" aria-labelledby="editIncomeModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="editIncomeForm">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editIncomeModalLabel">دەستکاری داهاتی تر</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="edit_id" name="id">
+          <div class="mb-3">
+            <label for="edit_description" class="form-label">وەسف (تێبینی)</label>
+            <textarea class="form-control" id="edit_description" name="description" rows="3" required></textarea>
+          </div>
+          
+          <div class="mb-3">
+            <label for="edit_currency" class="form-label">جۆری دراو</label>
+            <select class="form-select" id="edit_currency" name="currency" required>
+                <option value="دینار">دینار</option>
+                <option value="دۆلار">دۆلار</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="edit_amount" class="form-label">بڕ</label>
+            <div class="input-group">
+                <input type="number" step="0.01" class="form-control" id="edit_amount" name="amount" required>
+                <span class="input-group-text" id="edit-currency-addon">د.ع</span>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="edit_date" class="form-label">بەروار</label>
+            <input type="date" class="form-control" id="edit_date" name="date" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
+          <button type="submit" class="btn btn-primary" style="background: var(--seafoam-green); border: none; font-weight: bold;">پاشکەوتکردن</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -127,12 +173,24 @@ if (!isset($_SESSION['user_id'])) {
 
 <script src="../assets/js/swalAlert.js"></script>
 <script src="../assets/js/other_income/add_income.js"></script>
+<script src="../assets/js/other_income/update_income.js"></script>
+<script src="../assets/js/other_income/delete_income.js"></script>
 <script src="../assets/js/other_income/other_income.js"></script>
 
 <script>
-    // Simple script to update currency label
+    // Simple script to update currency label for Add modal
     document.getElementById('currency').addEventListener('change', function() {
         const addon = document.getElementById('currency-addon');
+        if (this.value === 'دینار') {
+            addon.textContent = 'د.ع';
+        } else {
+            addon.textContent = '$';
+        }
+    });
+
+    // Simple script to update currency label for Edit modal
+    document.getElementById('edit_currency').addEventListener('change', function() {
+        const addon = document.getElementById('edit-currency-addon');
         if (this.value === 'دینار') {
             addon.textContent = 'د.ع';
         } else {

@@ -30,6 +30,27 @@ function initGrid() {
             valueFormatter: params => formatCurrency(params.value, 'USD')
         },
         { headerName: "جۆری دراو", field: "currency", width: 100, maxWidth: 120, filter: true },
+        {
+            headerName: "کردارەکان",
+            field: "id",
+            width: 150,
+            maxWidth: 150,
+            sortable: false,
+            filter: false,
+            pinned: 'right',
+            cellRenderer: params => {
+                return `
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-primary" onclick="openEditIncomeModal(${params.data.id}, '${params.data.description.replace(/'/g, "\\'")}', ${params.data.amount_iqd}, ${params.data.amount_usd}, '${params.data.currency}', '${params.data.date}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteIncome(${params.data.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+            }
+        },
         { headerName: "دیبەیت", field: "created_at", width: 180, sortable: true, hide: true }
     ];
 
