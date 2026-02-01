@@ -716,9 +716,23 @@ try {
         error_log("Error calculating employee payments: " . $e->getMessage());
         $employee_payments_usd = 0;
     }
+
+    // Get asset depreciation total
+    $asset_depreciation_usd = 0;
+    try {
+        $depreciation_query = "SELECT 
+            SUM(amount_usd + (CASE WHEN ? > 0 THEN amount_iqd / (? / 100) ELSE 0 END)) as total_usd
+            FROM asset_depreciation 
+            WHERE depreciation_date BETWEEN ? AND ?";
+        $stmt = $pdo->prepare($depreciation_query);
+        $stmt->execute([$usd_iqd_rate, $usd_iqd_rate, $from_date, $to_date]);
+        $asset_depreciation_usd = floatval($stmt->fetchColumn() ?? 0);
+    } catch (Exception $e) {
+        error_log("Error calculating asset depreciation: " . $e->getMessage());
+    }
     
     // Calculate total income
-    // داهات = فرۆشتن + خزمەتگوزاری + داهاتی گاز + داهاتی کاڵا + داهاتی تر - (کڕین + داشکاندن + خەرجی تر + کڕینی کاڵا + مووچە)
+    // داهات = فرۆشتن + خزمەتگوزاری + داهاتی گاز + داهاتی کاڵا + داهاتی تر - (کڕین + داشکاندن + خەرجی تر + کڕینی کاڵا + مووچە + داخوران)
     $total_income_usd = 
         $total_sales_usd +
         $service_receipts_total_usd +
@@ -729,7 +743,8 @@ try {
         $total_discounts -
         $other_expenses_usd -
         $purchase_materials_usd -
-        $employee_payments_usd;
+        $employee_payments_usd -
+        $asset_depreciation_usd;
     
     // Debug: Log income calculation breakdown
     error_log("Debug - Income calculation: sales=" . $total_sales_usd . 
@@ -740,6 +755,7 @@ try {
               ", other_expenses=" . $other_expenses_usd . 
               ", purchase_materials=" . $purchase_materials_usd . 
               ", employee_payments=" . $employee_payments_usd . 
+              ", asset_depreciation=" . $asset_depreciation_usd . 
               ", total_income=" . $total_income_usd);
     
     // Debug: Log discount breakdown
@@ -1511,9 +1527,12 @@ try {
         
         // f. Debt Return Discount
         $cost_discount_debt_per_meter = ($customer_debt_discounts ?? 0) / $total_meters;
+
+        // g. Depreciation
+        $cost_depreciation_per_meter = ($asset_depreciation_usd ?? 0) / $total_meters;
         
         // Calculate Net Profit Per Meter
-        $total_cost_per_meter = $cost_material_per_meter + $cost_salary_per_meter + $cost_caravan_per_meter + $cost_expenses_per_meter + $cost_discount_sales_per_meter + $cost_discount_debt_per_meter;
+        $total_cost_per_meter = $cost_material_per_meter + $cost_salary_per_meter + $cost_caravan_per_meter + $cost_expenses_per_meter + $cost_discount_sales_per_meter + $cost_discount_debt_per_meter + $cost_depreciation_per_meter;
         
         $net_profit_per_m3 = $revenue_per_meter - $total_cost_per_meter;
         
@@ -1529,7 +1548,8 @@ try {
                 'caravan' => $cost_caravan_per_meter,
                 'expenses' => $cost_expenses_per_meter,
                 'discount_sales' => $cost_discount_sales_per_meter,
-                'discount_debt' => $cost_discount_debt_per_meter
+                'discount_debt' => $cost_discount_debt_per_meter,
+                'depreciation' => $cost_depreciation_per_meter
             ]
         ];
     }
