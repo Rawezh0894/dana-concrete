@@ -886,7 +886,7 @@ try {
                     SUM(p.kg) as total_kg
                 FROM purchases p
                 JOIN materials m ON p.material_id = m.id
-                WHERE p.kg > 0
+                WHERE p.kg > 0 AND p.date >= '2026-01-01'
                 GROUP BY m.name
             ";
             $stmt_global = $pdo->query($global_avg_query);
