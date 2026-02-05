@@ -130,22 +130,6 @@ function renderDashboardCards(data) {
     const salesDiscountUsd = Number(data.data?.discounts?.sales_usd) || 0;
     const debtDiscountUsd = Number(data.data?.discounts?.customer_debt_usd) || 0;
 
-    // Prepare Material Cost with Manual Override Logic
-    const isSpecificMonth = data.data?.view_context?.is_specific_month || false;
-    const currentYear = data.data?.view_context?.year;
-    const currentMonth = data.data?.view_context?.month;
-    const manualOverride = data.data?.material_consumption?.manual_override_cost_usd;
-
-    let totalMaterialCostValue = (Number(data.data?.material_consumption?.total_cost_usd) || 0) +
-        (Number(data.data?.raw_material_sales?.cost_usd) || 0) +
-        (Number(data.data?.material_consumption?.gas?.cost_usd) || 0);
-
-    let isManual = false;
-    if (manualOverride !== null && manualOverride !== undefined) {
-        totalMaterialCostValue = Number(manualOverride);
-        isManual = true;
-    }
-
     // Profit & Loss Tab Cards (تابی قازانج و زەرەر)
     const profitLossCards = [
         {
@@ -209,9 +193,12 @@ function renderDashboardCards(data) {
             label: 'کۆی گشتی تێچووی مەوادەکان',
             icon: 'fa-calculator',
             cardClass: 'total-expenses-card',
-            value: formatCurrency(totalMaterialCostValue, 'USD') +
-                (isManual ? ' <span style="font-size:0.5em; background:#ffc107; color:#000; padding:2px 5px; border-radius:4px; vertical-align: middle;">دەستکاری</span>' : '') +
-                (isSpecificMonth ? ` <i class="fas fa-edit ms-2" style="cursor:pointer; font-size:0.6em; color:rgba(255,255,255,0.7); vertical-align: middle;" onclick="event.stopPropagation(); editMaterialCost(${currentYear}, ${currentMonth}, ${totalMaterialCostValue})" title="دەستکاری تێچوو"></i>` : ''),
+            value: formatCurrency(
+                (Number(data.data?.material_consumption?.total_cost_usd) || 0) +
+                (Number(data.data?.raw_material_sales?.cost_usd) || 0) +
+                (Number(data.data?.material_consumption?.gas?.cost_usd) || 0),
+                'USD'
+            ),
             subtitle: 'کۆی نرخی کڕینی مەوادی بەکارهاتوو + تێچووی فرۆشتنی مەوادی خام + تێچووی بەکارهێنانی گاز'
         },
         {
@@ -1073,69 +1060,3 @@ function showPersonDebtPaymentsDetails() {
             });
         });
 }
-
-// Function to edit material cost
-window.editMaterialCost = function (year, month, currentCost) {
-    if (!year || !month) return;
-
-    Swal.fire({
-        title: 'دەستکاری تێچووی مەوادەکان',
-        html: `
-            <p>تێچووی ئێستا: ${formatCurrency(currentCost, 'USD')}</p>
-            <p class="text-muted">نرخێکی نوێ بنووسە بۆ ئەم مانگە:</p>
-            <input type="number" id="manual_cost_input" class="swal2-input" placeholder="نرخ بە دۆلار" step="0.01">
-            <div class="form-check mt-3 d-flex justify-content-center">
-                <input class="form-check-input me-2" type="checkbox" id="remove_override">
-                <label class="form-check-label" for="remove_override">
-                    بەکارھێنانی تێچووی سیستەم (سڕینەوەی دەستکاری)
-                </label>
-            </div>
-        `,
-        showCancelButton: true,
-        confirmButtonText: 'پاشەکەوت',
-        cancelButtonText: 'داخستن',
-        focusConfirm: false,
-        preConfirm: () => {
-            const cost = document.getElementById('manual_cost_input').value;
-            const remove = document.getElementById('remove_override').checked;
-
-            if (!remove && (!cost || cost < 0)) {
-                Swal.showValidationMessage('تکایە نرخێکی دروست بنووسە');
-                return false;
-            }
-            return { cost: cost, remove: remove };
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            const data = result.value;
-            const payload = new URLSearchParams();
-            payload.append('year', year);
-            payload.append('month', month);
-            if (!data.remove) {
-                payload.append('cost', data.cost);
-            } else {
-                payload.append('cost', ''); // Empty string to trigger delete
-            }
-
-            fetch('../process/reporst/set_monthly_material_cost.php', {
-                method: 'POST',
-                body: payload
-            })
-                .then(res => res.json())
-                .then(response => {
-                    if (response.success) {
-                        Swal.fire('سەرکەوتوو', 'زانیاریەکان نوێکرانەوە', 'success')
-                            .then(() => {
-                                fetchAndRenderReportData(); // Reload report
-                            });
-                    } else {
-                        Swal.fire('هەڵە', response.message || 'هەڵەیەک ڕویدا', 'error');
-                    }
-                })
-                .catch(err => {
-                    console.error(err);
-                    Swal.fire('هەڵە', 'هەڵەیەک لە پەیوەندی هەیە', 'error');
-                });
-        }
-    });
-};

@@ -775,45 +775,9 @@ try {
         'gravel_bin3' => 0,     // چەوی چاوی ٣
         'gravel_bin4' => 0,     // چەوی چاوی ٤
         'cement_cem1' => 0,     // چیمەنتۆی سایلۆی ١ (دەلتا + لاڤارج)
-        'cement_cem2' => 0,     // چیمەنتۆی سایلۆی ١ (ماس)
+        'cement_cem2' => 0,     // چیمەنتۆی سایلۆی ٢ (ماس)
         'additive' => 0         // زیادکراو (دەرمان)
     ];
-
-    // Check for manual cost override
-    $viewing_specific_month = false;
-    $target_year = 0;
-    $target_month = 0;
-    
-    // Determine if we are viewing a specific month
-    if ($filter === 'month') {
-        $viewing_specific_month = true;
-        $target_year = intval(date('Y'));
-        $target_month = intval(date('n'));
-    } elseif ($use_range) {
-        $start_ts = strtotime($period_start);
-        $end_ts = strtotime($period_end);
-        // Check if start is 1st of month, end is last of month, and same month/year
-        if (date('j', $start_ts) == 1 &&
-            date('Y-m-d', $end_ts) == date('Y-m-t', $start_ts)) {
-            $viewing_specific_month = true;
-            $target_year = intval(date('Y', $start_ts));
-            $target_month = intval(date('n', $start_ts));
-        }
-    }
-
-    $manual_override_cost_usd = null;
-    if ($viewing_specific_month) {
-        try {
-            $stmt = $pdo->prepare("SELECT cost_usd FROM monthly_material_cost_overrides WHERE year = ? AND month = ?");
-            $stmt->execute([$target_year, $target_month]);
-            $res = $stmt->fetchColumn();
-            if ($res !== false) {
-                $manual_override_cost_usd = floatval($res);
-            }
-        } catch (Exception $e) {
-            // Table might not exist yet
-        }
-    }
     
     /**
      * هەژمارکردنی بەکارهێنانی ماتریاڵ بە شێوەی SAP/Odoo/Oracle
@@ -1515,18 +1479,12 @@ try {
                 'costs' => $material_costs,
                 'total_cost_usd' => $total_used_material_cost_usd,
                 'current_stock' => $current_stock,
-                'manual_override_cost_usd' => $manual_override_cost_usd,
                 // Gas consumption data
                 'gas' => [
                     'liters' => $gas_consumption_liters,
                     'cost_usd' => $gas_consumption_cost_usd,
                     'price_per_liter' => $material_prices['gas']
                 ]
-            ],
-            'view_context' => [
-                'is_specific_month' => $viewing_specific_month,
-                'year' => $target_year,
-                'month' => $target_month
             ]
         ]
     ];
