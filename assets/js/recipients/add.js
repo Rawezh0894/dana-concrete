@@ -4,7 +4,7 @@ $(document).ready(function () {
 
     let isSubmitting = false;
 
-    addRecipientForm.on('submit', function (e) {
+    addRecipientForm.off('submit').on('submit', function (e) {
         e.preventDefault();
 
         if (isSubmitting) {

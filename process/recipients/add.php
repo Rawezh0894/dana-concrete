@@ -44,6 +44,13 @@ try {
             echo json_encode(['success' => false, 'message' => 'ئەم ژمارەی مۆبایلە پێشتر وەک وەرگر تۆمارکراوە.']);
             exit;
         }
+    } elseif ($phone1 === null) {
+        $nameStmt = $pdo->prepare("SELECT id FROM recipients WHERE name = ?");
+        $nameStmt->execute([$name]);
+        if ($nameStmt->fetch()) {
+            echo json_encode(['success' => false, 'message' => 'ئەم ناوە پێشتر تۆمارکراوە.']);
+            exit;
+        }
     }
     
     // If no customer or recipient exists, create new recipient in recipients table only
