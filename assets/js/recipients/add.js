@@ -12,6 +12,14 @@ $(document).ready(function () {
             return false;
         }
 
+        const name = $('#recipient_name').val().trim();
+        const phone1 = $('#recipient_phone1').val().trim();
+
+        if (name === '' && phone1 === '') {
+            showAlert('error', 'پێویستە ناو یان ژمارەی مۆبایل بنووسیت.');
+            return false;
+        }
+
         isSubmitting = true;
         const submitBtn = $(this).find('button[type="submit"]');
         const originalBtnText = submitBtn.html();

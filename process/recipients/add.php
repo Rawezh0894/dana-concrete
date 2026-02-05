@@ -27,6 +27,11 @@ $name = $name === '' ? null : $name;
 $phone1 = $phone1 === '' ? null : $phone1;
 $phone2 = $phone2 === '' ? null : $phone2;
 
+if ($name === null && $phone1 === null) {
+    echo json_encode(['success' => false, 'message' => 'پێویستە ناو یان ژمارەی مۆبایل بنووسیت.']);
+    exit;
+}
+
 try {
     if ($phone1 !== null) {
         // Check if customer with this mobile already exists (any customer, regardless of is_recipient)
