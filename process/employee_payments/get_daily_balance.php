@@ -36,18 +36,24 @@ try {
         $end_date = $current_date;
     }
     
-    // Get employee info
-    $employee_query = "SELECT id, name, salary, COALESCE(bonus, 0) as bonus, join_date FROM employees WHERE id = ?";
+    // Get employee info (with resignation_date)
+    $employee_query = "SELECT id, name, salary, COALESCE(bonus, 0) as bonus, join_date, resignation_date FROM employees WHERE id = ?";
     $stmt = $pdo->prepare($employee_query);
     $stmt->execute([$employee_id]);
     $employee = $stmt->fetch(PDO::FETCH_ASSOC);
-    
+
     if (!$employee) {
         echo json_encode([
             'success' => false,
             'error' => 'کارمەند نەدۆزرایەوە'
         ]);
         exit;
+    }
+
+    // Cap end_date at resignation_date if it exists
+    $resignation_date_val = $employee['resignation_date'] ?? null;
+    if ($resignation_date_val && $resignation_date_val < $end_date) {
+        $end_date = $resignation_date_val;
     }
     
     $monthly_salary = floatval($employee['salary']);
@@ -141,6 +147,11 @@ try {
             $expense_end_date = $current_date;
         } else {
             $expense_end_date = date('Y-m-t', strtotime($expense_date_str));
+        }
+
+        // Cap expense_end_date at resignation_date if it exists
+        if ($resignation_date && $resignation_date < $expense_end_date) {
+            $expense_end_date = $resignation_date;
         }
         
         $expense_days_used = (strtotime($expense_end_date) - strtotime($expense_date_str)) / (60 * 60 * 24) + 1;

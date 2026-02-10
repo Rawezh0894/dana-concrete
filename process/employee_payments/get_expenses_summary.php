@@ -50,17 +50,24 @@ try {
 
     $emp_params = [];
     $columns = "id, salary, COALESCE(bonus, 0) as bonus";
-    if ($join_date_exists) {
-        $columns .= ", join_date";
-    } else {
-        $columns .= ", NULL as join_date";
-    }
+    if ($join_date_exists) $columns .= ", join_date";
+    else $columns .= ", NULL as join_date";
+    
+    // Check if resignation_date column exists
+    $resignation_date_exists = false;
+    try {
+        $check_resign = $pdo->query("SHOW COLUMNS FROM employees LIKE 'resignation_date'");
+        $resignation_date_exists = $check_resign->rowCount() > 0;
+    } catch (Exception $e) {}
+
+    if ($resignation_date_exists) $columns .= ", resignation_date";
+    else $columns .= ", NULL as resignation_date";
     
     $emp_sql = "SELECT $columns FROM employees WHERE 1=1";
     
-    // Filter active employees if status column exists
+    // Filter employees - include resigned ones if they might have worked during this period
     if ($status_exists) {
-        $emp_sql .= " AND status = 'active'";
+        $emp_sql .= " AND status IN ('active', 'resigned')";
     }
 
     if ($employee_filter) {
@@ -95,10 +102,15 @@ try {
             continue;
         }
         
-        // End date for calculation is min of period_end and today
+        // End date for calculation is min of period_end, today, AND resignation_date
         $work_end = $period_end;
         if ($today < $work_end) {
             $work_end = $today;
+        }
+        
+        $resignation_date = $emp['resignation_date'];
+        if ($resignation_date && $resignation_date < $work_end) {
+            $work_end = $resignation_date;
         }
         
         $emp_start_ts = strtotime($work_start);
@@ -154,9 +166,11 @@ try {
         try {
             // Use COALESCE to fallback to created_at date if date column is NULL
             // This handles cases where receipts are added without an explicit date (defaulting to created_at)
-            $overtime_sql = "SELECT COUNT(*) as count FROM concrete_receipts 
-                         WHERE mixer_driver_id IN ($placeholders) 
-                         AND COALESCE(`date`, DATE(created_at)) BETWEEN ? AND ?";
+            $overtime_sql = "SELECT COUNT(*) as count FROM concrete_receipts cr
+                         JOIN employees e ON cr.mixer_driver_id = e.id
+                         WHERE cr.mixer_driver_id IN ($placeholders) 
+                         AND COALESCE(cr.`date`, DATE(cr.created_at)) BETWEEN ? AND ?
+                         AND (e.resignation_date IS NULL OR COALESCE(cr.`date`, DATE(cr.created_at)) <= e.resignation_date)";
                          
             $overtime_params = array_merge($mixer_driver_ids, [$period_start, $period_end]);
             

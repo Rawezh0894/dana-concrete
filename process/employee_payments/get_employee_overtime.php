@@ -25,8 +25,8 @@ if ($employee_id <= 0) {
 }
 
 try {
-    // Get employee name and role
-    $stmt = $pdo->prepare("SELECT name, role FROM employees WHERE id = ?");
+    // Get employee name, role, and resignation_date
+    $stmt = $pdo->prepare("SELECT name, role, resignation_date FROM employees WHERE id = ?");
     $stmt->execute([$employee_id]);
     $employee = $stmt->fetch(PDO::FETCH_ASSOC);
     
@@ -68,31 +68,33 @@ try {
         $params[] = $month;
     }
     
-    // Get count of receipts for this employee as mixer driver
+    // Get count of receipts for this employee as mixer driver (respect resignation_date)
     $query = "SELECT COUNT(*) as receipt_count 
-              FROM concrete_receipts 
-              WHERE mixer_driver_id = ? $dateFilter";
+              FROM concrete_receipts cr
+              WHERE cr.mixer_driver_id = ? $dateFilter
+              AND (? IS NULL OR COALESCE(cr.`date`, DATE(cr.created_at)) <= ?)";
     $stmt = $pdo->prepare($query);
-    $stmt->execute(array_merge([$employee_id], $params));
+    $stmt->execute(array_merge([$employee_id], $params, [$employee['resignation_date'], $employee['resignation_date']]));
     $mixer_result = $stmt->fetch(PDO::FETCH_ASSOC);
     $mixer_count = intval($mixer_result['receipt_count'] ?? 0);
     
-    // Get count of receipts for this employee as pump driver
+    // Get count of receipts for this employee as pump driver (respect resignation_date)
     $query = "SELECT COUNT(*) as receipt_count 
-              FROM concrete_receipts 
-              WHERE pump_driver_id = ? AND pump_driver_id IS NOT NULL $dateFilter";
+              FROM concrete_receipts cr
+              WHERE cr.pump_driver_id = ? AND cr.pump_driver_id IS NOT NULL $dateFilter
+              AND (? IS NULL OR COALESCE(cr.`date`, DATE(cr.created_at)) <= ?)";
     $stmt = $pdo->prepare($query);
-    $stmt->execute(array_merge([$employee_id], $params));
+    $stmt->execute(array_merge([$employee_id], $params, [$employee['resignation_date'], $employee['resignation_date']]));
     $pump_result = $stmt->fetch(PDO::FETCH_ASSOC);
     $pump_count = intval($pump_result['receipt_count'] ?? 0);
     
-    // Total receipt count (mixer + pump)
-    // Note: If employee is both mixer and pump driver for same receipt, count only once
-    $query = "SELECT COUNT(DISTINCT id) as total_receipts 
-              FROM concrete_receipts 
-              WHERE (mixer_driver_id = ? OR pump_driver_id = ?) $dateFilter";
+    // Total receipt count (mixer + pump) - respect resignation_date
+    $query = "SELECT COUNT(DISTINCT cr.id) as total_receipts 
+              FROM concrete_receipts cr
+              WHERE (cr.mixer_driver_id = ? OR cr.pump_driver_id = ?) $dateFilter
+              AND (? IS NULL OR COALESCE(cr.`date`, DATE(cr.created_at)) <= ?)";
     $stmt = $pdo->prepare($query);
-    $stmt->execute(array_merge([$employee_id, $employee_id], $params));
+    $stmt->execute(array_merge([$employee_id, $employee_id], $params, [$employee['resignation_date'], $employee['resignation_date']]));
     $total_result = $stmt->fetch(PDO::FETCH_ASSOC);
     $total_receipts = intval($total_result['total_receipts'] ?? 0);
     

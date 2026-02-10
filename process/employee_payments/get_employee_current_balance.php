@@ -27,8 +27,8 @@ try {
     $current_year = date('Y');
     $current_month = date('m');
     
-    // Get employee info
-    $employee_query = "SELECT id, name, salary, COALESCE(bonus, 0) as bonus, join_date FROM employees WHERE id = ?";
+    // Get employee info (with resignation_date)
+    $employee_query = "SELECT id, name, salary, COALESCE(bonus, 0) as bonus, join_date, resignation_date FROM employees WHERE id = ?";
     $stmt = $pdo->prepare($employee_query);
     $stmt->execute([$employee_id]);
     $employee = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -59,6 +59,12 @@ try {
         $end_date = $current_date;
     } else {
         $end_date = date('Y-m-t', strtotime($expense_date));
+    }
+    
+    // Cap end_date at resignation_date if it exists
+    $resignation_date = $employee['resignation_date'];
+    if ($resignation_date && $resignation_date < $end_date) {
+        $end_date = $resignation_date;
     }
     
     $calc_start_date = $expense_date;

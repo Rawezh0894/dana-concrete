@@ -48,7 +48,8 @@ try {
             ee.created_at,
             u.username as created_by_name,
             COALESCE(e.payable_balance, 0) as employee_payable_balance,
-            COALESCE(e.receivable_balance, 0) as employee_receivable_balance
+            COALESCE(e.receivable_balance, 0) as employee_receivable_balance,
+            e.resignation_date
         FROM employee_expenses ee
         LEFT JOIN employees e ON ee.employee_id = e.id
         LEFT JOIN users u ON ee.created_by = u.id
@@ -91,6 +92,7 @@ try {
         if (!isset($employee_balances[$employee_id])) {
             $employee_balances[$employee_id] = [
                 'monthly_salary' => floatval($expense['monthly_salary'] ?? 0),
+                'resignation_date' => $expense['resignation_date'],
                 'expenses' => []
             ];
         }
@@ -102,6 +104,12 @@ try {
             $expense_end_date = $current_date;
         } else {
             $expense_end_date = date('Y-m-t', strtotime($expense_date_str));
+        }
+        
+        // Cap at resignation_date
+        $resignation_date = $expense['resignation_date'];
+        if ($resignation_date && $resignation_date < $expense_end_date) {
+            $expense_end_date = $resignation_date;
         }
         
         $expense_days_used = (strtotime($expense_end_date) - strtotime($expense_date_str)) / (60 * 60 * 24) + 1;
@@ -160,6 +168,12 @@ try {
                 $expense_end_date = $current_date;
             } else {
                 $expense_end_date = date('Y-m-t', strtotime($expense_date_str));
+            }
+            
+            // Cap at resignation_date
+            $resignation_date = $employee_balances[$employee_id]['resignation_date'];
+            if ($resignation_date && $resignation_date < $expense_end_date) {
+                $expense_end_date = $resignation_date;
             }
             
             $expense_days_used = (strtotime($expense_end_date) - strtotime($expense_date_str)) / (60 * 60 * 24) + 1;
