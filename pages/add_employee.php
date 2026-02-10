@@ -142,6 +142,7 @@ if (!hasPermission('view_employee')) {
                     <th>موچە (د.ع)</th>
                     <th>بەخشیش (د.ع)</th>
                     <th>بەرواری دەستبەکار بوون</th>
+                    <th>بەرواری دەستلەکارکێشان</th>
                     <th>دۆخ</th>
                     <th>کردارەکان</th>
                 </tr>
@@ -212,6 +213,10 @@ if (!hasPermission('view_employee')) {
             <label for="employee_join_date" class="form-label">بەرواری دەستبەکار بوون</label>
             <input type="date" class="form-control" id="employee_join_date" name="join_date" value="<?php echo date('Y-m-d'); ?>">
           </div>
+          <div class="mb-3">
+            <label for="employee_resignation_date" class="form-label">بەرواری دەستلەکارکێشان</label>
+            <input type="date" class="form-control" id="employee_resignation_date" name="resignation_date">
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
@@ -281,6 +286,10 @@ if (!hasPermission('view_employee')) {
           <div class="mb-3">
             <label for="edit_employee_join_date" class="form-label">بەرواری دەستبەکار بوون</label>
             <input type="date" class="form-control" id="edit_employee_join_date" name="join_date">
+          </div>
+          <div class="mb-3">
+            <label for="edit_employee_resignation_date" class="form-label">بەرواری دەستلەکارکێشان</label>
+            <input type="date" class="form-control" id="edit_employee_resignation_date" name="resignation_date">
           </div>
         </div>
         <div class="modal-footer">

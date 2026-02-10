@@ -135,7 +135,20 @@ try {
         error_log('Error checking join_date column: ' . $e->getMessage());
     }
 
+    $resignationDateExists = false;
+    try {
+        $checkColumns = $pdo->query("SHOW COLUMNS FROM employees LIKE 'resignation_date'");
+        $resignationDateExists = $checkColumns->rowCount() > 0;
+        error_log("Resignation Date column exists: " . ($resignationDateExists ? 'YES' : 'NO'));
+    } catch (Exception $e) {
+        error_log('Error checking resignation_date column: ' . $e->getMessage());
+    }
+
     $join_date = $_POST['join_date'] ?? null;
+    $resignation_date = $_POST['resignation_date'] ?? null;
+    if ($resignation_date === '') {
+        $resignation_date = null;
+    }
     
     // Build UPDATE query based on column existence
     $query = 'UPDATE employees SET name=?, mobile=?, role=?, salary=?';
@@ -152,6 +165,10 @@ try {
     if ($joinDateExists) {
         $query .= ', join_date=?';
         $params[] = $join_date;
+    }
+    if ($resignationDateExists) {
+        $query .= ', resignation_date=?';
+        $params[] = $resignation_date;
     }
 
     $query .= ' WHERE id=?';

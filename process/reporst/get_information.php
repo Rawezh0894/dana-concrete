@@ -945,12 +945,23 @@ try {
         $join_date_exists = $check_join->rowCount() > 0;
     } catch (Exception $e) {}
 
+    // Check if resignation_date column exists
+    $resignation_date_exists = false;
+    try {
+        $check_resign = $pdo->query("SHOW COLUMNS FROM employees LIKE 'resignation_date'");
+        $resignation_date_exists = $check_resign->rowCount() > 0;
+    } catch (Exception $e) {}
+
     $col_emp = "salary, COALESCE(bonus, 0) as bonus";
     if ($join_date_exists) $col_emp .= ", join_date";
     else $col_emp .= ", NULL as join_date";
+    
+    if ($resignation_date_exists) $col_emp .= ", resignation_date";
+    else $col_emp .= ", NULL as resignation_date";
 
     $sql_emp = "SELECT $col_emp FROM employees";
-    if ($status_exists) $sql_emp .= " WHERE status = 'active'";
+    // Include both active and resigned employees for accurate calculation
+    if ($status_exists) $sql_emp .= " WHERE status IN ('active', 'resigned')";
     
     $stmt = $pdo->query($sql_emp);
     $employees_for_stats = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -976,6 +987,13 @@ try {
         }
         
         $calc_period_end = $period_end;
+        
+        // If employee has a resignation date, cap the calculation at that date
+        $resignation_date = $emp['resignation_date'];
+        if ($resignation_date && $resignation_date < $calc_period_end) {
+            $calc_period_end = $resignation_date;
+        }
+
         if ($today < $calc_period_end) {
             $calc_period_end = $today;
         }

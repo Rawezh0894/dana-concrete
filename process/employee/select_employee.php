@@ -51,6 +51,20 @@ try {
     } catch (Exception $e) {
         error_log('Error checking join_date column: ' . $e->getMessage());
     }
+
+    $resignationDateExists = false;
+    try {
+        $checkColumns = $pdo->query("SHOW COLUMNS FROM employees LIKE 'resignation_date'");
+        $resignationDateExists = $checkColumns->rowCount() > 0;
+        
+        // Auto-migration: if it doesn't exist, try to add it
+        if (!$resignationDateExists) {
+            $pdo->exec("ALTER TABLE employees ADD COLUMN resignation_date DATE DEFAULT NULL");
+            $resignationDateExists = true;
+        }
+    } catch (Exception $e) {
+        error_log('Error checking/adding resignation_date column: ' . $e->getMessage());
+    }
     
     // Build query based on column existence
     $columns = 'id, name, mobile, role, salary';
@@ -71,6 +85,12 @@ try {
         $columns .= ', join_date';
     } else {
         $columns .= ', NULL as join_date';
+    }
+
+    if ($resignationDateExists) {
+        $columns .= ', resignation_date';
+    } else {
+        $columns .= ', NULL as resignation_date';
     }
     
     $query = "SELECT $columns FROM employees ORDER BY id DESC";

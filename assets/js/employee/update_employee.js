@@ -9,6 +9,7 @@ $(function () {
         let bonus = $(this).data('bonus') || 0;
         let status = $(this).data('status') || 'active';
         const join_date = $(this).data('join_date');
+        const resignation_date = $(this).data('resignation_date');
 
         // Clean salary and bonus values
         salary = String(salary).replace(/[^\d.]/g, '');
@@ -48,6 +49,7 @@ $(function () {
         $('#edit_employee_bonus').val(bonus);
         $('#edit_employee_status').val(status);
         $('#edit_employee_join_date').val(join_date);
+        $('#edit_employee_resignation_date').val(resignation_date);
 
         // Trigger change event to ensure dropdown updates
         $('#edit_employee_status').trigger('change');
