@@ -847,7 +847,7 @@ try {
     ];
 
     try {
-        // First try getting filtered average
+        // Calculate average price from 2026-01-01 onwards, as requested
         $avg_query = "
             SELECT 
                 m.name,
@@ -855,7 +855,7 @@ try {
                 SUM(p.kg) as total_kg
             FROM purchases p
             JOIN materials m ON p.material_id = m.id
-            WHERE p.kg > 0 $date_condition_date
+            WHERE p.kg > 0 AND p.date >= '2026-01-01'
             GROUP BY m.name
         ";
         $stmt_avg = $pdo->query($avg_query);
@@ -871,39 +871,6 @@ try {
                 // بۆ گاز: نرخ بۆ لیتر (نەوەک تۆن)
                 $price_per_liter = ($row['total_kg'] > 0) ? ($row['total_usd'] / $row['total_kg']) : 0;
                 $material_prices['gas'] = $price_per_liter;
-            }
-        }
-
-        // Fallback for any material that still has 0 price (if no purchases in filtered period)
-        $has_zero = false;
-        foreach($material_prices as $p) { if($p == 0) { $has_zero = true; break; } }
-        
-        if ($has_zero) {
-             $global_avg_query = "
-                SELECT 
-                    m.name,
-                    SUM(CASE WHEN p.type = 'دۆلار' THEN p.price ELSE p.amount_iqd / NULLIF(p.exchange_rate / 100, 0) END) as total_usd,
-                    SUM(p.kg) as total_kg
-                FROM purchases p
-                JOIN materials m ON p.material_id = m.id
-                WHERE p.kg > 0 AND p.date >= '2026-01-01'
-                GROUP BY m.name
-            ";
-            $stmt_global = $pdo->query($global_avg_query);
-            while ($row = $stmt_global->fetch()) {
-                $m_name = $row['name'];
-                $price_per_ton = ($row['total_kg'] > 0) ? ($row['total_usd'] / $row['total_kg'] * 1000) : 0;
-                
-                if ($m_name == 'لمی کەسارە' && $material_prices['black_sand'] == 0) $material_prices['black_sand'] = $price_per_ton;
-                elseif ($m_name == 'لمی ڕەش' && $material_prices['brown_sand'] == 0) $material_prices['brown_sand'] = $price_per_ton;
-                elseif ($m_name == 'چەو' && $material_prices['gravel'] == 0) $material_prices['gravel'] = $price_per_ton;
-                elseif ($m_name == 'چیمەنتۆ' && $material_prices['cement'] == 0) $material_prices['cement'] = $price_per_ton;
-                elseif ($m_name == 'دەرمان' && $material_prices['additive'] == 0) $material_prices['additive'] = $price_per_ton;
-                elseif ($m_name == 'گاز' && $material_prices['gas'] == 0) {
-                    // بۆ گاز: نرخ بۆ لیتر (نەوەک تۆن)
-                    $price_per_liter = ($row['total_kg'] > 0) ? ($row['total_usd'] / $row['total_kg']) : 0;
-                    $material_prices['gas'] = $price_per_liter;
-                }
             }
         }
     } catch (Exception $e) {
