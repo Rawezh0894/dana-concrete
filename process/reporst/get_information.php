@@ -1236,8 +1236,9 @@ try {
         } catch (Exception $e) {}
         
         $emp_sql = "SELECT id FROM employees WHERE role LIKE '%شۆفێری میکسەر%'";
+        // Include both active and resigned drivers for accurate historical calculation
         if ($status_exists) {
-            $emp_sql .= " AND status = 'active'";
+            $emp_sql .= " AND status IN ('active', 'resigned')";
         }
         
         $stmt = $pdo->query($emp_sql);
@@ -1255,10 +1256,13 @@ try {
         try {
             // Use COALESCE to fallback to created_at date if date column is NULL (same as get_expenses_summary.php)
             // Only count mixer_driver_id (not pump_driver_id) - same as get_expenses_summary.php
+            // Join with employees to respect resignation_date
             $overtime_sql = "SELECT COUNT(*) as count 
-                           FROM concrete_receipts 
-                           WHERE mixer_driver_id IN ($placeholders)
-                           AND COALESCE(`date`, DATE(created_at)) BETWEEN ? AND ?";
+                           FROM concrete_receipts cr
+                           JOIN employees e ON cr.mixer_driver_id = e.id
+                           WHERE cr.mixer_driver_id IN ($placeholders)
+                           AND COALESCE(cr.`date`, DATE(cr.created_at)) BETWEEN ? AND ?
+                           AND (e.resignation_date IS NULL OR COALESCE(cr.`date`, DATE(cr.created_at)) <= e.resignation_date)";
             
             $overtime_params = array_merge($mixer_driver_ids, $caravan_hisabi_date_params);
             
@@ -1273,10 +1277,13 @@ try {
             error_log("Error calculating caravan hisabi: " . $e->getMessage());
             // Fallback: try with created_at only (same as get_expenses_summary.php)
             try {
+                // Fallback: try with created_at only and respect resignation_date
                 $overtime_sql = "SELECT COUNT(*) as count 
-                               FROM concrete_receipts 
-                               WHERE mixer_driver_id IN ($placeholders)
-                               AND created_at BETWEEN ? AND ?";
+                               FROM concrete_receipts cr
+                               JOIN employees e ON cr.mixer_driver_id = e.id
+                               WHERE cr.mixer_driver_id IN ($placeholders)
+                               AND cr.created_at BETWEEN ? AND ?
+                               AND (e.resignation_date IS NULL OR DATE(cr.created_at) <= e.resignation_date)";
                 
                 $date_start = $caravan_hisabi_date_params[0] . ' 00:00:00';
                 $date_end = (count($caravan_hisabi_date_params) > 1 ? $caravan_hisabi_date_params[1] : $caravan_hisabi_date_params[0]) . ' 23:59:59';
