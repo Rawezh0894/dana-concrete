@@ -49,12 +49,13 @@ try {
     $recipients_stmt->execute(['customer_id' => $customer_id]);
     $recipients = $recipients_stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Sanitize option lists (these values may be rendered into the DOM by JS)
+    // Do not sanitize option lists here because they are used as filter values
+    // Sanitizing would convert characters like '&' to '&amp;', breaking the SQL filter
     $locations = array_map(function($row) {
-        return ['location' => sanitize_text($row['location'] ?? '')];
+        return ['location' => $row['location'] ?? ''];
     }, $locations ?: []);
     $recipients = array_map(function($row) {
-        return ['recipient' => sanitize_text($row['recipient'] ?? '')];
+        return ['recipient' => $row['recipient'] ?? ''];
     }, $recipients ?: []);
 } catch (Exception $e) {
     error_log("Database error in select_sale.php: " . $e->getMessage());
