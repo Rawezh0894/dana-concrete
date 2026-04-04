@@ -704,7 +704,7 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
            سلێمانی، تاسڵوجە - نزیک بازگەی کەڵەوانان
             <br>
             <i class="fa fa-phone" style="margin-left: 0.5rem; color: #6c757d;"></i>
-            1454 144 0773
+            5414 144 0773
             <i class="fa fa-phone" style="margin-left: 1rem; color: #6c757d;"></i>
             0101 995 0772
             <i class="fa fa-phone" style="margin-left: 1rem; color: #6c757d;"></i>
