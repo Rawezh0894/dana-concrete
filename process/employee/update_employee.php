@@ -96,7 +96,7 @@ try {
     }
 
     // Check if employee exists
-    $checkStmt = $pdo->prepare('SELECT id, name FROM employees WHERE id = ?');
+    $checkStmt = $pdo->prepare('SELECT id, name, salary, COALESCE(bonus, 0) as bonus FROM employees WHERE id = ?');
     $checkStmt->execute([$id]);
     $existingEmployee = $checkStmt->fetch(PDO::FETCH_ASSOC);
     
@@ -105,6 +105,10 @@ try {
         echo json_encode(['success' => false, 'message' => 'کارمەند نەدۆزرایەوە!']);
         exit;
     }
+
+    $oldSalary = floatval($existingEmployee['salary']);
+    $oldBonus = floatval($existingEmployee['bonus']);
+
 
     // Check if bonus, status, and join_date columns exist
     $bonusExists = false;
@@ -181,6 +185,17 @@ try {
     $result = $stmt->execute($params);
     
     if ($result) {
+        // Record change in salary history if salary or bonus was modified
+        if (floatval($salary) != $oldSalary || floatval($bonus) != $oldBonus) {
+            try {
+                $historyStmt = $pdo->prepare('INSERT INTO employee_salary_history (employee_id, salary, bonus, effective_date) VALUES (?, ?, ?, CURDATE())');
+                $historyStmt->execute([$id, $salary, $bonus]);
+            } catch (Exception $e) {
+                // If the table doesn't exist yet, we just log and continue
+                error_log('Error recording salary history: ' . $e->getMessage());
+            }
+        }
+
         error_log('Employee successfully updated: ID=' . $id . ', Name=' . $name . ', Bonus=' . $bonus);
         echo json_encode(['success' => true, 'message' => 'کارمەند نوێکرایەوە!']);
     } else {

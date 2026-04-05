@@ -84,10 +84,27 @@ try {
     
     $today = date('Y-m-d');
     
+    // Prepare statement for historical salary lookup
+    $histStmt = $pdo->prepare("SELECT salary, bonus FROM employee_salary_history 
+                               WHERE employee_id = ? AND effective_date <= ? 
+                               ORDER BY effective_date DESC, id DESC LIMIT 1");
+
     foreach ($employees_data as $emp) {
         $employee_ids[] = $emp['id'];
-        $emp_salary = floatval($emp['salary']);
-        $emp_bonus = floatval($emp['bonus']);
+        
+        // Try to get historical salary for this period
+        $histStmt->execute([$emp['id'], $period_end]);
+        $history = $histStmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($history) {
+            $emp_salary = floatval($history['salary']);
+            $emp_bonus = floatval($history['bonus']);
+        } else {
+            // Fallback to current salary if no history found (though seeding should prevent this)
+            $emp_salary = floatval($emp['salary']);
+            $emp_bonus = floatval($emp['bonus']);
+        }
+
         $join_date = $emp['join_date'];
         
         // Calculate work days for THIS employee in THIS period

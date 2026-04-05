@@ -177,6 +177,16 @@ try {
     $result = $stmt->execute($params);
     
     if ($result) {
+        $new_id = $pdo->lastInsertId();
+        
+        // Record initial salary in history table
+        try {
+            $historyStmt = $pdo->prepare('INSERT INTO employee_salary_history (employee_id, salary, bonus, effective_date) VALUES (?, ?, ?, ?)');
+            $historyStmt->execute([$new_id, $salary, $bonus, $join_date]);
+        } catch (Exception $e) {
+            error_log('Error recording initial salary history: ' . $e->getMessage());
+        }
+
         error_log('Employee successfully added: Name=' . $name . ', Mobile=' . $mobile . ', Role=' . $role . ', Bonus=' . $bonus);
         echo json_encode(['success' => true, 'message' => 'کارمەند بەسەرکەوتوویی زیادکرا!']);
     } else {

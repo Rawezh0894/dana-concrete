@@ -41,12 +41,29 @@ try {
         exit;
     }
     
-    $monthly_salary = floatval($employee['salary']);
-    $monthly_bonus = floatval($employee['bonus']);
+    $current_salary = floatval($employee['salary']);
+    $current_bonus = floatval($employee['bonus']);
     $join_date = $employee['join_date'];
     
-    // Calculate daily balance for current month
+    // Calculate for a specific month
     $month_to_calculate = $month ?: date('Y-m');
+    $last_day_of_month = date('Y-m-t', strtotime($month_to_calculate . '-01'));
+
+    // Try to get historical salary for this period
+    $histStmt = $pdo->prepare("SELECT salary, bonus FROM employee_salary_history 
+                               WHERE employee_id = ? AND effective_date <= ? 
+                               ORDER BY effective_date DESC, id DESC LIMIT 1");
+    $histStmt->execute([$employee_id, $last_day_of_month]);
+    $history = $histStmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($history) {
+        $monthly_salary = floatval($history['salary']);
+        $monthly_bonus = floatval($history['bonus']);
+    } else {
+        $monthly_salary = $current_salary;
+        $monthly_bonus = $current_bonus;
+    }
+
     $expense_date = $month_to_calculate . '-01'; // First of month
     $year = intval(substr($month_to_calculate, 0, 4));
     $month_num = intval(substr($month_to_calculate, 5, 2));
