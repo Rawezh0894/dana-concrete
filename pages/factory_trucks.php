@@ -169,6 +169,7 @@ $trucks = $pdo->query("SELECT * FROM factory_trucks ORDER BY id DESC")->fetchAll
                             <th>ناوى بارهەڵگر</th>
                             <th>ژمارەی تەبلێ</th>
                             <th>ناوی شۆفێر</th>
+                            <th>پاداشتی گەشت (IQD)</th>
                             <th>حاڵەت</th>
                             <th class="text-center">کردارەکان</th>
                         </tr>
@@ -192,6 +193,7 @@ $trucks = $pdo->query("SELECT * FROM factory_trucks ORDER BY id DESC")->fetchAll
                             </td>
                             <td><span class="badge bg-light text-dark border p-2"><?= htmlspecialchars($truck['plate_number'] ?: '---') ?></span></td>
                             <td><?= htmlspecialchars($truck['driver_name'] ?: 'دیاری نەکراوە') ?></td>
+                            <td><span class="fw-bold text-success"><?= number_format($truck['commission_per_trip'] ?? 20000) ?></span></td>
                             <td>
                                 <?php if($truck['is_active']): ?>
                                     <span class="status-badge bg-success bg-opacity-10 text-success">چالاک</span>
@@ -243,6 +245,11 @@ $trucks = $pdo->query("SELECT * FROM factory_trucks ORDER BY id DESC")->fetchAll
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">ناوی شۆفێر</label>
                             <input type="text" name="driver_name" class="form-control" placeholder="ناوی شۆفێر">
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label fw-bold">پاداشتی هەر گەشتێک (IQD)</label>
+                            <input type="number" name="commission_per_trip" class="form-control" value="20000" placeholder="بڕی پارە بە دینار">
+                            <small class="text-muted">ئەم بڕە بۆ هەر گەشتێک لە قازانجی تڕێلەکە کەمدەکرێتەوە.</small>
                         </div>
                     </div>
                 </div>

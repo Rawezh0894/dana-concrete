@@ -20,6 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $truck_name = trim($_POST['truck_name'] ?? '');
     $plate_number = trim($_POST['plate_number'] ?? '');
     $driver_name = trim($_POST['driver_name'] ?? '');
+    $commission_per_trip = (float)($_POST['commission_per_trip'] ?? 20000);
 
     if (empty($truck_name)) {
         echo json_encode(['success' => false, 'msg' => 'ناوی بارهەڵگر پێویستە']);
@@ -35,8 +36,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
 
-        $stmt = $pdo->prepare("INSERT INTO factory_trucks (truck_name, plate_number, driver_name, is_active) VALUES (?, ?, ?, 1)");
-        if ($stmt->execute([$truck_name, $plate_number, $driver_name])) {
+        $stmt = $pdo->prepare("INSERT INTO factory_trucks (truck_name, plate_number, driver_name, commission_per_trip, is_active) VALUES (?, ?, ?, ?, 1)");
+        if ($stmt->execute([$truck_name, $plate_number, $driver_name, $commission_per_trip])) {
             echo json_encode(['success' => true]);
         } else {
             echo json_encode(['success' => false, 'msg' => 'هەڵە لە پاشەکەوتکردن']);

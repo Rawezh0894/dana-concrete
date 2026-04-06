@@ -44,7 +44,8 @@ $sql = "SELECT
             -- Trip Count
             (SELECT COUNT(*) FROM purchases p 
              WHERE p.factory_truck_id = ft.id 
-             AND MONTH(p.date) = ? AND YEAR(p.date) = ?) as trip_count
+             AND MONTH(p.date) = ? AND YEAR(p.date) = ?) as trip_count,
+            ft.commission_per_trip
         FROM factory_trucks ft 
         ORDER BY ft.truck_name ASC";
 
@@ -149,7 +150,9 @@ $fleet_expenses_total_usd = 0;
             // Calculate Fleet-Wide stats first
             foreach($reports as $row) {
                 $fleet_revenue_total_usd += calcTotalUsd($row['total_revenue_usd'], $row['total_revenue_iqd'], $current_rate);
-                $fleet_expenses_total_usd += calcTotalUsd($row['total_expenses_usd'], $row['total_expenses_iqd'], $current_rate);
+                
+                $commission_total_iqd = (int)$row['trip_count'] * (float)$row['commission_per_trip'];
+                $fleet_expenses_total_usd += calcTotalUsd($row['total_expenses_usd'], $row['total_expenses_iqd'] + $commission_total_iqd, $current_rate);
             }
             $fleet_net_total = $fleet_revenue_total_usd - $fleet_expenses_total_usd;
             ?>
@@ -181,7 +184,10 @@ $fleet_expenses_total_usd = 0;
             
             <?php foreach($reports as $r): 
                 $rev_total = calcTotalUsd($r['total_revenue_usd'], $r['total_revenue_iqd'], $current_rate);
-                $exp_total = calcTotalUsd($r['total_expenses_usd'], $r['total_expenses_iqd'], $current_rate);
+                
+                $commission_iqd = (int)$r['trip_count'] * (float)$r['commission_per_trip'];
+                $exp_total = calcTotalUsd($r['total_expenses_usd'], $r['total_expenses_iqd'] + $commission_iqd, $current_rate);
+                
                 $net = $rev_total - $exp_total;
             ?>
             <div class="truck-row shadow-sm">
@@ -201,6 +207,7 @@ $fleet_expenses_total_usd = 0;
                         <div class="text-muted small mb-1">خەرجی (Expenses)</div>
                         <div class="fw-bold text-danger">$<?= number_format($r['total_expenses_usd'], 2) ?></div>
                         <div class="small text-muted"><?= number_format($r['total_expenses_iqd']) ?> دینار</div>
+                        <div class="equivalent-label text-warning mt-1">پاداشت: <?= number_format($commission_iqd) ?> د.ع</div>
                         <div class="equivalent-label">کۆی هاوتا: $<?= number_format($exp_total, 2) ?></div>
                     </div>
                     <div class="col-md-3 text-end border-start">
@@ -208,7 +215,10 @@ $fleet_expenses_total_usd = 0;
                         <div class="fs-4 fw-bold <?= $net >= 0 ? 'text-success' : 'text-danger' ?>">
                             $<?= number_format($net, 2) ?>
                         </div>
-                        <div class="small <?= $net >= 0 ? 'text-success' : 'text-danger' ?>">وەک دۆلار</div>
+                        <div class="small <?= $net >= 0 ? 'text-success' : 'text-danger' ?> mb-2">وەک دۆلار</div>
+                        <a href="truck_monthly_report_print.php?id=<?= $r['id'] ?>&month=<?= $month ?>&year=<?= $year ?>" target="_blank" class="btn btn-outline-dark btn-sm rounded-pill mt-2">
+                            <i class="fas fa-print me-1"></i> چاپی ڕاپۆرت
+                        </a>
                     </div>
                 </div>
             </div>
