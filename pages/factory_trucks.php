@@ -203,7 +203,9 @@ $trucks = $pdo->query("SELECT * FROM factory_trucks ORDER BY id DESC")->fetchAll
                             </td>
                             <td>
                                 <div class="d-flex justify-content-center gap-2">
-                                    <button class="btn btn-sm btn-outline-info rounded-circle" data-bs-toggle="tooltip" title="دەستکاری">
+                                    <button class="btn btn-sm btn-outline-info rounded-circle" 
+                                            onclick="openEditModal(<?= htmlspecialchars(json_encode($truck)) ?>)" 
+                                            data-bs-toggle="tooltip" title="دەستکاری">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                     <button class="btn btn-sm btn-outline-danger rounded-circle" onclick="deleteTruck(<?= $truck['id'] ?>)" data-bs-toggle="tooltip" title="سڕینەوە">
@@ -264,13 +266,96 @@ $trucks = $pdo->query("SELECT * FROM factory_trucks ORDER BY id DESC")->fetchAll
     </div>
 </div>
 
-<!-- JS Dependencies -->
+<!-- Edit Truck Modal -->
+<div class="modal fade" id="editTruckModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-info">
+                <h5 class="modal-title fw-bold text-white">دەستکاری بارهەڵگر</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editTruckForm">
+                <input type="hidden" name="id" id="edit_truck_id">
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">ناوى بارهەڵگر</label>
+                        <input type="text" name="truck_name" id="edit_truck_name" class="form-control" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">ژمارەی تەبلێ</label>
+                            <input type="text" name="plate_number" id="edit_plate_number" class="form-control">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">ناوی شۆفێر</label>
+                            <input type="text" name="driver_name" id="edit_driver_name" class="form-control">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">پاداشتی هەر گەشتێک (IQD)</label>
+                        <input type="number" name="commission_per_trip" id="edit_commission_per_trip" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">حاڵەت</label>
+                        <select name="is_active" id="edit_is_active" class="form-select">
+                            <option value="1">چالاک</option>
+                            <option value="0">ڕاگیراو</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">پاشگەزبوونەوە</button>
+                    <button type="submit" class="btn btn-info rounded-pill px-5 fw-bold text-white" id="updateBtn">
+                        <i class="fas fa-save me-2"></i> نوێکردنەوە
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    // Handle form submission
+    // Open Edit Modal
+    function openEditModal(truck) {
+        $('#edit_truck_id').val(truck.id);
+        $('#edit_truck_name').val(truck.truck_name);
+        $('#edit_plate_number').val(truck.plate_number);
+        $('#edit_driver_name').val(truck.driver_name);
+        $('#edit_commission_per_trip').val(truck.commission_per_trip);
+        $('#edit_is_active').val(truck.is_active);
+        $('#editTruckModal').modal('show');
+    }
+
+    // Handle update submission
+    $('#editTruckForm').on('submit', function(e) {
+        e.preventDefault();
+        const updateBtn = $('#updateBtn');
+        updateBtn.prop('disabled', true).html('نوێکردنەوە...');
+
+        $.ajax({
+            url: '../process/factory_trucks/update.php',
+            method: 'POST',
+            data: $(this).serialize(),
+            dataType: 'json',
+            success: function(res) {
+                if(res.success) {
+                    Swal.fire('سەرکەوتوو', 'زانیارییەکان نوێکرانەوە', 'success').then(() => location.reload());
+                } else {
+                    Swal.fire('هەڵە', res.msg, 'error');
+                    updateBtn.prop('disabled', false).html('نوێکردنەوە');
+                }
+            },
+            error: function() {
+                Swal.fire('هەڵە', 'پەیوەندی لەکار کەوت', 'error');
+                updateBtn.prop('disabled', false).html('نوێکردنەوە');
+            }
+        });
+    });
+
+    // Handle add truck submission
     $('#addTruckForm').on('submit', function(e) {
         e.preventDefault();
         const saveBtn = $('#saveBtn');
