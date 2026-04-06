@@ -36,7 +36,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $remaining_iqd = $_POST['remaining_iqd'] ?? 0;
     $remaining_usd = $_POST['remaining_usd'] ?? 0;
     $payment_type = $_POST['payment_type'] ?? null;
-    $amount_iqd = $_POST['amount_iqd'] ?? 0;
+    $factory_truck_id = !empty($_POST['factory_truck_id']) ? $_POST['factory_truck_id'] : null;
+
     // Validate required fields (accept 0 as valid)
     $fields = [
         'company_id' => $company_id,
@@ -104,9 +105,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $location_stmt->execute([$location_id]);
     $location = $location_stmt->fetchColumn();
     try {
-        $stmt = $pdo->prepare("INSERT INTO purchases (date, invoice_number, driver, location, material_id, amount_iqd, kg, price, payment_type, exchange_rate, company_id, type, paid_usd, paid_iqd, remaining_usd, remaining_iqd, bin_id, price_per_kg_iqd, price_per_kg_usd) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt = $pdo->prepare("INSERT INTO purchases (date, invoice_number, driver, location, material_id, amount_iqd, kg, price, payment_type, exchange_rate, company_id, type, paid_usd, paid_iqd, remaining_usd, remaining_iqd, bin_id, price_per_kg_iqd, price_per_kg_usd, factory_truck_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         $ok = $stmt->execute([
-            $date, $invoice_number, $driver, $location, $material_id, $amount_iqd, $kg, $price, $payment_type, $exchange_rate, $company_id, $type, $paid_usd, $paid_iqd, $remaining_usd, $remaining_iqd, $bin_id, $price_per_kg_iqd, $price_per_kg_usd
+            $date, $invoice_number, $driver, $location, $material_id, $amount_iqd, $kg, $price, $payment_type, $exchange_rate, $company_id, $type, $paid_usd, $paid_iqd, $remaining_usd, $remaining_iqd, $bin_id, $price_per_kg_iqd, $price_per_kg_usd, $factory_truck_id
         ]);
         if ($ok) {
             // Update company debt
