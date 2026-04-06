@@ -333,18 +333,18 @@ $net_profit_iqd = $total_material_value_iqd - ($total_exp_iqd + $total_commissio
         <thead>
             <tr>
                 <th width="15%">ڕێککەوت</th>
-                <th>جۆری خەرجی</th>
+                <th>پسوڵە</th>
                 <th width="20%">بڕ (IQD)</th>
-                <th width="30%">تێبینی</th>
+                <th width="35%">تێبینی / وردەکاری</th>
             </tr>
         </thead>
         <tbody>
             <?php foreach($expenses as $exp): 
-                $v = (float)$exp['amount_iqd'] + ((float)$e['amount_usd'] * ($current_rate/100));
+                $v = (float)$exp['amount_iqd'] + ((float)$exp['amount_usd'] * ($current_rate/100));
             ?>
             <tr>
                 <td><?= $exp['date'] ?></td>
-                <td><?= htmlspecialchars($exp['expense_type']) ?></td>
+                <td><?= htmlspecialchars($exp['invoice_number'] ?: '---') ?></td>
                 <td style="font-weight: bold;"><?= number_format($v) ?> د.ع</td>
                 <td><?= htmlspecialchars($exp['note']) ?></td>
             </tr>
