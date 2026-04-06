@@ -36,6 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $remaining_iqd = $_POST['remaining_iqd'] ?? 0;
     $remaining_usd = $_POST['remaining_usd'] ?? 0;
     $payment_type = $_POST['payment_type'] ?? null;
+    $amount_iqd = $_POST['amount_iqd'] ?? 0;
     $factory_truck_id = !empty($_POST['factory_truck_id']) ? $_POST['factory_truck_id'] : null;
 
     // Validate required fields (accept 0 as valid)
