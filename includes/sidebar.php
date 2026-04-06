@@ -147,6 +147,16 @@ $logout_pages = ['logout.php'];
         <li><a href="../pages/asset_depreciation.php" class="sidebar-link<?php if($current_page == 'asset_depreciation.php') echo ' active'; ?>"><i class="bi bi-graph-down-arrow me-2"></i>داخورانی ئامێرەکان</a></li>
       </ul>
     </li>
+    <li class="sidebar-group">
+      <button class="sidebar-group-toggle d-flex align-items-center w-100" data-bs-toggle="collapse" data-bs-target="#factoryTrucksMenu" aria-expanded="false">
+        <i class="bi bi-truck me-2"></i> تڕێلەکانی کارگە
+      </button>
+      <ul class="collapse sidebar-submenu" id="factoryTrucksMenu">
+        <li><a href="../pages/factory_trucks.php" class="sidebar-link<?php if($current_page == 'factory_trucks.php') echo ' active'; ?>"><i class="bi bi-gear-fill me-2"></i> بەڕێوەبردنی تڕێلە</a></li>
+        <li><a href="../pages/truck_expenses.php" class="sidebar-link<?php if($current_page == 'truck_expenses.php') echo ' active'; ?>"><i class="bi bi-receipt-cutoff me-2"></i> خەرجی تڕێلە</a></li>
+        <li><a href="../pages/truck_report.php" class="sidebar-link<?php if($current_page == 'truck_report.php') echo ' active'; ?>"><i class="bi bi-graph-up-arrow me-2"></i> ڕاپۆرتی قازانج</a></li>
+      </ul>
+    </li>
     <!-- New Koga (Materials) Dropdown -->
     <li class="sidebar-group">
       <button class="sidebar-group-toggle d-flex align-items-center w-100" data-bs-toggle="collapse" data-bs-target="#materialsMenu" aria-expanded="false">
