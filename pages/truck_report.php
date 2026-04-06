@@ -16,10 +16,11 @@ if (!isset($_SESSION['user_id'])) {
 $month = isset($_GET['month']) ? (int)$_GET['month'] : (int)date('m');
 $year = isset($_GET['year']) ? (int)$_GET['year'] : (int)date('Y');
 
-// 1. Fetch current exchange rate from settings to calculate equivalent USD
-$rate_stmt = $pdo->query("SELECT usd_iqd_rate FROM settings LIMIT 1");
+// 1. Fetch current exchange rate from settings table (key-value structure)
+$rate_stmt = $pdo->prepare("SELECT value FROM settings WHERE name = 'usd_iqd_rate' LIMIT 1");
+$rate_stmt->execute();
 $settings = $rate_stmt->fetch(PDO::FETCH_ASSOC);
-$current_rate = (float)($settings['usd_iqd_rate'] ?? 150000); // Default to 150,000 if not set
+$current_rate = (float)($settings['value'] ?? 150000); // Default to 150,000 if not set
 
 // 2. Main Query for Trucks
 $sql = "SELECT 
