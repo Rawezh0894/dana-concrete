@@ -375,6 +375,10 @@ $net_profit_iqd = $total_material_value_iqd - ($total_exp_iqd + $total_commissio
         </div>
     </div>
 
+    <div class="footer-signatures">
+        <div class="sig-box">واژۆی ژمێریاری</div>
+        <div class="sig-box">واژۆی شۆفێر</div>
+        <div class="sig-box">مۆر و واژۆی بەڕێوەبەر</div>
     </div>
 </div>
 
