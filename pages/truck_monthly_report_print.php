@@ -282,7 +282,7 @@ $net_profit_iqd = $total_material_value_iqd - ($total_exp_iqd + $total_commissio
     <div class="header-section">
         <div class="company-info">
             <h1>دانە کۆنکریت</h1>
-            <p>بەرهەمهێنانی کۆنکریتی ئامادەکراو</p>
+            <p>بۆ بەرهەمهێنانی کۆنکرێتی ئاماداکراو</p>
             <p>ڕێککەوتی چاپ: <?= date('Y-m-d') ?></p>
         </div>
         <div class="report-title">ڕاپۆرتی وردەکاری بارهەڵگر</div>
@@ -290,7 +290,7 @@ $net_profit_iqd = $total_material_value_iqd - ($total_exp_iqd + $total_commissio
 
     <div class="truck-meta-grid">
         <div class="meta-item"><span class="meta-label">ناوی تڕێلە:</span><span class="meta-value"><?= htmlspecialchars($truck['truck_name']) ?></span></div>
-        <div class="meta-item"><span class="meta-label">ژمارەی تەبلێ:</span><span class="meta-value"><?= htmlspecialchars($truck['plate_number']) ?></span></div>
+        <div class="meta-item"><span class="meta-label">ژمارەی تابلۆ:</span><span class="meta-value"><?= htmlspecialchars($truck['plate_number']) ?></span></div>
         <div class="meta-item"><span class="meta-label">ناوی شۆفێر:</span><span class="meta-value"><?= htmlspecialchars($truck['driver_name']) ?></span></div>
         <div class="meta-item"><span class="meta-label">ماوەی ڕاپۆرت:</span><span class="meta-value"><?= $month ?> / <?= $year ?></span></div>
     </div>
