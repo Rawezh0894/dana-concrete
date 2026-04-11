@@ -72,6 +72,17 @@ function formatRemainingAmount($row) {
     }
 }
 
+// Helper function to format total price based on currency type
+function formatTotalPrice($row) {
+    if ($row['type'] === 'دۆلار') {
+        $total = $row['price'] ?? 0;
+        return number_format($total, 2);
+    } else {
+        $total = $row['amount_iqd'] ?? 0;
+        return number_format($total, 0);
+    }
+}
+
 // Get data
 $sql = "SELECT 
     c.name AS company_name,
@@ -300,7 +311,7 @@ try {
         if ($export_format === 'csv') {
             // CSV export for detailed data
             echo "\xEF\xBB\xBF"; // UTF-8 BOM
-            echo "شوێن,بەروار,ژ. پسوله,شؤفير,بڕی مەواد,مکان مشتريات,نوع مشتريات,پارەی ماوە\n";
+            echo "شوێن,بەروار,ژ. پسوله,شؤفير,بڕی مەواد,مکان مشتريات,نوع مشتريات,کۆی نرخ,پارەی ماوە\n";
             
             foreach ($data as $index => $row) {
                 echo '"' . ($row['location_name'] ?? '') . '",';
@@ -310,6 +321,7 @@ try {
                 echo number_format($row['kg'] ?? 0, 0) . ',';
                 echo '"' . ($row['company_name'] ?? '') . '",';
                 echo '"' . ($row['material_name'] ?? '') . '",';
+                echo formatTotalPrice($row) . ',';
                 echo formatRemainingAmount($row) . "\n";
             }
         } else {
@@ -340,6 +352,7 @@ try {
         echo '<th>بڕی مەواد</th>'; // Material Amount
         echo '<th>مکان مشتريات</th>'; // Purchase Location (Companies)
         echo '<th>نوع مشتريات</th>'; // Purchase Type
+        echo '<th>کۆی نرخ</th>'; // Total Price
         echo '<th>پارەی ماوە</th>'; // Remaining Amount (leftmost)
         echo '</tr>';
         
@@ -353,6 +366,7 @@ try {
             echo '<td class="number">' . number_format($row['kg'] ?? 0, 0) . '</td>'; // Material Amount in KG
             echo '<td>' . htmlspecialchars($row['company_name'] ?? '') . '</td>'; // Company name (مکان مشتريات)
             echo '<td>' . htmlspecialchars($row['material_name'] ?? '') . '</td>'; // Material name (نوع مشتريات)
+            echo '<td class="number">' . formatTotalPrice($row) . '</td>'; // Total Price
             echo '<td class="number">' . formatRemainingAmount($row) . '</td>'; // Remaining Amount (leftmost)
             echo '</tr>';
         }

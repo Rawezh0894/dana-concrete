@@ -285,18 +285,18 @@ $net_profit_iqd = $total_material_value_iqd - ($total_exp_iqd + $total_commissio
             <p>بۆ بەرهەمهێنانی کۆنکرێتی ئاماداکراو</p>
             <p>ڕێککەوتی چاپ: <?= date('Y-m-d') ?></p>
         </div>
-        <div class="report-title">ڕاپۆرتی وردەکاری بارهەڵگر</div>
+        <div class="report-title">ڕاپۆرتی مانگانەی بارهەڵگر</div>
     </div>
 
     <div class="truck-meta-grid">
         <div class="meta-item"><span class="meta-label">ناوی تڕێلە:</span><span class="meta-value"><?= htmlspecialchars($truck['truck_name']) ?></span></div>
         <div class="meta-item"><span class="meta-label">ژمارەی تابلۆ:</span><span class="meta-value"><?= htmlspecialchars($truck['plate_number']) ?></span></div>
         <div class="meta-item"><span class="meta-label">ناوی شۆفێر:</span><span class="meta-value"><?= htmlspecialchars($truck['driver_name']) ?></span></div>
-        <div class="meta-item"><span class="meta-label">ماوەی ڕاپۆرت:</span><span class="meta-value"><?= $month ?> / <?= $year ?></span></div>
+        <div class="meta-item"><span class="meta-label">بۆ مانگی:</span><span class="meta-value"><?= $month ?> / <?= $year ?></span></div>
     </div>
 
     <div class="section-header">
-        <h2>١. کۆبەندى کاروانەکان ( Trips )</h2>
+        <h2>١. کاروانەکان</h2>
         <div class="line"></div>
     </div>
     <table>
@@ -304,7 +304,7 @@ $net_profit_iqd = $total_material_value_iqd - ($total_exp_iqd + $total_commissio
             <tr>
                 <th>جۆری مەواد</th>
                 <th>شوێن (سەرچاوە)</th>
-                <th>ژمارەی گەشتەکان</th>
+                <th>ژمارەی کاروانەکان</th>
                 <th>کۆی کێش (تەن)</th>
                 <th>کۆی نرخ (IQD)</th>
             </tr>
@@ -320,7 +320,7 @@ $net_profit_iqd = $total_material_value_iqd - ($total_exp_iqd + $total_commissio
             </tr>
             <?php endforeach; ?>
             <?php if(empty($aggregated_trips)): ?>
-            <tr><td colspan="5">هیچ گەشتێک تۆمار نەکراوە</td></tr>
+            <tr><td colspan="5">هیچ کاروانێک تۆمار نەکراوە</td></tr>
             <?php endif; ?>
         </tbody>
     </table>
@@ -350,7 +350,7 @@ $net_profit_iqd = $total_material_value_iqd - ($total_exp_iqd + $total_commissio
             </tr>
             <?php endforeach; ?>
             <tr style="background: #fdfdfd; font-weight: bold;">
-                <td colspan="2">کۆی پاداشتی شۆفێر (کاروان حیسابی)</td>
+                <td colspan="2">کۆی کاروانحیسابی شۆفێر</td>
                 <td><?= number_format($total_commission_iqd) ?> د.ع</td>
                 <td><?= $total_trips ?> کاروان (<?= number_format($commission_per_trip) ?>/گەشت)</td>
             </tr>
@@ -366,11 +366,11 @@ $net_profit_iqd = $total_material_value_iqd - ($total_exp_iqd + $total_commissio
             <span style="font-weight: bold;"><?= number_format($total_material_value_iqd) ?> د.ع</span>
         </div>
         <div class="summary-row">
-            <span>کۆی خەرجییەکان + پاداشتی شۆفێر (Total Costs):</span>
+            <span>کۆی خەرجییەکان + کاروان حیسابی شۆفێر (Total Costs):</span>
             <span style="font-weight: bold;"><?= number_format($total_exp_iqd + $total_commission_iqd) ?> د.ع</span>
         </div>
         <div class="total-profit-row">
-            <span>قازانجی پاکی بارهەڵگر (Net Profit):</span>
+            <span>قازانجی بارهەڵگر (Net Profit):</span>
             <span><?= number_format($net_profit_iqd) ?> د.ع</span>
         </div>
     </div>
