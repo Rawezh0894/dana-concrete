@@ -1054,6 +1054,25 @@ $(document).ready(function() {
     if (!addPurchaseModalEl) return;
 
     let shouldReopenAddPurchase = false;
+    let pendingChildModalEl = null;
+
+    function ensureFocusSink() {
+        let sink = document.getElementById('modalFocusSink');
+        if (!sink) {
+            sink = document.createElement('button');
+            sink.id = 'modalFocusSink';
+            sink.type = 'button';
+            sink.setAttribute('aria-hidden', 'true');
+            sink.style.position = 'fixed';
+            sink.style.left = '-9999px';
+            sink.style.top = '0';
+            sink.style.width = '1px';
+            sink.style.height = '1px';
+            sink.style.opacity = '0';
+            document.body.appendChild(sink);
+        }
+        return sink;
+    }
 
     function cleanupExtraBackdrops() {
         const openModals = document.querySelectorAll('.modal.show').length;
@@ -1074,17 +1093,17 @@ $(document).ready(function() {
         const addPurchaseIsOpen = addPurchaseModalEl.classList.contains('show');
         shouldReopenAddPurchase = addPurchaseIsOpen;
         if (addPurchaseIsOpen) {
-            // Prevent aria-hidden/focus conflict: blur focused element before hiding parent modal
+            // Prevent aria-hidden/focus conflict: move focus outside before hiding parent modal
             const active = document.activeElement;
             if (active && addPurchaseModalEl.contains(active) && typeof active.blur === 'function') {
                 active.blur();
             }
-            document.body.focus();
+            ensureFocusSink().focus();
+            pendingChildModalEl = childModalEl;
             bootstrap.Modal.getOrCreateInstance(addPurchaseModalEl).hide();
+            return;
         }
-        setTimeout(() => {
-            bootstrap.Modal.getOrCreateInstance(childModalEl).show();
-        }, 120);
+        bootstrap.Modal.getOrCreateInstance(childModalEl).show();
     }
 
     // + location button inside Add Purchase modal
@@ -1115,6 +1134,25 @@ $(document).ready(function() {
                 shouldReopenAddPurchase = false;
             }
         });
+    });
+
+    // Always move focus out before hiding Add Purchase modal
+    addPurchaseModalEl.addEventListener('hide.bs.modal', function () {
+        const active = document.activeElement;
+        if (active && addPurchaseModalEl.contains(active)) {
+            if (typeof active.blur === 'function') active.blur();
+            ensureFocusSink().focus();
+        }
+    });
+
+    // If we hid Add Purchase to open child, open child only after hidden completes
+    addPurchaseModalEl.addEventListener('hidden.bs.modal', function () {
+        cleanupExtraBackdrops();
+        if (pendingChildModalEl) {
+            const child = pendingChildModalEl;
+            pendingChildModalEl = null;
+            bootstrap.Modal.getOrCreateInstance(child).show();
+        }
     });
 
     addPurchaseModalEl.addEventListener('hidden.bs.modal', cleanupExtraBackdrops);
@@ -1193,47 +1231,34 @@ function calculateKgFromTotalWeight() {
 
 // Load USD to IQD exchange rate from API
 function loadUsdRate() {
-    // API configuration
-    const apiUrl = 'https://dinarapi.hediworks.site/api/get-price';
-    const apiToken = 'S3gl9SVEkZ1Vvc93cCjsbLLmwDvgzk';
-    const id = '8'; // 100 dollar ID
-    
     $.ajax({
-        url: `${apiUrl}?id=${id}&api_token=${apiToken}`,
+        url: '../process/other_expenses/get_usd_rate.php',
         type: 'GET',
         dataType: 'json',
         timeout: 5000, // 5 seconds timeout
         success: function(response) {
-            console.log('API Response:', response);
-            
-            // Check different possible response formats
             let rate = null;
-            
-            if (response.success && response.data && response.data.price) {
-                rate = response.data.price;
-            } else if (response.value) {
-                rate = response.value;
-            } else if (response.price) {
-                rate = response.price;
-            } else if (response.rate) {
+            if (response && response.success && response.rate) {
                 rate = response.rate;
+            } else if (response && response.default_rate) {
+                rate = response.default_rate;
             }
             
             if (rate && rate > 0) {
                 $('#exchange_rate').val(rate);
-                console.log('USD rate loaded successfully from API:', rate);
+                console.log('USD rate loaded successfully:', rate);
                 // Trigger calculations if needed
                 if (typeof updateAmountsFor === 'function') {
                     updateAmountsFor('');
                 }
             } else {
-                console.warn('Invalid rate from API, using default:', response);
+                console.warn('Invalid rate response, using default:', response);
                 // Use default value 141000
                 $('#exchange_rate').val(141000);
             }
         },
-        error: function(xhr, status, error) {
-            console.warn('Error loading USD rate from API:', error, '- Using default value 141000');
+        error: function() {
+            console.warn('Error loading USD rate, using default value 141000');
             // Use default value 141000 if API fails
             $('#exchange_rate').val(141000);
         }
@@ -1242,30 +1267,17 @@ function loadUsdRate() {
 
 // Load USD to IQD exchange rate from API for edit modal
 function loadEditUsdRate() {
-    // API configuration
-    const apiUrl = 'https://dinarapi.hediworks.site/api/get-price';
-    const apiToken = 'S3gl9SVEkZ1Vvc93cCjsbLLmwDvgzk';
-    const id = '8'; // 100 dollar ID
-    
     $.ajax({
-        url: `${apiUrl}?id=${id}&api_token=${apiToken}`,
+        url: '../process/other_expenses/get_usd_rate.php',
         type: 'GET',
         dataType: 'json',
         timeout: 5000, // 5 seconds timeout
         success: function(response) {
-            console.log('API Response for Edit:', response);
-            
-            // Check different possible response formats
             let rate = null;
-            
-            if (response.success && response.data && response.data.price) {
-                rate = response.data.price;
-            } else if (response.value) {
-                rate = response.value;
-            } else if (response.price) {
-                rate = response.price;
-            } else if (response.rate) {
+            if (response && response.success && response.rate) {
                 rate = response.rate;
+            } else if (response && response.default_rate) {
+                rate = response.default_rate;
             }
             
             if (rate && rate > 0) {
@@ -1273,14 +1285,14 @@ function loadEditUsdRate() {
                 const currentValue = $('#edit_exchange_rate').val();
                 if (!currentValue || currentValue === '0' || currentValue === '141000') {
                     $('#edit_exchange_rate').val(rate);
-                    console.log('USD rate loaded successfully from API for edit:', rate);
+                    console.log('USD rate loaded successfully for edit:', rate);
                     // Trigger calculations if needed
                     if (typeof updateAmountsFor === 'function') {
                         updateAmountsFor('edit_');
                     }
                 }
             } else {
-                console.warn('Invalid rate from API for edit, using default:', response);
+                console.warn('Invalid rate response for edit, using default:', response);
                 // Use default value 141000 only if field is empty
                 const currentValue = $('#edit_exchange_rate').val();
                 if (!currentValue || currentValue === '0') {
@@ -1288,8 +1300,8 @@ function loadEditUsdRate() {
                 }
             }
         },
-        error: function(xhr, status, error) {
-            console.warn('Error loading USD rate from API for edit:', error, '- Using default value 141000');
+        error: function() {
+            console.warn('Error loading USD rate for edit, using default value 141000');
             // Use default value 141000 if API fails and field is empty
             const currentValue = $('#edit_exchange_rate').val();
             if (!currentValue || currentValue === '0') {
