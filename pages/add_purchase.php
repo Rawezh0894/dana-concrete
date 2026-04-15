@@ -1055,6 +1055,41 @@ $(document).ready(function() {
 
     let shouldReopenAddPurchase = false;
     let pendingChildModalEl = null;
+    const PURCHASE_MODAL_DEBUG = true;
+
+    function debugLog(message, details = null) {
+        if (!PURCHASE_MODAL_DEBUG) return;
+        if (details) {
+            console.log(`[PurchaseModalDebug] ${message}`, details);
+        } else {
+            console.log(`[PurchaseModalDebug] ${message}`);
+        }
+    }
+
+    function debugError(message, err = null) {
+        if (!PURCHASE_MODAL_DEBUG) return;
+        if (err) {
+            console.error(`[PurchaseModalDebug][ERROR] ${message}`, err);
+        } else {
+            console.error(`[PurchaseModalDebug][ERROR] ${message}`);
+        }
+    }
+
+    function getModalState(modalEl) {
+        if (!modalEl) return null;
+        const active = document.activeElement;
+        return {
+            id: modalEl.id,
+            hasShowClass: modalEl.classList.contains('show'),
+            ariaHidden: modalEl.getAttribute('aria-hidden'),
+            styleDisplay: modalEl.style.display || '',
+            bodyModalOpen: document.body.classList.contains('modal-open'),
+            backdrops: document.querySelectorAll('.modal-backdrop').length,
+            activeElementTag: active ? active.tagName : null,
+            activeElementClass: active ? active.className : null,
+            activeInsideModal: !!(active && modalEl.contains(active))
+        };
+    }
 
     function ensureFocusSink() {
         let sink = document.getElementById('modalFocusSink');
@@ -1077,6 +1112,10 @@ $(document).ready(function() {
     function cleanupExtraBackdrops() {
         const openModals = document.querySelectorAll('.modal.show').length;
         const backdrops = document.querySelectorAll('.modal-backdrop');
+        debugLog('cleanupExtraBackdrops() start', {
+            openModals,
+            backdrops: backdrops.length
+        });
         if (openModals === 0) {
             backdrops.forEach((bd) => bd.remove());
             document.body.classList.remove('modal-open');
@@ -1086,10 +1125,18 @@ $(document).ready(function() {
                 backdrops[i].remove();
             }
         }
+        debugLog('cleanupExtraBackdrops() end', {
+            openModalsAfter: document.querySelectorAll('.modal.show').length,
+            backdropsAfter: document.querySelectorAll('.modal-backdrop').length
+        });
     }
 
     function openChildModalSafely(childModalEl) {
         if (!childModalEl) return;
+        debugLog('openChildModalSafely() called', {
+            childModal: childModalEl.id,
+            addPurchaseState: getModalState(addPurchaseModalEl)
+        });
         const addPurchaseIsOpen = addPurchaseModalEl.classList.contains('show');
         shouldReopenAddPurchase = addPurchaseIsOpen;
         if (addPurchaseIsOpen) {
@@ -1100,9 +1147,15 @@ $(document).ready(function() {
             }
             ensureFocusSink().focus();
             pendingChildModalEl = childModalEl;
+            debugLog('Hiding addPurchaseModal before child modal open', {
+                pendingChildModal: pendingChildModalEl.id
+            });
             bootstrap.Modal.getOrCreateInstance(addPurchaseModalEl).hide();
             return;
         }
+        debugLog('Opening child modal directly', {
+            childModal: childModalEl.id
+        });
         bootstrap.Modal.getOrCreateInstance(childModalEl).show();
     }
 
@@ -1112,6 +1165,9 @@ $(document).ready(function() {
         addLocationFromPurchaseBtn.addEventListener('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
+            debugLog('Clicked + add location button', {
+                addPurchaseStateBefore: getModalState(addPurchaseModalEl)
+            });
             openChildModalSafely(addLocationModalEl);
         });
     }
@@ -1122,15 +1178,44 @@ $(document).ready(function() {
         openDriversManagementBtn.addEventListener('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
+            debugLog('Clicked drivers management button', {
+                addPurchaseStateBefore: getModalState(addPurchaseModalEl)
+            });
             openChildModalSafely(driversManagementModalEl);
         });
     }
 
     [addLocationModalEl, driversManagementModalEl].forEach((modalEl) => {
         if (!modalEl) return;
+        modalEl.addEventListener('show.bs.modal', function () {
+            debugLog(`${modalEl.id} show.bs.modal`, {
+                modalState: getModalState(modalEl),
+                addPurchaseState: getModalState(addPurchaseModalEl)
+            });
+        });
+        modalEl.addEventListener('shown.bs.modal', function () {
+            debugLog(`${modalEl.id} shown.bs.modal`, {
+                modalState: getModalState(modalEl),
+                addPurchaseState: getModalState(addPurchaseModalEl)
+            });
+        });
+        modalEl.addEventListener('hide.bs.modal', function () {
+            debugLog(`${modalEl.id} hide.bs.modal`, {
+                modalState: getModalState(modalEl),
+                addPurchaseState: getModalState(addPurchaseModalEl)
+            });
+        });
         modalEl.addEventListener('hidden.bs.modal', function () {
+            debugLog(`${modalEl.id} hidden.bs.modal`, {
+                modalState: getModalState(modalEl),
+                addPurchaseState: getModalState(addPurchaseModalEl),
+                shouldReopenAddPurchase
+            });
             cleanupExtraBackdrops();
             if (shouldReopenAddPurchase) {
+                debugLog('Reopening addPurchaseModal after child hidden', {
+                    childModal: modalEl.id
+                });
                 bootstrap.Modal.getOrCreateInstance(addPurchaseModalEl).show();
                 shouldReopenAddPurchase = false;
             }
@@ -1139,6 +1224,9 @@ $(document).ready(function() {
 
     // Always move focus out before hiding Add Purchase modal
     addPurchaseModalEl.addEventListener('hide.bs.modal', function () {
+        debugLog('addPurchaseModal hide.bs.modal', {
+            addPurchaseStateBefore: getModalState(addPurchaseModalEl)
+        });
         const active = document.activeElement;
         if (active && addPurchaseModalEl.contains(active)) {
             if (typeof active.blur === 'function') active.blur();
@@ -1149,6 +1237,10 @@ $(document).ready(function() {
     // Extra guard: when clicking close button inside parent modal, move focus out immediately
     addPurchaseModalEl.querySelectorAll('.btn-close,[data-bs-dismiss="modal"]').forEach((el) => {
         el.addEventListener('click', function () {
+            debugLog('Clicked close/dismiss inside addPurchaseModal', {
+                clickedClass: el.className,
+                addPurchaseStateBefore: getModalState(addPurchaseModalEl)
+            });
             const active = document.activeElement;
             if (active && addPurchaseModalEl.contains(active) && typeof active.blur === 'function') {
                 active.blur();
@@ -1159,15 +1251,39 @@ $(document).ready(function() {
 
     // If we hid Add Purchase to open child, open child only after hidden completes
     addPurchaseModalEl.addEventListener('hidden.bs.modal', function () {
+        debugLog('addPurchaseModal hidden.bs.modal', {
+            addPurchaseStateAfter: getModalState(addPurchaseModalEl),
+            pendingChildModalEl: pendingChildModalEl ? pendingChildModalEl.id : null
+        });
         cleanupExtraBackdrops();
         if (pendingChildModalEl) {
             const child = pendingChildModalEl;
             pendingChildModalEl = null;
+            debugLog('Opening pending child modal after addPurchase hidden', {
+                childModal: child.id
+            });
             bootstrap.Modal.getOrCreateInstance(child).show();
         }
     });
 
     addPurchaseModalEl.addEventListener('hidden.bs.modal', cleanupExtraBackdrops);
+
+    // Global error hooks for easier diagnosis
+    window.addEventListener('error', function (event) {
+        debugError('window error event', {
+            message: event.message,
+            source: event.filename,
+            line: event.lineno,
+            column: event.colno,
+            error: event.error
+        });
+    });
+
+    window.addEventListener('unhandledrejection', function (event) {
+        debugError('window unhandledrejection event', {
+            reason: event.reason
+        });
+    });
 })();
 
 // Load drivers data with load_capacity for automatic kg calculation
