@@ -277,7 +277,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
         <div class="d-flex flex-wrap gap-2 w-100 w-md-auto">
             <button class="btn btn-drivers" id="openDriversManagementBtn" type="button">
-                <i class="fas fa-users me-1"></i> <span class="d-none d-sm-inline">شۆفێرەکان</span>
+                <i class="fas fa-users-cog me-1"></i> <span class="d-none d-sm-inline">بەڕێوەبردنی شۆفێر و شوێن</span>
             </button>
             <div class="btn-group" role="group">
                 <button class="btn export-btn" onclick="exportPurchaseToExcel()" title="ئیکسپۆرتی هەموو زانیارییەکانی کڕین بۆ Excel">
@@ -301,6 +301,102 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
             </button>
             <?php endif; ?>
         </div>
+    </div>
+
+    <!-- Inline Drivers/Locations Management Panel (No Modal) -->
+    <div id="inlineManagementPanel" class="card shadow-sm mb-4" style="display:none;">
+      <div class="card-header d-flex justify-content-between align-items-center" style="background: var(--kelly-green); color: white;">
+        <h6 class="mb-0"><i class="fas fa-users-cog me-2"></i>بەڕێوەبردنی شۆفێر و شوێن</h6>
+        <button type="button" id="closeInlineManagementPanel" class="btn btn-sm btn-light">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-lg-6">
+            <div class="border rounded p-3 h-100">
+              <h6 class="mb-3">شۆفێرەکان</h6>
+              <form id="inlineAddDriverForm" class="row g-2 mb-2">
+                <div class="col-md-6">
+                  <input type="text" id="inline_driver_name" class="form-control" placeholder="ناوی شۆفێر" required>
+                </div>
+                <div class="col-md-4">
+                  <input type="number" id="inline_driver_load_capacity" class="form-control" placeholder="بەتاڵەی بارهەڵگر" min="0" step="0.01">
+                </div>
+                <div class="col-md-2 d-grid">
+                  <button type="submit" class="btn btn-success"><i class="fas fa-plus"></i></button>
+                </div>
+              </form>
+
+              <form id="inlineEditDriverForm" class="row g-2 mb-3" style="display:none;">
+                <input type="hidden" id="inline_edit_driver_id">
+                <div class="col-md-6">
+                  <input type="text" id="inline_edit_driver_name" class="form-control" placeholder="ناوی شۆفێر" required>
+                </div>
+                <div class="col-md-4">
+                  <input type="number" id="inline_edit_driver_load_capacity" class="form-control" placeholder="بەتاڵەی بارهەڵگر" min="0" step="0.01">
+                </div>
+                <div class="col-md-2 d-flex gap-1">
+                  <button type="submit" class="btn btn-warning btn-sm"><i class="fas fa-save"></i></button>
+                  <button type="button" id="inlineCancelEditDriverBtn" class="btn btn-secondary btn-sm"><i class="fas fa-times"></i></button>
+                </div>
+              </form>
+
+              <div class="table-responsive" style="max-height:280px; overflow:auto;">
+                <table class="table table-bordered table-sm align-middle" id="inlineDriversTable">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>ناو</th>
+                      <th>بەتاڵە</th>
+                      <th>کردار</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-6" id="inlineLocationSection">
+            <div class="border rounded p-3 h-100">
+              <h6 class="mb-3">شوێنەکان</h6>
+              <form id="inlineAddLocationForm" class="row g-2 mb-2">
+                <div class="col-md-10">
+                  <input type="text" id="inline_location_name" class="form-control" placeholder="ناوی شوێن" required>
+                </div>
+                <div class="col-md-2 d-grid">
+                  <button type="submit" class="btn btn-success"><i class="fas fa-plus"></i></button>
+                </div>
+              </form>
+
+              <form id="inlineEditLocationForm" class="row g-2 mb-3" style="display:none;">
+                <input type="hidden" id="inline_edit_location_id">
+                <div class="col-md-10">
+                  <input type="text" id="inline_edit_location_name" class="form-control" placeholder="ناوی شوێن" required>
+                </div>
+                <div class="col-md-2 d-flex gap-1">
+                  <button type="submit" class="btn btn-warning btn-sm"><i class="fas fa-save"></i></button>
+                  <button type="button" id="inlineCancelEditLocationBtn" class="btn btn-secondary btn-sm"><i class="fas fa-times"></i></button>
+                </div>
+              </form>
+
+              <div class="table-responsive" style="max-height:280px; overflow:auto;">
+                <table class="table table-bordered table-sm align-middle" id="inlineLocationsTable">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>ناو</th>
+                      <th>کردار</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     
     <!-- Summary Cards -->
@@ -929,14 +1025,9 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
 <script src="../assets/js/purchase/add_purchase.js" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/purchase/ag_grid_purchase.js" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/purchase/summary.js" nonce="<?php echo $csp_nonce; ?>"></script>
-<script src="../assets/js/location_driver/driver.js" nonce="<?php echo $csp_nonce; ?>"></script>
-<script src="../assets/js/location_driver/location.js" nonce="<?php echo $csp_nonce; ?>"></script>
-<script src="../assets/js/location_driver/load_locations.js" nonce="<?php echo $csp_nonce; ?>"></script>
-<script src="../assets/js/location_driver/delete_location.js" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/purchase/delete_purchase.js" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/purchase/purchase.js" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/purchase/update_purchase.js" nonce="<?php echo $csp_nonce; ?>"></script>
-<script src="../assets/js/drivers/drivers_management.js" nonce="<?php echo $csp_nonce; ?>"></script>
 <script nonce="<?php echo $csp_nonce; ?>">
 // Add modal: dynamic price per kg fields
 $(function() {
@@ -1046,259 +1137,363 @@ $(document).ready(function() {
     setTimeout(applyFilters, 100);
 });
 
-// Handle nested modals (Add Purchase -> Drivers/Location) safely
-(function manageNestedPurchaseModals() {
-    const addPurchaseModalEl = document.getElementById('addPurchaseModal');
-    const addLocationModalEl = document.getElementById('addLocationModal');
-    const driversManagementModalEl = document.getElementById('driversManagementModal');
-    if (!addPurchaseModalEl) return;
+// Inline management panel (No modal for drivers/locations)
+(function inlineDriversLocationsManager() {
+    const panel = $('#inlineManagementPanel');
+    const openPanelBtn = $('#openDriversManagementBtn');
+    const closePanelBtn = $('#closeInlineManagementPanel');
+    const openLocationBtn = $('#openAddLocationFromPurchaseBtn');
 
-    let shouldReopenAddPurchase = false;
-    let pendingChildModalEl = null;
-    const PURCHASE_MODAL_DEBUG = true;
+    const addDriverForm = $('#inlineAddDriverForm');
+    const editDriverForm = $('#inlineEditDriverForm');
+    const cancelEditDriverBtn = $('#inlineCancelEditDriverBtn');
+    const addLocationForm = $('#inlineAddLocationForm');
+    const editLocationForm = $('#inlineEditLocationForm');
+    const cancelEditLocationBtn = $('#inlineCancelEditLocationBtn');
 
-    function debugLog(message, details = null) {
-        if (!PURCHASE_MODAL_DEBUG) return;
-        if (details) {
-            console.log(`[PurchaseModalDebug] ${message}`, details);
+    const driversTableBody = $('#inlineDriversTable tbody');
+    const locationsTableBody = $('#inlineLocationsTable tbody');
+
+    function showPanel(scrollToLocation = false) {
+        panel.stop(true, true).slideDown(120);
+        if (scrollToLocation) {
+            const locSection = document.getElementById('inlineLocationSection');
+            if (locSection) {
+                locSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    }
+
+    function hidePanel() {
+        panel.stop(true, true).slideUp(120);
+    }
+
+    openPanelBtn.on('click', function () {
+        showPanel(false);
+        loadDriversInline();
+        loadLocationsInline();
+    });
+
+    closePanelBtn.on('click', hidePanel);
+
+    openLocationBtn.on('click', function () {
+        const addPurchaseModalEl = document.getElementById('addPurchaseModal');
+        const isAddPurchaseOpen = addPurchaseModalEl && addPurchaseModalEl.classList.contains('show');
+        if (isAddPurchaseOpen) {
+            const modalInstance = bootstrap.Modal.getOrCreateInstance(addPurchaseModalEl);
+            $(addPurchaseModalEl).one('hidden.bs.modal', function () {
+                showPanel(true);
+                loadLocationsInline();
+            });
+            modalInstance.hide();
         } else {
-            console.log(`[PurchaseModalDebug] ${message}`);
+            showPanel(true);
+            loadLocationsInline();
         }
-    }
+    });
 
-    function debugError(message, err = null) {
-        if (!PURCHASE_MODAL_DEBUG) return;
-        if (err) {
-            console.error(`[PurchaseModalDebug][ERROR] ${message}`, err);
-        } else {
-            console.error(`[PurchaseModalDebug][ERROR] ${message}`);
-        }
-    }
+    function refreshDriverSelects(drivers) {
+        const addSelect = $('#driver_id');
+        const editSelect = $('#edit_driver_id');
+        const currentAdd = addSelect.val();
+        const currentEdit = editSelect.val();
 
-    function getModalState(modalEl) {
-        if (!modalEl) return null;
-        const active = document.activeElement;
-        return {
-            id: modalEl.id,
-            hasShowClass: modalEl.classList.contains('show'),
-            ariaHidden: modalEl.getAttribute('aria-hidden'),
-            styleDisplay: modalEl.style.display || '',
-            bodyModalOpen: document.body.classList.contains('modal-open'),
-            backdrops: document.querySelectorAll('.modal-backdrop').length,
-            activeElementTag: active ? active.tagName : null,
-            activeElementClass: active ? active.className : null,
-            activeInsideModal: !!(active && modalEl.contains(active))
-        };
-    }
-
-    function ensureFocusSink() {
-        let sink = document.getElementById('modalFocusSink');
-        if (!sink) {
-            sink = document.createElement('button');
-            sink.id = 'modalFocusSink';
-            sink.type = 'button';
-            sink.tabIndex = -1;
-            sink.style.position = 'fixed';
-            sink.style.left = '-9999px';
-            sink.style.top = '0';
-            sink.style.width = '1px';
-            sink.style.height = '1px';
-            sink.style.opacity = '0';
-            document.body.appendChild(sink);
-        }
-        return sink;
-    }
-
-    function cleanupExtraBackdrops() {
-        const openModals = document.querySelectorAll('.modal.show').length;
-        const backdrops = document.querySelectorAll('.modal-backdrop');
-        debugLog('cleanupExtraBackdrops() start', {
-            openModals,
-            backdrops: backdrops.length
+        addSelect.html('<option value="">شۆفێرەکان</option>');
+        editSelect.html('<option value="">شۆفێرەکان</option>');
+        drivers.forEach((d) => {
+            addSelect.append(`<option value="${d.id}">${d.name}</option>`);
+            editSelect.append(`<option value="${d.id}">${d.name}</option>`);
         });
-        if (openModals === 0) {
-            backdrops.forEach((bd) => bd.remove());
-            document.body.classList.remove('modal-open');
-            document.body.style.removeProperty('padding-right');
-        } else if (backdrops.length > openModals) {
-            for (let i = 0; i < backdrops.length - openModals; i++) {
-                backdrops[i].remove();
+        addSelect.val(currentAdd);
+        editSelect.val(currentEdit);
+
+        if (typeof $.fn.select2 === 'function') {
+            addSelect.trigger('change.select2');
+            editSelect.trigger('change.select2');
+        }
+
+        // Update local driver cache used for kg calculation
+        driversData = {};
+        drivers.forEach((driver) => {
+            driversData[driver.id] = {
+                id: driver.id,
+                name: driver.name,
+                load_capacity: driver.load_capacity ? parseFloat(driver.load_capacity) : 0
+            };
+        });
+    }
+
+    function refreshLocationSelects(locations) {
+        const addSelect = $('#location_id');
+        const editSelect = $('#edit_location_id');
+        const filterSelect = $('#filter_location');
+        const currentAdd = addSelect.val();
+        const currentEdit = editSelect.val();
+        const currentFilter = filterSelect.val();
+
+        addSelect.html('<option value="">شوێن</option>');
+        editSelect.html('<option value="">شوێن</option>');
+        filterSelect.html('<option value="">هەموو شوێنەکان</option>');
+
+        locations.forEach((loc) => {
+            addSelect.append(`<option value="${loc.id}">${loc.name}</option>`);
+            editSelect.append(`<option value="${loc.id}">${loc.name}</option>`);
+            filterSelect.append(`<option value="${loc.id}">${loc.name}</option>`);
+        });
+
+        addSelect.val(currentAdd);
+        editSelect.val(currentEdit);
+        filterSelect.val(currentFilter);
+
+        if (typeof $.fn.select2 === 'function') {
+            addSelect.trigger('change.select2');
+            editSelect.trigger('change.select2');
+            filterSelect.trigger('change.select2');
+        }
+    }
+
+    function loadDriversInline() {
+        $.ajax({
+            url: '../process/drivers/select_drivers.php',
+            method: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (!response.success) return;
+                const drivers = response.data || [];
+                driversTableBody.empty();
+                if (drivers.length === 0) {
+                    driversTableBody.append('<tr><td colspan="4" class="text-center text-muted">هیچ شۆفێرێک نەدۆزرایەوە</td></tr>');
+                } else {
+                    drivers.forEach((d, index) => {
+                        const cap = d.load_capacity ? parseFloat(d.load_capacity).toLocaleString() + ' کگم' : '-';
+                        driversTableBody.append(`
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${d.name}</td>
+                                <td>${cap}</td>
+                                <td>
+                                    <button type="button" class="btn btn-warning btn-sm inline-edit-driver" data-id="${d.id}" data-name="${d.name}" data-load="${d.load_capacity || ''}">
+                                        <i class="fa fa-edit"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-danger btn-sm inline-delete-driver" data-id="${d.id}" data-name="${d.name}">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `);
+                    });
+                }
+                refreshDriverSelects(drivers);
             }
-        }
-        debugLog('cleanupExtraBackdrops() end', {
-            openModalsAfter: document.querySelectorAll('.modal.show').length,
-            backdropsAfter: document.querySelectorAll('.modal-backdrop').length
         });
     }
 
-    function openChildModalSafely(childModalEl) {
-        if (!childModalEl) return;
-        debugLog('openChildModalSafely() called', {
-            childModal: childModalEl.id,
-            addPurchaseState: getModalState(addPurchaseModalEl)
-        });
-        const addPurchaseIsOpen = addPurchaseModalEl.classList.contains('show');
-        shouldReopenAddPurchase = addPurchaseIsOpen;
-        if (addPurchaseIsOpen) {
-            // Prevent aria-hidden/focus conflict: move focus outside before hiding parent modal
-            addPurchaseModalEl.querySelectorAll('.btn-close,[data-bs-dismiss="modal"]').forEach((el) => {
-                if (typeof el.blur === 'function') el.blur();
-            });
-            const active = document.activeElement;
-            if (active && addPurchaseModalEl.contains(active) && typeof active.blur === 'function') {
-                active.blur();
+    function loadLocationsInline() {
+        $.ajax({
+            url: '../process/location_driver/select_locations.php',
+            method: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (!response.success) return;
+                const locations = response.data || [];
+                locationsTableBody.empty();
+                if (locations.length === 0) {
+                    locationsTableBody.append('<tr><td colspan="3" class="text-center text-muted">هیچ شوێنێک نەدۆزرایەوە</td></tr>');
+                } else {
+                    locations.forEach((loc, index) => {
+                        locationsTableBody.append(`
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${loc.name}</td>
+                                <td>
+                                    <button type="button" class="btn btn-warning btn-sm inline-edit-location" data-id="${loc.id}" data-name="${loc.name}">
+                                        <i class="fa fa-edit"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-danger btn-sm inline-delete-location" data-id="${loc.id}" data-name="${loc.name}">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `);
+                    });
+                }
+                refreshLocationSelects(locations);
             }
-            ensureFocusSink().focus();
-            pendingChildModalEl = childModalEl;
-            debugLog('Hiding addPurchaseModal before child modal open', {
-                pendingChildModal: pendingChildModalEl.id
-            });
-            bootstrap.Modal.getOrCreateInstance(addPurchaseModalEl).hide();
-            return;
-        }
-        debugLog('Opening child modal directly', {
-            childModal: childModalEl.id
-        });
-        bootstrap.Modal.getOrCreateInstance(childModalEl).show();
-    }
-
-    // + location button inside Add Purchase modal
-    const addLocationFromPurchaseBtn = document.getElementById('openAddLocationFromPurchaseBtn');
-    if (addLocationFromPurchaseBtn) {
-        addLocationFromPurchaseBtn.addEventListener('click', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            debugLog('Clicked + add location button', {
-                addPurchaseStateBefore: getModalState(addPurchaseModalEl)
-            });
-            openChildModalSafely(addLocationModalEl);
         });
     }
 
-    // Drivers button
-    const openDriversManagementBtn = document.getElementById('openDriversManagementBtn');
-    if (openDriversManagementBtn) {
-        openDriversManagementBtn.addEventListener('click', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            debugLog('Clicked drivers management button', {
-                addPurchaseStateBefore: getModalState(addPurchaseModalEl)
-            });
-            openChildModalSafely(driversManagementModalEl);
-        });
-    }
-
-    [addLocationModalEl, driversManagementModalEl].forEach((modalEl) => {
-        if (!modalEl) return;
-        modalEl.addEventListener('show.bs.modal', function () {
-            debugLog(`${modalEl.id} show.bs.modal`, {
-                modalState: getModalState(modalEl),
-                addPurchaseState: getModalState(addPurchaseModalEl)
-            });
-        });
-        modalEl.addEventListener('shown.bs.modal', function () {
-            debugLog(`${modalEl.id} shown.bs.modal`, {
-                modalState: getModalState(modalEl),
-                addPurchaseState: getModalState(addPurchaseModalEl)
-            });
-        });
-        modalEl.addEventListener('hide.bs.modal', function () {
-            debugLog(`${modalEl.id} hide.bs.modal`, {
-                modalState: getModalState(modalEl),
-                addPurchaseState: getModalState(addPurchaseModalEl)
-            });
-        });
-        modalEl.addEventListener('hidden.bs.modal', function () {
-            debugLog(`${modalEl.id} hidden.bs.modal`, {
-                modalState: getModalState(modalEl),
-                addPurchaseState: getModalState(addPurchaseModalEl),
-                shouldReopenAddPurchase
-            });
-            cleanupExtraBackdrops();
-            if (shouldReopenAddPurchase) {
-                debugLog('Reopening addPurchaseModal after child hidden', {
-                    childModal: modalEl.id
-                });
-                bootstrap.Modal.getOrCreateInstance(addPurchaseModalEl).show();
-                shouldReopenAddPurchase = false;
+    addDriverForm.on('submit', function (e) {
+        e.preventDefault();
+        $.ajax({
+            url: '../process/drivers/add_driver.php',
+            method: 'POST',
+            dataType: 'json',
+            data: {
+                name: $('#inline_driver_name').val().trim(),
+                load_capacity: $('#inline_driver_load_capacity').val() || null
+            },
+            success: function (response) {
+                if (response.success) {
+                    Swal.fire('سەرکەوتوو', 'شۆفێر زیادکرا', 'success');
+                    addDriverForm[0].reset();
+                    loadDriversInline();
+                } else {
+                    Swal.fire('هەڵە', response.message || 'هەڵەیەک ڕویدا', 'error');
+                }
             }
         });
     });
 
-    // Always move focus out before hiding Add Purchase modal
-    addPurchaseModalEl.addEventListener('hide.bs.modal', function () {
-        debugLog('addPurchaseModal hide.bs.modal', {
-            addPurchaseStateBefore: getModalState(addPurchaseModalEl)
-        });
-        const active = document.activeElement;
-        if (active && addPurchaseModalEl.contains(active)) {
-            if (typeof active.blur === 'function') active.blur();
-            ensureFocusSink().focus();
-        }
+    $(document).on('click', '.inline-edit-driver', function () {
+        $('#inline_edit_driver_id').val($(this).data('id'));
+        $('#inline_edit_driver_name').val($(this).data('name'));
+        $('#inline_edit_driver_load_capacity').val($(this).data('load'));
+        editDriverForm.slideDown(120);
     });
 
-    // Capture phase guard (runs earlier) to prevent Bootstrap from hiding a focused descendant
-    addPurchaseModalEl.addEventListener('hide.bs.modal', function () {
-        const active = document.activeElement;
-        if (active && addPurchaseModalEl.contains(active)) {
-            if (typeof active.blur === 'function') active.blur();
-            ensureFocusSink().focus();
-        }
-    }, true);
+    cancelEditDriverBtn.on('click', function () {
+        editDriverForm.slideUp(120);
+        editDriverForm[0].reset();
+    });
 
-    // Extra guard: when clicking close button inside parent modal, move focus out immediately
-    addPurchaseModalEl.querySelectorAll('.btn-close,[data-bs-dismiss="modal"]').forEach((el) => {
-        el.addEventListener('click', function () {
-            debugLog('Clicked close/dismiss inside addPurchaseModal', {
-                clickedClass: el.className,
-                addPurchaseStateBefore: getModalState(addPurchaseModalEl)
-            });
-            const active = document.activeElement;
-            if (active && addPurchaseModalEl.contains(active) && typeof active.blur === 'function') {
-                active.blur();
+    editDriverForm.on('submit', function (e) {
+        e.preventDefault();
+        $.ajax({
+            url: '../process/drivers/update_driver.php',
+            method: 'POST',
+            dataType: 'json',
+            data: {
+                id: $('#inline_edit_driver_id').val(),
+                name: $('#inline_edit_driver_name').val().trim(),
+                load_capacity: $('#inline_edit_driver_load_capacity').val() || null
+            },
+            success: function (response) {
+                if (response.success) {
+                    Swal.fire('سەرکەوتوو', 'شۆفێر نوێکرایەوە', 'success');
+                    editDriverForm.slideUp(120);
+                    editDriverForm[0].reset();
+                    loadDriversInline();
+                } else {
+                    Swal.fire('هەڵە', response.message || 'هەڵەیەک ڕویدا', 'error');
+                }
             }
-            ensureFocusSink().focus();
         });
     });
 
-    // If we hid Add Purchase to open child, open child only after hidden completes
-    addPurchaseModalEl.addEventListener('hidden.bs.modal', function () {
-        debugLog('addPurchaseModal hidden.bs.modal', {
-            addPurchaseStateAfter: getModalState(addPurchaseModalEl),
-            pendingChildModalEl: pendingChildModalEl ? pendingChildModalEl.id : null
-        });
-        // If child modal will open now, avoid removing backdrop during transition
-        if (!pendingChildModalEl) {
-            cleanupExtraBackdrops();
-        }
-        if (pendingChildModalEl) {
-            const child = pendingChildModalEl;
-            pendingChildModalEl = null;
-            debugLog('Opening pending child modal after addPurchase hidden', {
-                childModal: child.id
+    $(document).on('click', '.inline-delete-driver', function () {
+        const id = $(this).data('id');
+        const name = $(this).data('name');
+        Swal.fire({
+            title: 'دڵنیای؟',
+            text: `دەتەوێت شۆفێری "${name}" بسڕیتەوە؟`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'بەڵێ',
+            cancelButtonText: 'نەخێر'
+        }).then((result) => {
+            if (!result.isConfirmed) return;
+            $.ajax({
+                url: '../process/drivers/delete_driver.php',
+                method: 'POST',
+                dataType: 'json',
+                data: { id },
+                success: function (response) {
+                    if (response.success) {
+                        Swal.fire('سەرکەوتوو', 'شۆفێر سڕایەوە', 'success');
+                        loadDriversInline();
+                    } else {
+                        Swal.fire('هەڵە', response.message || 'هەڵەیەک ڕویدا', 'error');
+                    }
+                }
             });
-            bootstrap.Modal.getOrCreateInstance(child).show();
-        }
-    });
-
-    addPurchaseModalEl.addEventListener('hidden.bs.modal', cleanupExtraBackdrops);
-
-    // Global error hooks for easier diagnosis
-    window.addEventListener('error', function (event) {
-        debugError('window error event', {
-            message: event.message,
-            source: event.filename,
-            line: event.lineno,
-            column: event.colno,
-            error: event.error
         });
     });
 
-    window.addEventListener('unhandledrejection', function (event) {
-        debugError('window unhandledrejection event', {
-            reason: event.reason
+    addLocationForm.on('submit', function (e) {
+        e.preventDefault();
+        $.ajax({
+            url: '../process/location_driver/add_location.php',
+            method: 'POST',
+            dataType: 'json',
+            data: { name: $('#inline_location_name').val().trim() },
+            success: function (response) {
+                if (response.success) {
+                    Swal.fire('سەرکەوتوو', 'شوێن زیادکرا', 'success');
+                    addLocationForm[0].reset();
+                    loadLocationsInline();
+                } else {
+                    Swal.fire('هەڵە', response.msg || response.message || 'هەڵەیەک ڕویدا', 'error');
+                }
+            }
         });
     });
+
+    $(document).on('click', '.inline-edit-location', function () {
+        $('#inline_edit_location_id').val($(this).data('id'));
+        $('#inline_edit_location_name').val($(this).data('name'));
+        editLocationForm.slideDown(120);
+    });
+
+    cancelEditLocationBtn.on('click', function () {
+        editLocationForm.slideUp(120);
+        editLocationForm[0].reset();
+    });
+
+    editLocationForm.on('submit', function (e) {
+        e.preventDefault();
+        $.ajax({
+            url: '../process/location_driver/update_location.php',
+            method: 'POST',
+            dataType: 'json',
+            data: {
+                id: $('#inline_edit_location_id').val(),
+                name: $('#inline_edit_location_name').val().trim()
+            },
+            success: function (response) {
+                if (response.success) {
+                    Swal.fire('سەرکەوتوو', 'شوێن نوێکرایەوە', 'success');
+                    editLocationForm.slideUp(120);
+                    editLocationForm[0].reset();
+                    loadLocationsInline();
+                } else {
+                    Swal.fire('هەڵە', response.msg || response.message || 'هەڵەیەک ڕویدا', 'error');
+                }
+            }
+        });
+    });
+
+    $(document).on('click', '.inline-delete-location', function () {
+        const id = $(this).data('id');
+        const name = $(this).data('name');
+        Swal.fire({
+            title: 'دڵنیای؟',
+            text: `دەتەوێت شوێنی "${name}" بسڕیتەوە؟`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'بەڵێ',
+            cancelButtonText: 'نەخێر'
+        }).then((result) => {
+            if (!result.isConfirmed) return;
+            $.ajax({
+                url: '../process/location_driver/delete_location.php',
+                method: 'POST',
+                dataType: 'json',
+                data: { id },
+                success: function (response) {
+                    if (response.success) {
+                        Swal.fire('سەرکەوتوو', 'شوێن سڕایەوە', 'success');
+                        loadLocationsInline();
+                    } else {
+                        Swal.fire('هەڵە', response.message || 'هەڵەیەک ڕویدا', 'error');
+                    }
+                }
+            });
+        });
+    });
+
+    // Initial load for selects
+    loadDriversInline();
+    loadLocationsInline();
 })();
 
 // Load drivers data with load_capacity for automatic kg calculation
