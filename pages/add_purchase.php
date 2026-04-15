@@ -428,7 +428,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
     </div>
 </div>
 <!-- Add Purchase Modal -->
-<div class="modal fade" id="addPurchaseModal" tabindex="-1" aria-labelledby="addPurchaseModalLabel" aria-hidden="true">
+<div class="modal fade" id="addPurchaseModal" tabindex="-1" aria-labelledby="addPurchaseModalLabel" aria-hidden="true" data-bs-focus="false">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <form id="addPurchaseForm">
@@ -1141,6 +1141,9 @@ $(document).ready(function() {
         shouldReopenAddPurchase = addPurchaseIsOpen;
         if (addPurchaseIsOpen) {
             // Prevent aria-hidden/focus conflict: move focus outside before hiding parent modal
+            addPurchaseModalEl.querySelectorAll('.btn-close,[data-bs-dismiss="modal"]').forEach((el) => {
+                if (typeof el.blur === 'function') el.blur();
+            });
             const active = document.activeElement;
             if (active && addPurchaseModalEl.contains(active) && typeof active.blur === 'function') {
                 active.blur();
@@ -1234,6 +1237,15 @@ $(document).ready(function() {
         }
     });
 
+    // Capture phase guard (runs earlier) to prevent Bootstrap from hiding a focused descendant
+    addPurchaseModalEl.addEventListener('hide.bs.modal', function () {
+        const active = document.activeElement;
+        if (active && addPurchaseModalEl.contains(active)) {
+            if (typeof active.blur === 'function') active.blur();
+            ensureFocusSink().focus();
+        }
+    }, true);
+
     // Extra guard: when clicking close button inside parent modal, move focus out immediately
     addPurchaseModalEl.querySelectorAll('.btn-close,[data-bs-dismiss="modal"]').forEach((el) => {
         el.addEventListener('click', function () {
@@ -1255,7 +1267,10 @@ $(document).ready(function() {
             addPurchaseStateAfter: getModalState(addPurchaseModalEl),
             pendingChildModalEl: pendingChildModalEl ? pendingChildModalEl.id : null
         });
-        cleanupExtraBackdrops();
+        // If child modal will open now, avoid removing backdrop during transition
+        if (!pendingChildModalEl) {
+            cleanupExtraBackdrops();
+        }
         if (pendingChildModalEl) {
             const child = pendingChildModalEl;
             pendingChildModalEl = null;
