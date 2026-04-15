@@ -480,7 +480,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
                     <option value="<?= $loc['id'] ?>"><?= htmlspecialchars($loc['name']) ?></option>
                   <?php endforeach; ?>
                 </select>
-                <button type="button" class="btn flex-shrink-0" data-bs-toggle="modal" data-bs-target="#addLocationModal" style="background: var(--seafoam-green); color: white; font-weight: bold; width: 45px; padding: 0;">
+                <button type="button" id="openAddLocationFromPurchaseBtn" class="btn flex-shrink-0" style="background: var(--seafoam-green); color: white; font-weight: bold; width: 45px; padding: 0;">
                   <i class="fas fa-plus"></i>
                 </button>
               </div>
@@ -1074,6 +1074,12 @@ $(document).ready(function() {
         const addPurchaseIsOpen = addPurchaseModalEl.classList.contains('show');
         shouldReopenAddPurchase = addPurchaseIsOpen;
         if (addPurchaseIsOpen) {
+            // Prevent aria-hidden/focus conflict: blur focused element before hiding parent modal
+            const active = document.activeElement;
+            if (active && addPurchaseModalEl.contains(active) && typeof active.blur === 'function') {
+                active.blur();
+            }
+            document.body.focus();
             bootstrap.Modal.getOrCreateInstance(addPurchaseModalEl).hide();
         }
         setTimeout(() => {
@@ -1082,17 +1088,20 @@ $(document).ready(function() {
     }
 
     // + location button inside Add Purchase modal
-    document.querySelectorAll('[data-bs-target="#addLocationModal"]').forEach((btn) => {
-        btn.addEventListener('click', function (e) {
+    const addLocationFromPurchaseBtn = document.getElementById('openAddLocationFromPurchaseBtn');
+    if (addLocationFromPurchaseBtn) {
+        addLocationFromPurchaseBtn.addEventListener('click', function (e) {
             e.preventDefault();
+            e.stopPropagation();
             openChildModalSafely(addLocationModalEl);
         });
-    });
+    }
 
     // Drivers button can be clicked while Add Purchase is open
     document.querySelectorAll('[data-bs-target="#driversManagementModal"]').forEach((btn) => {
         btn.addEventListener('click', function (e) {
             e.preventDefault();
+            e.stopPropagation();
             openChildModalSafely(driversManagementModalEl);
         });
     });
