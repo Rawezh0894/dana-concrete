@@ -611,11 +611,15 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
   <div class="modal-dialog">
     <div class="modal-content">
       <form id="addLocationForm">
-        <div class="modal-header"><h5 class="modal-title">زیادکردنی شوێن</h5></div>
+        <div class="modal-header">
+          <h5 class="modal-title">زیادکردنی شوێن</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
         <div class="modal-body">
           <input type="text" class="form-control" name="name" placeholder="ناوی شوێن" required>
         </div>
         <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
           <button type="submit" class="btn" style="background: var(--seafoam-green); color: white; font-weight: bold;">زیادکردن</button>
         </div>
       </form>
@@ -742,11 +746,15 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
   <div class="modal-dialog">
     <div class="modal-content">
       <form id="addDriverForm">
-        <div class="modal-header"><h5 class="modal-title">زیادکردنی شۆفێر</h5></div>
+        <div class="modal-header">
+          <h5 class="modal-title">زیادکردنی شۆفێر</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
         <div class="modal-body">
           <input type="text" class="form-control" name="name" placeholder="ناوی شۆفێر" required>
         </div>
         <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
           <button type="submit" class="btn" style="background: var(--seafoam-green); color: white; font-weight: bold;">زیادکردن</button>
         </div>
       </form>
@@ -1037,6 +1045,71 @@ $(document).ready(function() {
     // Apply filters on page load (shows all records by default)
     setTimeout(applyFilters, 100);
 });
+
+// Handle nested modals (Add Purchase -> Drivers/Location) safely
+(function manageNestedPurchaseModals() {
+    const addPurchaseModalEl = document.getElementById('addPurchaseModal');
+    const addLocationModalEl = document.getElementById('addLocationModal');
+    const driversManagementModalEl = document.getElementById('driversManagementModal');
+    if (!addPurchaseModalEl) return;
+
+    let shouldReopenAddPurchase = false;
+
+    function cleanupExtraBackdrops() {
+        const openModals = document.querySelectorAll('.modal.show').length;
+        const backdrops = document.querySelectorAll('.modal-backdrop');
+        if (openModals === 0) {
+            backdrops.forEach((bd) => bd.remove());
+            document.body.classList.remove('modal-open');
+            document.body.style.removeProperty('padding-right');
+        } else if (backdrops.length > openModals) {
+            for (let i = 0; i < backdrops.length - openModals; i++) {
+                backdrops[i].remove();
+            }
+        }
+    }
+
+    function openChildModalSafely(childModalEl) {
+        if (!childModalEl) return;
+        const addPurchaseIsOpen = addPurchaseModalEl.classList.contains('show');
+        shouldReopenAddPurchase = addPurchaseIsOpen;
+        if (addPurchaseIsOpen) {
+            bootstrap.Modal.getOrCreateInstance(addPurchaseModalEl).hide();
+        }
+        setTimeout(() => {
+            bootstrap.Modal.getOrCreateInstance(childModalEl).show();
+        }, 120);
+    }
+
+    // + location button inside Add Purchase modal
+    document.querySelectorAll('[data-bs-target="#addLocationModal"]').forEach((btn) => {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            openChildModalSafely(addLocationModalEl);
+        });
+    });
+
+    // Drivers button can be clicked while Add Purchase is open
+    document.querySelectorAll('[data-bs-target="#driversManagementModal"]').forEach((btn) => {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            openChildModalSafely(driversManagementModalEl);
+        });
+    });
+
+    [addLocationModalEl, driversManagementModalEl].forEach((modalEl) => {
+        if (!modalEl) return;
+        modalEl.addEventListener('hidden.bs.modal', function () {
+            cleanupExtraBackdrops();
+            if (shouldReopenAddPurchase) {
+                bootstrap.Modal.getOrCreateInstance(addPurchaseModalEl).show();
+                shouldReopenAddPurchase = false;
+            }
+        });
+    });
+
+    addPurchaseModalEl.addEventListener('hidden.bs.modal', cleanupExtraBackdrops);
+})();
 
 // Load drivers data with load_capacity for automatic kg calculation
 let driversData = {};
