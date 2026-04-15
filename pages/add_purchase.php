@@ -276,7 +276,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
 <div class="container-fluid py-5">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
         <div class="d-flex flex-wrap gap-2 w-100 w-md-auto">
-            <button class="btn btn-drivers" data-bs-toggle="modal" data-bs-target="#driversManagementModal">
+            <button class="btn btn-drivers" id="openDriversManagementBtn" type="button">
                 <i class="fas fa-users me-1"></i> <span class="d-none d-sm-inline">شۆفێرەکان</span>
             </button>
             <div class="btn-group" role="group">
@@ -1062,7 +1062,7 @@ $(document).ready(function() {
             sink = document.createElement('button');
             sink.id = 'modalFocusSink';
             sink.type = 'button';
-            sink.setAttribute('aria-hidden', 'true');
+            sink.tabIndex = -1;
             sink.style.position = 'fixed';
             sink.style.left = '-9999px';
             sink.style.top = '0';
@@ -1116,14 +1116,15 @@ $(document).ready(function() {
         });
     }
 
-    // Drivers button can be clicked while Add Purchase is open
-    document.querySelectorAll('[data-bs-target="#driversManagementModal"]').forEach((btn) => {
-        btn.addEventListener('click', function (e) {
+    // Drivers button
+    const openDriversManagementBtn = document.getElementById('openDriversManagementBtn');
+    if (openDriversManagementBtn) {
+        openDriversManagementBtn.addEventListener('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
             openChildModalSafely(driversManagementModalEl);
         });
-    });
+    }
 
     [addLocationModalEl, driversManagementModalEl].forEach((modalEl) => {
         if (!modalEl) return;
@@ -1143,6 +1144,17 @@ $(document).ready(function() {
             if (typeof active.blur === 'function') active.blur();
             ensureFocusSink().focus();
         }
+    });
+
+    // Extra guard: when clicking close button inside parent modal, move focus out immediately
+    addPurchaseModalEl.querySelectorAll('.btn-close,[data-bs-dismiss="modal"]').forEach((el) => {
+        el.addEventListener('click', function () {
+            const active = document.activeElement;
+            if (active && addPurchaseModalEl.contains(active) && typeof active.blur === 'function') {
+                active.blur();
+            }
+            ensureFocusSink().focus();
+        });
     });
 
     // If we hid Add Purchase to open child, open child only after hidden completes
