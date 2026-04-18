@@ -555,6 +555,19 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
             </div>
           </div>
           <div class="row">
+            <div class="col-12 mb-3">
+              <label for="edit_factory_truck_id" class="form-label">تڕێلە (ئەگەر هی کارگە بوو)</label>
+              <select class="form-select select2" id="edit_factory_truck_id" name="factory_truck_id">
+                <option value="">-- بارهەڵگری دەرەکی (هیچ کام) --</option>
+                <?php
+                $edit_ft_stmt = $pdo->query("SELECT id, truck_name FROM factory_trucks WHERE is_active = 1");
+                while ($eft = $edit_ft_stmt->fetch(PDO::FETCH_ASSOC)): ?>
+                  <option value="<?= $eft['id'] ?>"><?= htmlspecialchars($eft['truck_name']) ?></option>
+                <?php endwhile; ?>
+              </select>
+            </div>
+          </div>
+          <div class="row">
             <div class="col-md-6 mb-3">
               <label for="edit_location_id" class="form-label">شوێن</label>
               <select class="form-select select2" id="edit_location_id" name="location_id" required>

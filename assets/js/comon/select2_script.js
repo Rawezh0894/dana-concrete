@@ -187,12 +187,14 @@ $(document).ready(function () {
     if ($('#addPurchaseModal').length > 0) {
         enableSelect2('#company_id', '#addPurchaseModal');
         enableSelect2('#driver_id', '#addPurchaseModal');
+        enableSelect2('#factory_truck_id', '#addPurchaseModal');
         enableSelect2('#location_id', '#addPurchaseModal');
         enableSelect2('#material_id', '#addPurchaseModal');
     }
     if ($('#editPurchasePanel').length > 0) {
         enableSelect2('#edit_company_id', '#editPurchasePanel');
         enableSelect2('#edit_driver_id', '#editPurchasePanel');
+        enableSelect2('#edit_factory_truck_id', '#editPurchasePanel');
         enableSelect2('#edit_location_id', '#editPurchasePanel');
         enableSelect2('#edit_material_id', '#editPurchasePanel');
     } else if ($('#editPurchaseModal').length > 0) {

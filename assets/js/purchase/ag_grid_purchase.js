@@ -289,6 +289,23 @@ const purchaseColumnDefs = [
         }
     },
     {
+        field: 'factory_truck_name',
+        headerName: 'تڕێلەی کارگە',
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+        sortable: true,
+        resizable: true,
+        minWidth: 110,
+        cellStyle: { textAlign: 'right', direction: 'rtl' },
+        valueFormatter: function (params) {
+            if (!params.value || params.value === '-') return '—';
+            return params.value;
+        },
+        tooltipValueGetter: function (params) {
+            return params.value && params.value !== '-' ? params.value : '';
+        }
+    },
+    {
         field: 'location_name',
         headerName: 'شوێن',
         filter: 'agTextColumnFilter',
@@ -436,6 +453,7 @@ function loadPurchaseData(preservePagination = false) {
                     company_name: row.company_name || '-',
                     location_name: row.location_name || '-',
                     driver_name: row.driver_name || '-',
+                    factory_truck_name: row.factory_truck_name || '',
                     invoice_number: row.invoice_number || '-',
                     material_name: row.material_name || '-',
                     date: row.date || '-',
@@ -634,6 +652,7 @@ $(document).on('click', '.edit-purchase', function (e) {
                 $('#edit_id').val(data.id);
                 $('#edit_company_id').val(data.company_id).trigger('change');
                 $('#edit_driver_id').val(data.driver_id).trigger('change');
+                $('#edit_factory_truck_id').val(data.factory_truck_id ? String(data.factory_truck_id) : '').trigger('change');
                 $('#edit_location_id').val(data.location_id).trigger('change');
                 $('#edit_invoice_number').val(data.invoice_number);
                 $('#edit_material_id').val(data.material_id).trigger('change');
