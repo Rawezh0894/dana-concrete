@@ -189,15 +189,65 @@ if ($customer_id) {
         <div class="tab-pane fade" id="debt" role="tabpanel" aria-labelledby="debt-tab">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="mb-0">مێژووی دانەوەی قەرزەکان</h5>
-                <button class="btn" style="background: var(--seafoam-green); color: #fff; border: none; font-weight: bold;" data-bs-toggle="modal" data-bs-target="#addCustomerDebtModal">
-                  <i class="fa fa-plus"></i> دانەوەی قەرز
-                </button>
+                <div class="d-flex gap-2">
+                    <button class="btn" style="background: #0d6efd; color: #fff; border: none; font-weight: bold;" data-bs-toggle="modal" data-bs-target="#addCustomerAdjustmentModal">
+                      <i class="fa fa-sliders"></i> ڕێکخستنەوەی حیساب
+                    </button>
+                    <button class="btn" style="background: var(--seafoam-green); color: #fff; border: none; font-weight: bold;" data-bs-toggle="modal" data-bs-target="#addCustomerDebtModal">
+                      <i class="fa fa-plus"></i> دانەوەی قەرز
+                    </button>
+                </div>
             </div>
             <!-- AG Grid Container for Debt Payments -->
             <div class="table-responsive">
                 <div id="customerDebtGrid" class="ag-grid-container ag-theme-alpine"></div>
             </div>
+            <hr class="my-4">
+            <h6 class="mb-3" style="color: var(--seafoam-green); font-weight: bold;">
+                مێژووی ڕێکخستنەوەی حیساب
+            </h6>
+            <div class="table-responsive">
+                <div id="customerAdjustmentsGrid" class="ag-grid-container ag-theme-alpine"></div>
+            </div>
         </div>
+    </div>
+    <!-- Add Customer Account Adjustment Modal -->
+    <div class="modal fade" id="addCustomerAdjustmentModal" tabindex="-1" aria-labelledby="addCustomerAdjustmentModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form id="addCustomerAdjustmentForm">
+            <div class="modal-header">
+              <h5 class="modal-title" id="addCustomerAdjustmentModalLabel">ڕێکخستنەوەی حیساب</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div class="mb-3">
+                <label for="adjustment_date" class="form-label">بەروار</label>
+                <input type="date" class="form-control" id="adjustment_date" name="date" required value="<?php echo date('Y-m-d'); ?>">
+              </div>
+              <div class="mb-3">
+                <label for="adjustment_type" class="form-label">جۆری ڕێکخستنەوە</label>
+                <select class="form-control" id="adjustment_type" name="adjustment_type" required>
+                  <option value="increase">زیادکردنی قەرز</option>
+                  <option value="decrease">کەمکردنی قەرز</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="adjustment_amount_usd" class="form-label">بڕ (USD)</label>
+                <input type="number" class="form-control" id="adjustment_amount_usd" name="amount_usd" min="0.01" step="0.0001" required>
+              </div>
+              <div class="mb-3">
+                <label for="adjustment_reason" class="form-label">هۆکار / وەسف</label>
+                <textarea class="form-control" id="adjustment_reason" name="reason" rows="3" required placeholder="بۆچی ئەم بڕە زیاد یان کەم کرا؟"></textarea>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
+              <button type="submit" class="btn" style="background: #0d6efd; color: #fff; border: none; font-weight: bold;">تۆمارکردن</button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
     <!-- Add Customer Debt Modal -->
     <div class="modal fade" id="addCustomerDebtModal" tabindex="-1" aria-labelledby="addCustomerDebtModalLabel" aria-hidden="true">
@@ -431,6 +481,11 @@ if ($customer_id) {
                 reloadCustomerDebts();
             } else if (typeof loadCustomerReturnDebts === 'function') {
                 loadCustomerReturnDebts(CUSTOMER_ID);
+            }
+
+            // Refresh account adjustments history
+            if (typeof loadCustomerAdjustments === 'function') {
+                loadCustomerAdjustments();
             }
             
             console.log('Customer data refreshed automatically');
@@ -956,6 +1011,7 @@ if ($customer_id) {
 <script src="../assets/js/customer_profile/customer_profile.js" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/customer_profile/delete_return_debt.js" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/customer_profile/update_return_debt.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/customer_profile/account_adjustments.js" nonce="<?php echo $csp_nonce; ?>"></script>
 
 <script nonce="<?php echo $csp_nonce; ?>">
     // Debugging script to help identify issues
