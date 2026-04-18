@@ -514,21 +514,8 @@ class ReceiptManager {
     }
     
     checkIfPaginationNeeded() {
-        // Check if we need pagination based on content size and layout
-        const openingDebt = window.OPENING_DEBT || 0;
-        const remainingAmount = window.REMAINING_TOTAL || 0;
-        const totalDebt = openingDebt + remainingAmount;
-        
-        // Check if any of the debt values are very large (would cause layout issues)
-        const hasLargeValues = totalDebt > 1000000 || openingDebt > 500000 || remainingAmount > 500000;
-        
-        // Check if we have significant amounts that would benefit from pagination
-        const hasSignificantDebt = totalDebt > 100000;
-        
-        // Force pagination if we have very large values or if user preference is set
-        const forcePagination = localStorage.getItem('forceDebtPagination') === 'true';
-        
-        return hasLargeValues || hasSignificantDebt || forcePagination;
+        // Force pagination ONLY if user preference is set explicitly
+        return localStorage.getItem('forceDebtPagination') === 'true';
     }
     
     createDebtPages(debtData) {
