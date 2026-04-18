@@ -190,7 +190,12 @@ $(document).ready(function () {
         enableSelect2('#location_id', '#addPurchaseModal');
         enableSelect2('#material_id', '#addPurchaseModal');
     }
-    if ($('#editPurchaseModal').length > 0) {
+    if ($('#editPurchasePanel').length > 0) {
+        enableSelect2('#edit_company_id', '#editPurchasePanel');
+        enableSelect2('#edit_driver_id', '#editPurchasePanel');
+        enableSelect2('#edit_location_id', '#editPurchasePanel');
+        enableSelect2('#edit_material_id', '#editPurchasePanel');
+    } else if ($('#editPurchaseModal').length > 0) {
         enableSelect2('#edit_company_id', '#editPurchaseModal');
         enableSelect2('#edit_driver_id', '#editPurchaseModal');
         enableSelect2('#edit_location_id', '#editPurchaseModal');

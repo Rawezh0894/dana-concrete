@@ -51,8 +51,9 @@ document.getElementById('addLocationForm').onsubmit = async function(e) {
                 allowClear: true
             });
             
+            const editPurchaseParent = ($('#editPurchasePanel').length ? $('#editPurchasePanel') : $('#editPurchaseModal'));
             $(editSelect).select2({
-                dropdownParent: $('#editPurchaseModal'),
+                dropdownParent: editPurchaseParent,
                 width: '100%',
                 placeholder: 'شوێن هەڵبژێرە',
                 dir: 'rtl',

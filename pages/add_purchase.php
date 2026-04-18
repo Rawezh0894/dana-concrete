@@ -522,6 +522,154 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
     <div class="table-responsive">
         <div id="purchaseGrid" class="ag-grid-container ag-theme-alpine"></div>
     </div>
+
+    <!-- نوێکردنەوەی کڕین — پانێلی ناوخۆیی (بێ مۆداڵ) -->
+    <div id="editPurchasePanel" class="card shadow mt-4 d-none" aria-labelledby="editPurchasePanelLabel">
+      <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2" style="background: var(--seafoam-green); color: white;">
+        <h5 class="mb-0" id="editPurchasePanelLabel"><i class="fas fa-pen-to-square me-2"></i>نوێکردنەوەی کڕین</h5>
+        <button type="button" class="btn btn-sm btn-light" id="editPurchasePanelCloseBtn" aria-label="داخستن">
+          <i class="fas fa-times me-1"></i>داخستن
+        </button>
+      </div>
+      <div class="card-body">
+      <form id="editPurchaseForm">
+        <input type="hidden" name="id" id="edit_id">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="edit_company_id" class="form-label">کۆمپانیا</label>
+              <select class="form-select select2" id="edit_company_id" name="company_id" required>
+                <option value="">کۆمپانیا</option>
+                <?php foreach ($companies as $comp): ?>
+                  <option value="<?= $comp['id'] ?>"><?= htmlspecialchars($comp['name']) ?></option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="edit_driver_id" class="form-label">شۆفێر</label>
+              <select class="form-select select2" id="edit_driver_id" name="driver_id" required>
+                <option value="">شۆفێرەکان</option>
+                <?php foreach ($drivers as $drv): ?>
+                  <option value="<?= $drv['id'] ?>"><?= htmlspecialchars($drv['name']) ?></option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="edit_location_id" class="form-label">شوێن</label>
+              <select class="form-select select2" id="edit_location_id" name="location_id" required>
+                <option value="">شوێن</option>
+                <?php foreach ($locations as $loc): ?>
+                  <option value="<?= $loc['id'] ?>"><?= htmlspecialchars($loc['name']) ?></option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="edit_invoice_number" class="form-label">ژمارەی پسوڵە</label>
+              <input type="text" class="form-control" id="edit_invoice_number" name="invoice_number" required>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="edit_material_id" class="form-label">مەواد</label>
+              <select class="form-select select2" id="edit_material_id" name="material_id" required>
+                <option value="">هەڵبژێرە</option>
+                <?php foreach ($materials as $mat): ?>
+                  <option value="<?= $mat['id'] ?>"><?= htmlspecialchars($mat['name']) ?></option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="edit_bin_id" class="form-label">چاۆ/سایلۆ</label>
+              <select class="form-select" id="edit_bin_id" name="bin_id" required>
+                <option value="">هەڵبژێرە</option>
+                <?php foreach ($bins as $bin): ?>
+                  <option value="<?= $bin['id'] ?>"><?= htmlspecialchars($bin['name']) ?></option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="edit_date" class="form-label">بەروار</label>
+              <input type="date" class="form-control" id="edit_date" name="date" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="edit_type" class="form-label">جۆری دراو</label>
+              <select class="form-select" id="edit_type" name="type" required>
+                <option value="">-- هەڵبژێرە --</option>
+                <option value="دینار">دینار</option>
+                <option value="دۆلار">دۆلار</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="edit_kg" class="form-label">چەند کیلۆ</label>
+              <input type="number" class="form-control" id="edit_kg" name="kg" min="0" step="0.01" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div id="edit_pricePerKgIqdGroup">
+                    <label for="edit_price_per_kg_iqd" class="form-label">نرخی یەک کیلۆ بە دینار</label>
+                    <input type="number" class="form-control" id="edit_price_per_kg_iqd" name="price_per_kg_iqd" min="0" step="0.01" required>
+                </div>
+                <div id="edit_pricePerKgUsdGroup">
+                    <label for="edit_price_per_kg_usd" class="form-label">نرخی یەک کیلۆ بە دۆلار</label>
+                    <input type="number" class="form-control" id="edit_price_per_kg_usd" name="price_per_kg_usd" min="0" step="0.01" required>
+                </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="edit_exchange_rate" class="form-label">نرخی 100 دۆلار بە دینار</label>
+              <input type="number" class="form-control" id="edit_exchange_rate" name="exchange_rate" min="0" step="1" required value="141000">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="edit_payment_type" class="form-label">جۆری پارەدان</label>
+              <select class="form-select" id="edit_payment_type" name="payment_type" required>
+                <option value="">-- هەڵبژێرە --</option>
+                <option value="نەقد">نەقد</option>
+                <option value="قەرز">قەرز</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="edit_price" class="form-label">بڕی پارە بە دۆلار</label>
+              <input type="number" class="form-control" id="edit_price" name="price" min="0" step="0.01" required value="0">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="edit_amount_iqd" class="form-label">بڕی پارە بە دینار</label>
+              <input type="number" class="form-control" id="edit_amount_iqd" name="amount_iqd" min="0" step="0.01" value="0" required>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="edit_paid_usd" class="form-label">بری پارەی دراو بە دۆلار</label>
+              <input type="number" class="form-control" id="edit_paid_usd" name="paid_usd" min="0" step="0.01" value="0" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="edit_paid_iqd" class="form-label">بری پارەی دراو بە دینار</label>
+              <input type="number" class="form-control" id="edit_paid_iqd" name="paid_iqd" min="0" step="0.01" value="0" required>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="edit_remaining_usd" class="form-label">بری پارەی ماوە بە دۆلار</label>
+              <input type="number" class="form-control" id="edit_remaining_usd" name="remaining_usd" min="0" step="0.01" value="0" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="edit_remaining_iqd" class="form-label">بری پارەی ماوە بە دینار</label>
+              <input type="number" class="form-control" id="edit_remaining_iqd" name="remaining_iqd" min="0" step="0.01" value="0" required>
+            </div>
+          </div>
+        <div class="d-flex flex-wrap gap-2 justify-content-end pt-2 border-top">
+          <button type="button" class="btn btn-secondary" id="editPurchasePanelCancelBtn">داخستن</button>
+          <button type="submit" class="btn" style="background: var(--seafoam-green); color: white; font-weight: bold;">نوێکردنەوە</button>
+        </div>
+      </form>
+      </div>
+    </div>
 </div>
 <!-- Add Purchase Modal -->
 <div class="modal fade" id="addPurchaseModal" tabindex="-1" aria-labelledby="addPurchaseModalLabel" aria-hidden="true" data-bs-focus="false">
@@ -857,155 +1005,6 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
     </div>
   </div>
 </div>
-<!-- Edit Purchase Modal -->
-<div class="modal fade" id="editPurchaseModal" tabindex="-1" aria-labelledby="editPurchaseModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <form id="editPurchaseForm">
-        <input type="hidden" name="id" id="edit_id">
-        <div class="modal-header">
-          <h5 class="modal-title" id="editPurchaseModalLabel">نوێکردنەوەی کڕین</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label for="edit_company_id" class="form-label">کۆمپانیا</label>
-              <select class="form-select select2" id="edit_company_id" name="company_id" required>
-                <option value="">کۆمپانیا</option>
-                <?php foreach ($companies as $comp): ?>
-                  <option value="<?= $comp['id'] ?>"><?= htmlspecialchars($comp['name']) ?></option>
-                <?php endforeach; ?>
-              </select>
-            </div>
-            <div class="col-md-6 mb-3">
-              <label for="edit_driver_id" class="form-label">شۆفێر</label>
-              <select class="form-select select2" id="edit_driver_id" name="driver_id" required>
-                <option value="">شۆفێرەکان</option>
-                <?php foreach ($drivers as $drv): ?>
-                  <option value="<?= $drv['id'] ?>"><?= htmlspecialchars($drv['name']) ?></option>
-                <?php endforeach; ?>
-              </select>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label for="edit_location_id" class="form-label">شوێن</label>
-              <select class="form-select select2" id="edit_location_id" name="location_id" required>
-                <option value="">شوێن</option>
-                <?php foreach ($locations as $loc): ?>
-                  <option value="<?= $loc['id'] ?>"><?= htmlspecialchars($loc['name']) ?></option>
-                <?php endforeach; ?>
-              </select>
-            </div>
-            <div class="col-md-6 mb-3">
-              <label for="edit_invoice_number" class="form-label">ژمارەی پسوڵە</label>
-              <input type="text" class="form-control" id="edit_invoice_number" name="invoice_number" required>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label for="edit_material_id" class="form-label">مەواد</label>
-              <select class="form-select select2" id="edit_material_id" name="material_id" required>
-                <option value="">هەڵبژێرە</option>
-                <?php foreach ($materials as $mat): ?>
-                  <option value="<?= $mat['id'] ?>"><?= htmlspecialchars($mat['name']) ?></option>
-                <?php endforeach; ?>
-              </select>
-            </div>
-            <div class="col-md-6 mb-3">
-              <label for="edit_bin_id" class="form-label">چاۆ/سایلۆ</label>
-              <select class="form-select" id="edit_bin_id" name="bin_id" required>
-                <option value="">هەڵبژێرە</option>
-                <?php foreach ($bins as $bin): ?>
-                  <option value="<?= $bin['id'] ?>"><?= htmlspecialchars($bin['name']) ?></option>
-                <?php endforeach; ?>
-              </select>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label for="edit_date" class="form-label">بەروار</label>
-              <input type="date" class="form-control" id="edit_date" name="date" required>
-            </div>
-            <div class="col-md-6 mb-3">
-              <label for="edit_type" class="form-label">جۆری دراو</label>
-              <select class="form-select" id="edit_type" name="type" required>
-                <option value="">-- هەڵبژێرە --</option>
-                <option value="دینار">دینار</option>
-                <option value="دۆلار">دۆلار</option>
-              </select>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label for="edit_kg" class="form-label">چەند کیلۆ</label>
-              <input type="number" class="form-control" id="edit_kg" name="kg" min="0" step="0.01" required>
-            </div>
-            <div class="col-md-6 mb-3">
-                <div id="edit_pricePerKgIqdGroup">
-                    <label for="edit_price_per_kg_iqd" class="form-label">نرخی یەک کیلۆ بە دینار</label>
-                    <input type="number" class="form-control" id="edit_price_per_kg_iqd" name="price_per_kg_iqd" min="0" step="0.01" required>
-                </div>
-                <div id="edit_pricePerKgUsdGroup">
-                    <label for="edit_price_per_kg_usd" class="form-label">نرخی یەک کیلۆ بە دۆلار</label>
-                    <input type="number" class="form-control" id="edit_price_per_kg_usd" name="price_per_kg_usd" min="0" step="0.01" required>
-                </div>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label for="edit_exchange_rate" class="form-label">نرخی 100 دۆلار بە دینار</label>
-              <input type="number" class="form-control" id="edit_exchange_rate" name="exchange_rate" min="0" step="1" required value="141000">
-            </div>
-            <div class="col-md-6 mb-3">
-              <label for="edit_payment_type" class="form-label">جۆری پارەدان</label>
-              <select class="form-select" id="edit_payment_type" name="payment_type" required>
-                <option value="">-- هەڵبژێرە --</option>
-                <option value="نەقد">نەقد</option>
-                <option value="قەرز">قەرز</option>
-              </select>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label for="edit_price" class="form-label">بڕی پارە بە دۆلار</label>
-              <input type="number" class="form-control" id="edit_price" name="price" min="0" step="0.01" required value="0">
-            </div>
-            <div class="col-md-6 mb-3">
-              <label for="edit_amount_iqd" class="form-label">بڕی پارە بە دینار</label>
-              <input type="number" class="form-control" id="edit_amount_iqd" name="amount_iqd" min="0" step="0.01" value="0" required>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label for="edit_paid_usd" class="form-label">بری پارەی دراو بە دۆلار</label>
-              <input type="number" class="form-control" id="edit_paid_usd" name="paid_usd" min="0" step="0.01" value="0" required>
-            </div>
-            <div class="col-md-6 mb-3">
-              <label for="edit_paid_iqd" class="form-label">بری پارەی دراو بە دینار</label>
-              <input type="number" class="form-control" id="edit_paid_iqd" name="paid_iqd" min="0" step="0.01" value="0" required>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label for="edit_remaining_usd" class="form-label">بری پارەی ماوە بە دۆلار</label>
-              <input type="number" class="form-control" id="edit_remaining_usd" name="remaining_usd" min="0" step="0.01" value="0" required>
-            </div>
-            <div class="col-md-6 mb-3">
-              <label for="edit_remaining_iqd" class="form-label">بری پارەی ماوە بە دینار</label>
-              <input type="number" class="form-control" id="edit_remaining_iqd" name="remaining_iqd" min="0" step="0.01" value="0" required>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
-          <button type="submit" class="btn" style="background: var(--seafoam-green); color: white; font-weight: bold;">نوێکردنەوە</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/swalAlert.js" nonce="<?php echo $csp_nonce; ?>"></script>
@@ -1062,7 +1061,7 @@ $('#edit_kg, #edit_price_per_kg_iqd, #edit_price_per_kg_usd, #edit_type, #edit_p
 $('#edit_amount_iqd').on('input', function() {
     updateAmountsFor('edit_');
 });
-$('#editPurchaseModal').on('shown.bs.modal', function() {
+$('#editPurchasePanel').on('editPurchasePanel:opened', function() {
     updateAmountsFor('edit_');
 });
 
@@ -1655,9 +1654,17 @@ $('#addPurchaseModal').on('shown.bs.modal', function() {
     loadUsdRate(); // Load USD rate when modal opens
 });
 
-// Load USD rate when edit modal opens (only if field is empty)
-$('#editPurchaseModal').on('shown.bs.modal', function() {
-    loadEditUsdRate(); // Load USD rate when edit modal opens
+// Load USD rate when edit panel opens (only if field is empty)
+$('#editPurchasePanel').on('editPurchasePanel:opened', function() {
+    loadEditUsdRate();
+});
+
+$(document).on('click', '#editPurchasePanelCloseBtn, #editPurchasePanelCancelBtn', function() {
+    if (typeof window.hideEditPurchaseUi === 'function') {
+        window.hideEditPurchaseUi();
+    } else {
+        $('#editPurchasePanel').addClass('d-none');
+    }
 });
 
 // Listen for driver selection change

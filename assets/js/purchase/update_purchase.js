@@ -1,18 +1,26 @@
 // Multiple submission prevention flag
 let isUpdating = false;
 
+function getEditPurchaseDropdownParent() {
+    if (typeof $ === 'undefined') return null;
+    const $panel = $('#editPurchasePanel');
+    if ($panel.length > 0) return $panel;
+    const $modal = $('#editPurchaseModal');
+    return $modal.length > 0 ? $modal : null;
+}
+
 function ensureEditDriverSelect2() {
     if (typeof $ === 'undefined' || typeof $.fn.select2 === 'undefined') return;
     const $driverSelect = $('#edit_driver_id');
-    const $modal = $('#editPurchaseModal');
-    if ($driverSelect.length === 0 || $modal.length === 0) return;
+    const $parent = getEditPurchaseDropdownParent();
+    if ($driverSelect.length === 0 || !$parent || $parent.length === 0) return;
     
     try {
         if ($driverSelect.hasClass('select2-hidden-accessible')) {
             $driverSelect.select2('destroy');
         }
         $driverSelect.select2({
-            dropdownParent: $modal,
+            dropdownParent: $parent,
             width: '100%',
             dir: 'rtl',
             placeholder: $driverSelect.attr('data-placeholder') || 'شۆفێرەکان',
@@ -23,9 +31,24 @@ function ensureEditDriverSelect2() {
     }
 }
 
+function hideEditPurchaseUi() {
+    const panel = document.getElementById('editPurchasePanel');
+    if (panel) {
+        panel.classList.add('d-none');
+        return;
+    }
+    const modalEl = document.getElementById('editPurchaseModal');
+    if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        const inst = bootstrap.Modal.getInstance(modalEl);
+        if (inst) inst.hide();
+    }
+}
+window.hideEditPurchaseUi = hideEditPurchaseUi;
+
 document.addEventListener('DOMContentLoaded', function() {
     ensureEditDriverSelect2();
     $('#editPurchaseModal').on('shown.bs.modal', ensureEditDriverSelect2);
+    $(document).on('editPurchasePanel:opened', '#editPurchasePanel', ensureEditDriverSelect2);
 });
 
 // API call removed - exchange_rate will be manually entered by user with default value of 0
@@ -152,8 +175,7 @@ document.getElementById('editPurchaseForm').onsubmit = async function(e) {
         }
         if (data.success) {
             Swal.fire('سەرکەوتوو!', 'کڕین نوێکرایەوە', 'success');
-            var modal = bootstrap.Modal.getInstance(document.getElementById('editPurchaseModal'));
-            modal.hide();
+            hideEditPurchaseUi();
             if (typeof reloadPurchases === 'function') {
                 reloadPurchases();
             } else if (typeof refreshPurchaseTable === 'function') {

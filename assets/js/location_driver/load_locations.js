@@ -119,8 +119,9 @@ function loadLocationSelects() {
                         allowClear: true
                     });
                     
+                    const editPurchaseParent = ($('#editPurchasePanel').length ? $('#editPurchasePanel') : $('#editPurchaseModal'));
                     editLocationSelect.select2({
-                        dropdownParent: $('#editPurchaseModal'),
+                        dropdownParent: editPurchaseParent,
                         width: '100%',
                         placeholder: 'شوێن هەڵبژێرە',
                         dir: 'rtl',
