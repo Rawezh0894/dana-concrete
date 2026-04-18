@@ -498,81 +498,76 @@ body {
     font-family: 'Rabar', sans-serif;
 }
 
-/* زانیارییەکانی قەرز */
-.debt-summary {
-    margin: 1.5rem 0;
-    padding: 1.2rem;
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+/* کۆتایی وەسڵ - ستایلی نوێ و چڕ */
+.receipt-final-footer {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 2px solid var(--seafoam-green);
     page-break-inside: avoid;
 }
 
-.debt-summary-row {
+.main-debt-row {
     display: flex;
-    gap: 1.5rem;
-    justify-content: center;
-    flex-wrap: wrap;
-    align-items: stretch;
+    justify-content: flex-end;
+    gap: 2rem;
+    margin-bottom: 0.8rem;
 }
 
-.debt-summary-box {
+.debt-box {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    background: #fff;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    padding: 1rem 1.5rem;
-    min-width: 200px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    transition: all 0.3s ease;
-    text-align: center;
+    gap: 0.8rem;
 }
 
-.debt-summary-box.total-box {
-    background: linear-gradient(135deg, var(--seafoam-green) 0%, #0056b3 100%);
-    color: #fff;
-    border: none;
-    box-shadow: 0 4px 12px rgba(0, 59, 115, 0.2);
+.d-label {
+    font-weight: bold;
+    color: #444;
+    font-size: 1rem;
 }
 
-.debt-summary-box i {
-    color: var(--seafoam-green);
-    font-size: 1.8rem;
-    margin-bottom: 0.3rem;
-    opacity: 0.9;
-}
-
-.debt-summary-box.total-box i {
-    color: #fff;
-    opacity: 1;
-}
-
-.debt-label {
-    color: #64748b;
-    font-weight: 600;
-    font-size: 0.95rem;
-    font-family: 'Rabar', sans-serif;
-}
-
-.debt-summary-box.total-box .debt-label {
-    color: rgba(255, 255, 255, 0.9);
-}
-
-.debt-value {
+.d-value {
     color: var(--seafoam-green);
     font-weight: 800;
-    font-size: 1.4rem;
-    font-family: 'Rabar', sans-serif;
+    font-size: 1.1rem;
 }
 
-.debt-summary-box.total-box .debt-value {
+.total-debt-row {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 1.5rem;
+    background: var(--seafoam-green);
     color: #fff;
-    font-size: 1.6rem;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 59, 115, 0.15);
+}
+
+.total-label {
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+.total-value {
+    font-size: 1.5rem;
+    font-weight: 900;
+}
+
+@media print {
+    .receipt-final-footer {
+        margin-top: 0.5rem;
+        padding-top: 0.5rem;
+    }
+    
+    .total-debt-row {
+        padding: 0.6rem 1rem;
+        box-shadow: none;
+        border: 1px solid var(--seafoam-green);
+    }
+    
+    .total-value {
+        font-size: 1.3rem;
+    }
 }
 
 /* Pagination controls for debt summary */
@@ -654,26 +649,7 @@ body {
     
     /* Show all pages when printing (if pagination is forced) */
     .debt-summary-page {
-        display: block !important;
-        margin-bottom: 1rem;
-    }
-    
-    /* Add some spacing between pages in print */
-    .debt-summary-page:not(:first-child) {
-        margin-top: 1rem;
-    }
-
-    .debt-summary-box {
-        min-width: 150px;
-        padding: 0.8rem;
-    }
-
-    .debt-value {
-        font-size: 1.2rem;
-    }
-
-    .debt-summary-box.total-box .debt-value {
-        font-size: 1.3rem;
+        display: none !important;
     }
 }
 .table td,

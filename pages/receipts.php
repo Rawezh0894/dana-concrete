@@ -615,15 +615,15 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                     <label for="show-opening-debt" class="filter-checkbox-label">
                         <input type="checkbox" id="show-opening-debt" checked class="filter-checkbox">
                         <span class="checkmark"></span>
-                        <i class="fa fa-credit-card"></i> نیشاندانی قەرزی پێشوو
+                        <i class="fa fa-credit-card"></i> قەرزی پێشوو نیشان بدە
         </label>
                 </div>
                 
-                <div class="filter-group checkbox-group">
+                <div class="filter-group checkbox-group" style="display: none;">
                     <label for="force-debt-pagination" class="filter-checkbox-label">
                         <input type="checkbox" id="force-debt-pagination" class="filter-checkbox">
                         <span class="checkmark"></span>
-                        <i class="fa fa-columns"></i> جیاکردنەوەی زانیارییەکانی قەرز
+                        <i class="fa fa-columns"></i> جیاکردنەوەی زانیارییەکان
                     </label>
                 </div>
                 
@@ -675,24 +675,9 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             <!-- Rows will be loaded by JS -->
         </tbody>
     </table>
-    
-    <!-- زانیارییەکانی قەرز -->
-    <div class="debt-summary" id="debt-summary-container">
-        <!-- Pagination controls -->
-        <div class="debt-pagination" id="debt-pagination" style="display: none;">
-            <button id="prev-page-btn" onclick="changeDebtPage(-1)">
-                <i class="fa fa-chevron-right"></i> پێشوو
-            </button>
-            <span class="page-info" id="debt-page-info">لاپەڕەی 1 لە 1</span>
-            <button id="next-page-btn" onclick="changeDebtPage(1)">
-                دواتر <i class="fa fa-chevron-left"></i>
-            </button>
-        </div>
-        
-        <!-- Debt summary pages -->
-        <div id="debt-summary-pages">
-            <!-- Pages will be dynamically generated -->
-        </div>
+    <!-- جێگەی کۆتایی وەسڵ و کۆی گشتی -->
+    <div id="final-summary-section" style="margin-top: 1rem;">
+        <!-- Summary will be dynamically loaded -->
     </div>
     
     <!-- Contact Information Footer -->
@@ -1137,20 +1122,7 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         }
     }
     
-    // Function to change debt summary pages
-    function changeDebtPage(direction) {
-        if (!window.receiptManager) return;
-        
-        const currentPage = window.DEBT_CURRENT_PAGE || 0;
-        const totalPages = window.DEBT_TOTAL_PAGES || 1;
-        const newPage = currentPage + direction;
-        
-        if (newPage >= 0 && newPage < totalPages) {
-            window.DEBT_CURRENT_PAGE = newPage;
-            window.receiptManager.showDebtPage(newPage);
-            window.receiptManager.updateDebtPaginationControls();
-        }
-    }
+
     
     // Location Multi-Select Functions
     function toggleLocationDropdown() {

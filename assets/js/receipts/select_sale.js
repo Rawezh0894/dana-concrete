@@ -454,7 +454,7 @@ class ReceiptManager {
     }
 
     updateDebtSummary(openingDebt, remainingTotal) {
-        // Handle opening debt - could be string or number
+        // Handle opening debt
         let openingDebtValue = 0;
         if (openingDebt) {
             if (typeof openingDebt === 'string') {
@@ -464,166 +464,41 @@ class ReceiptManager {
             }
         }
         
-        // Ensure remainingTotal is a number
         const remainingValue = typeof remainingTotal === 'number' ? remainingTotal : 0;
-        
-        // Check if opening debt should be included in total calculation
         const showOpeningDebtCheckbox = document.getElementById('show-opening-debt');
         const includeOpeningDebt = showOpeningDebtCheckbox ? showOpeningDebtCheckbox.checked : true;
-        
-        // Calculate total based on checkbox state
         const totalRemaining = includeOpeningDebt ? (openingDebtValue + remainingValue) : remainingValue;
         
-        // Store global values
+        // Store globals
         window.RECEIPT_TOTAL = totalRemaining;
         window.REMAINING_TOTAL = remainingValue;
         window.OPENING_DEBT = openingDebtValue;
         
-        // Create debt summary data for pagination
-        const debtData = {
-            openingDebt: openingDebtValue,
-            remainingAmount: remainingValue,
-            totalDebt: totalRemaining
-        };
-        
-        // Initialize pagination
-        this.initializeDebtPagination(debtData);
-    }
-    
-    initializeDebtPagination(debtData) {
-        const container = document.getElementById('debt-summary-pages');
-        const pagination = document.getElementById('debt-pagination');
-        
+        const container = document.getElementById('final-summary-section');
         if (!container) return;
-        
-        // Calculate if we need pagination (if content would overflow)
-        const needsPagination = this.checkIfPaginationNeeded();
-        
-        if (needsPagination) {
-            // Create multiple pages
-            this.createDebtPages(debtData);
-            pagination.style.display = 'flex';
-            window.DEBT_CURRENT_PAGE = 0;
-            window.DEBT_TOTAL_PAGES = 2; // We'll split into 2 pages
-            this.updateDebtPaginationControls();
-        } else {
-            // Show single page
-            this.createSingleDebtPage(debtData);
-            pagination.style.display = 'none';
-        }
-    }
-    
-    checkIfPaginationNeeded() {
-        // Force pagination ONLY if user preference is set explicitly
-        return localStorage.getItem('forceDebtPagination') === 'true';
-    }
-    
-    createDebtPages(debtData) {
-        const container = document.getElementById('debt-summary-pages');
-        if (!container) return;
-        
-        // Check if opening debt should be shown
-        const showOpeningDebtCheckbox = document.getElementById('show-opening-debt');
-        const showOpeningDebt = showOpeningDebtCheckbox ? showOpeningDebtCheckbox.checked : true;
-        
-        // Create opening debt box conditionally
-        const openingDebtBox = showOpeningDebt ? `
-            <div class="debt-summary-box">
-                <i class="fa fa-history"></i>
-                <span class="debt-label">قەرزی پێشوو:</span>
-                <span class="debt-value">${this.formatCurrency(debtData.openingDebt)}</span>
+
+        const openingDebtHtml = includeOpeningDebt ? `
+            <div class="debt-box">
+                <span class="d-label">قەرزی پێشوو:</span>
+                <span class="d-value">${this.formatCurrency(openingDebtValue)}</span>
             </div>
         ` : '';
-        
-        // Page 1: Opening debt and remaining amount
-        const page1 = document.createElement('div');
-        page1.className = 'debt-summary-page';
-        page1.innerHTML = `
-            <div class="debt-summary-row">
-                ${openingDebtBox}
-                <div class="debt-summary-box">
-                    <i class="fa fa-money-bill-wave"></i>
-                    <span class="debt-label">پارەی ماوە:</span>
-                    <span class="debt-value">${this.formatCurrency(debtData.remainingAmount)}</span>
-                </div>
-            </div>
-        `;
-        
-        // Page 2: Total debt
-        const page2 = document.createElement('div');
-        page2.className = 'debt-summary-page debt-summary-page-break';
-        page2.innerHTML = `
-            <div class="debt-summary-row">
-                <div class="debt-summary-box total-box">
-                    <i class="fa fa-calculator"></i>
-                    <span class="debt-label">کۆی گشتی پارەی ماوە:</span>
-                    <span class="debt-value">${this.formatCurrency(debtData.totalDebt)}</span>
-                </div>
-            </div>
-        `;
-        
-        container.innerHTML = '';
-        container.appendChild(page1);
-        container.appendChild(page2);
-        
-        // Show only first page initially
-        this.showDebtPage(0);
-    }
-    
-    createSingleDebtPage(debtData) {
-        const container = document.getElementById('debt-summary-pages');
-        if (!container) return;
-        
-        // Check if opening debt should be shown
-        const showOpeningDebtCheckbox = document.getElementById('show-opening-debt');
-        const showOpeningDebt = showOpeningDebtCheckbox ? showOpeningDebtCheckbox.checked : true;
-        
-        // Create opening debt box conditionally
-        const openingDebtBox = showOpeningDebt ? `
-            <div class="debt-summary-box">
-                <i class="fa fa-history"></i>
-                <span class="debt-label">قەرزی پێشوو:</span>
-                <span class="debt-value">${this.formatCurrency(debtData.openingDebt)}</span>
-            </div>
-        ` : '';
-        
+
         container.innerHTML = `
-            <div class="debt-summary-row">
-                ${openingDebtBox}
-                <div class="debt-summary-box">
-                    <i class="fa fa-money-bill-wave"></i>
-                    <span class="debt-label">پارەی ماوە:</span>
-                    <span class="debt-value">${this.formatCurrency(debtData.remainingAmount)}</span>
+            <div class="receipt-final-footer">
+                <div class="main-debt-row">
+                    ${openingDebtHtml}
+                    <div class="debt-box">
+                        <span class="d-label">پارەی ماوە:</span>
+                        <span class="d-value">${this.formatCurrency(remainingValue)}</span>
+                    </div>
                 </div>
-                <div class="debt-summary-box total-box">
-                    <i class="fa fa-calculator"></i>
-                    <span class="debt-label">کۆی گشتی پارەی ماوە:</span>
-                    <span class="debt-value">${this.formatCurrency(debtData.totalDebt)}</span>
+                <div class="total-debt-row">
+                    <span class="total-label">کۆی گشتی بۆ ئەمڕۆ:</span>
+                    <span class="total-value">${this.formatCurrency(totalRemaining)}</span>
                 </div>
             </div>
         `;
-    }
-    
-    showDebtPage(pageIndex) {
-        const pages = document.querySelectorAll('.debt-summary-page');
-        pages.forEach((page, index) => {
-            page.style.display = index === pageIndex ? 'block' : 'none';
-        });
-    }
-    
-    updateDebtPaginationControls() {
-        const prevBtn = document.getElementById('prev-page-btn');
-        const nextBtn = document.getElementById('next-page-btn');
-        const pageInfo = document.getElementById('debt-page-info');
-        
-        if (!prevBtn || !nextBtn || !pageInfo) return;
-        
-        const currentPage = window.DEBT_CURRENT_PAGE || 0;
-        const totalPages = window.DEBT_TOTAL_PAGES || 1;
-        
-        prevBtn.disabled = currentPage === 0;
-        nextBtn.disabled = currentPage === totalPages - 1;
-        pageInfo.textContent = `لاپەڕەی ${currentPage + 1} لە ${totalPages}`;
     }
 
     getSelectedTransactionType() {
