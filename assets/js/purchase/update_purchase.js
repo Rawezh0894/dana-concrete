@@ -31,6 +31,31 @@ function ensureEditDriverSelect2() {
     }
 }
 
+function ensureEditPurchasePanelSelect2() {
+    if (typeof $ === 'undefined' || typeof $.fn.select2 === 'undefined') return;
+    const $panel = $('#editPurchasePanel');
+    if ($panel.length === 0) return;
+
+    const ids = ['#edit_company_id', '#edit_driver_id', '#edit_factory_truck_id', '#edit_location_id', '#edit_material_id', '#edit_bin_id'];
+    ids.forEach((sel) => {
+        const $el = $(sel);
+        if ($el.length === 0) return;
+        try {
+            if ($el.hasClass('select2-hidden-accessible')) {
+                $el.select2('destroy');
+            }
+            $el.select2({
+                dropdownParent: $panel,
+                width: '100%',
+                dir: 'rtl',
+                allowClear: $el.find('option[value=""]').length > 0
+            });
+        } catch (e) {
+            console.error('Failed to initialize select2 for', sel, e);
+        }
+    });
+}
+
 function hideEditPurchaseUi() {
     const panel = document.getElementById('editPurchasePanel');
     if (panel) {
@@ -48,7 +73,10 @@ window.hideEditPurchaseUi = hideEditPurchaseUi;
 document.addEventListener('DOMContentLoaded', function() {
     ensureEditDriverSelect2();
     $('#editPurchaseModal').on('shown.bs.modal', ensureEditDriverSelect2);
-    $(document).on('editPurchasePanel:opened', '#editPurchasePanel', ensureEditDriverSelect2);
+    $(document).on('editPurchasePanel:opened', '#editPurchasePanel', function () {
+        ensureEditPurchasePanelSelect2();
+        ensureEditDriverSelect2();
+    });
 });
 
 // API call removed - exchange_rate will be manually entered by user with default value of 0

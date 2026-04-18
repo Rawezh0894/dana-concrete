@@ -1025,7 +1025,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
 <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/dist/ag-grid-community.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/comon/ag_grid_base.js" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/comon/table-controler.js" nonce="<?php echo $csp_nonce; ?>"></script>
-<script src="../assets/js/comon/select2_script.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/comon/select2_script.js?v=<?php echo @filemtime(__DIR__ . '/../assets/js/comon/select2_script.js') ?: time(); ?>" nonce="<?php echo $csp_nonce; ?>"></script>
 <script nonce="<?php echo $csp_nonce; ?>">
     // Pass permissions to JavaScript
     window.userPermissions = {
@@ -1034,12 +1034,12 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
       canDelete: <?php echo hasPermission('delete_purchase') ? 'true' : 'false'; ?>
     };
 </script>
-<script src="../assets/js/purchase/add_purchase.js" nonce="<?php echo $csp_nonce; ?>"></script>
-<script src="../assets/js/purchase/ag_grid_purchase.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/purchase/add_purchase.js?v=<?php echo @filemtime(__DIR__ . '/../assets/js/purchase/add_purchase.js') ?: time(); ?>" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/purchase/ag_grid_purchase.js?v=<?php echo @filemtime(__DIR__ . '/../assets/js/purchase/ag_grid_purchase.js') ?: time(); ?>" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/purchase/summary.js" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/purchase/delete_purchase.js" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/purchase/purchase.js" nonce="<?php echo $csp_nonce; ?>"></script>
-<script src="../assets/js/purchase/update_purchase.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/purchase/update_purchase.js?v=<?php echo @filemtime(__DIR__ . '/../assets/js/purchase/update_purchase.js') ?: time(); ?>" nonce="<?php echo $csp_nonce; ?>"></script>
 <script nonce="<?php echo $csp_nonce; ?>">
 // Add modal: dynamic price per kg fields
 $(function() {
