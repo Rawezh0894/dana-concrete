@@ -20,7 +20,6 @@ $materials = $pdo->query("SELECT id, name FROM materials")->fetchAll(PDO::FETCH_
 $locations = $pdo->query("SELECT id, name FROM locations")->fetchAll(PDO::FETCH_ASSOC);
 $drivers = $pdo->query("SELECT id, name FROM drivers")->fetchAll(PDO::FETCH_ASSOC);
 $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_ASSOC);
-$factory_trucks = $pdo->query("SELECT id, truck_name FROM factory_trucks WHERE is_active = 1")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="ku">
@@ -554,13 +553,17 @@ $factory_trucks = $pdo->query("SELECT id, truck_name FROM factory_trucks WHERE i
                 <?php endforeach; ?>
               </select>
             </div>
+          </div>
+          <div class="row">
             <div class="col-md-12 mb-3">
               <label class="form-label fw-bold">تڕێلە (ئەگەر هی کارگە بوو)</label>
               <select class="form-select select2" id="edit_factory_truck_id" name="factory_truck_id">
                 <option value="">-- بارهەڵگری دەرەکی (هیچ کام) --</option>
-                <?php foreach ($factory_trucks as $ft): ?>
+                <?php 
+                $ft_stmt = $pdo->query("SELECT id, truck_name FROM factory_trucks WHERE is_active = 1");
+                while($ft = $ft_stmt->fetch(PDO::FETCH_ASSOC)): ?>
                   <option value="<?= $ft['id'] ?>"><?= htmlspecialchars($ft['truck_name']) ?></option>
-                <?php endforeach; ?>
+                <?php endwhile; ?>
               </select>
             </div>
           </div>
@@ -716,9 +719,11 @@ $factory_trucks = $pdo->query("SELECT id, truck_name FROM factory_trucks WHERE i
               <label class="form-label fw-bold">تڕێلە (ئەگەر هی کارگە بوو)</label>
               <select class="form-select select2" id="factory_truck_id" name="factory_truck_id">
                 <option value="">-- بارهەڵگری دەرەکی (هیچ کام) --</option>
-                <?php foreach ($factory_trucks as $ft): ?>
+                <?php 
+                $ft_stmt = $pdo->query("SELECT id, truck_name FROM factory_trucks WHERE is_active = 1");
+                while($ft = $ft_stmt->fetch(PDO::FETCH_ASSOC)): ?>
                   <option value="<?= $ft['id'] ?>"><?= htmlspecialchars($ft['truck_name']) ?></option>
-                <?php endforeach; ?>
+                <?php endwhile; ?>
               </select>
             </div>
           </div>

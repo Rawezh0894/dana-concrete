@@ -31,6 +31,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = $_POST['id'] ?? null;
     $company_id = $_POST['company_id'] ?? null;
     $driver_id = $_POST['driver_id'] ?? null;
+    $factory_truck_id = $_POST['factory_truck_id'] ?? null;
+    if ($factory_truck_id === '') $factory_truck_id = null;
     $location_id = $_POST['location_id'] ?? null;
     $invoice_number = $_POST['invoice_number'] ?? null;
     $bin_id = $_POST['bin_id'] ?? null;
@@ -48,10 +50,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $remaining_usd = $_POST['remaining_usd'] ?? 0;
     $payment_type = $_POST['payment_type'] ?? null;
     $amount_iqd = $_POST['amount_iqd'] ?? 0;
-    $factory_truck_id = !empty($_POST['factory_truck_id']) ? $_POST['factory_truck_id'] : null;
 
     // Log parsed variables for debugging
-    error_log("Parsed vars: id='$id', company_id='$company_id', driver_id='$driver_id', location_id='$location_id', invoice_number='$invoice_number', bin_id='$bin_id', material_id='$material_id', date='$date', type='$type', kg='$kg', price_per_kg_iqd='$price_per_kg_iqd', price_per_kg_usd='$price_per_kg_usd', exchange_rate='$exchange_rate', price='$price', paid_iqd='$paid_iqd', paid_usd='$paid_usd', remaining_iqd='$remaining_iqd', remaining_usd='$remaining_usd', payment_type='$payment_type', amount_iqd='$amount_iqd', factory_truck_id='$factory_truck_id'");
+    error_log("Parsed vars: id='$id', company_id='$company_id', driver_id='$driver_id', location_id='$location_id', invoice_number='$invoice_number', bin_id='$bin_id', material_id='$material_id', date='$date', type='$type', kg='$kg', price_per_kg_iqd='$price_per_kg_iqd', price_per_kg_usd='$price_per_kg_usd', exchange_rate='$exchange_rate', price='$price', paid_iqd='$paid_iqd', paid_usd='$paid_usd', remaining_iqd='$remaining_iqd', remaining_usd='$remaining_usd', payment_type='$payment_type', amount_iqd='$amount_iqd'");
 
     // Validate required fields
     $missing_fields = [];
@@ -197,8 +198,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'price_per_kg_iqd' => $old_record['price_per_kg_iqd'],
             'price_per_kg_usd' => $old_record['price_per_kg_usd'],
             'invoice_number' => $old_record['invoice_number'],
-            'factory_truck_id' => $old_record['factory_truck_id'] ?? null,
-            'date' => $old_record['date']
+            'date' => $old_record['date'],
+            'factory_truck_id' => $old_record['factory_truck_id']
         ];
 
         // Now perform the update
@@ -247,8 +248,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'price_per_kg_iqd' => $price_per_kg_iqd,
                 'price_per_kg_usd' => $price_per_kg_usd,
                 'invoice_number' => $invoice_number,
-                'factory_truck_id' => $factory_truck_id,
-                'date' => $date
+                'date' => $date,
+                'factory_truck_id' => $factory_truck_id
             ];
 
             $additional_info = [

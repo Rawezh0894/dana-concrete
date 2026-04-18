@@ -57,19 +57,6 @@ const purchaseColumnDefs = [
         }
     },
     {
-        field: 'factory_truck_name',
-        headerName: 'تڕێلە (هی کارگە)',
-        filter: 'agTextColumnFilter',
-        floatingFilter: true,
-        sortable: true,
-        resizable: true,
-        minWidth: 100,
-        cellStyle: { textAlign: 'right', direction: 'rtl' },
-        tooltipValueGetter: function (params) {
-            return params.value || '';
-        }
-    },
-    {
         field: 'remaining_iqd',
         headerName: 'پارەی ماوە بە دینار',
         filter: 'agNumberColumnFilter',
@@ -299,6 +286,19 @@ const purchaseColumnDefs = [
         cellStyle: { textAlign: 'right', direction: 'rtl' },
         tooltipValueGetter: function (params) {
             return params.value || '';
+        }
+    },
+    {
+        field: 'factory_truck_name',
+        headerName: 'تڕێلە (کارگە)',
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+        sortable: true,
+        resizable: true,
+        minWidth: 100,
+        cellStyle: { textAlign: 'right', direction: 'rtl' },
+        tooltipValueGetter: function (params) {
+            return params.value || '-';
         }
     },
     {
@@ -648,11 +648,11 @@ $(document).on('click', '.edit-purchase', function (e) {
                 $('#edit_id').val(data.id);
                 $('#edit_company_id').val(data.company_id).trigger('change');
                 $('#edit_driver_id').val(data.driver_id).trigger('change');
+                $('#edit_factory_truck_id').val(data.factory_truck_id).trigger('change');
                 $('#edit_location_id').val(data.location_id).trigger('change');
                 $('#edit_invoice_number').val(data.invoice_number);
                 $('#edit_material_id').val(data.material_id).trigger('change');
                 $('#edit_bin_id').val(data.bin_id).trigger('change');
-                $('#edit_factory_truck_id').val(data.factory_truck_id).trigger('change');
                 $('#edit_date').val(data.date);
                 $('#edit_type').val(data.type).trigger('change');
                 $('#edit_kg').val(data.kg);
