@@ -32,22 +32,6 @@ try {
 
     $pdo->beginTransaction();
 
-    // Ensure history table exists
-    $pdo->exec("
-        CREATE TABLE IF NOT EXISTS customer_account_adjustments (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            customer_id INT NOT NULL,
-            date DATE NOT NULL,
-            adjustment_type ENUM('increase','decrease') NOT NULL,
-            amount_usd DECIMAL(18,4) NOT NULL DEFAULT 0,
-            reason TEXT NOT NULL,
-            created_by INT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            INDEX idx_customer_date (customer_id, date),
-            INDEX idx_created_by (created_by)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-    ");
-
     $stmt = $pdo->prepare('SELECT opening_debt_usd, name, mobile1 FROM customers WHERE id = ? FOR UPDATE');
     $stmt->execute([$customer_id]);
     $customer = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -100,6 +84,17 @@ try {
         $pdo->rollBack();
     }
     error_log('add_account_adjustment.php error: ' . $e->getMessage());
-    echo json_encode(['success' => false, 'msg' => 'هەڵەیەک ڕوویدا']);
+    $rawMsg = $e->getMessage();
+    $publicMsg = 'هەڵەیەک ڕوویدا';
+
+    if (stripos($rawMsg, 'customer_account_adjustments') !== false && stripos($rawMsg, 'doesn\'t exist') !== false) {
+        $publicMsg = 'تابڵی customer_account_adjustments بوونی نییە. تکایە SQL ی پێویست جێبەجێ بکە.';
+    } elseif (stripos($rawMsg, 'create command denied') !== false || stripos($rawMsg, 'alter command denied') !== false) {
+        $publicMsg = 'مۆڵەتی گۆڕینی داتابەیس نییە (CREATE/ALTER denied).';
+    } else {
+        $publicMsg = 'هەڵە: ' . $rawMsg;
+    }
+
+    echo json_encode(['success' => false, 'msg' => $publicMsg]);
 }
 

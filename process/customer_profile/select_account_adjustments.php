@@ -21,22 +21,6 @@ try {
         exit;
     }
 
-    // Ensure history table exists
-    $pdo->exec("
-        CREATE TABLE IF NOT EXISTS customer_account_adjustments (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            customer_id INT NOT NULL,
-            date DATE NOT NULL,
-            adjustment_type ENUM('increase','decrease') NOT NULL,
-            amount_usd DECIMAL(18,4) NOT NULL DEFAULT 0,
-            reason TEXT NOT NULL,
-            created_by INT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            INDEX idx_customer_date (customer_id, date),
-            INDEX idx_created_by (created_by)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-    ");
-
     $stmt = $pdo->prepare("
         SELECT a.id, a.date, a.adjustment_type, a.amount_usd, a.reason, a.created_at, u.name AS created_by_name
         FROM customer_account_adjustments a
@@ -50,6 +34,11 @@ try {
     echo json_encode(['success' => true, 'data' => $rows]);
 } catch (Throwable $e) {
     error_log('select_account_adjustments.php error: ' . $e->getMessage());
-    echo json_encode(['success' => false, 'data' => []]);
+    $rawMsg = $e->getMessage();
+    $msg = 'هەڵەیەک ڕوویدا';
+    if (stripos($rawMsg, 'customer_account_adjustments') !== false && stripos($rawMsg, 'doesn\'t exist') !== false) {
+        $msg = 'تابڵی customer_account_adjustments بوونی نییە. تکایە SQL ی پێویست جێبەجێ بکە.';
+    }
+    echo json_encode(['success' => false, 'data' => [], 'msg' => $msg]);
 }
 

@@ -89,6 +89,9 @@ function loadCustomerAdjustments() {
     fetch(`../process/customer_profile/select_account_adjustments.php?customer_id=${CUSTOMER_ID}`)
         .then(r => r.json())
         .then(data => {
+            if (data && data.success === false && data.msg && window.Swal) {
+                Swal.fire('هەڵە', data.msg, 'error');
+            }
             const rows = data && data.success && Array.isArray(data.data) ? data.data : [];
             customerAdjustmentsGridApi.setGridOption('rowData', rows);
             if (rows.length === 0) {
