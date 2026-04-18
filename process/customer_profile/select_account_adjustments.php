@@ -19,7 +19,7 @@ try {
     if (isset($_GET['adjustment_id'])) {
         $adjustment_id = intval($_GET['adjustment_id']);
         $stmt = $pdo->prepare("
-            SELECT a.id, a.customer_id, a.date, a.adjustment_type, a.amount_usd, a.reason, a.created_at, u.name AS created_by_name
+            SELECT a.id, a.customer_id, a.date, a.adjustment_type, a.amount_usd, a.reason, a.created_at, u.username AS created_by_name
             FROM customer_account_adjustments a
             LEFT JOIN users u ON a.created_by = u.id
             WHERE a.id = ?
@@ -38,7 +38,7 @@ try {
     }
 
     $stmt = $pdo->prepare("
-        SELECT a.id, a.date, a.adjustment_type, a.amount_usd, a.reason, a.created_at, u.name AS created_by_name
+        SELECT a.id, a.date, a.adjustment_type, a.amount_usd, a.reason, a.created_at, u.username AS created_by_name
         FROM customer_account_adjustments a
         LEFT JOIN users u ON a.created_by = u.id
         WHERE a.customer_id = ?
@@ -51,7 +51,7 @@ try {
 } catch (Throwable $e) {
     error_log('select_account_adjustments.php error: ' . $e->getMessage());
     $rawMsg = $e->getMessage();
-    $msg = 'هەڵەیەک ڕوویدا';
+    $msg = 'هەڵە: ' . $rawMsg;
     if (stripos($rawMsg, 'customer_account_adjustments') !== false && stripos($rawMsg, 'doesn\'t exist') !== false) {
         $msg = 'تابڵی customer_account_adjustments بوونی نییە. تکایە SQL ی پێویست جێبەجێ بکە.';
     }
