@@ -498,75 +498,123 @@ body {
     font-family: 'Rabar', sans-serif;
 }
 
-/* کۆتایی وەسڵ - ستایلی نوێ و چڕ */
+/* کۆتایی وەسڵ - ستایلی پرێمیۆم و ڕێک */
 .receipt-final-footer {
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 2px solid var(--seafoam-green);
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
     page-break-inside: avoid;
 }
 
-.main-debt-row {
+.debt-details-grid {
     display: flex;
     justify-content: flex-end;
-    gap: 2rem;
-    margin-bottom: 0.8rem;
+    align-items: center;
+    gap: 3rem;
+    margin-bottom: 1.5rem;
 }
 
-.debt-box {
+.detail-item {
     display: flex;
     align-items: center;
-    gap: 0.8rem;
+    gap: 1rem;
 }
 
-.d-label {
-    font-weight: bold;
-    color: #444;
-    font-size: 1rem;
+.detail-item i {
+    font-size: 1.8rem;
+    color: #94a3b8;
+    background: #fff;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
-.d-value {
-    color: var(--seafoam-green);
+.detail-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.detail-label {
+    font-size: 0.9rem;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.detail-value {
+    font-size: 1.25rem;
     font-weight: 800;
-    font-size: 1.1rem;
+    color: #1e293b;
 }
 
-.total-debt-row {
+.detail-separator {
+    width: 2px;
+    height: 35px;
+    background: #e2e8f0;
+}
+
+.grand-total-bar {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     align-items: center;
-    gap: 1.5rem;
-    background: var(--seafoam-green);
+    background: linear-gradient(135deg, var(--seafoam-green) 0%, #0056b3 100%);
     color: #fff;
-    padding: 0.8rem 1.5rem;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 59, 115, 0.15);
+    padding: 1.2rem 2rem;
+    border-radius: 10px;
+    box-shadow: 0 10px 15px -3px rgba(0, 59, 115, 0.2);
 }
 
-.total-label {
-    font-size: 1.1rem;
-    font-weight: bold;
+.total-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
 }
 
-.total-value {
+.total-info i {
     font-size: 1.5rem;
+    opacity: 0.9;
+}
+
+.total-text {
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.total-amount {
+    font-size: 1.8rem;
     font-weight: 900;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 @media print {
     .receipt-final-footer {
-        margin-top: 0.5rem;
-        padding-top: 0.5rem;
+        margin-top: 1rem;
+        padding: 1rem;
+        background: #fff !important;
+        border: 2px solid #e2e8f0;
     }
     
-    .total-debt-row {
-        padding: 0.6rem 1rem;
+    .grand-total-bar {
+        padding: 0.8rem 1.5rem;
         box-shadow: none;
-        border: 1px solid var(--seafoam-green);
+        background: var(--seafoam-green) !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
     }
     
-    .total-value {
-        font-size: 1.3rem;
+    .total-amount {
+        font-size: 1.5rem;
+    }
+
+    .detail-item i {
+        box-shadow: none;
+        border: 1px solid #e2e8f0;
     }
 }
 

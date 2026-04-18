@@ -478,24 +478,34 @@ class ReceiptManager {
         if (!container) return;
 
         const openingDebtHtml = includeOpeningDebt ? `
-            <div class="debt-box">
-                <span class="d-label">قەرزی پێشوو:</span>
-                <span class="d-value">${this.formatCurrency(openingDebtValue)}</span>
+            <div class="detail-item">
+                <i class="fa fa-history"></i>
+                <div class="detail-content">
+                    <span class="detail-label">قەرزی پێشوو</span>
+                    <span class="detail-value">${this.formatCurrency(openingDebtValue)}</span>
+                </div>
             </div>
+            <div class="detail-separator"></div>
         ` : '';
 
         container.innerHTML = `
             <div class="receipt-final-footer">
-                <div class="main-debt-row">
+                <div class="debt-details-grid">
                     ${openingDebtHtml}
-                    <div class="debt-box">
-                        <span class="d-label">پارەی ماوە:</span>
-                        <span class="d-value">${this.formatCurrency(remainingValue)}</span>
+                    <div class="detail-item">
+                        <i class="fa fa-money-bill-wave"></i>
+                        <div class="detail-content">
+                            <span class="detail-label">پارەی ماوەی وەسڵ</span>
+                            <span class="detail-value">${this.formatCurrency(remainingValue)}</span>
+                        </div>
                     </div>
                 </div>
-                <div class="total-debt-row">
-                    <span class="total-label">کۆی گشتی بۆ ئەمڕۆ:</span>
-                    <span class="total-value">${this.formatCurrency(totalRemaining)}</span>
+                <div class="grand-total-bar">
+                    <div class="total-info">
+                        <i class="fa fa-calculator"></i>
+                        <span class="total-text">کۆی گشتی پارەی ماوە</span>
+                    </div>
+                    <span class="total-amount">${this.formatCurrency(totalRemaining)}</span>
                 </div>
             </div>
         `;
