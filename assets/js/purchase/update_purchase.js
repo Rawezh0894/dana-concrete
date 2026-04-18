@@ -9,26 +9,39 @@ function getEditPurchaseDropdownParent() {
     return $modal.length > 0 ? $modal : null;
 }
 
-function ensureEditDriverSelect2() {
+function ensureEditSelect2() {
     if (typeof $ === 'undefined' || typeof $.fn.select2 === 'undefined') return;
-    const $driverSelect = $('#edit_driver_id');
     const $parent = getEditPurchaseDropdownParent();
-    if ($driverSelect.length === 0 || !$parent || $parent.length === 0) return;
+    if (!$parent || $parent.length === 0) return;
     
-    try {
-        if ($driverSelect.hasClass('select2-hidden-accessible')) {
-            $driverSelect.select2('destroy');
+    // Selects to initialize
+    const selects = [
+        '#edit_driver_id',
+        '#edit_factory_truck_id',
+        '#edit_company_id',
+        '#edit_location_id',
+        '#edit_material_id'
+    ];
+    
+    selects.forEach(selector => {
+        const $el = $(selector);
+        if ($el.length === 0) return;
+        
+        try {
+            if ($el.hasClass('select2-hidden-accessible')) {
+                $el.select2('destroy');
+            }
+            $el.select2({
+                dropdownParent: $parent,
+                width: '100%',
+                dir: 'rtl',
+                placeholder: $el.attr('data-placeholder') || 'هەڵبژێرە...',
+                allowClear: true
+            });
+        } catch (error) {
+            console.error(`Failed to initialize select2 on ${selector}:`, error);
         }
-        $driverSelect.select2({
-            dropdownParent: $parent,
-            width: '100%',
-            dir: 'rtl',
-            placeholder: $driverSelect.attr('data-placeholder') || 'شۆفێرەکان',
-            allowClear: $driverSelect.find('option[value=""]').length > 0
-        });
-    } catch (error) {
-        console.error('Failed to initialize select2 on edit driver select:', error);
-    }
+    });
 }
 
 function hideEditPurchaseUi() {
@@ -46,9 +59,9 @@ function hideEditPurchaseUi() {
 window.hideEditPurchaseUi = hideEditPurchaseUi;
 
 document.addEventListener('DOMContentLoaded', function() {
-    ensureEditDriverSelect2();
-    $('#editPurchaseModal').on('shown.bs.modal', ensureEditDriverSelect2);
-    $(document).on('editPurchasePanel:opened', '#editPurchasePanel', ensureEditDriverSelect2);
+    ensureEditSelect2();
+    $('#editPurchaseModal').on('shown.bs.modal', ensureEditSelect2);
+    $(document).on('editPurchasePanel:opened', '#editPurchasePanel', ensureEditSelect2);
 });
 
 // API call removed - exchange_rate will be manually entered by user with default value of 0

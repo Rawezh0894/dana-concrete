@@ -57,6 +57,19 @@ const purchaseColumnDefs = [
         }
     },
     {
+        field: 'factory_truck_name',
+        headerName: 'تڕێلە (کارگە)',
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+        sortable: true,
+        resizable: true,
+        minWidth: 100,
+        cellStyle: { textAlign: 'right', direction: 'rtl', fontWeight: 'bold', color: '#007bff' },
+        tooltipValueGetter: function (params) {
+            return params.value || '-';
+        }
+    },
+    {
         field: 'remaining_iqd',
         headerName: 'پارەی ماوە بە دینار',
         filter: 'agNumberColumnFilter',
@@ -288,19 +301,7 @@ const purchaseColumnDefs = [
             return params.value || '';
         }
     },
-    {
-        field: 'factory_truck_name',
-        headerName: 'تڕێلە (کارگە)',
-        filter: 'agTextColumnFilter',
-        floatingFilter: true,
-        sortable: true,
-        resizable: true,
-        minWidth: 100,
-        cellStyle: { textAlign: 'right', direction: 'rtl' },
-        tooltipValueGetter: function (params) {
-            return params.value || '-';
-        }
-    },
+
     {
         field: 'location_name',
         headerName: 'شوێن',
@@ -465,6 +466,7 @@ function loadPurchaseData(preservePagination = false) {
                     remaining_usd: row.remaining_usd || 0,
                     remaining_iqd: row.remaining_iqd || 0,
                     bin_name: row.bin_name || '-',
+                    factory_truck_id: row.factory_truck_id || '',
                     factory_truck_name: row.factory_truck_name || '-'
                 }));
 
