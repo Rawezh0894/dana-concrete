@@ -652,8 +652,13 @@ $(document).on('click', '.edit-purchase', function (e) {
                 $('#edit_remaining_usd').val(data.remaining_usd);
                 $('#edit_remaining_iqd').val(data.remaining_iqd);
 
-                // Show modal
-                $('#editPurchaseModal').modal('show');
+                // Show modal (Bootstrap 5 — jQuery .modal('show') does not exist without BS4 bridge)
+                const editModalEl = document.getElementById('editPurchaseModal');
+                if (editModalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                    bootstrap.Modal.getOrCreateInstance(editModalEl).show();
+                } else if (typeof $ !== 'undefined' && typeof $.fn.modal === 'function') {
+                    $('#editPurchaseModal').modal('show');
+                }
             } else {
                 Swal.fire('هەڵە!', 'نەتوانرا داتاکان بخوێندرێنەوە', 'error');
             }
