@@ -1054,7 +1054,7 @@ if ($customer_id) {
 <script src="../assets/js/customer_profile/customer_profile.js" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/customer_profile/delete_return_debt.js" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/customer_profile/update_return_debt.js" nonce="<?php echo $csp_nonce; ?>"></script>
-<script src="../assets/js/customer_profile/account_adjustments.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/customer_profile/account_adjustments.js?v=<?php echo @filemtime(__DIR__ . '/../assets/js/customer_profile/account_adjustments.js') ?: time(); ?>" nonce="<?php echo $csp_nonce; ?>"></script>
 
 <script nonce="<?php echo $csp_nonce; ?>">
     // Debugging script to help identify issues

@@ -112,7 +112,9 @@ function loadCustomerAdjustments() {
             if (data && data.success === false && data.msg && window.Swal) {
                 Swal.fire('هەڵە', data.msg, 'error');
             }
-            const rows = data && data.success && Array.isArray(data.data) ? data.data : [];
+            const rows = Array.isArray(data)
+                ? data
+                : (data && data.success && Array.isArray(data.data) ? data.data : []);
             customerAdjustmentsGridApi.setGridOption('rowData', rows);
             if (rows.length === 0) {
                 customerAdjustmentsGridApi.showNoRowsOverlay();
@@ -133,6 +135,22 @@ document.addEventListener('DOMContentLoaded', function () {
     if (gridDiv) {
         customerAdjustmentsGridApi = agGrid.createGrid(gridDiv, customerAdjustmentsGridOptions);
         loadCustomerAdjustments();
+    }
+
+    const adjustmentsTabBtn = document.getElementById('adjustments-tab');
+    if (adjustmentsTabBtn) {
+        adjustmentsTabBtn.addEventListener('shown.bs.tab', function () {
+            loadCustomerAdjustments();
+            if (customerAdjustmentsGridApi) {
+                setTimeout(() => {
+                    const cols = customerAdjustmentsGridApi.getColumns?.() || [];
+                    const colIds = cols.map(c => c.getColId()).filter(Boolean);
+                    if (colIds.length) {
+                        customerAdjustmentsGridApi.autoSizeColumns(colIds, false);
+                    }
+                }, 50);
+            }
+        });
     }
 
     const form = document.getElementById('addCustomerAdjustmentForm');

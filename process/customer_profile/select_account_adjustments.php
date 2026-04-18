@@ -15,6 +15,7 @@ if (!isset($_SESSION['user_id']) || !hasPermission('view_customer')) {
 }
 
 try {
+    error_log('select_account_adjustments.php GET: ' . print_r($_GET, true));
     if (isset($_GET['adjustment_id'])) {
         $adjustment_id = intval($_GET['adjustment_id']);
         $stmt = $pdo->prepare("
