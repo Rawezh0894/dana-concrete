@@ -57,6 +57,19 @@ const purchaseColumnDefs = [
         }
     },
     {
+        field: 'factory_truck_name',
+        headerName: 'تڕێلە (هی کارگە)',
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+        sortable: true,
+        resizable: true,
+        minWidth: 100,
+        cellStyle: { textAlign: 'right', direction: 'rtl' },
+        tooltipValueGetter: function (params) {
+            return params.value || '';
+        }
+    },
+    {
         field: 'remaining_iqd',
         headerName: 'پارەی ماوە بە دینار',
         filter: 'agNumberColumnFilter',
@@ -451,7 +464,8 @@ function loadPurchaseData(preservePagination = false) {
                     paid_iqd: row.paid_iqd || 0,
                     remaining_usd: row.remaining_usd || 0,
                     remaining_iqd: row.remaining_iqd || 0,
-                    bin_name: row.bin_name || '-'
+                    bin_name: row.bin_name || '-',
+                    factory_truck_name: row.factory_truck_name || '-'
                 }));
 
                 purchaseGridApi.setGridOption('rowData', rowData);
@@ -638,6 +652,7 @@ $(document).on('click', '.edit-purchase', function (e) {
                 $('#edit_invoice_number').val(data.invoice_number);
                 $('#edit_material_id').val(data.material_id).trigger('change');
                 $('#edit_bin_id').val(data.bin_id).trigger('change');
+                $('#edit_factory_truck_id').val(data.factory_truck_id).trigger('change');
                 $('#edit_date').val(data.date);
                 $('#edit_type').val(data.type).trigger('change');
                 $('#edit_kg').val(data.kg);

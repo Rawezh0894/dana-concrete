@@ -28,13 +28,15 @@ if (isset($_GET['id'])) {
             d.name as driver_name,
             c.name as company_name,
             m.name as material_name,
-            b.name as bin_name
+            b.name as bin_name,
+            ft.truck_name as factory_truck_name
         FROM purchases p 
         LEFT JOIN locations l ON p.location = l.name 
         LEFT JOIN drivers d ON p.driver = d.name
         LEFT JOIN company c ON p.company_id = c.id
         LEFT JOIN materials m ON p.material_id = m.id
         LEFT JOIN bins_silos b ON p.bin_id = b.id
+        LEFT JOIN factory_trucks ft ON p.factory_truck_id = ft.id
         WHERE p.id = ?
     ");
     $stmt->execute([$id]);
@@ -66,6 +68,8 @@ if (isset($_GET['id'])) {
         $row['paid_iqd'] = $row['paid_iqd'] ?? 0;
         $row['remaining_usd'] = $row['remaining_usd'] ?? 0;
         $row['remaining_iqd'] = $row['remaining_iqd'] ?? 0;
+        $row['factory_truck_id'] = $row['factory_truck_id'] ?? '';
+        $row['factory_truck_name'] = $row['factory_truck_name'] ?? '';
         
         // Log the data being returned for debugging
         error_log('Purchase data for edit modal: ' . print_r($row, true));
@@ -159,7 +163,8 @@ LEFT JOIN company c ON p.company_id = c.id
 LEFT JOIN locations l ON p.location = l.name
 LEFT JOIN drivers d ON p.driver = d.name
 LEFT JOIN materials m ON p.material_id = m.id
-LEFT JOIN bins_silos b ON p.bin_id = b.id";
+LEFT JOIN bins_silos b ON p.bin_id = b.id
+LEFT JOIN factory_trucks ft ON p.factory_truck_id = ft.id";
 if ($where) {
     $count_sql .= " WHERE " . implode(" AND ", $where);
 }
@@ -168,13 +173,14 @@ $count_stmt->execute($params);
 $total_records = $count_stmt->fetchColumn();
 
 // Get paginated data
-$sql = "SELECT p.id, c.name AS company_name, l.name AS location_name, d.name AS driver_name, p.invoice_number, m.name AS material_name, p.date, p.payment_type, p.type, p.kg, p.price_per_kg_usd, p.price_per_kg_iqd, p.price, p.amount_iqd, p.exchange_rate, p.paid_usd, p.paid_iqd, p.remaining_usd, p.remaining_iqd, b.name AS bin_name
+$sql = "SELECT p.id, c.name AS company_name, l.name AS location_name, d.name AS driver_name, p.invoice_number, m.name AS material_name, p.date, p.payment_type, p.type, p.kg, p.price_per_kg_usd, p.price_per_kg_iqd, p.price, p.amount_iqd, p.exchange_rate, p.paid_usd, p.paid_iqd, p.remaining_usd, p.remaining_iqd, b.name AS bin_name, ft.truck_name as factory_truck_name, p.factory_truck_id
 FROM purchases p
 LEFT JOIN company c ON p.company_id = c.id
 LEFT JOIN locations l ON p.location = l.name
 LEFT JOIN drivers d ON p.driver = d.name
 LEFT JOIN materials m ON p.material_id = m.id
-LEFT JOIN bins_silos b ON p.bin_id = b.id";
+LEFT JOIN bins_silos b ON p.bin_id = b.id
+LEFT JOIN factory_trucks ft ON p.factory_truck_id = ft.id";
 if ($where) {
     $sql .= " WHERE " . implode(" AND ", $where);
 }
