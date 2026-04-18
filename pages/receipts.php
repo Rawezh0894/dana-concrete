@@ -14,7 +14,7 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 <head>
     <meta charset="UTF-8">
     <title>پسووڵە</title>
-    <link rel="stylesheet" href="../assets/css/receipts.css">
+    <link rel="stylesheet" href="../assets/css/receipts.css?v=2.1">
     <link rel="stylesheet" href="../assets/fonts/Rabar_021.ttf">
     <link href="../assets/css/comon/table.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -1300,10 +1300,10 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         }
     });
 </script>
-<script src="../assets/js/receipts/receipts.js" nonce="<?php echo $csp_nonce; ?>"></script>
-<script src="../assets/js/receipts/select_sale.js" nonce="<?php echo $csp_nonce; ?>"></script>
-<script src="../assets/js/receipts/select_return_debt.js" nonce="<?php echo $csp_nonce; ?>"></script>
-<script src="../assets/js/receipts/load_locations.js" nonce="<?php echo $csp_nonce; ?>"></script>
-<script src="../assets/js/receipts/load_recipients.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/receipts/receipts.js?v=2.1" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/receipts/select_sale.js?v=2.1" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/receipts/select_return_debt.js?v=2.1" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/receipts/load_locations.js?v=2.1" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/receipts/load_recipients.js?v=2.1" nonce="<?php echo $csp_nonce; ?>"></script>
 </body>
 </html>
