@@ -57,19 +57,6 @@ const purchaseColumnDefs = [
         }
     },
     {
-        field: 'factory_truck_name',
-        headerName: 'تڕێلە (کارگە)',
-        filter: 'agTextColumnFilter',
-        floatingFilter: true,
-        sortable: true,
-        resizable: true,
-        minWidth: 100,
-        cellStyle: { textAlign: 'right', direction: 'rtl', fontWeight: 'bold', color: '#007bff' },
-        tooltipValueGetter: function (params) {
-            return params.value || '-';
-        }
-    },
-    {
         field: 'remaining_iqd',
         headerName: 'پارەی ماوە بە دینار',
         filter: 'agNumberColumnFilter',
@@ -301,7 +288,6 @@ const purchaseColumnDefs = [
             return params.value || '';
         }
     },
-
     {
         field: 'location_name',
         headerName: 'شوێن',
@@ -465,9 +451,7 @@ function loadPurchaseData(preservePagination = false) {
                     paid_iqd: row.paid_iqd || 0,
                     remaining_usd: row.remaining_usd || 0,
                     remaining_iqd: row.remaining_iqd || 0,
-                    bin_name: row.bin_name || '-',
-                    factory_truck_id: row.factory_truck_id || '',
-                    factory_truck_name: row.factory_truck_name || '-'
+                    bin_name: row.bin_name || '-'
                 }));
 
                 purchaseGridApi.setGridOption('rowData', rowData);
@@ -650,7 +634,6 @@ $(document).on('click', '.edit-purchase', function (e) {
                 $('#edit_id').val(data.id);
                 $('#edit_company_id').val(data.company_id).trigger('change');
                 $('#edit_driver_id').val(data.driver_id).trigger('change');
-                $('#edit_factory_truck_id').val(data.factory_truck_id).trigger('change');
                 $('#edit_location_id').val(data.location_id).trigger('change');
                 $('#edit_invoice_number').val(data.invoice_number);
                 $('#edit_material_id').val(data.material_id).trigger('change');

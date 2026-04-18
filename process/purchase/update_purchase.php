@@ -31,8 +31,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = $_POST['id'] ?? null;
     $company_id = $_POST['company_id'] ?? null;
     $driver_id = $_POST['driver_id'] ?? null;
-    $factory_truck_id = $_POST['factory_truck_id'] ?? null;
-    if ($factory_truck_id === '') $factory_truck_id = null;
     $location_id = $_POST['location_id'] ?? null;
     $invoice_number = $_POST['invoice_number'] ?? null;
     $bin_id = $_POST['bin_id'] ?? null;
@@ -198,14 +196,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'price_per_kg_iqd' => $old_record['price_per_kg_iqd'],
             'price_per_kg_usd' => $old_record['price_per_kg_usd'],
             'invoice_number' => $old_record['invoice_number'],
-            'date' => $old_record['date'],
-            'factory_truck_id' => $old_record['factory_truck_id']
+            'date' => $old_record['date']
         ];
 
         // Now perform the update
-        $stmt = $pdo->prepare("UPDATE purchases SET date=?, invoice_number=?, driver=?, location=?, material_id=?, amount_iqd=?, kg=?, price=?, payment_type=?, exchange_rate=?, company_id=?, type=?, paid_usd=?, paid_iqd=?, remaining_usd=?, remaining_iqd=?, bin_id=?, price_per_kg_iqd=?, price_per_kg_usd=?, factory_truck_id=? WHERE id=?");
+        $stmt = $pdo->prepare("UPDATE purchases SET date=?, invoice_number=?, driver=?, location=?, material_id=?, amount_iqd=?, kg=?, price=?, payment_type=?, exchange_rate=?, company_id=?, type=?, paid_usd=?, paid_iqd=?, remaining_usd=?, remaining_iqd=?, bin_id=?, price_per_kg_iqd=?, price_per_kg_usd=? WHERE id=?");
         $result = $stmt->execute([
-            $date, $invoice_number, $driver, $location, $material_id, $amount_iqd, $kg, $price, $payment_type, $exchange_rate, $company_id, $type, $paid_usd, $paid_iqd, $remaining_usd, $remaining_iqd, $bin_id, $price_per_kg_iqd, $price_per_kg_usd, $factory_truck_id, $id
+            $date, $invoice_number, $driver, $location, $material_id, $amount_iqd, $kg, $price, $payment_type, $exchange_rate, $company_id, $type, $paid_usd, $paid_iqd, $remaining_usd, $remaining_iqd, $bin_id, $price_per_kg_iqd, $price_per_kg_usd, $id
         ]);
 
         if ($result && $stmt->rowCount() > 0) {
@@ -248,8 +245,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'price_per_kg_iqd' => $price_per_kg_iqd,
                 'price_per_kg_usd' => $price_per_kg_usd,
                 'invoice_number' => $invoice_number,
-                'date' => $date,
-                'factory_truck_id' => $factory_truck_id
+                'date' => $date
             ];
 
             $additional_info = [
