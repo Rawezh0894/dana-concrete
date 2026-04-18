@@ -15,6 +15,21 @@ if (!isset($_SESSION['user_id']) || !hasPermission('view_customer')) {
 }
 
 try {
+    if (isset($_GET['adjustment_id'])) {
+        $adjustment_id = intval($_GET['adjustment_id']);
+        $stmt = $pdo->prepare("
+            SELECT a.id, a.customer_id, a.date, a.adjustment_type, a.amount_usd, a.reason, a.created_at, u.name AS created_by_name
+            FROM customer_account_adjustments a
+            LEFT JOIN users u ON a.created_by = u.id
+            WHERE a.id = ?
+            LIMIT 1
+        ");
+        $stmt->execute([$adjustment_id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        echo json_encode($row ?: []);
+        exit;
+    }
+
     $customer_id = isset($_GET['customer_id']) ? intval($_GET['customer_id']) : 0;
     if (!$customer_id) {
         echo json_encode(['success' => false, 'data' => []]);

@@ -2,6 +2,26 @@ let customerAdjustmentsGridApi;
 
 const customerAdjustmentsColumnDefs = [
     {
+        field: 'actions',
+        headerName: 'کردارەکان',
+        sortable: false,
+        filter: false,
+        minWidth: 130,
+        maxWidth: 160,
+        cellStyle: { textAlign: 'center', direction: 'ltr' },
+        cellRenderer: function (params) {
+            if (!params.data) return '-';
+            return `
+                <button class="btn btn-warning btn-sm edit-adjustment" data-id="${params.data.id}" title="نوێکردنەوە" style="margin:2px;">
+                    <i class="fa fa-edit"></i>
+                </button>
+                <button class="btn btn-danger btn-sm delete-adjustment" data-id="${params.data.id}" title="سڕینەوە" style="margin:2px;">
+                    <i class="fa fa-trash"></i>
+                </button>
+            `;
+        }
+    },
+    {
         field: 'date',
         headerName: 'بەروار',
         filter: 'agDateColumnFilter',
@@ -145,5 +165,89 @@ document.addEventListener('DOMContentLoaded', function () {
             Swal.fire('هەڵە', 'هەڵەیەک ڕوویدا', 'error');
         }
     });
+
+    const editForm = document.getElementById('editCustomerAdjustmentForm');
+    if (editForm) {
+        editForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const formData = new FormData(editForm);
+            try {
+                const res = await fetch('../process/customer_profile/update_account_adjustment.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                if (data.success) {
+                    Swal.fire('سەرکەوتوو', data.msg, 'success');
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('editCustomerAdjustmentModal'));
+                    if (modal) modal.hide();
+                    if (typeof refreshCustomerData === 'function') refreshCustomerData();
+                    loadCustomerAdjustments();
+                } else {
+                    Swal.fire('هەڵە', data.msg || 'هەڵەیەک ڕوویدا', 'error');
+                }
+            } catch (err) {
+                Swal.fire('هەڵە', 'هەڵەیەک ڕوویدا', 'error');
+            }
+        });
+    }
+});
+
+$(document).on('click', '.edit-adjustment', async function () {
+    const id = $(this).data('id');
+    if (!id) return;
+    try {
+        const res = await fetch(`../process/customer_profile/select_account_adjustments.php?adjustment_id=${id}`);
+        const data = await res.json();
+        if (!data || !data.id) {
+            Swal.fire('هەڵە', 'ڕیکۆرد نەدۆزرایەوە', 'error');
+            return;
+        }
+        $('#edit_adjustment_id').val(data.id);
+        $('#edit_adjustment_date').val(data.date || '');
+        $('#edit_adjustment_type').val(data.adjustment_type || 'increase');
+        $('#edit_adjustment_amount_usd').val(data.amount_usd || 0);
+        $('#edit_adjustment_reason').val(data.reason || '');
+        const modalEl = document.getElementById('editCustomerAdjustmentModal');
+        if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            bootstrap.Modal.getOrCreateInstance(modalEl).show();
+        }
+    } catch (e) {
+        Swal.fire('هەڵە', 'هەڵەیەک ڕوویدا', 'error');
+    }
+});
+
+$(document).on('click', '.delete-adjustment', async function () {
+    const id = $(this).data('id');
+    if (!id) return;
+    const result = await Swal.fire({
+        title: 'دڵنیایت؟',
+        text: 'دەتەوێت ئەم ڕیکۆردە بسڕیتەوە؟',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'بەڵێ، بسڕەوە',
+        cancelButtonText: 'داخستن',
+        confirmButtonColor: '#d33'
+    });
+    if (!result.isConfirmed) return;
+
+    const formData = new FormData();
+    formData.append('id', id);
+    try {
+        const res = await fetch('../process/customer_profile/delete_account_adjustment.php', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+            Swal.fire('سەرکەوتوو', data.msg, 'success');
+            if (typeof refreshCustomerData === 'function') refreshCustomerData();
+            loadCustomerAdjustments();
+        } else {
+            Swal.fire('هەڵە', data.msg || 'هەڵەیەک ڕوویدا', 'error');
+        }
+    } catch (e) {
+        Swal.fire('هەڵە', 'هەڵەیەک ڕوویدا', 'error');
+    }
 });
 

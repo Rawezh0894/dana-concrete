@@ -178,6 +178,9 @@ if ($customer_id) {
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="debt-tab" data-bs-toggle="tab" data-bs-target="#debt" type="button" role="tab" aria-controls="debt" aria-selected="false">مێژووی دانەوەی قەرزەکان</button>
         </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="adjustments-tab" data-bs-toggle="tab" data-bs-target="#adjustments" type="button" role="tab" aria-controls="adjustments" aria-selected="false">مێژووی ڕێکخستنەوەکان</button>
+        </li>
     </ul>
     <div class="tab-content" id="profileTabsContent">
         <div class="tab-pane fade show active" id="sales" role="tabpanel" aria-labelledby="sales-tab">
@@ -190,9 +193,6 @@ if ($customer_id) {
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="mb-0">مێژووی دانەوەی قەرزەکان</h5>
                 <div class="d-flex gap-2">
-                    <button class="btn" style="background: #0d6efd; color: #fff; border: none; font-weight: bold;" data-bs-toggle="modal" data-bs-target="#addCustomerAdjustmentModal">
-                      <i class="fa fa-sliders"></i> ڕێکخستنەوەی حیساب
-                    </button>
                     <button class="btn" style="background: var(--seafoam-green); color: #fff; border: none; font-weight: bold;" data-bs-toggle="modal" data-bs-target="#addCustomerDebtModal">
                       <i class="fa fa-plus"></i> دانەوەی قەرز
                     </button>
@@ -202,10 +202,14 @@ if ($customer_id) {
             <div class="table-responsive">
                 <div id="customerDebtGrid" class="ag-grid-container ag-theme-alpine"></div>
             </div>
-            <hr class="my-4">
-            <h6 class="mb-3" style="color: var(--seafoam-green); font-weight: bold;">
-                مێژووی ڕێکخستنەوەی حیساب
-            </h6>
+        </div>
+        <div class="tab-pane fade" id="adjustments" role="tabpanel" aria-labelledby="adjustments-tab">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">مێژووی ڕێکخستنەوەی حیساب</h5>
+                <button class="btn" style="background: #0d6efd; color: #fff; border: none; font-weight: bold;" data-bs-toggle="modal" data-bs-target="#addCustomerAdjustmentModal">
+                  <i class="fa fa-sliders"></i> ڕێکخستنەوەی حیساب
+                </button>
+            </div>
             <div class="table-responsive">
                 <div id="customerAdjustmentsGrid" class="ag-grid-container ag-theme-alpine"></div>
             </div>
@@ -244,6 +248,45 @@ if ($customer_id) {
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
               <button type="submit" class="btn" style="background: #0d6efd; color: #fff; border: none; font-weight: bold;">تۆمارکردن</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <!-- Edit Customer Account Adjustment Modal -->
+    <div class="modal fade" id="editCustomerAdjustmentModal" tabindex="-1" aria-labelledby="editCustomerAdjustmentModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form id="editCustomerAdjustmentForm">
+            <input type="hidden" id="edit_adjustment_id" name="id">
+            <div class="modal-header">
+              <h5 class="modal-title" id="editCustomerAdjustmentModalLabel">نوێکردنەوەی ڕێکخستنەوەی حیساب</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div class="mb-3">
+                <label for="edit_adjustment_date" class="form-label">بەروار</label>
+                <input type="date" class="form-control" id="edit_adjustment_date" name="date" required>
+              </div>
+              <div class="mb-3">
+                <label for="edit_adjustment_type" class="form-label">جۆری ڕێکخستنەوە</label>
+                <select class="form-control" id="edit_adjustment_type" name="adjustment_type" required>
+                  <option value="increase">زیادکردنی قەرز</option>
+                  <option value="decrease">کەمکردنی قەرز</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="edit_adjustment_amount_usd" class="form-label">بڕ (USD)</label>
+                <input type="number" class="form-control" id="edit_adjustment_amount_usd" name="amount_usd" min="0.01" step="0.0001" required>
+              </div>
+              <div class="mb-3">
+                <label for="edit_adjustment_reason" class="form-label">هۆکار / وەسف</label>
+                <textarea class="form-control" id="edit_adjustment_reason" name="reason" rows="3" required></textarea>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
+              <button type="submit" class="btn" style="background: #0d6efd; color: #fff; border: none; font-weight: bold;">نوێکردنەوە</button>
             </div>
           </form>
         </div>
