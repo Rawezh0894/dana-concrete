@@ -26,16 +26,25 @@ $categories = $stmt->fetchAll();
 
 // هێنانی دواین جوڵەکان (Transactions History) 
 $stmt = $pdo->prepare("
-    SELECT t.created_at, t.type, l.amount, l.currency_code, l.description, l.exchange_rate_applied, tc.name as category_name
+    SELECT t.created_at, t.type as trans_type, l.amount, l.currency_code, l.description, l.exchange_rate_applied, tc.name as category_name
     FROM ledger_entries l
     JOIN transactions t ON l.transaction_id = t.id
     LEFT JOIN transaction_categories tc ON t.category_id = tc.id
     JOIN wallets w ON l.wallet_id = w.id
     WHERE w.user_id = ?
-    ORDER BY t.created_at DESC LIMIT 10
+    ORDER BY t.created_at DESC, t.id DESC LIMIT 20
 ");
 $stmt->execute([$user_id]);
-$history = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$history_rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// گروپکردنی مێژووەکە بەپێی کات بۆ ئەوەی مامەڵە فرە دراوەکان پێکەوە بن
+$grouped_history = [];
+foreach ($history_rows as $row) {
+    $time = $row['created_at'];
+    // بەکارهێنانی کات وەکو کلیل بۆ گروپکردن (یان هەر ناسێنەرێکی تر گەر هەبێت)
+    // لێرەدا دەتوانین یەکێک لە ڕیفرنسەکان بەکاربهێنین، بەڵام بۆ سادەیی کاتەکە بەکاردێنین
+    $grouped_history[$time][] = $row;
+}
 ?>
 
 <!DOCTYPE html>
@@ -74,6 +83,7 @@ $history = $stmt->fetchAll(PDO::FETCH_ASSOC);
             color: white;
             transform: scale(1.05);
         }
+        .multi-currency-row { background-color: #f8f9fa; }
     </style>
 </head>
 <body dir="rtl">
@@ -90,7 +100,7 @@ $history = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
         </div>
         
-        <!-- Balance Cards Row -->
+        <!-- Balance Cards -->
         <div class="row g-3 mb-4">
             <div class="col-md-6">
                 <div class="card wallet-card bg-success text-white">
@@ -116,50 +126,64 @@ $history = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
         </div>
 
-        <!-- History Card -->
+        <!-- History -->
         <div class="card shadow border-0" style="border-radius: 12px;">
-            <div class="card-header bg-white py-3 border-0">
-                <h5 class="mb-0 fw-bold" style="color: var(--seafoam-green);">دواین ١٠ جوڵەی قاسە</h5>
+            <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold" style="color: var(--seafoam-green);">دواین چالاکییەکان</h5>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0 text-center">
+                    <table class="table align-middle mb-0 text-center">
                         <thead class="table-light">
                             <tr>
                                 <th>بەروار</th>
                                 <th>جۆر</th>
-                                <th>هۆکار / پۆلێن</th>
-                                <th>بڕ</th>
-                                <th>دراو</th>
-                                <th>سێرعی گۆڕینەوە</th>
+                                <th>هۆکار</th>
+                                <th>بڕی USD</th>
+                                <th>بڕی IQD</th>
                                 <th>تێبینی</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($history as $row): ?>
+                            <?php 
+                            // Re-fetch transactions grouped to show multi-currency clearly
+                            $stmt = $pdo->prepare("
+                                SELECT t.id, t.created_at, t.type as trans_type, tc.name as category_name,
+                                (SELECT amount FROM ledger_entries WHERE transaction_id = t.id AND currency_code = 'USD' LIMIT 1) as usd_amount,
+                                (SELECT amount FROM ledger_entries WHERE transaction_id = t.id AND currency_code = 'IQD' LIMIT 1) as iqd_amount,
+                                (SELECT description FROM ledger_entries WHERE transaction_id = t.id LIMIT 1) as description
+                                FROM transactions t
+                                LEFT JOIN transaction_categories tc ON t.category_id = tc.id
+                                WHERE t.created_by = ?
+                                ORDER BY t.created_at DESC LIMIT 15
+                            ");
+                            $stmt->execute([$user_id]);
+                            $transactions = $stmt->fetchAll();
+
+                            foreach ($transactions as $tx): 
+                                $is_exchange = $tx['trans_type'] === 'EXCHANGE';
+                            ?>
                                 <tr>
-                                    <td><span class="badge bg-secondary"><?= $row['created_at'] ?></span></td>
+                                    <td><small class="text-muted"><?= $tx['created_at'] ?></small></td>
                                     <td>
-                                        <?php if($row['type'] === 'EXCHANGE'): ?>
+                                        <?php if($is_exchange): ?>
                                             <span class="badge bg-warning text-dark">ئاڵوگۆڕ 💱</span>
-                                        <?php elseif($row['amount'] > 0): ?>
+                                        <?php elseif(($tx['usd_amount'] ?? 0) > 0 || ($tx['iqd_amount'] ?? 0) > 0): ?>
                                             <span class="badge bg-success">هاتن 📥</span>
                                         <?php else: ?>
                                             <span class="badge bg-danger">دەرچوون 📤</span>
                                         <?php endif; ?>
                                     </td>
-                                    <td><span class="fw-bold text-primary"><?= htmlspecialchars($row['category_name'] ?? 'ئاڵوگۆڕ') ?></span></td>
-                                    <td dir="ltr" class="fw-bold fs-5 <?= $row['amount'] > 0 ? 'text-success' : 'text-danger' ?>">
-                                        <?= number_format($row['amount'], 2) ?>
+                                    <td><span class="fw-bold text-primary"><?= htmlspecialchars($tx['category_name'] ?? ($is_exchange ? 'ئاڵوگۆڕ' : 'بی جۆر')) ?></span></td>
+                                    <td dir="ltr" class="fw-bold <?= ($tx['usd_amount'] ?? 0) > 0 ? 'text-success' : (($tx['usd_amount'] ?? 0) < 0 ? 'text-danger' : 'text-muted') ?>">
+                                        <?= $tx['usd_amount'] ? number_format(abs($tx['usd_amount']), 2) . ' $' : '-' ?>
                                     </td>
-                                    <td class="fw-bold"><?= $row['currency_code'] ?></td>
-                                    <td><?= floatval($row['exchange_rate_applied']) == 1 ? '-' : floatval($row['exchange_rate_applied']) ?></td>
-                                    <td class="text-muted"><?= htmlspecialchars($row['description'] ?? '') ?></td>
+                                    <td dir="ltr" class="fw-bold <?= ($tx['iqd_amount'] ?? 0) > 0 ? 'text-success' : (($tx['iqd_amount'] ?? 0) < 0 ? 'text-danger' : 'text-muted') ?>">
+                                        <?= $tx['iqd_amount'] ? number_format(abs($tx['iqd_amount']), 0) . ' IQD' : '-' ?>
+                                    </td>
+                                    <td class="text-muted small"><?= htmlspecialchars($tx['description'] ?? '') ?></td>
                                 </tr>
                             <?php endforeach; ?>
-                            <?php if (empty($history)): ?>
-                                <tr><td colspan="7" class="text-muted py-4">هیچ جوڵەیەک بوونی نییە</td></tr>
-                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
@@ -167,7 +191,7 @@ $history = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </div>
 
-    <!-- Modals -->
+    <!-- actionModal update for Dual Currency -->
     <div class="modal fade" id="actionModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content border-0 shadow">
@@ -180,8 +204,8 @@ $history = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <input type="hidden" name="action" id="formActionType">
                         
                         <div class="mb-3">
-                            <label class="form-label text-muted fw-bold">جۆری پۆلێن (هۆکار)</label>
-                            <select name="category_id" id="actionCategory" class="form-select form-select-lg" required>
+                            <label class="form-label text-muted fw-bold">هۆکاری مامەڵە</label>
+                            <select name="category_id" id="actionCategory" class="form-select" required>
                                 <option value="">هەڵبژاردن...</option>
                                 <?php foreach($categories as $cat): ?>
                                     <option value="<?= $cat['id'] ?>" data-type="<?= $cat['type'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
@@ -189,74 +213,80 @@ $history = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             </select>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label text-muted fw-bold">جۆری دراو</label>
-                            <select name="currency" id="actionCurrency" class="form-select form-select-lg" required>
-                                <option value="USD">دۆلار (USD)</option>
-                                <option value="IQD">دینار (IQD)</option>
-                            </select>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <div class="p-3 border rounded bg-light">
+                                    <h6 class="fw-bold mb-3 border-bottom pb-2">بڕی پارە بە هەردوو دراو (تەنهان دانەیەکیان پڕ بکەرەوە یان هەردووکیان)</h6>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <label class="form-label small text-success">بڕی دۆلار ($)</label>
+                                            <input type="number" name="amount_usd" id="amountUSD" class="form-control" step="0.01" placeholder="0.00">
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label small text-primary">بڕی دینار (عێراقی)</label>
+                                            <input type="number" name="amount_iqd" id="amountIQD" class="form-control" step="250" placeholder="0">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
+
                         <div class="mb-3">
-                            <label class="form-label text-muted fw-bold">بڕی پارە</label>
-                            <input type="number" name="amount" id="actionAmount" class="form-control form-control-lg" step="0.01" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label text-muted fw-bold">تێبینی زیادە</label>
-                            <textarea name="description" class="form-control" rows="2" placeholder="تێبینی بنووسە..."></textarea>
+                            <label class="form-label text-muted fw-bold">تێبینی</label>
+                            <textarea name="description" class="form-control" rows="2" placeholder="بۆ کێ تێبینی؟"></textarea>
                         </div>
                     </div>
                     <div class="modal-footer border-0">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
-                        <button type="submit" class="btn btn-primary px-4">ئەنجامدان</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">لابردن</button>
+                        <button type="submit" class="btn btn-primary px-4">تۆمارکردن</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- Exchange Modal (No changes needed for category here usually, or can add generic exchange category) -->
+    <!-- Exchange Modal (Keep same or similar) -->
     <div class="modal fade" id="exchangeModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content border-0 shadow">
                 <form id="exchangeForm">
                     <div class="modal-header bg-warning text-dark">
-                        <h5 class="modal-title fw-bold">ئاڵوگۆڕی دراو</h5>
+                        <h5 class="modal-title fw-bold">ئاڵوگۆڕی دراو (تەنها یەک جۆری پارە)</h5>
                         <button type="button" class="btn-close m-0 ms-auto" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body bg-light">
                         <input type="hidden" name="action" value="exchange">
                         <div class="row align-items-center">
                             <div class="col-md-5 mb-3">
-                                <label class="mb-2 fw-bold text-danger">دەدەم بە دراوی</label>
-                                <select name="from_currency" id="exFrom" class="form-select border-danger" required>
-                                    <option value="USD" selected>دۆلار (USD)</option>
+                                <label class="mb-2 fw-bold text-danger">لە پارەی</label>
+                                <select name="from_currency" id="exFrom" class="form-select" required>
+                                    <option value="USD">دۆلار (USD)</option>
                                     <option value="IQD">دینار (IQD)</option>
                                 </select>
                             </div>
-                            <div class="col-md-2 text-center fs-3 mb-3 text-muted">🔀</div>
+                            <div class="col-md-2 text-center fs-3 mb-3 text-muted">➡️</div>
                             <div class="col-md-5 mb-3">
-                                <label class="mb-2 fw-bold text-success">وەردەگرم بە دراوی</label>
-                                <select name="to_currency" id="exTo" class="form-select border-success" required>
+                                <label class="mb-2 fw-bold text-success">بۆ پارەی</label>
+                                <select name="to_currency" id="exTo" class="form-select" required>
                                     <option value="IQD" selected>دینار (IQD)</option>
                                     <option value="USD">دۆلار (USD)</option>
                                 </select>
                             </div>
                         </div>
-                        <hr>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label text-muted">بڕی خەرجکراو لە قاسە</label>
-                                <input type="number" name="exchange_amount" id="exAmount" class="form-control form-control-lg" step="0.01" required>
+                                <label class="form-label small">بڕی خەرجکراو</label>
+                                <input type="number" name="exchange_amount" id="exAmount" class="form-control" step="0.01" required>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label text-muted">سێرعی گۆڕینەوە (نموونە: 1520)</label>
-                                <input type="number" name="exchange_rate" class="form-control form-control-lg" step="0.0001" required>
+                                <label class="form-label small">سێرعی گۆڕینەوە</label>
+                                <input type="number" name="exchange_rate" class="form-control" step="0.0001" required>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">لابردن</button>
-                        <button type="submit" class="btn btn-warning px-5 fw-bold text-dark">ئاڵوگۆڕکردن</button>
+                        <button type="submit" class="btn btn-warning px-5 fw-bold text-dark">گۆڕینەوە</button>
                     </div>
                 </form>
             </div>
@@ -266,24 +296,20 @@ $history = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <script>
         function setFormAction(type) {
             $('#formActionType').val(type);
-            
-            // فلتەرکردنی هۆکارەکان بەپێی ئینفلۆو یان ئاوتفلۆو
             const filterType = (type === 'inflow') ? 'INFLOW' : 'OUTFLOW';
             $('#actionCategory option').each(function() {
                 const catType = $(this).data('type');
-                if (catType && catType !== 'BOTH' && catType !== filterType) {
-                    $(this).hide();
-                } else {
-                    $(this).show();
-                }
+                if (catType && catType !== 'BOTH' && catType !== filterType) $(this).hide();
+                else $(this).show();
             });
             $('#actionCategory').val('');
+            $('#amountUSD, #amountIQD').val('');
 
             if(type === 'inflow'){
-                $('#actionModalLabel').text('زیادکردنی پارە بۆ قاسە (Inflow)');
+                $('#actionModalLabel').text('تۆمارکردنی زیادکردنی پارە (Dual Currency)');
                 $('#actionModal .modal-header').removeClass('bg-danger').addClass('bg-success text-white');
-            }else{
-                $('#actionModalLabel').text('ڕاکێشانی پارە لە قاسە (Outflow)');
+            } else {
+                $('#actionModalLabel').text('تۆمارکردنی خەرجی / ڕاکێشان (Dual Currency)');
                 $('#actionModal .modal-header').removeClass('bg-success').addClass('bg-danger text-white');
             }
         }
@@ -291,12 +317,21 @@ $history = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $('#actionForm').submit(function(e) {
             e.preventDefault();
             const action = $('#formActionType').val();
-            const amount = parseFloat($('#actionAmount').val());
-            const currency = $('#actionCurrency').val();
-            let currentBalance = currency === 'USD' ? parseFloat($('#usdBalance').data('balance')) : parseFloat($('#iqdBalance').data('balance'));
-            if (action === 'outflow' && amount > currentBalance) {
-                alert('بڕی پارەی داواکراو بۆ ڕاکێشان لە باڵانسەکەت زیاترە!');
+            const usd = parseFloat($('#amountUSD').val() || 0);
+            const iqd = parseFloat($('#amountIQD').val() || 0);
+            
+            if (usd <= 0 && iqd <= 0) {
+                alert('تکایە بڕی لایەنی کەم یەکێک لە دراوەکان بنووسە!');
                 return;
+            }
+
+            if (action === 'outflow') {
+                const balUSD = parseFloat($('#usdBalance').data('balance'));
+                const balIQD = parseFloat($('#iqdBalance').data('balance'));
+                if (usd > balUSD || iqd > balIQD) {
+                    alert('باڵانسەکەت بەش ناکات بۆ ئەم کشانەوەیە!');
+                    return;
+                }
             }
             submitData($(this));
         });
@@ -306,15 +341,9 @@ $history = $stmt->fetchAll(PDO::FETCH_ASSOC);
             const amount = parseFloat($('#exAmount').val());
             const fromCurr = $('#exFrom').val();
             const toCurr = $('#exTo').val();
-            if (fromCurr === toCurr) {
-                alert('هەڵە: ناکرێت گۆڕینەوە بۆ هەمان جۆری دراو بێت!');
-                return;
-            }
-            let currentBalance = fromCurr === 'USD' ? parseFloat($('#usdBalance').data('balance')) : parseFloat($('#iqdBalance').data('balance'));
-            if (amount > currentBalance) {
-                alert('باڵانسەکەی قاسەت بەشە ناکات بۆ ئەم گۆڕینەوەیە!');
-                return;
-            }
+            if (fromCurr === toCurr) { alert('دراوەکان وەک یەکن!'); return; }
+            let balance = fromCurr === 'USD' ? parseFloat($('#usdBalance').data('balance')) : parseFloat($('#iqdBalance').data('balance'));
+            if (amount > balance) { alert('باڵانس بەش ناکات!'); return; }
             submitData($(this));
         });
 
@@ -325,15 +354,10 @@ $history = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 data: form.serialize(),
                 dataType: 'json',
                 success: function(res) {
-                    if (res.success) {
-                        location.reload();
-                    } else {
-                        alert('کێشە هەیە: ' + res.message);
-                    }
+                    if (res.success) location.reload();
+                    else alert('کێشە: ' + res.message);
                 },
-                error: function() {
-                    alert('هەڵەیەک ڕوویدا لە پەیوەندی کردن بە سێرڤەر (باکئێند).');
-                }
+                error: function() { alert('هەڵە لە سێرڤەر'); }
             });
         }
 
