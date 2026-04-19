@@ -48,27 +48,59 @@ $categories = $stmt->fetchAll();
         .wallet-card { border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.2s; border: none;}
         .wallet-card:hover { transform: translateY(-5px); }
         .currency-symbol { font-size: 1.5rem; font-weight: bold; opacity: 0.8; }
-        .balance { font-size: 2.5rem; font-weight: bold; }
-        .quick-action { background-color: var(--seafoam-green); color: white; font-weight: bold; border-radius: 8px; padding: 10px 20px; transition: all 0.3s ease; border: none; }
+        .balance { font-size: clamp(1.5rem, 5vw, 2.5rem); font-weight: bold; }
+        .quick-action { background-color: var(--seafoam-green); color: white; font-weight: bold; border-radius: 8px; padding: 10px 20px; transition: all 0.3s ease; border: none; flex: 1; text-align: center; }
         .quick-action:hover { background-color: var(--kelly-green); color: white; transform: scale(1.05); }
+        
+        .main-content {
+            transition: all 0.3s;
+            padding: 20px;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 991.98px) {
+            .quick-actions { width: 100%; display: grid !important; grid-template-columns: repeat(2, 1fr); gap: 10px !important; }
+            .quick-action { padding: 12px 10px; font-size: 0.85rem; }
+            .balance { font-size: 1.8rem; }
+        }
+
+        @media (max-width: 575.98px) {
+            .quick-actions { grid-template-columns: 1fr; }
+            .header-title h2 { font-size: 1.5rem; }
+            .filters-section .row > div { margin-bottom: 10px; }
+            .card-header h5 { font-size: 1rem; }
+            .dt-filter { font-size: 0.9rem; }
+        }
+
+        /* Fix for DataTables on mobile */
+        .dataTables_wrapper .row {
+            margin-bottom: 1rem;
+        }
+        .table-responsive {
+            border: none !important;
+        }
+        #transactionsTable {
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body dir="rtl">
     <?php include '../includes/navbar.php'; ?>
     <?php include '../includes/sidebar.php'; ?>
 
-    <div class="container-fluid py-4">
-        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
-            <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">بەڕێوەبردنی قاسە (Cashbox)</h2>
-            <div class="quick-actions d-flex gap-2">
-                <a href="wallet_report.php" class="btn quick-action bg-info text-dark"><i class="fa fa-file-invoice"></i> کشف حساب (ڕاپۆرت)</a>
-                <button class="btn quick-action" data-bs-toggle="modal" data-bs-target="#actionModal" onclick="setFormAction('inflow')"><i class="fa fa-plus"></i> زیادکردنی پارە</button>
-                <button class="btn quick-action" data-bs-toggle="modal" data-bs-target="#actionModal" onclick="setFormAction('outflow')"><i class="fa fa-minus"></i> ڕاکێشانی پارە</button>
-                <button class="btn quick-action bg-warning text-dark" data-bs-toggle="modal" data-bs-target="#exchangeModal"><i class="bi bi-arrow-left-right"></i> ئاڵوگۆڕی دراو</button>
+    <div class="main-content">
+        <div class="container-fluid">
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3 header-title">
+                <h2 class="mb-0 fw-bold" style="color: var(--seafoam-green);">بەڕێوەبردنی قاسە (Cashbox)</h2>
+                <div class="quick-actions d-flex gap-2 flex-grow-1 flex-md-grow-0 justify-content-end">
+                    <a href="wallet_report.php" class="btn quick-action bg-info text-dark"><i class="fa fa-file-invoice"></i> ڕاپۆرت</a>
+                    <button class="btn quick-action" data-bs-toggle="modal" data-bs-target="#actionModal" onclick="setFormAction('inflow')"><i class="fa fa-plus"></i> هاتن</button>
+                    <button class="btn quick-action" data-bs-toggle="modal" data-bs-target="#actionModal" onclick="setFormAction('outflow')"><i class="fa fa-minus"></i> چوون</button>
+                    <button class="btn quick-action bg-warning text-dark" data-bs-toggle="modal" data-bs-target="#exchangeModal"><i class="bi bi-arrow-left-right"></i> گۆڕینەوە</button>
+                </div>
             </div>
-        </div>
-        
-        <!-- Balance Cards -->
+            
+            <!-- Balance Cards -->
         <div class="row g-3 mb-4">
             <div class="col-md-6">
                 <div class="card wallet-card bg-success text-white">
@@ -98,15 +130,15 @@ $categories = $stmt->fetchAll();
         <div class="card shadow-sm border-0 mb-4 filters-section" style="border-radius: 12px;">
             <div class="card-body">
                 <div class="row g-2 align-items-end">
-                    <div class="col-md-2">
+                    <div class="col-sm-6 col-md-4 col-lg-2">
                         <label class="form-label small fw-bold text-muted">لە بەرواری</label>
                         <input type="date" id="filterFrom" class="form-control dt-filter">
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-sm-6 col-md-4 col-lg-2">
                         <label class="form-label small fw-bold text-muted">تا بەرواری</label>
                         <input type="date" id="filterTo" class="form-control dt-filter">
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-sm-6 col-md-4 col-lg-2">
                         <label class="form-label small fw-bold text-muted">جۆری مامەڵە</label>
                         <select id="filterType" class="form-select dt-filter">
                             <option value="">گشتی (هەمووی)</option>
@@ -115,7 +147,7 @@ $categories = $stmt->fetchAll();
                             <option value="EXCHANGE">ئاڵوگۆڕ</option>
                         </select>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-sm-6 col-md-4 col-lg-2">
                         <label class="form-label small fw-bold text-muted">هۆکار / پۆلێن</label>
                         <select id="filterCategory" class="form-select dt-filter">
                             <option value="">گشتی (هەمووی)</option>
@@ -124,13 +156,13 @@ $categories = $stmt->fetchAll();
                             <?php endforeach; ?>
                         </select>
                     </div>
-                    <div class="col-md-2">
-                        <label class="form-label small fw-bold text-muted">بڕی پارە (Amount)</label>
-                        <input type="number" id="filterAmount" class="form-control dt-filter" placeholder="بڕەکەی بنووسە...">
+                    <div class="col-sm-6 col-md-4 col-lg-2">
+                        <label class="form-label small fw-bold text-muted">بڕی پارە</label>
+                        <input type="number" id="filterAmount" class="form-control dt-filter" placeholder="بڕ... ">
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-sm-6 col-md-4 col-lg-2">
                         <label class="form-label small fw-bold text-muted">تێبینی</label>
-                        <input type="text" id="filterNotes" class="form-control dt-filter" placeholder="گەڕان بەدوای تێبینی...">
+                        <input type="text" id="filterNotes" class="form-control dt-filter" placeholder="گەڕان...">
                     </div>
                 </div>
             </div>
@@ -265,7 +297,9 @@ $categories = $stmt->fetchAll();
                         <button type="submit" class="btn btn-warning px-5 fw-bold text-dark">گۆڕینەوە</button>
                     </div>
                 </form>
-            </div>
+                    </div>
+        </div>
+    </div>
         </div>
     </div>
 
