@@ -147,6 +147,15 @@ $logout_pages = ['logout.php'];
         <li><a href="../pages/asset_depreciation.php" class="sidebar-link<?php if($current_page == 'asset_depreciation.php') echo ' active'; ?>"><i class="bi bi-graph-down-arrow me-2"></i>داخورانی ئامێرەکان</a></li>
       </ul>
     </li>
+    <!-- Financial System Dropdown -->
+    <li class="sidebar-group">
+      <button class="sidebar-group-toggle d-flex align-items-center w-100" data-bs-toggle="collapse" data-bs-target="#financialMenu" aria-expanded="false">
+        <i class="bi bi-bank me-2"></i> سیستەمی دارایی
+      </button>
+      <ul class="collapse sidebar-submenu" id="financialMenu">
+        <li><a href="../pages/user_wallets.php" class="sidebar-link<?php if($current_page == 'user_wallets.php') echo ' active'; ?>"><i class="bi bi-wallet2 me-2"></i> قاسەی بەکارهێنەر</a></li>
+      </ul>
+    </li>
     <li class="sidebar-group">
       <button class="sidebar-group-toggle d-flex align-items-center w-100" data-bs-toggle="collapse" data-bs-target="#factoryTrucksMenu" aria-expanded="false">
         <i class="bi bi-truck me-2"></i> تڕێلەکانی کارگە
