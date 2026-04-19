@@ -25,34 +25,45 @@ $stmtUser->execute([$user_id]);
 $user_info = $stmtUser->fetch();
 $user_name = $user_info['username'] ?? 'بەکارهێنەر';
 
+// --- یەکلاییکردنەوەی فلتەری دراو ---
+$currency_condition = "";
+$currency_params = [];
+if ($currency !== 'ALL') {
+    $currency_condition = "AND l.currency_code = :currency";
+    $currency_params['currency'] = $currency;
+}
+
 // --- 1. هێنانەی باڵانسی سەرەتا (Opening Balance) ---
 // باڵانسی سەرەتا بریتییە لە کۆی هەموو ئەو پارانەی هاتووە یان دەرچووە پێش بەرواری دیاریکراو
 $sql_opening = "
-    SELECT SUM(l.amount) as opening_balance
+    SELECT l.currency_code, SUM(l.amount) as opening_balance
     FROM ledger_entries l
     JOIN transactions t ON l.transaction_id = t.id
     JOIN wallets w ON l.wallet_id = w.id
     WHERE w.user_id = :user_id 
-    AND l.currency_code = :currency
+    $currency_condition
     AND DATE(t.created_at) < :from_date
+    GROUP BY l.currency_code
 ";
 $stmtOpening = $pdo->prepare($sql_opening);
-$stmtOpening->execute([
-    'user_id' => $user_id,
-    'currency' => $currency,
-    'from_date' => $from_date
-]);
-$opening_balance = floatval($stmtOpening->fetchColumn() ?: 0);
+$params_opening = array_merge(['user_id' => $user_id, 'from_date' => $from_date], $currency_params);
+$stmtOpening->execute($params_opening);
+$opening_data = $stmtOpening->fetchAll(PDO::FETCH_KEY_PAIR);
+
+$opening_balances = [
+    'USD' => floatval($opening_data['USD'] ?? 0),
+    'IQD' => floatval($opening_data['IQD'] ?? 0)
+];
 
 // --- 2. هێنانی مامەڵەکانی ناو ماوەی دیاریکراو ---
 $sql_transactions = "
-    SELECT t.id, t.created_at, t.type as trans_type, l.amount, l.description, tc.name as category_name
+    SELECT t.id, t.created_at, t.type as trans_type, l.amount, l.currency_code, l.description, tc.name as category_name
     FROM ledger_entries l
     JOIN transactions t ON l.transaction_id = t.id
     LEFT JOIN transaction_categories tc ON t.category_id = tc.id
     JOIN wallets w ON l.wallet_id = w.id
     WHERE w.user_id = :user_id 
-    AND l.currency_code = :currency
+    $currency_condition
     AND DATE(t.created_at) >= :from_date 
     AND DATE(t.created_at) <= :to_date
 ";
@@ -68,66 +79,53 @@ if ($type_filter === 'inflow') {
 $sql_transactions .= " ORDER BY t.created_at ASC, t.id ASC"; // دەبێت ڕیزبەندی کات بێت بۆ باڵانسی تراکەمی
 
 $stmtTrans = $pdo->prepare($sql_transactions);
-$stmtTrans->execute([
-    'user_id' => $user_id,
-    'currency' => $currency,
-    'from_date' => $from_date,
-    'to_date' => $to_date
-]);
+$params_trans = array_merge(['user_id' => $user_id, 'from_date' => $from_date, 'to_date' => $to_date], $currency_params);
+$stmtTrans->execute($params_trans);
 $transactions = $stmtTrans->fetchAll(PDO::FETCH_ASSOC);
 
 // --- 3. لۆجیکی Running Balance (باڵانسی تراکەمی) و ئامارەکان ---
-$running_balance = $opening_balance;
-$total_inflow = 0;
-$total_outflow = 0;
-$report_data = [];
+$total_inflow = ['USD' => 0, 'IQD' => 0];
+$total_outflow = ['USD' => 0, 'IQD' => 0];
 
-// باڵانسی کۆتایی و پەیوەندی بە فلتەرەوە (لێرەدا Running Balance بەپێی کات دروست دەکرێت)
-// تێبینی: ئەگەر فلتەری تەنها "Inflow" هەڵبژێردرێت، ڕەنگە Running Balance وا دەرکەوێت کە هەندێک مامەڵەی تێپەڕاندووە، 
-// چونکە تەنها پۆزەتیڤەکان نیشان دەدات، بەڵام بڕەکەی لە ڕاستیدا دەبێت دروست بێت. بۆیە باڵانسی کۆتایی هەر دروست دەبێت.
-// بۆ ڕاپۆرتی ستاندارد، واباشترە هەمووی دیاربێت (بەڵام داواکارییەکە فلتەری تێدایە).
 foreach ($transactions as $row) {
-    // ئەگەر فلتەر کرابێت، ئەم ئەلگۆریتمە هەر باڵانسی ڕاستەقینە نیشان دەدات گەر هەژماری پێشووتر بکرێت،
-    // بەڵام لێرەدا پشت دەبەستێت بەو دێڕانەی هاتوون. بۆ باڵانسی ١٠٠٪ تەواو پێویستە هەموو دێڕەکان بهێنین.
-    // پێشنیار: باشترە هەمووی بهێنین و لێرە فلتەری بکەین، بەڵام بۆ خێرایی SQL باشە.
-    // کۆکردنەوەی Summary
     if ($row['amount'] > 0) {
-        $total_inflow += $row['amount'];
+        $total_inflow[$row['currency_code']] += $row['amount'];
     } else {
-        $total_outflow += abs($row['amount']);
+        $total_outflow[$row['currency_code']] += abs($row['amount']);
     }
 }
 
 // بۆ کەیسی Running Balance پێویستە هەموو مامەڵەکان بهێنین بۆ ئەوەی ڕیزبەندییەکە دروست بێت
 $stmtAllTrans = $pdo->prepare("
-    SELECT t.id, t.created_at, t.type as trans_type, l.amount, l.description, tc.name as category_name
+    SELECT t.id, t.created_at, t.type as trans_type, l.amount, l.currency_code, l.description, tc.name as category_name
     FROM ledger_entries l
     JOIN transactions t ON l.transaction_id = t.id
     LEFT JOIN transaction_categories tc ON t.category_id = tc.id
     JOIN wallets w ON l.wallet_id = w.id
     WHERE w.user_id = :user_id 
-    AND l.currency_code = :currency
+    $currency_condition
     AND DATE(t.created_at) >= :from_date 
     AND DATE(t.created_at) <= :to_date
     ORDER BY t.created_at ASC, t.id ASC
 ");
-$stmtAllTrans->execute([
-    'user_id' => $user_id,
-    'currency' => $currency,
-    'from_date' => $from_date,
-    'to_date' => $to_date
-]);
+$stmtAllTrans->execute($params_trans);
 $all_transactions = $stmtAllTrans->fetchAll(PDO::FETCH_ASSOC);
 
 $running_balances = [];
-$current_balance = $opening_balance;
+$current_balances = [
+    'USD' => $opening_balances['USD'],
+    'IQD' => $opening_balances['IQD']
+];
+
 foreach ($all_transactions as $row) {
-    $current_balance += $row['amount'];
-    $running_balances[$row['id']] = $current_balance;
+    $current_balances[$row['currency_code']] += $row['amount'];
+    $running_balances[$row['id']] = $current_balances[$row['currency_code']];
 }
 
-$net_change = $total_inflow - $total_outflow;
-$final_balance = $opening_balance + $net_change;
+$final_balances = [
+    'USD' => $opening_balances['USD'] + $total_inflow['USD'] - $total_outflow['USD'],
+    'IQD' => $opening_balances['IQD'] + $total_inflow['IQD'] - $total_outflow['IQD']
+];
 
 ?>
 <!DOCTYPE html>
@@ -282,7 +280,7 @@ $final_balance = $opening_balance + $net_change;
         <h4>ڕاپۆرتی جوڵەی قاسە (کشف حساب)</h4>
         <div class="d-flex justify-content-between mt-3" style="font-size: 14pt;">
             <span><strong>ناوی قاسە:</strong> <?= htmlspecialchars($user_name) ?></span>
-            <span><strong>جۆری دراو:</strong> <?= $currency ?></span>
+            <span><strong>جۆری دراو:</strong> <?= $currency == 'ALL' ? 'گشتی (هەردووکی)' : $currency ?></span>
             <span><strong>بەروار:</strong> <?= $from_date ?> بـــۆ <?= $to_date ?></span>
         </div>
     </div>
@@ -317,6 +315,7 @@ $final_balance = $opening_balance + $net_change;
                     <div class="col-md-2">
                         <label class="form-label fw-bold">هەڵبژاردنی دراو</label>
                         <select name="currency" class="form-select">
+                            <option value="ALL" <?= $currency == 'ALL' ? 'selected' : '' ?>>گشتی (All)</option>
                             <option value="USD" <?= $currency == 'USD' ? 'selected' : '' ?>>دۆلار (USD)</option>
                             <option value="IQD" <?= $currency == 'IQD' ? 'selected' : '' ?>>دینار (IQD)</option>
                         </select>
@@ -345,7 +344,12 @@ $final_balance = $opening_balance + $net_change;
                         <div class="row no-gutters align-items-center">
                             <div class="col mr-2">
                                 <div class="text-xs fw-bold text-info text-uppercase mb-1">باڵانسی سەرەتا (Opening)</div>
-                                <div class="h4 mb-0 fw-bold text-gray-800" dir="ltr"><?= number_format($opening_balance, $currency=='IQD'?0:2) ?> <?= $currency ?></div>
+                                <?php if ($currency === 'ALL' || $currency === 'USD'): ?>
+                                    <div class="h5 mb-0 fw-bold border-bottom pb-1" style="color: #003b73;" dir="ltr"><?= number_format($opening_balances['USD'], 2) ?> <span class="fs-6">USD</span></div>
+                                <?php endif; ?>
+                                <?php if ($currency === 'ALL' || $currency === 'IQD'): ?>
+                                    <div class="h5 mb-0 fw-bold mt-1" style="color: #0074b7;" dir="ltr"><?= number_format($opening_balances['IQD'], 0) ?> <span class="fs-6">IQD</span></div>
+                                <?php endif; ?>
                             </div>
                             <div class="col-auto"><i class="fa fa-hourglass-start fa-2x text-info opacity-50"></i></div>
                         </div>
@@ -359,7 +363,12 @@ $final_balance = $opening_balance + $net_change;
                         <div class="row no-gutters align-items-center">
                             <div class="col mr-2">
                                 <div class="text-xs fw-bold text-success text-uppercase mb-1">کۆی هاتن (Total Inflow)</div>
-                                <div class="h4 mb-0 fw-bold text-gray-800" dir="ltr">+ <?= number_format($total_inflow, $currency=='IQD'?0:2) ?> <?= $currency ?></div>
+                                <?php if ($currency === 'ALL' || $currency === 'USD'): ?>
+                                    <div class="h5 mb-0 fw-bold border-bottom pb-1 text-success" dir="ltr">+ <?= number_format($total_inflow['USD'], 2) ?> <span class="fs-6">USD</span></div>
+                                <?php endif; ?>
+                                <?php if ($currency === 'ALL' || $currency === 'IQD'): ?>
+                                    <div class="h5 mb-0 fw-bold mt-1 text-success" dir="ltr">+ <?= number_format($total_inflow['IQD'], 0) ?> <span class="fs-6">IQD</span></div>
+                                <?php endif; ?>
                             </div>
                             <div class="col-auto"><i class="fa fa-arrow-down fa-2x text-success opacity-50"></i></div>
                         </div>
@@ -373,7 +382,12 @@ $final_balance = $opening_balance + $net_change;
                         <div class="row no-gutters align-items-center">
                             <div class="col mr-2">
                                 <div class="text-xs fw-bold text-danger text-uppercase mb-1">کۆی چوون (Total Outflow)</div>
-                                <div class="h4 mb-0 fw-bold text-gray-800" dir="ltr">- <?= number_format($total_outflow, $currency=='IQD'?0:2) ?> <?= $currency ?></div>
+                                <?php if ($currency === 'ALL' || $currency === 'USD'): ?>
+                                    <div class="h5 mb-0 fw-bold border-bottom pb-1 text-danger" dir="ltr">- <?= number_format($total_outflow['USD'], 2) ?> <span class="fs-6">USD</span></div>
+                                <?php endif; ?>
+                                <?php if ($currency === 'ALL' || $currency === 'IQD'): ?>
+                                    <div class="h5 mb-0 fw-bold mt-1 text-danger" dir="ltr">- <?= number_format($total_outflow['IQD'], 0) ?> <span class="fs-6">IQD</span></div>
+                                <?php endif; ?>
                             </div>
                             <div class="col-auto"><i class="fa fa-arrow-up fa-2x text-danger opacity-50"></i></div>
                         </div>
@@ -387,7 +401,12 @@ $final_balance = $opening_balance + $net_change;
                         <div class="row no-gutters align-items-center">
                             <div class="col mr-2">
                                 <div class="text-xs fw-bold text-primary text-uppercase mb-1">باڵانسی کۆتایی (Closing)</div>
-                                <div class="h4 mb-0 fw-bold text-primary" dir="ltr"><?= number_format($final_balance, $currency=='IQD'?0:2) ?> <?= $currency ?></div>
+                                <?php if ($currency === 'ALL' || $currency === 'USD'): ?>
+                                    <div class="h5 mb-0 fw-bold border-bottom pb-1 text-primary" dir="ltr"><?= number_format($final_balances['USD'], 2) ?> <span class="fs-6">USD</span></div>
+                                <?php endif; ?>
+                                <?php if ($currency === 'ALL' || $currency === 'IQD'): ?>
+                                    <div class="h5 mb-0 fw-bold mt-1 text-primary" dir="ltr"><?= number_format($final_balances['IQD'], 0) ?> <span class="fs-6">IQD</span></div>
+                                <?php endif; ?>
                             </div>
                             <div class="col-auto"><i class="fa fa-wallet fa-2x text-primary opacity-50"></i></div>
                         </div>
@@ -405,21 +424,37 @@ $final_balance = $opening_balance + $net_change;
                         <th>#</th>
                         <th>بەروار و کات</th>
                         <th>جۆری مامەڵە</th>
+                        <th>دراو</th>
                         <th>پۆلێن / هۆکار</th>
                         <th>هاتن (In)</th>
                         <th>چوون (Out)</th>
-                        <th>باڵانسی تراکەمی (Running Bal)</th>
+                        <th>باڵانسی تراکەمی (Bal)</th>
                         <th width="20%">تێبینی</th>
                     </tr>
                 </thead>
                 <tbody>
                     <!-- Opening Balance Row -->
+                    <?php if ($currency === 'ALL' || $currency === 'USD'): ?>
                     <tr class="table-secondary">
                         <td>-</td>
-                        <td colspan="5" class="fw-bold text-start">باڵانسی پێشوو (Opening Balance) تا بەرواری <?= $from_date ?></td>
-                        <td dir="ltr" class="fw-bold fs-5 text-primary"><?= number_format($opening_balance, $currency=='IQD'?0:2) ?></td>
+                        <td colspan="4" class="fw-bold text-start">باڵانسی پێشوو دۆلار (Opening Balance USD) تا <?= $from_date ?></td>
+                        <td dir="ltr" class="fw-bold fs-6 text-primary"><?= number_format($opening_balances['USD'], 2) ?></td>
+                        <td>-</td>
+                        <td dir="ltr" class="fw-bold fs-6 text-primary"><?= number_format($opening_balances['USD'], 2) ?> USD</td>
                         <td>-</td>
                     </tr>
+                    <?php endif; ?>
+                    
+                    <?php if ($currency === 'ALL' || $currency === 'IQD'): ?>
+                    <tr class="table-secondary">
+                        <td>-</td>
+                        <td colspan="4" class="fw-bold text-start">باڵانسی پێشوو دینار (Opening Balance IQD) تا <?= $from_date ?></td>
+                        <td dir="ltr" class="fw-bold fs-6 text-primary"><?= number_format($opening_balances['IQD'], 0) ?></td>
+                        <td>-</td>
+                        <td dir="ltr" class="fw-bold fs-6 text-primary"><?= number_format($opening_balances['IQD'], 0) ?> IQD</td>
+                        <td>-</td>
+                    </tr>
+                    <?php endif; ?>
 
                     <?php 
                     $counter = 1;
@@ -427,37 +462,39 @@ $final_balance = $opening_balance + $net_change;
                         // داواکردنی ڕەنینگ باڵانس لەو ئەرەییەی کە بۆی دروستکراوە
                         $current_rb = $running_balances[$row['id']] ?? 0;
                         $is_inflow = $row['amount'] > 0;
+                        $decimals = $row['currency_code'] === 'IQD' ? 0 : 2;
                     ?>
                         <tr>
                             <td><?= $counter++ ?></td>
-                            <td><span style="direction: ltr; display: inline-block;"><?= $row['created_at'] ?></span></td>
+                            <td><span style="direction: ltr; display: inline-block; font-size: 0.9em;"><?= $row['created_at'] ?></span></td>
                             <td>
                                 <?php if($row['trans_type'] === 'EXCHANGE'): ?>
                                     <span class="badge bg-warning text-dark no-print">ئاڵوگۆڕ</span>
-                                    <span class="d-none d-print-block">ئاڵوگۆڕ</span>
+                                    <span class="d-none d-print-block fw-bold text-warning border border-warning p-1">ئاڵوگۆڕ</span>
                                 <?php elseif($is_inflow): ?>
                                     <span class="badge bg-success no-print">هاتن</span>
-                                    <span class="d-none d-print-block">هاتن</span>
+                                    <span class="d-none d-print-block fw-bold text-success border border-success p-1">هاتن</span>
                                 <?php else: ?>
                                     <span class="badge bg-danger no-print">دەرچوون</span>
-                                    <span class="d-none d-print-block">دەرچوون</span>
+                                    <span class="d-none d-print-block fw-bold text-danger border border-danger p-1">چوون</span>
                                 <?php endif; ?>
                             </td>
-                            <td><?= htmlspecialchars($row['category_name'] ?? 'بی جۆر') ?></td>
+                            <td><span class="badge bg-light text-dark border"><?= $row['currency_code'] ?></span></td>
+                            <td><?= htmlspecialchars($row['category_name'] ?? 'بێ جۆر') ?></td>
                             
                             <!-- Inflow Column -->
                             <td dir="ltr" class="fw-bold text-success">
-                                <?= $is_inflow ? number_format($row['amount'], $currency=='IQD'?0:2) : '-' ?>
+                                <?= $is_inflow ? number_format($row['amount'], $decimals) : '-' ?>
                             </td>
                             
                             <!-- Outflow Column -->
                             <td dir="ltr" class="fw-bold text-danger">
-                                <?= !$is_inflow ? number_format(abs($row['amount']), $currency=='IQD'?0:2) : '-' ?>
+                                <?= !$is_inflow ? number_format(abs($row['amount']), $decimals) : '-' ?>
                             </td>
                             
                             <!-- Running Balance Column -->
-                            <td dir="ltr" class="fw-bold text-primary fs-6">
-                                <?= number_format($current_rb, $currency=='IQD'?0:2) ?>
+                            <td dir="ltr" class="fw-bold text-primary fs-6" style="background:#f8f9fa;">
+                                <?= number_format($current_rb, $decimals) ?> <span style="font-size: 0.8em;"><?= $row['currency_code'] ?></span>
                             </td>
                             
                             <td class="text-end small"><?= htmlspecialchars($row['description'] ?? '') ?></td>
@@ -465,7 +502,7 @@ $final_balance = $opening_balance + $net_change;
                     <?php endforeach; ?>
                     
                     <?php if (empty($transactions)): ?>
-                        <tr><td colspan="8" class="text-muted py-4">کشف حسابی ئەم بەروارە بەتاڵە</td></tr>
+                        <tr><td colspan="9" class="text-muted py-4">کشف حسابی ئەم ناوچەیە بەتاڵە</td></tr>
                     <?php endif; ?>
                 </tbody>
             </table>
