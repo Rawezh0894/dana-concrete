@@ -12,60 +12,88 @@ $user_id = $_SESSION['user_id'];
 $action = $_POST['action'] ?? '';
 
 try {
-    if ($action === 'inflow' || $action === 'outflow') {
+    if ($action === 'inflow' || $action === 'outflow' || $action === 'edit_transaction') {
+        $txn_id = intval($_POST['transaction_id'] ?? 0);
         $amount_usd = floatval($_POST['amount_usd'] ?? 0);
         $amount_iqd = floatval($_POST['amount_iqd'] ?? 0);
         $category_id = intval($_POST['category_id'] ?? 0);
         $desc = $_POST['description'] ?? '';
         
-        if ($amount_usd <= 0 && $amount_iqd <= 0) {
+        if ($amount_usd <= 0 && $amount_iqd <= 0 && $action !== 'delete_transaction') {
             throw new Exception("بڕی پارە دیاری نەکراوە.");
         }
 
-        $txn_type = ($action === 'inflow') ? 'DEPOSIT' : 'WITHDRAWAL';
-
         $pdo->beginTransaction();
 
-        // Check balances if outflow
-        if ($action === 'outflow') {
-            if ($amount_usd > 0) {
-                $check = $pdo->prepare("SELECT balance FROM wallets WHERE user_id = ? AND currency_code = 'USD' FOR UPDATE");
-                $check->execute([$user_id]);
-                if ($check->fetchColumn() < $amount_usd) throw new Exception("باڵانسی دۆلارەکەت بەش ناکات.");
+        // If Editing, FIRST reverse the OLD transaction effects
+        if ($action === 'edit_transaction' && $txn_id > 0) {
+            $old_entries = $pdo->prepare("SELECT wallet_id, amount FROM ledger_entries WHERE transaction_id = ?");
+            $old_entries->execute([$txn_id]);
+            while ($row = $old_entries->fetch()) {
+                $pdo->prepare("UPDATE wallets SET balance = balance - ? WHERE id = ?")
+                    ->execute([$row['amount'], $row['wallet_id']]);
             }
-            if ($amount_iqd > 0) {
-                $check = $pdo->prepare("SELECT balance FROM wallets WHERE user_id = ? AND currency_code = 'IQD' FOR UPDATE");
-                $check->execute([$user_id]);
-                if ($check->fetchColumn() < $amount_iqd) throw new Exception("باڵانسی دینارەکەت بەش ناکات.");
-            }
+            // Clear old entries
+            $pdo->prepare("DELETE FROM ledger_entries WHERE transaction_id = ?")->execute([$txn_id]);
         }
 
-        // 1. Transaction
-        $ref = uniqid('TXN_');
-        $stmt = $pdo->prepare("INSERT INTO transactions (reference_id, type, category_id, created_by) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$ref, $txn_type, $category_id ?: null, $user_id]);
-        $txn_id = $pdo->lastInsertId();
+        $txn_type = ($action === 'outflow') ? 'WITHDRAWAL' : 'DEPOSIT';
 
-        // 2. Process USD if exists
+        // 1. Create or Update Transaction Record
+        if ($action === 'edit_transaction' && $txn_id > 0) {
+            $stmt = $pdo->prepare("UPDATE transactions SET category_id = ? WHERE id = ?");
+            $stmt->execute([$category_id ?: null, $txn_id]);
+        } else {
+            $ref = uniqid('TXN_');
+            $stmt = $pdo->prepare("INSERT INTO transactions (reference_id, type, category_id, created_by) VALUES (?, ?, ?, ?)");
+            $stmt->execute([$ref, $txn_type, $category_id ?: null, $user_id]);
+            $txn_id = $pdo->lastInsertId();
+        }
+
+        // 2. Process USD
         if ($amount_usd > 0) {
-            $db_usd = ($action === 'inflow') ? $amount_usd : -$amount_usd;
-            $pdo->prepare("UPDATE wallets SET balance = balance + ? WHERE user_id = ? AND currency_code = 'USD'")->execute([$db_usd, $user_id]);
-            
+            $real_amount = ($action === 'outflow') ? -$amount_usd : $amount_usd;
+            // Update Wallet
+            $pdo->prepare("UPDATE wallets SET balance = balance + ? WHERE user_id = ? AND currency_code = 'USD'")->execute([$real_amount, $user_id]);
+            // Create Ledger Entry
             $stmt = $pdo->prepare("INSERT INTO ledger_entries (transaction_id, wallet_id, amount, currency_code, description) VALUES (?, (SELECT id FROM wallets WHERE user_id=? AND currency_code='USD'), ?, 'USD', ?)");
-            $stmt->execute([$txn_id, $user_id, $db_usd, $desc]);
+            $stmt->execute([$txn_id, $user_id, $real_amount, $desc]);
         }
 
-        // 3. Process IQD if exists
+        // 3. Process IQD
         if ($amount_iqd > 0) {
-            $db_iqd = ($action === 'inflow') ? $amount_iqd : -$amount_iqd;
-            $pdo->prepare("UPDATE wallets SET balance = balance + ? WHERE user_id = ? AND currency_code = 'IQD'")->execute([$db_iqd, $user_id]);
-            
+            $real_amount = ($action === 'outflow') ? -$amount_iqd : $amount_iqd;
+            // Update Wallet
+            $pdo->prepare("UPDATE wallets SET balance = balance + ? WHERE user_id = ? AND currency_code = 'IQD'")->execute([$real_amount, $user_id]);
+            // Create Ledger Entry
             $stmt = $pdo->prepare("INSERT INTO ledger_entries (transaction_id, wallet_id, amount, currency_code, description) VALUES (?, (SELECT id FROM wallets WHERE user_id=? AND currency_code='IQD'), ?, 'IQD', ?)");
-            $stmt->execute([$txn_id, $user_id, $db_iqd, $desc]);
+            $stmt->execute([$txn_id, $user_id, $real_amount, $desc]);
         }
 
         $pdo->commit();
         echo json_encode(['success' => true, 'message' => 'کردارەکە بە سەرکەوتوویی ئەنجامدرا.']);
+        exit;
+    }
+
+    if ($action === 'delete_transaction') {
+        $txn_id = intval($_POST['transaction_id'] ?? 0);
+        if ($txn_id <= 0) throw new Exception("Transaction ID missing");
+
+        $pdo->beginTransaction();
+
+        // 1. Reverse balance changes
+        $entries = $pdo->prepare("SELECT wallet_id, amount FROM ledger_entries WHERE transaction_id = ?");
+        $entries->execute([$txn_id]);
+        while ($row = $entries->fetch()) {
+            $pdo->prepare("UPDATE wallets SET balance = balance - ? WHERE id = ?")
+                ->execute([$row['amount'], $row['wallet_id']]);
+        }
+
+        // 2. Delete entries and transaction (Cascade should handle entries, but manual is safer depends on schema)
+        $pdo->prepare("DELETE FROM transactions WHERE id = ?")->execute([$txn_id]);
+
+        $pdo->commit();
+        echo json_encode(['success' => true, 'message' => 'بە سەرکەوتوویی سڕایەوە']);
         exit;
     }
 

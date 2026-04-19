@@ -23,28 +23,6 @@ $iqd_balance = floatval($wallets['IQD'] ?? 0);
 // هێنانی جۆرەکانی مامەڵە (Categories)
 $stmt = $pdo->query("SELECT id, name, type FROM transaction_categories ORDER BY name ASC");
 $categories = $stmt->fetchAll();
-
-// هێنانی دواین جوڵەکان (Transactions History) 
-$stmt = $pdo->prepare("
-    SELECT t.created_at, t.type as trans_type, l.amount, l.currency_code, l.description, l.exchange_rate_applied, tc.name as category_name
-    FROM ledger_entries l
-    JOIN transactions t ON l.transaction_id = t.id
-    LEFT JOIN transaction_categories tc ON t.category_id = tc.id
-    JOIN wallets w ON l.wallet_id = w.id
-    WHERE w.user_id = ?
-    ORDER BY t.created_at DESC, t.id DESC LIMIT 20
-");
-$stmt->execute([$user_id]);
-$history_rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// گروپکردنی مێژووەکە بەپێی کات بۆ ئەوەی مامەڵە فرە دراوەکان پێکەوە بن
-$grouped_history = [];
-foreach ($history_rows as $row) {
-    $time = $row['created_at'];
-    // بەکارهێنانی کات وەکو کلیل بۆ گروپکردن (یان هەر ناسێنەرێکی تر گەر هەبێت)
-    // لێرەدا دەتوانین یەکێک لە ڕیفرنسەکان بەکاربهێنین، بەڵام بۆ سادەیی کاتەکە بەکاردێنین
-    $grouped_history[$time][] = $row;
-}
 ?>
 
 <!DOCTYPE html>
@@ -69,21 +47,8 @@ foreach ($history_rows as $row) {
         .wallet-card:hover { transform: translateY(-5px); }
         .currency-symbol { font-size: 1.5rem; font-weight: bold; opacity: 0.8; }
         .balance { font-size: 2.5rem; font-weight: bold; }
-        .quick-action {
-            background-color: var(--seafoam-green);
-            color: white;
-            font-weight: bold;
-            border-radius: 8px;
-            padding: 10px 20px;
-            transition: all 0.3s ease;
-            border: none;
-        }
-        .quick-action:hover {
-            background-color: var(--kelly-green);
-            color: white;
-            transform: scale(1.05);
-        }
-        .multi-currency-row { background-color: #f8f9fa; }
+        .quick-action { background-color: var(--seafoam-green); color: white; font-weight: bold; border-radius: 8px; padding: 10px 20px; transition: all 0.3s ease; border: none; }
+        .quick-action:hover { background-color: var(--kelly-green); color: white; transform: scale(1.05); }
     </style>
 </head>
 <body dir="rtl">
@@ -128,7 +93,7 @@ foreach ($history_rows as $row) {
 
         <!-- History -->
         <div class="card shadow border-0" style="border-radius: 12px;">
-            <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+            <div class="card-header bg-white py-3 border-0">
                 <h5 class="mb-0 fw-bold" style="color: var(--seafoam-green);">دواین چالاکییەکان</h5>
             </div>
             <div class="card-body p-0">
@@ -142,20 +107,20 @@ foreach ($history_rows as $row) {
                                 <th>بڕی USD</th>
                                 <th>بڕی IQD</th>
                                 <th>تێبینی</th>
+                                <th>کردار</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php 
-                            // Re-fetch transactions grouped to show multi-currency clearly
                             $stmt = $pdo->prepare("
-                                SELECT t.id, t.created_at, t.type as trans_type, tc.name as category_name,
+                                SELECT t.id, t.created_at, t.type as trans_type, t.category_id, tc.name as category_name,
                                 (SELECT amount FROM ledger_entries WHERE transaction_id = t.id AND currency_code = 'USD' LIMIT 1) as usd_amount,
                                 (SELECT amount FROM ledger_entries WHERE transaction_id = t.id AND currency_code = 'IQD' LIMIT 1) as iqd_amount,
                                 (SELECT description FROM ledger_entries WHERE transaction_id = t.id LIMIT 1) as description
                                 FROM transactions t
                                 LEFT JOIN transaction_categories tc ON t.category_id = tc.id
                                 WHERE t.created_by = ?
-                                ORDER BY t.created_at DESC LIMIT 15
+                                ORDER BY t.created_at DESC LIMIT 20
                             ");
                             $stmt->execute([$user_id]);
                             $transactions = $stmt->fetchAll();
@@ -182,6 +147,16 @@ foreach ($history_rows as $row) {
                                         <?= $tx['iqd_amount'] ? number_format(abs($tx['iqd_amount']), 0) . ' IQD' : '-' ?>
                                     </td>
                                     <td class="text-muted small"><?= htmlspecialchars($tx['description'] ?? '') ?></td>
+                                    <td>
+                                        <?php if(!$is_exchange): ?>
+                                            <button class="btn btn-sm btn-outline-info border-0" onclick='prepareEdit(<?= json_encode($tx) ?>)'>
+                                                <i class="fa fa-edit"></i>
+                                            </button>
+                                        <?php endif; ?>
+                                        <button class="btn btn-sm btn-outline-danger border-0" onclick="deleteTransaction(<?= $tx['id'] ?>)">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
@@ -191,7 +166,7 @@ foreach ($history_rows as $row) {
         </div>
     </div>
 
-    <!-- actionModal update for Dual Currency -->
+    <!-- actionModal -->
     <div class="modal fade" id="actionModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content border-0 shadow">
@@ -202,6 +177,7 @@ foreach ($history_rows as $row) {
                     </div>
                     <div class="modal-body">
                         <input type="hidden" name="action" id="formActionType">
+                        <input type="hidden" name="transaction_id" id="editTxId">
                         
                         <div class="mb-3">
                             <label class="form-label text-muted fw-bold">هۆکاری مامەڵە</label>
@@ -216,14 +192,14 @@ foreach ($history_rows as $row) {
                         <div class="row">
                             <div class="col-md-12 mb-3">
                                 <div class="p-3 border rounded bg-light">
-                                    <h6 class="fw-bold mb-3 border-bottom pb-2">بڕی پارە بە هەردوو دراو (تەنهان دانەیەکیان پڕ بکەرەوە یان هەردووکیان)</h6>
+                                    <h6 class="fw-bold mb-3 border-bottom pb-2">بڕی پارە بە هەردوو دراو</h6>
                                     <div class="row">
                                         <div class="col-6">
                                             <label class="form-label small text-success">بڕی دۆلار ($)</label>
                                             <input type="number" name="amount_usd" id="amountUSD" class="form-control" step="0.01" placeholder="0.00">
                                         </div>
                                         <div class="col-6">
-                                            <label class="form-label small text-primary">بڕی دینار (عێراقی)</label>
+                                            <label class="form-label small text-primary">بڕی دینار (IQD)</label>
                                             <input type="number" name="amount_iqd" id="amountIQD" class="form-control" step="250" placeholder="0">
                                         </div>
                                     </div>
@@ -233,25 +209,25 @@ foreach ($history_rows as $row) {
 
                         <div class="mb-3">
                             <label class="form-label text-muted fw-bold">تێبینی</label>
-                            <textarea name="description" class="form-control" rows="2" placeholder="بۆ کێ تێبینی؟"></textarea>
+                            <textarea name="description" id="actionDesc" class="form-control" rows="2" placeholder="تێبینی..."></textarea>
                         </div>
                     </div>
                     <div class="modal-footer border-0">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">لابردن</button>
-                        <button type="submit" class="btn btn-primary px-4">تۆمارکردن</button>
+                        <button type="submit" class="btn btn-primary px-4" id="submitBtn">تۆمارکردن</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- Exchange Modal (Keep same or similar) -->
+    <!-- Exchange Modal (Optional Update) -->
     <div class="modal fade" id="exchangeModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
-            <div class="modal-content border-0 shadow">
+            <div class="modal-content border-0 shadow text-center">
                 <form id="exchangeForm">
                     <div class="modal-header bg-warning text-dark">
-                        <h5 class="modal-title fw-bold">ئاڵوگۆڕی دراو (تەنها یەک جۆری پارە)</h5>
+                        <h5 class="modal-title fw-bold">ئاڵوگۆڕی دراو</h5>
                         <button type="button" class="btn-close m-0 ms-auto" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body bg-light">
@@ -296,54 +272,64 @@ foreach ($history_rows as $row) {
     <script>
         function setFormAction(type) {
             $('#formActionType').val(type);
+            $('#editTxId').val('');
+            $('#submitBtn').text('تۆمارکردن');
+            
             const filterType = (type === 'inflow') ? 'INFLOW' : 'OUTFLOW';
             $('#actionCategory option').each(function() {
                 const catType = $(this).data('type');
                 if (catType && catType !== 'BOTH' && catType !== filterType) $(this).hide();
                 else $(this).show();
             });
-            $('#actionCategory').val('');
-            $('#amountUSD, #amountIQD').val('');
+            $('#actionCategory, #amountUSD, #amountIQD, #actionDesc').val('');
 
             if(type === 'inflow'){
-                $('#actionModalLabel').text('تۆمارکردنی زیادکردنی پارە (Dual Currency)');
-                $('#actionModal .modal-header').removeClass('bg-danger').addClass('bg-success text-white');
+                $('#actionModalLabel').text('تۆمارکردنی زیادکردنی پارە');
+                $('#actionModal .modal-header').removeClass('bg-danger bg-info').addClass('bg-success text-white');
             } else {
-                $('#actionModalLabel').text('تۆمارکردنی خەرجی / ڕاکێشان (Dual Currency)');
-                $('#actionModal .modal-header').removeClass('bg-success').addClass('bg-danger text-white');
+                $('#actionModalLabel').text('تۆمارکردنی خەرجی / ڕاکێشان');
+                $('#actionModal .modal-header').removeClass('bg-success bg-info').addClass('bg-danger text-white');
             }
+        }
+
+        function prepareEdit(tx) {
+            $('#actionModal').modal('show');
+            $('#actionModalLabel').text('دەستکاری کردنی مامەڵە');
+            $('#actionModal .modal-header').removeClass('bg-success bg-danger').addClass('bg-info text-dark');
+            
+            $('#formActionType').val('edit_transaction');
+            $('#editTxId').val(tx.id);
+            $('#actionCategory').val(tx.category_id);
+            $('#amountUSD').val(Math.abs(tx.usd_amount || 0));
+            $('#amountIQD').val(Math.abs(tx.iqd_amount || 0));
+            $('#actionDesc').val(tx.description);
+            $('#submitBtn').text('نوێکردنەوە');
+            
+            // Show all categories for edit
+            $('#actionCategory option').show();
+        }
+
+        function deleteTransaction(id) {
+            if (!confirm('ئایا دڵنیایت لە سڕینەوەی ئەم مامەڵەیە؟ هەموو بڕە پارەکان لە باڵانسەکەت پێچەوانە دەبنەوە.')) return;
+            $.ajax({
+                url: '../process/user_wallets/process.php',
+                type: 'POST',
+                data: { action: 'delete_transaction', transaction_id: id },
+                dataType: 'json',
+                success: function(res) {
+                    if (res.success) location.reload();
+                    else alert('هەڵە: ' + res.message);
+                }
+            });
         }
 
         $('#actionForm').submit(function(e) {
             e.preventDefault();
-            const action = $('#formActionType').val();
-            const usd = parseFloat($('#amountUSD').val() || 0);
-            const iqd = parseFloat($('#amountIQD').val() || 0);
-            
-            if (usd <= 0 && iqd <= 0) {
-                alert('تکایە بڕی لایەنی کەم یەکێک لە دراوەکان بنووسە!');
-                return;
-            }
-
-            if (action === 'outflow') {
-                const balUSD = parseFloat($('#usdBalance').data('balance'));
-                const balIQD = parseFloat($('#iqdBalance').data('balance'));
-                if (usd > balUSD || iqd > balIQD) {
-                    alert('باڵانسەکەت بەش ناکات بۆ ئەم کشانەوەیە!');
-                    return;
-                }
-            }
             submitData($(this));
         });
 
         $('#exchangeForm').submit(function(e) {
             e.preventDefault();
-            const amount = parseFloat($('#exAmount').val());
-            const fromCurr = $('#exFrom').val();
-            const toCurr = $('#exTo').val();
-            if (fromCurr === toCurr) { alert('دراوەکان وەک یەکن!'); return; }
-            let balance = fromCurr === 'USD' ? parseFloat($('#usdBalance').data('balance')) : parseFloat($('#iqdBalance').data('balance'));
-            if (amount > balance) { alert('باڵانس بەش ناکات!'); return; }
             submitData($(this));
         });
 
@@ -360,9 +346,6 @@ foreach ($history_rows as $row) {
                 error: function() { alert('هەڵە لە سێرڤەر'); }
             });
         }
-
-        $('#exFrom').change(function() { $('#exTo').val($(this).val() === 'USD' ? 'IQD' : 'USD'); });
-        $('#exTo').change(function() { $('#exFrom').val($(this).val() === 'USD' ? 'IQD' : 'USD'); });
     </script>
 </body>
 </html>
