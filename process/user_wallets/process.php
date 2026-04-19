@@ -15,6 +15,7 @@ try {
     if ($action === 'inflow' || $action === 'outflow') {
         $currency = $_POST['currency'] ?? '';
         $amount = floatval($_POST['amount'] ?? 0);
+        $category_id = intval($_POST['category_id'] ?? 0);
         $desc = $_POST['description'] ?? '';
         
         if ($amount <= 0 || !in_array($currency, ['USD', 'IQD'])) {
@@ -39,8 +40,8 @@ try {
 
         // 1. Transaction
         $ref = uniqid('TXN_');
-        $stmt = $pdo->prepare("INSERT INTO transactions (reference_id, type, created_by) VALUES (?, ?, ?)");
-        $stmt->execute([$ref, $txn_type, $user_id]);
+        $stmt = $pdo->prepare("INSERT INTO transactions (reference_id, type, category_id, created_by) VALUES (?, ?, ?, ?)");
+        $stmt->execute([$ref, $txn_type, $category_id ?: null, $user_id]);
         $txn_id = $pdo->lastInsertId();
 
         // 2. Wallets Table

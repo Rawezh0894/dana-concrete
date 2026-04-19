@@ -20,11 +20,16 @@ $wallets = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
 $usd_balance = floatval($wallets['USD'] ?? 0);
 $iqd_balance = floatval($wallets['IQD'] ?? 0);
 
+// هێنانی جۆرەکانی مامەڵە (Categories)
+$stmt = $pdo->query("SELECT id, name, type FROM transaction_categories ORDER BY name ASC");
+$categories = $stmt->fetchAll();
+
 // هێنانی دواین جوڵەکان (Transactions History) 
 $stmt = $pdo->prepare("
-    SELECT t.created_at, t.type, l.amount, l.currency_code, l.description, l.exchange_rate_applied
+    SELECT t.created_at, t.type, l.amount, l.currency_code, l.description, l.exchange_rate_applied, tc.name as category_name
     FROM ledger_entries l
     JOIN transactions t ON l.transaction_id = t.id
+    LEFT JOIN transaction_categories tc ON t.category_id = tc.id
     JOIN wallets w ON l.wallet_id = w.id
     WHERE w.user_id = ?
     ORDER BY t.created_at DESC LIMIT 10
@@ -123,6 +128,7 @@ $history = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <tr>
                                 <th>بەروار</th>
                                 <th>جۆر</th>
+                                <th>هۆکار / پۆلێن</th>
                                 <th>بڕ</th>
                                 <th>دراو</th>
                                 <th>سێرعی گۆڕینەوە</th>
@@ -142,6 +148,7 @@ $history = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                             <span class="badge bg-danger">دەرچوون 📤</span>
                                         <?php endif; ?>
                                     </td>
+                                    <td><span class="fw-bold text-primary"><?= htmlspecialchars($row['category_name'] ?? 'ئاڵوگۆڕ') ?></span></td>
                                     <td dir="ltr" class="fw-bold fs-5 <?= $row['amount'] > 0 ? 'text-success' : 'text-danger' ?>">
                                         <?= number_format($row['amount'], 2) ?>
                                     </td>
@@ -151,7 +158,7 @@ $history = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 </tr>
                             <?php endforeach; ?>
                             <?php if (empty($history)): ?>
-                                <tr><td colspan="6" class="text-muted py-4">هیچ جوڵەیەک بوونی نییە</td></tr>
+                                <tr><td colspan="7" class="text-muted py-4">هیچ جوڵەیەک بوونی نییە</td></tr>
                             <?php endif; ?>
                         </tbody>
                     </table>
@@ -160,7 +167,7 @@ $history = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </div>
 
-    <!-- Modals remain the same but with improved styling -->
+    <!-- Modals -->
     <div class="modal fade" id="actionModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content border-0 shadow">
@@ -171,20 +178,31 @@ $history = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </div>
                     <div class="modal-body">
                         <input type="hidden" name="action" id="formActionType">
+                        
                         <div class="mb-3">
-                            <label class="form-label text-muted">جۆری دراو</label>
+                            <label class="form-label text-muted fw-bold">جۆری پۆلێن (هۆکار)</label>
+                            <select name="category_id" id="actionCategory" class="form-select form-select-lg" required>
+                                <option value="">هەڵبژاردن...</option>
+                                <?php foreach($categories as $cat): ?>
+                                    <option value="<?= $cat['id'] ?>" data-type="<?= $cat['type'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label text-muted fw-bold">جۆری دراو</label>
                             <select name="currency" id="actionCurrency" class="form-select form-select-lg" required>
                                 <option value="USD">دۆلار (USD)</option>
                                 <option value="IQD">دینار (IQD)</option>
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label text-muted">بڕی پارە</label>
+                            <label class="form-label text-muted fw-bold">بڕی پارە</label>
                             <input type="number" name="amount" id="actionAmount" class="form-control form-control-lg" step="0.01" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label text-muted">هۆکار / تێبینی</label>
-                            <textarea name="description" class="form-control" rows="2"></textarea>
+                            <label class="form-label text-muted fw-bold">تێبینی زیادە</label>
+                            <textarea name="description" class="form-control" rows="2" placeholder="تێبینی بنووسە..."></textarea>
                         </div>
                     </div>
                     <div class="modal-footer border-0">
@@ -196,6 +214,7 @@ $history = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </div>
 
+    <!-- Exchange Modal (No changes needed for category here usually, or can add generic exchange category) -->
     <div class="modal fade" id="exchangeModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content border-0 shadow">
@@ -247,6 +266,19 @@ $history = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <script>
         function setFormAction(type) {
             $('#formActionType').val(type);
+            
+            // فلتەرکردنی هۆکارەکان بەپێی ئینفلۆو یان ئاوتفلۆو
+            const filterType = (type === 'inflow') ? 'INFLOW' : 'OUTFLOW';
+            $('#actionCategory option').each(function() {
+                const catType = $(this).data('type');
+                if (catType && catType !== 'BOTH' && catType !== filterType) {
+                    $(this).hide();
+                } else {
+                    $(this).show();
+                }
+            });
+            $('#actionCategory').val('');
+
             if(type === 'inflow'){
                 $('#actionModalLabel').text('زیادکردنی پارە بۆ قاسە (Inflow)');
                 $('#actionModal .modal-header').removeClass('bg-danger').addClass('bg-success text-white');
