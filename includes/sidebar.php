@@ -154,6 +154,7 @@ $logout_pages = ['logout.php'];
       </button>
       <ul class="collapse sidebar-submenu" id="financialMenu">
         <li><a href="../pages/user_wallets.php" class="sidebar-link<?php if($current_page == 'user_wallets.php') echo ' active'; ?>"><i class="bi bi-wallet2 me-2"></i> قاسەی بەکارهێنەر</a></li>
+        <li><a href="../pages/transaction_categories.php" class="sidebar-link<?php if($current_page == 'transaction_categories.php') echo ' active'; ?>"><i class="bi bi-tags me-2"></i> پۆلێنکردنی مامەڵەکان</a></li>
       </ul>
     </li>
     <li class="sidebar-group">
