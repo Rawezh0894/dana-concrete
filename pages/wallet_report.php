@@ -20,10 +20,10 @@ $currency = $_GET['currency'] ?? 'USD'; // دۆلار بە دیفاڵت
 $type_filter = $_GET['type'] ?? 'all';
 
 // --- هێنانی زانیاری بەکارهێنەر بۆ هێدەری ڕاپۆرت ---
-$stmtUser = $pdo->prepare("SELECT full_name FROM users WHERE id = ?");
+$stmtUser = $pdo->prepare("SELECT username FROM users WHERE id = ?");
 $stmtUser->execute([$user_id]);
 $user_info = $stmtUser->fetch();
-$user_name = $user_info['full_name'] ?? 'بەکارهێنەر';
+$user_name = $user_info['username'] ?? 'بەکارهێنەر';
 
 // --- 1. هێنانەی باڵانسی سەرەتا (Opening Balance) ---
 // باڵانسی سەرەتا بریتییە لە کۆی هەموو ئەو پارانەی هاتووە یان دەرچووە پێش بەرواری دیاریکراو
