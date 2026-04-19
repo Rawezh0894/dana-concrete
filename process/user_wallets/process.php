@@ -18,6 +18,8 @@ try {
         $amount_iqd = floatval($_POST['amount_iqd'] ?? 0);
         $category_id = intval($_POST['category_id'] ?? 0);
         $desc = $_POST['description'] ?? '';
+        $created_at = $_POST['created_at'] ?? date('Y-m-d H:i:s');
+        $created_at = str_replace('T', ' ', $created_at); // Format for SQL
         
         if ($amount_usd <= 0 && $amount_iqd <= 0 && $action !== 'delete_transaction') {
             throw new Exception("بڕی پارە دیاری نەکراوە.");
@@ -54,12 +56,12 @@ try {
 
         // 1. Create or Update Transaction Record
         if ($is_editing && $txn_id > 0) {
-            $stmt = $pdo->prepare("UPDATE transactions SET category_id = ? WHERE id = ?");
-            $stmt->execute([$category_id ?: null, $txn_id]);
+            $stmt = $pdo->prepare("UPDATE transactions SET category_id = ?, created_at = ? WHERE id = ?");
+            $stmt->execute([$category_id ?: null, $created_at, $txn_id]);
         } else {
             $ref = uniqid('TXN_');
-            $stmt = $pdo->prepare("INSERT INTO transactions (reference_id, type, category_id, created_by) VALUES (?, ?, ?, ?)");
-            $stmt->execute([$ref, $txn_type, $category_id ?: null, $user_id]);
+            $stmt = $pdo->prepare("INSERT INTO transactions (reference_id, type, category_id, created_by, created_at) VALUES (?, ?, ?, ?, ?)");
+            $stmt->execute([$ref, $txn_type, $category_id ?: null, $user_id, $created_at]);
             $txn_id = $pdo->lastInsertId();
         }
 

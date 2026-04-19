@@ -175,6 +175,11 @@ $categories = $stmt->fetchAll();
                         <input type="hidden" name="transaction_id" id="editTxId">
                         
                         <div class="mb-3">
+                            <label class="form-label text-muted fw-bold">بەرواری مامەڵە</label>
+                            <input type="datetime-local" name="created_at" id="actionDate" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
                             <label class="form-label text-muted fw-bold">هۆکاری مامەڵە</label>
                             <select name="category_id" id="actionCategory" class="form-select" required>
                                 <option value="">هەڵبژاردن...</option>
@@ -283,6 +288,15 @@ $categories = $stmt->fetchAll();
                 else $(this).show();
             });
             $('#actionCategory, #amountUSD, #amountIQD, #actionDesc').val('');
+            
+            // Set default date to now
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            $('#actionDate').val(`${year}-${month}-${day}T${hours}:${minutes}`);
 
             if(type === 'inflow'){
                 $('#actionModalLabel').text('تۆمارکردنی زیادکردنی پارە');
@@ -304,6 +318,9 @@ $categories = $stmt->fetchAll();
             $('#amountUSD').val(Math.abs(tx.usd_amount || 0));
             $('#amountIQD').val(Math.abs(tx.iqd_amount || 0));
             $('#actionDesc').val(tx.description);
+            // Handle date format for datetime-local (replace space with T)
+            const txDate = tx.created_at.replace(' ', 'T').substring(0, 16);
+            $('#actionDate').val(txDate);
             $('#submitBtn').text('نوێکردنەوە');
             
             // Show all categories for edit
