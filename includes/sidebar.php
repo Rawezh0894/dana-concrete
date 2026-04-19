@@ -37,8 +37,11 @@ $logout_pages = ['logout.php'];
         <?php if (hasPermission('view_reports')): ?>
           <li><a href="../pages/reports.php" class="sidebar-link<?php if($current_page == 'reports.php') echo ' active'; ?>"><i class="bi bi-graph-up me-2"></i> ڕاپۆرت</a></li>
         <?php endif; ?>
-        <?php if (hasPermission('view_cash_box')): ?>
+        <!-- <?php if (hasPermission('view_cash_box')): ?>
           <li><a href="../pages/cash_box.php" class="sidebar-link<?php if($current_page == 'cash_box.php') echo ' active'; ?>"><i class="bi bi-cash-stack me-2"></i> قاسەکە</a></li>
+        <?php endif; ?> -->
+        <?php if (hasPermission('view_user_wallets')): ?>
+          <li><a href="../pages/user_wallets.php" class="sidebar-link<?php if($current_page == 'user_wallets.php') echo ' active'; ?>"><i class="bi bi-wallet2 me-2"></i> هەژماری تایبەت</a></li>
         <?php endif; ?>
       </ul>
     </li>
@@ -155,6 +158,7 @@ $logout_pages = ['logout.php'];
       <ul class="collapse sidebar-submenu" id="financialMenu">
         <li><a href="../pages/user_wallets.php" class="sidebar-link<?php if($current_page == 'user_wallets.php') echo ' active'; ?>"><i class="bi bi-wallet2 me-2"></i> قاسەی بەکارهێنەر</a></li>
         <li><a href="../pages/transaction_categories.php" class="sidebar-link<?php if($current_page == 'transaction_categories.php') echo ' active'; ?>"><i class="bi bi-tags me-2"></i> پۆلێنکردنی مامەڵەکان</a></li>
+        <li><a href="../pages/wallet_report.php" class="sidebar-link<?php if($current_page == 'wallet_report.php') echo ' active'; ?>"><i class="bi bi-file-earmark-spreadsheet me-2"></i> کشف حساب (ڕاپۆرت)</a></li>
       </ul>
     </li>
     <li class="sidebar-group">

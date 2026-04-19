@@ -59,6 +59,7 @@ $categories = $stmt->fetchAll();
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
             <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">بەڕێوەبردنی قاسە (Cashbox)</h2>
             <div class="quick-actions d-flex gap-2">
+                <a href="wallet_report.php" class="btn quick-action bg-info text-dark"><i class="fa fa-file-invoice"></i> کشف حساب (ڕاپۆرت)</a>
                 <button class="btn quick-action" data-bs-toggle="modal" data-bs-target="#actionModal" onclick="setFormAction('inflow')"><i class="fa fa-plus"></i> زیادکردنی پارە</button>
                 <button class="btn quick-action" data-bs-toggle="modal" data-bs-target="#actionModal" onclick="setFormAction('outflow')"><i class="fa fa-minus"></i> ڕاکێشانی پارە</button>
                 <button class="btn quick-action bg-warning text-dark" data-bs-toggle="modal" data-bs-target="#exchangeModal"><i class="bi bi-arrow-left-right"></i> ئاڵوگۆڕی دراو</button>
