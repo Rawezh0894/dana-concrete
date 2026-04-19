@@ -35,12 +35,15 @@ $categories = $stmt->fetchAll();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
     <link href="../assets/css/variables.css" rel="stylesheet">
     <link href="../assets/css/dashboard.css" rel="stylesheet">
-    <link href="../assets/css/comon/cards.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="../assets/css/kurdish-font.css" rel="stylesheet">
+    <!-- Core Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- AG Grid Support -->
+    <script src="https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community/styles/ag-grid.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community/styles/ag-theme-alpine.css">
     <style>
         body { font-family: 'Rabar', sans-serif; background-color: #f4f6f9; }
         .wallet-card { border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.2s; border: none;}
@@ -49,6 +52,19 @@ $categories = $stmt->fetchAll();
         .balance { font-size: 2.5rem; font-weight: bold; }
         .quick-action { background-color: var(--seafoam-green); color: white; font-weight: bold; border-radius: 8px; padding: 10px 20px; transition: all 0.3s ease; border: none; }
         .quick-action:hover { background-color: var(--kelly-green); color: white; transform: scale(1.05); }
+        
+        /* AG Grid Custom Styling */
+        #walletsGrid { height: 600px; width: 100%; }
+        .ag-theme-alpine {
+            --ag-font-family: 'Rabar', sans-serif;
+            --ag-border-radius: 12px;
+            --ag-header-background-color: #f8f9fa;
+        }
+        .filter-section-custom {
+            background: #fff;
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+        }
     </style>
 </head>
 <body dir="rtl">
@@ -92,76 +108,40 @@ $categories = $stmt->fetchAll();
             </div>
         </div>
 
-        <!-- History -->
-        <div class="card shadow border-0" style="border-radius: 12px;">
-            <div class="card-header bg-white py-3 border-0">
-                <h5 class="mb-0 fw-bold" style="color: var(--seafoam-green);">دواین چالاکییەکان</h5>
+        <!-- History Section with AG Grid -->
+        <div class="card shadow border-0 overflow-hidden" style="border-radius: 12px;">
+            <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold" style="color: var(--seafoam-green);"><i class="fa fa-history me-2"></i> سەرجەم چالاکییەکان</h5>
+                <span class="badge bg-light text-dark border">سیستەمی فلتەری زیرەک</span>
             </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table align-middle mb-0 text-center">
-                        <thead class="table-light">
-                            <tr>
-                                <th>بەروار</th>
-                                <th>جۆر</th>
-                                <th>هۆکار</th>
-                                <th>بڕی USD</th>
-                                <th>بڕی IQD</th>
-                                <th>تێبینی</th>
-                                <th>کردار</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php 
-                            $stmt = $pdo->prepare("
-                                SELECT t.id, t.created_at, t.type as trans_type, t.category_id, tc.name as category_name,
-                                (SELECT amount FROM ledger_entries WHERE transaction_id = t.id AND currency_code = 'USD' LIMIT 1) as usd_amount,
-                                (SELECT amount FROM ledger_entries WHERE transaction_id = t.id AND currency_code = 'IQD' LIMIT 1) as iqd_amount,
-                                (SELECT description FROM ledger_entries WHERE transaction_id = t.id LIMIT 1) as description
-                                FROM transactions t
-                                LEFT JOIN transaction_categories tc ON t.category_id = tc.id
-                                WHERE t.created_by = ?
-                                ORDER BY t.created_at DESC LIMIT 20
-                            ");
-                            $stmt->execute([$user_id]);
-                            $transactions = $stmt->fetchAll();
-
-                            foreach ($transactions as $tx): 
-                                $is_exchange = $tx['trans_type'] === 'EXCHANGE';
-                            ?>
-                                <tr>
-                                    <td><small class="text-muted"><?= $tx['created_at'] ?></small></td>
-                                    <td>
-                                        <?php if($is_exchange): ?>
-                                            <span class="badge bg-warning text-dark">ئاڵوگۆڕ 💱</span>
-                                        <?php elseif(($tx['usd_amount'] ?? 0) > 0 || ($tx['iqd_amount'] ?? 0) > 0): ?>
-                                            <span class="badge bg-success">هاتن 📥</span>
-                                        <?php else: ?>
-                                            <span class="badge bg-danger">دەرچوون 📤</span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td><span class="fw-bold text-primary"><?= htmlspecialchars($tx['category_name'] ?? ($is_exchange ? 'ئاڵوگۆڕ' : 'بی جۆر')) ?></span></td>
-                                    <td dir="ltr" class="fw-bold <?= ($tx['usd_amount'] ?? 0) > 0 ? 'text-success' : (($tx['usd_amount'] ?? 0) < 0 ? 'text-danger' : 'text-muted') ?>">
-                                        <?= $tx['usd_amount'] ? number_format(abs($tx['usd_amount']), 2) . ' $' : '-' ?>
-                                    </td>
-                                    <td dir="ltr" class="fw-bold <?= ($tx['iqd_amount'] ?? 0) > 0 ? 'text-success' : (($tx['iqd_amount'] ?? 0) < 0 ? 'text-danger' : 'text-muted') ?>">
-                                        <?= $tx['iqd_amount'] ? number_format(abs($tx['iqd_amount']), 0) . ' IQD' : '-' ?>
-                                    </td>
-                                    <td class="text-muted small"><?= htmlspecialchars($tx['description'] ?? '') ?></td>
-                                    <td>
-                                        <?php if(!$is_exchange): ?>
-                                            <button class="btn btn-sm btn-outline-info border-0" onclick='prepareEdit(<?= json_encode($tx) ?>)'>
-                                                <i class="fa fa-edit"></i>
-                                            </button>
-                                        <?php endif; ?>
-                                        <button class="btn btn-sm btn-outline-danger border-0" onclick="deleteTransaction(<?= $tx['id'] ?>)">
-                                            <i class="fa fa-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
+            
+            <!-- Filters Overlay -->
+            <div class="filter-section-custom">
+                <div class="row g-2">
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold">لە بەرواری</label>
+                        <input type="date" id="filter_from" class="form-control form-control-sm">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold">بۆ بەرواری</label>
+                        <input type="date" id="filter_to" class="form-control form-control-sm">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold">جۆری مامەڵە</label>
+                        <select id="filter_type" class="form-select form-select-sm">
+                            <option value="ALL">هەمووی</option>
+                            <option value="INFLOW">هاتن (Inflow)</option>
+                            <option value="OUTFLOW">چوون (Outflow)</option>
+                            <option value="EXCHANGE">ئاڵوگۆڕ (Exchange)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold">هۆکار / پۆلێن</label>
+                        <select id="filter_category" class="form-select form-select-sm">
+                            <option value="">هەموو هۆکارەکان</option>
+                            <?php foreach($categories as $cat): ?>
+                                <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
                             <?php endforeach; ?>
-                        </tbody>
-                    </table>
                 </div>
             </div>
         </div>
@@ -270,6 +250,7 @@ $categories = $stmt->fetchAll();
         </div>
     </div>
 
+    <script src="../assets/js/user_wallets/ag_grid_wallets.js"></script>
     <script>
         function setFormAction(type) {
             $('#formActionType').val(type);
@@ -318,7 +299,11 @@ $categories = $stmt->fetchAll();
                 data: { action: 'delete_transaction', transaction_id: id },
                 dataType: 'json',
                 success: function(res) {
-                    if (res.success) location.reload();
+                    if (res.success) {
+                        // Reload AG Grid and Balances
+                        loadWalletData();
+                        updateBalancesOnPage();
+                    }
                     else alert('هەڵە: ' + res.message);
                 }
             });
@@ -341,10 +326,23 @@ $categories = $stmt->fetchAll();
                 data: form.serialize(),
                 dataType: 'json',
                 success: function(res) {
-                    if (res.success) location.reload();
+                    if (res.success) {
+                        $('.modal').modal('hide');
+                        loadWalletData();
+                        updateBalancesOnPage();
+                    }
                     else alert('کێشە: ' + res.message);
                 },
                 error: function() { alert('هەڵە لە سێرڤەر'); }
+            });
+        }
+
+        function updateBalancesOnPage() {
+            $.getJSON('../process/user_wallets/get_balances.php', function(data) {
+                if(data.success) {
+                    $('#usdBalance').text(Number(data.usd).toLocaleString(undefined, {minimumFractionDigits: 2}));
+                    $('#iqdBalance').text(Number(data.iqd).toLocaleString());
+                }
             });
         }
     </script>
