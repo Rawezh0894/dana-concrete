@@ -38,6 +38,8 @@ $categories = $stmt->fetchAll();
     <link href="../assets/css/comon/cards.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="../assets/css/kurdish-font.css" rel="stylesheet">
@@ -92,17 +94,59 @@ $categories = $stmt->fetchAll();
             </div>
         </div>
 
+        <!-- Filters -->
+        <div class="card shadow-sm border-0 mb-4 filters-section" style="border-radius: 12px;">
+            <div class="card-body">
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold text-muted">لە بەرواری</label>
+                        <input type="date" id="filterFrom" class="form-control dt-filter">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold text-muted">تا بەرواری</label>
+                        <input type="date" id="filterTo" class="form-control dt-filter">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold text-muted">جۆری مامەڵە</label>
+                        <select id="filterType" class="form-select dt-filter">
+                            <option value="">گشتی (هەمووی)</option>
+                            <option value="INFLOW">هاتن (Inflow)</option>
+                            <option value="OUTFLOW">چوون (Outflow)</option>
+                            <option value="EXCHANGE">ئاڵوگۆڕ</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold text-muted">هۆکار / پۆلێن</label>
+                        <select id="filterCategory" class="form-select dt-filter">
+                            <option value="">گشتی (هەمووی)</option>
+                            <?php foreach($categories as $cat): ?>
+                                <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold text-muted">بڕی پارە (Amount)</label>
+                        <input type="number" id="filterAmount" class="form-control dt-filter" placeholder="بڕەکەی بنووسە...">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold text-muted">تێبینی</label>
+                        <input type="text" id="filterNotes" class="form-control dt-filter" placeholder="گەڕان بەدوای تێبینی...">
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- History -->
         <div class="card shadow border-0" style="border-radius: 12px;">
             <div class="card-header bg-white py-3 border-0">
-                <h5 class="mb-0 fw-bold" style="color: var(--seafoam-green);">دواین چالاکییەکان</h5>
+                <h5 class="mb-0 fw-bold" style="color: var(--seafoam-green);">دواین چالاکییەکان و مامەڵەکان</h5>
             </div>
-            <div class="card-body p-0">
+            <div class="card-body p-3">
                 <div class="table-responsive">
-                    <table class="table align-middle mb-0 text-center">
+                    <table id="transactionsTable" class="table align-middle mb-0 text-center w-100 table-hover">
                         <thead class="table-light">
                             <tr>
-                                <th>بەروار</th>
+                                <th>بەروار و کات</th>
                                 <th>جۆر</th>
                                 <th>هۆکار</th>
                                 <th>بڕی USD</th>
@@ -111,56 +155,6 @@ $categories = $stmt->fetchAll();
                                 <th>کردار</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <?php 
-                            $stmt = $pdo->prepare("
-                                SELECT t.id, t.created_at, t.type as trans_type, t.category_id, tc.name as category_name,
-                                (SELECT amount FROM ledger_entries WHERE transaction_id = t.id AND currency_code = 'USD' LIMIT 1) as usd_amount,
-                                (SELECT amount FROM ledger_entries WHERE transaction_id = t.id AND currency_code = 'IQD' LIMIT 1) as iqd_amount,
-                                (SELECT description FROM ledger_entries WHERE transaction_id = t.id LIMIT 1) as description
-                                FROM transactions t
-                                LEFT JOIN transaction_categories tc ON t.category_id = tc.id
-                                WHERE t.created_by = ?
-                                ORDER BY t.created_at DESC LIMIT 20
-                            ");
-                            $stmt->execute([$user_id]);
-                            $transactions = $stmt->fetchAll();
-
-                            foreach ($transactions as $tx): 
-                                $is_exchange = $tx['trans_type'] === 'EXCHANGE';
-                            ?>
-                                <tr>
-                                    <td><small class="text-muted"><?= $tx['created_at'] ?></small></td>
-                                    <td>
-                                        <?php if($is_exchange): ?>
-                                            <span class="badge bg-warning text-dark">ئاڵوگۆڕ 💱</span>
-                                        <?php elseif(($tx['usd_amount'] ?? 0) > 0 || ($tx['iqd_amount'] ?? 0) > 0): ?>
-                                            <span class="badge bg-success">هاتن 📥</span>
-                                        <?php else: ?>
-                                            <span class="badge bg-danger">دەرچوون 📤</span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td><span class="fw-bold text-primary"><?= htmlspecialchars($tx['category_name'] ?? ($is_exchange ? 'ئاڵوگۆڕ' : 'بی جۆر')) ?></span></td>
-                                    <td dir="ltr" class="fw-bold <?= ($tx['usd_amount'] ?? 0) > 0 ? 'text-success' : (($tx['usd_amount'] ?? 0) < 0 ? 'text-danger' : 'text-muted') ?>">
-                                        <?= $tx['usd_amount'] ? number_format(abs($tx['usd_amount']), 2) . ' $' : '-' ?>
-                                    </td>
-                                    <td dir="ltr" class="fw-bold <?= ($tx['iqd_amount'] ?? 0) > 0 ? 'text-success' : (($tx['iqd_amount'] ?? 0) < 0 ? 'text-danger' : 'text-muted') ?>">
-                                        <?= $tx['iqd_amount'] ? number_format(abs($tx['iqd_amount']), 0) . ' IQD' : '-' ?>
-                                    </td>
-                                    <td class="text-muted small"><?= htmlspecialchars($tx['description'] ?? '') ?></td>
-                                    <td>
-                                        <?php if(!$is_exchange): ?>
-                                            <button class="btn btn-sm btn-outline-info border-0" onclick='prepareEdit(<?= json_encode($tx) ?>)'>
-                                                <i class="fa fa-edit"></i>
-                                            </button>
-                                        <?php endif; ?>
-                                        <button class="btn btn-sm btn-outline-danger border-0" onclick="deleteTransaction(<?= $tx['id'] ?>)">
-                                            <i class="fa fa-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
                     </table>
                 </div>
             </div>
@@ -270,6 +264,12 @@ $categories = $stmt->fetchAll();
         </div>
     </div>
 
+    </div>
+
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
     <script>
         function setFormAction(type) {
             $('#formActionType').val(type);
@@ -347,6 +347,68 @@ $categories = $stmt->fetchAll();
                 error: function() { alert('هەڵە لە سێرڤەر'); }
             });
         }
+
+        $(document).ready(function() {
+            // Initialize DataTable
+            let table = $('#transactionsTable').DataTable({
+                "processing": true,
+                "serverSide": true,
+                "ajax": {
+                    "url": "../process/user_wallets/fetch_transactions.php",
+                    "type": "POST",
+                    "data": function(d) {
+                        d.from_date = $('#filterFrom').val();
+                        d.to_date = $('#filterTo').val();
+                        d.type = $('#filterType').val();
+                        d.category = $('#filterCategory').val();
+                        d.amount = $('#filterAmount').val();
+                        d.notes = $('#filterNotes').val();
+                    }
+                },
+                "columns": [
+                    { "data": "created_at" },
+                    { "data": "type" },
+                    { "data": "category" },
+                    { "data": "usd" },
+                    { "data": "iqd" },
+                    { "data": "notes" },
+                    { "data": "action", "orderable": false }
+                ],
+                "language": {
+                    "sProcessing":   "چاوەڕێ بە...",
+                    "sLengthMenu":   "پیشاندانی _MENU_ ڕیزەکان لە پەڕەیەکدا",
+                    "sZeroRecords":  "هیچ داتایەک نەدۆزرایەوە بە پشتبەستن بەم فلتەرانە",
+                    "sInfo":         "پیشاندانی _START_ بۆ _END_ لە کۆی _TOTAL_ ڕیکۆرد",
+                    "sInfoEmpty":    "پیشاندانی 0 بۆ 0 لە کۆی 0 ڕیکۆرد",
+                    "sInfoFiltered": "(فلتەرکراوە لە کۆی _MAX_ ڕیکۆرد)",
+                    "oPaginate": {
+                        "sFirst":    "یەکەم",
+                        "sPrevious": "پێشوو",
+                        "sNext":     "دواتر",
+                        "sLast":     "کۆتایی"
+                    }
+                },
+                "order": [[0, "desc"]],
+                "lengthMenu": [10, 25, 50, 100],
+                "pageLength": 10,
+                "bFilter": false, // custom filter is used
+            });
+
+            // Delay timer for typing to prevent overloaded Ajax requests
+            let typingTimer;
+            const doneTypingInterval = 400; // time in ms 
+
+            $('.dt-filter').on('keyup', function () {
+                clearTimeout(typingTimer);
+                typingTimer = setTimeout(function() {
+                    table.draw();
+                }, doneTypingInterval);
+            });
+
+            $('.dt-filter').on('change', function () {
+                table.draw();
+            });
+        });
     </script>
 </body>
 </html>
