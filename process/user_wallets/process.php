@@ -25,8 +25,18 @@ try {
 
         $pdo->beginTransaction();
 
+        $is_editing = false;
+
         // If Editing, FIRST reverse the OLD transaction effects
         if ($action === 'edit_transaction' && $txn_id > 0) {
+            $is_editing = true;
+            
+            // Get original transaction type to correctly process new amounts
+            $stmtType = $pdo->prepare("SELECT type FROM transactions WHERE id = ?");
+            $stmtType->execute([$txn_id]);
+            $originalType = $stmtType->fetchColumn();
+
+            // Reverse old wallet balances
             $old_entries = $pdo->prepare("SELECT wallet_id, amount FROM ledger_entries WHERE transaction_id = ?");
             $old_entries->execute([$txn_id]);
             while ($row = $old_entries->fetch()) {
@@ -35,12 +45,15 @@ try {
             }
             // Clear old entries
             $pdo->prepare("DELETE FROM ledger_entries WHERE transaction_id = ?")->execute([$txn_id]);
+            
+            // Re-assign action so the rest of the flow knows if it should be positive or negative
+            $action = ($originalType === 'WITHDRAWAL') ? 'outflow' : 'inflow';
         }
 
         $txn_type = ($action === 'outflow') ? 'WITHDRAWAL' : 'DEPOSIT';
 
         // 1. Create or Update Transaction Record
-        if ($action === 'edit_transaction' && $txn_id > 0) {
+        if ($is_editing && $txn_id > 0) {
             $stmt = $pdo->prepare("UPDATE transactions SET category_id = ? WHERE id = ?");
             $stmt->execute([$category_id ?: null, $txn_id]);
         } else {
