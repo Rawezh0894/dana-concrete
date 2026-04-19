@@ -153,7 +153,12 @@ $final_balance = $opening_balance + $net_change;
         
         /* Print Optimization - Professional Layout */
         @media print {
-            body { 
+            /* Override global variables.css rule causing white screen */
+            body * { visibility: visible !important; position: static !important; }
+            html, body {
+                height: auto !important;
+                overflow: visible !important;
+                position: static !important;
                 background-color: #fff !important; 
                 margin: 0; 
                 padding: 0; 
@@ -162,8 +167,9 @@ $final_balance = $opening_balance + $net_change;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
-            .no-print, .sidebar, .navbar, .filters-section, .btn { 
+            .no-print, .no-print *, .sidebar, .sidebar *, .navbar, .navbar *, .filters-section, .filters-section *, .btn, .btn * { 
                 display: none !important; 
+                visibility: hidden !important;
             }
             .print-header { 
                 display: flex !important; 
