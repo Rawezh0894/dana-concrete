@@ -149,9 +149,8 @@ $final_balances = [
         .currency-symbol { font-size: 1.2rem; font-weight: bold; }
         .table-responsive { background: white; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         
-        /* Print Optimization - Professional Layout */
+        /* Print Optimization - Premium Designer Layout */
         @media print {
-            /* Override global variables.css rule causing white screen */
             body * { visibility: visible !important; position: static !important; }
             html, body {
                 height: auto !important;
@@ -160,39 +159,82 @@ $final_balances = [
                 background-color: #fff !important; 
                 margin: 0; 
                 padding: 0; 
-                font-size: 11pt; 
-                color: #000;
+                font-size: 10.5pt; 
+                color: #2c3e50;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
+                font-family: 'Rabar', sans-serif;
             }
             .no-print, .no-print *, .sidebar, .sidebar *, .navbar, .navbar *, .filters-section, .filters-section *, .btn, .btn * { 
                 display: none !important; 
                 visibility: hidden !important;
             }
+            
+            /* Professional Header */
             .print-header { 
-                display: flex !important; 
-                flex-direction: column;
-                align-items: center;
-                border-bottom: 2px solid #000; 
-                padding-bottom: 15px; 
-                margin-bottom: 25px; 
+                display: block !important; 
+                border-bottom: 3px solid #003b73; 
+                padding-bottom: 20px; 
+                margin-bottom: 30px; 
+                text-align: right;
             }
             .print-header h2 {
-                color: #000 !important;
-                font-weight: bold;
-                margin-bottom: 5px;
+                color: #003b73 !important;
+                font-size: 24pt;
+                font-weight: 800;
+                margin-bottom: 8px;
+                letter-spacing: -0.5px;
             }
             .print-header h4 {
-                color: #444 !important;
-                margin-bottom: 15px;
+                color: #666 !important;
+                font-size: 14pt;
+                margin-bottom: 20px;
+                font-weight: 500;
             }
-            .print-header .d-flex {
-                width: 100%;
+            .header-info-grid {
+                display: flex;
                 justify-content: space-between;
-                border-top: 1px dashed #ccc;
-                padding-top: 10px;
-                font-size: 12pt;
+                background: #f8fafc;
+                padding: 15px 20px;
+                border-radius: 8px;
+                border: 1px solid #e2e8f0;
+                font-size: 11pt;
             }
+            .header-info-item strong { color: #003b73; }
+
+            /* Professional Print Summary Section */
+            .print-summary-section {
+                display: block !important;
+                margin-bottom: 30px;
+            }
+            .print-summary-table {
+                width: 100%;
+                border-collapse: collapse;
+                table-layout: fixed;
+            }
+            .print-summary-table td {
+                padding: 15px;
+                border: 1px solid #e2e8f0;
+                background: #fff;
+                vertical-align: top;
+            }
+            .summary-label {
+                font-size: 9pt;
+                color: #64748b;
+                text-transform: uppercase;
+                font-weight: 700;
+                margin-bottom: 5px;
+                display: block;
+            }
+            .summary-value {
+                font-size: 13pt;
+                font-weight: 800;
+                color: #0f172a;
+            }
+            .val-usd { color: #003b73; display: block; }
+            .val-iqd { color: #0074b7; display: block; border-top: 1px dashed #cbd5e1; margin-top: 5px; padding-top: 5px; }
+
+            /* Table Refinement */
             .table-responsive { 
                 overflow: visible !important; 
                 box-shadow: none !important; 
@@ -204,68 +246,42 @@ $final_balances = [
                 margin-bottom: 0 !important;
             }
             .table-bordered th, .table-bordered td { 
-                border: 1px solid #000 !important; 
-                padding: 8px 10px !important; 
-                color: #000 !important;
+                border: 1px solid #cbd5e1 !important; 
+                padding: 10px 8px !important; 
             }
             thead { display: table-header-group; }
-            tr { page-break-inside: avoid; page-break-after: auto; }
             th { 
-                background-color: #f0f0f0 !important; 
-                color: #000 !important; 
-                font-weight: bold;
+                background-color: #003b73 !important; 
+                color: #fff !important; 
+                font-weight: 700 !important;
                 text-align: center !important;
-            }
-            .summary-card { 
-                border: 1px solid #000 !important; 
-                break-inside: avoid; 
-                page-break-inside: avoid; 
-                margin-bottom: 20px; 
-                background-color: #fff !important;
-                box-shadow: none !important;
-            }
-            @page { size: A4 portrait; margin: 15mm; }
-            
-            .container-fluid { 
-                padding: 0 !important; 
-                margin: 0 !important;
-                width: 100% !important;
+                font-size: 10pt;
             }
             
-            .row {
-                display: flex !important;
-                flex-wrap: wrap !important;
-                margin-right: -5px !important;
-                margin-left: -5px !important;
-            }
-            .col-xl-3, .col-md-6 { 
-                width: 25% !important; 
-                flex: 0 0 25% !important; 
-                max-width: 25% !important; 
-                padding: 5px !important; 
-                box-sizing: border-box !important;
-            }
-            .card-body {
-                padding: 10px 15px !important;
-            }
-            .text-xs { font-size: 9pt !important; color: #555 !important; }
-            .h4 { font-size: 13pt !important; color: #000 !important; font-weight: bold; margin-top: 5px; }
-            .fa-2x { font-size: 1.5em !important; opacity: 0.8 !important; }
-            
-            /* Badges for Print */
+            /* Color Coding for Rows */
+            .row-inflow { background-color: #f0fff4 !important; }
+            .row-outflow { background-color: #fff5f5 !important; }
+            .row-exchange { background-color: #fffbeb !important; }
+
             .badge {
                 border: 1px solid #000 !important;
-                color: #000 !important;
                 background: transparent !important;
-                padding: 4px 8px !important;
-                font-weight: bold !important;
+                color: #000 !important;
+                font-weight: 800 !important;
+                font-size: 8pt !important;
+                padding: 3px 6px !important;
             }
-            #reportTable td, #reportTable th {
-                vertical-align: middle;
-            }
-            .fs-5 { font-size: 1.1rem !important; }
-            .fs-6 { font-size: 1rem !important; }
+            
+            @page { size: A4 portrait; margin: 15mm; }
+            
+            .container-fluid { padding: 0 !important; margin: 0 !important; width: 100% !important; }
+            .summary-card { display: none !important; } /* Hide web cards in print */
         }
+        
+        /* Web Styling for row colors */
+        .row-inflow { background-color: #f0fff4; }
+        .row-outflow { background-color: #fff5f5; }
+        .row-exchange { background-color: #fffbeb; }
     </style>
 </head>
 <body dir="rtl">
@@ -274,15 +290,68 @@ $final_balances = [
         <?php include '../includes/sidebar.php'; ?>
     </div>
 
-    <!-- Print Header (Hidden on Web) -->
+    <!-- Print Header (Integrated & Professional) -->
     <div class="print-header">
-        <h2 class="fw-bold">کارگەی کۆنکرێتی دانا</h2>
-        <h4>ڕاپۆرتی جوڵەی قاسە (کشف حساب)</h4>
-        <div class="d-flex justify-content-between mt-3" style="font-size: 14pt;">
-            <span><strong>ناوی قاسە:</strong> <?= htmlspecialchars($user_name) ?></span>
-            <span><strong>جۆری دراو:</strong> <?= $currency == 'ALL' ? 'گشتی (هەردووکی)' : $currency ?></span>
-            <span><strong>بەروار:</strong> <?= $from_date ?> بـــۆ <?= $to_date ?></span>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2>کارگەی کۆنکرێتی دانا</h2>
+                <h4>ڕاپۆرتی دارایی و جوڵەی دراوەکان (Account Statement)</h4>
+            </div>
+            <div style="text-align: left;">
+                <img src="../assets/images/logo.png" style="height: 80px; filter: grayscale(1);">
+            </div>
         </div>
+        
+        <div class="header-info-grid">
+            <div class="header-info-item">
+                <strong>ناوی قاسە:</strong> <span><?= htmlspecialchars($user_name) ?></span>
+            </div>
+            <div class="header-info-item">
+                <strong>ماوەی ڕاپۆرت:</strong> <span><?= $from_date ?> ➟ <?= $to_date ?></span>
+            </div>
+            <div class="header-info-item">
+                <strong>کاتی دەرچوون:</strong> <span><?= date('Y-m-d H:i') ?></span>
+            </div>
+            <div class="header-info-item">
+                <strong>جۆری دراو:</strong> <span><?= $currency == 'ALL' ? 'USD & IQD' : $currency ?></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Print Summary Section (Only visible on print) -->
+    <div class="container-fluid print-summary-section d-none">
+        <table class="print-summary-table">
+            <tr>
+                <td>
+                    <span class="summary-label">Opening Balance</span>
+                    <div class="summary-value">
+                        <?php if ($currency === 'ALL' || $currency === 'USD'): ?><span class="val-usd"><?= number_format($opening_balances['USD'], 2) ?> USD</span><?php endif; ?>
+                        <?php if ($currency === 'ALL' || $currency === 'IQD'): ?><span class="val-iqd"><?= number_format($opening_balances['IQD'], 0) ?> IQD</span><?php endif; ?>
+                    </div>
+                </td>
+                <td>
+                    <span class="summary-label">Total Inflow</span>
+                    <div class="summary-value">
+                        <?php if ($currency === 'ALL' || $currency === 'USD'): ?><span class="val-usd text-success">+<?= number_format($total_inflow['USD'], 2) ?> USD</span><?php endif; ?>
+                        <?php if ($currency === 'ALL' || $currency === 'IQD'): ?><span class="val-iqd text-success">+<?= number_format($total_inflow['IQD'], 0) ?> IQD</span><?php endif; ?>
+                    </div>
+                </td>
+                <td>
+                    <span class="summary-label">Total Outflow</span>
+                    <div class="summary-value">
+                        <?php if ($currency === 'ALL' || $currency === 'USD'): ?><span class="val-usd text-danger">-<?= number_format($total_outflow['USD'], 2) ?> USD</span><?php endif; ?>
+                        <?php if ($currency === 'ALL' || $currency === 'IQD'): ?><span class="val-iqd text-danger">-<?= number_format($total_outflow['IQD'], 0) ?> IQD</span><?php endif; ?>
+                    </div>
+                </td>
+                <td style="background: #f0f7ff;">
+                    <span class="summary-label">Final Net Worth</span>
+                    <div class="summary-value">
+                        <?php if ($currency === 'ALL' || $currency === 'USD'): ?><span class="val-usd text-primary"><?= number_format($final_balances['USD'], 2) ?> USD</span><?php endif; ?>
+                        <?php if ($currency === 'ALL' || $currency === 'IQD'): ?><span class="val-iqd text-primary"><?= number_format($final_balances['IQD'], 0) ?> IQD</span><?php endif; ?>
+                    </div>
+                </td>
+            </tr>
+        </table>
     </div>
 
     <div class="container-fluid py-4 pl-print-0 pr-print-0 mb-5">
@@ -433,53 +502,37 @@ $final_balances = [
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Opening Balance Row -->
-                    <?php if ($currency === 'ALL' || $currency === 'USD'): ?>
-                    <tr class="table-secondary">
-                        <td>-</td>
-                        <td colspan="4" class="fw-bold text-start">باڵانسی پێشوو دۆلار (Opening Balance USD) تا <?= $from_date ?></td>
-                        <td dir="ltr" class="fw-bold fs-6 text-primary"><?= number_format($opening_balances['USD'], 2) ?></td>
-                        <td>-</td>
-                        <td dir="ltr" class="fw-bold fs-6 text-primary"><?= number_format($opening_balances['USD'], 2) ?> USD</td>
-                        <td>-</td>
-                    </tr>
-                    <?php endif; ?>
-                    
-                    <?php if ($currency === 'ALL' || $currency === 'IQD'): ?>
-                    <tr class="table-secondary">
-                        <td>-</td>
-                        <td colspan="4" class="fw-bold text-start">باڵانسی پێشوو دینار (Opening Balance IQD) تا <?= $from_date ?></td>
-                        <td dir="ltr" class="fw-bold fs-6 text-primary"><?= number_format($opening_balances['IQD'], 0) ?></td>
-                        <td>-</td>
-                        <td dir="ltr" class="fw-bold fs-6 text-primary"><?= number_format($opening_balances['IQD'], 0) ?> IQD</td>
-                        <td>-</td>
-                    </tr>
-                    <?php endif; ?>
-
                     <?php 
                     $counter = 1;
                     foreach ($transactions as $row): 
                         // داواکردنی ڕەنینگ باڵانس لەو ئەرەییەی کە بۆی دروستکراوە
                         $current_rb = $running_balances[$row['id']] ?? 0;
                         $is_inflow = $row['amount'] > 0;
+                        $is_exchange = ($row['trans_type'] === 'EXCHANGE');
                         $decimals = $row['currency_code'] === 'IQD' ? 0 : 2;
+                        
+                        // Dynamic Classes for Row Painting
+                        $row_class = "";
+                        if($is_exchange) $row_class = "row-exchange";
+                        elseif($is_inflow) $row_class = "row-inflow";
+                        else $row_class = "row-outflow";
                     ?>
-                        <tr>
+                        <tr class="<?= $row_class ?>">
                             <td><?= $counter++ ?></td>
                             <td><span style="direction: ltr; display: inline-block; font-size: 0.9em;"><?= $row['created_at'] ?></span></td>
                             <td>
-                                <?php if($row['trans_type'] === 'EXCHANGE'): ?>
+                                <?php if($is_exchange): ?>
                                     <span class="badge bg-warning text-dark no-print">ئاڵوگۆڕ</span>
-                                    <span class="d-none d-print-block fw-bold text-warning border border-warning p-1">ئاڵوگۆڕ</span>
+                                    <span class="d-none d-print-block fw-bold text-dark border border-dark p-1 rounded-1">Exchange</span>
                                 <?php elseif($is_inflow): ?>
                                     <span class="badge bg-success no-print">هاتن</span>
-                                    <span class="d-none d-print-block fw-bold text-success border border-success p-1">هاتن</span>
+                                    <span class="d-none d-print-block fw-bold text-success border border-success p-1 rounded-1">Credit</span>
                                 <?php else: ?>
                                     <span class="badge bg-danger no-print">دەرچوون</span>
-                                    <span class="d-none d-print-block fw-bold text-danger border border-danger p-1">چوون</span>
+                                    <span class="d-none d-print-block fw-bold text-danger border border-danger p-1 rounded-1">Debit</span>
                                 <?php endif; ?>
                             </td>
-                            <td><span class="badge bg-light text-dark border"><?= $row['currency_code'] ?></span></td>
+                            <td><span class="badge bg-white text-dark border shadow-sm"><?= $row['currency_code'] ?></span></td>
                             <td><?= htmlspecialchars($row['category_name'] ?? 'بێ جۆر') ?></td>
                             
                             <!-- Inflow Column -->
@@ -493,16 +546,16 @@ $final_balances = [
                             </td>
                             
                             <!-- Running Balance Column -->
-                            <td dir="ltr" class="fw-bold text-primary fs-6" style="background:#f8f9fa;">
-                                <?= number_format($current_rb, $decimals) ?> <span style="font-size: 0.8em;"><?= $row['currency_code'] ?></span>
+                            <td dir="ltr" class="fw-bold text-dark fs-6" style="background: rgba(0,0,0,0.02);">
+                                <?= number_format($current_rb, $decimals) ?> <span style="font-size: 0.8em; opacity: 0.6;"><?= $row['currency_code'] ?></span>
                             </td>
                             
-                            <td class="text-end small"><?= htmlspecialchars($row['description'] ?? '') ?></td>
+                            <td class="text-end small" style="font-size: 0.85em;"><?= htmlspecialchars($row['description'] ?? '') ?></td>
                         </tr>
                     <?php endforeach; ?>
                     
                     <?php if (empty($transactions)): ?>
-                        <tr><td colspan="9" class="text-muted py-4">کشف حسابی ئەم ناوچەیە بەتاڵە</td></tr>
+                        <tr><td colspan="9" class="text-muted py-4">هیچ مامەڵەیەک نەدۆزرایەوە</td></tr>
                     <?php endif; ?>
                 </tbody>
             </table>
