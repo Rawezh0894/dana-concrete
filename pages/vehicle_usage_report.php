@@ -119,49 +119,53 @@ if (!isset($_SESSION['user_id'])) {
                 print-color-adjust: exact !important;
             }
             @page {
-                size: A4;
+                size: A4 portrait;
                 margin: 1.5cm;
             }
             html, body {
                 height: auto !important;
                 overflow: visible !important;
                 background: white !important;
+                font-family: 'Rabar', 'Noto Sans Arabic', sans-serif !important;
             }
-            .sidebar, .navbar, .filter-section, .btn-print, .btn-premium {
+            .sidebar, .navbar, .filter-section, .btn-print, .btn-premium, .no-print {
                 display: none !important;
                 visibility: hidden !important;
             }
-            .main-content, .container-custom, .report-card, .card-body {
-                background: white !important;
+            .main-content {
                 margin: 0 !important;
                 padding: 0 !important;
                 width: 100% !important;
                 display: block !important;
-                box-shadow: none !important;
-                border: none !important;
-                visibility: visible !important;
-                float: none !important;
                 position: static !important;
             }
-            .main-content {
-                margin-right: 0 !important;
+            .container-custom {
+                width: 100% !important;
+                max-width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
             }
-            .page-header {
-                display: block !important;
-                background: white !important;
-                color: black !important;
-                border-bottom: 2px solid #000 !important;
+            .report-card {
+                box-shadow: none !important;
+                border: 1px solid #eee !important;
                 margin-bottom: 20px !important;
             }
-            table {
-                width: 100% !important;
-                border: 1px solid #000 !important;
+            .stat-card {
+                box-shadow: none !important;
+                border: 1px solid #eee !important;
+                padding: 1rem !important;
             }
-            th, td {
-                border: 1px solid #ddd !important;
-                padding: 8px !important;
-                color: black !important;
+            .print-header {
+                display: block !important;
+                margin-bottom: 30px !important;
             }
+        }
+
+        /* Print Header Style */
+        .print-header {
+            display: none;
+            border-bottom: 3px solid #1e293b;
+            padding-bottom: 15px;
         }
 
         @media (max-width: 991.98px) {
@@ -175,13 +179,25 @@ if (!isset($_SESSION['user_id'])) {
 
     <div class="main-content">
         <div class="container-custom">
+            <!-- Print-Only Header -->
+            <div class="print-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="fw-bold mb-0">کارگەی کۆنکرێتی دانا</h2>
+                        <h4 class="mb-1">ڕاپۆرتی بەکارهێنانی سەیارە</h4>
+                        <p class="mb-0 text-muted small">کاتی چاپکردن: <?= date('Y-m-d H:i') ?></p>
+                    </div>
+                    <img src="../assets/images/logo.png" height="70" style="filter: grayscale(1);">
+                </div>
+            </div>
+
             <!-- Header -->
-            <div class="page-header d-flex justify-content-between align-items-center">
+            <div class="page-header d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h2 class="fw-bold mb-1">ڕاپۆرتی بەکارهێنانی سەیارە</h2>
                     <p class="mb-0 opacity-75">بەدواداچوونی ورد بۆ پارچە یەدەگە بەکارهاتووەکان بەپێی سەیارە</p>
                 </div>
-                <button class="btn btn-light btn-premium btn-print" onclick="window.print()">
+                <button class="btn btn-light btn-premium btn-print no-print" onclick="printReport()">
                     <i class="fas fa-print me-2"></i> پرینتکردنی ڕاپۆرت
                 </button>
             </div>
@@ -368,6 +384,156 @@ if (!isset($_SESSION['user_id'])) {
 
         function loadInitialData() {
             loadReport();
+        }
+
+        function printReport() {
+            // "The other way" - Opening a new window for printing to avoid UI/CSS conflicts
+            const printContent = `
+                <!DOCTYPE html>
+                <html lang="ku" dir="rtl">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>ڕاپۆرتی بەکارهێنانی سەیارە</title>
+                    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+                    <style>
+                        @font-face {
+                            font-family: 'Rabar';
+                            src: url('../assets/fonts/Rabar_021.ttf') format('truetype');
+                        }
+                        body { 
+                            font-family: 'Rabar', sans-serif; 
+                            background: white; 
+                            padding: 2.5rem;
+                            color: #1a1a1a;
+                        }
+                        .print-header {
+                            border-bottom: 3px solid #1e293b;
+                            padding-bottom: 1.5rem;
+                            margin-bottom: 2rem;
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                        }
+                        .summary-grid {
+                            display: grid;
+                            grid-template-columns: 1fr 1fr;
+                            gap: 1.5rem;
+                            margin-bottom: 2rem;
+                        }
+                        .summary-box {
+                            padding: 1.5rem;
+                            border: 1px solid #e2e8f0;
+                            border-radius: 12px;
+                            text-align: center;
+                        }
+                        .summary-label {
+                            color: #64748b;
+                            font-size: 0.9rem;
+                            margin-bottom: 0.5rem;
+                            font-weight: bold;
+                        }
+                        .summary-value {
+                            font-size: 1.5rem;
+                            font-weight: 800;
+                            color: #1e293b;
+                        }
+                        .table-premium {
+                            width: 100%;
+                            border-collapse: collapse;
+                            margin-top: 1rem;
+                        }
+                        .table-premium th {
+                            background: #f8fafc !important;
+                            color: #1e293b;
+                            padding: 12px;
+                            border: 1px solid #e2e8f0;
+                            font-size: 0.85rem;
+                            text-align: center;
+                        }
+                        .table-premium td {
+                            padding: 10px;
+                            border: 1px solid #e2e8f0;
+                            text-align: center;
+                            vertical-align: middle;
+                        }
+                        .badge-type {
+                            border: 1px solid #1e293b;
+                            padding: 2px 8px;
+                            border-radius: 4px;
+                            font-size: 0.8rem;
+                            font-weight: bold;
+                        }
+                        @media print {
+                            body { padding: 0; }
+                            @page { margin: 1.5cm; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="print-header">
+                        <div>
+                            <h1 style="margin:0; font-weight:800;">کارگەی کۆنکرێتی دانا</h1>
+                            <h3 style="margin:5px 0; color:#334155;">ڕاپۆرتی بەکارهێنانی سەیارە</h3>
+                            <p style="margin:0; color:#64748b;">ڕێککەوت: ${new Date().toLocaleDateString('ku-IQ')}</p>
+                        </div>
+                        <img src="../assets/images/logo.png" height="80" style="filter: grayscale(1);">
+                    </div>
+
+                    <div class="summary-grid">
+                        <div class="summary-box">
+                            <div class="summary-label">کۆی گشتی تێچوو (دۆلار)</div>
+                            <div class="summary-value" style="color: #2563eb;">${$('#totalValueUSD').text()}</div>
+                        </div>
+                        <div class="summary-box">
+                            <div class="summary-label">کۆی گشتی تێچوو (دینار)</div>
+                            <div class="summary-value" style="color: #059669;">${$('#totalValueIQD').text()}</div>
+                        </div>
+                    </div>
+
+                    <h4 style="margin-bottom:1rem; border-right:4px solid #1e293b; padding-right:10px;">لیستی وردەکارییەکان</h4>
+                    <table class="table-premium">
+                        <thead>
+                            <tr>
+                                <th>بەروار</th>
+                                <th>جۆر</th>
+                                <th>ناوی پارچە / مەبەست</th>
+                                <th>پۆلێن</th>
+                                <th>سەیارە</th>
+                                <th>بڕ</th>
+                                <th>دۆلار</th>
+                                <th>دینار</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${$('#reportData').html().replace(/<span class="badge[^>]*">/g, '<span class="badge-type">')}
+                        </tbody>
+                    </table>
+
+                    <div style="margin-top: 50px; display: flex; justify-content: space-between;">
+                        <div style="text-align:center; flex:1;">
+                            <div style="border-top:1px solid #000; width:150px; margin:0 auto; padding-top:5px;">واژۆی ژمێریار</div>
+                        </div>
+                        <div style="text-align:center; flex:1;">
+                            <div style="border-top:1px solid #000; width:150px; margin:0 auto; padding-top:5px;">واژۆی شۆفێر</div>
+                        </div>
+                        <div style="text-align:center; flex:1;">
+                            <div style="border-top:1px solid #000; width:150px; margin:0 auto; padding-top:5px;">مۆر و واژۆی کارگە</div>
+                        </div>
+                    </div>
+
+                    <script>
+                        window.onload = function() {
+                            window.print();
+                            // window.onafterprint = function() { window.close(); };
+                        };
+                    <\/script>
+                </body>
+                </html>
+            `;
+
+            const printWindow = window.open('', '_blank', 'width=1000,height=800');
+            printWindow.document.write(printContent);
+            printWindow.document.close();
         }
     </script>
 </body>
