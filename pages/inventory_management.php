@@ -327,7 +327,7 @@ if (!isset($_SESSION['user_id'])) {
                 <div class="inventory-card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <span><i class="fas fa-list-ul me-2 text-primary"></i>لیستی گشتی کۆگا</span>
-                        <button class="btn btn-sm btn-light border-0" onclick="loadStock()">
+                        <button class="btn btn-sm btn-light border-0" onclick="loadStock(1)">
                             <i class="fas fa-sync-alt text-muted"></i>
                         </button>
                     </div>
@@ -349,6 +349,9 @@ if (!isset($_SESSION['user_id'])) {
                                 </tbody>
                             </table>
                         </div>
+                    </div>
+                    <div class="card-footer bg-white border-0 py-3">
+                        <div id="stockPagination" class="d-flex justify-content-center"></div>
                     </div>
                 </div>
             </div>
@@ -400,28 +403,32 @@ if (!isset($_SESSION['user_id'])) {
                                 </button>
                             </div>
                         </form>
-
-                        <hr class="my-5">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h6 class="fw-bold mb-0"><i class="fas fa-history me-2 text-primary"></i>مێژووی کڕینەکان</h6>
-                        </div>
+                    </div>
+                </div>
+                <div class="inventory-card mb-5">
+                    <div class="card-header">
+                        <span><i class="fas fa-history me-2 text-primary"></i>دوایین کڕینەکان</span>
+                    </div>
+                    <div class="card-body p-0">
                         <div class="table-responsive">
-                            <table class="table table-hover align-middle" id="purchaseTable">
+                            <table class="table table-hover align-middle">
                                 <thead>
                                     <tr>
-                                        <th>#</th>
-                                        <th>بەروار</th>
-                                        <th>ژ. پسوڵە</th>
+                                        <th>بەرورار</th>
+                                        <th>پسوڵە</th>
                                         <th>فرۆشیار</th>
                                         <th>کۆی بڕ (USD)</th>
                                         <th>کردارەکان</th>
                                     </tr>
                                 </thead>
-                                <tbody id="purchaseData">
+                                <tbody id="recentPurchasesData">
                                     <!-- Dynamic Data -->
                                 </tbody>
                             </table>
                         </div>
+                    </div>
+                    <div class="card-footer bg-white border-0 py-3">
+                        <div id="purchasesPagination" class="d-flex justify-content-center"></div>
                     </div>
                 </div>
             </div>
@@ -499,6 +506,9 @@ if (!isset($_SESSION['user_id'])) {
                             </table>
                         </div>
                     </div>
+                    <div class="card-footer bg-white border-0 py-3">
+                        <div id="issuancesPagination" class="d-flex justify-content-center"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -527,6 +537,12 @@ if (!isset($_SESSION['user_id'])) {
                                     <!-- Categories will be here -->
                                 </select>
                             </div>
+                            <div class="col-md-6" id="editPriceDiv" style="display:none;">
+                                <label class="form-label fw-600">تێکڕای نرخ (USD)</label>
+                                <input type="number" step="0.001" name="avg_cost_usd" class="form-control" placeholder="0.000">
+                                <small class="text-info"><i class="fas fa-info-circle"></i> تەنها لە کاتی پێویست دەستکاری بکە</small>
+                            </div>
+                        </div>
                         <div class="row mb-4">
                             <div class="col-md-6">
                                 <label class="form-label fw-600">یەکەی سەرەکی (بچووک)</label>
@@ -555,41 +571,28 @@ if (!isset($_SESSION['user_id'])) {
                         </div>
 
                         <hr class="my-4 opacity-10">
-                        <h6 class="fw-bold mb-3"><i class="fas fa-warehouse me-1"></i> باری موجودی کۆگا (Stock Status)</h6>
+                        <h6 class="fw-bold mb-3"><i class="fas fa-warehouse me-1"></i> بڕی سەرەتایی (Opening Stock)</h6>
                         <div class="row g-3">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label class="form-label small text-muted">بڕی موجود (بچووک)</label>
-                                <input type="number" step="0.01" name="current_qty" class="form-control" value="0">
+                                <input type="number" step="0.01" name="opening_qty" class="form-control" value="0">
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label small text-muted">تێکڕای نرخ (USD)</label>
-                                <input type="number" step="0.0001" name="avg_cost_usd" class="form-control" value="0">
+                            <div class="col-md-4">
+                                <label class="form-label small text-muted">تێکڕای نرخ</label>
+                                <div class="input-group">
+                                    <input type="number" step="0.01" name="opening_cost" class="form-control" value="0">
+                                    <select name="opening_currency" class="form-select" style="max-width: 90px;">
+                                        <option value="USD">$ USD</option>
+                                        <option value="IQD">IQD</option>
+                                    </select>
+                                </div>
                             </div>
-                        </div>
-                        <div id="openingStockSection">
-                            <hr class="my-4 opacity-10">
-                            <h6 class="fw-bold mb-3"><i class="fas fa-plus-circle me-1"></i> بڕی سەرەتایی (Opening Stock)</h6>
-                            <div class="row g-3">
-                                <div class="col-md-4">
-                                    <label class="form-label small text-muted">بڕی دەسپێک</label>
-                                    <input type="number" step="0.01" name="opening_qty" class="form-control" value="0">
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label small text-muted">نرخی دەسپێک</label>
-                                    <div class="input-group">
-                                        <input type="number" step="0.01" name="opening_cost" class="form-control" value="0">
-                                        <select name="opening_currency" class="form-select" style="max-width: 90px;">
-                                            <option value="USD">$ USD</option>
-                                            <option value="IQD">IQD</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-4" id="openingExchangeRateDiv" style="display:none;">
-                                    <label class="form-label small text-muted">نرخی ١٠٠دۆلار (دینار)</label>
-                                    <input type="number" name="opening_exchange_rate" class="form-control" value="150000">
-                                </div>
+                            <div class="col-md-4" id="openingExchangeRateDiv" style="display:none;">
+                                <label class="form-label small text-muted">نرخی ١٠٠دۆلار (دینار)</label>
+                                <input type="number" name="opening_exchange_rate" class="form-control" value="150000">
                             </div>
                         </div>
+                        <small class="text-muted">ئەم بڕە ڕاستەوخۆ دەچێتە ناو کۆگاوە وەک دەسپێکی کار</small>
                     </div>
                     <div class="modal-footer bg-light">
                         <button type="button" class="btn btn-light btn-premium" data-bs-dismiss="modal">پاشگەزبوونەوە</button>
@@ -671,7 +674,6 @@ if (!isset($_SESSION['user_id'])) {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script src="../assets/js/comon/table-controler.js"></script>
 
     <script>
         let itemsGlobal = [];
@@ -687,13 +689,55 @@ if (!isset($_SESSION['user_id'])) {
             loadCategories();
             loadItems();
             loadVehicles();
-            loadStock();
-            loadIssuances();
-            loadPurchases();
+            loadStock(1);
+            loadPurchases(1);
+            loadIssuances(1);
             loadSuppliers();
             addPurchaseRow(); // Initial row
             addIssueRow(); // Initial row for issuance
         });
+
+        function createPagination(totalItems, itemsPerPage, currentPage, targetId, callbackName) {
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            if (totalPages <= 1) {
+                $(`#${targetId}`).empty();
+                return;
+            }
+
+            let html = '<nav aria-label="Page navigation"><ul class="pagination pagination-sm mb-0">';
+            
+            // Previous
+            html += `
+                <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="javascript:void(0)" onclick="${callbackName}(${currentPage - 1})" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+            `;
+
+            const startRange = Math.max(1, currentPage - 2);
+            const endRange = Math.min(totalPages, currentPage + 2);
+
+            for (let i = startRange; i <= endRange; i++) {
+                html += `
+                    <li class="page-item ${i === currentPage ? 'active' : ''}">
+                        <a class="page-link" href="javascript:void(0)" onclick="${callbackName}(${i})">${i}</a>
+                    </li>
+                `;
+            }
+
+            // Next
+            html += `
+                <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                    <a class="page-link" href="javascript:void(0)" onclick="${callbackName}(${currentPage + 1})" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            `;
+
+            html += '</ul></nav>';
+            $(`#${targetId}`).html(html);
+        }
 
         async function loadUnits() {
             const res = await fetch('../process/inventory/get_units.php');
@@ -1023,20 +1067,20 @@ if (!isset($_SESSION['user_id'])) {
             modal.find('select[name="unit"]').val(item.unit);
             modal.find('select[name="secondary_unit"]').val(item.secondary_unit);
             modal.find('input[name="conversion_factor"]').val(item.conversion_factor);
+            modal.find('input[name="avg_cost_usd"]').val(item.avg_cost_usd || 0);
             
-            // Set current stock and cost
-            modal.find('input[name="current_qty"]').val(item.current_qty);
-            modal.find('input[name="avg_cost_usd"]').val(item.avg_cost_usd);
+            // Show price edit during edit
+            $('#editPriceDiv').show();
 
             // Add hidden item_id if not exists
             if (!modal.find('input[name="item_id"]').length) {
-                modal.find('form').append(`<input type="hidden" name="item_id" value="${item.item_id}">`);
+                modal.find('form').append(`<input type="hidden" name="item_id" value="${item.id}">`);
             } else {
-                modal.find('input[name="item_id"]').val(item.item_id);
+                modal.find('input[name="item_id"]').val(item.id);
             }
             
-            // Hide initial opening stock section during edit
-            $('#openingStockSection').hide();
+            // Hide opening stock section during edit
+            modal.find('h6, .row.g-3, .text-muted').last().hide();
             
             if (item.secondary_unit) {
                 $('#conversionFactorDiv').removeClass('d-none');
@@ -1052,9 +1096,77 @@ if (!isset($_SESSION['user_id'])) {
         $('#addItemModal').on('hidden.bs.modal', function () {
             $(this).find('form')[0].reset();
             $(this).find('input[name="item_id"]').remove();
-            $('#openingStockSection').show();
+            $(this).find('h6, .row.g-3, .text-muted').last().show();
+            $('#editPriceDiv').hide();
             $(this).find('.modal-title').text('کاڵایەکی نوێ زیاد بکە');
         });
+
+        $('#purchaseForm').submit(async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const isEdit = formData.get('purchase_id');
+            const url = isEdit ? '../process/inventory/update_purchase.php' : '../process/inventory/add_purchase.php';
+
+            const res = await fetch(url, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            if (data.success) {
+                Swal.fire('سەرکەوتوو', data.msg, 'success');
+                this.reset();
+                $('#purchaseForm input[name="purchase_id"]').remove();
+                $('#purchaseForm .card-header span').html('<i class="fas fa-plus-circle me-2 text-success"></i>تۆمارکردنی کڕینی نوێ');
+                $('#purchaseItemsList').empty();
+                addPurchaseRow();
+                loadStock(1);
+                loadPurchases(1);
+            } else {
+                Swal.fire('هەڵە', data.msg, 'error');
+            }
+        });
+
+        async function editPurchase(id) {
+            const res = await fetch(`../process/inventory/get_purchase_details.php?id=${id}`);
+            const data = await res.json();
+            if (data.success) {
+                const p = data.purchase;
+                const form = $('#purchaseForm');
+                
+                // Set Header
+                form.find('input[name="invoice_number"]').val(p.invoice_number);
+                form.find('select[name="person_id"]').val(p.person_id).trigger('change');
+                form.find('input[name="purchase_date"]').val(p.purchase_date);
+                form.find('input[name="exchange_rate"]').val(p.exchange_rate);
+                
+                // Add hidden purchase_id
+                if (!form.find('input[name="purchase_id"]').length) {
+                    form.append(`<input type="hidden" name="purchase_id" value="${id}">`);
+                } else {
+                    form.find('input[name="purchase_id"]').val(id);
+                }
+
+                // Update UI title
+                form.find('.card-header span').html('<i class="fas fa-edit me-2 text-warning"></i>دەستکاری کڕینی ' + p.invoice_number);
+                
+                // Clear and Fill Items
+                $('#purchaseItemsList').empty();
+                data.items.forEach((item, index) => {
+                    addPurchaseRow();
+                    const row = $('#purchaseItemsList .purchase-row').last();
+                    row.find(`select[name="items[${index}][item_id]"]`).val(item.item_id).trigger('change');
+                    row.find(`input[name="items[${index}][qty]"]`).val(item.qty);
+                    row.find(`select[name="items[${index}][unit_used]"]`).val(item.unit_used);
+                    row.find(`input[name="items[${index}][unit_price]"]`).val(item.unit_price);
+                    row.find(`select[name="items[${index}][currency]"]`).val(item.currency);
+                });
+
+                // Scroll to form
+                $('html, body').animate({
+                    scrollTop: $("#purchase-panel").offset().top - 100
+                }, 500);
+            }
+        }
 
         async function deleteItem(id) {
             const result = await Swal.fire({
@@ -1098,21 +1210,53 @@ if (!isset($_SESSION['user_id'])) {
                 this.reset();
                 $('#purchaseItemsList').empty();
                 addPurchaseRow();
-                loadStock();
-                loadPurchases();
+                loadStock(1);
+                loadPurchases(1);
             } else {
                 Swal.fire('هەڵە', data.msg, 'error');
             }
         });
 
+        async function loadPurchases(page = 1) {
+            const res = await fetch(`../process/inventory/get_purchases.php?page=${page}`);
+            const data = await res.json();
+            if (data.success) {
+                let html = '';
+                data.data.forEach(p => {
+                    html += `
+                        <tr>
+                            <td>${p.purchase_date}</td>
+                            <td><span class="badge bg-light text-dark border">${p.invoice_number}</span></td>
+                            <td>${p.supplier_name || 'کەسانی خەرجی تر'}</td>
+                            <td class="fw-bold text-success">$${Number(p.total_usd).toLocaleString()}</td>
+                            <td class="text-end">
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <button class="btn btn-sm btn-outline-primary border-0" onclick="editPurchase(${p.id})">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger border-0" onclick="deletePurchase(${p.id})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+                $('#recentPurchasesData').html(html);
+                createPagination(data.total, 10, page, 'purchasesPagination', 'loadPurchases');
+            }
+        }
+
         async function deletePurchase(id) {
             const result = await Swal.fire({
-                title: 'دڵنیایت؟',
-                text: "ئەم کڕینە دەسڕێتەوە و بڕی کاڵاکان لە کۆگا کەمدەبنەوە!",
+                title: 'ئایا دڵنیایت؟',
+                text: "ئەم کڕینە دەسڕێتەوە و کاریگەری لەسەر کۆگا نامێنێت!",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
-                confirmButtonText: 'بەڵی، بیسڕەوە'
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'بەڵێ، بیسڕەوە',
+                cancelButtonText: 'پاشگەزبوونەوە'
             });
 
             if (result.isConfirmed) {
@@ -1124,113 +1268,115 @@ if (!isset($_SESSION['user_id'])) {
                 });
                 const data = await res.json();
                 if (data.success) {
-                    Swal.fire('سڕایەوە', data.msg, 'success');
-                    loadStock();
-                    loadPurchases();
+                    Swal.fire('سڕایەوە!', data.msg, 'success');
+                    loadPurchases(1);
+                    loadStock(1);
                 } else {
                     Swal.fire('هەڵە', data.msg, 'error');
                 }
             }
         }
 
-        async function loadStock() {
-            const res = await fetch('../process/inventory/get_stock.php');
+        $('#issueForm').submit(async function(e) {
+            e.preventDefault();
+            
+            // Basic validation: ensure at least one item row exists after potential deletions
+            if ($('#issueItemsList').children().length === 0) {
+                Swal.fire('ئاگاداری', 'تکایە بەلایەنی کەمەوە کاڵایەک زیاد بکە', 'warning');
+                return;
+            }
+
+            const res = await fetch('../process/inventory/issue_item.php', {
+                method: 'POST',
+                body: new FormData(this)
+            });
             const data = await res.json();
             if (data.success) {
+                Swal.fire('سەرکەوتوو', data.msg, 'success');
+                this.reset();
+                $('#issueItemsList').empty();
+                addIssueRow();
+                loadStock();
+                loadIssuances();
+            } else {
+                Swal.fire('هەڵە', data.msg, 'error');
+            }
+        });
+
+        async function loadStock(page = 1) {
+            const res = await fetch(`../process/inventory/get_stock.php?page=${page}`);
+            const data = await res.json();
+            if (data.success) {
+                let html = '';
                 let totalValuationSum = 0;
                 let lowStock = 0;
                 
-                const tableData = data.data.map((item, idx) => {
+                data.data.forEach(item => {
                     const totalValuation = (item.current_qty * item.avg_cost_usd);
                     totalValuationSum += totalValuation;
+                    
                     if(item.current_qty <= 5) lowStock++;
 
-                    return {
-                        '#': '',
-                        name: `<strong>${item.name}</strong>`,
-                        category: `<span class="badge bg-light text-dark border">${item.category}</span>`,
-                        current_qty: `<span class="fw-bold ${item.current_qty <= 5 ? 'text-danger' : 'text-primary'}">${Number(item.current_qty).toLocaleString()} ${item.unit}</span>`,
-                        avg_cost_usd: `$${Number(item.avg_cost_usd).toLocaleString(undefined, {minimumFractionDigits: 3})}`,
-                        total_valuation: `<span class="fw-bold">$${Number(totalValuation).toLocaleString()}</span>`,
-                        actions: `
-                            <div class="d-flex gap-2 justify-content-end">
-                                <button class="btn btn-sm btn-outline-primary border-0" onclick='openEditItemModal(${JSON.stringify(item).replace(/'/g, "&apos;")})'>
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                ${item.issuance_count == 0 ? `
-                                    <button class="btn btn-sm btn-outline-danger border-0" onclick="deleteItem(${item.item_id})">
-                                        <i class="fas fa-trash"></i>
+                    html += `
+                        <tr>
+                            <td class="fw-bold">${item.name}</td>
+                            <td><span class="badge bg-light text-dark border">${item.category}</span></td>
+                            <td class="fw-bold ${item.current_qty <= 5 ? 'text-danger' : 'text-primary'}">
+                                ${Number(item.current_qty).toLocaleString()} ${item.unit}
+                            </td>
+                            <td>$${Number(item.avg_cost_usd).toLocaleString(undefined, {minimumFractionDigits: 3})}</td>
+                            <td class="fw-bold">$${Number(totalValuation).toLocaleString()}</td>
+                            <td class="text-end">
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <button class="btn btn-sm btn-outline-primary border-0" onclick='openEditItemModal(${JSON.stringify(item).replace(/'/g, "&apos;")})'>
+                                        <i class="fas fa-edit"></i>
                                     </button>
-                                ` : `
-                                    <button class="btn btn-sm btn-outline-secondary border-0" disabled title="بۆ سەیارە بەکارهاتووە، ناتوانرێت بسڕدرێتەوە">
-                                        <i class="fas fa-trash opacity-50"></i>
-                                    </button>
-                                `}
-                            </div>
-                        `
-                    };
+                                    ${item.issuance_count == 0 ? `
+                                        <button class="btn btn-sm btn-outline-danger border-0" onclick="deleteItem(${item.item_id})">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    ` : `
+                                        <button class="btn btn-sm btn-outline-secondary border-0" disabled title="بۆ سەیارە بەکارهاتووە، ناتوانرێت بسڕدرێتەوە">
+                                            <i class="fas fa-trash opacity-50"></i>
+                                        </button>
+                                    `}
+                                </div>
+                            </td>
+                        </tr>
+                    `;
                 });
                 
-                TableController.renderWithPagination('#stockTable', tableData, ['name', 'category', 'current_qty', 'avg_cost_usd', 'total_valuation', 'actions']);
-                
-                $('#totalItemCount').text(data.data.length);
-                $('#totalStockValue').text('$' + Number(totalValuationSum).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}));
-                $('#lowStockCount').text(lowStock).addClass(lowStock > 0 ? 'text-danger' : '');
+                $('#stockData').html(html);
+                if (data.stats) {
+                    $('#totalItemCount').text(data.stats.total_items);
+                    $('#totalStockValue').text('$' + Number(data.stats.total_value).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                    $('#lowStockCount').text(data.stats.low_stock).addClass(data.stats.low_stock > 0 ? 'text-danger' : '');
+                }
+                createPagination(data.total, 10, page, 'stockPagination', 'loadStock');
             }
         }
 
-        async function loadIssuances() {
-            const res = await fetch('../process/inventory/get_issuances.php');
+        async function loadIssuances(page = 1) {
+            const res = await fetch(`../process/inventory/get_issuances.php?page=${page}`);
             const data = await res.json();
             if (data.success) {
-                const tableData = data.data.map((row, idx) => {
+                let html = '';
+                data.data.forEach(row => {
                     const totalCost = (row.qty * row.cost_usd_at_time).toFixed(2);
-                    return {
-                        '#': '',
-                        issued_date: row.issued_date,
-                        car_name: `<span class="fw-bold text-dark">${row.car_name}</span>`,
-                        item_name: row.item_name,
-                        qty: `<span class="badge bg-light text-primary border">${row.qty}</span>`,
-                        cost: `<span class="fw-bold text-success">$${Number(totalCost).toLocaleString()}</span>`,
-                        actions: `
-                            <button class="btn btn-sm btn-outline-danger border-0" onclick="deleteIssuance(${row.id})">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                        `
-                    };
+                    html += `
+                        <tr>
+                            <td>${row.issued_date}</td>
+                            <td class="fw-bold text-dark">${row.car_name}</td>
+                            <td>${row.item_name}</td>
+                            <td><span class="badge bg-light text-primary border">${row.qty}</span></td>
+                            <td class="fw-bold text-success">$${Number(totalCost).toLocaleString()}</td>
+                        </tr>
+                    `;
                 });
-                TableController.renderWithPagination('#issuanceData', tableData, ['#', 'issued_date', 'car_name', 'item_name', 'qty', 'cost', 'actions']);
+                $('#issuanceData').html(html);
+                createPagination(data.total, 10, page, 'issuancesPagination', 'loadIssuances');
             }
         }
-
-        async function deleteIssuance(id) {
-            const result = await Swal.fire({
-                title: 'دڵنیایت؟',
-                text: "ئەم دەرکردنە دەسڕێتەوە و بڕی کاڵاکە دەگەڕێتەوە بۆ کۆگا!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                confirmButtonText: 'بەڵێ، بیسڕەوە'
-            });
-
-            if (result.isConfirmed) {
-                const formData = new FormData();
-                formData.append('id', id);
-                const res = await fetch('../process/inventory/delete_issuance.php', {
-                    method: 'POST',
-                    body: formData
-                });
-                const data = await res.json();
-                if (data.success) {
-                    Swal.fire('سڕایەوە', data.msg, 'success');
-                    loadStock();
-                    loadIssuances();
-                } else {
-                    Swal.fire('هەڵە', data.msg, 'error');
-                }
-            }
-        }
-
 
         async function loadMaintenanceReport() {
             const vehicleId = $('#vehicleFilter').val();

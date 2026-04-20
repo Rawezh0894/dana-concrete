@@ -15,14 +15,10 @@ try {
     $unit = $_POST['unit'] ?? '';
     $secondary_unit = $_POST['secondary_unit'] ?? null;
     $conversion_factor = $_POST['conversion_factor'] ?? 1;
-    
-    $current_qty = isset($_POST['current_qty']) ? floatval($_POST['current_qty']) : null;
-    $avg_cost_usd = isset($_POST['avg_cost_usd']) ? floatval($_POST['avg_cost_usd']) : null;
+    $avg_cost_usd = floatval($_POST['avg_cost_usd'] ?? 0);
 
     if ($item_id <= 0) throw new Exception("Invalid Item ID");
     if (empty($name)) throw new Exception("Item name is required");
-
-    $pdo->beginTransaction();
 
     $stmt = $pdo->prepare("UPDATE inv_items SET name = ?, category = ?, unit = ?, secondary_unit = ?, conversion_factor = ? WHERE id = ?");
     $stmt->execute([
@@ -34,13 +30,11 @@ try {
         $item_id
     ]);
 
-    if ($current_qty !== null && $avg_cost_usd !== null) {
-        $stmt_stock = $pdo->prepare("UPDATE inv_stock SET current_qty = ?, avg_cost_usd = ? WHERE item_id = ?");
-        $stmt_stock->execute([$current_qty, $avg_cost_usd, $item_id]);
-    }
+    // Update the average cost in the stock table
+    $stmt_stock = $pdo->prepare("UPDATE inv_stock SET avg_cost_usd = ? WHERE item_id = ?");
+    $stmt_stock->execute([$avg_cost_usd, $item_id]);
 
-    $pdo->commit();
-    echo json_encode(['success' => true, 'msg' => 'زانیارییەکان و باری کۆگا بە سەرکەوتوویی نوێکرایەوە']);
+    echo json_encode(['success' => true, 'msg' => 'زانیارییەکانی کاڵا بە سەرکەوتوویی نوێکرایەوە']);
 } catch (Exception $e) {
     echo json_encode(['success' => false, 'msg' => $e->getMessage()]);
 }
