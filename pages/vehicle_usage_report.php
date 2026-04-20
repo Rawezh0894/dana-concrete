@@ -275,7 +275,6 @@ if (!isset($_SESSION['user_id'])) {
                                     <th>بەروار</th>
                                     <th>جۆری تێچوو</th>
                                     <th>ناوی پارچە / مەبەست</th>
-                                    <th>پۆلێن / جۆر</th>
                                     <th>سەیارە</th>
                                     <th>بڕ</th>
                                     <th class="text-primary">تێچوو (دۆلار)</th>
@@ -355,8 +354,8 @@ if (!isset($_SESSION['user_id'])) {
                 html = '<tr><td colspan="8" class="text-center py-4">هیچ زانیارییەک نەدۆزرایەوە</td></tr>';
             } else {
                 data.forEach(row => {
-                    const typeBadge = row.type === 'گۆڕینی پارچە' 
-                        ? '<span class="badge bg-primary bg-opacity-10 text-primary">گۆڕینی پارچە</span>'
+                    const typeBadge = row.type === 'کاڵا بەکارهاتن' 
+                        ? '<span class="badge bg-primary bg-opacity-10 text-primary">کاڵا بەکارهاتن</span>'
                         : '<span class="badge bg-warning bg-opacity-10 text-warning">خەرجی گشتی</span>';
                         
                     html += `
@@ -364,7 +363,6 @@ if (!isset($_SESSION['user_id'])) {
                             <td>${row.date}</td>
                             <td>${typeBadge}</td>
                             <td class="fw-bold">${row.name}</td>
-                            <td><span class="badge bg-light text-dark border">${row.category}</span></td>
                             <td>${row.vehicle}</td>
                             <td>${row.qty}</td>
                             <td class="fw-bold text-primary">$${Number(row.cost_usd).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
@@ -497,7 +495,6 @@ if (!isset($_SESSION['user_id'])) {
                                 <th>بەروار</th>
                                 <th>جۆر</th>
                                 <th>ناوی پارچە / مەبەست</th>
-                                <th>پۆلێن</th>
                                 <th>سەیارە</th>
                                 <th>بڕ</th>
                                 <th>دۆلار</th>

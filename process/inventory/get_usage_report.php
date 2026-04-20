@@ -87,7 +87,7 @@ try {
             'qty' => $row['qty'] . ' ' . $row['unit'],
             'cost_usd' => $line_usd,
             'cost_iqd' => $line_iqd,
-            'type' => 'گۆڕینی پارچە'
+            'type' => 'کاڵا بەکارهاتن'
         ];
         // Spare parts are always USD
         $total_pure_usd += $line_usd;
