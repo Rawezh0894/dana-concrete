@@ -540,13 +540,23 @@ if (!isset($_SESSION['user_id'])) {
                         <hr class="my-4 opacity-10">
                         <h6 class="fw-bold mb-3"><i class="fas fa-warehouse me-1"></i> بڕی سەرەتایی (Opening Stock)</h6>
                         <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label small text-muted">بڕی موجود (بە یەکەی بچووک)</label>
+                            <div class="col-md-4">
+                                <label class="form-label small text-muted">بڕی موجود (بچووک)</label>
                                 <input type="number" step="0.01" name="opening_qty" class="form-control" value="0">
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label small text-muted">تێکڕای نرخی کڕین (USD)</label>
-                                <input type="number" step="0.01" name="opening_cost" class="form-control" value="0">
+                            <div class="col-md-4">
+                                <label class="form-label small text-muted">تێکڕای نرخ</label>
+                                <div class="input-group">
+                                    <input type="number" step="0.01" name="opening_cost" class="form-control" value="0">
+                                    <select name="opening_currency" class="form-select" style="max-width: 90px;">
+                                        <option value="USD">$ USD</option>
+                                        <option value="IQD">IQD</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4" id="openingExchangeRateDiv" style="display:none;">
+                                <label class="form-label small text-muted">نرخی ١٠٠دۆلار (دینار)</label>
+                                <input type="number" name="opening_exchange_rate" class="form-control" value="150000">
                             </div>
                         </div>
                         <small class="text-muted">ئەم بڕە ڕاستەوخۆ دەچێتە ناو کۆگاوە وەک دەسپێکی کار</small>
@@ -698,6 +708,15 @@ if (!isset($_SESSION['user_id'])) {
                     $('#conversionFactorDiv').removeClass('d-none');
                 } else {
                     $('#conversionFactorDiv').addClass('d-none');
+                }
+            });
+
+            // Handle currency change in Add Item modal
+            $('select[name="opening_currency"]').on('change', function() {
+                if ($(this).val() === 'IQD') {
+                    $('#openingExchangeRateDiv').fadeIn();
+                } else {
+                    $('#openingExchangeRateDiv').fadeOut();
                 }
             });
         }
