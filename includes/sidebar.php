@@ -178,6 +178,7 @@ $logout_pages = ['logout.php'];
       </button>
       <ul class="collapse sidebar-submenu shadow-sm" id="newInventoryMenu">
         <li><a href="../pages/inventory_management.php" class="sidebar-link<?php if($current_page == 'inventory_management.php') echo ' active'; ?>"><i class="bi bi-box-seam me-2"></i> بەڕێوەبردنی پارچە</a></li>
+        <li><a href="../pages/vehicle_usage_report.php" class="sidebar-link<?php if($current_page == 'vehicle_usage_report.php') echo ' active'; ?>"><i class="bi bi-file-earmark-bar-graph me-2"></i> ڕاپۆرتی بەکارهێنانی سەیارە</a></li>
       </ul>
     </li>
     <!-- New Koga (Materials) Dropdown -->
