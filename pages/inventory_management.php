@@ -429,9 +429,15 @@ if (!isset($_SESSION['user_id'])) {
                                             <input type="number" step="0.01" name="qty" class="form-control" required placeholder="0.00">
                                         </div>
                                         <div class="col-6">
-                                            <label class="form-label fw-600">بەروار</label>
-                                            <input type="date" name="issued_date" class="form-control" value="<?php echo date('Y-m-d'); ?>" required>
+                                            <label class="form-label fw-600">یەکە</label>
+                                            <select name="unit_used" id="issue_unit_used" class="form-select" required>
+                                                <option value="">--</option>
+                                            </select>
                                         </div>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="form-label fw-600">بەروار</label>
+                                        <input type="date" name="issued_date" class="form-control" value="<?php echo date('Y-m-d'); ?>" required>
                                     </div>
                                     <button type="submit" class="btn btn-premium w-100 btn-primary-premium bg-danger">
                                         <i class="fas fa-paper-plane"></i> پەسەندکردنی دەرکردن
@@ -504,12 +510,31 @@ if (!isset($_SESSION['user_id'])) {
                                     <!-- Categories will be here -->
                                 </select>
                             </div>
+                        <div class="row mb-4">
                             <div class="col-md-6">
-                                <label class="form-label fw-600">یەکە (Unit)</label>
+                                <label class="form-label fw-600">یەکەی سەرەکی (بچووک)</label>
                                 <select name="unit" id="item_unit_select" class="form-select" required>
                                     <!-- Units will be here -->
                                 </select>
+                                <small class="text-muted">نموونە: دانە، لیتر</small>
                             </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-600">یەکەی دووەم (گەورە - ئیختیاری)</label>
+                                <select name="secondary_unit" id="item_secondary_unit_select" class="form-select">
+                                    <option value="">نییە</option>
+                                    <!-- Units will be here -->
+                                </select>
+                                <small class="text-muted">نموونە: کارتۆن، بەرمیل</small>
+                            </div>
+                        </div>
+                        <div class="mb-0 animate__animated animate__fadeIn d-none" id="conversionFactorDiv">
+                            <label class="form-label fw-600">ڕێژەی گۆڕین (Conversion Factor)</label>
+                            <div class="input-group">
+                                <span class="input-group-text small">یەک یەکەی گەورە = </span>
+                                <input type="number" step="0.0001" name="conversion_factor" class="form-control" value="1" placeholder="چەند لە یەکەی بچووک؟">
+                                <span class="input-group-text small" id="primaryUnitLabel">یەکە</span>
+                            </div>
+                            <small class="text-info"><i class="fas fa-info-circle me-1"></i> بۆ نموونە: ئەگەر یەکەی گەورە بەرمیل بێت و بچووک لیتر، بنووسە ٢٠٠</small>
                         </div>
                     </div>
                     <div class="modal-footer bg-light">
@@ -649,7 +674,17 @@ if (!isset($_SESSION['user_id'])) {
                 options += `<option value="${unit.name_ku}">${unit.name_ku}</option>`;
             });
             $('#unitsListData').html(html);
-            $('#item_unit_select').html(options);
+            $('#item_secondary_unit_select').html(options);
+            $('#item_unit_select').on('change', function() {
+                $('#primaryUnitLabel').text($(this).val());
+            });
+            $('#item_secondary_unit_select').on('change', function() {
+                if ($(this).val()) {
+                    $('#conversionFactorDiv').removeClass('d-none');
+                } else {
+                    $('#conversionFactorDiv').addClass('d-none');
+                }
+            });
         }
 
         function updateCategoryUI() {
@@ -761,7 +796,7 @@ if (!isset($_SESSION['user_id'])) {
         function updateItemDropdowns() {
             let html = '<option value="">-- هەڵبژێرە --</option>';
             itemsGlobal.forEach(item => {
-                html += `<option value="${item.id}">${item.name} (${item.unit})</option>`;
+                html += `<option value="${item.id}" data-unit="${item.unit}" data-sunit="${item.secondary_unit || ''}" data-factor="${item.conversion_factor}">${item.name}</option>`;
             });
             $('#issue_item_id').html(html);
             $('.p-item-select').each(function() {
@@ -770,27 +805,47 @@ if (!isset($_SESSION['user_id'])) {
             });
         }
 
+        // Handle item selection in issuance to show correct units
+        $('#issue_item_id').on('change', function() {
+            const selected = $(this).find(':selected');
+            const unit = selected.data('unit');
+            const sunit = selected.data('sunit');
+            
+            let unitHtml = `<option value="${unit}">${unit} (بچووک)</option>`;
+            if (sunit) {
+                unitHtml += `<option value="${sunit}">${sunit} (گەورە)</option>`;
+            }
+            $('#issue_unit_used').html(unitHtml);
+        });
+
+        // Add unit selection to purchase rows
         function addPurchaseRow() {
             const container = $('#purchaseItemsList');
             const index = container.children().length;
             
             let options = '<option value="">-- هەڵبژێرە --</option>';
             itemsGlobal.forEach(item => {
-                options += `<option value="${item.id}">${item.name}</option>`;
+                options += `<option value="${item.id}" data-unit="${item.unit}" data-sunit="${item.secondary_unit || ''}">${item.name}</option>`;
             });
 
             const row = `
                 <div class="purchase-row animate__animated animate__fadeInUp">
                     <div class="row g-3">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label class="form-label small text-muted">ناو و جۆری کاڵا</label>
-                            <select name="items[${index}][item_id]" class="form-select p-item-select" required>
+                            <select name="items[${index}][item_id]" class="form-select p-item-select" onchange="updatePurchaseUnit(this)" required>
                                 ${options}
                             </select>
                         </div>
                         <div class="col-md-2">
                             <label class="form-label small text-muted">بڕ</label>
                             <input type="number" step="0.01" name="items[${index}][qty]" class="form-control" placeholder="0.00" required>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small text-muted">یەکە</label>
+                            <select name="items[${index}][unit_used]" class="form-select p-unit-select" required>
+                                <option value="">--</option>
+                            </select>
                         </div>
                         <div class="col-md-2">
                             <label class="form-label small text-muted">نرخی تاک</label>
@@ -803,7 +858,7 @@ if (!isset($_SESSION['user_id'])) {
                                 <option value="USD" selected>USD (دۆلار)</option>
                             </select>
                         </div>
-                        <div class="col-md-2 d-flex align-items-end justify-content-end">
+                        <div class="col-md-1 d-flex align-items-end justify-content-end">
                             <button type="button" class="btn btn-outline-danger border-0 h-100 px-3" onclick="$(this).closest('.purchase-row').fadeOut(200, function(){ $(this).remove(); })">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
@@ -812,6 +867,19 @@ if (!isset($_SESSION['user_id'])) {
                 </div>
             `;
             container.append(row);
+        }
+
+        function updatePurchaseUnit(select) {
+            const selected = $(select).find(':selected');
+            const unit = selected.data('unit');
+            const sunit = selected.data('sunit');
+            const unitSelect = $(select).closest('.row').find('.p-unit-select');
+            
+            let html = `<option value="${unit}">${unit}</option>`;
+            if (sunit) {
+                html += `<option value="${sunit}">${sunit}</option>`;
+            }
+            unitSelect.html(html);
         }
 
         $('#addItemForm').submit(async function(e) {
