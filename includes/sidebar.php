@@ -171,6 +171,15 @@ $logout_pages = ['logout.php'];
         <li><a href="../pages/truck_report.php" class="sidebar-link<?php if($current_page == 'truck_report.php') echo ' active'; ?>"><i class="bi bi-graph-up-arrow me-2"></i> ڕاپۆرتی قازانج</a></li>
       </ul>
     </li>
+    <!-- New Spare Parts Inventory -->
+    <li class="sidebar-group">
+      <button class="sidebar-group-toggle d-flex align-items-center w-100" data-bs-toggle="collapse" data-bs-target="#newInventoryMenu" aria-expanded="false">
+        <i class="bi bi-gear-wide-connected me-2"></i> کۆگای یەدەگ
+      </button>
+      <ul class="collapse sidebar-submenu shadow-sm" id="newInventoryMenu">
+        <li><a href="../pages/inventory_management.php" class="sidebar-link<?php if($current_page == 'inventory_management.php') echo ' active'; ?>"><i class="bi bi-box-seam me-2"></i> بەڕێوەبردنی پارچە</a></li>
+      </ul>
+    </li>
     <!-- New Koga (Materials) Dropdown -->
     <li class="sidebar-group">
       <button class="sidebar-group-toggle d-flex align-items-center w-100" data-bs-toggle="collapse" data-bs-target="#materialsMenu" aria-expanded="false">
