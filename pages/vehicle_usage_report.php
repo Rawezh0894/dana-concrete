@@ -119,7 +119,7 @@ if (!isset($_SESSION['user_id'])) {
                 print-color-adjust: exact !important;
             }
             @page {
-                size: A4 portrait;
+                size: A4 landscape;
                 margin: 1.5cm;
             }
             html, body {
@@ -465,7 +465,7 @@ if (!isset($_SESSION['user_id'])) {
                         }
                         @media print {
                             body { padding: 0; }
-                            @page { margin: 1.5cm; }
+                            @page { size: A4 landscape; margin: 1cm; }
                         }
                     </style>
                 </head>
