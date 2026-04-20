@@ -22,6 +22,11 @@ if (!isset($_SESSION['user_id'])) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        @font-face {
+            font-family: 'Rabar';
+            src: url('../assets/fonts/Rabar_021.ttf') format('truetype');
+        }
+
         :root {
             --glass-bg: rgba(255, 255, 255, 0.9);
             --glass-border: rgba(255, 255, 255, 0.2);
@@ -34,7 +39,7 @@ if (!isset($_SESSION['user_id'])) {
 
         body {
             background-color: #f1f5f9;
-            font-family: 'Outfit', 'Noto Sans Arabic', sans-serif;
+            font-family: 'Rabar', 'Outfit', 'Noto Sans Arabic', sans-serif;
             color: #1e293b;
             min-height: 100vh;
         }
@@ -253,7 +258,13 @@ if (!isset($_SESSION['user_id'])) {
                     <h1 class="display-6 fw-bold mb-1">بەڕێوەبردنی کۆگا</h1>
                     <p class="opacity-75 mb-0">کۆنترۆڵکردنی سەرجەم کاڵاکان، کڕینەکان و دەرچووەکانی کۆگا</p>
                 </div>
-                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <div class="col-md-4 text-md-end mt-3 mt-md-0 d-flex gap-2 justify-content-md-end">
+                    <button class="btn btn-light btn-premium text-info" data-bs-toggle="modal" data-bs-target="#manageCategoriesModal">
+                        <i class="fas fa-list-alt"></i> پۆلێنەکان
+                    </button>
+                    <button class="btn btn-light btn-premium text-info" data-bs-toggle="modal" data-bs-target="#manageUnitsModal">
+                        <i class="fas fa-ruler-combined"></i> یەکەکان
+                    </button>
                     <button class="btn btn-light btn-premium text-primary" data-bs-toggle="modal" data-bs-target="#addItemModal">
                         <i class="fas fa-plus"></i> کاڵای نوێ
                     </button>
@@ -357,7 +368,10 @@ if (!isset($_SESSION['user_id'])) {
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label fw-600">ناوی فرۆشیار</label>
-                                    <input type="text" name="supplier_name" class="form-control" placeholder="وەک: کۆمپانیای ئەحمەد">
+                                    <input type="text" name="supplier_name" id="supplier_name" class="form-control" list="supplierList" placeholder="وەک: کۆمپانیای ئەحمەد">
+                                    <datalist id="supplierList">
+                                        <!-- Person names will be here -->
+                                    </datalist>
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label fw-600">بەرواری کڕین</label>
@@ -486,18 +500,15 @@ if (!isset($_SESSION['user_id'])) {
                         <div class="row mb-4">
                             <div class="col-md-6">
                                 <label class="form-label fw-600">پۆلێن</label>
-                                <select name="category" class="form-select">
-                                    <option value="Oil">ڕۆن (Oil)</option>
-                                    <option value="Battery">پاتری (Battery)</option>
-                                    <option value="Spare Part">پارچەی یەدەگ (Spare Part)</option>
-                                    <option value="Filters">فلتەر (Filters)</option>
-                                    <option value="Tyres">تایە (Tyres)</option>
-                                    <option value="Other">تر</option>
+                                <select name="category" id="item_category_select" class="form-select" required>
+                                    <!-- Categories will be here -->
                                 </select>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-600">یەکە (Unit)</label>
-                                <input type="text" name="unit" class="form-control" placeholder="وەک: pcs, liter">
+                                <select name="unit" id="item_unit_select" class="form-select" required>
+                                    <!-- Units will be here -->
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -510,6 +521,72 @@ if (!isset($_SESSION['user_id'])) {
         </div>
     </div>
 
+    <!-- Manage Categories Modal -->
+    <div class="modal fade" id="manageCategoriesModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg border-0">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold">بەڕێوەبردنی پۆلێنەکان</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="addCategoryForm" class="mb-4">
+                        <div class="input-group">
+                            <input type="text" name="name_ku" class="form-control" placeholder="پۆلێنی نوێ (نموونە: ڕۆن)" required>
+                            <button type="submit" class="btn btn-primary">زیادکردن</button>
+                        </div>
+                    </form>
+                    <div class="table-responsive" style="max-height: 300px;">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ناو</th>
+                                    <th class="text-end">کردار</th>
+                                </tr>
+                            </thead>
+                            <tbody id="categoriesListData">
+                                <!-- Categories dynamic list -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manage Units Modal -->
+    <div class="modal fade" id="manageUnitsModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg border-0">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold">بەڕێوەبردنی یەکەکان</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="addUnitForm" class="mb-4">
+                        <div class="input-group">
+                            <input type="text" name="name_ku" class="form-control" placeholder="یەکەی نوێ (نموونە: دانە)" required>
+                            <button type="submit" class="btn btn-primary">زیادکردن</button>
+                        </div>
+                    </form>
+                    <div class="table-responsive" style="max-height: 300px;">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ناو</th>
+                                    <th class="text-end">کردار</th>
+                                </tr>
+                            </thead>
+                            <tbody id="unitsListData">
+                                <!-- Units dynamic list -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -518,6 +595,8 @@ if (!isset($_SESSION['user_id'])) {
 
     <script>
         let itemsGlobal = [];
+        let unitsGlobal = [];
+        let categoriesGlobal = [];
 
         $(document).ready(function() {
             $('.select2').select2({
@@ -525,12 +604,137 @@ if (!isset($_SESSION['user_id'])) {
                 width: '100%'
             });
             
+            loadUnits();
+            loadCategories();
             loadItems();
             loadVehicles();
             loadStock();
             loadIssuances();
+            loadSuppliers();
             addPurchaseRow(); // Initial row
         });
+
+        async function loadUnits() {
+            const res = await fetch('../process/inventory/get_units.php');
+            const data = await res.json();
+            if (data.success) {
+                unitsGlobal = data.data;
+                updateUnitUI();
+            }
+        }
+
+        async function loadCategories() {
+            const res = await fetch('../process/inventory/get_categories.php');
+            const data = await res.json();
+            if (data.success) {
+                categoriesGlobal = data.data;
+                updateCategoryUI();
+            }
+        }
+
+        function updateUnitUI() {
+            let html = '';
+            let options = '<option value="">-- هەڵبژێرە --</option>';
+            unitsGlobal.forEach(unit => {
+                html += `
+                    <tr>
+                        <td>${unit.name_ku}</td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-outline-danger border-0" onclick="deleteUnit(${unit.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                options += `<option value="${unit.name_ku}">${unit.name_ku}</option>`;
+            });
+            $('#unitsListData').html(html);
+            $('#item_unit_select').html(options);
+        }
+
+        function updateCategoryUI() {
+            let html = '';
+            let options = '<option value="">-- هەڵبژێرە --</option>';
+            categoriesGlobal.forEach(cat => {
+                html += `
+                    <tr>
+                        <td>${cat.name_ku}</td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-outline-danger border-0" onclick="deleteCategory(${cat.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                options += `<option value="${cat.name_ku}">${cat.name_ku}</option>`;
+            });
+            $('#categoriesListData').html(html);
+            $('#item_category_select').html(options);
+        }
+
+        async function loadSuppliers() {
+            const res = await fetch('../process/other_expenses/select_persons.php');
+            const persons = await res.json();
+            let html = '';
+            persons.forEach(person => {
+                html += `<option value="${person.name}">`;
+            });
+            $('#supplierList').html(html);
+        }
+
+        $('#addUnitForm').submit(async function(e) {
+            e.preventDefault();
+            const res = await fetch('../process/inventory/add_unit.php', {
+                method: 'POST',
+                body: new FormData(this)
+            });
+            const data = await res.json();
+            if (data.success) {
+                this.reset();
+                loadUnits();
+            }
+        });
+
+        $('#addCategoryForm').submit(async function(e) {
+            e.preventDefault();
+            const res = await fetch('../process/inventory/add_category.php', {
+                method: 'POST',
+                body: new FormData(this)
+            });
+            const data = await res.json();
+            if (data.success) {
+                this.reset();
+                loadCategories();
+            }
+        });
+
+        async function deleteUnit(id) {
+            if (!confirm('ئایا دڵنیای لە سڕینەوەی ئەم یەکەیە؟')) return;
+            const formData = new FormData();
+            formData.append('id', id);
+            const res = await fetch('../process/inventory/delete_unit.php', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            if (data.success) {
+                loadUnits();
+            }
+        }
+
+        async function deleteCategory(id) {
+            if (!confirm('ئایا دڵنیای لە سڕینەوەی ئەم پۆلێنە؟')) return;
+            const formData = new FormData();
+            formData.append('id', id);
+            const res = await fetch('../process/inventory/delete_category.php', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            if (data.success) {
+                loadCategories();
+            }
+        }
 
         async function loadItems() {
             const res = await fetch('../process/inventory/get_items.php');
