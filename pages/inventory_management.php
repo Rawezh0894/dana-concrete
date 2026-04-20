@@ -46,8 +46,15 @@ if (!isset($_SESSION['user_id'])) {
 
         .main-content {
             margin-right: 260px;
-            padding: 2rem;
+            padding: 2.5rem;
             transition: all 0.3s ease;
+            min-height: 100vh;
+        }
+
+        .container-custom {
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .page-header {
@@ -251,7 +258,8 @@ if (!isset($_SESSION['user_id'])) {
     <?php include '../includes/sidebar.php'; ?>
 
     <div class="main-content">
-        <!-- Page Header -->
+        <div class="container-custom">
+            <!-- Page Header -->
         <div class="page-header">
             <div class="row align-items-center">
                 <div class="col-md-8">
@@ -510,13 +518,11 @@ if (!isset($_SESSION['user_id'])) {
                         <div id="issuancesPagination" class="d-flex justify-content-center"></div>
                     </div>
                 </div>
-            </div>
         </div>
     </div>
-        </div>
-    </div>
+</div>
 
-    <!-- Add Item Modal -->
+<!-- Add Item Modal -->
     <div class="modal fade" id="addItemModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content shadow-lg border-0">
