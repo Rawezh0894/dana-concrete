@@ -12,13 +12,20 @@ try {
     $pdo->beginTransaction();
 
     $invoice_number = $_POST['invoice_number'] ?? '';
-    $supplier_name = $_POST['supplier_name'] ?? '';
+    $person_id = intval($_POST['person_id'] ?? 0);
     $purchase_date = $_POST['purchase_date'] ?? date('Y-m-d');
     $exchange_rate = floatval($_POST['exchange_rate'] ?? 150000); // 100 USD rate
 
+    $supplier_name = '';
+    if ($person_id > 0) {
+        $stmt_p = $pdo->prepare("SELECT name FROM other_expense_persons WHERE id = ?");
+        $stmt_p->execute([$person_id]);
+        $supplier_name = $stmt_p->fetchColumn();
+    }
+
     // 1. Insert Purchase Header
-    $stmt = $pdo->prepare("INSERT INTO inv_purchases (invoice_number, supplier_name, purchase_date, exchange_rate) VALUES (?, ?, ?, ?)");
-    $stmt->execute([$invoice_number, $supplier_name, $purchase_date, $exchange_rate]);
+    $stmt = $pdo->prepare("INSERT INTO inv_purchases (invoice_number, person_id, supplier_name, purchase_date, exchange_rate) VALUES (?, ?, ?, ?, ?)");
+    $stmt->execute([$invoice_number, $person_id, $supplier_name, $purchase_date, $exchange_rate]);
     $purchase_id = $pdo->lastInsertId();
 
     $items = $_POST['items'] ?? []; // Expected format: Array of {item_id, qty, unit_price, currency, unit_used}

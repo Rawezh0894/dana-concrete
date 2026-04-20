@@ -341,7 +341,7 @@ if (!isset($_SESSION['user_id'])) {
                                         <th>بڕی ماوە</th>
                                         <th>تێکڕای نرخ (USD)</th>
                                         <th>کۆی بەها (USD)</th>
-                                        <th>دوا گۆڕانکاری</th>
+                                        <th>کردارەکان</th>
                                     </tr>
                                 </thead>
                                 <tbody id="stockData">
@@ -367,11 +367,10 @@ if (!isset($_SESSION['user_id'])) {
                                     <input type="text" name="invoice_number" class="form-control" required placeholder="بۆ نموونە: INV-001">
                                 </div>
                                 <div class="col-md-3">
-                                    <label class="form-label fw-600">ناوی فرۆشیار</label>
-                                    <input type="text" name="supplier_name" id="supplier_name" class="form-control" list="supplierList" placeholder="وەک: کۆمپانیای ئەحمەد">
-                                    <datalist id="supplierList">
-                                        <!-- Person names will be here -->
-                                    </datalist>
+                                    <label class="form-label fw-600">ناوی فرۆشیار (کەسانی خەرجی تر)</label>
+                                    <select name="person_id" id="supplier_select" class="form-select select2" required>
+                                        <option value="">-- هەڵبژێرە --</option>
+                                    </select>
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label fw-600">بەرواری کڕین</label>
@@ -645,7 +644,6 @@ if (!isset($_SESSION['user_id'])) {
 
         $(document).ready(function() {
             $('.select2').select2({
-                dropdownParent: $('#issue-panel'),
                 width: '100%'
             });
             
@@ -741,11 +739,11 @@ if (!isset($_SESSION['user_id'])) {
         async function loadSuppliers() {
             const res = await fetch('../process/other_expenses/select_persons.php');
             const persons = await res.json();
-            let html = '';
+            let html = '<option value="">-- هەڵبژێرە --</option>';
             persons.forEach(person => {
-                html += `<option value="${person.name}">`;
+                html += `<option value="${person.id}">${person.name}</option>`;
             });
-            $('#supplierList').html(html);
+            $('#supplier_select').html(html);
         }
 
         $('#addUnitForm').submit(async function(e) {
@@ -954,9 +952,13 @@ if (!isset($_SESSION['user_id'])) {
 
         $('#addItemForm').submit(async function(e) {
             e.preventDefault();
-            const res = await fetch('../process/inventory/add_item.php', {
+            const formData = new FormData(this);
+            const isEdit = formData.get('item_id');
+            const url = isEdit ? '../process/inventory/update_item.php' : '../process/inventory/add_item.php';
+            
+            const res = await fetch(url, {
                 method: 'POST',
-                body: new FormData(this)
+                body: formData
             });
             const data = await res.json();
             if (data.success) {
@@ -968,9 +970,80 @@ if (!isset($_SESSION['user_id'])) {
                 });
                 $('#addItemModal').modal('hide');
                 loadItems();
+                loadStock();
                 this.reset();
+                delete formData.item_id; // Clean up
+                $('#addItemModal .modal-title').text('کاڵایەکی نوێ زیاد بکە');
+                $('#conversionFactorDiv').addClass('d-none');
             }
         });
+
+        function openEditItemModal(item) {
+            const modal = $('#addItemModal');
+            modal.find('.modal-title').text('دەستکاری کاڵا: ' + item.name);
+            modal.find('input[name="name"]').val(item.name);
+            modal.find('select[name="category"]').val(item.category);
+            modal.find('select[name="unit"]').val(item.unit);
+            modal.find('select[name="secondary_unit"]').val(item.secondary_unit);
+            modal.find('input[name="conversion_factor"]').val(item.conversion_factor);
+            
+            // Add hidden item_id if not exists
+            if (!modal.find('input[name="item_id"]').length) {
+                modal.find('form').append(`<input type="hidden" name="item_id" value="${item.id}">`);
+            } else {
+                modal.find('input[name="item_id"]').val(item.id);
+            }
+            
+            // Hide opening stock section during edit
+            modal.find('h6, .row.g-3, .text-muted').last().hide();
+            
+            if (item.secondary_unit) {
+                $('#conversionFactorDiv').removeClass('d-none');
+                $('#primaryUnitLabel').text(item.unit);
+            } else {
+                $('#conversionFactorDiv').addClass('d-none');
+            }
+            
+            modal.modal('show');
+        }
+
+        // Reset modal on close
+        $('#addItemModal').on('hidden.bs.modal', function () {
+            $(this).find('form')[0].reset();
+            $(this).find('input[name="item_id"]').remove();
+            $(this).find('h6, .row.g-3, .text-muted').last().show();
+            $(this).find('.modal-title').text('کاڵایەکی نوێ زیاد بکە');
+        });
+
+        async function deleteItem(id) {
+            const result = await Swal.fire({
+                title: 'ئایا دڵنیایت؟',
+                text: "ئەم کاڵایە دەسڕێتەوە بە هەموو داتاکانی کۆگاوە!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'بەڵێ، بیسڕەوە',
+                cancelButtonText: 'پاشگەزبوونەوە'
+            });
+
+            if (result.isConfirmed) {
+                const formData = new FormData();
+                formData.append('id', id);
+                const res = await fetch('../process/inventory/delete_item.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                if (data.success) {
+                    Swal.fire('سڕایەوە!', data.msg, 'success');
+                    loadItems();
+                    loadStock();
+                } else {
+                    Swal.fire('هەڵە', data.msg, 'error');
+                }
+            }
+        }
 
         $('#purchaseForm').submit(async function(e) {
             e.preventDefault();
@@ -1039,7 +1112,22 @@ if (!isset($_SESSION['user_id'])) {
                             </td>
                             <td>$${Number(item.avg_cost_usd).toLocaleString(undefined, {minimumFractionDigits: 3})}</td>
                             <td class="fw-bold">$${Number(totalValuation).toLocaleString()}</td>
-                            <td class="text-muted small">${item.last_updated}</td>
+                            <td class="text-end">
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <button class="btn btn-sm btn-outline-primary border-0" onclick='openEditItemModal(${JSON.stringify(item).replace(/'/g, "&apos;")})'>
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    ${item.issuance_count == 0 ? `
+                                        <button class="btn btn-sm btn-outline-danger border-0" onclick="deleteItem(${item.item_id})">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    ` : `
+                                        <button class="btn btn-sm btn-outline-secondary border-0" disabled title="بۆ سەیارە بەکارهاتووە، ناتوانرێت بسڕدرێتەوە">
+                                            <i class="fas fa-trash opacity-50"></i>
+                                        </button>
+                                    `}
+                                </div>
+                            </td>
                         </tr>
                     `;
                 });
