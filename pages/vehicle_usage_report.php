@@ -245,8 +245,9 @@ if (!isset($_SESSION['user_id'])) {
                             <thead>
                                 <tr>
                                     <th>بەروار</th>
-                                    <th>ناوی پارچە</th>
-                                    <th>پۆلێن</th>
+                                    <th>جۆری تێچوو</th>
+                                    <th>ناوی پارچە / مەبەست</th>
+                                    <th>پۆلێن / جۆر</th>
                                     <th>سەیارە</th>
                                     <th>بڕ</th>
                                     <th>نرخی تاک</th>
@@ -322,18 +323,23 @@ if (!isset($_SESSION['user_id'])) {
         function renderTable(data) {
             let html = '';
             if (data.length === 0) {
-                html = '<tr><td colspan="7" class="text-center py-4">هیچ زانیارییەک نەدۆزرایەوە</td></tr>';
+                html = '<tr><td colspan="8" class="text-center py-4">هیچ زانیارییەک نەدۆزرایەوە</td></tr>';
             } else {
                 data.forEach(row => {
+                    const typeBadge = row.type === 'گۆڕینی پارچە' 
+                        ? '<span class="badge bg-primary bg-opacity-10 text-primary">گۆڕینی پارچە</span>'
+                        : '<span class="badge bg-warning bg-opacity-10 text-warning">خەرجی گشتی</span>';
+                        
                     html += `
                         <tr>
-                            <td>${row.issued_date}</td>
-                            <td class="fw-bold">${row.item_name}</td>
+                            <td>${row.date}</td>
+                            <td>${typeBadge}</td>
+                            <td class="fw-bold">${row.name}</td>
                             <td><span class="badge bg-light text-dark border">${row.category}</span></td>
-                            <td>${row.vehicle_name}</td>
-                            <td>${row.qty} ${row.unit}</td>
-                            <td>$${Number(row.cost_usd_at_time).toLocaleString()}</td>
-                            <td class="fw-bold text-primary">$${Number(row.total_line_cost).toLocaleString()}</td>
+                            <td>${row.vehicle}</td>
+                            <td>${row.qty}</td>
+                            <td>$${Number(row.unit_price).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            <td class="fw-bold text-primary">$${Number(row.total_cost).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                         </tr>
                     `;
                 });
