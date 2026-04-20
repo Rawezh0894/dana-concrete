@@ -9,8 +9,8 @@ try {
     $from_date = $_GET['from_date'] ?? '';
     $to_date = $_GET['to_date'] ?? '';
 
-    // Current/Default exchange rate for spare parts conversion
-    $current_ex_rate = 148500; // Updated to a more standard rate, can be adjusted later
+    // Current/Default exchange rate for table display only (conversions)
+    $current_ex_rate = 148500;
 
     $params_iss = [];
     $params_oe = [];
@@ -38,7 +38,7 @@ try {
         $params_oe[] = $to_date;
     }
 
-    // Query 1: Inventory Issuances (Spare Parts)
+    // Query 1: Inventory Issuances
     $iss_sql = "SELECT iss.*, i.name as item_name, i.category as item_category, i.unit, c.name as vehicle_name
                 FROM inv_issuance iss
                 JOIN inv_items i ON iss.item_id = i.id
@@ -71,8 +71,8 @@ try {
     $other_expenses = $stmt_oe->fetchAll(PDO::FETCH_ASSOC);
 
     $combined_data = [];
-    $total_usd = 0;
-    $total_iqd = 0;
+    $total_pure_usd = 0;
+    $total_pure_iqd = 0;
 
     // Process Issuances
     foreach ($issuances as $row) {
@@ -89,25 +89,28 @@ try {
             'cost_iqd' => $line_iqd,
             'type' => 'گۆڕینی پارچە'
         ];
-        $total_usd += $line_usd;
-        $total_iqd += $line_iqd;
+        // Spare parts are always USD
+        $total_pure_usd += $line_usd;
     }
 
     // Process Other Expenses
     foreach ($other_expenses as $row) {
-        $line_usd = 0;
-        $line_iqd = 0;
         $row_ex_rate = floatval($row['exchange_rate'] ?: $current_ex_rate);
+        $display_usd = 0;
+        $display_iqd = 0;
 
         if (floatval($row['amount_usd']) > 0) {
-            $line_usd = floatval($row['amount_usd']);
-            $line_iqd = $line_usd * ($row_ex_rate / 100);
+            $display_usd = floatval($row['amount_usd']);
+            $display_iqd = $display_usd * ($row_ex_rate / 100);
+            $total_pure_usd += $display_usd;
         } else if (floatval($row['amount_iqd']) > 0) {
-            $line_iqd = floatval($row['amount_iqd']);
-            $line_usd = $line_iqd / ($row_ex_rate / 100);
+            $display_iqd = floatval($row['amount_iqd']);
+            $display_usd = $display_iqd / ($row_ex_rate / 100);
+            $total_pure_iqd += $display_iqd;
         } else if (floatval($row['gas_total_cost']) > 0) {
-            $line_iqd = floatval($row['gas_total_cost']);
-            $line_usd = $line_iqd / ($row_ex_rate / 100);
+            $display_iqd = floatval($row['gas_total_cost']);
+            $display_usd = $display_iqd / ($row_ex_rate / 100);
+            $total_pure_iqd += $display_iqd;
         }
 
         $qty_str = '-';
@@ -121,12 +124,10 @@ try {
             'category' => $row['expense_type'],
             'vehicle' => $row['vehicle_name'],
             'qty' => $qty_str,
-            'cost_usd' => $line_usd,
-            'cost_iqd' => $line_iqd,
+            'cost_usd' => $display_usd,
+            'cost_iqd' => $display_iqd,
             'type' => 'خەرجی گشتی'
         ];
-        $total_usd += $line_usd;
-        $total_iqd += $line_iqd;
     }
 
     usort($combined_data, function($a, $b) {
@@ -136,8 +137,8 @@ try {
     echo json_encode([
         'success' => true,
         'data' => $combined_data,
-        'total_usd' => $total_usd,
-        'total_iqd' => $total_iqd
+        'total_usd' => $total_pure_usd,
+        'total_iqd' => $total_pure_iqd
     ]);
 
 } catch (Exception $e) {
