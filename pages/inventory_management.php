@@ -19,76 +19,225 @@ if (!isset($_SESSION['user_id'])) {
     <link href="../assets/css/variables.css" rel="stylesheet">
     <link href="../assets/css/nav.css" rel="stylesheet">
     <link href="../assets/css/comon/style.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-gradient: linear-gradient(135deg, #2c3e50, #4ca1af);
-            --success-gradient: linear-gradient(135deg, #1d976c, #93f9b9);
-            --danger-gradient: linear-gradient(135deg, #eb3349, #f45c43);
+            --glass-bg: rgba(255, 255, 255, 0.9);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --primary-accent: #3b82f6;
+            --secondary-accent: #6366f1;
+            --header-gradient: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            --stat-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
         }
-        
+
         body {
-            background-color: #f8f9fa;
+            background-color: #f1f5f9;
+            font-family: 'Outfit', 'Noto Sans Arabic', sans-serif;
+            color: #1e293b;
+            min-height: 100vh;
         }
-        
-        .card {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            margin-bottom: 1.5rem;
+
+        .main-content {
+            margin-right: 260px;
+            padding: 2rem;
+            transition: all 0.3s ease;
         }
-        
-        .card-header {
-            background-color: white;
-            border-bottom: 1px solid #f1f1f1;
-            padding: 1.25rem;
-            border-top-left-radius: 15px !important;
-            border-top-right-radius: 15px !important;
-        }
-        
-        .stats-card {
-            padding: 1.5rem;
+
+        .page-header {
+            background: var(--header-gradient);
+            padding: 2.5rem;
+            border-radius: 24px;
             color: white;
-            transition: transform 0.3s ease;
-        }
-        
-        .stats-card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .stats-primary { background: var(--primary-gradient); }
-        .stats-success { background: var(--success-gradient); }
-        .stats-danger { background: var(--danger-gradient); }
-        
-        .table {
-            background: white;
-            border-radius: 10px;
+            margin-bottom: 2.5rem;
+            box-shadow: var(--card-shadow);
+            position: relative;
             overflow: hidden;
         }
-        
+
+        .page-header::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .inventory-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 2rem;
+        }
+
+        .inventory-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(59, 130, 246, 0.1);
+        }
+
+        .card-header {
+            background: transparent !important;
+            border-bottom: 1px solid rgba(0,0,0,0.05) !important;
+            padding: 1.5rem !important;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .nav-pills {
+            background: white;
+            padding: 0.5rem;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            display: inline-flex;
+            margin-bottom: 2.5rem;
+        }
+
+        .nav-pills .nav-link {
+            border-radius: 12px;
+            padding: 0.8rem 1.8rem;
+            font-weight: 600;
+            color: #64748b;
+            transition: all 0.2s ease;
+            border: none;
+            margin: 0 2px;
+        }
+
+        .nav-pills .nav-link.active {
+            background: var(--primary-accent) !important;
+            color: white !important;
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
+        }
+
+        .nav-pills .nav-link:not(.active):hover {
+            background: #f8fafc;
+            color: #1e293b;
+        }
+
+        .stat-badge {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
         .table thead th {
-            background-color: #f8f9fa;
-            border-bottom: 1px solid #dee2e6;
+            background-color: #f8fafc;
+            border-bottom: 2px solid #e2e8f0;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.025em;
+            padding: 1.2rem 1rem;
+        }
+
+        .table tbody td {
+            padding: 1.2rem 1rem;
+            vertical-align: middle;
+            color: #334155;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .form-control, .form-select {
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+            background-color: #f8fafc;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background-color: white;
+            border-color: var(--primary-accent);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        .purchase-row {
+            background: white;
+            padding: 1.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            margin-bottom: 1.25rem;
+            transition: all 0.2s ease;
+        }
+
+        .purchase-row:hover {
+            border-color: var(--primary-accent);
+            box-shadow: var(--card-shadow);
+        }
+
+        .btn-premium {
+            border-radius: 12px;
+            padding: 0.8rem 2rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary-premium {
+            background: var(--primary-accent);
+            border: none;
+            color: white;
+        }
+
+        .btn-primary-premium:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
+        }
+
+        .badge-premium {
+            padding: 0.5em 1em;
+            border-radius: 8px;
             font-weight: 600;
         }
-        
-        .nav-pills .nav-link {
-            border-radius: 10px;
-            padding: 0.75rem 1.5rem;
-            font-weight: 500;
-            color: #6c757d;
+
+        .modal-content {
+            border-radius: 24px;
+            border: none;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         }
-        
-        .nav-pills .nav-link.active {
-            background: var(--primary-gradient);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+
+        .modal-header {
+            border-bottom: 1px solid #f1f5f9;
+            padding: 1.5rem 2rem;
         }
+
+        .modal-footer {
+            border-top: 1px solid #f1f5f9;
+            padding: 1.5rem 2rem;
+        }
+
+        /* RTL Specifics */
+        .me-1 { margin-left: 0.25rem !important; margin-right: 0 !important; }
+        .me-2 { margin-left: 0.5rem !important; margin-right: 0 !important; }
+        .ms-1 { margin-right: 0.25rem !important; margin-left: 0 !important; }
         
-        .purchase-row {
-            background: #fff;
-            padding: 1rem;
-            border: 1px solid #eee;
-            border-radius: 10px;
-            margin-bottom: 10px;
+        @media (max-width: 991.98px) {
+            .main-content {
+                margin-right: 0;
+            }
         }
     </style>
 </head>
@@ -96,32 +245,37 @@ if (!isset($_SESSION['user_id'])) {
     <?php include '../includes/navbar.php'; ?>
     <?php include '../includes/sidebar.php'; ?>
 
-    <div class="container-fluid py-4" style="margin-right: 250px; width: calc(100% - 250px);">
+    <div class="main-content">
         <!-- Page Header -->
-        <div class="row mb-4">
-            <div class="col-12 d-flex justify-content-between align-items-center">
-                <h3 class="fw-bold"><i class="fas fa-warehouse me-2"></i>بەڕێوەبردنی کۆگا</h3>
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addItemModal">
-                    <i class="fas fa-plus me-1"></i>زیادکردنی کاڵای نوێ
-                </button>
+        <div class="page-header">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="display-6 fw-bold mb-1">بەڕێوەبردنی کۆگا</h1>
+                    <p class="opacity-75 mb-0">کۆنترۆڵکردنی سەرجەم کاڵاکان، کڕینەکان و دەرچووەکانی کۆگا</p>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <button class="btn btn-light btn-premium text-primary" data-bs-toggle="modal" data-bs-target="#addItemModal">
+                        <i class="fas fa-plus"></i> کاڵای نوێ
+                    </button>
+                </div>
             </div>
         </div>
 
         <!-- Navigation Tabs -->
-        <ul class="nav nav-pills mb-4" id="inventoryTabs" role="tablist">
+        <ul class="nav nav-pills" id="inventoryTabs" role="tablist">
             <li class="nav-item">
                 <button class="nav-link active" id="stock-tab" data-bs-toggle="pill" data-bs-target="#stock-panel">
-                    <i class="fas fa-boxes me-1"></i>کۆگا و بڕی کاڵا
+                    <i class="fas fa-boxes"></i> کۆگا و کاڵا
                 </button>
             </li>
             <li class="nav-item">
                 <button class="nav-link" id="purchase-tab" data-bs-toggle="pill" data-bs-target="#purchase-panel">
-                    <i class="fas fa-shopping-cart me-1"></i>تۆمارکردنی کڕین
+                    <i class="fas fa-shopping-cart"></i> تۆمارکردنی کڕین
                 </button>
             </li>
             <li class="nav-item">
                 <button class="nav-link" id="issue-tab" data-bs-toggle="pill" data-bs-target="#issue-panel">
-                    <i class="fas fa-shuttle-van me-1"></i>دەرکردن بۆ سەیارە
+                    <i class="fas fa-shuttle-van"></i> دەرکردن بۆ سەیارە
                 </button>
             </li>
         </ul>
@@ -129,14 +283,44 @@ if (!isset($_SESSION['user_id'])) {
         <div class="tab-content" id="inventoryTabsContent">
             <!-- Stock Panel -->
             <div class="tab-pane fade show active" id="stock-panel">
-                <div class="card">
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="inventory-card p-4">
+                            <div class="stat-badge bg-primary bg-opacity-10 text-primary">
+                                <i class="fas fa-layer-group"></i>
+                            </div>
+                            <h6 class="text-muted fw-bold">کۆی جۆری کاڵاکان</h6>
+                            <h3 class="fw-bold mb-0" id="totalItemCount">0</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="inventory-card p-4">
+                            <div class="stat-badge bg-success bg-opacity-10 text-success">
+                                <i class="fas fa-dollar-sign"></i>
+                            </div>
+                            <h6 class="text-muted fw-bold">کۆی بەهای کۆگا (USD)</h6>
+                            <h3 class="fw-bold mb-0" id="totalStockValue">$0.00</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="inventory-card p-4">
+                            <div class="stat-badge bg-warning bg-opacity-10 text-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <h6 class="text-muted fw-bold">کاڵا کەمبووەکان</h6>
+                            <h3 class="fw-bold mb-0" id="lowStockCount">0</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="inventory-card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">لیستی کاڵاکان و نرخەکان</h5>
-                        <button class="btn btn-sm btn-outline-secondary" onclick="loadStock()">
-                            <i class="fas fa-sync-alt"></i> نوێکردنەوە
+                        <span><i class="fas fa-list-ul me-2 text-primary"></i>لیستی گشتی کۆگا</span>
+                        <button class="btn btn-sm btn-light border-0" onclick="loadStock()">
+                            <i class="fas fa-sync-alt text-muted"></i>
                         </button>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body p-0">
                         <div class="table-responsive">
                             <table class="table table-hover align-middle" id="stockTable">
                                 <thead>
@@ -144,7 +328,7 @@ if (!isset($_SESSION['user_id'])) {
                                         <th>ناوی کاڵا</th>
                                         <th>پۆلێن</th>
                                         <th>بڕی ماوە</th>
-                                        <th>تێکڕای نرخی کڕین (USD)</th>
+                                        <th>تێکڕای نرخ (USD)</th>
                                         <th>کۆی بەها (USD)</th>
                                         <th>دوا گۆڕانکاری</th>
                                     </tr>
@@ -160,43 +344,46 @@ if (!isset($_SESSION['user_id'])) {
 
             <!-- Purchase Entry Panel -->
             <div class="tab-pane fade" id="purchase-panel">
-                <div class="card">
+                <div class="inventory-card">
                     <div class="card-header">
-                        <h5 class="mb-0">فۆڕمی تۆمارکردنی کڕینی نوێ</h5>
+                        <span><i class="fas fa-plus-circle me-2 text-success"></i>تۆمارکردنی کڕینی نوێ</span>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body p-4">
                         <form id="purchaseForm">
-                            <div class="row g-3 mb-4">
+                            <div class="row g-4 mb-5">
                                 <div class="col-md-3">
-                                    <label class="form-label">ژمارەی پسوڵە</label>
-                                    <input type="text" name="invoice_number" class="form-control" required>
+                                    <label class="form-label fw-600">ژمارەی پسوڵە</label>
+                                    <input type="text" name="invoice_number" class="form-control" required placeholder="بۆ نموونە: INV-001">
                                 </div>
                                 <div class="col-md-3">
-                                    <label class="form-label">ناوی فرۆشیار</label>
-                                    <input type="text" name="supplier_name" class="form-control">
+                                    <label class="form-label fw-600">ناوی فرۆشیار</label>
+                                    <input type="text" name="supplier_name" class="form-control" placeholder="وەک: کۆمپانیای ئەحمەد">
                                 </div>
                                 <div class="col-md-3">
-                                    <label class="form-label">بەرواری کڕین</label>
+                                    <label class="form-label fw-600">بەرواری کڕین</label>
                                     <input type="date" name="purchase_date" class="form-control" value="<?php echo date('Y-m-d'); ?>" required>
                                 </div>
                                 <div class="col-md-3">
-                                    <label class="form-label">نرخی ١٠٠ دۆلار (دینار)</label>
+                                    <label class="form-label fw-600">نرخی ١٠٠ دۆلار (دینار)</label>
                                     <input type="number" name="exchange_rate" id="p_exchange_rate" class="form-control" value="150000" required>
                                 </div>
                             </div>
 
-                            <h6 class="mb-3 border-bottom pb-2">کاڵاکان</h6>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="fw-bold mb-0">لیستی کاڵاکانی پێویست</h6>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="addPurchaseRow()">
+                                    <i class="fas fa-plus me-1"></i>زیادکردنی ڕیز
+                                </button>
+                            </div>
+                            
                             <div id="purchaseItemsList">
                                 <!-- Row Template -->
                             </div>
                             
-                            <button type="button" class="btn btn-outline-primary btn-sm mb-4" onclick="addPurchaseRow()">
-                                <i class="fas fa-plus me-1"></i>زیادکردنی ڕیزێک
-                            </button>
-
-                            <div class="text-start">
-                                <button type="submit" class="btn btn-success px-5">
-                                    <i class="fas fa-save me-1"></i>تۆمارکردنی کڕینەکە
+                            <div class="text-start mt-4">
+                                <hr class="opacity-10">
+                                <button type="submit" class="btn btn-premium btn-primary-premium">
+                                    <i class="fas fa-save"></i> هەڵگرتنی تۆمارەکە
                                 </button>
                             </div>
                         </form>
@@ -206,60 +393,65 @@ if (!isset($_SESSION['user_id'])) {
 
             <!-- Issue/Issuance Panel -->
             <div class="tab-pane fade" id="issue-panel">
-                <div class="row">
-                    <div class="col-md-5">
-                        <div class="card">
+                <div class="row g-4">
+                    <div class="col-xl-4">
+                        <div class="inventory-card h-100">
                             <div class="card-header">
-                                <h5 class="mb-0">دەرکردنی کاڵا بۆ سەیارە</h5>
+                                <span><i class="fas fa-share-square me-2 text-danger"></i>دەرکردنی کاڵا</span>
                             </div>
-                            <div class="card-body">
+                            <div class="card-body p-4">
                                 <form id="issueForm">
-                                    <div class="mb-3">
-                                        <label class="form-label">کاڵا هەڵبژێرە</label>
+                                    <div class="mb-4">
+                                        <label class="form-label fw-600">کاڵا</label>
                                         <select name="item_id" id="issue_item_id" class="form-select select2" required></select>
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">سەیارە هەڵبژێرە</label>
+                                    <div class="mb-4">
+                                        <label class="form-label fw-600">سەیارە</label>
                                         <select name="vehicle_id" id="issue_vehicle_id" class="form-select select2" required></select>
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">بڕ</label>
-                                        <input type="number" step="0.01" name="qty" class="form-control" required>
+                                    <div class="row mb-4">
+                                        <div class="col-6">
+                                            <label class="form-label fw-600">بڕ</label>
+                                            <input type="number" step="0.01" name="qty" class="form-control" required placeholder="0.00">
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label fw-600">بەروار</label>
+                                            <input type="date" name="issued_date" class="form-control" value="<?php echo date('Y-m-d'); ?>" required>
+                                        </div>
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">بەروار</label>
-                                        <input type="date" name="issued_date" class="form-control" value="<?php echo date('Y-m-d'); ?>" required>
-                                    </div>
-                                    <button type="submit" class="btn btn-danger w-100">
-                                        <i class="fas fa-paper-plane me-1"></i>دەرکردن
+                                    <button type="submit" class="btn btn-premium w-100 btn-primary-premium bg-danger">
+                                        <i class="fas fa-paper-plane"></i> پەسەندکردنی دەرکردن
                                     </button>
                                 </form>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-7">
-                        <div class="card">
+                    <div class="col-xl-8">
+                        <div class="inventory-card h-100">
                             <div class="card-header d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0">دوایین دەرکردنەکان</h5>
-                                <div class="col-md-4">
+                                <span><i class="fas fa-history me-2 text-info"></i>دوایین جوڵەکانی دەرکردن</span>
+                                <div style="min-width: 200px;">
                                      <select id="vehicleFilter" class="form-select form-select-sm" onchange="loadMaintenanceReport()">
-                                         <option value="">هەموو سەیارەکان (تێچوو)</option>
+                                         <option value="">هەموو سەیارەکان</option>
                                      </select>
                                 </div>
                             </div>
-                            <div class="card-body">
-                                <div id="maintenanceSummary" class="alert alert-info py-2 px-3 mb-3" style="display:none;">
-                                    کۆی تێچووی چاککردنەوە بۆ ئەم سەیارەیە: <strong id="vehicleTotalCost">$0.00</strong>
+                            <div class="card-body p-0">
+                                <div id="maintenanceSummary" class="bg-light p-3 border-bottom d-none">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="text-muted">کۆی تێچووی چاککردنەوە:</span>
+                                        <span class="h5 mb-0 fw-bold text-primary" id="vehicleTotalCost">$0.00</span>
+                                    </div>
                                 </div>
                                 <div class="table-responsive">
-                                    <table class="table table-sm">
+                                    <table class="table table-hover align-middle">
                                         <thead>
                                             <tr>
-                                                <th>بەروار</th>
+                                                <th>تاریخ</th>
                                                 <th>سەیارە</th>
                                                 <th>کاڵا</th>
                                                 <th>بڕ</th>
-                                                <th>تێچوو (USD)</th>
+                                                <th>تێچوو</th>
                                             </tr>
                                         </thead>
                                         <tbody id="issuanceData">
@@ -274,37 +466,44 @@ if (!isset($_SESSION['user_id'])) {
             </div>
         </div>
     </div>
+        </div>
+    </div>
 
     <!-- Add Item Modal -->
     <div class="modal fade" id="addItemModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">زیادکردنی کاڵای نوێ</h5>
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg border-0">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold">کاڵایەکی نوێ زیاد بکە</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <form id="addItemForm">
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">ناوی کاڵا</label>
-                            <input type="text" name="name" class="form-control" required>
+                    <div class="modal-body p-4">
+                        <div class="mb-4">
+                            <label class="form-label fw-600">ناوی کاڵا</label>
+                            <input type="text" name="name" class="form-control" required placeholder="ناوی پارچە یان مەواد بنووسە">
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">پۆلێن</label>
-                            <select name="category" class="form-select">
-                                <option value="Oil">ڕۆن (Oil)</option>
-                                <option value="Battery">پاتری (Battery)</option>
-                                <option value="Spare Part">پارچەی یەدەگ (Spare Part)</option>
-                                <option value="Other">تر</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">یەکە (Unit)</label>
-                            <input type="text" name="unit" class="form-control" placeholder="pcs, liter, etc.">
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-600">پۆلێن</label>
+                                <select name="category" class="form-select">
+                                    <option value="Oil">ڕۆن (Oil)</option>
+                                    <option value="Battery">پاتری (Battery)</option>
+                                    <option value="Spare Part">پارچەی یەدەگ (Spare Part)</option>
+                                    <option value="Filters">فلتەر (Filters)</option>
+                                    <option value="Tyres">تایە (Tyres)</option>
+                                    <option value="Other">تر</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-600">یەکە (Unit)</label>
+                                <input type="text" name="unit" class="form-control" placeholder="وەک: pcs, liter">
+                            </div>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary">پاشەکەوتکردن</button>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-light btn-premium" data-bs-dismiss="modal">پاشگەزبوونەوە</button>
+                        <button type="submit" class="btn btn-primary-premium btn-premium">تۆمارکردنی کاڵا</button>
                     </div>
                 </form>
             </div>
@@ -321,6 +520,11 @@ if (!isset($_SESSION['user_id'])) {
         let itemsGlobal = [];
 
         $(document).ready(function() {
+            $('.select2').select2({
+                dropdownParent: $('#issue-panel'),
+                width: '100%'
+            });
+            
             loadItems();
             loadVehicles();
             loadStock();
@@ -342,7 +546,7 @@ if (!isset($_SESSION['user_id'])) {
             const data = await res.json();
             const cars = data.data || data;
             
-            let html = '<option value="">-- هەڵبژێرە --</option>';
+            let html = '<option value="">-- سەیارە هەڵبژێرە --</option>';
             cars.forEach(car => {
                 html += `<option value="${car.id}">${car.name}</option>`;
             });
@@ -356,7 +560,10 @@ if (!isset($_SESSION['user_id'])) {
                 html += `<option value="${item.id}">${item.name} (${item.unit})</option>`;
             });
             $('#issue_item_id').html(html);
-            $('.p-item-select').html(html);
+            $('.p-item-select').each(function() {
+                const currentVal = $(this).val();
+                $(this).html(html).val(currentVal);
+            });
         }
 
         function addPurchaseRow() {
@@ -369,28 +576,34 @@ if (!isset($_SESSION['user_id'])) {
             });
 
             const row = `
-                <div class="purchase-row row g-2">
-                    <div class="col-md-4">
-                        <select name="items[${index}][item_id]" class="form-select form-select-sm p-item-select" required>
-                            ${options}
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <input type="number" step="0.01" name="items[${index}][qty]" class="form-control form-control-sm" placeholder="بڕ" required>
-                    </div>
-                    <div class="col-md-2">
-                        <input type="number" step="0.01" name="items[${index}][unit_price]" class="form-control form-control-sm" placeholder="نرخ" required>
-                    </div>
-                    <div class="col-md-2">
-                        <select name="items[${index}][currency]" class="form-select form-select-sm" required>
-                            <option value="IQD">IQD</option>
-                            <option value="USD" selected>USD</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2 text-start">
-                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="$(this).closest('.purchase-row').remove()">
-                            <i class="fas fa-times"></i>
-                        </button>
+                <div class="purchase-row animate__animated animate__fadeInUp">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label small text-muted">ناو و جۆری کاڵا</label>
+                            <select name="items[${index}][item_id]" class="form-select p-item-select" required>
+                                ${options}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small text-muted">بڕ</label>
+                            <input type="number" step="0.01" name="items[${index}][qty]" class="form-control" placeholder="0.00" required>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small text-muted">نرخی تاک</label>
+                            <input type="number" step="0.01" name="items[${index}][unit_price]" class="form-control" placeholder="0.00" required>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small text-muted">دراو</label>
+                            <select name="items[${index}][currency]" class="form-select" required>
+                                <option value="IQD">IQD (دینار)</option>
+                                <option value="USD" selected>USD (دۆلار)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end justify-content-end">
+                            <button type="button" class="btn btn-outline-danger border-0 h-100 px-3" onclick="$(this).closest('.purchase-row').fadeOut(200, function(){ $(this).remove(); })">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -405,7 +618,12 @@ if (!isset($_SESSION['user_id'])) {
             });
             const data = await res.json();
             if (data.success) {
-                Swal.fire('سەرکەوتوو', data.msg, 'success');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'سەرکەوتوو بوو',
+                    text: data.msg,
+                    confirmButtonText: 'باشە'
+                });
                 $('#addItemModal').modal('hide');
                 loadItems();
                 this.reset();
@@ -452,20 +670,33 @@ if (!isset($_SESSION['user_id'])) {
             const data = await res.json();
             if (data.success) {
                 let html = '';
+                let totalValuationSum = 0;
+                let lowStock = 0;
+                
                 data.data.forEach(item => {
-                    const totalValuation = (item.current_qty * item.avg_cost_usd).toFixed(2);
+                    const totalValuation = (item.current_qty * item.avg_cost_usd);
+                    totalValuationSum += totalValuation;
+                    
+                    if(item.current_qty <= 5) lowStock++;
+
                     html += `
                         <tr>
-                            <td>${item.name}</td>
-                            <td><span class="badge bg-secondary">${item.category}</span></td>
-                            <td class="fw-bold text-primary">${Number(item.current_qty).toLocaleString()} ${item.unit}</td>
+                            <td class="fw-bold">${item.name}</td>
+                            <td><span class="badge bg-light text-dark border">${item.category}</span></td>
+                            <td class="fw-bold ${item.current_qty <= 5 ? 'text-danger' : 'text-primary'}">
+                                ${Number(item.current_qty).toLocaleString()} ${item.unit}
+                            </td>
                             <td>$${Number(item.avg_cost_usd).toLocaleString(undefined, {minimumFractionDigits: 3})}</td>
-                            <td>$${Number(totalValuation).toLocaleString()}</td>
+                            <td class="fw-bold">$${Number(totalValuation).toLocaleString()}</td>
                             <td class="text-muted small">${item.last_updated}</td>
                         </tr>
                     `;
                 });
+                
                 $('#stockData').html(html);
+                $('#totalItemCount').text(data.data.length);
+                $('#totalStockValue').text('$' + Number(totalValuationSum).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                $('#lowStockCount').text(lowStock).addClass(lowStock > 0 ? 'text-danger' : '');
             }
         }
 
@@ -479,10 +710,10 @@ if (!isset($_SESSION['user_id'])) {
                     html += `
                         <tr>
                             <td>${row.issued_date}</td>
-                            <td>${row.car_name}</td>
+                            <td class="fw-bold text-dark">${row.car_name}</td>
                             <td>${row.item_name}</td>
-                            <td>${row.qty}</td>
-                            <td>$${Number(totalCost).toLocaleString()}</td>
+                            <td><span class="badge bg-light text-primary border">${row.qty}</span></td>
+                            <td class="fw-bold text-success">$${Number(totalCost).toLocaleString()}</td>
                         </tr>
                     `;
                 });
@@ -493,7 +724,7 @@ if (!isset($_SESSION['user_id'])) {
         async function loadMaintenanceReport() {
             const vehicleId = $('#vehicleFilter').val();
             if(!vehicleId) {
-                $('#maintenanceSummary').hide();
+                $('#maintenanceSummary').addClass('d-none');
                 return;
             }
             
@@ -501,7 +732,7 @@ if (!isset($_SESSION['user_id'])) {
             const data = await res.json();
             if (data.success) {
                 $('#vehicleTotalCost').text(`$${Number(data.total_cost).toLocaleString()}`);
-                $('#maintenanceSummary').show();
+                $('#maintenanceSummary').removeClass('d-none');
             }
         }
     </script>
