@@ -32,7 +32,7 @@ try {
             // We could block here, or just allow it and let stock go negative. 
             // Blocking is safer.
             $item_name = $pdo->query("SELECT name FROM inv_items WHERE id = $item_id")->fetchColumn();
-            throw new Exception("ناتوانرێت ئەم کڕینە بسڕێتەوە چونکە بەشێک لەم کاڵایە (${item_name}) بەکارهێنراوە و لە کۆکا کەمترە لەو بڕەی کڕاوە.");
+            throw new Exception("ناتوانرێت ئەم کڕینە بسڕێتەوە چونکە بەشێک لەم کاڵایە ({$item_name}) بەکارهێنراوە و لە کۆکا کەمترە لەو بڕەی کڕاوە.");
         }
 
         // Deduct from stock
