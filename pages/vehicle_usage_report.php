@@ -47,8 +47,9 @@ if (!isset($_SESSION['user_id'])) {
         }
 
         .container-custom {
-            max-width: 1400px;
-            margin: 0 auto;
+            width: 100%;
+            padding-left: 15px;
+            padding-right: 15px;
         }
 
         .page-header {
@@ -219,16 +220,27 @@ if (!isset($_SESSION['user_id'])) {
                 </form>
             </div>
 
-            <!-- Summary Card -->
-            <div class="row mb-4">
-                <div class="col-md-4 ms-auto">
-                    <div class="stat-card d-flex align-items-center justify-content-between">
+            <!-- Summary Cards -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <div class="stat-card d-flex align-items-center justify-content-between border-start border-4 border-primary">
                         <div>
-                            <p class="text-muted small fw-bold mb-1">کۆی گشتی تێچوو</p>
-                            <h3 class="fw-bold mb-0 text-primary" id="totalValue">$0.00</h3>
+                            <p class="text-muted small fw-bold mb-1">کۆی گشتی تێچوو (دۆلار)</p>
+                            <h3 class="fw-bold mb-0 text-primary" id="totalValueUSD">$0.00</h3>
                         </div>
                         <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
                             <i class="fas fa-dollar-sign text-primary fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="stat-card d-flex align-items-center justify-content-between border-start border-4 border-success">
+                        <div>
+                            <p class="text-muted small fw-bold mb-1">کۆی گشتی تێچوو (دینار)</p>
+                            <h3 class="fw-bold mb-0 text-success" id="totalValueIQD">0 د.ع</h3>
+                        </div>
+                        <div class="bg-success bg-opacity-10 p-3 rounded-circle">
+                            <i class="fas fa-money-bill-wave text-success fa-lg"></i>
                         </div>
                     </div>
                 </div>
@@ -237,7 +249,7 @@ if (!isset($_SESSION['user_id'])) {
             <!-- Data Table Card -->
             <div class="report-card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <span><i class="fas fa-table me-2 text-primary"></i>لیستی پارچە بەکارهاتووەکان</span>
+                    <span><i class="fas fa-table me-2 text-primary"></i>لیستی خەرجییە تێکەڵەکان</span>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -250,8 +262,8 @@ if (!isset($_SESSION['user_id'])) {
                                     <th>پۆلێن / جۆر</th>
                                     <th>سەیارە</th>
                                     <th>بڕ</th>
-                                    <th>نرخی تاک</th>
-                                    <th>کۆی تێچوو</th>
+                                    <th class="text-primary">تێچوو (دۆلار)</th>
+                                    <th class="text-success">تێچوو (دینار)</th>
                                 </tr>
                             </thead>
                             <tbody id="reportData">
@@ -316,7 +328,8 @@ if (!isset($_SESSION['user_id'])) {
             
             if (result.success) {
                 renderTable(result.data);
-                $('#totalValue').text('$' + Number(result.total_cost).toLocaleString(undefined, {minimumFractionDigits: 2}));
+                $('#totalValueUSD').text('$' + Number(result.total_usd).toLocaleString(undefined, {minimumFractionDigits: 2}));
+                $('#totalValueIQD').text(Number(result.total_iqd).toLocaleString() + ' د.ع');
             }
         }
 
@@ -338,8 +351,8 @@ if (!isset($_SESSION['user_id'])) {
                             <td><span class="badge bg-light text-dark border">${row.category}</span></td>
                             <td>${row.vehicle}</td>
                             <td>${row.qty}</td>
-                            <td>$${Number(row.unit_price).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                            <td class="fw-bold text-primary">$${Number(row.total_cost).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            <td class="fw-bold text-primary">$${Number(row.cost_usd).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            <td class="fw-bold text-success">${Number(row.cost_iqd).toLocaleString()} د.ع</td>
                         </tr>
                     `;
                 });
