@@ -322,13 +322,21 @@ try {
             <div class="table-responsive">
                 <table class="sap-table">
                     <thead>
+                        <tr>
                             <th>بڕ</th>
                             <th>نرخی یەکە</th>
                             <th>کۆی پارە</th>
                         </tr>
                     </thead>
                     <tbody>
-                            <td><?= number_format($receipt['meter_amount'], 2) ?> m³</td>
+                        <tr>
+                            <td>
+                                <?php if ($receipt['meter_amount'] <= 1.00): ?>
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border">بڕی جێگیر (Fixed)</span>
+                                <?php else: ?>
+                                    <?= number_format($receipt['meter_amount'], 2) ?> m³
+                                <?php endif; ?>
+                            </td>
                             <td>$ <?= number_format($receipt['price_per_meter'], 2) ?></td>
                             <td class="fw-bold">$ <?= number_format($receipt['meter_amount'] * $receipt['price_per_meter'], 2) ?></td>
                         </tr>
