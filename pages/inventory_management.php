@@ -407,79 +407,75 @@ if (!isset($_SESSION['user_id'])) {
 
             <!-- Issue/Issuance Panel -->
             <div class="tab-pane fade" id="issue-panel">
-                <div class="row g-4">
-                    <div class="col-xl-4">
-                        <div class="inventory-card h-100">
-                            <div class="card-header">
-                                <span><i class="fas fa-share-square me-2 text-danger"></i>دەرکردنی کاڵا</span>
+                <div class="inventory-card mb-4">
+                    <div class="card-header">
+                        <span><i class="fas fa-share-square me-2 text-danger"></i>دەرکردنی کاڵا بۆ سەیارە</span>
+                    </div>
+                    <div class="card-body p-4">
+                        <form id="issueForm">
+                            <div class="row g-4 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-600">سەیارە</label>
+                                    <select name="vehicle_id" id="issue_vehicle_id" class="form-select select2" required></select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-600">بەروار</label>
+                                    <input type="date" name="issued_date" class="form-control" value="<?php echo date('Y-m-d'); ?>" required>
+                                </div>
                             </div>
-                            <div class="card-body p-4">
-                                <form id="issueForm">
-                                    <div class="mb-4">
-                                        <label class="form-label fw-600">کاڵا</label>
-                                        <select name="item_id" id="issue_item_id" class="form-select select2" required></select>
-                                    </div>
-                                    <div class="mb-4">
-                                        <label class="form-label fw-600">سەیارە</label>
-                                        <select name="vehicle_id" id="issue_vehicle_id" class="form-select select2" required></select>
-                                    </div>
-                                    <div class="row mb-4">
-                                        <div class="col-6">
-                                            <label class="form-label fw-600">بڕ</label>
-                                            <input type="number" step="0.01" name="qty" class="form-control" required placeholder="0.00">
-                                        </div>
-                                        <div class="col-6">
-                                            <label class="form-label fw-600">یەکە</label>
-                                            <select name="unit_used" id="issue_unit_used" class="form-select" required>
-                                                <option value="">--</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="mb-4">
-                                        <label class="form-label fw-600">بەروار</label>
-                                        <input type="date" name="issued_date" class="form-control" value="<?php echo date('Y-m-d'); ?>" required>
-                                    </div>
-                                    <button type="submit" class="btn btn-premium w-100 btn-primary-premium bg-danger">
-                                        <i class="fas fa-paper-plane"></i> پەسەندکردنی دەرکردن
-                                    </button>
-                                </form>
+
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="fw-bold mb-0">لیستی کاڵاکان</h6>
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="addIssueRow()">
+                                    <i class="fas fa-plus me-1"></i>زیادکردنی کاڵا
+                                </button>
                             </div>
+
+                            <div id="issueItemsList" class="mb-3">
+                                <!-- Dynamic Rows -->
+                            </div>
+
+                            <div class="text-start mt-4">
+                                <hr class="opacity-10">
+                                <button type="submit" class="btn btn-premium btn-primary-premium bg-danger border-0">
+                                    <i class="fas fa-paper-plane"></i> پەسەندکردنی دەرکردنی گشتی
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="inventory-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-history me-2 text-info"></i>دوایین جوڵەکانی دەرکردن</span>
+                        <div style="min-width: 200px;">
+                                <select id="vehicleFilter" class="form-select form-select-sm" onchange="loadMaintenanceReport()">
+                                    <option value="">هەموو سەیارەکان</option>
+                                </select>
                         </div>
                     </div>
-                    <div class="col-xl-8">
-                        <div class="inventory-card h-100">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <span><i class="fas fa-history me-2 text-info"></i>دوایین جوڵەکانی دەرکردن</span>
-                                <div style="min-width: 200px;">
-                                     <select id="vehicleFilter" class="form-select form-select-sm" onchange="loadMaintenanceReport()">
-                                         <option value="">هەموو سەیارەکان</option>
-                                     </select>
-                                </div>
+                    <div class="card-body p-0">
+                        <div id="maintenanceSummary" class="bg-light p-3 border-bottom d-none">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-muted">کۆی تێچووی چاککردنەوە:</span>
+                                <span class="h5 mb-0 fw-bold text-primary" id="vehicleTotalCost">$0.00</span>
                             </div>
-                            <div class="card-body p-0">
-                                <div id="maintenanceSummary" class="bg-light p-3 border-bottom d-none">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span class="text-muted">کۆی تێچووی چاککردنەوە:</span>
-                                        <span class="h5 mb-0 fw-bold text-primary" id="vehicleTotalCost">$0.00</span>
-                                    </div>
-                                </div>
-                                <div class="table-responsive">
-                                    <table class="table table-hover align-middle">
-                                        <thead>
-                                            <tr>
-                                                <th>تاریخ</th>
-                                                <th>سەیارە</th>
-                                                <th>کاڵا</th>
-                                                <th>بڕ</th>
-                                                <th>تێچوو</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="issuanceData">
-                                            <!-- Dynamic Data -->
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>تاریخ</th>
+                                        <th>سەیارە</th>
+                                        <th>کاڵا</th>
+                                        <th>بڕ</th>
+                                        <th>تێچوو</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="issuanceData">
+                                    <!-- Dynamic Data -->
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -661,6 +657,7 @@ if (!isset($_SESSION['user_id'])) {
             loadIssuances();
             loadSuppliers();
             addPurchaseRow(); // Initial row
+            addIssueRow(); // Initial row for issuance
         });
 
         async function loadUnits() {
@@ -832,25 +829,64 @@ if (!isset($_SESSION['user_id'])) {
             itemsGlobal.forEach(item => {
                 html += `<option value="${item.id}" data-unit="${item.unit}" data-sunit="${item.secondary_unit || ''}" data-factor="${item.conversion_factor}">${item.name}</option>`;
             });
-            $('#issue_item_id').html(html);
-            $('.p-item-select').each(function() {
+            
+            $('.p-item-select, .i-item-select').each(function() {
                 const currentVal = $(this).val();
                 $(this).html(html).val(currentVal);
             });
         }
 
-        // Handle item selection in issuance to show correct units
-        $('#issue_item_id').on('change', function() {
-            const selected = $(this).find(':selected');
+        function addIssueRow() {
+            const container = $('#issueItemsList');
+            const index = container.children().length;
+            
+            let options = '<option value="">-- هەڵبژێرە --</option>';
+            itemsGlobal.forEach(item => {
+                options += `<option value="${item.id}" data-unit="${item.unit}" data-sunit="${item.secondary_unit || ''}">${item.name}</option>`;
+            });
+
+            const row = `
+                <div class="purchase-row border-danger border-opacity-10 animate__animated animate__fadeInUp">
+                    <div class="row g-3">
+                        <div class="col-md-5">
+                            <label class="form-label small text-muted">ناوی کاڵا</label>
+                            <select name="items[${index}][item_id]" class="form-select i-item-select" onchange="updateIssueUnit(this)" required>
+                                ${options}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small text-muted">بڕی دەرکردن</label>
+                            <input type="number" step="0.01" name="items[${index}][qty]" class="form-control" placeholder="0.00" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small text-muted">یەکە</label>
+                            <select name="items[${index}][unit_used]" class="form-select i-unit-select" required>
+                                <option value="">--</option>
+                            </select>
+                        </div>
+                        <div class="col-md-1 d-flex align-items-end justify-content-end">
+                            <button type="button" class="btn btn-outline-danger border-0 h-100 px-3" onclick="$(this).closest('.purchase-row').fadeOut(200, function(){ $(this).remove(); })">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.append(row);
+        }
+
+        function updateIssueUnit(select) {
+            const selected = $(select).find(':selected');
             const unit = selected.data('unit');
             const sunit = selected.data('sunit');
+            const unitSelect = $(select).closest('.row').find('.i-unit-select');
             
-            let unitHtml = `<option value="${unit}">${unit} (بچووک)</option>`;
+            let html = `<option value="${unit}">${unit} (بچووک)</option>`;
             if (sunit) {
-                unitHtml += `<option value="${sunit}">${sunit} (گەورە)</option>`;
+                html += `<option value="${sunit}">${sunit} (گەورە)</option>`;
             }
-            $('#issue_unit_used').html(unitHtml);
-        });
+            unitSelect.html(html);
+        }
 
         // Add unit selection to purchase rows
         function addPurchaseRow() {
@@ -956,6 +992,13 @@ if (!isset($_SESSION['user_id'])) {
 
         $('#issueForm').submit(async function(e) {
             e.preventDefault();
+            
+            // Basic validation: ensure at least one item row exists after potential deletions
+            if ($('#issueItemsList').children().length === 0) {
+                Swal.fire('ئاگاداری', 'تکایە بەلایەنی کەمەوە کاڵایەک زیاد بکە', 'warning');
+                return;
+            }
+
             const res = await fetch('../process/inventory/issue_item.php', {
                 method: 'POST',
                 body: new FormData(this)
@@ -964,6 +1007,8 @@ if (!isset($_SESSION['user_id'])) {
             if (data.success) {
                 Swal.fire('سەرکەوتوو', data.msg, 'success');
                 this.reset();
+                $('#issueItemsList').empty();
+                addIssueRow();
                 loadStock();
                 loadIssuances();
             } else {
