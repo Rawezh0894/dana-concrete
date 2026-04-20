@@ -285,22 +285,19 @@ class AdvancedFilters {
             }
 
             // Calculate totals using the same logic as select_expenses.js
-            const totalCarMaterialCostIQD = parseFloat(summary.total_car_material_cost_iqd || 0);
-            const totalCarMaterialCostUSD = parseFloat(summary.total_car_material_cost_usd || 0);
             const totalCarGasCost = parseFloat(summary.total_car_gas_cost || 0);
             const totalOtherExpensesIQD = parseFloat(summary.total_other_expenses_iqd || 0);
             const totalOtherExpensesUSD = parseFloat(summary.total_other_expenses_usd || 0);
 
             // Convert IQD to USD for display (same formula as select_expenses.js)
-            const totalCarMaterialCostUSDConverted = iqdToUsd(totalCarMaterialCostIQD) + totalCarMaterialCostUSD;
             const totalCarGasCostUSD = iqdToUsd(totalCarGasCost);
             const totalOtherExpensesUSDConverted = iqdToUsd(totalOtherExpensesIQD) + totalOtherExpensesUSD;
-            const totalCarExpensesUSD = totalCarMaterialCostUSDConverted + totalCarGasCostUSD;
+            const totalCarExpensesUSD = totalCarGasCostUSD;
             const totalAllExpensesUSD = totalOtherExpensesUSDConverted + totalCarExpensesUSD;
 
             // Calculate total IQD and USD expenses
-            const totalExpensesIQD = totalCarMaterialCostIQD + totalCarGasCost + totalOtherExpensesIQD;
-            const totalExpensesUSD = totalCarMaterialCostUSD + totalOtherExpensesUSD;
+            const totalExpensesIQD = totalCarGasCost + totalOtherExpensesIQD;
+            const totalExpensesUSD = totalOtherExpensesUSD;
 
             function formatIQD(num) {
                 return num ? `${Number(num).toLocaleString('en-US')} د.ع` : '0 د.ع';
@@ -308,7 +305,6 @@ class AdvancedFilters {
 
             // Update car expense cards (including new IQD and USD total cards)
             const elements = {
-                'totalCarMaterialCost': formatUSD(totalCarMaterialCostUSDConverted),
                 'totalCarGasCost': formatUSD(totalCarGasCostUSD),
                 'totalOtherExpenses': formatUSD(totalOtherExpensesUSDConverted),
                 'totalCarExpenses': formatUSD(totalAllExpensesUSD),
@@ -360,7 +356,7 @@ class AdvancedFilters {
 
         // Clear expense type checkboxes
         const checkboxes = [
-            'expenseTypeOther', 'expenseTypeMaterial', 'expenseTypeGas'
+            'expenseTypeOther', 'expenseTypeGas'
         ];
 
         checkboxes.forEach(id => {

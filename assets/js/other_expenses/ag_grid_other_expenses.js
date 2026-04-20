@@ -211,77 +211,7 @@ const otherExpensesColumnDefs = [
         },
         type: 'numericColumn'
     },
-    {
-        field: 'material_total_cost',
-        headerName: 'کۆی نرخی کاڵای بەکارهاتوو',
-        filter: 'agNumberColumnFilter',
-        floatingFilter: true,
-        sortable: true,
-        resizable: true,
-        minWidth: 100,
-        cellStyle: { textAlign: 'center', direction: 'rtl' },
-        valueFormatter: function (params) {
-            if (params.value === null || params.value === undefined || params.value === '') return '-';
-            return window.AGGridFormatters?.formatNumber(params.value) || params.value;
-        },
-        type: 'numericColumn'
-    },
-    {
-        field: 'material_purchase_price_usd',
-        headerName: 'نرخی کڕینی کاڵا بە دۆلار',
-        filter: 'agNumberColumnFilter',
-        floatingFilter: true,
-        sortable: true,
-        resizable: true,
-        minWidth: 100,
-        cellStyle: { textAlign: 'center', direction: 'rtl' },
-        valueFormatter: function (params) {
-            return window.AGGridFormatters?.formatUSD(params.value) || '-';
-        },
-        type: 'numericColumn'
-    },
-    {
-        field: 'material_purchase_price_iqd',
-        headerName: 'نرخی کڕینی کاڵا بە دینار',
-        filter: 'agNumberColumnFilter',
-        floatingFilter: true,
-        sortable: true,
-        resizable: true,
-        minWidth: 100,
-        cellStyle: { textAlign: 'center', direction: 'rtl' },
-        valueFormatter: function (params) {
-            return window.AGGridFormatters?.formatIQD(params.value) || '-';
-        },
-        type: 'numericColumn'
-    },
-    {
-        field: 'material_quantity',
-        headerName: 'بڕی عەدەدی کاڵا',
-        filter: 'agNumberColumnFilter',
-        floatingFilter: true,
-        sortable: true,
-        resizable: true,
-        minWidth: 100,
-        cellStyle: { textAlign: 'center', direction: 'rtl' },
-        valueFormatter: function (params) {
-            if (params.value === null || params.value === undefined || params.value === '') return '-';
-            return window.AGGridFormatters?.formatNumber(params.value) || params.value;
-        },
-        type: 'numericColumn'
-    },
-    {
-        field: 'material_name',
-        headerName: 'کاڵا لە کۆگا',
-        filter: 'agTextColumnFilter',
-        floatingFilter: true,
-        sortable: true,
-        resizable: true,
-        minWidth: 100,
-        cellStyle: { textAlign: 'center', direction: 'rtl' },
-        tooltipValueGetter: function (params) {
-            return params.value || '';
-        }
-    },
+
     {
         field: 'expense_type',
         headerName: 'جۆری خەرجی',
@@ -295,7 +225,6 @@ const otherExpensesColumnDefs = [
             if (!params.value) return '-';
             const colors = {
                 'خەرجی تر': '#6c757d',
-                'بەکارهێنانی کاڵای کۆگا': '#007bff',
                 'بەکارهێنانی گاز': '#ffc107',
                 'خواردنگە': '#28a745',
                 'ئۆفیس': '#17a2b8'
@@ -593,16 +522,13 @@ function updateSummaryCards(expenses) {
         let totalOtherExpensesIQD = 0, totalOtherExpensesUSD = 0;
 
         expenses.forEach(row => {
-            if (row.car_id && row.expense_type === 'بەکارهێنانی کاڵای کۆگا') {
-                totalCarMaterialCostIQD += parseFloat(row.material_purchase_price_iqd || 0) * parseFloat(row.material_quantity || 0);
-                totalCarMaterialCostUSD += parseFloat(row.material_purchase_price_usd || 0) * parseFloat(row.material_quantity || 0);
-            }
+
 
             if (row.car_id && row.expense_type === 'بەکارهێنانی گاز') {
                 totalCarGasCost += parseFloat(row.gas_total_cost || 0);
             }
 
-            if (!row.car_id || (row.expense_type !== 'بەکارهێنانی کاڵای کۆگا' && row.expense_type !== 'بەکارهێنانی گاز')) {
+            if (!row.car_id || row.expense_type !== 'بەکارهێنانی گاز') {
                 if (row.currency_type === 'دۆلار') {
                     totalOtherExpensesUSD += parseFloat(row.amount_usd || 0);
                 } else if (row.currency_type === 'دینار') {
@@ -617,15 +543,14 @@ function updateSummaryCards(expenses) {
             }
         });
 
-        const totalCarMaterialCostUSDConverted = totalCarMaterialCostIQD / (usdRate / 100) + totalCarMaterialCostUSD;
         const totalCarGasCostUSD = totalCarGasCost / (usdRate / 100);
         const totalOtherExpensesUSDConverted = totalOtherExpensesIQD / (usdRate / 100) + totalOtherExpensesUSD;
-        const totalCarExpensesUSD = totalCarMaterialCostUSDConverted + totalCarGasCostUSD;
+        const totalCarExpensesUSD = totalCarGasCostUSD;
         const totalAllExpensesUSD = totalOtherExpensesUSDConverted + totalCarExpensesUSD;
 
         // Calculate total IQD and USD expenses
-        const totalExpensesIQD = totalCarMaterialCostIQD + totalCarGasCost + totalOtherExpensesIQD;
-        const totalExpensesUSD = totalCarMaterialCostUSD + totalOtherExpensesUSD;
+        const totalExpensesIQD = totalCarGasCost + totalOtherExpensesIQD;
+        const totalExpensesUSD = totalOtherExpensesUSD;
 
         function formatNumber(num) {
             return Number(num).toLocaleString('en-US');
@@ -639,9 +564,7 @@ function updateSummaryCards(expenses) {
             return num ? `${formatNumber(num)} د.ع` : '0 د.ع';
         }
 
-        if (document.getElementById('totalCarMaterialCost')) {
-            document.getElementById('totalCarMaterialCost').innerHTML = `${formatUSD(totalCarMaterialCostUSDConverted)}`;
-        }
+
         if (document.getElementById('totalCarGasCost')) {
             document.getElementById('totalCarGasCost').innerHTML = `${formatUSD(totalCarGasCostUSD)}`;
         }
@@ -792,12 +715,7 @@ window.openEditModalById = async function (id) {
             }
         }
 
-        if (document.getElementById('edit_material_id')) {
-            await populateSelect('../process/other_expenses/select_materials.php', 'edit_material_id', row.material_id);
-            setTimeout(() => {
-                if (row.material_id && typeof populateMaterialPrices === 'function') populateMaterialPrices(row.material_id, 'edit');
-            }, 100);
-        }
+
 
         if (document.getElementById('edit_material_quantity')) document.getElementById('edit_material_quantity').value = row.material_quantity || '';
         if (document.getElementById('edit_usage_unit_type')) document.getElementById('edit_usage_unit_type').value = row.usage_unit_type || '';

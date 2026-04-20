@@ -39,7 +39,6 @@ function exportOtherExpensesToExcel() {
     // Get expense type filters
     const expenseTypes = [];
     if (document.getElementById('expenseTypeOther')?.checked) expenseTypes.push('خەرجی تر');
-    if (document.getElementById('expenseTypeMaterial')?.checked) expenseTypes.push('بەکارهێنانی کاڵای کۆگا');
     if (document.getElementById('expenseTypeGas')?.checked) expenseTypes.push('بەکارهێنانی گاز');
     if (document.getElementById('filter_expense_type_khwardnga')?.checked) expenseTypes.push('خواردنگە');
     if (document.getElementById('filter_expense_type_office')?.checked) expenseTypes.push('ئۆفیس');
@@ -129,7 +128,6 @@ function exportOtherExpensesSummaryToExcel() {
     // Get expense type filters
     const expenseTypes = [];
     if (document.getElementById('expenseTypeOther')?.checked) expenseTypes.push('خەرجی تر');
-    if (document.getElementById('expenseTypeMaterial')?.checked) expenseTypes.push('بەکارهێنانی کاڵای کۆگا');
     if (document.getElementById('expenseTypeGas')?.checked) expenseTypes.push('بەکارهێنانی گاز');
     if (document.getElementById('filter_expense_type_khwardnga')?.checked) expenseTypes.push('خواردنگە');
     if (document.getElementById('filter_expense_type_office')?.checked) expenseTypes.push('ئۆفیس');

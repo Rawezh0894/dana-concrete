@@ -79,20 +79,17 @@ async function loadOtherExpenses() {
         let filtered = data;
 
         // Calculate totals
-        let totalCarMaterialCostIQD = 0, totalCarMaterialCostUSD = 0, totalCarGasCost = 0;
+        let totalCarGasCost = 0;
         let totalOtherExpensesIQD = 0, totalOtherExpensesUSD = 0;
 
         filtered.forEach(row => {
-            if (row.car_id && row.expense_type === 'بەکارهێنانی کاڵای کۆگا') {
-                totalCarMaterialCostIQD += parseFloat(row.material_purchase_price_iqd || 0) * parseFloat(row.material_quantity || 0);
-                totalCarMaterialCostUSD += parseFloat(row.material_purchase_price_usd || 0) * parseFloat(row.material_quantity || 0);
-            }
+
 
             if (row.car_id && row.expense_type === 'بەکارهێنانی گاز') {
                 totalCarGasCost += parseFloat(row.gas_total_cost || 0);
             }
 
-            if (!row.car_id || (row.expense_type !== 'بەکارهێنانی کاڵای کۆگا' && row.expense_type !== 'بەکارهێنانی گاز')) {
+            if (!row.car_id || row.expense_type !== 'بەکارهێنانی گاز') {
                 if (row.currency_type === 'دۆلار') {
                     totalOtherExpensesUSD += parseFloat(row.amount_usd || 0);
                 } else if (row.currency_type === 'دینار') {
@@ -108,17 +105,16 @@ async function loadOtherExpenses() {
             }
         });
 
-        const totalCarMaterialCostUSDConverted = totalCarMaterialCostIQD / (usdRate / 100) + totalCarMaterialCostUSD;
         const totalCarGasCostUSD = totalCarGasCost / (usdRate / 100);
         const totalOtherExpensesUSDConverted = totalOtherExpensesIQD / (usdRate / 100) + totalOtherExpensesUSD;
-        const totalCarExpensesUSD = totalCarMaterialCostUSDConverted + totalCarGasCostUSD;
+        const totalCarExpensesUSD = totalCarGasCostUSD;
         const totalAllExpensesUSD = totalOtherExpensesUSDConverted + totalCarExpensesUSD;
 
         // Calculate total IQD and USD expenses
-        const totalExpensesIQD = totalCarMaterialCostIQD + totalCarGasCost + totalOtherExpensesIQD;
-        const totalExpensesUSD = totalCarMaterialCostUSD + totalOtherExpensesUSD;
+        const totalExpensesIQD = totalCarGasCost + totalOtherExpensesIQD;
+        const totalExpensesUSD = totalOtherExpensesUSD;
 
-        document.getElementById('totalCarMaterialCost').innerHTML = `${formatUSD(totalCarMaterialCostUSDConverted)}`;
+
         document.getElementById('totalCarGasCost').innerHTML = `${formatUSD(totalCarGasCostUSD)}`;
         document.getElementById('totalOtherExpenses').innerHTML = `${formatUSD(totalOtherExpensesUSDConverted)}`;
         document.getElementById('totalCarExpenses').innerHTML = `${formatUSD(totalAllExpensesUSD)}`;
@@ -138,11 +134,7 @@ async function loadOtherExpenses() {
             row.car_name || '',
             row.gas_liters ? formatNumber(row.gas_liters) : '',
             row.expense_type || '',
-            row.material_name || '',
-            row.material_quantity ? formatNumber(row.material_quantity) : '',
-            row.material_purchase_price_iqd ? formatIQD(row.material_purchase_price_iqd) : '',
-            row.material_purchase_price_usd ? formatUSD(row.material_purchase_price_usd) : '',
-            row.material_total_cost ? formatNumber(row.material_total_cost) : '',
+
             row.gas_purchase_price_input ? formatIQD(row.gas_purchase_price_input) : '',
             row.gas_total_cost ? formatNumber(row.gas_total_cost) : '',
             row.payment_type || '',
@@ -169,11 +161,7 @@ async function loadOtherExpenses() {
                 { title: 'سەیارە' },
                 { title: 'بڕی گاز (لیتر)' },
                 { title: 'جۆری خەرجی' },
-                { title: 'کاڵا لە کۆگا' },
-                { title: 'بڕی عەدەدی کاڵا' },
-                { title: 'نرخی کڕینی کaڵa بە دینار' },
-                { title: 'نrخی کڕینی کaڵa بە دۆlار' },
-                { title: 'کۆی نرخی کاڵای بەکارهاتuو' },
+
                 { title: 'ئینپوتی نرخی کڕینی گاز' },
                 { title: 'کۆی نرخی گازی بەکارهاتuو' },
                 { title: 'جۆری مامەڵە' },
@@ -352,18 +340,9 @@ window.openEditModalById = async function (id) {
             }
         }
 
-        if (document.getElementById('edit_material_id')) {
-            populateSelect('../process/other_expenses/select_materials.php', 'edit_material_id', row.material_id);
-            setTimeout(() => {
-                if (row.material_id && typeof populateMaterialPrices === 'function') populateMaterialPrices(row.material_id, 'edit');
-            }, 100);
-        }
 
-        if (document.getElementById('edit_material_quantity')) document.getElementById('edit_material_quantity').value = row.material_quantity || '';
-        if (document.getElementById('edit_usage_unit_type')) document.getElementById('edit_usage_unit_type').value = row.usage_unit_type || '';
-        if (document.getElementById('edit_material_purchase_price_iqd')) document.getElementById('edit_material_purchase_price_iqd').value = row.material_purchase_price_iqd || '';
-        if (document.getElementById('edit_material_purchase_price_usd')) document.getElementById('edit_material_purchase_price_usd').value = row.material_purchase_price_usd || '';
-        if (document.getElementById('edit_material_total_cost')) document.getElementById('edit_material_total_cost').value = row.material_total_cost || '';
+
+
         if (document.getElementById('edit_gas_purchase_price_input')) document.getElementById('edit_gas_purchase_price_input').value = row.gas_purchase_price_input || '';
         if (document.getElementById('edit_gas_total_cost')) document.getElementById('edit_gas_total_cost').value = row.gas_total_cost || '';
 

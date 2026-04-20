@@ -2,7 +2,7 @@
 let submittingExpense = false;
 let isSplitMode = false;
 let carOptionsHtml = '';
-let materialOptionsHtml = ''; // For storing material selections
+
 
 const addExpenseForm = document.getElementById('addExpenseForm');
 if (addExpenseForm) {
@@ -46,22 +46,7 @@ if (addExpenseForm) {
                 return;
             }
 
-            // Check if there's an error message indicating insufficient material
-            const errorMessage = document.querySelector('.material-availability-message.text-danger');
-            if (errorMessage) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'هەڵە',
-                    text: 'ناتوانرێت خەرجی تۆمار بکرێت - بڕی پێویست لە کۆگا نەماوە',
-                    confirmButtonText: 'باشە'
-                });
-                submittingExpense = false;
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = originalBtnText;
-                }
-                return;
-            }
+
         }
         const formData = new FormData(addExpenseForm);
 
@@ -83,15 +68,6 @@ if (addExpenseForm) {
                         amount_iqd: amountIqd || 0,
                         amount_usd: amountUsd || 0
                     });
-                } else if (rowType === 'stock' && materialId) {
-                    splits.push({
-                        type: 'stock',
-                        material_id: materialId,
-                        quantity: quantity,
-                        usage_unit_type: row.querySelector('.split-unit-type')?.value || '',
-                        amount_iqd: amountIqd || 0,
-                        amount_usd: amountUsd || 0
-                    });
                 }
             });
 
@@ -106,7 +82,6 @@ if (addExpenseForm) {
             }
             formData.append('invoice_splits', JSON.stringify(splits));
             formData.set('car_id', ''); // Clear main car_id
-            formData.set('material_id', '');
         }
 
         // Add gas_liters if present in the form
@@ -117,31 +92,7 @@ if (addExpenseForm) {
         if (document.getElementById('expense_type')) {
             formData.append('expense_type', document.getElementById('expense_type').value);
         }
-        if (document.getElementById('material_id')) {
-            const materialId = document.getElementById('material_id').value;
-            // Only append if not empty
-            if (materialId && materialId.trim() !== '') {
-                formData.append('material_id', materialId);
-            }
-        }
-        if (document.getElementById('material_quantity')) {
-            formData.append('material_quantity', document.getElementById('material_quantity').value);
-        }
-        if (document.getElementById('usage_unit_type')) {
-            const usageUnitType = document.getElementById('usage_unit_type').value;
-            // Always append usage_unit_type - empty string will be converted to null on server
-            formData.append('usage_unit_type', usageUnitType || '');
-            console.log('Usage unit type being sent:', usageUnitType || '');
-        }
-        if (document.getElementById('material_purchase_price_iqd')) {
-            formData.append('material_purchase_price_iqd', document.getElementById('material_purchase_price_iqd').value);
-        }
-        if (document.getElementById('material_purchase_price_usd')) {
-            formData.append('material_purchase_price_usd', document.getElementById('material_purchase_price_usd').value);
-        }
-        if (document.getElementById('material_total_cost')) {
-            formData.append('material_total_cost', document.getElementById('material_total_cost').value);
-        }
+
         if (document.getElementById('gas_purchase_price_input')) {
             formData.append('gas_purchase_price_input', document.getElementById('gas_purchase_price_input').value);
         }
@@ -355,11 +306,7 @@ if (addExpenseModal) {
             const carSelect = document.getElementById('car_id');
             carOptionsHtml = carSelect.innerHTML;
         });
-        populateSelect('../process/other_expenses/select_materials.php', 'material_id').then(() => {
-            // Save material options for future rows
-            const materialSelect = document.getElementById('material_id');
-            materialOptionsHtml = materialSelect.innerHTML;
-        });
+
 
         // Reset split mode
         isSplitMode = false;
@@ -409,7 +356,6 @@ function addInvoiceSplitRow() {
             <label class="form-label small">جۆر</label>
             <select class="form-control form-control-sm split-row-type">
                 <option value="car">خەرجی سەیارە</option>
-                <option value="stock">کڕینی کۆگا</option>
             </select>
         </div>
         <div class="col-md-3 entity-container">

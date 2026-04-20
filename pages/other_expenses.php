@@ -193,12 +193,7 @@ if (!isset($_SESSION['user_id'])) {
                     خەرجی تر
                   </label>
                 </div>
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" id="expenseTypeMaterial" value="بەکارهێنانی کاڵای کۆگا">
-                  <label class="form-check-label" for="expenseTypeMaterial">
-                    بەکارهێنانی کاڵای کۆگا
-                  </label>
-                </div>
+
                 <div class="form-check">
                   <input class="form-check-input" type="checkbox" id="expenseTypeGas" value="بەکارهێنانی گاز">
                   <label class="form-check-label" for="expenseTypeGas">
@@ -213,10 +208,7 @@ if (!isset($_SESSION['user_id'])) {
                   <input class="form-check-input" type="checkbox" id="filter_expense_type_office" name="expenseTypes[]" value="ئۆفیس">
                   <label class="form-check-label" for="filter_expense_type_office">ئۆفیس</label>
                 </div>
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" id="filter_expense_type_stock_purchase" name="expenseTypes[]" value="کڕینی کاڵا بۆ کۆگا">
-                  <label class="form-check-label" for="filter_expense_type_stock_purchase">کڕینی کاڵا بۆ کۆگا</label>
-                </div>
+
               </div>
               <div class="auto-filter-indicator mt-1">
                 <i class="fas fa-check-square me-1"></i>
@@ -247,15 +239,7 @@ if (!isset($_SESSION['user_id'])) {
     </div>
       <!-- First row: 4 main expense cards -->
       <div class="row w-100 mt-3 g-3">
-        <div class="col-md-3">
-          <div class="card gradient-card green-gradient">
-            <div class="card-body">
-              <h6 class="card-title">خەرجی سەیارەکان (کاڵا)</h6>
-              <div id="totalCarMaterialCost" class="card-value">$0</div>
-              <small>بەکارهێنانی کاڵای کۆگا</small>
-            </div>
-          </div>
-        </div>
+
         <div class="col-md-3">
           <div class="card gradient-card orange-gradient">
             <div class="card-body">
@@ -279,7 +263,7 @@ if (!isset($_SESSION['user_id'])) {
             <div class="card-body">
               <h6 class="card-title">کۆی گشتی</h6>
               <div id="totalCarExpenses" class="card-value">$0</div>
-              <small>کاڵا + گاز + خەرجی تر</small>
+              <small>گاز + خەرجی تر</small>
             </div>
           </div>
         </div>
@@ -378,7 +362,7 @@ if (!isset($_SESSION['user_id'])) {
 
           <!-- Multiple Items Split Container (Hidden by default) -->
           <div id="splitItemsContainer" class="mb-3 border p-3 rounded bg-light" style="display: none;">
-            <h6 class="mb-3">دابەشکردنی پسووڵە (سەیارە + کۆگا)</h6>
+            <h6 class="mb-3">دابەشکردنی پسووڵە (سەیارە)</h6>
             <div id="invoiceSplitsList">
               <!-- Split rows will be added here -->
             </div>
@@ -393,40 +377,13 @@ if (!isset($_SESSION['user_id'])) {
               <select class="form-control" id="expense_type" name="expense_type" required>
                 <option value="">-- هەلبژێرە --</option>
                 <option value="خەرجی تر">خەرجی تر</option>
-                <option value="بەکارهێنانی کاڵای کۆگا">بەکارهێنانی کاڵای کۆگا</option>
+
                 <option value="بەکارهێنانی گاز">بەکارهێنانی گاز</option>
                 <option value="خواردنگە">خواردنگە</option>
                 <option value="ئۆفیس">ئۆفیس</option>
               </select>
             </div>
-            <div class="col-md-4 gas-material-field">
-              <label for="material_id" class="form-label">کاڵا لە کۆگا</label>
-              <select class="form-control" id="material_id" name="material_id">
-                <option value="">-- هەلبژێرە --</option>
-              </select>
-            </div>
-            <div class="col-md-4 gas-material-field">
-              <label for="usage_unit_type" class="form-label">یەکەی بەکارهێنان</label>
-              <select class="form-control" id="usage_unit_type" name="usage_unit_type">
-                <option value="">یەکەی بەکارهێنان هەڵبژێرە</option>
-              </select>
-            </div>
-            <div class="col-md-4 gas-material-field">
-              <label for="material_quantity" class="form-label">بڕی عەدەدی کاڵا</label>
-              <input type="number" step="0.01" class="form-control" id="material_quantity" name="material_quantity" placeholder="0">
-            </div>
-            <div class="col-md-4 gas-material-field">
-              <label for="material_purchase_price_iqd" class="form-label">نرخی کڕینی کاڵا بە دینار</label>
-              <input type="number" step="0.01" class="form-control" id="material_purchase_price_iqd" name="material_purchase_price_iqd" placeholder="0">
-            </div>
-            <div class="col-md-4 gas-material-field">
-              <label for="material_purchase_price_usd" class="form-label">نرخی کڕینی کاڵا بە دۆلار</label>
-              <input type="number" step="0.01" class="form-control" id="material_purchase_price_usd" name="material_purchase_price_usd" placeholder="0">
-            </div>
-            <div class="col-md-4 gas-material-field">
-              <label for="material_total_cost" class="form-label">کۆی نرخی کاڵای بەکارهاتوو</label>
-              <input type="number" step="0.01" class="form-control" id="material_total_cost" name="material_total_cost" placeholder="0" readonly>
-            </div>
+
           </div>
           <div class="mb-3 row">
             <div class="col-md-4 gas-material-field">
@@ -591,41 +548,14 @@ if (!isset($_SESSION['user_id'])) {
               <select class="form-control" id="edit_expense_type" name="expense_type" required>
                 <option value="">-- هەلبژێرە --</option>
                 <option value="خەرجی تر">خەرجی تر</option>
-                <option value="بەکارهێنانی کاڵای کۆگا">بەکارهێنانی کاڵای کۆگا</option>
+
                 <option value="بەکارهێنانی گاز">بەکارهێنانی گاز</option>
                 <option value="خواردنگە">خواردنگە</option>
                 <option value="ئۆفیس">ئۆفیس</option>
-                <option value="کڕینی کاڵا بۆ کۆگا">کڕینی کاڵا بۆ کۆگا</option>
+
               </select>
             </div>
-            <div class="col-md-4 gas-material-field">
-              <label for="edit_material_id" class="form-label">کاڵا لە کۆگا</label>
-              <select class="form-control" id="edit_material_id" name="material_id">
-                <option value="">-- هەلبژێرە --</option>
-              </select>
-            </div>
-            <div class="col-md-4 gas-material-field">
-              <label for="edit_usage_unit_type" class="form-label">یەکەی بەکارهێنان</label>
-              <select class="form-control" id="edit_usage_unit_type" name="usage_unit_type">
-                <option value="">یەکەی بەکارهێنان هەڵبژێرە</option>
-              </select>
-            </div>
-            <div class="col-md-4 gas-material-field">
-              <label for="edit_material_quantity" class="form-label">بڕی عەدەدی کاڵا</label>
-              <input type="number" step="0.01" class="form-control" id="edit_material_quantity" name="material_quantity" placeholder="0">
-            </div>
-            <div class="col-md-4 gas-material-field">
-              <label for="edit_material_purchase_price_iqd" class="form-label">نرخی کڕینی کاڵا بە دینار</label>
-              <input type="number" step="0.01" class="form-control" id="edit_material_purchase_price_iqd" name="material_purchase_price_iqd" placeholder="0">
-            </div>
-            <div class="col-md-4 gas-material-field">
-              <label for="edit_material_purchase_price_usd" class="form-label">نرخی کڕینی کاڵا بە دۆلار</label>
-              <input type="number" step="0.01" class="form-control" id="edit_material_purchase_price_usd" name="material_purchase_price_usd" placeholder="0">
-            </div>
-            <div class="col-md-4 gas-material-field">
-              <label for="edit_material_total_cost" class="form-label">کۆی نرخی کاڵای بەکارهاتوو</label>
-              <input type="number" step="0.01" class="form-control" id="edit_material_total_cost" name="material_total_cost" placeholder="0" readonly>
-            </div>
+
           </div>
           <div class="mb-3 row">
             <div class="col-md-4 gas-material-field">

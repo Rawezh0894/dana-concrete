@@ -1,15 +1,5 @@
 async function editExpense(id, data) {
-    // Check if there's an error message indicating insufficient material
-    const errorMessage = document.querySelector('.material-availability-message.text-danger');
-    if (errorMessage) {
-        Swal.fire({
-            icon: 'error',
-            title: 'هەڵە',
-            text: 'ناتوانرێت خەرجی نوێ بکرێتەوە - بڕی پێویست لە کۆگا نەماوە',
-            confirmButtonText: 'باشە'
-        });
-        return;
-    }
+
 
     const formData = new FormData();
     for (const key in data) {
@@ -23,26 +13,7 @@ async function editExpense(id, data) {
     if (document.getElementById('edit_expense_type')) {
         formData.append('expense_type', document.getElementById('edit_expense_type').value);
     }
-    if (document.getElementById('edit_material_id')) {
-        formData.append('material_id', document.getElementById('edit_material_id').value);
-    }
-    if (document.getElementById('edit_material_quantity')) {
-        formData.append('material_quantity', document.getElementById('edit_material_quantity').value);
-    }
-    if (document.getElementById('edit_usage_unit_type')) {
-        const usageUnitType = document.getElementById('edit_usage_unit_type').value;
-        // Always append usage_unit_type - empty string will be converted to null on server
-        formData.append('usage_unit_type', usageUnitType || '');
-    }
-    if (document.getElementById('edit_material_purchase_price_iqd')) {
-        formData.append('material_purchase_price_iqd', document.getElementById('edit_material_purchase_price_iqd').value);
-    }
-    if (document.getElementById('edit_material_purchase_price_usd')) {
-        formData.append('material_purchase_price_usd', document.getElementById('edit_material_purchase_price_usd').value);
-    }
-    if (document.getElementById('edit_material_total_cost')) {
-        formData.append('material_total_cost', document.getElementById('edit_material_total_cost').value);
-    }
+
     if (document.getElementById('edit_gas_purchase_price_input')) {
         formData.append('gas_purchase_price_input', document.getElementById('edit_gas_purchase_price_input').value);
     }
