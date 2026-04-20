@@ -289,11 +289,6 @@ if (!isset($_SESSION['user_id'])) {
                     <i class="fas fa-shuttle-van"></i> دەرکردن بۆ سەیارە
                 </button>
             </li>
-            <li class="nav-item">
-                <button class="nav-link" id="adjust-tab" data-bs-toggle="pill" data-bs-target="#adjust-panel">
-                    <i class="fas fa-adjust"></i> ڕێکخستنی بڕ (Initial Stock)
-                </button>
-            </li>
         </ul>
 
         <div class="tab-content" id="inventoryTabsContent">
@@ -489,48 +484,8 @@ if (!isset($_SESSION['user_id'])) {
                     </div>
                 </div>
             </div>
-
-            <!-- Stock Adjustment Panel -->
-            <div class="tab-pane fade" id="adjust-panel">
-                <div class="inventory-card">
-                    <div class="card-header">
-                        <span><i class="fas fa-tools me-2 text-warning"></i>ڕێکخستنی بڕی کاڵا یان داخڵکردنی سەرەتایی</span>
-                    </div>
-                    <div class="card-body p-4">
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle me-2"></i> لێرە دەتوانیت بڕی کاڵاکان ڕاستەوخۆ دەستکاری بکەیت، بۆ نموونە بۆ یەکەمجار کە کاڵا داخڵ دەکەیت (Opening Stock).
-                        </div>
-                        <form id="adjustmentForm">
-                            <div class="row g-4">
-                                <div class="col-md-4">
-                                    <label class="form-label fw-600">کاڵا</label>
-                                    <select name="item_id" id="adjust_item_id" class="form-select select2" required></select>
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label fw-600">بڕی نوێ</label>
-                                    <input type="number" step="0.01" name="new_qty" class="form-control" required placeholder="0.00">
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label fw-600">یەکە</label>
-                                    <select name="unit_used" id="adjust_unit_used" class="form-select" required>
-                                        <option value="">--</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label fw-600">تێکڕای نرخ (USD)</label>
-                                    <input type="number" step="0.0001" name="avg_cost_usd" class="form-control" placeholder="0.000">
-                                    <small class="text-muted">ئارەزوومەندانە</small>
-                                </div>
-                                <div class="col-md-2 d-flex align-items-end">
-                                    <button type="submit" class="btn btn-premium btn-primary-premium w-100">
-                                        <i class="fas fa-check"></i> نوێکردنەوە
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
+        </div>
+    </div>
         </div>
     </div>
 
@@ -839,26 +794,12 @@ if (!isset($_SESSION['user_id'])) {
             $('#vehicleFilter').append(html);
         }
 
-        // Handle item selection in adjustment to show correct units
-        $('#adjust_item_id').on('change', function() {
-            const selected = $(this).find(':selected');
-            const unit = selected.data('unit');
-            const sunit = selected.data('sunit');
-            
-            let unitHtml = `<option value="${unit}">${unit} (بچووک)</option>`;
-            if (sunit) {
-                unitHtml += `<option value="${sunit}">${sunit} (گەورە)</option>`;
-            }
-            $('#adjust_unit_used').html(unitHtml);
-        });
-
         function updateItemDropdowns() {
             let html = '<option value="">-- هەڵبژێرە --</option>';
             itemsGlobal.forEach(item => {
                 html += `<option value="${item.id}" data-unit="${item.unit}" data-sunit="${item.secondary_unit || ''}" data-factor="${item.conversion_factor}">${item.name}</option>`;
             });
             $('#issue_item_id').html(html);
-            $('#adjust_item_id').html(html);
             $('.p-item-select').each(function() {
                 const currentVal = $(this).val();
                 $(this).html(html).val(currentVal);
@@ -992,22 +933,6 @@ if (!isset($_SESSION['user_id'])) {
                 this.reset();
                 loadStock();
                 loadIssuances();
-            } else {
-                Swal.fire('هەڵە', data.msg, 'error');
-            }
-        });
-
-        $('#adjustmentForm').submit(async function(e) {
-            e.preventDefault();
-            const res = await fetch('../process/inventory/adjust_stock.php', {
-                method: 'POST',
-                body: new FormData(this)
-            });
-            const data = await res.json();
-            if (data.success) {
-                Swal.fire('سەرکەوتوو', data.msg, 'success');
-                this.reset();
-                loadStock();
             } else {
                 Swal.fire('هەڵە', data.msg, 'error');
             }
