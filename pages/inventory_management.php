@@ -536,6 +536,20 @@ if (!isset($_SESSION['user_id'])) {
                             </div>
                             <small class="text-info"><i class="fas fa-info-circle me-1"></i> بۆ نموونە: ئەگەر یەکەی گەورە بەرمیل بێت و بچووک لیتر، بنووسە ٢٠٠</small>
                         </div>
+
+                        <hr class="my-4 opacity-10">
+                        <h6 class="fw-bold mb-3"><i class="fas fa-warehouse me-1"></i> بڕی سەرەتایی (Opening Stock)</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small text-muted">بڕی موجود (بە یەکەی بچووک)</label>
+                                <input type="number" step="0.01" name="opening_qty" class="form-control" value="0">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-muted">تێکڕای نرخی کڕین (USD)</label>
+                                <input type="number" step="0.01" name="opening_cost" class="form-control" value="0">
+                            </div>
+                        </div>
+                        <small class="text-muted">ئەم بڕە ڕاستەوخۆ دەچێتە ناو کۆگاوە وەک دەسپێکی کار</small>
                     </div>
                     <div class="modal-footer bg-light">
                         <button type="button" class="btn btn-light btn-premium" data-bs-dismiss="modal">پاشگەزبوونەوە</button>
