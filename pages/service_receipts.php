@@ -512,6 +512,7 @@ $pump_drivers = array_filter($employees, function ($emp) {
   <script src="../assets/js/service_receipts/add_service_receipts.js" nonce="<?php echo $csp_nonce; ?>"></script>
   <script src="../assets/js/service_receipts/update_service_receipts.js" nonce="<?php echo $csp_nonce; ?>"></script>
   <script src="../assets/js/service_receipts/delete_service_receipts.js" nonce="<?php echo $csp_nonce; ?>"></script>
+  <script src="../assets/js/service_receipts/print_service_receipts.js" nonce="<?php echo $csp_nonce; ?>"></script>
   
   <script nonce="<?php echo $csp_nonce; ?>">
     // Pass permissions to JavaScript
