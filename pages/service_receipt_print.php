@@ -234,6 +234,10 @@ try {
             .no-print {
                 display: none !important;
             }
+            .receipt-header, .sap-table th, .meta-item {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
         }
         .btn-toolbar {
             max-width: 850px;
@@ -259,7 +263,7 @@ try {
         <div class="receipt-header">
             <div class="company-details">
                 <h1>کارگەی کۆنکرێتی دانا</h1>
-                <p>Dana Concrete Factory - SAP System Integrated</p>
+                <p>بۆ کۆنکرێتی ئامادەکراو</p>
             </div>
             <div class="logo-section">
                 <img src="../assets/images/logo.png" alt="Logo">
@@ -273,10 +277,10 @@ try {
             </div>
             <div class="meta-item">
                 <label>بەروار و کات</label>
-                <span><?= date('Y-m-d H:i', strtotime($receipt['created_at'])) ?></span>
+                <span><?= date('Y-m-d', strtotime($receipt['created_at'])) ?></span>
             </div>
             <div class="meta-item">
-                <label>جۆری پارەدان</label>
+                <label>جۆری مامەڵە</label>
                 <span><?= $receipt['payment_type'] == 'cash' ? 'نەقد (Cash)' : 'قەرز (Credit)' ?></span>
             </div>
         </div>
@@ -290,26 +294,26 @@ try {
                         <span><?= $receipt['customer_name'] ?></span>
                     </div>
                     <div class="info-row">
-                        <strong>شوێن (Location):</strong>
+                        <strong>شوێن:</strong>
                         <span><?= $receipt['location'] ?: '-' ?></span>
                     </div>
                     <div class="info-row">
-                        <strong>وەرگر (Receiver):</strong>
+                        <strong>وەرگر:</strong>
                         <span><?= $receipt['receiver_name'] ?: '-' ?></span>
                     </div>
                 </div>
                 <div class="info-section">
                     <h6>زانیارییەکانی بارکردن</h6>
                     <div class="info-row">
-                        <strong>میکسەر (Mixer):</strong>
+                        <strong>میکسەر:</strong>
                         <span><?= $receipt['mixer_car_name'] ?> - <?= $receipt['mixer_driver_name'] ?></span>
                     </div>
                     <div class="info-row">
-                        <strong>پەمپ (Pump):</strong>
+                        <strong>پەمپ:</strong>
                         <span><?= $receipt['pump_car_name'] ?> - <?= $receipt['pump_driver_name'] ?></span>
                     </div>
                     <div class="info-row">
-                        <strong>بڕی خزمەتگوزاری:</strong>
+                        <strong>بڕی مەتر</strong>
                         <span><?= number_format($receipt['meter_amount'], 2) ?> m³</span>
                     </div>
                 </div>
@@ -318,16 +322,12 @@ try {
             <div class="table-responsive">
                 <table class="sap-table">
                     <thead>
-                        <tr>
-                            <th>وەسف (Description)</th>
-                            <th>بڕ (Qty)</th>
-                            <th>نـرخی یەکە (Unit Price)</th>
-                            <th>کۆی پارە (Total Price)</th>
+                            <th>بڕ</th>
+                            <th>نرخی یەکە</th>
+                            <th>کۆی پارە</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td class="text-end">خزمەتگوزاری ڕشتنی کۆنکرێت (Concrete Service)</td>
                             <td><?= number_format($receipt['meter_amount'], 2) ?> m³</td>
                             <td>$ <?= number_format($receipt['price_per_meter'], 2) ?></td>
                             <td class="fw-bold">$ <?= number_format($receipt['meter_amount'] * $receipt['price_per_meter'], 2) ?></td>
@@ -339,15 +339,15 @@ try {
             <div class="totals-section">
                 <table class="totals-table">
                     <tr>
-                        <td>کۆی گشتی (Subtotal):</td>
+                        <td>کۆی گشتی:</td>
                         <td>$ <?= number_format($receipt['meter_amount'] * $receipt['price_per_meter'], 2) ?></td>
                     </tr>
                     <tr>
-                        <td>دراو (Paid Amount):</td>
+                        <td>دراو:</td>
                         <td>$ <?= number_format($receipt['paid_usd'] + ($receipt['paid_iqd'] / $receipt['exchange_rate']), 2) ?></td>
                     </tr>
                     <tr class="grand-total">
-                        <td>بڕی ماوە (Balance Due):</td>
+                        <td>بڕی ماوە:</td>
                         <td>$ <?= number_format(($receipt['meter_amount'] * $receipt['price_per_meter']) - ($receipt['paid_usd'] + ($receipt['paid_iqd'] / $receipt['exchange_rate'])), 2) ?></td>
                     </tr>
                 </table>
