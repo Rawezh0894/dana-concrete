@@ -181,7 +181,7 @@ $logout_pages = ['logout.php'];
       </ul>
     </li>
     <!-- New Koga (Materials) Dropdown -->
-    <li class="sidebar-group">
+    <!-- <li class="sidebar-group">
       <button class="sidebar-group-toggle d-flex align-items-center w-100" data-bs-toggle="collapse" data-bs-target="#materialsMenu" aria-expanded="false">
         <i class="bi bi-boxes me-2"></i> کۆگا
       </button>
@@ -194,7 +194,7 @@ $logout_pages = ['logout.php'];
           <li><a href="../pages/material_sales.php" class="sidebar-link<?php if($current_page == 'material_sales.php') echo ' active'; ?>"><i class="bi bi-clock-history me-2"></i> مێژووی فرۆشتنی کاڵا</a></li>
         <?php endif; ?>
       </ul>
-    </li>
+    </li> -->
     <!-- System Management Dropdown -->
     <li class="sidebar-group">
       <button class="sidebar-group-toggle d-flex align-items-center w-100" data-bs-toggle="collapse" data-bs-target="#systemMenu" aria-expanded="false">
