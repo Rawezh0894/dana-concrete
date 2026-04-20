@@ -234,7 +234,7 @@ try {
             .no-print {
                 display: none !important;
             }
-            .receipt-header, .sap-table th, .meta-item {
+            .receipt-header, .sap-table th, .meta-item, .notes-section {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
@@ -362,9 +362,9 @@ try {
             </div>
 
             <?php if ($receipt['notes']): ?>
-            <div class="mt-4 p-3 bg-light rounded border">
-                <small class="d-block text-muted mb-1 text-uppercase fw-bold">تێبینییەکان:</small>
-                <div class="small"><?= nl2br(htmlspecialchars($receipt['notes'])) ?></div>
+            <div class="mt-4 notes-section" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px;">
+                <label style="display: block; font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">تێبینییەکان (Notes)</label>
+                <div style="font-size: 0.95rem; color: #1e293b; line-height: 1.5;"><?= nl2br(htmlspecialchars($receipt['notes'])) ?></div>
             </div>
             <?php endif; ?>
         </div>
