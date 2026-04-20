@@ -23,6 +23,32 @@ $iqd_balance = floatval($wallets['IQD'] ?? 0);
 // هێنانی جۆرەکانی مامەڵە (Categories)
 $stmt = $pdo->query("SELECT id, name, type FROM transaction_categories ORDER BY name ASC");
 $categories = $stmt->fetchAll();
+
+// هێنانی کۆی گشتی هاتوو و ڕۆیشتوو (Inflow/Outflow Totals)
+$stmt = $pdo->prepare("
+    SELECT 
+        le.currency_code,
+        SUM(CASE WHEN le.amount > 0 THEN le.amount ELSE 0 END) as total_inflow,
+        SUM(CASE WHEN le.amount < 0 THEN ABS(le.amount) ELSE 0 END) as total_outflow
+    FROM ledger_entries le
+    JOIN transactions t ON le.transaction_id = t.id
+    WHERE t.created_by = ?
+    GROUP BY le.currency_code
+");
+$stmt->execute([$user_id]);
+$totals_raw = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$totals = [
+    'USD' => ['in' => 0, 'out' => 0],
+    'IQD' => ['in' => 0, 'out' => 0]
+];
+
+foreach ($totals_raw as $row) {
+    if (isset($totals[$row['currency_code']])) {
+        $totals[$row['currency_code']]['in'] = floatval($row['total_inflow']);
+        $totals[$row['currency_code']]['out'] = floatval($row['total_outflow']);
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -52,6 +78,47 @@ $categories = $stmt->fetchAll();
         .quick-action { background-color: var(--seafoam-green); color: white; font-weight: bold; border-radius: 8px; padding: 10px 20px; transition: all 0.3s ease; border: none; flex: 1; text-align: center; }
         .quick-action:hover { background-color: var(--kelly-green); color: white; transform: scale(1.05); }
         
+        .stat-card {
+            border-radius: 12px;
+            border: none;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s ease;
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+            z-index: -1;
+        }
+        .stat-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+            opacity: 0.9;
+        }
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0;
+        }
+        .stat-icon {
+            position: absolute;
+            top: 50%;
+            left: 20px;
+            transform: translateY(-50%);
+            font-size: 3rem;
+            opacity: 0.15;
+            pointer-events: none;
+        }
+
         .main-content {
             transition: all 0.3s;
             padding: 20px;
@@ -143,8 +210,48 @@ $categories = $stmt->fetchAll();
             
             <!-- Balance Cards -->
         <div class="row g-3 mb-4">
-            <div class="col-md-6">
-                <div class="card wallet-card bg-success text-white">
+            <!-- USD Summary -->
+            <div class="col-md-3">
+                <div class="card stat-card bg-success text-white h-100">
+                    <div class="card-body">
+                        <div class="stat-label">کۆیی هاتوو (USD)</div>
+                        <div class="stat-value" id="usdInVal">$ <?= number_format($totals['USD']['in'], 2) ?></div>
+                        <i class="fas fa-arrow-down stat-icon"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card bg-danger text-white h-100">
+                    <div class="card-body">
+                        <div class="stat-label">کۆیی ڕۆیشتوو (USD)</div>
+                        <div class="stat-value" id="usdOutVal">$ <?= number_format($totals['USD']['out'], 2) ?></div>
+                        <i class="fas fa-arrow-up stat-icon"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- IQD Summary -->
+            <div class="col-md-3">
+                <div class="card stat-card bg-success text-white h-100">
+                    <div class="card-body">
+                        <div class="stat-label">کۆیی هاتوو (IQD)</div>
+                        <div class="stat-value" id="iqdInVal"><?= number_format($totals['IQD']['in'], 0) ?> <small>د.ع</small></div>
+                        <i class="fas fa-arrow-down stat-icon"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card bg-danger text-white h-100">
+                    <div class="card-body">
+                        <div class="stat-label">کۆیی ڕۆیشتوو (IQD)</div>
+                        <div class="stat-value" id="iqdOutVal"><?= number_format($totals['IQD']['out'], 0) ?> <small>د.ع</small></div>
+                        <i class="fas fa-arrow-up stat-icon"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mt-3">
+                <div class="card wallet-card bg-dark text-white" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;">
                     <div class="card-body">
                         <h5 class="card-title fw-bold">باڵانسی دۆلار (USD)</h5>
                         <div class="d-flex align-items-center justify-content-between mt-3">
@@ -154,8 +261,8 @@ $categories = $stmt->fetchAll();
                     </div>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="card wallet-card bg-primary text-white">
+            <div class="col-md-6 mt-3">
+                <div class="card wallet-card bg-dark text-white" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;">
                     <div class="card-body">
                         <h5 class="card-title fw-bold">باڵانسی دینار (IQD)</h5>
                         <div class="d-flex align-items-center justify-content-between mt-3">
@@ -455,6 +562,15 @@ $categories = $stmt->fetchAll();
                         d.category = $('#filterCategory').val();
                         d.amount = $('#filterAmount').val();
                         d.notes = $('#filterNotes').val();
+                    }
+                },
+                "drawCallback": function(settings) {
+                    let json = settings.json;
+                    if (json && json.totals) {
+                        $('#usdInVal').text('$ ' + (json.totals.usd_in || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                        $('#usdOutVal').text('$ ' + (json.totals.usd_out || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                        $('#iqdInVal').html((json.totals.iqd_in || 0).toLocaleString() + ' <small>د.ع</small>');
+                        $('#iqdOutVal').html((json.totals.iqd_out || 0).toLocaleString() + ' <small>د.ع</small>');
                     }
                 },
                 "columns": [

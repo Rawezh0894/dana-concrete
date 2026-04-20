@@ -157,11 +157,42 @@ foreach ($transactions as $tx) {
     );
 }
 
+// Calculate Filtered Totals
+$totalsQuery = "
+    SELECT 
+        le.currency_code,
+        SUM(CASE WHEN le.amount > 0 THEN le.amount ELSE 0 END) as total_inflow,
+        SUM(CASE WHEN le.amount < 0 THEN ABS(le.amount) ELSE 0 END) as total_outflow
+    FROM ledger_entries le
+    JOIN transactions t ON le.transaction_id = t.id
+    WHERE t.created_by = ? " . $searchQuery . "
+    GROUP BY le.currency_code
+";
+$stmtTotals = $pdo->prepare($totalsQuery);
+$stmtTotals->execute($params);
+$totalsRaw = $stmtTotals->fetchAll(PDO::FETCH_ASSOC);
+
+$filteredTotals = [
+    'usd_in' => 0, 'usd_out' => 0,
+    'iqd_in' => 0, 'iqd_out' => 0
+];
+
+foreach ($totalsRaw as $row) {
+    if ($row['currency_code'] === 'USD') {
+        $filteredTotals['usd_in'] = floatval($row['total_inflow']);
+        $filteredTotals['usd_out'] = floatval($row['total_outflow']);
+    } elseif ($row['currency_code'] === 'IQD') {
+        $filteredTotals['iqd_in'] = floatval($row['total_inflow']);
+        $filteredTotals['iqd_out'] = floatval($row['total_outflow']);
+    }
+}
+
 $response = array(
     "draw" => $draw,
     "recordsTotal" => $totalRecords,
     "recordsFiltered" => $totalRecordwithFilter,
-    "data" => $data
+    "data" => $data,
+    "totals" => $filteredTotals
 );
 
 echo json_encode($response);
