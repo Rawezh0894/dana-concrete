@@ -113,47 +113,54 @@ if (!isset($_SESSION['user_id'])) {
         }
 
         @media print {
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            @page {
+                size: A4;
+                margin: 1.5cm;
+            }
+            html, body {
+                height: auto !important;
+                overflow: visible !important;
+                background: white !important;
+            }
             .sidebar, .navbar, .filter-section, .btn-print, .btn-premium {
                 display: none !important;
+                visibility: hidden !important;
             }
-            .main-content {
-                margin-right: 0 !important;
+            .main-content, .container-custom, .report-card, .card-body {
+                background: white !important;
+                margin: 0 !important;
                 padding: 0 !important;
                 width: 100% !important;
                 display: block !important;
-            }
-            .container-custom {
-                max-width: 100% !important;
-                margin: 0 !important;
-                padding: 0 !important;
-            }
-            .report-card {
                 box-shadow: none !important;
-                border: 1px solid #eee !important;
-                margin-bottom: 1rem !important;
+                border: none !important;
+                visibility: visible !important;
+                float: none !important;
+                position: static !important;
+            }
+            .main-content {
+                margin-right: 0 !important;
             }
             .page-header {
+                display: block !important;
                 background: white !important;
                 color: black !important;
-                padding: 10px 0 !important;
-                margin-bottom: 2rem !important;
-                box-shadow: none !important;
-                border-bottom: 2px solid #333 !important;
-            }
-            .stat-card {
-                border: 1px solid #eee !important;
-                box-shadow: none !important;
+                border-bottom: 2px solid #000 !important;
+                margin-bottom: 20px !important;
             }
             table {
                 width: 100% !important;
                 border: 1px solid #000 !important;
             }
             th, td {
-                padding: 6px !important;
-                font-size: 10px !important;
                 border: 1px solid #ddd !important;
+                padding: 8px !important;
+                color: black !important;
             }
-            body { background: white !important; }
         }
 
         @media (max-width: 991.98px) {
