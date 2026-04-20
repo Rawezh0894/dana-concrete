@@ -114,9 +114,54 @@ if (!isset($_SESSION['user_id'])) {
         }
 
         @media print {
-            body * { visibility: hidden; }
-            #printableArea, #printableArea * { visibility: visible; }
-            #printableArea { position: absolute; left: 0; top: 0; width: 100%; }
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            @page {
+                size: A4;
+                margin: 1.5cm;
+            }
+            html, body {
+                height: auto !important;
+                overflow: visible !important;
+                background: white !important;
+            }
+            .sidebar, .navbar, .filter-section, .btn-print, .btn-premium {
+                display: none !important;
+                visibility: hidden !important;
+            }
+            .main-content, .container-custom, .report-card, .card-body {
+                background: white !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+                display: block !important;
+                box-shadow: none !important;
+                border: none !important;
+                visibility: visible !important;
+                float: none !important;
+                position: static !important;
+            }
+            .main-content {
+                margin-right: 0 !important;
+            }
+            .page-header {
+                display: block !important;
+                background: white !important;
+                color: black !important;
+                border-bottom: 2px solid #000 !important;
+                margin-bottom: 20px !important;
+            }
+            table {
+                width: 100% !important;
+                border: 1px solid #000 !important;
+            }
+            th, td {
+                border: 1px solid #ddd !important;
+                padding: 8px !important;
+                color: black !important;
+            }
         }
 
         @media (max-width: 991.98px) {
@@ -130,106 +175,103 @@ if (!isset($_SESSION['user_id'])) {
 
     <div class="main-content">
         <div class="container-custom">
-            
-            <div id="printableArea">
-                <!-- Header -->
-                <div class="page-header d-flex justify-content-between align-items-center">
-                    <div>
-                        <h2 class="fw-bold mb-1">ڕاپۆرتی بەکارهێنانی سەیارە</h2>
-                        <p class="mb-0 opacity-75">خەرجییە گشتییەکان و پارچە یەدەگەکان بۆ هەر سەیارەیەک</p>
-                    </div>
-                    <button class="btn btn-light btn-premium btn-print d-print-none" onclick="printReport()">
-                        <i class="fas fa-print me-2"></i> پرینتکردنی ڕاپۆرت
-                    </button>
+            <!-- Header -->
+            <div class="page-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="fw-bold mb-1">ڕاپۆرتی بەکارهێنانی سەیارە</h2>
+                    <p class="mb-0 opacity-75">بەدواداچوونی ورد بۆ پارچە یەدەگە بەکارهاتووەکان بەپێی سەیارە</p>
                 </div>
+                <button class="btn btn-light btn-premium btn-print" onclick="window.print()">
+                    <i class="fas fa-print me-2"></i> پرینتکردنی ڕاپۆرت
+                </button>
+            </div>
 
-                <!-- Filters Section (Not printable) -->
-                <div class="report-card p-4 filter-section d-print-none">
-                    <form id="filterForm" class="row g-3">
-                        <div class="col-md-3">
-                            <label class="form-label small fw-bold">سەیارە</label>
-                            <select name="vehicle_id" id="v_select" class="form-select select2">
-                                <option value="">هەموو سەیارەکان</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label small fw-bold">پۆلێن یان جۆر</label>
-                            <select name="category" id="c_select" class="form-select">
-                                <option value="">هەموو پۆلێنەکان</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label small fw-bold">لە بەرواری</label>
-                            <input type="date" name="from_date" class="form-control">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label small fw-bold">بۆ بەرواری</label>
-                            <input type="date" name="to_date" class="form-control">
-                        </div>
-                        <div class="col-12 mt-4 text-end">
-                            <button type="button" class="btn btn-secondary btn-premium me-2" onclick="resetFilters()">
-                                <i class="fas fa-undo"></i> پاککردنەوە
-                            </button>
-                            <button type="submit" class="btn btn-primary btn-premium">
-                                <i class="fas fa-filter"></i> فلتەرکردن
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- Summary Cards -->
-                <div class="row g-4 mb-4">
-                    <div class="col-md-6">
-                        <div class="stat-card d-flex align-items-center justify-content-between border-start border-4 border-primary">
-                            <div>
-                                <p class="text-muted small fw-bold mb-1">کۆی گشتی تێچوو (دۆلار)</p>
-                                <h3 class="fw-bold mb-0 text-primary" id="totalValueUSD">$0.00</h3>
-                            </div>
-                            <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
-                                <i class="fas fa-dollar-sign text-primary fa-lg"></i>
-                            </div>
-                        </div>
+            <!-- Filters Section -->
+            <div class="report-card p-4 filter-section">
+                <form id="filterForm" class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">سەیارە</label>
+                        <select name="vehicle_id" id="v_select" class="form-select select2">
+                            <option value="">هەموو سەیارەکان</option>
+                        </select>
                     </div>
-                    <div class="col-md-6">
-                        <div class="stat-card d-flex align-items-center justify-content-between border-start border-4 border-success">
-                            <div>
-                                <p class="text-muted small fw-bold mb-1">کۆی گشتی تێچوو (دینار)</p>
-                                <h3 class="fw-bold mb-0 text-success" id="totalValueIQD">0 د.ع</h3>
-                            </div>
-                            <div class="bg-success bg-opacity-10 p-3 rounded-circle">
-                                <i class="fas fa-money-bill-wave text-success fa-lg"></i>
-                            </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">پۆلێنی پارچە</label>
+                        <select name="category" id="c_select" class="form-select">
+                            <option value="">هەموو پۆلێنەکان</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">لە بەرواری</label>
+                        <input type="date" name="from_date" class="form-control">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">بۆ بەرواری</label>
+                        <input type="date" name="to_date" class="form-control">
+                    </div>
+                    <div class="col-12 mt-4 text-end">
+                        <button type="button" class="btn btn-secondary btn-premium me-2" onclick="resetFilters()">
+                            <i class="fas fa-undo"></i> پاککردنەوە
+                        </button>
+                        <button type="submit" class="btn btn-primary btn-premium">
+                            <i class="fas fa-filter"></i> فلتەرکردن
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <div class="stat-card d-flex align-items-center justify-content-between border-start border-4 border-primary">
+                        <div>
+                            <p class="text-muted small fw-bold mb-1">کۆی گشتی تێچوو (دۆلار)</p>
+                            <h3 class="fw-bold mb-0 text-primary" id="totalValueUSD">$0.00</h3>
+                        </div>
+                        <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
+                            <i class="fas fa-dollar-sign text-primary fa-lg"></i>
                         </div>
                     </div>
                 </div>
-
-                <!-- Data Table Card -->
-                <div class="report-card">
-                    <div class="card-header d-flex justify-content-between align-items-center d-print-none">
-                        <span><i class="fas fa-table me-2 text-primary"></i>تێچووە تێکەڵەکان</span>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0" id="reportTable">
-                                <thead>
-                                    <tr>
-                                        <th>بەروار</th>
-                                        <th>جۆر</th>
-                                        <th>ناو / مەبەست</th>
-                                        <th>پۆلێن</th>
-                                        <th>سەیارە</th>
-                                        <th>بڕ</th>
-                                        <th class="text-primary">تێچوو (دۆلار)</th>
-                                        <th class="text-success">تێچوو (دینار)</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="reportData">
-                                    <tr>
-                                        <td colspan="8" class="text-center py-5 text-muted">زانیارییەکان باردەکرێن...</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                <div class="col-md-6">
+                    <div class="stat-card d-flex align-items-center justify-content-between border-start border-4 border-success">
+                        <div>
+                            <p class="text-muted small fw-bold mb-1">کۆی گشتی تێچوو (دینار)</p>
+                            <h3 class="fw-bold mb-0 text-success" id="totalValueIQD">0 د.ع</h3>
                         </div>
+                        <div class="bg-success bg-opacity-10 p-3 rounded-circle">
+                            <i class="fas fa-money-bill-wave text-success fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Table Card -->
+            <div class="report-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-table me-2 text-primary"></i>لیستی خەرجییە تێکەڵەکان</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" id="reportTable">
+                            <thead>
+                                <tr>
+                                    <th>بەروار</th>
+                                    <th>جۆری تێچوو</th>
+                                    <th>ناوی پارچە / مەبەست</th>
+                                    <th>پۆلێن / جۆر</th>
+                                    <th>سەیارە</th>
+                                    <th>بڕ</th>
+                                    <th class="text-primary">تێچوو (دۆلار)</th>
+                                    <th class="text-success">تێچوو (دینار)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reportData">
+                                <tr>
+                                    <td colspan="7" class="text-center py-5 text-muted">بۆ بینینی داتاکان، فلتەر بەکاربهێنە یان گەڕان بکە...</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -244,9 +286,9 @@ if (!isset($_SESSION['user_id'])) {
     <script>
         $(document).ready(function() {
             $('.select2').select2({ width: '100%', dir: 'rtl' });
+            loadInitialData();
             loadVehicles();
             loadCategories();
-            loadReport();
 
             $('#filterForm').on('submit', function(e) {
                 e.preventDefault();
@@ -255,47 +297,39 @@ if (!isset($_SESSION['user_id'])) {
         });
 
         async function loadVehicles() {
-            try {
-                const res = await fetch('../process/other_expenses/select_cars.php');
-                const data = await res.json();
-                const cars = data.data || data;
-                let html = '<option value="">هەموو سەیارەکان</option>';
-                cars.forEach(car => {
-                    html += `<option value="${car.id}">${car.name}</option>`;
-                });
-                $('#v_select').html(html).trigger('change');
-            } catch(e) {}
+            const res = await fetch('../process/other_expenses/select_cars.php');
+            const data = await res.json();
+            const cars = data.data || data;
+            let html = '<option value="">هەموو سەیارەکان</option>';
+            cars.forEach(car => {
+                html += `<option value="${car.id}">${car.name}</option>`;
+            });
+            $('#v_select').html(html);
         }
 
         async function loadCategories() {
-            try {
-                const res = await fetch('../process/inventory/get_categories.php');
-                const data = await res.json();
-                if (data.success) {
-                    let html = '<option value="">هەموو پۆلێنەکان</option>';
-                    data.data.forEach(cat => {
-                        html += `<option value="${cat.name_ku}">${cat.name_ku}</option>`;
-                    });
-                    $('#c_select').html(html);
-                }
-            } catch(e) {}
+            const res = await fetch('../process/inventory/get_categories.php');
+            const data = await res.json();
+            if (data.success) {
+                let html = '<option value="">هەموو پۆلێنەکان</option>';
+                data.data.forEach(cat => {
+                    html += `<option value="${cat.name_ku}">${cat.name_ku}</option>`;
+                });
+                $('#c_select').html(html);
+            }
         }
 
         async function loadReport() {
             const formData = new FormData(document.getElementById('filterForm'));
             const params = new URLSearchParams(formData).toString();
             
-            try {
-                const res = await fetch(`../process/inventory/get_usage_report.php?${params}`);
-                const result = await res.json();
-                
-                if (result.success) {
-                    renderTable(result.data);
-                    $('#totalValueUSD').text('$' + Number(result.total_usd).toLocaleString(undefined, {minimumFractionDigits: 2}));
-                    $('#totalValueIQD').text(Number(result.total_iqd).toLocaleString() + ' د.ع');
-                }
-            } catch(e) {
-                $('#reportData').html('<tr><td colspan="8" class="text-center py-4 text-danger">کێشەیەک لە پەیوەندی داتابەیس هەیە</td></tr>');
+            const res = await fetch(`../process/inventory/get_usage_report.php?${params}`);
+            const result = await res.json();
+            
+            if (result.success) {
+                renderTable(result.data);
+                $('#totalValueUSD').text('$' + Number(result.total_usd).toLocaleString(undefined, {minimumFractionDigits: 2}));
+                $('#totalValueIQD').text(Number(result.total_iqd).toLocaleString() + ' د.ع');
             }
         }
 
@@ -306,15 +340,15 @@ if (!isset($_SESSION['user_id'])) {
             } else {
                 data.forEach(row => {
                     const typeBadge = row.type === 'گۆڕینی پارچە' 
-                        ? '<span class="badge bg-primary bg-opacity-10 text-primary">پارچە</span>'
-                        : '<span class="badge bg-warning bg-opacity-10 text-warning">گشتی</span>';
+                        ? '<span class="badge bg-primary bg-opacity-10 text-primary">گۆڕینی پارچە</span>'
+                        : '<span class="badge bg-warning bg-opacity-10 text-warning">خەرجی گشتی</span>';
                         
                     html += `
                         <tr>
                             <td>${row.date}</td>
                             <td>${typeBadge}</td>
                             <td class="fw-bold">${row.name}</td>
-                            <td><span class="badge bg-light text-dark border small">${row.category}</span></td>
+                            <td><span class="badge bg-light text-dark border">${row.category}</span></td>
                             <td>${row.vehicle}</td>
                             <td>${row.qty}</td>
                             <td class="fw-bold text-primary">$${Number(row.cost_usd).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
@@ -329,53 +363,11 @@ if (!isset($_SESSION['user_id'])) {
         function resetFilters() {
             document.getElementById('filterForm').reset();
             $('.select2').val('').trigger('change');
-            loadReport();
+            loadInitialData();
         }
 
-        function printReport() {
-            const printWindow = window.open('', '_blank', 'width=1100,height=900');
-            const content = document.getElementById('printableArea').cloneNode(true);
-            
-            // Remove unprintable elements from clones
-            content.querySelectorAll('.d-print-none, .filter-section').forEach(el => el.remove());
-
-            // Get styles
-            const styles = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
-                .map(s => s.outerHTML)
-                .join('\n');
-
-            printWindow.document.write(`
-                <html lang="ku" dir="rtl">
-                <head>
-                    <title>ڕاپۆرتی بەکارهێنانی سەیارە</title>
-                    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
-                    ${styles}
-                    <style>
-                        body { background: white !important; padding: 40px; font-family: 'Rabar', 'Noto Sans Arabic', sans-serif; appearance: none; -webkit-print-color-adjust: exact; }
-                        .stat-card { border: 1px solid #eee !important; margin-bottom: 20px; box-shadow: none !important; }
-                        table { width: 100% !important; border: 1px solid #eee !important; border-collapse: collapse !important; }
-                        th, td { border: 1px solid #ddd !important; padding: 12px 8px !important; font-size: 11px !important; }
-                        th { background-color: #f8fafc !important; color: #333 !important; }
-                        .page-header { border-bottom: 2px solid #1e293b; color: #1e293b !important; background: none !important; padding: 0 0 10px 0 !important; margin-bottom: 30px !important; }
-                        .page-header h2 { color: #1e293b !important; }
-                        .page-header p { color: #64748b !important; }
-                        .report-card { border: none !important; }
-                    </style>
-                </head>
-                <body>
-                    ${content.innerHTML}
-                    <script>
-                        window.onload = function() {
-                            setTimeout(() => {
-                                window.print();
-                                window.close();
-                            }, 800);
-                        };
-                    <\/script>
-                </body>
-                </html>
-            `);
-            printWindow.document.close();
+        function loadInitialData() {
+            loadReport();
         }
     </script>
 </body>
