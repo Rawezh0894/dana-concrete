@@ -32,7 +32,7 @@ try {
         $params[] = $to_date;
     }
 
-    $sql = "SELECT iss.*, i.name as item_name, i.category, i.unit, c.name as vehicle_name, c.car_number
+    $sql = "SELECT iss.*, i.name as item_name, i.category, i.unit, c.name as vehicle_name
             FROM inv_issuance iss
             JOIN inv_items i ON iss.item_id = i.id
             JOIN cars c ON iss.vehicle_id = c.id

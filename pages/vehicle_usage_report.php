@@ -119,26 +119,39 @@ if (!isset($_SESSION['user_id'])) {
             .main-content {
                 margin-right: 0 !important;
                 padding: 0 !important;
+                width: 100% !important;
+                display: block !important;
+            }
+            .container-custom {
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .report-card {
+                box-shadow: none !important;
+                border: 1px solid #eee !important;
+                margin-bottom: 1rem !important;
             }
             .page-header {
                 background: white !important;
                 color: black !important;
-                padding: 0 !important;
+                padding: 10px 0 !important;
                 margin-bottom: 2rem !important;
                 box-shadow: none !important;
-                border-bottom: 2px solid #000;
+                border-bottom: 2px solid #333 !important;
             }
-            .report-card {
+            .stat-card {
+                border: 1px solid #eee !important;
                 box-shadow: none !important;
-                border: none !important;
             }
             table {
                 width: 100% !important;
-                border-collapse: collapse !important;
+                border: 1px solid #000 !important;
             }
             th, td {
+                padding: 6px !important;
+                font-size: 10px !important;
                 border: 1px solid #ddd !important;
-                padding: 8px !important;
             }
             body { background: white !important; }
         }
@@ -269,7 +282,7 @@ if (!isset($_SESSION['user_id'])) {
             const cars = data.data || data;
             let html = '<option value="">هەموو سەیارەکان</option>';
             cars.forEach(car => {
-                html += `<option value="${car.id}">${car.name} (${car.car_number})</option>`;
+                html += `<option value="${car.id}">${car.name}</option>`;
             });
             $('#v_select').html(html);
         }
@@ -310,7 +323,7 @@ if (!isset($_SESSION['user_id'])) {
                             <td>${row.issued_date}</td>
                             <td class="fw-bold">${row.item_name}</td>
                             <td><span class="badge bg-light text-dark border">${row.category}</span></td>
-                            <td>${row.vehicle_name} <small class="text-muted">(${row.car_number})</small></td>
+                            <td>${row.vehicle_name}</td>
                             <td>${row.qty} ${row.unit}</td>
                             <td>$${Number(row.cost_usd_at_time).toLocaleString()}</td>
                             <td class="fw-bold text-primary">$${Number(row.total_line_cost).toLocaleString()}</td>
