@@ -125,31 +125,34 @@ foreach ($transactions as $tx) {
     elseif(($tx['usd_amount'] ?? 0) > 0 || ($tx['iqd_amount'] ?? 0) > 0) $typeHtml = '<span class="badge bg-success">هاتن 📥</span>';
     else $typeHtml = '<span class="badge bg-danger">دەرچوون 📤</span>';
 
-    // Categories
-    $categoryHtml = '<span class="fw-bold text-primary">' . htmlspecialchars($tx['category_name'] ?? ($is_exchange ? 'ئاڵوگۆڕ' : 'بی جۆر')) . '</span>';
+    // Categories - Using a variety of subtle badge styles based on category ID
+    $category_colors = ['bg-primary-subtle text-primary border-primary-subtle', 'bg-info-subtle text-info border-info-subtle', 'bg-warning-subtle text-warning border-warning-subtle', 'bg-secondary-subtle text-secondary border-secondary-subtle', 'bg-dark-subtle text-dark border-dark-subtle'];
+    $color_class = $category_colors[($tx['category_id'] ?? 0) % count($category_colors)];
+    $categoryHtml = '<span class="badge '.$color_class.' border fw-bold" style="font-size: 0.9rem; padding: 6px 12px; border-radius: 8px;">' . htmlspecialchars($tx['category_name'] ?? ($is_exchange ? 'ئاڵوگۆڕ' : 'بی جۆر')) . '</span>';
     
     // Amounts
     $usd_class = ($tx['usd_amount'] ?? 0) > 0 ? 'text-success' : (($tx['usd_amount'] ?? 0) < 0 ? 'text-danger' : 'text-muted');
-    $usdHtml = '<span dir="ltr" class="fw-bold '.$usd_class.'">' . ($tx['usd_amount'] ? number_format(abs($tx['usd_amount']), 2) . ' $' : '-') . '</span>';
+    $usdHtml = '<div class="text-center w-100"><span dir="ltr" class="fw-bold '.$usd_class.'">' . ($tx['usd_amount'] ? number_format(abs($tx['usd_amount']), 2) . ' $' : '-') . '</span></div>';
     
     $iqd_class = ($tx['iqd_amount'] ?? 0) > 0 ? 'text-success' : (($tx['iqd_amount'] ?? 0) < 0 ? 'text-danger' : 'text-muted');
-    $iqdHtml = '<span dir="ltr" class="fw-bold '.$iqd_class.'">' . ($tx['iqd_amount'] ? number_format(abs($tx['iqd_amount']), 0) . ' IQD' : '-') . '</span>';
+    $iqdHtml = '<div class="text-center w-100"><span dir="ltr" class="fw-bold '.$iqd_class.'">' . ($tx['iqd_amount'] ? number_format(abs($tx['iqd_amount']), 0) . ' IQD' : '-') . '</span></div>';
 
     // Action buttons
     $encodedTx = htmlspecialchars(json_encode($tx), ENT_QUOTES, 'UTF-8');
-    $actionHtml = "";
+    $actionHtml = '<div class="d-flex justify-content-center">';
     if(!$is_exchange) {
         $actionHtml .= '<button class="btn btn-sm btn-outline-info border-0 me-1" onclick="prepareEdit('.$encodedTx.')"><i class="fa fa-edit"></i></button>';
     }
     $actionHtml .= '<button class="btn btn-sm btn-outline-danger border-0" onclick="deleteTransaction('.$tx['id'].')"><i class="fa fa-trash"></i></button>';
+    $actionHtml .= '</div>';
 
     $data[] = array(
-        "created_at" => '<small class="text-muted" style="direction: ltr; display: inline-block;">' . $tx['created_at'] . '</small>',
-        "type" => $typeHtml,
-        "category" => $categoryHtml,
+        "created_at" => '<div class="text-center w-100"><small class="text-muted" style="direction: ltr; display: inline-block;">' . $tx['created_at'] . '</small></div>',
+        "type" => '<div class="text-center w-100">' . $typeHtml . '</div>',
+        "category" => '<div class="text-center w-100">' . $categoryHtml . '</div>',
         "usd" => $usdHtml,
         "iqd" => $iqdHtml,
-        "notes" => '<span class="text-muted small">' . htmlspecialchars($tx['description'] ?? '') . '</span>',
+        "notes" => '<div class="text-start px-2"><span class="text-muted small">' . htmlspecialchars($tx['description'] ?? '') . '</span></div>',
         "action" => $actionHtml
     );
 }

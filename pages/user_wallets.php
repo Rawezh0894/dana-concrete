@@ -80,7 +80,48 @@ $categories = $stmt->fetchAll();
             border: none !important;
         }
         #transactionsTable {
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+        }
+        #transactionsTable thead th {
+            background-color: #f8f9fa;
+            border: none;
+            color: #495057;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+            padding: 15px;
+            text-align: center !important;
+        }
+        #transactionsTable tbody tr {
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        #transactionsTable tbody tr:hover {
+            background-color: #f1f4f9;
+            transform: scale(1.002);
+        }
+        #transactionsTable tbody td {
+            padding: 12px 10px;
+            vertical-align: middle;
+            border: none;
+            text-align: center !important;
+        }
+        #transactionsTable tbody td:first-child {
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+        #transactionsTable tbody td:last-child {
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+        }
+        .badge {
+            font-weight: 500;
+            padding: 0.5em 0.8em;
         }
     </style>
 </head>
@@ -174,17 +215,17 @@ $categories = $stmt->fetchAll();
                 <h5 class="mb-0 fw-bold" style="color: var(--seafoam-green);">دواین چالاکییەکان و مامەڵەکان</h5>
             </div>
             <div class="card-body p-3">
-                <div class="table-responsive">
-                    <table id="transactionsTable" class="table align-middle mb-0 text-center w-100 table-hover">
-                        <thead class="table-light">
+                <div class="table-responsive" style="overflow-x: auto;">
+                    <table id="transactionsTable" class="table align-middle mb-0 text-center w-100 table-hover" style="border-collapse: separate; border-spacing: 0 10px;">
+                        <thead>
                             <tr>
-                                <th>بەروار و کات</th>
-                                <th>جۆر</th>
-                                <th>هۆکار</th>
-                                <th>بڕی USD</th>
-                                <th>بڕی IQD</th>
-                                <th>تێبینی</th>
-                                <th>کردار</th>
+                                <th class="text-center">بەروار و کات</th>
+                                <th class="text-center">جۆر</th>
+                                <th class="text-center">هۆکار</th>
+                                <th class="text-center">بڕی USD</th>
+                                <th class="text-center">بڕی IQD</th>
+                                <th class="text-start">تێبینی</th>
+                                <th class="text-center">کردار</th>
                             </tr>
                         </thead>
                     </table>
@@ -417,13 +458,13 @@ $categories = $stmt->fetchAll();
                     }
                 },
                 "columns": [
-                    { "data": "created_at" },
-                    { "data": "type" },
-                    { "data": "category" },
-                    { "data": "usd" },
-                    { "data": "iqd" },
-                    { "data": "notes" },
-                    { "data": "action", "orderable": false }
+                    { "data": "created_at", "className": "dt-center" },
+                    { "data": "type", "className": "dt-center" },
+                    { "data": "category", "className": "dt-center" },
+                    { "data": "usd", "className": "dt-center" },
+                    { "data": "iqd", "className": "dt-center" },
+                    { "data": "notes", "className": "dt-start" },
+                    { "data": "action", "className": "dt-center", "orderable": false }
                 ],
                 "language": {
                     "sProcessing":   "چاوەڕێ بە...",
@@ -443,6 +484,9 @@ $categories = $stmt->fetchAll();
                 "lengthMenu": [10, 25, 50, 100],
                 "pageLength": 10,
                 "bFilter": false, // custom filter is used
+                "createdRow": function(row, data, dataIndex) {
+                    $(row).addClass('shadow-sm bg-white mb-2');
+                }
             });
 
             // Delay timer for typing to prevent overloaded Ajax requests
