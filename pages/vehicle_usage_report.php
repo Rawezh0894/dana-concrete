@@ -184,7 +184,7 @@ if (!isset($_SESSION['user_id'])) {
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h2 class="fw-bold mb-0">کارگەی کۆنکرێتی دانا</h2>
-                        <h4 class="mb-1">ڕاپۆرتی بەکارهێنانی سەیارە</h4>
+                        <h4 class="mb-1">ڕاپۆرتی خەرجیەکانی سەیارەکان</h4>
                         <p class="mb-0 text-muted small">کاتی چاپکردن: <?= date('Y-m-d H:i') ?></p>
                     </div>
                     <img src="../assets/images/logo.png" height="70" style="filter: grayscale(1);">
@@ -194,7 +194,7 @@ if (!isset($_SESSION['user_id'])) {
             <!-- Header -->
             <div class="page-header d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h2 class="fw-bold mb-1">ڕاپۆرتی بەکارهێنانی سەیارە</h2>
+                    <h2 class="fw-bold mb-1">ڕاپۆرتی خەرجیەکانی سەیارەکان</h2>
                     <p class="mb-0 opacity-75">بەدواداچوونی ورد بۆ پارچە یەدەگە بەکارهاتووەکان بەپێی سەیارە</p>
                 </div>
                 <button class="btn btn-light btn-premium btn-print no-print" onclick="printReport()">
