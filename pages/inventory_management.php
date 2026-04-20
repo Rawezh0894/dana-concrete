@@ -674,6 +674,7 @@ if (!isset($_SESSION['user_id'])) {
                 options += `<option value="${unit.name_ku}">${unit.name_ku}</option>`;
             });
             $('#unitsListData').html(html);
+            $('#item_unit_select').html(options);
             $('#item_secondary_unit_select').html(options);
             $('#item_unit_select').on('change', function() {
                 $('#primaryUnitLabel').text($(this).val());
