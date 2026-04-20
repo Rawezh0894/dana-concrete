@@ -9,9 +9,8 @@ try {
     $from_date = $_GET['from_date'] ?? '';
     $to_date = $_GET['to_date'] ?? '';
 
-    // Fetch a default/current exchange rate for spare parts conversion
-    $ex_stmt = $pdo->query("SELECT rate FROM currency_rates ORDER BY id DESC LIMIT 1");
-    $current_ex_rate = $ex_stmt->fetchColumn() ?: 150000;
+    // Current/Default exchange rate for spare parts conversion
+    $current_ex_rate = 148500; // Updated to a more standard rate, can be adjusted later
 
     $params_iss = [];
     $params_oe = [];
