@@ -13,7 +13,7 @@ if (!isset($_SESSION['user_id'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ڕاپۆرتی بەکارهێنانی سەیارە</title>
+    <title>ڕاپۆرتی خەرجیەکانی سەیارەکان</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="../assets/css/variables.css" rel="stylesheet">
@@ -393,7 +393,7 @@ if (!isset($_SESSION['user_id'])) {
                 <html lang="ku" dir="rtl">
                 <head>
                     <meta charset="UTF-8">
-                    <title>ڕاپۆرتی بەکارهێنانی سەیارە</title>
+                    <title>ڕاپۆرتی خەرجیەکانی سەیارەکان</title>
                     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
                     <style>
                         @font-face {
@@ -473,7 +473,7 @@ if (!isset($_SESSION['user_id'])) {
                     <div class="print-header">
                         <div>
                             <h1 style="margin:0; font-weight:800;">کارگەی کۆنکرێتی دانا</h1>
-                            <h3 style="margin:5px 0; color:#334155;">ڕاپۆرتی بەکارهێنانی سەیارە</h3>
+                            <h3 style="margin:5px 0; color:#334155;">ڕاپۆرتی خەرجیەکانی سەیارەکان</h3>
                             <p style="margin:0; color:#64748b;">ڕێککەوت: ${new Date().toLocaleDateString('ku-IQ')}</p>
                         </div>
                         <img src="../assets/images/logo.png" height="80" style="filter: grayscale(1);">
