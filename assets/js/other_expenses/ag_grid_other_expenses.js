@@ -717,11 +717,6 @@ window.openEditModalById = async function (id) {
 
 
 
-        if (document.getElementById('edit_material_quantity')) document.getElementById('edit_material_quantity').value = row.material_quantity || '';
-        if (document.getElementById('edit_usage_unit_type')) document.getElementById('edit_usage_unit_type').value = row.usage_unit_type || '';
-        if (document.getElementById('edit_material_purchase_price_iqd')) document.getElementById('edit_material_purchase_price_iqd').value = row.material_purchase_price_iqd || '';
-        if (document.getElementById('edit_material_purchase_price_usd')) document.getElementById('edit_material_purchase_price_usd').value = row.material_purchase_price_usd || '';
-        if (document.getElementById('edit_material_total_cost')) document.getElementById('edit_material_total_cost').value = row.material_total_cost || '';
         if (document.getElementById('edit_gas_purchase_price_input')) document.getElementById('edit_gas_purchase_price_input').value = row.gas_purchase_price_input || '';
         if (document.getElementById('edit_gas_total_cost')) document.getElementById('edit_gas_total_cost').value = row.gas_total_cost || '';
 

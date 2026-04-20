@@ -56,7 +56,6 @@ if (addExpenseForm) {
             document.querySelectorAll('.invoice-split-row').forEach(row => {
                 const rowType = row.querySelector('.split-row-type').value;
                 const carId = row.querySelector('.split-car-id')?.value;
-                const materialId = row.querySelector('.split-material-id')?.value;
                 const quantity = row.querySelector('.split-quantity')?.value || 0;
                 const amountIqd = row.querySelector('.split-amount-iqd').value;
                 const amountUsd = row.querySelector('.split-amount-usd').value;
@@ -405,9 +404,6 @@ function addInvoiceSplitRow() {
         if (this.value === 'car') {
             entityContainer.innerHTML = `<label class="form-label small">سەیارە</label><select class="form-control form-control-sm split-car-id select2-dynamic">${carOptionsHtml}</select>`;
             qtyContainer.style.display = 'none';
-        } else {
-            entityContainer.innerHTML = `<label class="form-label small">کاڵا</label><select class="form-control form-control-sm split-material-id select2-dynamic">${materialOptionsHtml}</select>`;
-            qtyContainer.style.display = 'block';
         }
         initSelect2InRow(row);
     });

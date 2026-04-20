@@ -485,18 +485,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Clear gas price messages
             clearGasPriceMessage(formType);
-        } else if (expenseType === 'بەکارهێنانی کاڵای کۆگا') {
-            // Show only material fields for "Warehouse material usage"
-            gasMaterialFields.forEach(field => {
-                const fieldId = field.querySelector('input, select')?.id || '';
-                if (fieldId.includes('material_') || fieldId.includes('usage_unit_type')) {
-                    field.style.display = 'block';
-                    field.classList.add('show');
-                } else {
-                    field.style.display = 'none';
-                    field.classList.remove('show');
-                }
-            });
 
         } else if (expenseType === 'بەکارهێنانی گاز') {
             // Show gas fields for "Gas usage"
@@ -594,12 +582,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-        // Show/hide relevant fields based on expense type
-        const materialFields = document.querySelectorAll(`[id^="${prefix}material_"]`);
-        const gasFields = document.querySelectorAll(`[id^="${prefix}gas_"]`);
-
-
-        } else if (expenseType === 'بەکارهێنانی گاز') {
+        if (expenseType === 'بەکارهێنانی گاز') {
             // Show gas fields, hide material fields
             gasFields.forEach(field => {
                 if (field.parentElement) {

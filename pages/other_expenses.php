@@ -652,17 +652,17 @@ if (!isset($_SESSION['user_id'])) {
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" nonce="<?php echo $csp_nonce; ?>"></script>
 <!-- AG Grid JS -->
 <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/dist/ag-grid-community.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
-<script src="../assets/js/comon/ag_grid_base.js" nonce="<?php echo $csp_nonce; ?>"></script>
-<script src="../assets/js/swalAlert.js" nonce="<?php echo $csp_nonce; ?>"></script>
-<script src="../assets/js/other_expenses/error_logger.js" nonce="<?php echo $csp_nonce; ?>"></script>
-<script src="../assets/js/other_expenses/debug_panel.js" nonce="<?php echo $csp_nonce; ?>"></script>
-<script src="../assets/js/other_expenses/advanced_filters.js" nonce="<?php echo $csp_nonce; ?>"></script>
-<script src="../assets/js/other_expenses/add_expenses.js" nonce="<?php echo $csp_nonce; ?>"></script>
-<script src="../assets/js/other_expenses/ag_grid_other_expenses.js" nonce="<?php echo $csp_nonce; ?>"></script>
-<script src="../assets/js/other_expenses/other_expenses.js" nonce="<?php echo $csp_nonce; ?>"></script>
-<script src="../assets/js/other_expenses/delete_expenses.js" nonce="<?php echo $csp_nonce; ?>"></script>
-<script src="../assets/js/other_expenses/update_expenses.js" nonce="<?php echo $csp_nonce; ?>"></script>
-<script src="../assets/js/comon/select2_script.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/comon/ag_grid_base.js?v=<?= time() ?>" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/swalAlert.js?v=<?= time() ?>" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/other_expenses/error_logger.js?v=<?= time() ?>" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/other_expenses/debug_panel.js?v=<?= time() ?>" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/other_expenses/advanced_filters.js?v=<?= time() ?>" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/other_expenses/add_expenses.js?v=<?= time() ?>" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/other_expenses/ag_grid_other_expenses.js?v=<?= time() ?>" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/other_expenses/other_expenses.js?v=<?= time() ?>" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/other_expenses/delete_expenses.js?v=<?= time() ?>" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/other_expenses/update_expenses.js?v=<?= time() ?>" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/comon/select2_script.js?v=<?= time() ?>" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/other_expenses/export_functions.js?v=<?= time() ?>" nonce="<?php echo $csp_nonce; ?>"></script>
 </body>
 </html>

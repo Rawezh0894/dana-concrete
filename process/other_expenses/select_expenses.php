@@ -86,11 +86,8 @@ try {
     // Calculate summary including car expenses (material and gas usage)
     $summarySql = "SELECT 
         -- Other expenses (non-car expenses)
-        SUM(CASE WHEN (car_id IS NULL OR (expense_type NOT IN ('بەکارهێنانی کاڵای کۆگا', 'بەکارهێنانی گاز'))) AND currency_type = 'دینار' THEN amount_iqd ELSE 0 END) as total_other_expenses_iqd,
-        SUM(CASE WHEN (car_id IS NULL OR (expense_type NOT IN ('بەکارهێنانی کاڵای کۆگا', 'بەکارهێنانی گاز'))) AND currency_type = 'دۆلار' THEN amount_usd ELSE 0 END) as total_other_expenses_usd,
-        -- Car material expenses (has both IQD and USD)
-        SUM(CASE WHEN car_id IS NOT NULL AND expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN material_purchase_price_iqd * material_quantity ELSE 0 END) as total_car_material_cost_iqd,
-        SUM(CASE WHEN car_id IS NOT NULL AND expense_type = 'بەکارهێنانی کاڵای کۆگا' THEN material_purchase_price_usd * material_quantity ELSE 0 END) as total_car_material_cost_usd,
+        SUM(CASE WHEN (car_id IS NULL OR expense_type != 'بەکارهێنانی گاز') AND currency_type = 'دینار' THEN amount_iqd ELSE 0 END) as total_other_expenses_iqd,
+        SUM(CASE WHEN (car_id IS NULL OR expense_type != 'بەکارهێنانی گاز') AND currency_type = 'دۆلار' THEN amount_usd ELSE 0 END) as total_other_expenses_usd,
         -- Car gas expenses (only IQD)
         SUM(CASE WHEN car_id IS NOT NULL AND expense_type = 'بەکارهێنانی گاز' THEN gas_total_cost ELSE 0 END) as total_car_gas_cost
         FROM other_expenses oe";
