@@ -281,7 +281,7 @@ $net_profit_iqd = $total_material_value_iqd - ($total_exp_iqd + $total_commissio
 <div class="print-page">
     <div class="header-section">
         <div class="company-info">
-            <h1>دانە کۆنکریت</h1>
+            <h1>دانا کۆنکرێت</h1>
             <p>بۆ بەرهەمهێنانی کۆنکرێتی ئاماداکراو</p>
             <p>ڕێککەوتی چاپ: <?= date('Y-m-d') ?></p>
         </div>
