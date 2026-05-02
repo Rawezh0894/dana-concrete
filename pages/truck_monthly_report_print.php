@@ -362,7 +362,7 @@ $net_profit_iqd = $total_material_value_iqd - ($total_exp_iqd + $total_commissio
 
     <div class="summary-wrapper">
         <div class="summary-row">
-            <span>کۆی گشتی داهاتی بارهەڵگر بۆ ئەم مانگە:</span>
+            <span>کۆی گشتی نرخی مەوادی هاتوو بۆ ئەم مانگە: </span>
             <span style="font-weight: bold;"><?= number_format($total_material_value_iqd) ?> د.ع</span>
         </div>
         <div class="summary-row">
