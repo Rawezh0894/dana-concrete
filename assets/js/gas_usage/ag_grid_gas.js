@@ -64,7 +64,11 @@ const gridOptions = {
     }
 };
 
+let gasGridApi;
+
 document.addEventListener('DOMContentLoaded', () => {
     const gridDiv = document.querySelector('#gasUsageGrid');
-    new agGrid.Grid(gridDiv, gridOptions);
+    if (gridDiv) {
+        gasGridApi = agGrid.createGrid(gridDiv, gridOptions);
+    }
 });

@@ -17,11 +17,9 @@ if (!hasPermission('view_other_expenses')) {
     <!-- External CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/ag-grid-community/styles/ag-grid.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/ag-grid-community/styles/ag-theme-alpine.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
-    
-    <link href="../assets/css/style.css" rel="stylesheet">
+    <link href="../assets/css/variables.css" rel="stylesheet">
+    <link href="../assets/css/nav.css" rel="stylesheet">
+    <link href="../assets/css/comon/style.css" rel="stylesheet">
     <link href="../assets/css/kurdish-font.css" rel="stylesheet">
     
     <style>
@@ -245,7 +243,8 @@ if (!hasPermission('view_other_expenses')) {
 <!-- External JS -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.noStyle.js"></script>
+<!-- AG Grid JS v31+ -->
+<script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/dist/ag-grid-community.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <!-- Module JS -->

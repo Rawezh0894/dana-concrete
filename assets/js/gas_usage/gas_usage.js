@@ -65,8 +65,8 @@ function loadGasData() {
         data: filters,
         dataType: 'json',
         success: function(response) {
-            if (response.success) {
-                gridOptions.api.setRowData(response.data);
+            if (response.success && gasGridApi) {
+                gasGridApi.setGridOption('rowData', response.data);
                 
                 // Update stats
                 $('#totalGasLiters').text(parseFloat(response.summary.total_liters).toLocaleString());
@@ -78,23 +78,23 @@ function loadGasData() {
 
 function loadCars() {
     $.ajax({
-        url: '../process/other_expenses/get_cars.php',
+        url: '../process/other_expenses/select_cars.php',
         type: 'GET',
         dataType: 'json',
-        success: function(response) {
-            if (response.success) {
-                let options = '<option value="">هەڵبژێرە...</option>';
-                let filterOptions = '<option value="">هەموو سەیارەکان</option>';
-                
-                response.data.forEach(car => {
-                    options += `<option value="${car.id}">${car.name}</option>`;
-                    filterOptions += `<option value="${car.id}">${car.name}</option>`;
-                });
-                
-                $('#modal_car_id').html(options);
-                $('#filterCar').html(filterOptions);
-            }
+    success: function(data) {
+        if (Array.isArray(data)) {
+            let options = '<option value="">هەڵبژێرە...</option>';
+            let filterOptions = '<option value="">هەموو سەیارەکان</option>';
+            
+            data.forEach(car => {
+                options += `<option value="${car.id}">${car.name}</option>`;
+                filterOptions += `<option value="${car.id}">${car.name}</option>`;
+            });
+            
+            $('#modal_car_id').html(options);
+            $('#filterCar').html(filterOptions);
         }
+    }
     });
 }
 
