@@ -274,8 +274,7 @@ if (!isset($_SESSION['user_id'])) {
                             <thead>
                                 <tr>
                                     <th>بەروار</th>
-                                    <th>جۆری تێچوو</th>
-                                    <th>ناوی پارچە / مەبەست</th>
+                                    <th>ناوی پارچە / پۆلێن</th>
                                     <th>سەیارە</th>
                                     <th>بڕ</th>
                                     <th class="text-primary">تێچوو (دۆلار)</th>
@@ -367,7 +366,7 @@ if (!isset($_SESSION['user_id'])) {
                 }
             } catch (error) {
                 console.error('Error loading report:', error);
-                $('#reportData').html('<tr><td colspan="7" class="text-center py-4 text-danger">هەڵەیەک لە بارکردنی داتاکان ڕوویدا</td></tr>');
+                $('#reportData').html('<tr><td colspan="6" class="text-center py-4 text-danger">هەڵەیەک لە بارکردنی داتاکان ڕوویدا</td></tr>');
             }
         }
 
@@ -390,9 +389,6 @@ if (!isset($_SESSION['user_id'])) {
                 },
                 order: [[0, 'desc']], // Default sort by date
                 pageLength: 25,
-                columnDefs: [
-                    { targets: [1], orderable: false } // Type badge not sortable
-                ],
                 dom: '<"d-flex justify-content-between align-items-center mb-3"lf>rtip',
                 drawCallback: function() {
                     $('.dataTables_paginate > .pagination').addClass('pagination-sm');
@@ -403,22 +399,12 @@ if (!isset($_SESSION['user_id'])) {
         function renderTable(data) {
             let html = '';
             if (data.length === 0) {
-                html = '<tr><td colspan="7" class="text-center py-4">هیچ زانیارییەک نەدۆزرایەوە</td></tr>';
+                html = '<tr><td colspan="6" class="text-center py-4">هیچ زانیارییەک نەدۆزرایەوە</td></tr>';
             } else {
                 data.forEach(row => {
-                    let typeBadge = '';
-                    if (row.type === 'کاڵا بەکارهاتن') {
-                        typeBadge = '<span class="badge bg-primary bg-opacity-10 text-primary">کاڵا بەکارهاتن</span>';
-                    } else if (row.category === 'بەکارهێنانی گاز') {
-                        typeBadge = '<span class="badge bg-info bg-opacity-10 text-info">بەکارهێنانی گاز</span>';
-                    } else {
-                        typeBadge = '<span class="badge bg-warning bg-opacity-10 text-warning">خەرجی گشتی</span>';
-                    }
-                        
                     html += `
                         <tr>
                             <td>${row.date}</td>
-                            <td>${typeBadge}</td>
                             <td>
                                 <div class="fw-bold">${row.name}</div>
                                 <div class="text-muted small">${row.category}</div>
@@ -553,7 +539,6 @@ if (!isset($_SESSION['user_id'])) {
                         <thead>
                             <tr>
                                 <th>بەروار</th>
-                                <th>جۆر</th>
                                 <th>ناوی پارچە / پۆلێن</th>
                                 <th>سەیارە</th>
                                 <th>بڕ</th>
@@ -562,10 +547,7 @@ if (!isset($_SESSION['user_id'])) {
                             </tr>
                         </thead>
                         <tbody>
-                            ${$('#reportData').html()
-                                .replace(/<span class="badge[^>]*bg-primary[^>]*">/g, '<span class="badge-type" style="border-color:#2563eb; color:#2563eb;">کاڵا بەکارهاتن</span>')
-                                .replace(/<span class="badge[^>]*bg-info[^>]*">/g, '<span class="badge-type" style="border-color:#0891b2; color:#0891b2;">بەکارهێنانی گاز</span>')
-                                .replace(/<span class="badge[^>]*bg-warning[^>]*">/g, '<span class="badge-type" style="border-color:#d97706; color:#d97706;">خەرجی گشتی</span>')}
+                            ${$('#reportData').html()}
                         </tbody>
                     </table>
 
