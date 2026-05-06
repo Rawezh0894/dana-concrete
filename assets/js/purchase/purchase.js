@@ -102,13 +102,12 @@ function updateAmountsFor(prefix) {
         $('#' + prefix + 'remaining_iqd').prop('readonly', true);
         $('#' + prefix + 'remaining_usd').prop('readonly', false);
 
-        // Round amount_iqd if not focused
+        // Calculate amount_iqd from price and exchange_rate if not focused
         if (!amountIqdFocused) {
-            const currentA = parseFloat($('#' + prefix + 'amount_iqd').val()) || 0;
-            if (currentA > 0) {
-                const flooredA = Math.floor(currentA / 1000) * 1000;
-                $('#' + prefix + 'amount_iqd').val(flooredA.toFixed(0));
-            }
+            const currentPrice = parseFloat($('#' + prefix + 'price').val()) || 0;
+            const calculatedAmountIqd = currentPrice * exchange_rate / 100;
+            const flooredA = Math.floor(calculatedAmountIqd / 1000) * 1000;
+            $('#' + prefix + 'amount_iqd').val(flooredA.toFixed(0));
         }
 
         // Also round paid_iqd if not focused

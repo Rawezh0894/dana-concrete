@@ -401,28 +401,38 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
     
     <!-- Summary Cards -->
     <div class="row mb-4" id="purchaseSummaryCards">
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card text-center shadow  card-gradient-danger card-animate-hover">
+        <div class="col-xl-2 col-lg-3 col-md-6 mb-3">
+            <div class="card text-center shadow card-gradient-success card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-dollar-sign card-icon"></i>
+                    <h6 class="card-title">کۆی نرخ (دۆلار)</h6>
+                    <div class="fs-4 fw-bold" id="total-price-usd">$0</div>
+                    <small class="text-light">کۆی هەموو کڕینەکان</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-lg-3 col-md-6 mb-3">
+            <div class="card text-center shadow card-gradient-primary card-animate-hover">
                 <div class="card-body">
                     <i class="fas fa-money-bill-wave card-icon"></i>
-                    <h6 class="card-title">کۆی قەرزی ئێمە</h6>
-                    <div class="fs-4 fw-bold" id="total-debt">$0</div>
-                    <small class="text-light">کۆی قەرزی کۆمپانیاکان</small>
+                    <h6 class="card-title">کۆی نرخ (دینار)</h6>
+                    <div class="fs-4 fw-bold" id="total-price-iqd">0</div>
+                    <small class="text-light">کۆی هەموو کڕینەکان</small>
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card text-center shadow  card-gradient-info card-animate-hover">
+        <div class="col-xl-2 col-lg-3 col-md-4 mb-3">
+            <div class="card text-center shadow card-gradient-info card-animate-hover">
                 <div class="card-body">
                     <i class="fas fa-building card-icon"></i>
-                    <h6 class="card-title">کۆی ژمارەی کۆمپانیاکان</h6>
+                    <h6 class="card-title">کۆی کۆمپانیاکان</h6>
                     <div class="fs-4 fw-bold" id="total-companies">0</div>
-                    <small class="text-light">ژمارەی هەموو کۆمپانیاکان</small>
+                    <small class="text-light">ژمارەی گشتی</small>
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card text-center shadow  card-gradient-warning card-animate-hover">
+        <div class="col-xl-2 col-lg-3 col-md-4 mb-3">
+            <div class="card text-center shadow card-gradient-warning card-animate-hover">
                 <div class="card-body">
                     <i class="fas fa-hand-holding-usd card-icon"></i>
                     <h6 class="card-title">کۆمپانیاکانی قەرزدار</h6>
@@ -431,8 +441,8 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card text-center shadow card-animate-hover summary-export-card">
+        <div class="col-xl-4 col-lg-12 col-md-4 mb-3">
+            <div class="card text-center shadow card-animate-hover summary-export-card h-100 d-flex align-items-center justify-content-center">
                 <div class="card-body">
                     <i class="fas fa-file-excel card-icon"></i>
                     <h6 class="card-title">ئیکسپۆرتی کورتە</h6>

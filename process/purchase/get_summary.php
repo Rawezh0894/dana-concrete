@@ -35,6 +35,8 @@ try {
     $location_id = $_GET['location_id'] ?? null;
     $driver_id = $_GET['driver_id'] ?? null;
     $material_id = $_GET['material_id'] ?? null;
+    $from_date = $_GET['from'] ?? null;
+    $to_date = $_GET['to'] ?? null;
     
     // Build filter conditions
     $filter_conditions = [];
@@ -45,16 +47,24 @@ try {
         $filter_params[] = $company_id;
     }
     if ($location_id) {
-        $filter_conditions[] = "l.id = ?";
+        $filter_conditions[] = "EXISTS (SELECT 1 FROM locations l WHERE l.id = ? AND l.name = p.location)";
         $filter_params[] = $location_id;
     }
     if ($driver_id) {
-        $filter_conditions[] = "d.id = ?";
+        $filter_conditions[] = "EXISTS (SELECT 1 FROM drivers d WHERE d.id = ? AND d.name = p.driver)";
         $filter_params[] = $driver_id;
     }
     if ($material_id) {
         $filter_conditions[] = "p.material_id = ?";
         $filter_params[] = $material_id;
+    }
+    if ($from_date) {
+        $filter_conditions[] = "p.date >= ?";
+        $filter_params[] = $from_date;
+    }
+    if ($to_date) {
+        $filter_conditions[] = "p.date <= ?";
+        $filter_params[] = $to_date;
     }
     
     $filter_sql = "";
@@ -69,29 +79,32 @@ try {
         $usd_iqd_rate = $api_rate;
     }
     
-    // 1. Total debt (کۆی قەرزی ئێمە) - with filters
+    // 1. Total debt and Total Prices - with filters
     $total_debt_usd = 0;
     $total_debt_iqd = 0;
+    $total_price_usd = 0;
+    $total_price_iqd = 0;
     
-    // Get debt from purchases (remaining amounts) with individual exchange rates and filters
-    $purchase_debt_sql = "
+    // Get debt and prices from purchases
+    $purchase_stats_sql = "
         SELECT 
-            SUM(p.remaining_usd) as usd, 
-            SUM(p.remaining_iqd) as iqd,
-            SUM(p.remaining_iqd / NULLIF(p.exchange_rate / 100, 0)) as iqd_converted
+            SUM(p.remaining_usd) as remaining_usd, 
+            SUM(p.remaining_iqd) as remaining_iqd,
+            SUM(p.remaining_iqd / NULLIF(p.exchange_rate / 100, 0)) as remaining_iqd_converted,
+            SUM(p.price) as total_price_usd,
+            SUM(p.amount_iqd) as total_price_iqd
         FROM purchases p
-        LEFT JOIN company c ON p.company_id = c.id
-        LEFT JOIN locations l ON p.location = l.name
-        LEFT JOIN drivers d ON p.driver = d.name
-        LEFT JOIN materials m ON p.material_id = m.id
         $filter_sql
     ";
     
-    $stmt = $pdo->prepare($purchase_debt_sql);
+    $stmt = $pdo->prepare($purchase_stats_sql);
     $stmt->execute($filter_params);
     $row = $stmt->fetch();
-    $total_debt_usd += floatval($row['usd'] ?? 0);
-    $total_debt_usd += floatval($row['iqd_converted'] ?? 0); // Add converted IQD amount
+    
+    $total_debt_usd += floatval($row['remaining_usd'] ?? 0);
+    $total_debt_usd += floatval($row['remaining_iqd_converted'] ?? 0);
+    $total_price_usd = floatval($row['total_price_usd'] ?? 0);
+    $total_price_iqd = floatval($row['total_price_iqd'] ?? 0);
     
     // Get debt from company opening debts - only if company filter is applied
     if ($company_id) {
@@ -157,6 +170,8 @@ try {
         'success' => true,
         'data' => [
             'total_debt' => round($total_debt_final, 2),
+            'total_price_usd' => round($total_price_usd, 2),
+            'total_price_iqd' => round($total_price_iqd, 0),
             'total_companies' => $total_companies,
             'indebted_companies' => $indebted_companies,
             'usd_iqd_rate' => $usd_iqd_rate
