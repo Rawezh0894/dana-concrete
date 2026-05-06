@@ -19,6 +19,7 @@ if (!isset($_SESSION['user_id'])) {
     <link href="../assets/css/variables.css" rel="stylesheet">
     <link href="../assets/css/nav.css" rel="stylesheet">
     <link href="../assets/css/comon/style.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         @font-face {
@@ -219,11 +220,11 @@ if (!isset($_SESSION['user_id'])) {
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold">لە بەرواری</label>
-                        <input type="date" name="from_date" class="form-control">
+                        <input type="date" name="from_date" class="form-control" value="<?= date('Y-m-01') ?>">
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold">بۆ بەرواری</label>
-                        <input type="date" name="to_date" class="form-control">
+                        <input type="date" name="to_date" class="form-control" value="<?= date('Y-m-d') ?>">
                     </div>
                     <div class="col-12 mt-4 text-end">
                         <button type="button" class="btn btn-secondary btn-premium me-2" onclick="resetFilters()">
@@ -295,10 +296,15 @@ if (!isset($_SESSION['user_id'])) {
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
+        let reportTable = null;
+
         $(document).ready(function() {
             $('.select2').select2({ width: '100%', dir: 'rtl' });
             loadInitialData();
@@ -340,14 +346,58 @@ if (!isset($_SESSION['user_id'])) {
             const formData = new FormData(document.getElementById('filterForm'));
             const params = new URLSearchParams(formData).toString();
             
-            const res = await fetch(`../process/inventory/get_usage_report.php?${params}`);
-            const result = await res.json();
-            
-            if (result.success) {
-                renderTable(result.data);
-                $('#totalValueUSD').text('$' + Number(result.total_usd).toLocaleString(undefined, {minimumFractionDigits: 2}));
-                $('#totalValueIQD').text(Number(result.total_iqd).toLocaleString() + ' د.ع');
+            // Show loading state
+            if (reportTable) {
+                reportTable.destroy();
+                reportTable = null;
             }
+            $('#reportData').html('<tr><td colspan="7" class="text-center py-5"><div class="spinner-border text-primary" role="status"></div><div class="mt-2">تکایە چاوەڕوان بە...</div></td></tr>');
+
+            try {
+                const res = await fetch(`../process/inventory/get_usage_report.php?${params}`);
+                const result = await res.json();
+                
+                if (result.success) {
+                    renderTable(result.data);
+                    $('#totalValueUSD').text('$' + Number(result.total_usd).toLocaleString(undefined, {minimumFractionDigits: 2}));
+                    $('#totalValueIQD').text(Number(result.total_iqd).toLocaleString() + ' د.ع');
+                    
+                    // Initialize DataTable
+                    initializeDataTable();
+                }
+            } catch (error) {
+                console.error('Error loading report:', error);
+                $('#reportData').html('<tr><td colspan="7" class="text-center py-4 text-danger">هەڵەیەک لە بارکردنی داتاکان ڕوویدا</td></tr>');
+            }
+        }
+
+        function initializeDataTable() {
+            reportTable = $('#reportTable').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/ku.json',
+                    // Manual fallbacks if URL fails
+                    search: "گەڕان:",
+                    lengthMenu: "پیشاندان _MENU_ تۆمار",
+                    info: "پیشاندانی _START_ بۆ _END_ لە کۆی _TOTAL_ تۆمار",
+                    infoEmpty: "هیچ تۆمارێک نییە",
+                    infoFiltered: "(فلتەرکراوە لە کۆی _MAX_ تۆمار)",
+                    paginate: {
+                        first: "یەکەم",
+                        previous: "پێشوو",
+                        next: "دواتر",
+                        last: "کۆتایی"
+                    }
+                },
+                order: [[0, 'desc']], // Default sort by date
+                pageLength: 25,
+                columnDefs: [
+                    { targets: [1], orderable: false } // Type badge not sortable
+                ],
+                dom: '<"d-flex justify-content-between align-items-center mb-3"lf>rtip',
+                drawCallback: function() {
+                    $('.dataTables_paginate > .pagination').addClass('pagination-sm');
+                }
+            });
         }
 
         function renderTable(data) {
