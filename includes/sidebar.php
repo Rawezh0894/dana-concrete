@@ -140,7 +140,7 @@ $logout_pages = ['logout.php'];
         <?php endif; ?>
         <?php if (hasPermission('view_other_expenses')): ?>
           <li><a href="../pages/other_expenses.php" class="sidebar-link<?php if($current_page == 'other_expenses.php') echo ' active'; ?>"><i class="bi bi-receipt-cutoff me-2"></i>خەرجی سەیارەکان</a></li>
-          <!-- <li><a href="../pages/cars_expenses.php" class="sidebar-link<?php if($current_page == 'cars_expenses.php') echo ' active'; ?>"><i class="bi bi-truck-front me-2"></i> خەرجی سەیارەکان</a></li> -->
+          <li><a href="../pages/gas_usage.php" class="sidebar-link<?php if($current_page == 'gas_usage.php') echo ' active'; ?>"><i class="bi bi-gas-pump me-2"></i>بەکارهێنانی گاز</a></li>
         <?php endif; ?>
        
         <?php if (hasPermission('view_income_from_cars')): ?>
