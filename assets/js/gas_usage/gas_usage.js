@@ -168,6 +168,7 @@ function loadCars() {
             });
             
             $('#modal_car_id').html(options);
+            $('#edit_car_id').html(options);
             $('#filterCar').html(filterOptions);
         }
     }

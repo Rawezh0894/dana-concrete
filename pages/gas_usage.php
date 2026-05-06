@@ -17,10 +17,10 @@ if (!hasPermission('view_other_expenses')) {
     <!-- External CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="../assets/css/variables.css?v=1.0.3" rel="stylesheet">
-    <link href="../assets/css/nav.css?v=1.0.3" rel="stylesheet">
-    <link href="../assets/css/comon/style.css?v=1.0.3" rel="stylesheet">
-    <link href="../assets/css/kurdish-font.css?v=1.0.3" rel="stylesheet">
+    <link href="../assets/css/variables.css?v=1.0.4" rel="stylesheet">
+    <link href="../assets/css/nav.css?v=1.0.4" rel="stylesheet">
+    <link href="../assets/css/comon/style.css?v=1.0.4" rel="stylesheet">
+    <link href="../assets/css/kurdish-font.css?v=1.0.4" rel="stylesheet">
     
     <style>
         :root {
