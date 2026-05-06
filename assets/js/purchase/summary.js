@@ -101,6 +101,7 @@ function exportPurchaseSummaryToExcel() {
     formData.append('material_id', materialId);
     formData.append('from_date', fromDate);
     formData.append('to_date', toDate);
+    formData.append('export_format', 'csv');
     formData.append('export_type', 'summary');
     
     // Show loading message
@@ -130,7 +131,7 @@ function exportPurchaseSummaryToExcel() {
         const a = document.createElement('a');
         a.style.display = 'none';
         a.href = url;
-        a.download = `کورتەی_کڕینەکان_${new Date().toISOString().split('T')[0]}.xls`;
+        a.download = `کورتەی_کڕینەکان_${new Date().toISOString().split('T')[0]}.csv`;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);

@@ -157,8 +157,8 @@ $(document).ready(function () {
     updateAmountsFor('purchase');
 });
 
-// Excel Export Function
-function exportPurchaseToExcel(format = 'excel') {
+// Excel Export Function (Switched to CSV for better compatibility)
+function exportPurchaseToExcel(format = 'csv') {
     // Get current filter values
     const companyId = $('#filter_company').val() || '';
     const locationId = $('#filter_location').val() || '';
@@ -175,7 +175,7 @@ function exportPurchaseToExcel(format = 'excel') {
     formData.append('material_id', materialId);
     formData.append('from_date', fromDate);
     formData.append('to_date', toDate);
-    formData.append('export_format', format);
+    formData.append('export_format', 'csv');
 
     // Show loading message
     Swal.fire({
@@ -204,8 +204,7 @@ function exportPurchaseToExcel(format = 'excel') {
             const a = document.createElement('a');
             a.style.display = 'none';
             a.href = url;
-            const fileExtension = format === 'csv' ? '.csv' : '.xls';
-            a.download = `کڕینەکان_${new Date().toISOString().split('T')[0]}${fileExtension}`;
+            a.download = `کڕینەکان_${new Date().toISOString().split('T')[0]}.csv`;
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
@@ -230,8 +229,8 @@ function exportPurchaseToExcel(format = 'excel') {
         });
 }
 
-// Monthly Report Export Function
-function exportPurchaseMonthlyReport(format = 'excel') {
+// Monthly Report Export Function (Switched to CSV)
+function exportPurchaseMonthlyReport(format = 'csv') {
     // Get current filter values
     const companyId = $('#filter_company').val() || '';
     const locationId = $('#filter_location').val() || '';
@@ -249,7 +248,7 @@ function exportPurchaseMonthlyReport(format = 'excel') {
     formData.append('from_date', fromDate);
     formData.append('to_date', toDate);
     formData.append('export_type', 'monthly_report');
-    formData.append('export_format', format);
+    formData.append('export_format', 'csv');
 
     // Show loading message
     Swal.fire({
@@ -278,8 +277,7 @@ function exportPurchaseMonthlyReport(format = 'excel') {
             const a = document.createElement('a');
             a.style.display = 'none';
             a.href = url;
-            const fileExtension = format === 'csv' ? '.csv' : '.xls';
-            a.download = `ڕاپۆرتی_مانگانەی_کڕینەکان_و_شۆفێرەکان_${new Date().toISOString().split('T')[0]}${fileExtension}`;
+            a.download = `ڕاپۆرتی_مانگانەی_کڕینەکان_و_شۆفێرەکان_${new Date().toISOString().split('T')[0]}.csv`;
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
@@ -313,7 +311,7 @@ function exportPurchaseMonthlyReportToCSV() {
     exportPurchaseMonthlyReport('csv');
 }
 
-// Summary Export Function
+// Summary Export Function (Switched to CSV)
 function exportPurchaseSummaryToExcel() {
     // Get current filter values
     const companyId = $('#filter_company').val() || '';
@@ -332,7 +330,7 @@ function exportPurchaseSummaryToExcel() {
     formData.append('from_date', fromDate);
     formData.append('to_date', toDate);
     formData.append('export_type', 'summary');
-    formData.append('export_format', 'excel');
+    formData.append('export_format', 'csv');
 
     // Show loading message
     Swal.fire({
@@ -361,7 +359,7 @@ function exportPurchaseSummaryToExcel() {
             const a = document.createElement('a');
             a.style.display = 'none';
             a.href = url;
-            a.download = `کورتەی_کڕینەکان_${new Date().toISOString().split('T')[0]}.xls`;
+            a.download = `کورتەی_کڕینەکان_${new Date().toISOString().split('T')[0]}.csv`;
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
