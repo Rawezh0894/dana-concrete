@@ -325,13 +325,15 @@ if (!isset($_SESSION['user_id'])) {
         async function loadCategories() {
             const res = await fetch('../process/inventory/get_categories.php');
             const data = await res.json();
+            let html = '<option value="">هەموو پۆلێنەکان</option>';
             if (data.success) {
-                let html = '<option value="">هەموو پۆلێنەکان</option>';
                 data.data.forEach(cat => {
                     html += `<option value="${cat.name_ku}">${cat.name_ku}</option>`;
                 });
-                $('#c_select').html(html);
             }
+            // Add Gas Usage manually
+            html += '<option value="بەکارهێنانی گاز">بەکارهێنانی گاز</option>';
+            $('#c_select').html(html);
         }
 
         async function loadReport() {
@@ -351,18 +353,26 @@ if (!isset($_SESSION['user_id'])) {
         function renderTable(data) {
             let html = '';
             if (data.length === 0) {
-                html = '<tr><td colspan="8" class="text-center py-4">هیچ زانیارییەک نەدۆزرایەوە</td></tr>';
+                html = '<tr><td colspan="7" class="text-center py-4">هیچ زانیارییەک نەدۆزرایەوە</td></tr>';
             } else {
                 data.forEach(row => {
-                    const typeBadge = row.type === 'کاڵا بەکارهاتن' 
-                        ? '<span class="badge bg-primary bg-opacity-10 text-primary">کاڵا بەکارهاتن</span>'
-                        : '<span class="badge bg-warning bg-opacity-10 text-warning">خەرجی گشتی</span>';
+                    let typeBadge = '';
+                    if (row.type === 'کاڵا بەکارهاتن') {
+                        typeBadge = '<span class="badge bg-primary bg-opacity-10 text-primary">کاڵا بەکارهاتن</span>';
+                    } else if (row.category === 'بەکارهێنانی گاز') {
+                        typeBadge = '<span class="badge bg-info bg-opacity-10 text-info">بەکارهێنانی گاز</span>';
+                    } else {
+                        typeBadge = '<span class="badge bg-warning bg-opacity-10 text-warning">خەرجی گشتی</span>';
+                    }
                         
                     html += `
                         <tr>
                             <td>${row.date}</td>
                             <td>${typeBadge}</td>
-                            <td class="fw-bold">${row.name}</td>
+                            <td>
+                                <div class="fw-bold">${row.name}</div>
+                                <div class="text-muted small">${row.category}</div>
+                            </td>
                             <td>${row.vehicle}</td>
                             <td>${row.qty}</td>
                             <td class="fw-bold text-primary">$${Number(row.cost_usd).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
@@ -494,7 +504,7 @@ if (!isset($_SESSION['user_id'])) {
                             <tr>
                                 <th>بەروار</th>
                                 <th>جۆر</th>
-                                <th>ناوی پارچە / مەبەست</th>
+                                <th>ناوی پارچە / پۆلێن</th>
                                 <th>سەیارە</th>
                                 <th>بڕ</th>
                                 <th>دۆلار</th>
@@ -502,7 +512,10 @@ if (!isset($_SESSION['user_id'])) {
                             </tr>
                         </thead>
                         <tbody>
-                            ${$('#reportData').html().replace(/<span class="badge[^>]*">/g, '<span class="badge-type">')}
+                            ${$('#reportData').html()
+                                .replace(/<span class="badge[^>]*bg-primary[^>]*">/g, '<span class="badge-type" style="border-color:#2563eb; color:#2563eb;">کاڵا بەکارهاتن</span>')
+                                .replace(/<span class="badge[^>]*bg-info[^>]*">/g, '<span class="badge-type" style="border-color:#0891b2; color:#0891b2;">بەکارهێنانی گاز</span>')
+                                .replace(/<span class="badge[^>]*bg-warning[^>]*">/g, '<span class="badge-type" style="border-color:#d97706; color:#d97706;">خەرجی گشتی</span>')}
                         </tbody>
                     </table>
 
