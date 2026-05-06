@@ -239,7 +239,7 @@ if (!isset($_SESSION['user_id'])) {
 
             <!-- Summary Cards -->
             <div class="row g-4 mb-4">
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="stat-card d-flex align-items-center justify-content-between border-start border-4 border-primary">
                         <div>
                             <p class="text-muted small fw-bold mb-1">کۆی گشتی تێچوو (دۆلار)</p>
@@ -250,7 +250,7 @@ if (!isset($_SESSION['user_id'])) {
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="stat-card d-flex align-items-center justify-content-between border-start border-4 border-success">
                         <div>
                             <p class="text-muted small fw-bold mb-1">کۆی گشتی تێچوو (دینار)</p>
@@ -258,6 +258,17 @@ if (!isset($_SESSION['user_id'])) {
                         </div>
                         <div class="bg-success bg-opacity-10 p-3 rounded-circle">
                             <i class="fas fa-money-bill-wave text-success fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card d-flex align-items-center justify-content-between border-start border-4 border-info">
+                        <div>
+                            <p class="text-muted small fw-bold mb-1">کۆی مەتری بارکراو (م³)</p>
+                            <h3 class="fw-bold mb-0 text-info" id="totalMeters">0 م³</h3>
+                        </div>
+                        <div class="bg-info bg-opacity-10 p-3 rounded-circle">
+                            <i class="fas fa-truck-loading text-info fa-lg"></i>
                         </div>
                     </div>
                 </div>
@@ -360,6 +371,7 @@ if (!isset($_SESSION['user_id'])) {
                     renderTable(result.data);
                     $('#totalValueUSD').text('$' + Number(result.total_usd).toLocaleString(undefined, {minimumFractionDigits: 2}));
                     $('#totalValueIQD').text(Number(result.total_iqd).toLocaleString() + ' د.ع');
+                    $('#totalMeters').text(Number(result.total_meters).toLocaleString() + ' م³');
                     
                     // Initialize DataTable
                     initializeDataTable();
@@ -460,7 +472,7 @@ if (!isset($_SESSION['user_id'])) {
                         }
                         .summary-grid {
                             display: grid;
-                            grid-template-columns: 1fr 1fr;
+                            grid-template-columns: 1fr 1fr 1fr;
                             gap: 1.5rem;
                             margin-bottom: 2rem;
                         }
@@ -531,6 +543,10 @@ if (!isset($_SESSION['user_id'])) {
                         <div class="summary-box">
                             <div class="summary-label">کۆی گشتی تێچوو (دینار)</div>
                             <div class="summary-value" style="color: #059669;">${$('#totalValueIQD').text()}</div>
+                        </div>
+                        <div class="summary-box">
+                            <div class="summary-label">کۆی مەتری بارکراو</div>
+                            <div class="summary-value" style="color: #0891b2;">${$('#totalMeters').text()}</div>
                         </div>
                     </div>
 

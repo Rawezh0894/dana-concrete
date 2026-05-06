@@ -70,6 +70,28 @@ try {
     $stmt_oe->execute($params_oe);
     $other_expenses = $stmt_oe->fetchAll(PDO::FETCH_ASSOC);
 
+    // Query 3: Total Loaded Meters (from concrete_receipts)
+    $params_meters = [];
+    $where_meters = ["1=1"];
+    if (!empty($vehicle_id)) {
+        $where_meters[] = "(cr.mixer_car_id = ? OR cr.pump_car_id = ?)";
+        $params_meters[] = $vehicle_id;
+        $params_meters[] = $vehicle_id;
+    }
+    if (!empty($from_date)) {
+        $where_meters[] = "DATE(cr.created_at) >= ?";
+        $params_meters[] = $from_date;
+    }
+    if (!empty($to_date)) {
+        $where_meters[] = "DATE(cr.created_at) <= ?";
+        $params_meters[] = $to_date;
+    }
+
+    $meters_sql = "SELECT SUM(cr.meter_amount) as total_meters FROM concrete_receipts cr WHERE " . implode(" AND ", $where_meters);
+    $stmt_meters = $pdo->prepare($meters_sql);
+    $stmt_meters->execute($params_meters);
+    $total_meters = floatval($stmt_meters->fetch(PDO::FETCH_ASSOC)['total_meters'] ?? 0);
+
     $combined_data = [];
     $total_pure_usd = 0;
     $total_pure_iqd = 0;
@@ -139,7 +161,8 @@ try {
         'success' => true,
         'data' => $combined_data,
         'total_usd' => $total_pure_usd,
-        'total_iqd' => $total_pure_iqd
+        'total_iqd' => $total_pure_iqd,
+        'total_meters' => $total_meters
     ]);
 
 } catch (Exception $e) {
