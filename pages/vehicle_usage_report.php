@@ -294,7 +294,8 @@ if (!isset($_SESSION['user_id'])) {
                             </thead>
                             <tbody id="reportData">
                                 <tr>
-                                    <td colspan="6" class="text-center py-5 text-muted">بۆ بینینی داتاکان، فلتەر بەکاربهێنە یان گەڕان بکە...</td>
+                                    <td class="text-center py-5 text-muted">بۆ بینینی داتاکان، فلتەر بەکاربهێنە یان گەڕان بکە...</td>
+                                    <td></td><td></td><td></td><td></td><td></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -361,7 +362,7 @@ if (!isset($_SESSION['user_id'])) {
                 reportTable.destroy();
                 reportTable = null;
             }
-            $('#reportData').html('<tr><td colspan="6" class="text-center py-5"><div class="spinner-border text-primary" role="status"></div><div class="mt-2">تکایە چاوەڕوان بە...</div></td></tr>');
+            $('#reportData').html('<tr><td class="text-center py-5"><div class="spinner-border text-primary" role="status"></div><div class="mt-2">تکایە چاوەڕوان بە...</div></td><td></td><td></td><td></td><td></td><td></td></tr>');
 
             try {
                 const res = await fetch(`../process/inventory/get_usage_report.php?${params}`);
@@ -378,7 +379,7 @@ if (!isset($_SESSION['user_id'])) {
                 }
             } catch (error) {
                 console.error('Error loading report:', error);
-                $('#reportData').html('<tr><td colspan="6" class="text-center py-4 text-danger">هەڵەیەک لە بارکردنی داتاکان ڕوویدا</td></tr>');
+                $('#reportData').html('<tr><td class="text-center py-4 text-danger">هەڵەیەک لە بارکردنی داتاکان ڕوویدا</td><td></td><td></td><td></td><td></td><td></td></tr>');
             }
         }
 
@@ -411,7 +412,7 @@ if (!isset($_SESSION['user_id'])) {
         function renderTable(data) {
             let html = '';
             if (data.length === 0) {
-                html = '<tr><td colspan="6" class="text-center py-4">هیچ زانیارییەک نەدۆزرایەوە</td></tr>';
+                html = '<tr><td class="text-center py-4">هیچ زانیارییەک نەدۆزرایەوە</td><td></td><td></td><td></td><td></td><td></td></tr>';
             } else {
                 data.forEach(row => {
                     html += `
