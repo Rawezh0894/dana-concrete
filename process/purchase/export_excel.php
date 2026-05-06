@@ -1,10 +1,16 @@
 <?php
+ob_start();
 session_start();
 require_once '../../config/db_conected.php';
 require_once '../../config/permissions.php';
 
 if (!isset($_SESSION['user_id'])) {
-    redirectToLogin();
+    if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'msg' => 'Unauthorized']);
+    } else {
+        header("Location: ../../login.php");
+    }
     exit;
 }
 
@@ -118,77 +124,86 @@ try {
     $stmt->execute($params);
     $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
+    // Clear any previous output (warnings, notices, etc)
+    if (ob_get_length()) ob_clean();
+    
     // Set headers based on export format
     if ($export_format === 'csv') {
         header('Content-Type: text/csv; charset=utf-8');
-        header('Content-Transfer-Encoding: binary');
     } else {
-        header('Content-Type: application/vnd.ms-excel; charset=utf-8');
-        header('Content-Transfer-Encoding: binary');
+        header('Content-Type: application/vnd.ms-excel');
     }
+    header('Content-Transfer-Encoding: binary');
+    header('Cache-Control: must-revalidate');
+    header('Pragma: public');
     
     if ($export_type === 'summary') {
         // Export summary data
+        $filename = 'کورتەی_کڕینەکان_' . date('Y-m-d');
         if ($export_format === 'csv') {
-            header('Content-Disposition: attachment; filename*=UTF-8\'\'کورتەی_کڕینەکان_' . date('Y-m-d') . '.csv');
+            header('Content-Disposition: attachment; filename*=UTF-8\'\'' . $filename . '.csv');
         } else {
-            header('Content-Disposition: attachment; filename*=UTF-8\'\'کورتەی_کڕینەکان_' . date('Y-m-d') . '.xls');
+            header('Content-Disposition: attachment; filename*=UTF-8\'\'' . $filename . '.xls');
         }
         
         // Get summary data
         $summary_sql = "SELECT 
+            COUNT(p.id) as total_invoices,
             COUNT(DISTINCT p.company_id) as total_companies,
-            SUM(CASE WHEN p.payment_type = 'قەرز' THEN p.remaining_usd ELSE 0 END) as total_debt,
-            COUNT(DISTINCT CASE WHEN p.payment_type = 'قەرز' AND p.remaining_usd > 0 THEN p.company_id END) as indebted_companies
+            SUM(CASE WHEN p.type = 'دۆلار' THEN p.price ELSE 0 END) as total_price_usd,
+            SUM(CASE WHEN p.type = 'دینار' THEN p.amount_iqd ELSE 0 END) as total_price_iqd,
+            SUM(p.remaining_usd) as remaining_usd,
+            SUM(p.remaining_iqd) as remaining_iqd,
+            SUM(p.remaining_iqd / NULLIF(p.exchange_rate / 100, 0)) as remaining_iqd_converted
         FROM purchases p
-        LEFT JOIN company c ON p.company_id = c.id
         LEFT JOIN locations l ON p.location = l.name
         LEFT JOIN drivers d ON p.driver = d.name
-        LEFT JOIN materials m ON p.material_id = m.id
-        LEFT JOIN bins_silos b ON p.bin_id = b.id
         $where_sql";
         
         $summary_stmt = $pdo->prepare($summary_sql);
         $summary_stmt->execute($params);
         $summary_data = $summary_stmt->fetch(PDO::FETCH_ASSOC);
         
+        // Calculate total debt (opening debts + purchase debts)
+        $total_debt_usd = floatval($summary_data['remaining_usd'] ?? 0) + floatval($summary_data['remaining_iqd_converted'] ?? 0);
+        
+        // Get opening debts for company count etc
+        if ($company_id) {
+            $stmt = $pdo->prepare("SELECT SUM(opening_debt_usd) as usd, SUM(opening_debt_iqd) as iqd FROM company WHERE id = ?");
+            $stmt->execute([$company_id]);
+            $comp_row = $stmt->fetch();
+            $total_debt_usd += floatval($comp_row['usd'] ?? 0);
+            // (Note: simple conversion for export)
+        } else {
+            $stmt = $pdo->query("SELECT SUM(opening_debt_usd) as usd, SUM(opening_debt_iqd) as iqd FROM company");
+            $comp_row = $stmt->fetch();
+            $total_debt_usd += floatval($comp_row['usd'] ?? 0);
+        }
+
         if ($export_format === 'csv') {
             // CSV export for summary
             echo "\xEF\xBB\xBF"; // UTF-8 BOM
             echo "کورتەی کڕینەکان\n";
             echo "بەروار," . date('Y-m-d') . "\n";
-            echo "کۆی قەرزی ئێمە," . number_format($summary_data['total_debt'] ?? 0, 2) . "\n";
-            echo "کۆی ژمارەی کۆمپانیاکان," . number_format($summary_data['total_companies'] ?? 0, 0) . "\n";
-            echo "کۆمپانیاکانی قەرزدار," . number_format($summary_data['indebted_companies'] ?? 0, 0) . "\n";
+            echo "کۆی نرخ (دۆلار)," . number_format($summary_data['total_price_usd'] ?? 0, 2) . "\n";
+            echo "کۆی نرخ (دینار)," . number_format($summary_data['total_price_iqd'] ?? 0, 0) . "\n";
+            echo "کۆی وەسڵەکان," . ($summary_data['total_invoices'] ?? 0) . "\n";
+            echo "کۆی ژمارەی کۆمپانیاکان," . ($summary_data['total_companies'] ?? 0) . "\n";
+            echo "کۆی قەرزی ئێمە (دۆلار - خەمڵێنراو)," . number_format($total_debt_usd, 2) . "\n";
         } else {
             // Start Excel content for summary with UTF-8 BOM
             echo "\xEF\xBB\xBF"; // UTF-8 BOM
-        echo '<!DOCTYPE html>';
-        echo '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
-        echo '<head>';
-        echo '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">';
-        echo '<meta charset="UTF-8">';
-        echo '<style>';
-        echo 'table { border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; }';
-        echo 'th, td { border: 1px solid #000; padding: 8px; text-align: center; }';
-        echo 'th { background-color: #4CAF50; color: white; font-weight: bold; }';
-        echo '.number { text-align: right; }';
-        echo '</style>';
-        echo '</head>';
-        echo '<body>';
-        
-        echo '<table border="1">';
-        
-        // Summary header
-        echo '<tr><th colspan="2" style="background-color: #2196F3; color: white; font-size: 16px;">کورتەی کڕینەکان</th></tr>';
-        echo '<tr><th>بەروار</th><th>' . date('Y-m-d') . '</th></tr>';
-        echo '<tr><th>کۆی قەرزی ئێمە</th><td class="number">' . number_format($summary_data['total_debt'] ?? 0, 2) . '</td></tr>';
-        echo '<tr><th>کۆی ژمارەی کۆمپانیاکان</th><td class="number">' . number_format($summary_data['total_companies'] ?? 0, 0) . '</td></tr>';
-        echo '<tr><th>کۆمپانیاکانی قەرزدار</th><td class="number">' . number_format($summary_data['indebted_companies'] ?? 0, 0) . '</td></tr>';
-        
-        echo '</table>';
-        echo '</body>';
-        echo '</html>';
+            echo '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
+            echo '<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body>';
+            echo '<table border="1">';
+            echo '<tr><th colspan="2" style="background-color: #2196F3; color: white; font-size: 16px;">کورتەی کڕینەکان</th></tr>';
+            echo '<tr><td>بەروار</td><td>' . date('Y-m-d') . '</td></tr>';
+            echo '<tr><td>کۆی نرخ (دۆلار)</td><td>' . number_format($summary_data['total_price_usd'] ?? 0, 2) . '</td></tr>';
+            echo '<tr><td>کۆی نرخ (دینار)</td><td>' . number_format($summary_data['total_price_iqd'] ?? 0, 0) . '</td></tr>';
+            echo '<tr><td>کۆی وەسڵەکان</td><td>' . ($summary_data['total_invoices'] ?? 0) . '</td></tr>';
+            echo '<tr><td>کۆی ژمارەی کۆمپانیاکان</td><td>' . ($summary_data['total_companies'] ?? 0) . '</td></tr>';
+            echo '<tr><td>کۆی قەرزی ئێمە (دۆلار)</td><td>' . number_format($total_debt_usd, 2) . '</td></tr>';
+            echo '</table></body></html>';
         }
         
     } elseif ($export_type === 'monthly_report') {
