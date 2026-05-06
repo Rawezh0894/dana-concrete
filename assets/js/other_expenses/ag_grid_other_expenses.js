@@ -511,20 +511,11 @@ function updateSummaryCards(expenses) {
             return num ? `${formatNumber(num)} د.ع` : '0 د.ع';
         }
 
-        if (document.getElementById('totalOtherExpenses')) {
-            document.getElementById('totalOtherExpenses').innerHTML = `${formatUSD(totalOtherExpensesUSDConverted)}`;
-        }
-        if (document.getElementById('totalCarExpenses')) {
-            document.getElementById('totalCarExpenses').innerHTML = `${formatUSD(totalAllExpensesUSD)}`;
-        }
         if (document.getElementById('totalExpensesIQD')) {
             document.getElementById('totalExpensesIQD').innerHTML = `${formatIQD(totalExpensesIQD)}`;
         }
         if (document.getElementById('totalExpensesUSD')) {
             document.getElementById('totalExpensesUSD').innerHTML = `${formatUSD(totalExpensesUSD)}`;
-        }
-        if (document.getElementById('usdExchangeRate')) {
-            document.getElementById('usdExchangeRate').innerHTML = `${formatNumber(usdRate)} د.ع`;
         }
     } catch (error) {
         console.error('Error updating summary cards:', error);

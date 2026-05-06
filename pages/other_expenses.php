@@ -232,33 +232,9 @@ if (!isset($_SESSION['user_id'])) {
         </div>
       </div>
     </div>
-      <!-- First row: 4 main expense cards -->
-      <div class="row w-100 mt-3 g-3">
 
-
-        <div class="col-md-3">
-          <div class="card gradient-card teal-gradient">
-            <div class="card-body">
-              <h6 class="card-title">خەرجی تر</h6>
-              <div id="totalOtherExpenses" class="card-value">$0</div>
-              <small>خەرجی تر (نەک سەیارە)</small>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-3">
-          <div class="card gradient-card purple-gradient">
-            <div class="card-body">
-              <h6 class="card-title">کۆی گشتی</h6>
-              <div id="totalCarExpenses" class="card-value">$0</div>
-              <small>گاز + خەرجی تر</small>
-            </div>
-          </div>
-        </div>
-      </div>
       
-      <!-- Second row: IQD and USD totals -->
-      <div class="row w-100 mt-2 g-3">
-        <div class="col-md-6">
+      <!-- Second row: IQD and USD totals -->        <div class="col-md-6">
           <div class="card gradient-card blue-gradient">
             <div class="card-body">
               <h6 class="card-title">کۆی گشتی خەرجییەکان بە دینار</h6>
@@ -278,32 +254,7 @@ if (!isset($_SESSION['user_id'])) {
         </div>
       </div>
       
-      <!-- Third row: Export and USD exchange rate -->
-      <div class="row w-100 mt-2 g-3">
-        <div class="col-md-6">
-          <div class="card gradient-card summary-export-card">
-            <div class="card-body">
-              <i class="fas fa-file-excel card-icon"></i>
-              <h6 class="card-title">ئیکسپۆرتی کورتە</h6>
-              <button class="btn btn-sm btn-light mt-2" onclick="exportOtherExpensesSummaryToExcel()" title="ئیکسپۆرتی کورتەی خەرجی تر بۆ Excel">
-                <i class="fas fa-download me-1"></i>داگرتن
-              </button>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="card gradient-card red-gradient">
-            <div class="card-body">
-              <h6 class="card-title">نرخی دۆلار</h6>
-              <div id="usdExchangeRate" class="card-value">0 د.ع</div>
-              <small>نرخی 100 دۆلار بە دینار</small>
-              <button class="btn btn-sm btn-outline-light mt-2" id="refreshUsdRate" title="نوێکردنەوەی نرخی دۆلار">
-                <i class="fas fa-sync-alt"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+
     </div>
     <div class="table-responsive">
         <div id="otherExpensesGrid" class="ag-grid-container ag-theme-alpine"></div>

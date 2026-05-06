@@ -1,113 +1,4 @@
-// Function to fetch and update USD exchange rate display
-async function updateUsdRateDisplay() {
-    const usdRateElement = document.getElementById('usdExchangeRate');
-    const refreshBtn = document.getElementById('refreshUsdRate');
-    const refreshIcon = refreshBtn ? refreshBtn.querySelector('i') : null;
 
-    // Show loading state
-    if (usdRateElement) {
-        usdRateElement.textContent = 'جێبەجێکردن...';
-    }
-    if (refreshBtn && refreshIcon) {
-        refreshIcon.classList.add('fa-spin');
-        refreshBtn.disabled = true;
-    }
-
-    try {
-        const response = await fetch('../process/other_expenses/get_usd_rate.php');
-
-        // Check if response is ok
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        // Check if response has content
-        const responseText = await response.text();
-        if (!responseText || responseText.trim() === '') {
-            throw new Error('Empty response from server');
-        }
-
-        // Try to parse JSON
-        let data;
-        try {
-            data = JSON.parse(responseText);
-        } catch (jsonError) {
-            console.error('JSON parsing error:', jsonError);
-            console.error('Response text:', responseText);
-            throw new Error('Invalid JSON response from server');
-        }
-
-        if (usdRateElement) {
-            if (data.success && data.rate) {
-                usdRateElement.textContent = data.rate.toLocaleString() + ' د.ع';
-                // console.log('USD rate display updated:', data.rate);
-
-                // Show success notification
-                Swal.fire({
-                    icon: 'success',
-                    title: 'نرخی دۆلار نوێکرایەوە',
-                    text: `نرخی ١٠٠ دۆلار: ${data.rate.toLocaleString()} دینار`,
-                    timer: 2000,
-                    showConfirmButton: false,
-                    toast: true,
-                    position: 'top-end'
-                });
-            } else {
-                console.warn('Failed to fetch USD rate for display:', data.error || 'Unknown error');
-                if (data.default_rate) {
-                    usdRateElement.textContent = data.default_rate.toLocaleString() + ' د.ع';
-                    // console.log('Using default USD rate for display:', data.default_rate);
-                } else {
-                    usdRateElement.textContent = '139250 د.ع';
-                }
-            }
-        }
-    } catch (error) {
-        console.error('Error updating USD rate display:', error);
-
-        // Try alternative API endpoint as fallback
-        try {
-            console.log('Trying alternative API endpoint...');
-            const alternativeResponse = await fetch('https://dinarapi.hediworks.site/api/get-price?id=8&api_token=S3gl9SVEkZ1Vvc93cCjsbLLmwDvgzk');
-            const alternativeData = await alternativeResponse.json();
-
-            if (alternativeData && alternativeData.value) {
-                if (usdRateElement) {
-                    usdRateElement.textContent = alternativeData.value.toLocaleString() + ' د.ع';
-                    console.log('USD rate updated from alternative API:', alternativeData.value);
-                }
-                return; // Success, don't show error
-            }
-        } catch (fallbackError) {
-            console.error('Alternative API also failed:', fallbackError);
-        }
-
-        // Use fallback value
-        if (usdRateElement) {
-            usdRateElement.textContent = '139250 د.ع';
-            console.log('Using fallback USD rate for display: 139250');
-        }
-
-        // Show error notification only if it's a manual refresh
-        if (refreshBtn && refreshBtn.disabled) {
-            Swal.fire({
-                icon: 'error',
-                title: 'هەڵە لە وەرگرتنی نرخی دۆلار',
-                text: 'نەتوانرا نرخی دۆلار وەربگیرێت',
-                timer: 3000,
-                showConfirmButton: false,
-                toast: true,
-                position: 'top-end'
-            });
-        }
-    } finally {
-        // Remove loading state
-        if (refreshBtn && refreshIcon) {
-            refreshIcon.classList.remove('fa-spin');
-            refreshBtn.disabled = false;
-        }
-    }
-}
 
 // Function to fetch and populate exchange rate in modals
 async function fetchAndPopulateExchangeRate() {
@@ -195,16 +86,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
-    // Update USD rate display when page loads
-    updateUsdRateDisplay();
 
-    // Add refresh button event listener
-    const refreshUsdRateBtn = document.getElementById('refreshUsdRate');
-    if (refreshUsdRateBtn) {
-        refreshUsdRateBtn.addEventListener('click', function () {
-            updateUsdRateDisplay();
-        });
-    }
 
     const currencyType = document.getElementById('currency_type');
     const amountIqd = document.getElementById('amount_iqd');
@@ -426,8 +308,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Update USD rate display every 5 minutes
-    setInterval(updateUsdRateDisplay, 5 * 60 * 1000);
+
 
 
 });

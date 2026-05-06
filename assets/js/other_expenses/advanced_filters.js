@@ -301,8 +301,6 @@ class AdvancedFilters {
 
             // Update expense cards
             const elements = {
-                'totalOtherExpenses': formatUSD(totalOtherExpensesUSDConverted),
-                'totalCarExpenses': formatUSD(totalAllExpensesUSD),
                 'totalExpensesIQD': formatIQD(totalExpensesIQD),
                 'totalExpensesUSD': formatUSD(totalExpensesUSD)
             };
@@ -314,12 +312,6 @@ class AdvancedFilters {
                     element.textContent = value;
                 }
             });
-
-            // Update USD exchange rate card
-            const usdRateElement = document.getElementById('usdExchangeRate');
-            if (usdRateElement) {
-                usdRateElement.textContent = `${Number(usdRate).toLocaleString('en-US')} د.ع`;
-            }
         }
     }
 
