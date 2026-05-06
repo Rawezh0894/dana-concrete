@@ -63,6 +63,11 @@ function loadPurchaseSummary(filterParams = '') {
                 $('#total-price-iqd').text(formatNumber(data.total_price_iqd));
             }
             
+            // Update total invoices card
+            if (data.total_invoices !== undefined) {
+                $('#total-invoices').text(formatNumber(data.total_invoices));
+            }
+            
             // Update total companies card
             if (data.total_companies !== undefined) {
                 $('#total-companies').text(formatNumber(data.total_companies));

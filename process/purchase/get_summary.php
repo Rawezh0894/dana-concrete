@@ -92,7 +92,8 @@ try {
             SUM(p.remaining_iqd) as remaining_iqd,
             SUM(p.remaining_iqd / NULLIF(p.exchange_rate / 100, 0)) as remaining_iqd_converted,
             SUM(CASE WHEN p.type = 'دۆلار' THEN p.price ELSE 0 END) as total_price_usd,
-            SUM(CASE WHEN p.type = 'دینار' THEN p.amount_iqd ELSE 0 END) as total_price_iqd
+            SUM(CASE WHEN p.type = 'دینار' THEN p.amount_iqd ELSE 0 END) as total_price_iqd,
+            COUNT(p.id) as total_invoices
         FROM purchases p
         LEFT JOIN locations l ON p.location = l.name
         LEFT JOIN drivers d ON p.driver = d.name
@@ -107,6 +108,7 @@ try {
     $total_debt_usd += floatval($row['remaining_iqd_converted'] ?? 0);
     $total_price_usd = floatval($row['total_price_usd'] ?? 0);
     $total_price_iqd = floatval($row['total_price_iqd'] ?? 0);
+    $total_invoices = intval($row['total_invoices'] ?? 0);
     
     // Get debt from company opening debts - only if company filter is applied
     if ($company_id) {
@@ -174,6 +176,7 @@ try {
             'total_debt' => round($total_debt_final, 2),
             'total_price_usd' => round($total_price_usd, 2),
             'total_price_iqd' => round($total_price_iqd, 0),
+            'total_invoices' => $total_invoices,
             'total_companies' => $total_companies,
             'indebted_companies' => $indebted_companies,
             'usd_iqd_rate' => $usd_iqd_rate

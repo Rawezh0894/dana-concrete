@@ -421,6 +421,16 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
                 </div>
             </div>
         </div>
+        <div class="col-xl-2 col-lg-3 col-md-6 mb-3">
+            <div class="card text-center shadow card-gradient-secondary card-animate-hover">
+                <div class="card-body">
+                    <i class="fas fa-file-invoice card-icon"></i>
+                    <h6 class="card-title">کۆی وەسڵەکان</h6>
+                    <div class="fs-4 fw-bold" id="total-invoices">0</div>
+                    <small class="text-light">ژمارەی وەسڵەکان</small>
+                </div>
+            </div>
+        </div>
         <div class="col-xl-2 col-lg-3 col-md-4 mb-3">
             <div class="card text-center shadow card-gradient-info card-animate-hover">
                 <div class="card-body">
@@ -441,11 +451,11 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
                 </div>
             </div>
         </div>
-        <div class="col-xl-4 col-lg-12 col-md-4 mb-3">
+        <div class="col-xl-2 col-lg-12 col-md-4 mb-3">
             <div class="card text-center shadow card-animate-hover summary-export-card h-100 d-flex align-items-center justify-content-center">
                 <div class="card-body">
                     <i class="fas fa-file-excel card-icon"></i>
-                    <h6 class="card-title">ئیکسپۆرتی کورتە</h6>
+                    <h6 class="card-title">ئیکسپۆرت</h6>
                     <button class="btn btn-sm btn-light mt-2" onclick="exportPurchaseSummaryToExcel()" title="ئیکسپۆرتی کورتەی کڕینەکان بۆ Excel">
                         <i class="fas fa-download me-1"></i>داگرتن
                     </button>
