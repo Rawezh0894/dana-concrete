@@ -240,6 +240,51 @@ if (!hasPermission('view_other_expenses')) {
     </div>
 </div>
 
+<!-- Edit Gas Modal -->
+<div class="modal fade" id="editGasModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0" style="border-radius: 20px;">
+            <div class="gradient-header" style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);">
+                <h5 class="modal-title m-0"><i class="fas fa-edit me-2"></i>نوێکردنەوەی بەکارهێنانی گاز</h5>
+            </div>
+            <form id="editGasForm">
+                <input type="hidden" name="id" id="edit_id">
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">سەیارە</label>
+                        <select name="car_id" id="edit_car_id" class="form-select rounded-3" required>
+                            <option value="">هەڵبژێرە...</option>
+                        </select>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">بڕی گاز (لیتر)</label>
+                            <input type="number" step="0.01" name="gas_liters" id="edit_gas_liters" class="form-control rounded-3" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">نرخی لیتر (دینار)</label>
+                            <input type="number" name="gas_price" id="edit_gas_price" class="form-control rounded-3" readonly>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">کۆی تێچوو (دینار)</label>
+                        <input type="text" id="edit_total_cost_display" class="form-control rounded-3 bg-light" readonly value="0">
+                        <input type="hidden" name="gas_total_cost" id="edit_gas_total_cost">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">بەروار</label>
+                        <input type="date" name="date" id="edit_date" class="form-control rounded-3" required>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" class="btn btn-secondary rounded-3" data-bs-dismiss="modal">پاشگەزبوونەوە</button>
+                    <button type="submit" class="btn btn-primary btn-premium rounded-3" style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); border: none;">نوێکردنەوە</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- External JS -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

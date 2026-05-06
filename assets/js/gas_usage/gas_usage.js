@@ -10,14 +10,25 @@ $(document).ready(function() {
 
     // Auto-calculate total cost
     $('#modal_gas_liters').on('input', function() {
-        calculateTotalCost();
+        calculateTotalCost('modal');
+    });
+
+    $('#edit_gas_liters').on('input', function() {
+        calculateTotalCost('edit');
     });
 
     // Handle Form Submission
     $('#addGasForm').on('submit', function(e) {
         e.preventDefault();
         
-        const formData = $(this).serialize();
+        const $form = $(this);
+        const $btn = $form.find('button[type="submit"]');
+        
+        // Prevent double click
+        if ($btn.prop('disabled')) return;
+        $btn.prop('disabled', true).prepend('<i class="fas fa-spinner fa-spin me-2"></i>');
+
+        const formData = $form.serialize();
         
         $.ajax({
             url: '../process/gas_usage/add.php',
@@ -34,7 +45,7 @@ $(document).ready(function() {
                         showConfirmButton: false
                     });
                     $('#addGasModal').modal('hide');
-                    $('#addGasForm')[0].reset();
+                    $form[0].reset();
                     loadGasData();
                 } else {
                     Swal.fire('هەڵە', response.msg, 'error');
@@ -42,6 +53,51 @@ $(document).ready(function() {
             },
             error: function() {
                 Swal.fire('هەڵە', 'هەڵەیەک لە سێرڤەر ڕوویدا', 'error');
+            },
+            complete: function() {
+                $btn.prop('disabled', false).find('i.fa-spinner').remove();
+            }
+        });
+    });
+
+    // Handle Edit Form Submission
+    $('#editGasForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        const $form = $(this);
+        const $btn = $form.find('button[type="submit"]');
+        
+        // Prevent double click
+        if ($btn.prop('disabled')) return;
+        $btn.prop('disabled', true).prepend('<i class="fas fa-spinner fa-spin me-2"></i>');
+
+        const formData = $form.serialize();
+        
+        $.ajax({
+            url: '../process/gas_usage/update.php',
+            type: 'POST',
+            data: formData,
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'نوێکرایەوە',
+                        text: 'تۆمارەکە بە سەرکەوتوویی نوێکرایەوە',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    $('#editGasModal').modal('hide');
+                    loadGasData();
+                } else {
+                    Swal.fire('هەڵە', response.msg, 'error');
+                }
+            },
+            error: function() {
+                Swal.fire('هەڵە', 'هەڵەیەک لە سێرڤەر ڕوویدا', 'error');
+            },
+            complete: function() {
+                $btn.prop('disabled', false).find('i.fa-spinner').remove();
             }
         });
     });
@@ -105,9 +161,12 @@ function getCurrentGasPrice() {
         dataType: 'json',
         success: function(response) {
             if (response.success) {
-                $('#currentGasPrice').text(parseFloat(response.price).toLocaleString() + ' د.ع');
+                const priceFormatted = parseFloat(response.price).toLocaleString() + ' د.ع';
+                $('#currentGasPrice').text(priceFormatted);
                 $('#modal_gas_price').val(response.price);
-                calculateTotalCost();
+                $('#edit_gas_price').val(response.price);
+                calculateTotalCost('modal');
+                calculateTotalCost('edit');
             } else {
                 $('#currentGasPrice').text('0 د.ع');
                 Swal.fire('ئاگاداری', response.msg, 'warning');
@@ -116,13 +175,25 @@ function getCurrentGasPrice() {
     });
 }
 
-function calculateTotalCost() {
-    const liters = parseFloat($('#modal_gas_liters').val()) || 0;
-    const price = parseFloat($('#modal_gas_price').val()) || 0;
+window.openEditModal = function(data) {
+    $('#edit_id').val(data.id);
+    $('#edit_car_id').val(data.car_id);
+    $('#edit_gas_liters').val(data.gas_liters);
+    $('#edit_gas_price').val(data.gas_purchase_price_input);
+    $('#edit_date').val(data.date);
+    
+    calculateTotalCost('edit');
+    $('#editGasModal').modal('show');
+};
+
+function calculateTotalCost(type) {
+    const prefix = type === 'edit' ? 'edit_' : 'modal_';
+    const liters = parseFloat($(`#${prefix}gas_liters`).val()) || 0;
+    const price = parseFloat($(`#${prefix}gas_price`).val()) || 0;
     const total = liters * price;
     
-    $('#modal_total_cost_display').val(total.toLocaleString() + ' د.ع');
-    $('#modal_gas_total_cost').val(total);
+    $(`#${prefix}total_cost_display`).val(total.toLocaleString() + ' د.ع');
+    $(`#${prefix}gas_total_cost`).val(total);
 }
 
 function deleteGasRecord(id) {

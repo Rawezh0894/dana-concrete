@@ -44,11 +44,16 @@ const columnDefs = [
     },
     {
         headerName: "کردارەکان",
-        width: 100,
+        width: 150,
         cellRenderer: params => {
-            return `<button class="btn btn-sm btn-danger rounded-3" onclick="deleteGasRecord(${params.data.id})">
-                        <i class="fas fa-trash"></i>
-                    </button>`;
+            return `<div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-warning rounded-3" onclick="openEditModal(${JSON.stringify(params.data).replace(/"/g, '&quot;')})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger rounded-3" onclick="deleteGasRecord(${params.data.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>`;
         }
     }
 ];
