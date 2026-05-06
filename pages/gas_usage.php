@@ -293,8 +293,8 @@ if (!hasPermission('view_other_expenses')) {
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <!-- Module JS -->
-<script src="../assets/js/gas_usage/ag_grid_gas.js?v=1.0.1"></script>
-<script src="../assets/js/gas_usage/gas_usage.js?v=1.0.1"></script>
+<script src="../assets/js/gas_usage/ag_grid_gas.js?v=1.0.5"></script>
+<script src="../assets/js/gas_usage/gas_usage.js?v=1.0.5"></script>
 
 </body>
 </html>
