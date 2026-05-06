@@ -44,7 +44,7 @@ const columnDefs = [
     },
     {
         headerName: "کردارەکان",
-        width: 150,
+        width: 180,
         cellRenderer: params => {
             return `<div class="d-flex gap-2">
                         <button class="btn btn-sm btn-warning rounded-3" onclick="openEditModal(${JSON.stringify(params.data).replace(/"/g, '&quot;')})">
