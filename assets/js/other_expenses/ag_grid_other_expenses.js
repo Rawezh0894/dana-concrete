@@ -68,21 +68,7 @@ const otherExpensesColumnDefs = [
         },
         type: 'numericColumn'
     },
-    {
-        field: 'exchange_rate',
-        headerName: 'نرخی ١٠٠ دۆلار',
-        filter: 'agNumberColumnFilter',
-        floatingFilter: true,
-        sortable: true,
-        resizable: true,
-        minWidth: 100,
-        cellStyle: { textAlign: 'center', direction: 'rtl' },
-        valueFormatter: function (params) {
-            if (params.value === null || params.value === undefined || params.value === '') return '-';
-            return window.AGGridFormatters?.formatNumber(params.value) || params.value;
-        },
-        type: 'numericColumn'
-    },
+
     {
         field: 'paid_usd',
         headerName: 'پارەی دراو دۆلار',

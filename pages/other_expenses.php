@@ -104,6 +104,29 @@ if (!isset($_SESSION['user_id'])) {
     </div>
     
 
+
+    <!-- Summary Cards -->
+    <div class="row w-100 mb-4 g-3 mx-0">
+        <div class="col-md-6">
+            <div class="card gradient-card blue-gradient">
+                <div class="card-body">
+                    <h6 class="card-title">کۆی گشتی خەرجییەکان بە دینار</h6>
+                    <div id="totalExpensesIQD" class="card-value">0 د.ع</div>
+                    <small>کۆی هەموو خەرجییەکان بە دینار</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card gradient-card yellow-gradient">
+                <div class="card-body">
+                    <h6 class="card-title">کۆی گشتی خەرجییەکان بە دۆلار</h6>
+                    <div id="totalExpensesUSD" class="card-value">$0</div>
+                    <small>کۆی هەموو خەرجییەکان بە دۆلار</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="mb-4">
       <!-- Advanced Filter Section -->
       <div class="card shadow-sm">
@@ -232,28 +255,6 @@ if (!isset($_SESSION['user_id'])) {
         </div>
       </div>
     </div>
-
-      
-      <!-- Second row: IQD and USD totals -->        <div class="col-md-6">
-          <div class="card gradient-card blue-gradient">
-            <div class="card-body">
-              <h6 class="card-title">کۆی گشتی خەرجییەکان بە دینار</h6>
-              <div id="totalExpensesIQD" class="card-value">0 د.ع</div>
-              <small>کۆی هەموو خەرجییەکان بە دینار</small>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="card gradient-card yellow-gradient">
-            <div class="card-body">
-              <h6 class="card-title">کۆی گشتی خەرجییەکان بە دۆلار</h6>
-              <div id="totalExpensesUSD" class="card-value">$0</div>
-              <small>کۆی هەموو خەرجییەکان بە دۆلار</small>
-            </div>
-          </div>
-        </div>
-      </div>
-      
 
     </div>
     <div class="table-responsive">
