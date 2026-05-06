@@ -260,7 +260,6 @@ class AdvancedFilters {
             const exchangeRateInput = document.getElementById('exchange_rate');
             if (exchangeRateInput && exchangeRateInput.value) {
                 usdRate = parseFloat(exchangeRateInput.value);
-                // console.log('Using exchange rate from input field:', usdRate);
             } else {
                 // Fallback to API if input field is empty
                 try {
@@ -284,28 +283,24 @@ class AdvancedFilters {
                 return usdRate && iqd ? (parseFloat(iqd) / (usdRate / 100)) : 0;
             }
 
-            // Calculate totals using the same logic as select_expenses.js
-            const totalCarGasCost = parseFloat(summary.total_car_gas_cost || 0);
+            // Calculate totals
             const totalOtherExpensesIQD = parseFloat(summary.total_other_expenses_iqd || 0);
             const totalOtherExpensesUSD = parseFloat(summary.total_other_expenses_usd || 0);
 
-            // Convert IQD to USD for display (same formula as select_expenses.js)
-            const totalCarGasCostUSD = iqdToUsd(totalCarGasCost);
+            // Convert IQD to USD for display
             const totalOtherExpensesUSDConverted = iqdToUsd(totalOtherExpensesIQD) + totalOtherExpensesUSD;
-            const totalCarExpensesUSD = totalCarGasCostUSD;
-            const totalAllExpensesUSD = totalOtherExpensesUSDConverted + totalCarExpensesUSD;
+            const totalAllExpensesUSD = totalOtherExpensesUSDConverted;
 
             // Calculate total IQD and USD expenses
-            const totalExpensesIQD = totalCarGasCost + totalOtherExpensesIQD;
+            const totalExpensesIQD = totalOtherExpensesIQD;
             const totalExpensesUSD = totalOtherExpensesUSD;
 
             function formatIQD(num) {
                 return num ? `${Number(num).toLocaleString('en-US')} د.ع` : '0 د.ع';
             }
 
-            // Update car expense cards (including new IQD and USD total cards)
+            // Update expense cards
             const elements = {
-                'totalCarGasCost': formatUSD(totalCarGasCostUSD),
                 'totalOtherExpenses': formatUSD(totalOtherExpensesUSDConverted),
                 'totalCarExpenses': formatUSD(totalAllExpensesUSD),
                 'totalExpensesIQD': formatIQD(totalExpensesIQD),
@@ -356,7 +351,7 @@ class AdvancedFilters {
 
         // Clear expense type checkboxes
         const checkboxes = [
-            'expenseTypeOther', 'expenseTypeGas'
+            'expenseTypeOther'
         ];
 
         checkboxes.forEach(id => {

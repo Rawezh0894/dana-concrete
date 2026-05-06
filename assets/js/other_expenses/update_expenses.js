@@ -5,20 +5,9 @@ async function editExpense(id, data) {
     for (const key in data) {
         formData.append(key, data[key]);
     }
-    // Add gas_liters if present in the form
-    if (document.getElementById('edit_gas_liters')) {
-        formData.append('gas_liters', document.getElementById('edit_gas_liters').value);
-    }
-    // Add new fields
+    // Add expense_type
     if (document.getElementById('edit_expense_type')) {
         formData.append('expense_type', document.getElementById('edit_expense_type').value);
-    }
-
-    if (document.getElementById('edit_gas_purchase_price_input')) {
-        formData.append('gas_purchase_price_input', document.getElementById('edit_gas_purchase_price_input').value);
-    }
-    if (document.getElementById('edit_gas_total_cost')) {
-        formData.append('gas_total_cost', document.getElementById('edit_gas_total_cost').value);
     }
     // Add payment_type
     if (document.getElementById('edit_payment_type')) {

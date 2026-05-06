@@ -182,35 +182,7 @@ const otherExpensesColumnDefs = [
             return `<span style="background: ${color}; color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold;">${params.value}</span>`;
         }
     },
-    {
-        field: 'gas_total_cost',
-        headerName: 'کۆی نرخی گازی بەکارهاتوو',
-        filter: 'agNumberColumnFilter',
-        floatingFilter: true,
-        sortable: true,
-        resizable: true,
-        minWidth: 100,
-        cellStyle: { textAlign: 'center', direction: 'rtl' },
-        valueFormatter: function (params) {
-            if (params.value === null || params.value === undefined || params.value === '') return '-';
-            return window.AGGridFormatters?.formatNumber(params.value) || params.value;
-        },
-        type: 'numericColumn'
-    },
-    {
-        field: 'gas_purchase_price_input',
-        headerName: 'ئینپوتی نرخی کڕینی گاز',
-        filter: 'agNumberColumnFilter',
-        floatingFilter: true,
-        sortable: true,
-        resizable: true,
-        minWidth: 100,
-        cellStyle: { textAlign: 'center', direction: 'rtl' },
-        valueFormatter: function (params) {
-            return window.AGGridFormatters?.formatIQD(params.value) || '-';
-        },
-        type: 'numericColumn'
-    },
+
 
     {
         field: 'expense_type',
@@ -225,7 +197,7 @@ const otherExpensesColumnDefs = [
             if (!params.value) return '-';
             const colors = {
                 'خەرجی تر': '#6c757d',
-                'بەکارهێنانی گاز': '#ffc107',
+
                 'خواردنگە': '#28a745',
                 'ئۆفیس': '#17a2b8'
             };
@@ -233,21 +205,7 @@ const otherExpensesColumnDefs = [
             return `<span style="background: ${color}; color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold;">${params.value}</span>`;
         }
     },
-    {
-        field: 'gas_liters',
-        headerName: 'بڕی گاز (لیتر)',
-        filter: 'agNumberColumnFilter',
-        floatingFilter: true,
-        sortable: true,
-        resizable: true,
-        minWidth: 100,
-        cellStyle: { textAlign: 'center', direction: 'rtl' },
-        valueFormatter: function (params) {
-            if (params.value === null || params.value === undefined || params.value === '') return '-';
-            return window.AGGridFormatters?.formatNumber(params.value) + ' L' || '-';
-        },
-        type: 'numericColumn'
-    },
+
     {
         field: 'car_name',
         headerName: 'سەیارە',
@@ -518,38 +476,27 @@ function updateSummaryCards(expenses) {
         }
 
         // Calculate totals
-        let totalCarMaterialCostIQD = 0, totalCarMaterialCostUSD = 0, totalCarGasCost = 0;
         let totalOtherExpensesIQD = 0, totalOtherExpensesUSD = 0;
 
         expenses.forEach(row => {
-
-
-            if (row.car_id && row.expense_type === 'بەکارهێنانی گاز') {
-                totalCarGasCost += parseFloat(row.gas_total_cost || 0);
-            }
-
-            if (!row.car_id || row.expense_type !== 'بەکارهێنانی گاز') {
-                if (row.currency_type === 'دۆلار') {
-                    totalOtherExpensesUSD += parseFloat(row.amount_usd || 0);
-                } else if (row.currency_type === 'دینار') {
-                    totalOtherExpensesIQD += parseFloat(row.amount_iqd || 0);
-                } else if (row.currency_type === 'تێکەڵ') {
-                    totalOtherExpensesUSD += parseFloat(row.amount_usd || 0);
-                    totalOtherExpensesIQD += parseFloat(row.amount_iqd || 0);
-                } else {
-                    totalOtherExpensesUSD += parseFloat(row.amount_usd || 0);
-                    totalOtherExpensesIQD += parseFloat(row.amount_iqd || 0);
-                }
+            if (row.currency_type === 'دۆلار') {
+                totalOtherExpensesUSD += parseFloat(row.amount_usd || 0);
+            } else if (row.currency_type === 'دینار') {
+                totalOtherExpensesIQD += parseFloat(row.amount_iqd || 0);
+            } else if (row.currency_type === 'تێکەڵ') {
+                totalOtherExpensesUSD += parseFloat(row.amount_usd || 0);
+                totalOtherExpensesIQD += parseFloat(row.amount_iqd || 0);
+            } else {
+                totalOtherExpensesUSD += parseFloat(row.amount_usd || 0);
+                totalOtherExpensesIQD += parseFloat(row.amount_iqd || 0);
             }
         });
 
-        const totalCarGasCostUSD = totalCarGasCost / (usdRate / 100);
         const totalOtherExpensesUSDConverted = totalOtherExpensesIQD / (usdRate / 100) + totalOtherExpensesUSD;
-        const totalCarExpensesUSD = totalCarGasCostUSD;
-        const totalAllExpensesUSD = totalOtherExpensesUSDConverted + totalCarExpensesUSD;
+        const totalAllExpensesUSD = totalOtherExpensesUSDConverted;
 
         // Calculate total IQD and USD expenses
-        const totalExpensesIQD = totalCarGasCost + totalOtherExpensesIQD;
+        const totalExpensesIQD = totalOtherExpensesIQD;
         const totalExpensesUSD = totalOtherExpensesUSD;
 
         function formatNumber(num) {
@@ -564,10 +511,6 @@ function updateSummaryCards(expenses) {
             return num ? `${formatNumber(num)} د.ع` : '0 د.ع';
         }
 
-
-        if (document.getElementById('totalCarGasCost')) {
-            document.getElementById('totalCarGasCost').innerHTML = `${formatUSD(totalCarGasCostUSD)}`;
-        }
         if (document.getElementById('totalOtherExpenses')) {
             document.getElementById('totalOtherExpenses').innerHTML = `${formatUSD(totalOtherExpensesUSDConverted)}`;
         }
@@ -698,27 +641,11 @@ window.openEditModalById = async function (id) {
         document.getElementById('edit_exchange_rate').value = row.exchange_rate || 139250;
         document.getElementById('edit_remaining_iqd').value = row.remaining_iqd || 0;
         document.getElementById('edit_remaining_usd').value = row.remaining_usd || 0;
-
-        if (document.getElementById('edit_gas_liters')) {
-            document.getElementById('edit_gas_liters').value = row.gas_liters || '';
-        }
-
         if (document.getElementById('edit_expense_type')) {
             document.getElementById('edit_expense_type').value = row.expense_type || '';
             const event = new Event('change');
             document.getElementById('edit_expense_type').dispatchEvent(event);
-
-            if (row.expense_type === 'بەکارهێنانی گاز') {
-                setTimeout(() => {
-                    if (typeof populateGasPurchasePrice === 'function') populateGasPurchasePrice('edit');
-                }, 100);
-            }
         }
-
-
-
-        if (document.getElementById('edit_gas_purchase_price_input')) document.getElementById('edit_gas_purchase_price_input').value = row.gas_purchase_price_input || '';
-        if (document.getElementById('edit_gas_total_cost')) document.getElementById('edit_gas_total_cost').value = row.gas_total_cost || '';
 
         document.getElementById('edit_date').value = row.date || '';
 

@@ -194,12 +194,7 @@ if (!isset($_SESSION['user_id'])) {
                   </label>
                 </div>
 
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" id="expenseTypeGas" value="بەکارهێنانی گاز">
-                  <label class="form-check-label" for="expenseTypeGas">
-                    بەکارهێنانی گاز
-                  </label>
-                </div>
+
                 <div class="form-check">
                   <input class="form-check-input" type="checkbox" id="filter_expense_type_khwardnga" name="expenseTypes[]" value="خواردنگە">
                   <label class="form-check-label" for="filter_expense_type_khwardnga">خواردنگە</label>
@@ -240,15 +235,7 @@ if (!isset($_SESSION['user_id'])) {
       <!-- First row: 4 main expense cards -->
       <div class="row w-100 mt-3 g-3">
 
-        <div class="col-md-3">
-          <div class="card gradient-card orange-gradient">
-            <div class="card-body">
-              <h6 class="card-title">خەرجی سەیارەکان (گاز)</h6>
-              <div id="totalCarGasCost" class="card-value">$0</div>
-              <small>بەکارهێنانی گاز</small>
-            </div>
-          </div>
-        </div>
+
         <div class="col-md-3">
           <div class="card gradient-card teal-gradient">
             <div class="card-body">
@@ -354,10 +341,7 @@ if (!isset($_SESSION['user_id'])) {
                 </select>
               </div>
             </div>
-            <div class="col-md-4 gas-material-field">
-              <label for="gas_liters" class="form-label">بڕی گاز (لیتر)</label>
-              <input type="number" step="0.01" class="form-control" id="gas_liters" name="gas_liters" placeholder="0">
-            </div>
+
           </div>
 
           <!-- Multiple Items Split Container (Hidden by default) -->
@@ -378,23 +362,14 @@ if (!isset($_SESSION['user_id'])) {
                 <option value="">-- هەلبژێرە --</option>
                 <option value="خەرجی تر">خەرجی تر</option>
 
-                <option value="بەکارهێنانی گاز">بەکارهێنانی گاز</option>
+
                 <option value="خواردنگە">خواردنگە</option>
                 <option value="ئۆفیس">ئۆفیس</option>
               </select>
             </div>
 
           </div>
-          <div class="mb-3 row">
-            <div class="col-md-4 gas-material-field">
-              <label for="gas_purchase_price_input" class="form-label">ئینپوتی نرخی کڕینی گاز</label>
-              <input type="number" step="0.01" class="form-control" id="gas_purchase_price_input" name="gas_purchase_price_input" placeholder="0">
-            </div>
-            <div class="col-md-4 gas-material-field">
-              <label for="gas_total_cost" class="form-label">کۆی نرخی گازی بەکارهاتوو</label>
-              <input type="number" step="0.01" class="form-control" id="gas_total_cost" name="gas_total_cost" placeholder="0" readonly>
-            </div>
-          </div>
+
           <div class="mb-3 row">
             <div class="col-md-4 warehouse-hidden-field">
               <label for="person_id" class="form-label">کەس</label>
@@ -537,10 +512,7 @@ if (!isset($_SESSION['user_id'])) {
                 <option value="">-- هەلبژێرە --</option>
               </select>
             </div>
-            <div class="col-md-4 gas-material-field">
-              <label for="edit_gas_liters" class="form-label">بڕی گاز (لیتر)</label>
-              <input type="number" step="0.01" class="form-control" id="edit_gas_liters" name="gas_liters" placeholder="0">
-            </div>
+
           </div>
           <div class="mb-3 row">
             <div class="col-md-4">
@@ -549,7 +521,7 @@ if (!isset($_SESSION['user_id'])) {
                 <option value="">-- هەلبژێرە --</option>
                 <option value="خەرجی تر">خەرجی تر</option>
 
-                <option value="بەکارهێنانی گاز">بەکارهێنانی گاز</option>
+
                 <option value="خواردنگە">خواردنگە</option>
                 <option value="ئۆفیس">ئۆفیس</option>
 
@@ -557,16 +529,7 @@ if (!isset($_SESSION['user_id'])) {
             </div>
 
           </div>
-          <div class="mb-3 row">
-            <div class="col-md-4 gas-material-field">
-              <label for="edit_gas_purchase_price_input" class="form-label">ئینپوتی نرخی کڕینی گاز</label>
-              <input type="number" step="0.01" class="form-control" id="edit_gas_purchase_price_input" name="gas_purchase_price_input" placeholder="0">
-            </div>
-            <div class="col-md-4 gas-material-field">
-              <label for="edit_gas_total_cost" class="form-label">کۆی نرخی گازی بەکارهاتوو</label>
-              <input type="number" step="0.01" class="form-control" id="edit_gas_total_cost" name="gas_total_cost" placeholder="0" readonly>
-            </div>
-          </div>
+
           <div class="mb-3 row">
             <div class="col-md-4 warehouse-hidden-field">
               <label for="edit_person_id" class="form-label">کەس</label>

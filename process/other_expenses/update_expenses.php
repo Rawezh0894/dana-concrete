@@ -34,10 +34,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($car_id === '') {
         $car_id = null;
     }
-    $gas_liters = isset($_POST['gas_liters']) ? floatval($_POST['gas_liters']) : null;
+
     $expense_type = $_POST['expense_type'] ?? 'خەرجی تر'; // Default to خەرجی تر if empty
     // Ensure expense_type is valid
-    if (!in_array($expense_type, ['بەکارهێنانی کاڵای کۆگا', 'بەکارهێنانی گاز', 'خەرجی تر', 'خواردنگە', 'ئۆفیس', 'کڕینی کاڵا بۆ کۆگا'])) {
+    if (!in_array($expense_type, ['بەکارهێنانی کاڵای کۆگا', 'خەرجی تر', 'خواردنگە', 'ئۆفیس', 'کڕینی کاڵا بۆ کۆگا'])) {
         $expense_type = 'خەرجی تر';
     }
     $material_id = $_POST['material_id'] ?? null;
@@ -56,8 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $material_purchase_price_iqd = !empty($_POST['material_purchase_price_iqd']) ? floatval($_POST['material_purchase_price_iqd']) : 0;
     $material_purchase_price_usd = !empty($_POST['material_purchase_price_usd']) ? floatval($_POST['material_purchase_price_usd']) : 0;
     $material_total_cost = !empty($_POST['material_total_cost']) ? floatval($_POST['material_total_cost']) : 0;
-    $gas_purchase_price_input = !empty($_POST['gas_purchase_price_input']) ? floatval($_POST['gas_purchase_price_input']) : 0;
-    $gas_total_cost = isset($_POST['gas_total_cost']) ? floatval($_POST['gas_total_cost']) : null;
+
     $payment_type = $_POST['payment_type'] ?? 'نەقد'; // Default to نەقد if empty
     // Ensure payment_type is valid
     if (!in_array($payment_type, ['نەقد', 'قەرز'])) {
@@ -170,40 +169,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Check gas availability for gas usage expenses
-    if ($expense_type === 'بەکارهێنانی گاز' && $gas_liters && $gas_liters > 0) {
-        // Get current gas amount in the tank
-        $gas_sql = "SELECT amount FROM bins_silos WHERE type = 'تەنکی' AND material_type = 'گاز' LIMIT 1";
-        $gas_stmt = $pdo->prepare($gas_sql);
-        $gas_stmt->execute();
-        $gas_tank = $gas_stmt->fetch(PDO::FETCH_ASSOC);
-        
-        if (!$gas_tank) {
-            echo json_encode(['success' => false, 'msg' => 'تەنکی گاز لە سیستەمەکەدا نییە']);
-            exit;
-        }
-        
-        $available_gas = floatval($gas_tank['amount']);
-        $required_gas = floatval($gas_liters);
 
-        // Get the current expense record to see if we need to adjust the check
-        $current_gas_sql = "SELECT gas_liters FROM other_expenses WHERE id = ?";
-        $current_gas_stmt = $pdo->prepare($current_gas_sql);
-        $current_gas_stmt->execute([$id]);
-        $current_gas_expense = $current_gas_stmt->fetch(PDO::FETCH_ASSOC);
-
-        $current_gas = $current_gas_expense ? floatval($current_gas_expense['gas_liters']) : 0;
-        $gas_difference = $required_gas - $current_gas;
-
-        // Only check if we're requesting more gas than what was already used
-        if ($gas_difference > 0 && $available_gas < $gas_difference) {
-            echo json_encode([
-                'success' => false,
-                'msg' => "بڕی گاز لە تەنکی کەمە. بڕی بەردەست: {$available_gas} لیتر، بڕی پێویست: {$gas_difference} لیتر"
-            ]);
-            exit;
-        }
-    }
 
     // Check for invoice_number
     if (empty($invoice_number)) {
@@ -219,10 +185,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Fetch old gas_liters value for this expense
-    $stmt_old = $pdo->prepare('SELECT gas_liters FROM other_expenses WHERE id=?');
-    $stmt_old->execute([$id]);
-    $old_gas_liters = $stmt_old->fetchColumn();
+
 
     // Get old values BEFORE updating
     $stmt = $pdo->prepare("SELECT * FROM other_expenses WHERE id = ?");
@@ -270,7 +233,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'employee_name' => $old_employee_name,
         'car_id' => $old_record['car_id'],
         'car_name' => $old_car_name,
-        'gas_liters' => $old_record['gas_liters'],
         'expense_type' => $old_record['expense_type'],
         'material_id' => $old_record['material_id'],
         'material_name' => $old_material_name,
@@ -278,8 +240,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'material_purchase_price_iqd' => $old_record['material_purchase_price_iqd'],
         'material_purchase_price_usd' => $old_record['material_purchase_price_usd'],
         'material_total_cost' => $old_record['material_total_cost'],
-        'gas_purchase_price_input' => $old_record['gas_purchase_price_input'],
-        'gas_total_cost' => $old_record['gas_total_cost'],
         'payment_type' => $old_record['payment_type'],
         'currency_type' => $old_record['currency_type'],
         'invoice_number' => $old_record['invoice_number'],
@@ -336,15 +296,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $person_id,
         $employee_id ?: null,
         $car_id ?: null,
-        $gas_liters,
+        null, // gas_liters
         $expense_type,
         $material_id,
         $material_quantity,
         $material_purchase_price_iqd,
         $material_purchase_price_usd,
         $material_total_cost,
-        $gas_purchase_price_input,
-        $gas_total_cost,
+        0, // gas_purchase_price_input
+        0, // gas_total_cost
         $payment_type,
         $currency_type,
         $invoice_number,
@@ -411,9 +371,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             'person_name' => $person_name,
                             'employee_id' => $employee_id,
                             'employee_name' => $employee_name,
-                            'car_id' => $car_id,
                             'car_name' => $car_name,
-                            'gas_liters' => $gas_liters,
                             'expense_type' => $expense_type,
                             'material_id' => $material_id,
                             'material_name' => $material_name,
@@ -421,8 +379,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             'material_purchase_price_iqd' => $material_purchase_price_iqd,
                             'material_purchase_price_usd' => $material_purchase_price_usd,
                             'material_total_cost' => $material_total_cost,
-                            'gas_purchase_price_input' => $gas_purchase_price_input,
-                            'gas_total_cost' => $gas_total_cost,
                             'payment_type' => $payment_type,
                             'currency_type' => $currency_type,
                             'invoice_number' => $invoice_number,

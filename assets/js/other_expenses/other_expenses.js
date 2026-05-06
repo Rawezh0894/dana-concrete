@@ -310,149 +310,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-    // Add event listeners for gas total cost calculation
-    const addGasLitersField = document.getElementById('gas_liters');
-    const addGasPriceField = document.getElementById('gas_purchase_price_input');
 
-    if (addGasLitersField) {
-        addGasLitersField.addEventListener('input', function () {
-            calculateGasTotalCost('add');
-        });
-    }
-    if (addGasPriceField) {
-        addGasPriceField.addEventListener('input', function () {
-            calculateGasTotalCost('add');
-        });
-    }
-
-
-
-    // Add event listeners for gas total cost calculation in edit form
-    const editGasLitersField = document.getElementById('edit_gas_liters');
-    const editGasPriceField = document.getElementById('edit_gas_purchase_price_input');
-
-    if (editGasLitersField) {
-        editGasLitersField.addEventListener('input', function () {
-            calculateGasTotalCost('edit');
-        });
-    }
-    if (editGasPriceField) {
-        editGasPriceField.addEventListener('input', function () {
-            calculateGasTotalCost('edit');
-        });
-    }
 
 
 
     // Function to populate gas purchase price from bins_silos
-    window.populateGasPurchasePrice = function (formType) {
-        try {
-            console.log('populateGasPurchasePrice called with:', { formType });
 
-            const prefix = formType === 'edit' ? 'edit_' : '';
-            const gasPurchasePriceField = document.getElementById(prefix + 'gas_purchase_price_input');
-
-            console.log('Looking for gas purchase price field:', prefix + 'gas_purchase_price_input');
-
-            if (!gasPurchasePriceField) {
-                console.warn('Gas purchase price field not found:', prefix + 'gas_purchase_price_input');
-                return;
-            }
-
-            console.log('Gas purchase price field found, fetching average price...');
-
-            // Fetch average gas price from bins_silos
-            fetch('../process/other_expenses/get_gas_average_price.php')
-                .then(response => {
-                    console.log('Gas price response status:', response.status);
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Gas price data received:', data);
-                    if (data.success) {
-                        // Populate the gas purchase price field
-                        const price = data.average_price.toFixed(2);
-                        gasPurchasePriceField.value = price;
-                        console.log('Populated gas purchase price field with:', price);
-
-                        // Calculate gas total cost after populating price
-                        console.log('Calling calculateGasTotalCost');
-                        calculateGasTotalCost(formType);
-
-                        // Show success message
-                        showGasPriceMessage(formType, 'success', data.msg);
-                    } else {
-                        console.error('Error in gas price response:', data.msg);
-                        // Show error message
-                        showGasPriceMessage(formType, 'error', data.msg);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching gas price:', error);
-                    console.error('Error details:', {
-                        message: error.message,
-                        stack: error.stack,
-                        formType
-                    });
-                    showGasPriceMessage(formType, 'error', 'هەڵە لە وەرگرتنی نرخی گاز');
-                });
-        } catch (error) {
-            console.error('Unexpected error in populateGasPurchasePrice:', error);
-            console.error('Error details:', {
-                message: error.message,
-                stack: error.stack,
-                formType
-            });
-        }
-    }
-
-    // Function to show gas price message
-    window.showGasPriceMessage = function (formType, type, message) {
-        const prefix = formType === 'edit' ? 'edit_' : '';
-        const gasPurchasePriceField = document.getElementById(prefix + 'gas_purchase_price_input');
-
-        if (!gasPurchasePriceField) return;
-
-        // Remove any existing message
-        clearGasPriceMessage(formType);
-
-        // Create message element
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `gas-price-message ${type === 'success' ? 'text-success' : 'text-danger'}`;
-        messageDiv.style.fontSize = '12px';
-        messageDiv.style.marginTop = '5px';
-        messageDiv.textContent = message;
-
-        // Add message after gas purchase price field
-        gasPurchasePriceField.parentNode.appendChild(messageDiv);
-
-        // Add visual feedback to field
-        if (type === 'error') {
-            gasPurchasePriceField.style.borderColor = '#dc3545';
-        } else {
-            gasPurchasePriceField.style.borderColor = '#198754';
-        }
-    }
-
-    // Function to clear gas price message
-    window.clearGasPriceMessage = function (formType) {
-        const prefix = formType === 'edit' ? 'edit_' : '';
-        const gasPurchasePriceField = document.getElementById(prefix + 'gas_purchase_price_input');
-
-        if (!gasPurchasePriceField) return;
-
-        // Remove existing message
-        const existingMessage = gasPurchasePriceField.parentNode.querySelector('.gas-price-message');
-        if (existingMessage) {
-            existingMessage.remove();
-        }
-
-        // Reset field border
-        gasPurchasePriceField.style.borderColor = '';
-    }
 
     // Function to toggle gas and material fields visibility
     window.toggleGasMaterialFields = function (expenseType, formType) {
@@ -486,36 +349,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // Clear gas price messages
             clearGasPriceMessage(formType);
 
-        } else if (expenseType === 'بەکارهێنانی گاز') {
-            // Show gas fields for "Gas usage"
-            gasMaterialFields.forEach(field => {
-                const fieldId = field.querySelector('input, select')?.id || '';
-                if (fieldId.includes('gas_') || fieldId.includes('gas_liters')) {
-                    field.style.display = 'block';
-                    field.classList.add('show');
-                } else {
-                    field.style.display = 'none';
-                    field.classList.remove('show');
-                }
-            });
-            // Hide specified fields for gas usage
-            const fieldsToHideForGas = [
-                'person_id', 'payment_type', 'currency_type',
-                'amount_iqd', 'amount_usd', 'paid_iqd', 'paid_usd', 'exchange_rate',
-                'remaining_iqd', 'remaining_usd'
-            ];
-            fieldsToHideForGas.forEach(fieldName => {
-                const field = document.getElementById(fieldName) || document.getElementById(prefix + fieldName);
-                if (field) {
-                    const container = field.closest('.warehouse-hidden-field') || field.closest('.gas-material-field');
-                    if (container) {
-                        container.classList.add('hide');
-                    }
-                }
-            });
 
-            // Populate gas purchase price from bins_silos
-            populateGasPurchasePrice(formType);
 
         } else if (expenseType === 'خواردنگە' || expenseType === 'ئۆفیس') {
             // Show all fields for "خواردنگە" and "ئۆفیس" (same as "خەرجی تر")
@@ -572,48 +406,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Function to handle expense type changes
-    window.handleExpenseTypeChange = function (formType) {
-        const prefix = formType === 'edit' ? 'edit_' : '';
-        const expenseTypeSelect = document.getElementById(prefix + 'expense_type');
-
-        if (!expenseTypeSelect) return;
-
-        const expenseType = expenseTypeSelect.value;
 
 
 
-        if (expenseType === 'بەکارهێنانی گاز') {
-            // Show gas fields, hide material fields
-            gasFields.forEach(field => {
-                if (field.parentElement) {
-                    field.parentElement.style.display = 'block';
-                }
-            });
-        } else {
-            // Hide gas fields for other expense types
-            gasFields.forEach(field => {
-                if (field.parentElement) {
-                    field.parentElement.style.display = 'none';
-                }
-            });
-        }
-    }
-
-    // Add event listeners for expense type changes
-    const addExpenseTypeSelect = document.getElementById('expense_type');
-    const editExpenseTypeSelect = document.getElementById('edit_expense_type');
-
-    if (addExpenseTypeSelect) {
-        addExpenseTypeSelect.addEventListener('change', function () {
-            handleExpenseTypeChange('add');
-        });
-    }
-
-    if (editExpenseTypeSelect) {
-        editExpenseTypeSelect.addEventListener('change', function () {
-            handleExpenseTypeChange('edit');
-        });
-    }
 
     // Initialize field visibility when modals are shown
     if (addExpenseModal) {

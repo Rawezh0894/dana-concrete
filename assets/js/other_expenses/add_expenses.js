@@ -83,20 +83,9 @@ if (addExpenseForm) {
             formData.set('car_id', ''); // Clear main car_id
         }
 
-        // Add gas_liters if present in the form
-        if (document.getElementById('gas_liters')) {
-            formData.append('gas_liters', document.getElementById('gas_liters').value);
-        }
-        // Add new fields
+        // Add expense_type
         if (document.getElementById('expense_type')) {
             formData.append('expense_type', document.getElementById('expense_type').value);
-        }
-
-        if (document.getElementById('gas_purchase_price_input')) {
-            formData.append('gas_purchase_price_input', document.getElementById('gas_purchase_price_input').value);
-        }
-        if (document.getElementById('gas_total_cost')) {
-            formData.append('gas_total_cost', document.getElementById('gas_total_cost').value);
         }
         // Add payment_type
         if (document.getElementById('payment_type')) {

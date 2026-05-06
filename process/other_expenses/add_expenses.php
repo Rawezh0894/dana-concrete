@@ -35,10 +35,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($car_id === '') {
         $car_id = null;
     }
-     $gas_liters = isset($_POST['gas_liters']) ? floatval($_POST['gas_liters']) : null;
+
     $expense_type = $_POST['expense_type'] ?? 'خەرجی تر'; // Default to خەرجی تر if empty
     // Ensure expense_type is valid
-    if (!in_array($expense_type, ['بەکارهێنانی کاڵای کۆگا', 'بەکارهێنانی گاز', 'خەرجی تر', 'خواردنگە', 'ئۆفیس', 'کڕینی کاڵا بۆ کۆگا'])) {
+    if (!in_array($expense_type, ['بەکارهێنانی کاڵای کۆگا', 'خەرجی تر', 'خواردنگە', 'ئۆفیس', 'کڕینی کاڵا بۆ کۆگا'])) {
         $expense_type = 'خەرجی تر';
     }
     $material_id = $_POST['material_id'] ?? null;
@@ -65,8 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $material_purchase_price_iqd = !empty($_POST['material_purchase_price_iqd']) ? floatval($_POST['material_purchase_price_iqd']) : 0;
     $material_purchase_price_usd = !empty($_POST['material_purchase_price_usd']) ? floatval($_POST['material_purchase_price_usd']) : 0;
     $material_total_cost = !empty($_POST['material_total_cost']) ? floatval($_POST['material_total_cost']) : 0;
-    $gas_purchase_price_input = !empty($_POST['gas_purchase_price_input']) ? floatval($_POST['gas_purchase_price_input']) : 0;
-    $gas_total_cost = !empty($_POST['gas_total_cost']) ? floatval($_POST['gas_total_cost']) : 0;
+
     $payment_type = $_POST['payment_type'] ?? 'نەقد'; // Default to نەقد if empty
     // Ensure payment_type is valid
     if (!in_array($payment_type, ['نەقد', 'قەرز'])) {
@@ -166,30 +165,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Check gas availability for gas usage expenses
-    if ($expense_type === 'بەکارهێنانی گاز' && $gas_liters && $gas_liters > 0) {
-        // Get current gas amount in the tank
-        $gas_sql = "SELECT amount FROM bins_silos WHERE type = 'تەنکی' AND material_type = 'گاز' LIMIT 1";
-        $gas_stmt = $pdo->prepare($gas_sql);
-        $gas_stmt->execute();
-        $gas_tank = $gas_stmt->fetch(PDO::FETCH_ASSOC);
-        
-        if (!$gas_tank) {
-            echo json_encode(['success' => false, 'msg' => 'تەنکی گاز لە سیستەمەکەدا نییە']);
-            exit;
-        }
-        
-        $available_gas = floatval($gas_tank['amount']);
-        $required_gas = floatval($gas_liters);
-        
-        if ($available_gas < $required_gas) {
-            echo json_encode([
-                'success' => false, 
-                'msg' => "بڕی گاز لە تەنکی کەمە. بڕی بەردەست: {$available_gas} لیتر، بڕی پێویست: {$required_gas} لیتر"
-            ]);
-            exit;
-        }
-    }
+
 
     // Check for invoice_number
     if (empty($invoice_number)) {
@@ -313,15 +289,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $person_id,
             $employee_id ?: null,
             $obj['car_id'],
-            $gas_liters,
+            null, // gas_liters
             $obj['expense_type'],
             $obj['material_id'],
             $obj['material_quantity'],
             $material_purchase_price_iqd,
             $material_purchase_price_usd,
             $material_total_cost,
-            $gas_purchase_price_input,
-            $gas_total_cost,
+            0, // gas_purchase_price_input
+            0, // gas_total_cost
             $payment_type,
             $currency_type,
             $invoice_number,
