@@ -47,11 +47,11 @@ try {
         $filter_params[] = $company_id;
     }
     if ($location_id) {
-        $filter_conditions[] = "EXISTS (SELECT 1 FROM locations l WHERE l.id = ? AND l.name = p.location)";
+        $filter_conditions[] = "l.id = ?";
         $filter_params[] = $location_id;
     }
     if ($driver_id) {
-        $filter_conditions[] = "EXISTS (SELECT 1 FROM drivers d WHERE d.id = ? AND d.name = p.driver)";
+        $filter_conditions[] = "d.id = ?";
         $filter_params[] = $driver_id;
     }
     if ($material_id) {
@@ -91,15 +91,17 @@ try {
             SUM(p.remaining_usd) as remaining_usd, 
             SUM(p.remaining_iqd) as remaining_iqd,
             SUM(p.remaining_iqd / NULLIF(p.exchange_rate / 100, 0)) as remaining_iqd_converted,
-            SUM(p.price) as total_price_usd,
-            SUM(p.amount_iqd) as total_price_iqd
+            SUM(CASE WHEN p.type = 'دۆلار' THEN p.price ELSE 0 END) as total_price_usd,
+            SUM(CASE WHEN p.type = 'دینار' THEN p.amount_iqd ELSE 0 END) as total_price_iqd
         FROM purchases p
+        LEFT JOIN locations l ON p.location = l.name
+        LEFT JOIN drivers d ON p.driver = d.name
         $filter_sql
     ";
     
     $stmt = $pdo->prepare($purchase_stats_sql);
     $stmt->execute($filter_params);
-    $row = $stmt->fetch();
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
     
     $total_debt_usd += floatval($row['remaining_usd'] ?? 0);
     $total_debt_usd += floatval($row['remaining_iqd_converted'] ?? 0);

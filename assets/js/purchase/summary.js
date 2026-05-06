@@ -47,6 +47,7 @@ function loadPurchaseSummary(filterParams = '') {
     fetch(url)
         .then(response => response.json())
         .then(result => {
+            console.log('Summary Data Received:', result);
             if (!result.success) {
                 console.error('Error loading summary:', result.error);
                 return;
@@ -55,17 +56,25 @@ function loadPurchaseSummary(filterParams = '') {
             const data = result.data;
             
             // Update total price cards
-            $('#total-price-usd').text('$' + formatCurrency(data.total_price_usd));
-            $('#total-price-iqd').text(formatNumber(data.total_price_iqd));
+            if (data.total_price_usd !== undefined) {
+                $('#total-price-usd').text('$' + formatCurrency(data.total_price_usd));
+            }
+            if (data.total_price_iqd !== undefined) {
+                $('#total-price-iqd').text(formatNumber(data.total_price_iqd));
+            }
             
             // Update total companies card
-            $('#total-companies').text(formatNumber(data.total_companies));
+            if (data.total_companies !== undefined) {
+                $('#total-companies').text(formatNumber(data.total_companies));
+            }
             
             // Update indebted companies card
-            $('#indebted-companies').text(formatNumber(data.indebted_companies));
+            if (data.indebted_companies !== undefined) {
+                $('#indebted-companies').text(formatNumber(data.indebted_companies));
+            }
         })
         .catch(error => {
-            console.error('Error:', error);
+            console.error('Fetch Error:', error);
         });
 }
 
