@@ -86,7 +86,7 @@ try {
             'vehicle' => $row['vehicle_name'],
             'qty' => $row['qty'] . ' ' . $row['unit'],
             'cost_usd' => $line_usd,
-            'cost_iqd' => $line_iqd,
+            'cost_iqd' => 0, // Show nothing in IQD for USD records
             'type' => 'کاڵا بەکارهاتن'
         ];
         // Spare parts are always USD
@@ -98,19 +98,20 @@ try {
         $row_ex_rate = floatval($row['exchange_rate'] ?: $current_ex_rate);
         $display_usd = 0;
         $display_iqd = 0;
+        $is_usd = false;
 
         if (floatval($row['amount_usd']) > 0) {
             $display_usd = floatval($row['amount_usd']);
-            $display_iqd = $display_usd * ($row_ex_rate / 100);
             $total_pure_usd += $display_usd;
+            $is_usd = true;
         } else if (floatval($row['amount_iqd']) > 0) {
             $display_iqd = floatval($row['amount_iqd']);
-            $display_usd = $display_iqd / ($row_ex_rate / 100);
             $total_pure_iqd += $display_iqd;
+            $is_usd = false;
         } else if (floatval($row['gas_total_cost']) > 0) {
             $display_iqd = floatval($row['gas_total_cost']);
-            $display_usd = $display_iqd / ($row_ex_rate / 100);
             $total_pure_iqd += $display_iqd;
+            $is_usd = false;
         }
 
         $qty_str = '-';
@@ -124,8 +125,8 @@ try {
             'category' => $row['expense_type'],
             'vehicle' => $row['vehicle_name'],
             'qty' => $qty_str,
-            'cost_usd' => $display_usd,
-            'cost_iqd' => $display_iqd,
+            'cost_usd' => $is_usd ? $display_usd : 0,
+            'cost_iqd' => !$is_usd ? $display_iqd : 0,
             'type' => 'خەرجی گشتی'
         ];
     }

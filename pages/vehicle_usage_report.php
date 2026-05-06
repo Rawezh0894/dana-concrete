@@ -411,8 +411,8 @@ if (!isset($_SESSION['user_id'])) {
                             </td>
                             <td>${row.vehicle}</td>
                             <td>${row.qty}</td>
-                            <td class="fw-bold text-primary">$${Number(row.cost_usd).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                            <td class="fw-bold text-success">${Number(row.cost_iqd).toLocaleString()} د.ع</td>
+                            <td class="fw-bold text-primary">${row.cost_usd > 0 ? '$' + Number(row.cost_usd).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '-'}</td>
+                            <td class="fw-bold text-success">${row.cost_iqd > 0 ? Number(row.cost_iqd).toLocaleString() + ' د.ع' : '-'}</td>
                         </tr>
                     `;
                 });
