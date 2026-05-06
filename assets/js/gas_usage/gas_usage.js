@@ -106,6 +106,26 @@ $(document).ready(function() {
     $('#btnFilter').click(function() {
         loadGasData();
     });
+
+    // Event delegation for edit and delete buttons
+    $(document).on('click', '.edit-gas', function() {
+        const id = $(this).data('id');
+        // Find row data from grid api
+        let rowData;
+        gasGridApi.forEachNode(node => {
+            if (node.data.id == id) {
+                rowData = node.data;
+            }
+        });
+        if (rowData) {
+            openEditModal(rowData);
+        }
+    });
+
+    $(document).on('click', '.delete-gas', function() {
+        const id = $(this).data('id');
+        deleteGasRecord(id);
+    });
 });
 
 function loadGasData() {

@@ -43,14 +43,15 @@ const columnDefs = [
         valueFormatter: params => params.value ? parseFloat(params.value).toLocaleString() : '0'
     },
     {
-        headerName: "کردارەکان",
+        headerName: "کردارەکان (ئەپدەیٹ)",
         width: 180,
         cellRenderer: params => {
+            if (!params.data) return '-';
             return `<div class="d-flex gap-2">
-                        <button class="btn btn-sm btn-warning rounded-3" onclick="openEditModal(${JSON.stringify(params.data).replace(/"/g, '&quot;')})">
+                        <button class="btn btn-sm btn-warning rounded-3 edit-gas" data-id="${params.data.id}" title="نوێکردنەوە">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button class="btn btn-sm btn-danger rounded-3" onclick="deleteGasRecord(${params.data.id})">
+                        <button class="btn btn-sm btn-danger rounded-3 delete-gas" data-id="${params.data.id}" title="سڕینەوە">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>`;
