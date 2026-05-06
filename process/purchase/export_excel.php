@@ -194,7 +194,9 @@ try {
             // Start Excel content for summary with UTF-8 BOM
             echo "\xEF\xBB\xBF"; // UTF-8 BOM
             echo '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
-            echo '<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body>';
+            echo '<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8">';
+            echo '<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Summary</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->';
+            echo '</head><body>';
             echo '<table border="1">';
             echo '<tr><th colspan="2" style="background-color: #2196F3; color: white; font-size: 16px;">کورتەی کڕینەکان</th></tr>';
             echo '<tr><td>بەروار</td><td>' . date('Y-m-d') . '</td></tr>';
@@ -264,11 +266,10 @@ try {
         } else {
             // Start Excel content for monthly report with UTF-8 BOM
             echo "\xEF\xBB\xBF"; // UTF-8 BOM
-        echo '<!DOCTYPE html>';
         echo '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
         echo '<head>';
         echo '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">';
-        echo '<meta charset="UTF-8">';
+        echo '<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Monthly Report</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->';
         echo '<style>';
         echo 'table { border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; }';
         echo 'th, td { border: 1px solid #000; padding: 8px; text-align: center; }';
@@ -342,11 +343,10 @@ try {
         } else {
             // Start Excel content for detailed export with UTF-8 BOM
             echo "\xEF\xBB\xBF"; // UTF-8 BOM
-        echo '<!DOCTYPE html>';
         echo '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
         echo '<head>';
         echo '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">';
-        echo '<meta charset="UTF-8">';
+        echo '<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Purchases</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->';
         echo '<style>';
         echo 'table { border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; }';
         echo 'th, td { border: 1px solid #000; padding: 8px; text-align: center; }';
