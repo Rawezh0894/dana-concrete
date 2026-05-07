@@ -145,6 +145,12 @@ document.addEventListener('DOMContentLoaded', function () {
             updateRemaining();
         }
         window.updateRemaining = function () {
+            const paymentType = document.getElementById('payment_type');
+            if (paymentType && paymentType.value === 'نەقد') {
+                paidIqd.value = amountIqd.value;
+                paidUsd.value = amountUsd.value;
+            }
+
             let amountIqdVal = parseFloat(amountIqd.value) || 0;
             let amountUsdVal = parseFloat(amountUsd.value) || 0;
             let paidIqdVal = parseFloat(paidIqd.value) || 0;
@@ -181,6 +187,12 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
         currencyType.addEventListener('change', handleCurrencyChange);
+        
+        const paymentTypeSelect = document.getElementById('payment_type');
+        if (paymentTypeSelect) {
+            paymentTypeSelect.addEventListener('change', updateRemaining);
+        }
+
         [amountIqd, paidIqd, amountUsd, paidUsd, exchangeRate].forEach(input => {
             if (input) input.addEventListener('input', updateRemaining);
         });
