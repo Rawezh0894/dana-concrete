@@ -102,13 +102,8 @@ function updateAmountsFor(prefix) {
         $('#' + prefix + 'remaining_iqd').prop('readonly', true);
         $('#' + prefix + 'remaining_usd').prop('readonly', false);
 
-        // Calculate amount_iqd from price and exchange_rate if not focused
-        if (!amountIqdFocused) {
-            const currentPrice = parseFloat($('#' + prefix + 'price').val()) || 0;
-            const calculatedAmountIqd = currentPrice * exchange_rate / 100;
-            const flooredA = Math.floor(calculatedAmountIqd / 1000) * 1000;
-            $('#' + prefix + 'amount_iqd').val(flooredA.toFixed(0));
-        }
+        // Do not calculate amount_iqd from price when type is دۆلار
+        // (Removing automatic calculation as requested)
 
         // Also round paid_iqd if not focused
         const paidIqdFocused = document.activeElement === document.getElementById(prefix + 'paid_iqd');
