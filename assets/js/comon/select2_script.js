@@ -330,6 +330,6 @@ $(document).on('select2:open', function (e) {
 // Add CSS for select2 dropdown scroll
 if (typeof window !== 'undefined') {
     var style = document.createElement('style');
-    style.innerHTML = '.select2-results__options { max-height: 220px !important; overflow-y: auto !important; }';
+    style.innerHTML = '.select2-results__options { max-height: 450px !important; overflow-y: auto !important; }';
     document.head.appendChild(style);
 }
