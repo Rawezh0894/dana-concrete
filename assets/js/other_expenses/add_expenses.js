@@ -171,6 +171,10 @@ if (addExpenseForm) {
                     loadOtherExpenses();
                 }
                 addExpenseForm.reset();
+                // Reset Select2 components
+                if (typeof $ !== 'undefined' && $.fn.select2) {
+                    $(addExpenseForm).find('.select2').val('').trigger('change');
+                }
                 // Reset split mode and other UI states after success
                 isSplitMode = false;
                 document.getElementById('splitItemsContainer').style.display = 'none';
