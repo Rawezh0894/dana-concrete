@@ -317,14 +317,12 @@ $(document).ready(function () {
     }
 });
 
-// Focus select2 search input when dropdown opens for customer select in addConcreteReceiptModal
+// Focus select2 search input when dropdown opens
 $(document).on('select2:open', function (e) {
-    if (e.target && (e.target.id === 'customer_id' || e.target.id === 'edit_customer_id')) {
-        setTimeout(function () {
-            let searchBox = document.querySelector('.select2-container--open .select2-search__field');
-            if (searchBox) searchBox.focus();
-        }, 10);
-    }
+    setTimeout(function () {
+        let searchBox = document.querySelector('.select2-container--open .select2-search__field');
+        if (searchBox) searchBox.focus();
+    }, 10);
 });
 
 // Add CSS for select2 dropdown scroll
