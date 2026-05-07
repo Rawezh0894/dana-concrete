@@ -112,6 +112,10 @@ document.getElementById('addPurchaseForm').onsubmit = async function(e) {
         if (data.success) {
             Swal.fire('سەرکەوتوو!', 'کڕین زیادکرا', 'success');
             form.reset();
+            // Reset Select2 components manually
+            if (typeof $.fn.select2 === 'function') {
+                $(form).find('.select2').val('').trigger('change');
+            }
             var modal = bootstrap.Modal.getInstance(document.getElementById('addPurchaseModal'));
             modal.hide();
             if (typeof reloadPurchases === 'function') {
