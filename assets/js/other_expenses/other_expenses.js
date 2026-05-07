@@ -100,15 +100,30 @@ document.addEventListener('DOMContentLoaded', function () {
     const addExpenseModal = document.getElementById('addExpenseModal');
     if (addExpenseModal && dateInput) {
         addExpenseModal.addEventListener('show.bs.modal', function () {
-            const today = new Date();
-            const yyyy = today.getFullYear();
-            const mm = String(today.getMonth() + 1).padStart(2, '0');
-            const dd = String(today.getDate()).padStart(2, '0');
-            dateInput.value = `${yyyy}-${mm}-${dd}`;
+            // Only set today's date if the field is empty
+            if (!dateInput.value) {
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                const dd = String(today.getDate()).padStart(2, '0');
+                dateInput.value = `${yyyy}-${mm}-${dd}`;
+            }
 
-            // Fetch and populate exchange rate
-            fetchAndPopulateExchangeRate();
+            // Only fetch and populate exchange rate if it's empty or 0
+            const exRate = document.getElementById('exchange_rate');
+            if (!exRate || !exRate.value || parseFloat(exRate.value) === 0) {
+                fetchAndPopulateExchangeRate();
+            }
         });
+    }
+
+    // Initialize date on page load if it's empty
+    if (dateInput && !dateInput.value) {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        dateInput.value = `${yyyy}-${mm}-${dd}`;
     }
     if (currencyType && amountIqd && amountUsd && paidIqd && paidUsd && exchangeRate) {
         // Set default option for currency type
@@ -293,18 +308,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     // Initialize field visibility when modals are shown
+    /*
     if (addExpenseModal) {
         addExpenseModal.addEventListener('show.bs.modal', function () {
-            // Hide all gas and material fields initially
-            toggleGasMaterialFields('', 'add');
+            // This was causing resets, handled by initial form state now
+            // toggleGasMaterialFields('', 'add');
         });
     }
+    */
 
     const editExpenseModal = document.getElementById('editExpenseModal');
     if (editExpenseModal) {
         editExpenseModal.addEventListener('show.bs.modal', function () {
-            // Hide all gas and material fields initially
-            toggleGasMaterialFields('', 'edit');
+            // For edit modal, we want to reset based on current selection which happens in openEditModalById
         });
     }
 

@@ -171,6 +171,13 @@ if (addExpenseForm) {
                     loadOtherExpenses();
                 }
                 addExpenseForm.reset();
+                // Reset split mode and other UI states after success
+                isSplitMode = false;
+                document.getElementById('splitItemsContainer').style.display = 'none';
+                document.getElementById('singleCarContainer').style.display = 'block';
+                document.getElementById('invoiceSplitsList').innerHTML = '';
+                document.getElementById('toggleSplitCars').innerText = 'دابەشکردن';
+                if (typeof fetchAndPopulateExchangeRate === 'function') fetchAndPopulateExchangeRate();
             } else {
                 console.error('Server returned error:', data.msg);
                 Swal.fire('هەڵە!', data.msg || 'هەڵەیەک ڕویدا', 'error');
@@ -284,29 +291,28 @@ async function fetchAndSetUsdRate() {
     }
 }
 
+// Initial population on page load
+$(document).ready(function() {
+    populateSelect('../process/other_expenses/select_persons.php', 'person_id');
+    populateSelect('../process/other_expenses/select_employees.php', 'employee_id');
+    populateSelect('../process/other_expenses/select_cars.php', 'car_id').then(() => {
+        const carSelect = document.getElementById('car_id');
+        if (carSelect) carOptionsHtml = carSelect.innerHTML;
+    });
+    
+    // Fetch exchange rate once on load
+    fetchAndSetUsdRate();
+});
+
+// Remove the show.bs.modal listener that was causing resets
+/*
 const addExpenseModal = document.getElementById('addExpenseModal');
 if (addExpenseModal) {
     addExpenseModal.addEventListener('show.bs.modal', function () {
-        populateSelect('../process/other_expenses/select_persons.php', 'person_id');
-        populateSelect('../process/other_expenses/select_employees.php', 'employee_id');
-        populateSelect('../process/other_expenses/select_cars.php', 'car_id').then(() => {
-            // Save car options for future rows
-            const carSelect = document.getElementById('car_id');
-            carOptionsHtml = carSelect.innerHTML;
-        });
-
-
-        // Reset split mode
-        isSplitMode = false;
-        document.getElementById('splitItemsContainer').style.display = 'none';
-        document.getElementById('singleCarContainer').style.display = 'block';
-        document.getElementById('invoiceSplitsList').innerHTML = '';
-        document.getElementById('toggleSplitCars').innerText = 'دابەشکردن';
-
-        // Fetch and set USD exchange rate when modal opens
-        fetchAndSetUsdRate();
+        // This was causing the form to reset every time it opened
     });
 }
+*/
 
 // Split Mode Toggling
 document.getElementById('toggleSplitCars')?.addEventListener('click', function () {
