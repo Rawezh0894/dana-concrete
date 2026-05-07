@@ -167,7 +167,7 @@ if (!isset($_SESSION['user_id'])) {
             <!-- Entity Filters -->
             <div class="col-md-3">
               <label for="carFilter" class="form-label">سەیارە:</label>
-              <select id="carFilter" class="form-control">
+              <select id="carFilter" class="form-control select2">
                 <option value="">هەموو سەیارەکان</option>
               </select>
               <div class="auto-filter-indicator mt-1">
@@ -177,7 +177,7 @@ if (!isset($_SESSION['user_id'])) {
             </div>
             <div class="col-md-3">
               <label for="employeeFilter" class="form-label">کارمەند:</label>
-              <select id="employeeFilter" class="form-control">
+              <select id="employeeFilter" class="form-control select2">
                 <option value="">هەموو کارمەندەکان</option>
               </select>
               <div class="auto-filter-indicator mt-1">
@@ -278,7 +278,7 @@ if (!isset($_SESSION['user_id'])) {
           <div class="mb-3 row">
             <div class="col-md-4">
               <label for="employee_id" class="form-label">کارمەند</label>
-              <select class="form-control" id="employee_id" name="employee_id">
+              <select class="form-control select2" id="employee_id" name="employee_id">
                 <option value="">-- هەلبژێرە --</option>
               </select>
             </div>
@@ -288,7 +288,7 @@ if (!isset($_SESSION['user_id'])) {
                 <button type="button" id="toggleSplitCars" class="btn btn-sm btn-outline-primary" style="font-size: 0.7rem; padding: 2px 5px;">دابەشکردن</button>
               </label>
               <div id="singleCarContainer">
-                <select class="form-control" id="car_id" name="car_id">
+                <select class="form-control select2" id="car_id" name="car_id">
                   <option value="">-- هەلبژێرە --</option>
                 </select>
               </div>
@@ -454,13 +454,13 @@ if (!isset($_SESSION['user_id'])) {
           <div class="mb-3 row">
             <div class="col-md-4">
               <label for="edit_employee_id" class="form-label">کارمەند</label>
-              <select class="form-control" id="edit_employee_id" name="employee_id">
+              <select class="form-control select2" id="edit_employee_id" name="edit_employee_id">
                 <option value="">-- هەلبژێرە --</option>
               </select>
             </div>
             <div class="col-md-4">
               <label for="edit_car_id" class="form-label">سەیارە</label>
-              <select class="form-control" id="edit_car_id" name="car_id">
+              <select class="form-control select2" id="edit_car_id" name="edit_car_id">
                 <option value="">-- هەلبژێرە --</option>
               </select>
             </div>

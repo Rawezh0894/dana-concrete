@@ -296,14 +296,24 @@ $(document).ready(function () {
     if ($('#addExpenseModal').length > 0) {
         enableSelect2('#person_id', '#addExpenseModal');
         enableSelect2('#material_id', '#addExpenseModal');
+        enableSelect2('#employee_id', '#addExpenseModal');
+        enableSelect2('#car_id', '#addExpenseModal');
     }
     if ($('#editExpenseModal').length > 0) {
         enableSelect2('#edit_person_id', '#editExpenseModal');
         enableSelect2('#edit_material_id', '#editExpenseModal');
+        enableSelect2('#edit_employee_id', '#editExpenseModal');
+        enableSelect2('#edit_car_id', '#editExpenseModal');
     }
     // بۆ other expenses filters - تەنها ئەگەر پەیجەکە هەبێت
     if ($('#personFilter').length > 0) {
         enableSelect2('#personFilter', 'body');
+    }
+    if ($('#carFilter').length > 0) {
+        enableSelect2('#carFilter', 'body');
+    }
+    if ($('#employeeFilter').length > 0) {
+        enableSelect2('#employeeFilter', 'body');
     }
 });
 
