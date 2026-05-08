@@ -677,12 +677,12 @@ usort($recipients, function($a, $b) {
       canDelete: <?php echo hasPermission('delete_sale') ? 'true' : 'false'; ?>
     };
 </script>
-<script src="../assets/js/sale/add_sale.js" nonce="<?php echo $csp_nonce; ?>"></script>
-<script src="../assets/js/sale/ag_grid_sale.js" nonce="<?php echo $csp_nonce; ?>"></script>
-<script src="../assets/js/sale/delete_sale.js" nonce="<?php echo $csp_nonce; ?>"></script>
-<script src="../assets/js/sale/update_sale.js" nonce="<?php echo $csp_nonce; ?>"></script>
-<script src="../assets/js/sale/sale.js" nonce="<?php echo $csp_nonce; ?>"></script>
-<script src="../assets/js/sale/summary_cards.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/sale/add_sale.js?v=1.1" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/sale/ag_grid_sale.js?v=1.1" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/sale/delete_sale.js?v=1.1" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/sale/update_sale.js?v=1.1" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/sale/sale.js?v=1.1" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/sale/summary_cards.js?v=1.1" nonce="<?php echo $csp_nonce; ?>"></script>
 
 <script nonce="<?php echo $csp_nonce; ?>">
 // Filter functionality for customer and date

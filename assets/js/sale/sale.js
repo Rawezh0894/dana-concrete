@@ -1,5 +1,6 @@
 // Calculate total price and set it as readonly
 $(document).ready(function() {
+    console.log('Sale JS v1.1 loaded - unit price auto-calc disabled');
     // Set total_price inputs to readonly
     $('#total_price, #edit_total_price').prop('readonly', true);
     $('#remaining_amount, #edit_remaining_amount').prop('readonly', true);
