@@ -97,14 +97,27 @@ try {
     $stmt->execute([$person_id]);
     $remaining_purchase = $stmt->fetch(PDO::FETCH_ASSOC);
     
-    // Calculate our debt (opening debt + remaining amounts)
+    // Get adjustments
+    $stmt = $pdo->prepare("
+        SELECT 
+            SUM(amount_usd) as total_adj_usd,
+            SUM(amount_iqd) as total_adj_iqd
+        FROM person_other_expenses_adjustments
+        WHERE person_id = ?
+    ");
+    $stmt->execute([$person_id]);
+    $adjustments = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    // Calculate our debt (opening debt + adjustments + remaining amounts)
     $our_debt_usd = ($person['opening_debt_usd'] ?? 0) + 
+                   ($adjustments['total_adj_usd'] ?? 0) +
                    ($remaining_expenses['total_remaining_usd'] ?? 0) + 
-                   max(0, ($remaining_purchase['total_remaining_usd_purchase'] ?? 0)); // Ensure non-negative
+                   max(0, ($remaining_purchase['total_remaining_usd_purchase'] ?? 0));
     
     $our_debt_iqd = ($person['opening_debt_iqd'] ?? 0) + 
+                   ($adjustments['total_adj_iqd'] ?? 0) +
                    ($remaining_expenses['total_remaining_iqd'] ?? 0) + 
-                   max(0, ($remaining_purchase['total_remaining_iqd_purchase'] ?? 0)); // Ensure non-negative
+                   max(0, ($remaining_purchase['total_remaining_iqd_purchase'] ?? 0));
     
     $responseData = [
         'total_expense_usd' => (float)($expenses['total_expense_usd'] ?? 0),
@@ -114,6 +127,8 @@ try {
         'our_debt_iqd' => (float)$our_debt_iqd,
         'opening_debt_usd' => (float)($person['opening_debt_usd'] ?? 0),
         'opening_debt_iqd' => (float)($person['opening_debt_iqd'] ?? 0),
+        'adjustment_usd' => (float)($adjustments['total_adj_usd'] ?? 0),
+        'adjustment_iqd' => (float)($adjustments['total_adj_iqd'] ?? 0),
         'remaining_expenses_usd' => (float)($remaining_expenses['total_remaining_usd'] ?? 0),
         'remaining_expenses_iqd' => (float)($remaining_expenses['total_remaining_iqd'] ?? 0),
         'remaining_purchase_usd' => max(0, (float)($remaining_purchase['total_remaining_usd_purchase'] ?? 0)),

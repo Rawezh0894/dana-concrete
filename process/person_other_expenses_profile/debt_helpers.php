@@ -30,8 +30,20 @@ function getPersonDebtSnapshot(PDO $pdo, int $personId): array
     $purchasesStmt->execute([$personId]);
     $purchases = $purchasesStmt->fetch(PDO::FETCH_ASSOC);
 
+    $adjStmt = $pdo->prepare("
+        SELECT 
+            COALESCE(SUM(amount_usd), 0) AS total_adj_usd,
+            COALESCE(SUM(amount_iqd), 0) AS total_adj_iqd
+        FROM person_other_expenses_adjustments
+        WHERE person_id = ?
+    ");
+    $adjStmt->execute([$personId]);
+    $adjustments = $adjStmt->fetch(PDO::FETCH_ASSOC);
+
     $openingUsd = (float)($person['opening_debt_usd'] ?? 0);
     $openingIqd = (float)($person['opening_debt_iqd'] ?? 0);
+    $adjUsd = (float)($adjustments['total_adj_usd'] ?? 0);
+    $adjIqd = (float)($adjustments['total_adj_iqd'] ?? 0);
     $expensesUsd = (float)($expenses['remaining_usd'] ?? 0);
     $expensesIqd = (float)($expenses['remaining_iqd'] ?? 0);
     $purchasesUsd = (float)($purchases['remaining_usd'] ?? 0);
@@ -40,12 +52,14 @@ function getPersonDebtSnapshot(PDO $pdo, int $personId): array
     return [
         'opening_debt_usd' => $openingUsd,
         'opening_debt_iqd' => $openingIqd,
+        'adjustment_usd' => $adjUsd,
+        'adjustment_iqd' => $adjIqd,
         'remaining_expenses_usd' => $expensesUsd,
         'remaining_expenses_iqd' => $expensesIqd,
         'remaining_purchases_usd' => $purchasesUsd,
         'remaining_purchases_iqd' => $purchasesIqd,
-        'total_debt_usd' => $openingUsd + $expensesUsd + $purchasesUsd,
-        'total_debt_iqd' => $openingIqd + $expensesIqd + $purchasesIqd,
+        'total_debt_usd' => $openingUsd + $expensesUsd + $purchasesUsd + $adjUsd,
+        'total_debt_iqd' => $openingIqd + $expensesIqd + $purchasesIqd + $adjIqd,
     ];
 }
 

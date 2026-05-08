@@ -37,6 +37,7 @@ function updateSummaryCards(data) {
     // Add tooltip with breakdown for USD debt
     $('#summary_our_debt_usd').attr('title', 
         'قەرزی سەرەتایی: ' + Number(data.opening_debt_usd || 0).toLocaleString('en-US') + ' $' +
+        '\nڕێکخستنەوە: ' + Number(data.adjustment_usd || 0).toLocaleString('en-US') + ' $' +
         '\nماوەی خەرجیەکان: ' + Number(data.remaining_expenses_usd || 0).toLocaleString('en-US') + ' $' +
         '\nماوەی کڕینەکان: ' + Number(data.remaining_purchase_usd || 0).toLocaleString('en-US') + ' $'
     );
@@ -44,6 +45,7 @@ function updateSummaryCards(data) {
     // Add tooltip with breakdown for IQD debt
     $('#summary_our_debt_iqd').attr('title', 
         'قەرزی سەرەتایی: ' + Number(data.opening_debt_iqd || 0).toLocaleString('en-US') + ' د.ع' +
+        '\nڕێکخستنەوە: ' + Number(data.adjustment_iqd || 0).toLocaleString('en-US') + ' د.ع' +
         '\nماوەی خەرجیەکان: ' + Number(data.remaining_expenses_iqd || 0).toLocaleString('en-US') + ' د.ع' +
         '\nماوەی کڕینەکان: ' + Number(data.remaining_purchase_iqd || 0).toLocaleString('en-US') + ' د.ع'
     );

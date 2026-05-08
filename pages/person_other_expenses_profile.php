@@ -132,6 +132,10 @@ $default_rate = $rate ? $rate : 150000;
                 <button class="nav-link" id="debt-tab" data-bs-toggle="tab" data-bs-target="#debt" type="button"
                     role="tab" aria-controls="debt" aria-selected="false">مێژووی دانەوە</button>
             </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="adjustment-tab" data-bs-toggle="tab" data-bs-target="#adjustment" type="button"
+                    role="tab" aria-controls="adjustment" aria-selected="false">ڕێکخستنەوە</button>
+            </li>
         </ul>
         <div class="tab-content" id="profileTabsContent">
             <div class="tab-pane fade show active" id="expenses" role="tabpanel" aria-labelledby="expenses-tab">
@@ -210,6 +214,54 @@ $default_rate = $rate ? $rate : 150000;
                     <table class="table table-bordered table-hover align-middle text-center" id="debtTable">
                         <!-- DataTables will build the table structure -->
                     </table>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="adjustment" role="tabpanel" aria-labelledby="adjustment-tab">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">ڕێکخستنەوەی قەرز</h5>
+                    <button class="btn"
+                        style="background: var(--seafoam-green); color: #fff; border: none; font-weight: bold;"
+                        data-bs-toggle="modal" data-bs-target="#addAdjustmentModal"><i class="fa fa-plus"></i> ڕێکخستنەوە</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle text-center" id="adjustmentTable">
+                        <!-- DataTables will build the table structure -->
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- Add Adjustment Modal -->
+        <div class="modal fade" id="addAdjustmentModal" tabindex="-1" aria-labelledby="addAdjustmentModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form id="addAdjustmentForm">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="addAdjustmentModalLabel">ڕێکخستنەوەی نوێ</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="adj_date" class="form-label">بەروار</label>
+                                <input type="date" class="form-control" id="adj_date" name="date" required value="<?php echo date('Y-m-d'); ?>">
+                            </div>
+                            <div class="mb-3">
+                                <label for="adj_amount_usd" class="form-label">بڕی دۆلار (بۆ کەمکردنەوە (-) دابنێ)</label>
+                                <input type="number" class="form-control" id="adj_amount_usd" name="amount_usd" step="0.01" value="0">
+                            </div>
+                            <div class="mb-3">
+                                <label for="adj_amount_iqd" class="form-label">بڕی دینار (بۆ کەمکردنەوە (-) دابنێ)</label>
+                                <input type="number" class="form-control" id="adj_amount_iqd" name="amount_iqd" step="0.01" value="0">
+                            </div>
+                            <div class="mb-3">
+                                <label for="adj_note" class="form-label">تێبینی</label>
+                                <textarea class="form-control" id="adj_note" name="note" rows="2" required></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
+                            <button type="submit" class="btn" style="background: var(--seafoam-green); color: #fff; border: none; font-weight: bold;">تۆمارکردن</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -404,6 +456,10 @@ $default_rate = $rate ? $rate : 150000;
     <script src="../assets/js/person_other_expenses_profile/update_debt.js?v=1.1" nonce="<?php echo $csp_nonce; ?>"></script>
     <script src="../assets/js/person_other_expenses_profile/delete_debt.js?v=1.1" nonce="<?php echo $csp_nonce; ?>"></script>
     <script src="../assets/js/person_other_expenses_profile/summary_cards.js?v=1.1" nonce="<?php echo $csp_nonce; ?>"></script>
+    <script src="../assets/js/person_other_expenses_profile/select_adjustments.js?v=1.1" nonce="<?php echo $csp_nonce; ?>"></script>
+    <script src="../assets/js/person_other_expenses_profile/add_adjustment.js?v=1.1" nonce="<?php echo $csp_nonce; ?>"></script>
+    <script src="../assets/js/person_other_expenses_profile/delete_adjustment.js?v=1.1" nonce="<?php echo $csp_nonce; ?>"></script>
+    <script src="../assets/js/person_other_expenses_profile/adjustments.js?v=1.1" nonce="<?php echo $csp_nonce; ?>"></script>
     
     <script nonce="<?php echo $csp_nonce; ?>">
         // Check summary card remaining amounts function
