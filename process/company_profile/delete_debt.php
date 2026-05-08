@@ -47,10 +47,11 @@ try {
     $company_name = $company['name'] ?? 'Unknown';
 
     $dollar_rate = floatval($payment['dollar_rate'] ?? 0);
-    restoreCompanyCurrencyAmount($pdo, $company_id, 'usd', floatval($payment['amount_usd'] ?? 0), $dollar_rate);
-    restoreCompanyCurrencyAmount($pdo, $company_id, 'usd', floatval($payment['discount_usd'] ?? 0), $dollar_rate);
-    restoreCompanyCurrencyAmount($pdo, $company_id, 'iqd', floatval($payment['amount_iqd'] ?? 0), $dollar_rate);
-    restoreCompanyCurrencyAmount($pdo, $company_id, 'iqd', floatval($payment['discount_iqd'] ?? 0), $dollar_rate);
+    $net_usd = floatval($payment['amount_usd'] ?? 0) + floatval($payment['discount_usd'] ?? 0) - floatval($payment['change_back_usd'] ?? 0);
+    $net_iqd = floatval($payment['amount_iqd'] ?? 0) + floatval($payment['discount_iqd'] ?? 0) - floatval($payment['change_back_iqd'] ?? 0);
+
+    restoreCompanyCurrencyAmount($pdo, $company_id, 'usd', $net_usd, $dollar_rate);
+    restoreCompanyCurrencyAmount($pdo, $company_id, 'iqd', $net_iqd, $dollar_rate);
 
     $delete = $pdo->prepare('DELETE FROM debt_payments WHERE id = ?');
     if (!$delete->execute([$id])) {

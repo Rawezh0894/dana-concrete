@@ -20,27 +20,37 @@ function recalculateAmounts() {
     let amount_iqd = parseFloat($('#debt_amount_iqd').val()) || 0;
     let discount_usd = parseFloat($('#debt_discount_usd').val()) || 0;
     let discount_iqd = parseFloat($('#debt_discount_iqd').val()) || 0;
+    let change_back_usd = parseFloat($('#debt_change_back_usd').val()) || 0;
+    let change_back_iqd = parseFloat($('#debt_change_back_iqd').val()) || 0;
     let dollar_rate = parseFloat($('#debt_dollar_rate').val()) || 150000;
     const rateFactor = dollar_rate > 0 ? (dollar_rate / 100) : 0;
+
     if (companyCurrencyType === 'دۆلار') {
-        // Convert IQD payment and discount to USD
+        // Convert IQD fields to USD
         let effective_usd_pay = amount_usd + (rateFactor > 0 ? (amount_iqd / rateFactor) : 0);
         let effective_discount_usd = discount_usd + (rateFactor > 0 ? (discount_iqd / rateFactor) : 0);
-        let new_remaining = lastTotalRemainingUSD - (effective_usd_pay + effective_discount_usd);
+        let effective_change_back_usd = change_back_usd + (rateFactor > 0 ? (change_back_iqd / rateFactor) : 0);
+        
+        let net_reduction = (effective_usd_pay + effective_discount_usd) - effective_change_back_usd;
+        let new_remaining = lastTotalRemainingUSD - net_reduction;
+        
         $('#total_remaining_usd').val(new_remaining.toLocaleString('en-US') + ' $');
         $('#total_remaining_iqd').val('');
     } else {
-        // Convert USD payment and discount to IQD
+        // Convert USD fields to IQD
         let usd_to_iqd = amount_usd * rateFactor;
         let discount_to_iqd = discount_usd * rateFactor;
-        let total_iqd_effect = amount_iqd + discount_iqd + usd_to_iqd + discount_to_iqd;
+        let change_back_to_iqd = change_back_usd * rateFactor;
+        
+        let total_iqd_effect = (amount_iqd + discount_iqd + usd_to_iqd + discount_to_iqd) - (change_back_iqd + change_back_to_iqd);
         let new_remaining = lastTotalRemainingIQD - total_iqd_effect;
+        
         $('#total_remaining_iqd').val(new_remaining.toLocaleString('en-US') + ' د.ع');
         $('#total_remaining_usd').val('');
     }
 }
 
-$('#debt_amount_usd, #debt_amount_iqd, #debt_dollar_rate, #debt_discount_usd, #debt_discount_iqd').on('input', recalculateAmounts);
+$('#debt_amount_usd, #debt_amount_iqd, #debt_dollar_rate, #debt_discount_usd, #debt_discount_iqd, #debt_change_back_usd, #debt_change_back_iqd').on('input', recalculateAmounts);
 
 async function fetchAndSetDollarRate(inputId) {
     try {
@@ -106,6 +116,8 @@ document.getElementById('addDebtForm').onsubmit = async function(e) {
     const raw_amount_iqd = parseFloat(form.amount_iqd.value) || 0;
     const raw_discount_usd = parseFloat(form.discount_usd?.value || 0);
     const raw_discount_iqd = parseFloat(form.discount_iqd?.value || 0);
+    const raw_change_back_usd = parseFloat(form.change_back_usd?.value || 0);
+    const raw_change_back_iqd = parseFloat(form.change_back_iqd?.value || 0);
     const dollar_rate = parseFloat(form.dollar_rate?.value || 0);
     
     console.log('Form submission started');
@@ -113,10 +125,12 @@ document.getElementById('addDebtForm').onsubmit = async function(e) {
     console.log('Amount IQD:', raw_amount_iqd);
     console.log('Discount USD:', raw_discount_usd);
     console.log('Discount IQD:', raw_discount_iqd);
+    console.log('Change Back USD:', raw_change_back_usd);
+    console.log('Change Back IQD:', raw_change_back_iqd);
     console.log('Company ID:', COMPANY_ID);
     
-    if (raw_amount_usd <= 0 && raw_amount_iqd <= 0 && raw_discount_usd <= 0 && raw_discount_iqd <= 0) {
-        Swal.fire('هەڵە!', 'بە لایەنی کەم یەک بڕ پڕبکە (پارە یان داشکاندن)', 'error');
+    if (raw_amount_usd <= 0 && raw_amount_iqd <= 0 && raw_discount_usd <= 0 && raw_discount_iqd <= 0 && raw_change_back_usd <= 0 && raw_change_back_iqd <= 0) {
+        Swal.fire('هەڵە!', 'بە لایەنی کەم یەک بڕ پڕبکە', 'error');
         submitting = false;
         if (submitBtn) {
             submitBtn.disabled = false;
@@ -129,17 +143,25 @@ document.getElementById('addDebtForm').onsubmit = async function(e) {
     if (companyCurrencyType === 'دۆلار') {
         const effectiveUsd = raw_amount_usd + (rateFactor > 0 ? (raw_amount_iqd / rateFactor) : 0);
         const effectiveDiscountUsd = raw_discount_usd + (rateFactor > 0 ? (raw_discount_iqd / rateFactor) : 0);
+        const effectiveChangeBackUsd = raw_change_back_usd + (rateFactor > 0 ? (raw_change_back_iqd / rateFactor) : 0);
+        
         form.amount_usd.value = effectiveUsd;
         form.amount_iqd.value = 0;
         form.discount_usd.value = effectiveDiscountUsd;
         if (form.discount_iqd) form.discount_iqd.value = 0;
+        form.change_back_usd.value = effectiveChangeBackUsd;
+        if (form.change_back_iqd) form.change_back_iqd.value = 0;
     } else if (companyCurrencyType === 'دینار') {
         const effectiveIqd = raw_amount_iqd + (rateFactor > 0 ? (raw_amount_usd * rateFactor) : 0);
         const effectiveDiscountIqd = raw_discount_iqd + (rateFactor > 0 ? (raw_discount_usd * rateFactor) : 0);
+        const effectiveChangeBackIqd = raw_change_back_iqd + (rateFactor > 0 ? (raw_change_back_usd * rateFactor) : 0);
+        
         form.amount_iqd.value = effectiveIqd;
         form.amount_usd.value = 0;
         if (form.discount_iqd) form.discount_iqd.value = effectiveDiscountIqd;
         form.discount_usd.value = 0;
+        if (form.change_back_iqd) form.change_back_iqd.value = effectiveChangeBackIqd;
+        form.change_back_usd.value = 0;
     }
     
     const formData = new FormData(form);

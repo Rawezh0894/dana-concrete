@@ -37,6 +37,8 @@ function loadDebts() {
                 Number(debt.amount_iqd).toLocaleString('en-US') + ' د.ع',
                 Number(debt.discount_usd || 0).toLocaleString('en-US') + ' $',
                 Number(debt.discount_iqd || 0).toLocaleString('en-US') + ' د.ع',
+                Number(debt.change_back_usd || 0).toLocaleString('en-US') + ' $',
+                Number(debt.change_back_iqd || 0).toLocaleString('en-US') + ' د.ع',
                 Number(debt.dollar_rate).toLocaleString('en-US') + ' د.ع',
                 debt.note || '',
                 `
@@ -47,6 +49,8 @@ function loadDebts() {
                         data-amount_iqd="${debt.amount_iqd}"
                         data-discount_usd="${debt.discount_usd || 0}"
                         data-discount_iqd="${debt.discount_iqd || 0}"
+                        data-change_back_usd="${debt.change_back_usd || 0}"
+                        data-change_back_iqd="${debt.change_back_iqd || 0}"
                         data-dollar_rate="${debt.dollar_rate}"
                         data-note="${debt.note || ''}"
                         title="دەستکاری">
@@ -65,8 +69,10 @@ function loadDebts() {
                     { title: 'بەروار' },
                     { title: 'بڕی دۆلار' },
                     { title: 'بڕی دینار' },
-                    { title: 'داشکاندن (دۆلار)' },
-                    { title: 'داشکاندن (دینار)' },
+                    { title: 'داشکاندن ($)' },
+                    { title: 'داشکاندن (د.ع)' },
+                    { title: 'باقی ($)' },
+                    { title: 'باقی (د.ع)' },
                     { title: 'نرخی دۆلار' },
                     { title: 'تێبینی' },
                     { title: 'کردارەکان' }

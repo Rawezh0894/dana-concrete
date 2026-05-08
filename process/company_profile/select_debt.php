@@ -150,6 +150,6 @@ if ($from_date && $to_date) {
     $params[] = $to_date;
 }
 
-$stmt = $pdo->prepare('SELECT id, date, amount_usd, amount_iqd, discount_usd, discount_iqd, dollar_rate, note FROM debt_payments WHERE company_id = ?' . $date_condition . ' ORDER BY date DESC, id DESC');
+$stmt = $pdo->prepare('SELECT id, date, amount_usd, amount_iqd, discount_usd, discount_iqd, change_back_usd, change_back_iqd, dollar_rate, note FROM debt_payments WHERE company_id = ?' . $date_condition . ' ORDER BY date DESC, id DESC');
 $stmt->execute($params);
 echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));

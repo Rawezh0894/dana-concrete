@@ -130,6 +130,10 @@ if ($company_id) {
                 <div class="col-6"><label class="form-label">داشکاندن (دۆلار)</label><input type="number" step="0.01" class="form-control" id="debt_discount_usd" name="discount_usd" value="0"></div>
                 <div class="col-6"><label class="form-label">داشکاندن (دینار)</label><input type="number" step="1" class="form-control" id="debt_discount_iqd" name="discount_iqd" value="0"></div>
             </div>
+            <div class="row g-3 mt-1">
+                <div class="col-6"><label class="form-label">باقی (دۆلار)</label><input type="number" step="0.01" class="form-control" id="debt_change_back_usd" name="change_back_usd" value="0"></div>
+                <div class="col-6"><label class="form-label">باقی (دینار)</label><input type="number" step="1" class="form-control" id="debt_change_back_iqd" name="change_back_iqd" value="0"></div>
+            </div>
             <div class="row g-3 mt-3">
                 <div class="col-6">
                     <label class="form-label small text-muted">قەرزی نوێ (USD)</label>

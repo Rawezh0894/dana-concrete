@@ -32,6 +32,8 @@ $amount_usd = max(0, floatval($_POST['amount_usd'] ?? 0));
 $amount_iqd = max(0, floatval($_POST['amount_iqd'] ?? 0));
 $discount_usd = max(0, floatval($_POST['discount_usd'] ?? 0));
 $discount_iqd = max(0, floatval($_POST['discount_iqd'] ?? 0));
+$change_back_usd = max(0, floatval($_POST['change_back_usd'] ?? 0));
+$change_back_iqd = max(0, floatval($_POST['change_back_iqd'] ?? 0));
 $dollar_rate = floatval($_POST['dollar_rate'] ?? 0);
 $note = trim($_POST['note'] ?? '');
 $user_id = $_SESSION['user_id'];
@@ -63,12 +65,12 @@ try {
     $total_iqd_available = $snapshot['opening_debt_iqd'] + $snapshot['remaining_iqd'];
     $tolerance = 0.0001;
 
-    if (($amount_usd + $discount_usd) - $total_usd_available > $tolerance) {
+    if (($amount_usd + $discount_usd - $change_back_usd) - $total_usd_available > $tolerance) {
         echo json_encode(['success' => false, 'msg' => 'بڕی پارەی دۆلاری داوە زیاترە لە قەرزی کۆمپانیا!']);
         exit;
     }
 
-    if (($amount_iqd + $discount_iqd) - $total_iqd_available > $tolerance) {
+    if (($amount_iqd + $discount_iqd - $change_back_iqd) - $total_iqd_available > $tolerance) {
         echo json_encode(['success' => false, 'msg' => 'بڕی پارەی دیناری داوە زیاترە لە قەرزی کۆمپانیا!']);
         exit;
     }
@@ -76,8 +78,8 @@ try {
     $pdo->beginTransaction();
 
     $insert = $pdo->prepare('
-        INSERT INTO debt_payments (company_id, date, amount_usd, amount_iqd, discount_usd, discount_iqd, dollar_rate, note, created_by)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO debt_payments (company_id, date, amount_usd, amount_iqd, discount_usd, discount_iqd, change_back_usd, change_back_iqd, dollar_rate, note, created_by)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ');
 
     $ok = $insert->execute([
@@ -87,6 +89,8 @@ try {
         $amount_iqd,
         $discount_usd,
         $discount_iqd,
+        $change_back_usd,
+        $change_back_iqd,
         $dollar_rate,
         $note,
         $user_id
@@ -98,10 +102,9 @@ try {
 
     $debt_payment_id = (int)$pdo->lastInsertId();
 
-    applyCompanyCurrencyReduction($pdo, $company_id, 'usd', $amount_usd, $dollar_rate);
-    applyCompanyCurrencyReduction($pdo, $company_id, 'usd', $discount_usd, $dollar_rate);
-    applyCompanyCurrencyReduction($pdo, $company_id, 'iqd', $amount_iqd, $dollar_rate);
-    applyCompanyCurrencyReduction($pdo, $company_id, 'iqd', $discount_iqd, $dollar_rate);
+    // Net reduction: (payment + discount) - change_back
+    applyCompanyCurrencyReduction($pdo, $company_id, 'usd', $amount_usd + $discount_usd - $change_back_usd, $dollar_rate);
+    applyCompanyCurrencyReduction($pdo, $company_id, 'iqd', $amount_iqd + $discount_iqd - $change_back_iqd, $dollar_rate);
 
     $new_values = [
         'company_id' => $company_id,
@@ -111,6 +114,8 @@ try {
         'amount_iqd' => $amount_iqd,
         'discount_usd' => $discount_usd,
         'discount_iqd' => $discount_iqd,
+        'change_back_usd' => $change_back_usd,
+        'change_back_iqd' => $change_back_iqd,
         'dollar_rate' => $dollar_rate,
         'note' => $note,
         'created_by' => $user_id
