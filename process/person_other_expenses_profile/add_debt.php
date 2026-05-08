@@ -25,94 +25,53 @@ $amount_usd = max(0, floatval($_POST['amount_usd'] ?? 0));
 $amount_iqd = max(0, floatval($_POST['amount_iqd'] ?? 0));
 $discount_usd = max(0, floatval($_POST['discount_usd'] ?? 0));
 $discount_iqd = max(0, floatval($_POST['discount_iqd'] ?? 0));
+$change_back_usd = max(0, floatval($_POST['change_back_usd'] ?? 0));
+$change_back_iqd = max(0, floatval($_POST['change_back_iqd'] ?? 0));
+$dollar_rate = floatval($_POST['exchange_rate'] ?? 150000);
+if ($dollar_rate <= 0) $dollar_rate = 150000;
 $note = trim($_POST['note'] ?? '');
 
 if (
     !$person_id ||
-    ($amount_usd <= 0 && $amount_iqd <= 0 && $discount_usd <= 0 && $discount_iqd <= 0)
+    ($amount_usd <= 0 && $amount_iqd <= 0 && $discount_usd <= 0 && $discount_iqd <= 0 && $change_back_usd <= 0 && $change_back_iqd <= 0)
 ) {
     echo json_encode(['success' => false, 'msg' => 'زانیاری پێویست بە شێوەیەکی دروست داخڵ بکە!']);
     exit;
 }
 
 try {
-    $snapshot = getPersonDebtSnapshot($pdo, $person_id);
-    $total_usd_available = $snapshot['total_debt_usd'];
-    $total_iqd_available = $snapshot['total_debt_iqd'];
-    
-    $rate = floatval($_POST['exchange_rate'] ?? 150000);
-    if ($rate <= 0) $rate = 150000;
-    $rate_per_usd = $rate / 100;
-
-    $payment_usd = $amount_usd + $discount_usd;
-    $payment_iqd = $amount_iqd + $discount_iqd;
-
-    // Calculate excesses
-    $excess_usd = max(0, $payment_usd - $total_usd_available);
-    $excess_iqd = max(0, $payment_iqd - $total_iqd_available);
-
-    // Calculate cross-currency values
-    $cross_usd_to_iqd = $excess_usd * $rate_per_usd;
-    $cross_iqd_to_usd = $excess_iqd / $rate_per_usd;
-
-    // Calculate final effective reductions
-    $final_usd_reduction = min($payment_usd, $total_usd_available) + $cross_iqd_to_usd;
-    $final_iqd_reduction = min($payment_iqd, $total_iqd_available) + $cross_usd_to_iqd;
-
-    // Validate Total Value
-    // We allow tolerance for floating point math
-    $total_payment_value_usd = $payment_usd + ($payment_iqd / $rate_per_usd);
-    $total_debt_value_usd = $total_usd_available + ($total_iqd_available / $rate_per_usd);
-
-    if ($total_payment_value_usd - $total_debt_value_usd > 1.0) { // Allow $1 tolerance/rounding
-        echo json_encode(['success' => false, 'msg' => 'بڕی پارەی دراو زیاترە لە کۆی گشتی قەرز!']);
-        exit;
-    }
-
     $pdo->beginTransaction();
 
-    // Check if discount columns exist
-    $checkDiscount = $pdo->query("SHOW COLUMNS FROM `person_other_expenses_debt_payments` LIKE 'discount_usd'");
-    $hasDiscount = $checkDiscount->rowCount() > 0;
-    
-    if ($hasDiscount) {
-        $insert = $pdo->prepare("
-            INSERT INTO person_other_expenses_debt_payments
-            (person_id, date, amount_usd, amount_iqd, discount_usd, discount_iqd, note)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        ");
-        $insert->execute([
-            $person_id,
-            $date,
-            $amount_usd,
-            $amount_iqd,
-            $discount_usd,
-            $discount_iqd,
-            $note
-        ]);
-    } else {
-        $insert = $pdo->prepare("
-            INSERT INTO person_other_expenses_debt_payments
-            (person_id, date, amount_usd, amount_iqd, note)
-            VALUES (?, ?, ?, ?, ?)
-        ");
-        $insert->execute([
-            $person_id,
-            $date,
-            $amount_usd,
-            $amount_iqd,
-            $note
-        ]);
-    }
+    $insert = $pdo->prepare("
+        INSERT INTO person_other_expenses_debt_payments
+        (person_id, date, amount_usd, amount_iqd, discount_usd, discount_iqd, change_back_usd, change_back_iqd, dollar_rate, note)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ");
+    $insert->execute([
+        $person_id,
+        $date,
+        $amount_usd,
+        $amount_iqd,
+        $discount_usd,
+        $discount_iqd,
+        $change_back_usd,
+        $change_back_iqd,
+        $dollar_rate,
+        $note
+    ]);
 
     $debt_payment_id = (int)$pdo->lastInsertId();
 
-    // Apply reductions using calculated effective amounts
-    if ($final_usd_reduction > 0) {
-        applyPersonCurrencyReduction($pdo, $person_id, 'usd', $final_usd_reduction);
+    // Apply reductions for payment and discount
+    applyPersonCurrencyReduction($pdo, $person_id, 'usd', $amount_usd + $discount_usd, $dollar_rate);
+    applyPersonCurrencyReduction($pdo, $person_id, 'iqd', $amount_iqd + $discount_iqd, $dollar_rate);
+
+    // Apply restoration for change back
+    if ($change_back_usd > 0) {
+        restorePersonCurrencyAmount($pdo, $person_id, 'usd', $change_back_usd, $dollar_rate);
     }
-    if ($final_iqd_reduction > 0) {
-        applyPersonCurrencyReduction($pdo, $person_id, 'iqd', $final_iqd_reduction);
+    if ($change_back_iqd > 0) {
+        restorePersonCurrencyAmount($pdo, $person_id, 'iqd', $change_back_iqd, $dollar_rate);
     }
 
     require_once __DIR__ . '/../../includes/notify.php';

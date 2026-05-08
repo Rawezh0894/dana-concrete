@@ -39,12 +39,7 @@ async function openEditDebtModal(debtId) {
         $('#edit_debt_note').val(debt.note || '');
 
         if (typeof setupEditDebtModal === 'function') {
-            setupEditDebtModal({
-                amount_usd: amountUsd,
-                discount_usd: discountUsd,
-                amount_iqd: amountIqd,
-                discount_iqd: discountIqd
-            });
+            setupEditDebtModal(debt);
         }
 
         $('#editDebtModal').modal('show');
@@ -77,9 +72,12 @@ async function loadDebtPayments() {
                 columns: [
                     { title: 'بەروار' },
                     { title: 'بڕی دۆلار' },
-                    { title: 'داشکاندن بە دۆلار' },
+                    { title: 'داشکاندن ($)' },
                     { title: 'بڕی دینار' },
-                    { title: 'داشکاندن بە دینار' },
+                    { title: 'داشکاندن (د.ع)' },
+                    { title: 'باقی ($)' },
+                    { title: 'باقی (د.ع)' },
+                    { title: 'نرخی دۆلار' },
                     { title: 'تێبینی' },
                     { title: 'کردارەکان' }
                 ],
@@ -120,6 +118,9 @@ async function loadDebtPayments() {
             const discountUsd = parseFloat(row.discount_usd ?? 0) || 0;
             const amountIqd = parseFloat(row.amount_iqd ?? 0) || 0;
             const discountIqd = parseFloat(row.discount_iqd ?? 0) || 0;
+            const changeBackUsd = parseFloat(row.change_back_usd ?? 0) || 0;
+            const changeBackIqd = parseFloat(row.change_back_iqd ?? 0) || 0;
+            const dollarRate = parseFloat(row.dollar_rate ?? 150000) || 150000;
 
             return [
                 row.date || '',
@@ -127,6 +128,9 @@ async function loadDebtPayments() {
                 formatUSD(discountUsd),
                 formatIQD(amountIqd),
                 formatIQD(discountIqd),
+                formatUSD(changeBackUsd),
+                formatIQD(changeBackIqd),
+                formatIQD(dollarRate),
                 row.note || '',
                 `
                 <button class="btn btn-sm btn-warning edit-debt" data-id="${row.id}">
@@ -144,9 +148,12 @@ async function loadDebtPayments() {
             columns: [
                 { title: 'بەروار' },
                 { title: 'بڕی دۆلار' },
-                { title: 'داشکاندن بە دۆلار' },
+                { title: 'داشکاندن ($)' },
                 { title: 'بڕی دینار' },
-                { title: 'داشکاندن بە دینار' },
+                { title: 'داشکاندن (د.ع)' },
+                { title: 'باقی ($)' },
+                { title: 'باقی (د.ع)' },
+                { title: 'نرخی دۆلار' },
                 { title: 'تێبینی' },
                 { title: 'کردارەکان' }
             ],

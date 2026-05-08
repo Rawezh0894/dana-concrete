@@ -230,7 +230,12 @@ $default_rate = $rate ? $rate : 150000;
                             </div>
                             <div class="mb-3">
                                 <label for="exchange_rate" class="form-label">نرخی ١٠٠ دۆلار (د.ع)</label>
-                                <input type="number" class="form-control" id="exchange_rate" name="exchange_rate" min="1" step="0.01" required>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="exchange_rate" name="exchange_rate" min="1" step="0.01" required>
+                                    <button class="btn btn-outline-secondary" type="button" onclick="fetchAndSetDollarRate('exchange_rate')">
+                                        <i class="fas fa-sync-alt"></i>
+                                    </button>
+                                </div>
                             </div>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
@@ -258,12 +263,24 @@ $default_rate = $rate ? $rate : 150000;
                             </div>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
+                                    <label for="debt_change_back_usd" class="form-label">باقی (دۆلار)</label>
+                                    <input type="number" class="form-control" id="debt_change_back_usd" name="change_back_usd" min="0"
+                                        step="0.01" value="0">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="debt_change_back_iqd" class="form-label">باقی (دینار)</label>
+                                    <input type="number" class="form-control" id="debt_change_back_iqd" name="change_back_iqd" min="0"
+                                        step="1" value="0">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
                                     <label for="debt_remaining_usd" class="form-label">کۆی قەرزی ماوە بە دۆلار</label>
-                                    <input type="number" class="form-control" id="debt_remaining_usd" value="0" readonly>
+                                    <input type="text" class="form-control bg-light fw-bold" id="debt_remaining_usd" value="0" readonly>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="debt_remaining_iqd" class="form-label">کۆی قەرزی ماوە بە دینار</label>
-                                    <input type="number" class="form-control" id="debt_remaining_iqd" value="0" readonly>
+                                    <input type="text" class="form-control bg-light fw-bold" id="debt_remaining_iqd" value="0" readonly>
                                 </div>
                             </div>
                             <div class="mb-3">
@@ -298,8 +315,13 @@ $default_rate = $rate ? $rate : 150000;
                             </div>
                             <div class="mb-3">
                                 <label for="edit_exchange_rate" class="form-label">نرخی ١٠٠ دۆلار (د.ع)</label>
-                                <input type="number" class="form-control" id="edit_exchange_rate" name="exchange_rate" min="1" step="0.01" required>
-                            </div><!-- added rate input -->
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="edit_exchange_rate" name="exchange_rate" min="1" step="0.01" required>
+                                    <button class="btn btn-outline-secondary" type="button" onclick="fetchAndSetDollarRate('edit_exchange_rate')">
+                                        <i class="fas fa-sync-alt"></i>
+                                    </button>
+                                </div>
+                            </div>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label for="edit_debt_amount_usd" class="form-label">بڕی دۆلار</label>
@@ -326,12 +348,24 @@ $default_rate = $rate ? $rate : 150000;
                             </div>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
+                                    <label for="edit_debt_change_back_usd" class="form-label">باقی (دۆلار)</label>
+                                    <input type="number" class="form-control" id="edit_debt_change_back_usd" name="change_back_usd" min="0"
+                                        step="0.01" value="0">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="edit_debt_change_back_iqd" class="form-label">باقی (دینار)</label>
+                                    <input type="number" class="form-control" id="edit_debt_change_back_iqd" name="change_back_iqd" min="0"
+                                        step="1" value="0">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
                                     <label for="edit_debt_remaining_usd" class="form-label">کۆی قەرزی ماوە بە دۆلار</label>
-                                    <input type="number" class="form-control" id="edit_debt_remaining_usd" value="0" readonly>
+                                    <input type="text" class="form-control bg-light fw-bold" id="edit_debt_remaining_usd" value="0" readonly>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="edit_debt_remaining_iqd" class="form-label">کۆی قەرزی ماوە بە دینار</label>
-                                    <input type="number" class="form-control" id="edit_debt_remaining_iqd" value="0" readonly>
+                                    <input type="text" class="form-control bg-light fw-bold" id="edit_debt_remaining_iqd" value="0" readonly>
                                 </div>
                             </div>
                             <div class="mb-3">
@@ -363,13 +397,13 @@ $default_rate = $rate ? $rate : 150000;
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
     <script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.html5.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
     <script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.print.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
-    <script src="../assets/js/person_other_expenses_profile/select_other_expenses.js" nonce="<?php echo $csp_nonce; ?>"></script>
-    <script src="../assets/js/person_other_expenses_profile/select_purchases.js" nonce="<?php echo $csp_nonce; ?>"></script>
-    <script src="../assets/js/person_other_expenses_profile/select_debt.js" nonce="<?php echo $csp_nonce; ?>"></script>
-    <script src="../assets/js/person_other_expenses_profile/add_debt.js" nonce="<?php echo $csp_nonce; ?>"></script>
-    <script src="../assets/js/person_other_expenses_profile/update_debt.js" nonce="<?php echo $csp_nonce; ?>"></script>
-    <script src="../assets/js/person_other_expenses_profile/delete_debt.js" nonce="<?php echo $csp_nonce; ?>"></script>
-    <script src="../assets/js/person_other_expenses_profile/summary_cards.js" nonce="<?php echo $csp_nonce; ?>"></script>
+    <script src="../assets/js/person_other_expenses_profile/select_other_expenses.js?v=1.1" nonce="<?php echo $csp_nonce; ?>"></script>
+    <script src="../assets/js/person_other_expenses_profile/select_purchases.js?v=1.1" nonce="<?php echo $csp_nonce; ?>"></script>
+    <script src="../assets/js/person_other_expenses_profile/select_debt.js?v=1.1" nonce="<?php echo $csp_nonce; ?>"></script>
+    <script src="../assets/js/person_other_expenses_profile/add_debt.js?v=1.1" nonce="<?php echo $csp_nonce; ?>"></script>
+    <script src="../assets/js/person_other_expenses_profile/update_debt.js?v=1.1" nonce="<?php echo $csp_nonce; ?>"></script>
+    <script src="../assets/js/person_other_expenses_profile/delete_debt.js?v=1.1" nonce="<?php echo $csp_nonce; ?>"></script>
+    <script src="../assets/js/person_other_expenses_profile/summary_cards.js?v=1.1" nonce="<?php echo $csp_nonce; ?>"></script>
     
     <script nonce="<?php echo $csp_nonce; ?>">
         // Check summary card remaining amounts function

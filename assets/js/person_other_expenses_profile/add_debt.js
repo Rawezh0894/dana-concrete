@@ -12,41 +12,47 @@ function updateAddDebtSummaryFields() {
     const discountUSD = parseFloat($('#debt_discount_usd').val()) || 0;
     const amountIQD = parseFloat($('#debt_amount_iqd').val()) || 0;
     const discountIQD = parseFloat($('#debt_discount_iqd').val()) || 0;
+    const changeBackUSD = parseFloat($('#debt_change_back_usd').val()) || 0;
+    const changeBackIQD = parseFloat($('#debt_change_back_iqd').val()) || 0;
 
-    // Get exchange rate (Price of $100 in IQD)
-    // Default to 1 if invalid or 0 to avoid division by zero issues, though typically it's ~150000
     let rate = parseFloat($('#exchange_rate').val()) || 0;
     if (rate <= 0) rate = window.DEFAULT_USD_RATE || 150000;
-
-    // Rate per 1 USD
     const ratePerUSD = rate / 100;
 
-    let remainingUSD = totalDebtUSD - amountUSD - discountUSD;
-    let remainingIQD = totalDebtIQD - amountIQD - discountIQD;
+    // Calculate total net effect in each currency
+    // Note: Payment + Discount reduces debt, Change Back increases debt.
+    let netUSD = amountUSD + discountUSD - changeBackUSD;
+    let netIQD = amountIQD + discountIQD - changeBackIQD;
 
-    // Cross-currency settlement logic
-    // If excess USD payment, apply to IQD debt
-    if (remainingUSD < 0) {
-        const excessUSD = Math.abs(remainingUSD);
-        const equivalentIQD = excessUSD * ratePerUSD;
-        remainingIQD -= equivalentIQD;
-        remainingUSD = 0;
+    let remainingUSD = totalDebtUSD;
+    let remainingIQD = totalDebtIQD;
+
+    // Apply USD net effect
+    if (netUSD > 0) {
+        let reduction = Math.min(netUSD, remainingUSD);
+        remainingUSD -= reduction;
+        let excess = netUSD - reduction;
+        if (excess > 0) {
+            remainingIQD -= (excess * ratePerUSD);
+        }
+    } else if (netUSD < 0) {
+        remainingUSD += Math.abs(netUSD);
     }
-    // If excess IQD payment, apply to USD debt
-    else if (remainingIQD < 0) {
-        const excessIQD = Math.abs(remainingIQD);
-        const equivalentUSD = excessIQD / ratePerUSD;
-        remainingUSD -= equivalentUSD;
-        remainingIQD = 0;
+
+    // Apply IQD net effect
+    if (netIQD > 0) {
+        let reduction = Math.min(netIQD, remainingIQD);
+        remainingIQD -= reduction;
+        let excess = netIQD - reduction;
+        if (excess > 0 && ratePerUSD > 0) {
+            remainingUSD -= (excess / ratePerUSD);
+        }
+    } else if (netIQD < 0) {
+        remainingIQD += Math.abs(netIQD);
     }
 
-    // Ensure we don't show negative remaining (unless they are actually overpaying total value)
-    // Actually, showing negative means they are paying MORE than total debt, which is fine to show as negative (credit) or zero. 
-    // The previous code used Math.max(..., 0). Let's stick to that for "Remaining Debt".
-    // If it's negative, it means they overpaid.
-
-    $('#debt_remaining_usd').val(formatNumber(Math.max(remainingUSD, 0)));
-    $('#debt_remaining_iqd').val(formatNumber(Math.max(remainingIQD, 0)));
+    $('#debt_remaining_usd').val(formatNumber(remainingUSD) + ' $');
+    $('#debt_remaining_iqd').val(formatNumber(remainingIQD) + ' د.ع');
 }
 
 function fetchDebtTotalsForAddModal() {
@@ -124,6 +130,19 @@ $('#addDebtModal').on('hidden.bs.modal', function () {
     $('#debt_remaining_iqd').val('0.00');
 });
 
-$('#debt_amount_usd, #debt_discount_usd, #debt_amount_iqd, #debt_discount_iqd, #exchange_rate').on('input', function () {
+async function fetchAndSetDollarRate(inputId) {
+    try {
+        const res = await fetch('../process/purchase_materilas/get_usd_rate.php');
+        const data = await res.json();
+        if (data.success && data.rate) {
+            document.getElementById(inputId).value = data.rate;
+            updateAddDebtSummaryFields();
+        }
+    } catch (e) {
+        console.error('Error fetching rate:', e);
+    }
+}
+
+$('#debt_amount_usd, #debt_discount_usd, #debt_amount_iqd, #debt_discount_iqd, #exchange_rate, #debt_change_back_usd, #debt_change_back_iqd').on('input', function () {
     updateAddDebtSummaryFields();
 });

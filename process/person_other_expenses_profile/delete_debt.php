@@ -39,14 +39,12 @@ try {
 
     $person_id = intval($payment['person_id']);
 
-    restorePersonCurrencyAmount($pdo, $person_id, 'usd', floatval($payment['amount_usd'] ?? 0));
-    restorePersonCurrencyAmount($pdo, $person_id, 'iqd', floatval($payment['amount_iqd'] ?? 0));
-    
-    // Restore discount if columns exist
-    if (isset($payment['discount_usd']) && isset($payment['discount_iqd'])) {
-        restorePersonCurrencyAmount($pdo, $person_id, 'usd', floatval($payment['discount_usd'] ?? 0));
-        restorePersonCurrencyAmount($pdo, $person_id, 'iqd', floatval($payment['discount_iqd'] ?? 0));
-    }
+    $dollar_rate = floatval($payment['dollar_rate'] ?? 0);
+    $net_usd = floatval($payment['amount_usd'] ?? 0) + floatval($payment['discount_usd'] ?? 0) - floatval($payment['change_back_usd'] ?? 0);
+    $net_iqd = floatval($payment['amount_iqd'] ?? 0) + floatval($payment['discount_iqd'] ?? 0) - floatval($payment['change_back_iqd'] ?? 0);
+
+    restorePersonCurrencyAmount($pdo, $person_id, 'usd', $net_usd, $dollar_rate);
+    restorePersonCurrencyAmount($pdo, $person_id, 'iqd', $net_iqd, $dollar_rate);
 
     $deleteStmt = $pdo->prepare('DELETE FROM person_other_expenses_debt_payments WHERE id = ?');
     $deleteStmt->execute([$id]);

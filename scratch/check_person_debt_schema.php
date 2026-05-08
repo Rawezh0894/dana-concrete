@@ -1,0 +1,10 @@
+<?php
+try {
+    $p = new PDO('mysql:host=localhost;dbname=dana_concrete_db', 'root', '');
+    $res = $p->query('DESCRIBE person_other_expenses_debt_payments')->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($res as $r) {
+        echo $r['Field'] . " (" . $r['Type'] . ")\n";
+    }
+} catch (Exception $e) {
+    echo $e->getMessage();
+}

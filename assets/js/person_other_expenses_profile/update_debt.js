@@ -12,38 +12,49 @@ function updateEditDebtSummaryFields() {
     const discountUSD = parseFloat($('#edit_debt_discount_usd').val()) || 0;
     const amountIQD = parseFloat($('#edit_debt_amount_iqd').val()) || 0;
     const discountIQD = parseFloat($('#edit_debt_discount_iqd').val()) || 0;
+    const changeBackUSD = parseFloat($('#edit_debt_change_back_usd').val()) || 0;
+    const changeBackIQD = parseFloat($('#edit_debt_change_back_iqd').val()) || 0;
 
-    // Get exchange rate (Price of $100 in IQD)
     let rate = parseFloat($('#edit_exchange_rate').val()) || 0;
     if (rate <= 0) rate = window.DEFAULT_USD_RATE || 150000;
-
-    // Rate per 1 USD
     const ratePerUSD = rate / 100;
 
-    let remainingUSD = editDebtBaseUSD - amountUSD - discountUSD;
-    let remainingIQD = editDebtBaseIQD - amountIQD - discountIQD;
+    let netUSD = amountUSD + discountUSD - changeBackUSD;
+    let netIQD = amountIQD + discountIQD - changeBackIQD;
 
-    // Cross-currency settlement logic
-    if (remainingUSD < 0) {
-        const excessUSD = Math.abs(remainingUSD);
-        const equivalentIQD = excessUSD * ratePerUSD;
-        remainingIQD -= equivalentIQD;
-        remainingUSD = 0;
-    } else if (remainingIQD < 0) {
-        const excessIQD = Math.abs(remainingIQD);
-        const equivalentUSD = excessIQD / ratePerUSD;
-        remainingUSD -= equivalentUSD;
-        remainingIQD = 0;
+    let remainingUSD = editDebtBaseUSD;
+    let remainingIQD = editDebtBaseIQD;
+
+    if (netUSD > 0) {
+        let reduction = Math.min(netUSD, remainingUSD);
+        remainingUSD -= reduction;
+        let excess = netUSD - reduction;
+        if (excess > 0) {
+            remainingIQD -= (excess * ratePerUSD);
+        }
+    } else if (netUSD < 0) {
+        remainingUSD += Math.abs(netUSD);
     }
 
-    $('#edit_debt_remaining_usd').val(formatNumber(Math.max(remainingUSD, 0)));
-    $('#edit_debt_remaining_iqd').val(formatNumber(Math.max(remainingIQD, 0)));
+    if (netIQD > 0) {
+        let reduction = Math.min(netIQD, remainingIQD);
+        remainingIQD -= reduction;
+        let excess = netIQD - reduction;
+        if (excess > 0 && ratePerUSD > 0) {
+            remainingUSD -= (excess / ratePerUSD);
+        }
+    } else if (netIQD < 0) {
+        remainingIQD += Math.abs(netIQD);
+    }
+
+    $('#edit_debt_remaining_usd').val(formatNumber(remainingUSD) + ' $');
+    $('#edit_debt_remaining_iqd').val(formatNumber(remainingIQD) + ' د.ع');
 }
 
 function fetchDebtTotalsForEditModal(oldValues) {
     if (typeof PERSON_ID === 'undefined' || !PERSON_ID) {
-        editDebtBaseUSD = (oldValues.amount_usd || 0) + (oldValues.discount_usd || 0);
-        editDebtBaseIQD = (oldValues.amount_iqd || 0) + (oldValues.discount_iqd || 0);
+        editDebtBaseUSD = (oldValues.amount_usd || 0) + (oldValues.discount_usd || 0) - (oldValues.change_back_usd || 0);
+        editDebtBaseIQD = (oldValues.amount_iqd || 0) + (oldValues.discount_iqd || 0) - (oldValues.change_back_iqd || 0);
         updateEditDebtSummaryFields();
         return;
     }
@@ -53,16 +64,16 @@ function fetchDebtTotalsForEditModal(oldValues) {
             if (response && response.success && response.data) {
                 const currentUSD = parseFloat(response.data.total_debt_usd) || 0;
                 const currentIQD = parseFloat(response.data.total_debt_iqd) || 0;
-                editDebtBaseUSD = currentUSD + (oldValues.amount_usd || 0) + (oldValues.discount_usd || 0);
-                editDebtBaseIQD = currentIQD + (oldValues.amount_iqd || 0) + (oldValues.discount_iqd || 0);
+                editDebtBaseUSD = currentUSD + (oldValues.amount_usd || 0) + (oldValues.discount_usd || 0) - (oldValues.change_back_usd || 0);
+                editDebtBaseIQD = currentIQD + (oldValues.amount_iqd || 0) + (oldValues.discount_iqd || 0) - (oldValues.change_back_iqd || 0);
             } else {
-                editDebtBaseUSD = (oldValues.amount_usd || 0) + (oldValues.discount_usd || 0);
-                editDebtBaseIQD = (oldValues.amount_iqd || 0) + (oldValues.discount_iqd || 0);
+                editDebtBaseUSD = (oldValues.amount_usd || 0) + (oldValues.discount_usd || 0) - (oldValues.change_back_usd || 0);
+                editDebtBaseIQD = (oldValues.amount_iqd || 0) + (oldValues.discount_iqd || 0) - (oldValues.change_back_iqd || 0);
             }
         })
         .fail(function () {
-            editDebtBaseUSD = (oldValues.amount_usd || 0) + (oldValues.discount_usd || 0);
-            editDebtBaseIQD = (oldValues.amount_iqd || 0) + (oldValues.discount_iqd || 0);
+            editDebtBaseUSD = (oldValues.amount_usd || 0) + (oldValues.discount_usd || 0) - (oldValues.change_back_usd || 0);
+            editDebtBaseIQD = (oldValues.amount_iqd || 0) + (oldValues.discount_iqd || 0) - (oldValues.change_back_iqd || 0);
         })
         .always(function () {
             updateEditDebtSummaryFields();
@@ -70,8 +81,9 @@ function fetchDebtTotalsForEditModal(oldValues) {
 }
 
 window.setupEditDebtModal = function (oldValues) {
-    // Set default rate if available
-    $('#edit_exchange_rate').val(window.DEFAULT_USD_RATE || 150000);
+    $('#edit_exchange_rate').val(oldValues.dollar_rate || window.DEFAULT_USD_RATE || 150000);
+    $('#edit_debt_change_back_usd').val(oldValues.change_back_usd || 0);
+    $('#edit_debt_change_back_iqd').val(oldValues.change_back_iqd || 0);
     fetchDebtTotalsForEditModal(oldValues || {});
 };
 

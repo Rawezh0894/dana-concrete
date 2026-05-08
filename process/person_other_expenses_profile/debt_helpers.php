@@ -49,9 +49,9 @@ function getPersonDebtSnapshot(PDO $pdo, int $personId): array
     ];
 }
 
-function applyPersonCurrencyReduction(PDO $pdo, int $personId, string $currency, float $amount): void
+function applyPersonCurrencyReduction(PDO $pdo, int $personId, string $currency, float $amount, float $dollarRate = 0): void
 {
-    if ($amount <= 0) {
+    if ($amount <= 1e-6) {
         return;
     }
 
@@ -59,9 +59,8 @@ function applyPersonCurrencyReduction(PDO $pdo, int $personId, string $currency,
     $expenseColumn = $currency === 'usd' ? 'expense_usd' : 'expense_iqd';
     $expenseRemainingColumn = $currency === 'usd' ? 'remaining_usd' : 'remaining_iqd';
     $purchaseRemainingColumn = $currency === 'usd' ? 'remaining_amount_usd' : 'remaining_amount_iqd';
-    $typeValue = $currency === 'usd' ? 'دۆلار' : 'دینار';
 
-    // Opening debt first
+    // 1. Opening debt first
     $openingStmt = $pdo->prepare("SELECT {$openingColumn} FROM other_expense_persons WHERE id = ? FOR UPDATE");
     $openingStmt->execute([$personId]);
     $openingDebt = (float)$openingStmt->fetchColumn();
@@ -75,11 +74,9 @@ function applyPersonCurrencyReduction(PDO $pdo, int $personId, string $currency,
         }
     }
 
-    if ($amount <= 0) {
-        return;
-    }
+    if ($amount <= 1e-6) return;
 
-    // Then FIFO from other_expenses
+    // 2. FIFO from other_expenses
     $deductedFromExpenses = 0;
     $expenseStmt = $pdo->prepare("
         SELECT id, {$expenseRemainingColumn} AS remaining
@@ -90,11 +87,8 @@ function applyPersonCurrencyReduction(PDO $pdo, int $personId, string $currency,
     ");
     $expenseStmt->execute([$personId]);
 
-    while ($amount > 0 && ($row = $expenseStmt->fetch(PDO::FETCH_ASSOC))) {
+    while ($amount > 1e-6 && ($row = $expenseStmt->fetch(PDO::FETCH_ASSOC))) {
         $remaining = (float)$row['remaining'];
-        if ($remaining <= 0) {
-            continue;
-        }
         $toDeduct = min($remaining, $amount);
         $pdo->prepare("UPDATE other_expenses SET {$expenseRemainingColumn} = {$expenseRemainingColumn} - ? WHERE id = ?")
             ->execute([$toDeduct, $row['id']]);
@@ -107,11 +101,9 @@ function applyPersonCurrencyReduction(PDO $pdo, int $personId, string $currency,
             ->execute([$deductedFromExpenses, $personId]);
     }
 
-    if ($amount <= 0) {
-        return;
-    }
+    if ($amount <= 1e-6) return;
 
-    // Finally FIFO from purchase_materials
+    // 3. FIFO from purchase_materials
     $purchaseStmt = $pdo->prepare("
         SELECT id, {$purchaseRemainingColumn} AS remaining
         FROM purchase_materials
@@ -121,27 +113,30 @@ function applyPersonCurrencyReduction(PDO $pdo, int $personId, string $currency,
     ");
     $purchaseStmt->execute([$personId]);
 
-    while ($amount > 0 && ($row = $purchaseStmt->fetch(PDO::FETCH_ASSOC))) {
+    while ($amount > 1e-6 && ($row = $purchaseStmt->fetch(PDO::FETCH_ASSOC))) {
         $remaining = (float)$row['remaining'];
-        if ($remaining <= 0) {
-            continue;
-        }
         $toDeduct = min($remaining, $amount);
         $pdo->prepare("UPDATE purchase_materials SET {$purchaseRemainingColumn} = {$purchaseRemainingColumn} - ? WHERE id = ?")
             ->execute([$toDeduct, $row['id']]);
         $amount -= $toDeduct;
     }
 
-    // If anything is left due to rounding, subtract it from opening debt as a safeguard
-    if ($amount > 0) {
-        $pdo->prepare("UPDATE other_expense_persons SET {$openingColumn} = GREATEST({$openingColumn} - ?, 0) WHERE id = ?")
-            ->execute([$amount, $personId]);
+    // 4. Cross-currency if still remaining
+    if ($amount > 1e-6 && $dollarRate > 0) {
+        $rateFactor = $dollarRate / 100;
+        if ($currency === 'usd') {
+            // Remaining USD to IQD
+            applyPersonCurrencyReduction($pdo, $personId, 'iqd', $amount * $rateFactor, 0);
+        } else {
+            // Remaining IQD to USD
+            applyPersonCurrencyReduction($pdo, $personId, 'usd', $amount / $rateFactor, 0);
+        }
     }
 }
 
-function restorePersonCurrencyAmount(PDO $pdo, int $personId, string $currency, float $amount): void
+function restorePersonCurrencyAmount(PDO $pdo, int $personId, string $currency, float $amount, float $dollarRate = 0): void
 {
-    if ($amount <= 0) {
+    if ($amount <= 1e-6) {
         return;
     }
 
@@ -151,10 +146,8 @@ function restorePersonCurrencyAmount(PDO $pdo, int $personId, string $currency, 
     $expenseTotalColumn = $currency === 'usd' ? 'amount_usd' : 'amount_iqd';
     $purchaseRemainingColumn = $currency === 'usd' ? 'remaining_amount_usd' : 'remaining_amount_iqd';
     $purchaseTotalColumn = $currency === 'usd' ? 'total_price_usd' : 'total_price_iqd';
-    $typeValue = $currency === 'usd' ? 'دۆلار' : 'دینار';
 
-    // Restore purchases first (LIFO - Last In First Out)
-    // Get all purchases that have been paid (remaining < total)
+    // 1. Restore purchases first (LIFO)
     $purchaseStmt = $pdo->prepare("
         SELECT id, {$purchaseRemainingColumn} AS remaining, {$purchaseTotalColumn} AS total
         FROM purchase_materials
@@ -164,24 +157,18 @@ function restorePersonCurrencyAmount(PDO $pdo, int $personId, string $currency, 
     ");
     $purchaseStmt->execute([$personId]);
 
-    $restoredPurchases = 0;
-    while ($amount > 0 && ($row = $purchaseStmt->fetch(PDO::FETCH_ASSOC))) {
-        $total = (float)$row['total'];
-        $remaining = (float)$row['remaining'];
-        $used = max($total - $remaining, 0);
-        if ($used <= 0) {
-            continue;
-        }
+    while ($amount > 1e-6 && ($row = $purchaseStmt->fetch(PDO::FETCH_ASSOC))) {
+        $used = max((float)$row['total'] - (float)$row['remaining'], 0);
+        if ($used <= 1e-6) continue;
         $toRestore = min($used, $amount);
-        if ($toRestore > 0) {
-            $pdo->prepare("UPDATE purchase_materials SET {$purchaseRemainingColumn} = LEAST({$purchaseRemainingColumn} + ?, {$purchaseTotalColumn}) WHERE id = ?")
-                ->execute([$toRestore, $row['id']]);
-            $amount -= $toRestore;
-            $restoredPurchases += $toRestore;
-        }
+        $pdo->prepare("UPDATE purchase_materials SET {$purchaseRemainingColumn} = LEAST({$purchaseRemainingColumn} + ?, {$purchaseTotalColumn}) WHERE id = ?")
+            ->execute([$toRestore, $row['id']]);
+        $amount -= $toRestore;
     }
 
-    // Then restore other expenses (LIFO)
+    if ($amount <= 1e-6) return;
+
+    // 2. Restore other expenses (LIFO)
     $restoredExpenses = 0;
     $expenseStmt = $pdo->prepare("
         SELECT id, {$expenseRemainingColumn} AS remaining, {$expenseTotalColumn} AS total
@@ -192,20 +179,14 @@ function restorePersonCurrencyAmount(PDO $pdo, int $personId, string $currency, 
     ");
     $expenseStmt->execute([$personId]);
 
-    while ($amount > 0 && ($row = $expenseStmt->fetch(PDO::FETCH_ASSOC))) {
-        $total = (float)$row['total'];
-        $remaining = (float)$row['remaining'];
-        $used = max($total - $remaining, 0);
-        if ($used <= 0) {
-            continue;
-        }
+    while ($amount > 1e-6 && ($row = $expenseStmt->fetch(PDO::FETCH_ASSOC))) {
+        $used = max((float)$row['total'] - (float)$row['remaining'], 0);
+        if ($used <= 1e-6) continue;
         $toRestore = min($used, $amount);
-        if ($toRestore > 0) {
-            $pdo->prepare("UPDATE other_expenses SET {$expenseRemainingColumn} = LEAST({$expenseRemainingColumn} + ?, {$expenseTotalColumn}) WHERE id = ?")
-                ->execute([$toRestore, $row['id']]);
-            $amount -= $toRestore;
-            $restoredExpenses += $toRestore;
-        }
+        $pdo->prepare("UPDATE other_expenses SET {$expenseRemainingColumn} = LEAST({$expenseRemainingColumn} + ?, {$expenseTotalColumn}) WHERE id = ?")
+            ->execute([$toRestore, $row['id']]);
+        $amount -= $toRestore;
+        $restoredExpenses += $toRestore;
     }
 
     if ($restoredExpenses > 0) {
@@ -213,10 +194,18 @@ function restorePersonCurrencyAmount(PDO $pdo, int $personId, string $currency, 
             ->execute([$restoredExpenses, $personId]);
     }
 
-    // Any remaining amount increases opening debt
-    if ($amount > 0) {
-        $pdo->prepare("UPDATE other_expense_persons SET {$openingColumn} = {$openingColumn} + ? WHERE id = ?")
-            ->execute([$amount, $personId]);
-    }
+    if ($amount <= 1e-6) return;
+
+    // 3. Opening debt
+    $openingStmt = $pdo->prepare("SELECT {$openingColumn} FROM other_expense_persons WHERE id = ? FOR UPDATE");
+    $openingStmt->execute([$personId]);
+    $openingDebtValue = (float)$openingStmt->fetchColumn();
+    // For person profile, we actually have 'opening_debt' which can be any amount.
+    // We'll just increase it.
+    $pdo->prepare("UPDATE other_expense_persons SET {$openingColumn} = {$openingColumn} + ? WHERE id = ?")
+        ->execute([$amount, $personId]);
+    $amount = 0;
+
+    // 4. Cross-currency (optional, but for person profile we usually just stop at opening debt)
 }
 
