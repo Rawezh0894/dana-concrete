@@ -116,7 +116,7 @@ function populateFormFromLocalStorage() {
             // Calculate total price if quantity and price are available
             if (data.quantity && data.price_per_unit) {
                 const totalPrice = parseFloat(data.quantity) * parseFloat(data.price_per_unit);
-                $('#total_price').val(totalPrice.toFixed(4));
+                $('#total_price').val(totalPrice.toFixed(2));
             }
 
             if (data.total_price && !data.quantity) {

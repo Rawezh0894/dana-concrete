@@ -13,7 +13,7 @@ const formatNumber = window.AGGridFormatters?.formatNumber || function(n) {
 
 const formatUSD = window.AGGridFormatters?.formatUSD || function(n) {
     if (n === null || n === undefined || n === '' || isNaN(n)) return '-';
-    return formatNumber(Number(n).toFixed(4)) + ' $';
+    return formatNumber(Number(n).toFixed(2)) + ' $';
 };
 
 const formatIQD = window.AGGridFormatters?.formatIQD || function(n) {

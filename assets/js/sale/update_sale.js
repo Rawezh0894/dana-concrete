@@ -20,9 +20,7 @@ function fetchDollarRateForEdit() {
                 $('#edit_dolar_rate').prop('disabled', false);
                 console.log('Dollar rate fetched successfully for edit:', response.value);
                 // Recalculate remaining amount after updating rate
-                if (typeof calculateRemainingAmount === 'function') {
-                    calculateRemainingAmount('edit_');
-                }
+                calculateRemainingAmount();
                 // Show success notification
                 Swal.fire({
                     icon: 'success',

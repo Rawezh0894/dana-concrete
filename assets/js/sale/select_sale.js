@@ -8,7 +8,7 @@ function formatNumber(n) {
 
 function formatUSD(n) {
     if (n === null || n === undefined || n === '' || isNaN(n)) return '-';
-    return formatNumber(Number(n).toFixed(4)) + ' $';
+    return formatNumber(Number(n).toFixed(2)) + ' $';
 }
 
 function formatIQD(n) {
