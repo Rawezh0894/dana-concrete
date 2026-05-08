@@ -47,8 +47,8 @@ function updateEditDebtSummaryFields() {
         remainingIQD += Math.abs(netIQD);
     }
 
-    $('#edit_debt_remaining_usd').val(formatNumber(remainingUSD) + ' $');
-    $('#edit_debt_remaining_iqd').val(formatNumber(remainingIQD) + ' د.ع');
+    $('#edit_debt_remaining_usd').val(formatNumber(Math.max(remainingUSD, 0)) + ' $');
+    $('#edit_debt_remaining_iqd').val(formatNumber(Math.max(remainingIQD, 0)) + ' د.ع');
 }
 
 function fetchDebtTotalsForEditModal(oldValues) {
