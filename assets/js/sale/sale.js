@@ -11,23 +11,6 @@ $(document).ready(function() {
         $('#' + prefix + 'total_price').val(total.toFixed(4));
     }
 
-    function calculatePricePerUnit(prefix = '') {
-        var quantity = parseFloat($('#' + prefix + 'quantity').val()) || 0;
-        var paidUSD = parseFloat($('#' + prefix + 'amount_paid_usd').val()) || 0;
-        var paidIQD = parseFloat($('#' + prefix + 'amount_paid_iq').val()) || 0;
-        var changeUSD = parseFloat($('#' + prefix + 'change_back_usd').val()) || 0;
-        var changeIQD = parseFloat($('#' + prefix + 'change_back_iq').val()) || 0;
-        var dolarRate = parseFloat($('#' + prefix + 'dolar_rate').val()) || 1;
-        
-        if (quantity > 0) {
-            var netPaidUSD = paidUSD - changeUSD;
-            var netPaidIQD = paidIQD - changeIQD;
-            var netPaidIQD_inUSD = netPaidIQD / (dolarRate / 100);
-            var totalPaid = netPaidUSD + netPaidIQD_inUSD;
-            var pricePerUnit = totalPaid / quantity;
-            $('#' + prefix + 'price_per_unit').val(pricePerUnit.toFixed(4));
-        }
-    }
 
     function calculateRemainingAmount(prefix = '') {
         var total = parseFloat($('#' + prefix + 'total_price').val()) || 0;
@@ -45,30 +28,18 @@ $(document).ready(function() {
         $('#' + prefix + 'remaining_amount').val(remaining.toFixed(4));
     }
 
-    // Event listeners
+    // Event listeners: quantity and price_per_unit -> recalculate total and remaining
     $('#quantity, #price_per_unit, #edit_quantity, #edit_price_per_unit').on('input', function() {
         var prefix = this.id.startsWith('edit_') ? 'edit_' : '';
         calculateTotalPrice(prefix);
         calculateRemainingAmount(prefix);
     });
     
-    // When paid amounts, change back, or dollar rate change -> recalculate unit price and remaining
-    $('#amount_paid_usd, #amount_paid_iq, #change_back_usd, #change_back_iq, #dolar_rate, #edit_amount_paid_usd, #edit_amount_paid_iq, #edit_change_back_usd, #edit_change_back_iq, #edit_dolar_rate').on('input', function() {
-        var prefix = this.id.startsWith('edit_') ? 'edit_' : '';
-        calculatePricePerUnit(prefix);
-        calculateTotalPrice(prefix);
-        calculateRemainingAmount(prefix);
-    });
-
-    // When discount changes -> only recalculate remaining amount (NOT unit price)
-    $('#discount, #edit_discount').on('input', function() {
+    // Paid amounts, change back, dollar rate, discount -> only recalculate remaining
+    // price_per_unit is NEVER auto-calculated from payments
+    $('#amount_paid_usd, #amount_paid_iq, #change_back_usd, #change_back_iq, #dolar_rate, #discount, #edit_amount_paid_usd, #edit_amount_paid_iq, #edit_change_back_usd, #edit_change_back_iq, #edit_dolar_rate, #edit_discount').on('input', function() {
         var prefix = this.id.startsWith('edit_') ? 'edit_' : '';
         calculateRemainingAmount(prefix);
-    });
-
-    $('#quantity, #edit_quantity').on('input', function() {
-        var prefix = this.id.startsWith('edit_') ? 'edit_' : '';
-        calculatePricePerUnit(prefix);
     });
 
     // Initial calculations
