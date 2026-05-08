@@ -56,9 +56,11 @@ editCustomerDebtForm.addEventListener('submit', async function(e) {
         const paid_usd = parseFloat(document.getElementById('edit_customer_debt_paid_usd').value) || 0;
         const paid_iqd = parseFloat(document.getElementById('edit_customer_debt_paid_iqd').value) || 0;
         const discount = parseFloat(document.getElementById('edit_customer_debt_discount').value) || 0;
-        const note = document.getElementById('edit_customer_debt_note').value;
         const paymentTypeField = document.getElementById('edit_customer_debt_payment_type');
         const payment_type = paymentTypeField ? paymentTypeField.value : 'fifo';
+        const change_back_usd = parseFloat(document.getElementById('edit_customer_debt_change_back_usd').value) || 0;
+        const change_back_iq = parseFloat(document.getElementById('edit_customer_debt_change_back_iqd').value) || 0;
+        const note = document.getElementById('edit_customer_debt_note').value;
 
         if (!id || !customer_id || !date || (paid_usd <= 0 && paid_iqd <= 0 && discount <= 0)) {
             Swal.fire('هەڵە', 'هەموو خانەکان پڕ بکە!', 'error');
@@ -75,6 +77,8 @@ editCustomerDebtForm.addEventListener('submit', async function(e) {
         formData.append('discount', discount);
         formData.append('note', note);
         formData.append('payment_type', payment_type);
+        formData.append('change_back_usd', change_back_usd);
+        formData.append('change_back_iq', change_back_iq);
 
         if (payment_type === 'specific_sales') {
             const selectedSales = {};

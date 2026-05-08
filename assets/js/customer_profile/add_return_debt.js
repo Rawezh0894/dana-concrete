@@ -3,6 +3,8 @@ let CUSTOMER_CURRENT_DEBT = 0;
 let CUSTOMER_OPENING_DEBT_USD = 0;
 // Multiple submission prevention flag
 let submitting = false;
+let isManualChangeBack = false;
+let isManualDiscount = false;
 
 // Function to fetch dollar rate from API
 async function fetchDollarRateFromAPI() {
@@ -67,12 +69,14 @@ window.fetchCustomerOpeningDebt = fetchCustomerOpeningDebt;
 window.updateDollarRateInModal = updateDollarRateInModal;
 
 // Function to calculate and display remaining debt
-function calculateRemainingDebt() {
-    const dolarRateInput = document.getElementById('customer_debt_dolar_rate');
-    const paidUsdInput = document.getElementById('customer_debt_paid_usd');
-    const paidIqdInput = document.getElementById('customer_debt_paid_iqd');
-    const discountInput = document.getElementById('customer_debt_discount');
-    const remainingElement = document.getElementById('customer_debt_remaining');
+function calculateRemainingDebt(prefix = 'customer_debt_') {
+    const dolarRateInput = document.getElementById(prefix + 'dolar_rate');
+    const paidUsdInput = document.getElementById(prefix + 'paid_usd');
+    const paidIqdInput = document.getElementById(prefix + 'paid_iqd');
+    const changeUsdInput = document.getElementById(prefix + 'change_back_usd');
+    const changeIqdInput = document.getElementById(prefix + 'change_back_iqd');
+    const discountInput = document.getElementById(prefix + 'discount');
+    const remainingElement = document.getElementById(prefix + 'remaining');
 
     if (!dolarRateInput || !paidUsdInput || !paidIqdInput || !discountInput || !remainingElement) {
         return;
@@ -81,33 +85,80 @@ function calculateRemainingDebt() {
     const dolar_rate = parseFloat(dolarRateInput.value) || 0;
     const paid_usd = parseFloat(paidUsdInput.value) || 0;
     const paid_iqd = parseFloat(paidIqdInput.value) || 0;
+    const change_usd = parseFloat(changeUsdInput?.value) || 0;
+    const change_iqd = parseFloat(changeIqdInput?.value) || 0;
     const discount = parseFloat(discountInput.value) || 0;
     
-    // Calculate IQD to USD conversion
-    const paid_iqd_usd = dolar_rate > 0 ? paid_iqd / (dolar_rate / 100) : 0;
-    const total_payment = paid_usd + paid_iqd_usd + discount;
+    // Calculate IQD to USD conversion (Net)
+    const net_paid_usd = paid_usd - change_usd;
+    const net_paid_iqd = paid_iqd - change_iqd;
+    const net_paid_iqd_usd = dolar_rate > 0 ? net_paid_iqd / (dolar_rate / 100) : 0;
+    const total_payment = net_paid_usd + net_paid_iqd_usd + discount;
     
-    // Calculate remaining debt (داخیلکردنی قەرزی پێشوو)
-    const remainingDebt = (CUSTOMER_CURRENT_DEBT + CUSTOMER_OPENING_DEBT_USD) - total_payment;
+    // Calculate remaining debt
+    let total_debt = CUSTOMER_CURRENT_DEBT + CUSTOMER_OPENING_DEBT_USD;
     
-    // Handle floating-point precision issues - if very close to zero, treat as zero
+    // If in edit mode, we should ideally fetch the specific debt situation of that record's context
+    // But for now, we'll use the current global debt as a reference
+    const remainingDebt = total_debt - total_payment;
     const adjustedRemainingDebt = Math.abs(remainingDebt) < 0.01 ? 0 : remainingDebt;
     
-    // Format and display remaining debt
-    if (remainingElement) {
-        remainingElement.value = adjustedRemainingDebt.toFixed(4) + ' USD';
+    // Smart Auto-Balance Logic (Only for Add Modal)
+    const autoBalanceToggle = document.getElementById('auto_balance_toggle');
+    const paymentType = document.getElementById(prefix + 'payment_type')?.value || 'fifo';
+    
+    if (prefix === 'customer_debt_' && autoBalanceToggle && autoBalanceToggle.checked) {
+        let target_amount = total_debt;
         
-        // Change color based on remaining debt
-        if (adjustedRemainingDebt < 0) {
-            remainingElement.style.color = 'red';
-            remainingElement.style.fontWeight = 'bold';
-        } else if (adjustedRemainingDebt === 0) {
-            remainingElement.style.color = 'green';
-            remainingElement.style.fontWeight = 'bold';
-        } else {
-            remainingElement.style.color = 'black';
-            remainingElement.style.fontWeight = 'normal';
+        if (paymentType === 'specific_sales') {
+            // In specific sales, we want to match the total allocated amount
+            let total_allocated = 0;
+            document.querySelectorAll('.sale-checkbox:checked').forEach(cb => {
+                const amtInput = document.querySelector(`.sale-amount[data-sale-id="${cb.value}"]`);
+                if (amtInput) total_allocated += parseFloat(amtInput.value) || 0;
+            });
+            if (total_allocated > 0) target_amount = total_allocated;
         }
+
+        const current_net_paid_no_discount = (paid_usd - change_usd) + ((paid_iqd - change_iqd) / (dolar_rate / 100));
+        const current_gap = target_amount - current_net_paid_no_discount;
+
+        if (current_gap > 0 && current_gap < 10) { 
+            // Small Positive Gap -> Auto-fill Discount
+            if (!isManualDiscount) {
+                discountInput.value = Math.max(0, current_gap).toFixed(4);
+            }
+        } else if (current_gap <= 0) {
+            // No gap or surplus -> Discount should be 0 unless manual
+            if (!isManualDiscount) {
+                discountInput.value = 0;
+            }
+        }
+        
+        // Recalculate final remaining
+        const final_discount = parseFloat(discountInput.value) || 0;
+        const final_total_p = current_net_paid_no_discount + final_discount;
+        const final_rem_d = total_debt - final_total_p;
+        const final_adj_rem_d = Math.abs(final_rem_d) < 0.01 ? 0 : final_rem_d;
+        
+        remainingElement.value = final_adj_rem_d.toFixed(4) + ' USD';
+        updateRemainingColor(remainingElement, final_adj_rem_d);
+    } else {
+        remainingElement.value = adjustedRemainingDebt.toFixed(4) + ' USD';
+        updateRemainingColor(remainingElement, adjustedRemainingDebt);
+    }
+}
+
+function updateRemainingColor(element, debt) {
+    if (debt < 0) {
+        element.style.color = 'red';
+        element.style.fontWeight = 'bold';
+    } else if (debt === 0) {
+        element.style.color = 'green';
+        element.style.fontWeight = 'bold';
+    } else {
+        element.style.color = 'black';
+        element.style.fontWeight = 'normal';
     }
 }
 
@@ -116,12 +167,90 @@ window.calculateRemainingDebt = calculateRemainingDebt;
 
 // Add event listeners for real-time calculation
 document.addEventListener('DOMContentLoaded', function() {
-    const inputs = ['customer_debt_dolar_rate', 'customer_debt_paid_usd', 'customer_debt_paid_iqd', 'customer_debt_discount'];
+    const inputs = ['customer_debt_dolar_rate', 'customer_debt_paid_usd', 'customer_debt_paid_iqd', 'customer_debt_change_back_usd', 'customer_debt_change_back_iqd', 'customer_debt_discount'];
     inputs.forEach(id => {
         const element = document.getElementById(id);
         if (element) {
-            element.addEventListener('input', calculateRemainingDebt);
+            element.addEventListener('input', (e) => {
+                if (id === 'customer_debt_change_back_usd' || id === 'customer_debt_change_back_iqd') isManualChangeBack = true;
+                if (id === 'customer_debt_discount') isManualDiscount = true;
+                calculateRemainingDebt('customer_debt_');
+            });
         }
+    });
+
+    // Delegate listeners for dynamically loaded sale amounts and checkboxes
+    $(document).on('input', '.sale-amount', function() {
+        calculateRemainingDebt('customer_debt_');
+    });
+    $(document).on('change', '.sale-checkbox', function() {
+        calculateRemainingDebt('customer_debt_');
+    });
+    $(document).on('change', '#customer_debt_payment_type', function() {
+        calculateRemainingDebt('customer_debt_');
+    });
+
+    const editInputs = ['edit_customer_debt_dolar_rate', 'edit_customer_debt_paid_usd', 'edit_customer_debt_paid_iqd', 'edit_customer_debt_change_back_usd', 'edit_customer_debt_change_back_iqd', 'edit_customer_debt_discount'];
+    editInputs.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.addEventListener('input', (e) => {
+                calculateRemainingDebt('edit_customer_debt_');
+            });
+        }
+    });
+    
+    $(document).on('input', '.edit-sale-amount', function() {
+        calculateRemainingDebt('edit_customer_debt_');
+    });
+    $(document).on('change', '.edit-sale-checkbox', function() {
+        calculateRemainingDebt('edit_customer_debt_');
+    });
+    $(document).on('change', '#edit_customer_debt_payment_type', function() {
+        calculateRemainingDebt('edit_customer_debt_');
+    });
+
+    // Handle Balance Buttons
+    document.querySelectorAll('.balance-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const dolar_rate = parseFloat(document.getElementById('customer_debt_dolar_rate')?.value || document.getElementById('edit_customer_debt_dolar_rate')?.value) || 0;
+            const total_debt = CUSTOMER_CURRENT_DEBT + CUSTOMER_OPENING_DEBT_USD;
+            
+            // Get current paid values based on which modal is open
+            const isEdit = targetId.startsWith('edit_');
+            const prefix = isEdit ? 'edit_customer_debt_' : 'customer_debt_';
+            
+            const paid_usd = parseFloat(document.getElementById(prefix + 'paid_usd')?.value) || 0;
+            const paid_iqd = parseFloat(document.getElementById(prefix + 'paid_iqd')?.value) || 0;
+            const discount = parseFloat(document.getElementById(prefix + 'discount')?.value) || 0;
+            const change_usd = parseFloat(document.getElementById(prefix + 'change_back_usd')?.value) || 0;
+            const change_iqd = parseFloat(document.getElementById(prefix + 'change_back_iqd')?.value) || 0;
+
+            const current_net_paid_no_target = 
+                (targetId.includes('change_back_usd') ? paid_usd : (paid_usd - change_usd)) + 
+                (targetId.includes('change_back_iq') ? (paid_iqd / (dolar_rate / 100)) : ((paid_iqd - change_iqd) / (dolar_rate / 100))) + 
+                (targetId.includes('discount') ? 0 : discount);
+            
+            const diff_to_zero = total_debt - current_net_paid_no_target;
+
+            const input = document.getElementById(targetId);
+            if (!input) return;
+
+            if (targetId.includes('change_back_usd')) {
+                input.value = Math.max(0, -diff_to_zero).toFixed(4);
+                if (!isEdit) isManualChangeBack = true;
+            } else if (targetId.includes('change_back_iq')) {
+                const diffIqd = (-diff_to_zero) * (dolar_rate / 100);
+                input.value = Math.max(0, Math.round(diffIqd));
+                if (!isEdit) isManualChangeBack = true;
+            } else if (targetId.includes('discount')) {
+                input.value = Math.max(0, diff_to_zero).toFixed(4);
+                if (!isEdit) isManualDiscount = true;
+            }
+            
+            if (typeof calculateRemainingDebt === 'function') calculateRemainingDebt();
+        });
     });
     
     // Fetch initial customer debt and opening debt
@@ -134,6 +263,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const modal = document.getElementById('addCustomerDebtModal');
     if (modal) {
         modal.addEventListener('shown.bs.modal', function() {
+            isManualChangeBack = false;
+            isManualDiscount = false;
             if (typeof CUSTOMER_ID !== 'undefined' && CUSTOMER_ID) {
                 fetchCustomerDebt(CUSTOMER_ID);
                 fetchCustomerOpeningDebt(CUSTOMER_ID);
@@ -172,6 +303,8 @@ addCustomerDebtForm.addEventListener('submit', async function(e) {
     const discount = parseFloat(document.getElementById('customer_debt_discount').value) || 0;
     const note = document.getElementById('customer_debt_note').value;
     const payment_type = document.getElementById('customer_debt_payment_type').value;
+    const change_back_usd = parseFloat(document.getElementById('customer_debt_change_back_usd').value) || 0;
+    const change_back_iq = parseFloat(document.getElementById('customer_debt_change_back_iqd').value) || 0;
     
     // Collect specific sales data if payment type is specific_sales
     let specific_sales = {};
@@ -222,6 +355,8 @@ addCustomerDebtForm.addEventListener('submit', async function(e) {
     formData.append('discount', discount);
     formData.append('note', note);
     formData.append('payment_type', payment_type);
+    formData.append('change_back_usd', change_back_usd);
+    formData.append('change_back_iq', change_back_iq);
     
     // Add specific sales data if applicable
     if (payment_type === 'specific_sales' && Object.keys(specific_sales).length > 0) {

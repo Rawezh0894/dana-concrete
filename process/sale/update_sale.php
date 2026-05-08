@@ -40,6 +40,8 @@ try {
     $notes = $_POST['edit_notes'] ?? null;
     $formula_id = $_POST['edit_formula_id'] ?? null;
     $discount = $_POST['edit_discount'] ?? 0;
+    $change_back_usd = $_POST['edit_change_back_usd'] ?? 0;
+    $change_back_iq = $_POST['edit_change_back_iq'] ?? 0;
 
     // Log parsed variables for debugging
     error_log("Parsed vars: id='$id', customer_id='$customer_id', recipient='$recipient', location='$location', quantity='$quantity', price_per_unit='$price_per_unit', total_price='$total_price', payment_type='$payment_type', amount_paid_usd='$amount_paid_usd', amount_paid_iq='$amount_paid_iq', dolar_rate='$dolar_rate', remaining_amount='$remaining_amount', invoice_number='$invoice_number', order_date='$order_date', notes='$notes', formula_id='$formula_id', discount='$discount'");
@@ -120,7 +122,9 @@ try {
         'notes' => $old_record['notes'],
         'formula_id' => $old_record['formula_id'],
         'formula_name' => $old_formula_name,
-        'discount' => $old_record['discount']
+        'discount' => $old_record['discount'],
+        'change_back_usd' => $old_record['change_back_usd'],
+        'change_back_iq' => $old_record['change_back_iq']
     ];
 
     if ($recipient_id) {
@@ -145,7 +149,7 @@ try {
     }
 
     // Now perform the update
-    $stmt = $pdo->prepare("UPDATE sales SET customer_id=?, recipient=?, location=?, quantity=?, price_per_unit=?, total_price=?, payment_type=?, amount_paid_usd=?, amount_paid_iq=?, dolar_rate=?, remaining_amount=?, invoice_number=?, order_date=?, notes=?, formula_id=?, discount=? WHERE id=?");
+    $stmt = $pdo->prepare("UPDATE sales SET customer_id=?, recipient=?, location=?, quantity=?, price_per_unit=?, total_price=?, payment_type=?, amount_paid_usd=?, amount_paid_iq=?, dolar_rate=?, remaining_amount=?, invoice_number=?, order_date=?, notes=?, formula_id=?, discount=?, change_back_usd=?, change_back_iq=? WHERE id=?");
     $result = $stmt->execute([
         $customer_id,
         $recipient,
@@ -163,6 +167,8 @@ try {
         $notes,
         $formula_id,
         $discount,
+        $change_back_usd,
+        $change_back_iq,
         $id
     ]);
 
@@ -196,7 +202,9 @@ try {
             'notes' => $notes,
             'formula_id' => $formula_id,
             'formula_name' => $formula_name,
-            'discount' => $discount
+            'discount' => $discount,
+            'change_back_usd' => $change_back_usd,
+            'change_back_iq' => $change_back_iq
         ];
 
         $additional_info = [

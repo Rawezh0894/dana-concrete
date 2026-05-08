@@ -133,6 +133,34 @@ const columnDefs = [
         type: 'numericColumn'
     },
     {
+        field: 'change_back_usd',
+        headerName: 'باقی بە دۆلار',
+        filter: 'agNumberColumnFilter',
+        floatingFilter: true,
+        sortable: true,
+        resizable: true,
+        minWidth: 100,
+        cellStyle: { textAlign: 'right', direction: 'rtl', color: '#dc3545' },
+        valueFormatter: function(params) {
+            return formatUSD(params.value);
+        },
+        type: 'numericColumn'
+    },
+    {
+        field: 'change_back_iq',
+        headerName: 'باقی بە دینار',
+        filter: 'agNumberColumnFilter',
+        floatingFilter: true,
+        sortable: true,
+        resizable: true,
+        minWidth: 100,
+        cellStyle: { textAlign: 'right', direction: 'rtl', color: '#dc3545' },
+        valueFormatter: function(params) {
+            return formatIQD(params.value);
+        },
+        type: 'numericColumn'
+    },
+    {
         field: 'total_price',
         headerName: 'کۆی نرخ',
         filter: 'agNumberColumnFilter',
@@ -337,6 +365,8 @@ function loadSalesData(preservePagination = false) {
                 dolar_rate: row.dolar_rate || 0,
                 notes: row.notes || '-',
                 discount: row.discount || 0,
+                change_back_usd: row.change_back_usd || 0,
+                change_back_iq: row.change_back_iq || 0,
                 duplicate_count: row.duplicate_count || 0
             }));
         };
@@ -374,6 +404,8 @@ function loadSalesData(preservePagination = false) {
                         dolar_rate: row.dolar_rate || 0,
                         notes: row.notes || '-',
                         discount: row.discount || 0,
+                        change_back_usd: row.change_back_usd || 0,
+                        change_back_iq: row.change_back_iq || 0,
                         duplicate_count: row.duplicate_count || 0
                     }));
                     

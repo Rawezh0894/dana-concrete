@@ -299,6 +299,12 @@ if ($customer_id) {
           <form id="addCustomerDebtForm">
             <div class="modal-header">
               <h5 class="modal-title" id="addCustomerDebtModalLabel">دانەوەی قەرز</h5>
+              <div class="ms-auto me-3 d-flex align-items-center">
+                <div class="form-check form-switch mb-0">
+                  <input class="form-check-input" type="checkbox" id="auto_balance_toggle" checked>
+                  <label class="form-check-label small" for="auto_balance_toggle">هاوسەنگی خوودکار</label>
+                </div>
+              </div>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -320,6 +326,22 @@ if ($customer_id) {
                 <div class="col-md-6">
                   <label for="customer_debt_paid_iqd" class="form-label">بڕی پارەی داوە (IQD)</label>
                   <input type="number" class="form-control" id="customer_debt_paid_iqd" name="paid_iqd" min="0" step="1" value="0">
+                </div>
+              </div>
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="customer_debt_change_back_usd" class="form-label">باقی بە دۆلار</label>
+                  <div class="input-group">
+                    <input type="number" class="form-control" id="customer_debt_change_back_usd" name="change_back_usd" min="0" step="0.01" value="0">
+                    <button class="btn btn-outline-secondary btn-sm balance-btn" type="button" data-target="customer_debt_change_back_usd" title="هاوسەنگ کردن"><i class="fa fa-magic"></i></button>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <label for="customer_debt_change_back_iqd" class="form-label">باقی بە دینار</label>
+                  <div class="input-group">
+                    <input type="number" class="form-control" id="customer_debt_change_back_iqd" name="change_back_iq" min="0" step="1" value="0">
+                    <button class="btn btn-outline-secondary btn-sm balance-btn" type="button" data-target="customer_debt_change_back_iqd" title="هاوسەنگ کردن"><i class="fa fa-magic"></i></button>
+                  </div>
                 </div>
               </div>
               <div class="row mb-3">
@@ -350,7 +372,10 @@ if ($customer_id) {
               <div class="row mb-3">
                 <div class="col-md-6">
                   <label for="customer_debt_discount" class="form-label">داشکاندن (USD)</label>
-                  <input type="number" class="form-control" id="customer_debt_discount" name="discount" min="0" step="0.0001" value="0">
+                  <div class="input-group">
+                    <input type="number" class="form-control" id="customer_debt_discount" name="discount" min="0" step="0.0001" value="0">
+                    <button class="btn btn-outline-secondary btn-sm balance-btn" type="button" data-target="customer_debt_discount" title="هاوسەنگ کردن"><i class="fa fa-magic"></i></button>
+                  </div>
                 </div>
                 <div class="col-md-6">
                   <label for="customer_debt_remaining" class="form-label">قەرزی ماوە (USD)</label>
@@ -402,6 +427,35 @@ if ($customer_id) {
                 </div>
               </div>
               <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="edit_customer_debt_change_back_usd" class="form-label">باقی بە دۆلار</label>
+                  <div class="input-group">
+                    <input type="number" class="form-control" id="edit_customer_debt_change_back_usd" name="change_back_usd" min="0" step="0.01" value="0">
+                    <button class="btn btn-outline-secondary btn-sm balance-btn" type="button" data-target="edit_customer_debt_change_back_usd" title="هاوسەنگ کردن"><i class="fa fa-magic"></i></button>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <label for="edit_customer_debt_change_back_iqd" class="form-label">باقی بە دینار</label>
+                  <div class="input-group">
+                    <input type="number" class="form-control" id="edit_customer_debt_change_back_iqd" name="change_back_iq" min="0" step="1" value="0">
+                    <button class="btn btn-outline-secondary btn-sm balance-btn" type="button" data-target="edit_customer_debt_change_back_iqd" title="هاوسەنگ کردن"><i class="fa fa-magic"></i></button>
+                  </div>
+                </div>
+              </div>
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="edit_customer_debt_discount" class="form-label">داشکاندن (USD)</label>
+                  <div class="input-group">
+                    <input type="number" class="form-control" id="edit_customer_debt_discount" name="discount" min="0" step="0.0001">
+                    <button class="btn btn-outline-secondary btn-sm balance-btn" type="button" data-target="edit_customer_debt_discount" title="هاوسەنگ کردن"><i class="fa fa-magic"></i></button>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <label for="edit_customer_debt_remaining" class="form-label">قەرزی ماوە (USD)</label>
+                  <input type="text" class="form-control bg-light" id="edit_customer_debt_remaining" readonly value="0.0000 USD">
+                </div>
+              </div>
+              <div class="row mb-3">
                 <div class="col-md-12">
                   <label for="edit_customer_debt_payment_type" class="form-label">جۆری پارەدان</label>
                   <select class="form-control" id="edit_customer_debt_payment_type" name="payment_type" required>
@@ -429,7 +483,10 @@ if ($customer_id) {
               <div class="row mb-3">
                 <div class="col-md-6">
                   <label for="edit_customer_debt_discount" class="form-label">داشکاندن (USD)</label>
-                  <input type="number" class="form-control" id="edit_customer_debt_discount" name="discount" min="0" step="0.0001">
+                  <div class="input-group">
+                    <input type="number" class="form-control" id="edit_customer_debt_discount" name="discount" min="0" step="0.0001">
+                    <button class="btn btn-outline-secondary btn-sm balance-btn" type="button" data-target="edit_customer_debt_discount" title="هاوسەنگ کردن"><i class="fa fa-magic"></i></button>
+                  </div>
                 </div>
               </div>
               <div class="mb-3">
@@ -587,13 +644,16 @@ if ($customer_id) {
             const dolarRateInput = addForm.querySelector('#customer_debt_dolar_rate');
             const remainingInput = addForm.querySelector('#customer_debt_remaining');
             
+            const changeUsdInput = addForm.querySelector('#customer_debt_change_back_usd');
+            const changeIqdInput = addForm.querySelector('#customer_debt_change_back_iqd');
+            
             function calculateRemaining() {
                 if (typeof calculateRemainingDebt === 'function') {
                     calculateRemainingDebt();
                 }
             }
             
-            [paidUsdInput, paidIqdInput, discountInput, dolarRateInput].forEach(input => {
+            [paidUsdInput, paidIqdInput, discountInput, dolarRateInput, changeUsdInput, changeIqdInput].forEach(input => {
                 input.addEventListener('input', calculateRemaining);
             });
         }
@@ -610,7 +670,7 @@ if ($customer_id) {
         }
         
         // Add real-time validation for payment amounts
-        const paymentInputs = ['customer_debt_paid_usd', 'customer_debt_paid_iqd', 'customer_debt_discount', 'customer_debt_dolar_rate'];
+        const paymentInputs = ['customer_debt_paid_usd', 'customer_debt_paid_iqd', 'customer_debt_change_back_usd', 'customer_debt_change_back_iqd', 'customer_debt_discount', 'customer_debt_dolar_rate'];
         paymentInputs.forEach(inputId => {
             const input = document.getElementById(inputId);
             if (input) {
@@ -854,10 +914,12 @@ if ($customer_id) {
         const paymentType = document.getElementById('customer_debt_payment_type').value;
         const totalAmount = parseFloat(document.getElementById('customer_debt_paid_usd').value) || 0;
         const totalIqd = parseFloat(document.getElementById('customer_debt_paid_iqd').value) || 0;
+        const changeUsd = parseFloat(document.getElementById('customer_debt_change_back_usd').value) || 0;
+        const changeIqd = parseFloat(document.getElementById('customer_debt_change_back_iqd').value) || 0;
         const dolarRate = parseFloat(document.getElementById('customer_debt_dolar_rate').value) || 150000;
         const discount = parseFloat(document.getElementById('customer_debt_discount').value) || 0;
         
-        const totalPaidUsd = totalAmount + (totalIqd / (dolarRate / 100)) + discount;
+        const totalPaidUsd = (totalAmount - changeUsd) + ((totalIqd - changeIqd) / (dolarRate / 100)) + discount;
         
         if (totalPaidUsd <= 0) {
             alert('بڕی پارەی داوە دەبێت گەورەتر بێت لە سفر!');
@@ -866,7 +928,7 @@ if ($customer_id) {
         
         if (paymentType === 'opening_debt_only') {
             // Validate against opening debt only
-            if (totalPaidUsd > CUSTOMER_OPENING_DEBT_USD) {
+            if (totalPaidUsd > (CUSTOMER_OPENING_DEBT_USD + 0.01)) {
                 alert(`بڕی پارەی داوە (${totalPaidUsd.toFixed(2)} $) نابێت زیاتر بێت لە قەرزی سەرەتایی (${CUSTOMER_OPENING_DEBT_USD.toFixed(2)} $)!`);
                 return false;
             }
@@ -909,7 +971,7 @@ if ($customer_id) {
         } else {
             // FIFO validation - check against total debt
             const totalDebt = CUSTOMER_CURRENT_DEBT + CUSTOMER_OPENING_DEBT_USD;
-            if (totalPaidUsd > totalDebt) {
+            if (totalPaidUsd > (totalDebt + 0.01)) {
                 alert(`بڕی پارەی داوە (${totalPaidUsd.toFixed(2)} $) نابێت زیاتر بێت لە کۆی قەرز (${totalDebt.toFixed(2)} $)!`);
                 return false;
             }
@@ -923,10 +985,12 @@ if ($customer_id) {
         const paymentType = document.getElementById('customer_debt_payment_type').value;
         const totalAmount = parseFloat(document.getElementById('customer_debt_paid_usd').value) || 0;
         const totalIqd = parseFloat(document.getElementById('customer_debt_paid_iqd').value) || 0;
+        const changeUsd = parseFloat(document.getElementById('customer_debt_change_back_usd').value) || 0;
+        const changeIqd = parseFloat(document.getElementById('customer_debt_change_back_iqd').value) || 0;
         const dolarRate = parseFloat(document.getElementById('customer_debt_dolar_rate').value) || 150000;
         const discount = parseFloat(document.getElementById('customer_debt_discount').value) || 0;
         
-        const totalPaidUsd = totalAmount + (totalIqd / (dolarRate / 100)) + discount;
+        const totalPaidUsd = (totalAmount - changeUsd) + ((totalIqd - changeIqd) / (dolarRate / 100)) + discount;
         
         // Reset all input styles
         const inputs = ['customer_debt_paid_usd', 'customer_debt_paid_iqd', 'customer_debt_discount'];
@@ -945,7 +1009,7 @@ if ($customer_id) {
             isValid = false;
             errorMessage = 'بڕی پارەی داوە دەبێت گەورەتر بێت لە سفر!';
         } else if (paymentType === 'opening_debt_only') {
-            if (totalPaidUsd > CUSTOMER_OPENING_DEBT_USD) {
+            if (totalPaidUsd > (CUSTOMER_OPENING_DEBT_USD + 0.01)) {
                 isValid = false;
                 errorMessage = `بڕی پارەی داوە نابێت زیاتر بێت لە قەرزی سەرەتایی (${CUSTOMER_OPENING_DEBT_USD.toFixed(2)} $)!`;
             }
@@ -986,7 +1050,7 @@ if ($customer_id) {
         } else {
             // FIFO validation
             const totalDebt = CUSTOMER_CURRENT_DEBT + CUSTOMER_OPENING_DEBT_USD;
-            if (totalPaidUsd > totalDebt) {
+            if (totalPaidUsd > (totalDebt + 0.01)) {
                 isValid = false;
                 errorMessage = `بڕی پارەی داوە نابێت زیاتر بێت لە کۆی قەرز (${totalDebt.toFixed(2)} $)!`;
             }

@@ -18288,3 +18288,1713 @@
 )
 
 [28-Jan-2026 10:57:05 Asia/Baghdad] Customer sales retrieved: Customer=24, Count=4
+[08-May-2026 10:07:10 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778224030
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 10:07:10 Asia/Baghdad] Dashboard data loaded successfully for user: 1
+[08-May-2026 10:08:48 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778224128
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 10:08:48 Asia/Baghdad] delete_concrete_receipts.php POST: Array
+(
+    [id] => 7267
+)
+
+[08-May-2026 10:08:48 Asia/Baghdad] Found concrete receipt for deletion: Array
+(
+    [id] => 7267
+    [receipt_number] => A-7241
+    [customer_id] => 165
+    [location] => پیرەمەگرون
+    [meter_amount] => 4.00
+    [price_per_meter] => 
+    [formulas_id] => 42
+    [pump_car_id] => 12
+    [pump_driver_id] => 26
+    [mixer_car_id] => 23
+    [mixer_driver_id] => 29
+    [created_at] => 2026-05-07 17:31:02
+    [updated_at] => 
+    [receiver_name] => 
+    [notes] => 
+    [payment_status] => unpaid
+)
+
+[08-May-2026 10:08:48 Asia/Baghdad] Concrete receipt successfully deleted: ID=7267, Receipt Number=A-7241, Customer=کاک سەربەستی  پەمپ
+[08-May-2026 10:19:22 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778224762
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 10:19:22 Asia/Baghdad] Cars retrieved successfully: Count=49
+[08-May-2026 10:19:22 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778224762
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 10:19:22 Asia/Baghdad] Query: SELECT id, name, mobile, role, salary, COALESCE(bonus, 0) as bonus, COALESCE(status, "active") as status, join_date, resignation_date FROM employees ORDER BY id DESC
+[08-May-2026 10:19:22 Asia/Baghdad] Employees fetched: 59
+[08-May-2026 10:19:22 Asia/Baghdad] Employees retrieved successfully: Count=59
+[08-May-2026 10:21:00 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778224860
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 10:21:00 Asia/Baghdad] Companies retrieved successfully: Count=21
+[08-May-2026 10:21:22 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778224882
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 10:21:22 Asia/Baghdad] Companies retrieved successfully: Count=21
+[08-May-2026 10:22:56 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778224976
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 10:22:56 Asia/Baghdad] Dashboard data loaded successfully for user: 1
+[08-May-2026 10:46:25 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778226385
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 10:46:25 Asia/Baghdad] add_sale.php POST: Array
+(
+    [customer_id] => 24
+    [recipient_id] => 
+    [location] => جە
+    [invoice_number] => 258
+    [formula_id] => 17
+    [order_date] => 2026-05-07
+    [quantity] => 30.5
+    [price_per_unit] => 42.0000
+    [total_price] => 1281.0000
+    [payment_type] => نەقد
+    [amount_paid_iq] => 0
+    [amount_paid_usd] => 1281
+    [remaining_amount] => 0.0000
+    [dolar_rate] => 153000
+    [discount] => 0
+    [notes] => 
+)
+
+[08-May-2026 10:48:12 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778226492
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 10:48:12 Asia/Baghdad] get_customer_debt.php GET: Array
+(
+    [customer_id] => 568
+)
+
+[08-May-2026 10:48:12 Asia/Baghdad] Customer debt retrieved: Customer=568, Debt=0
+[08-May-2026 10:48:13 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778226493
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 10:48:13 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 568
+    [stats] => 1
+)
+
+[08-May-2026 10:48:13 Asia/Baghdad] Customer stats retrieved: Customer=568, Total Debt USD=0, Total Debt IQD=0, Sales Count=1
+[08-May-2026 10:48:13 Asia/Baghdad] select_account_adjustments.php GET: Array
+(
+    [customer_id] => 568
+)
+
+[08-May-2026 10:48:13 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778226493
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 10:48:13 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 568
+)
+
+[08-May-2026 10:48:13 Asia/Baghdad] Customer sales retrieved: Customer=568, Count=1
+[08-May-2026 10:48:13 Asia/Baghdad] Debt payments retrieved: Customer=568, Count=0
+[08-May-2026 10:48:13 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778226493
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 10:48:13 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 568
+    [stats] => 1
+)
+
+[08-May-2026 10:48:13 Asia/Baghdad] Customer stats retrieved: Customer=568, Total Debt USD=0, Total Debt IQD=0, Sales Count=1
+[08-May-2026 10:48:13 Asia/Baghdad] Debt payments retrieved: Customer=568, Count=0
+[08-May-2026 10:48:13 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778226493
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 10:48:13 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 568
+)
+
+[08-May-2026 10:48:13 Asia/Baghdad] Customer sales retrieved: Customer=568, Count=1
+[08-May-2026 10:48:26 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778226506
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 10:48:26 Asia/Baghdad] get_customer_debt.php GET: Array
+(
+    [customer_id] => 29
+)
+
+[08-May-2026 10:48:26 Asia/Baghdad] Customer debt retrieved: Customer=29, Debt=1100.3
+[08-May-2026 10:48:26 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778226506
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 10:48:26 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 29
+    [stats] => 1
+)
+
+[08-May-2026 10:48:26 Asia/Baghdad] Customer stats retrieved: Customer=29, Total Debt USD=1100.3, Total Debt IQD=0, Sales Count=12
+[08-May-2026 10:48:26 Asia/Baghdad] select_account_adjustments.php GET: Array
+(
+    [customer_id] => 29
+)
+
+[08-May-2026 10:48:26 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778226506
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 10:48:26 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 29
+)
+
+[08-May-2026 10:48:26 Asia/Baghdad] Customer sales retrieved: Customer=29, Count=12
+[08-May-2026 10:48:26 Asia/Baghdad] Debt payments retrieved: Customer=29, Count=5
+[08-May-2026 10:48:26 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778226506
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 10:48:26 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 29
+    [stats] => 1
+)
+
+[08-May-2026 10:48:26 Asia/Baghdad] Customer stats retrieved: Customer=29, Total Debt USD=1100.3, Total Debt IQD=0, Sales Count=12
+[08-May-2026 10:48:26 Asia/Baghdad] Debt payments retrieved: Customer=29, Count=5
+[08-May-2026 10:48:26 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778226506
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 10:48:26 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 29
+)
+
+[08-May-2026 10:48:26 Asia/Baghdad] Customer sales retrieved: Customer=29, Count=12
+[08-May-2026 10:48:28 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778226508
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 10:48:28 Asia/Baghdad] get_customer_debt.php GET: Array
+(
+    [customer_id] => 29
+)
+
+[08-May-2026 10:48:28 Asia/Baghdad] Customer debt retrieved: Customer=29, Debt=1100.3
+[08-May-2026 10:48:44 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778226524
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 10:48:44 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 29
+    [remaining_only] => 1
+)
+
+[08-May-2026 10:48:44 Asia/Baghdad] Customer remaining sales retrieved: Customer=29, Count=1
+[08-May-2026 10:56:37 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778226997
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 10:56:37 Asia/Baghdad] get_customer_debt.php GET: Array
+(
+    [customer_id] => 29
+)
+
+[08-May-2026 10:56:37 Asia/Baghdad] Customer debt retrieved: Customer=29, Debt=1100.3
+[08-May-2026 10:56:37 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778226997
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 10:56:37 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 29
+    [stats] => 1
+)
+
+[08-May-2026 10:56:37 Asia/Baghdad] Customer stats retrieved: Customer=29, Total Debt USD=1100.3, Total Debt IQD=0, Sales Count=12
+[08-May-2026 10:56:37 Asia/Baghdad] select_account_adjustments.php GET: Array
+(
+    [customer_id] => 29
+)
+
+[08-May-2026 10:56:37 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778226997
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 10:56:37 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 29
+)
+
+[08-May-2026 10:56:37 Asia/Baghdad] Customer sales retrieved: Customer=29, Count=12
+[08-May-2026 10:56:37 Asia/Baghdad] Debt payments retrieved: Customer=29, Count=5
+[08-May-2026 10:56:37 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778226997
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 10:56:37 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 29
+    [stats] => 1
+)
+
+[08-May-2026 10:56:37 Asia/Baghdad] Customer stats retrieved: Customer=29, Total Debt USD=1100.3, Total Debt IQD=0, Sales Count=12
+[08-May-2026 10:56:37 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778226997
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 10:56:37 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 29
+)
+
+[08-May-2026 10:56:37 Asia/Baghdad] Customer sales retrieved: Customer=29, Count=12
+[08-May-2026 10:56:37 Asia/Baghdad] Debt payments retrieved: Customer=29, Count=5
+[08-May-2026 10:56:39 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778226999
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 10:56:39 Asia/Baghdad] get_customer_debt.php GET: Array
+(
+    [customer_id] => 29
+)
+
+[08-May-2026 10:56:39 Asia/Baghdad] Customer debt retrieved: Customer=29, Debt=1100.3
+[08-May-2026 11:07:22 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778227642
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:07:22 Asia/Baghdad] get_customer_debt.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:07:22 Asia/Baghdad] Customer debt retrieved: Customer=147, Debt=1713.5
+[08-May-2026 11:07:22 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778227642
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:07:22 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+    [stats] => 1
+)
+
+[08-May-2026 11:07:22 Asia/Baghdad] Customer stats retrieved: Customer=147, Total Debt USD=1713.5, Total Debt IQD=0, Sales Count=49
+[08-May-2026 11:07:22 Asia/Baghdad] select_account_adjustments.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:07:22 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778227642
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:07:22 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:07:22 Asia/Baghdad] Customer sales retrieved: Customer=147, Count=49
+[08-May-2026 11:07:22 Asia/Baghdad] Debt payments retrieved: Customer=147, Count=16
+[08-May-2026 11:07:22 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778227642
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:07:22 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+    [stats] => 1
+)
+
+[08-May-2026 11:07:22 Asia/Baghdad] Customer stats retrieved: Customer=147, Total Debt USD=1713.5, Total Debt IQD=0, Sales Count=49
+[08-May-2026 11:07:22 Asia/Baghdad] Debt payments retrieved: Customer=147, Count=16
+[08-May-2026 11:07:23 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778227642
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:07:23 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:07:23 Asia/Baghdad] Customer sales retrieved: Customer=147, Count=49
+[08-May-2026 11:07:26 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778227646
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:07:26 Asia/Baghdad] get_customer_debt.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:07:26 Asia/Baghdad] Customer debt retrieved: Customer=147, Debt=1713.5
+[08-May-2026 11:07:26 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778227646
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:07:26 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+    [stats] => 1
+)
+
+[08-May-2026 11:07:26 Asia/Baghdad] Customer stats retrieved: Customer=147, Total Debt USD=1713.5, Total Debt IQD=0, Sales Count=49
+[08-May-2026 11:07:26 Asia/Baghdad] select_account_adjustments.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:07:26 Asia/Baghdad] Debt payments retrieved: Customer=147, Count=16
+[08-May-2026 11:07:26 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778227646
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:07:26 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:07:26 Asia/Baghdad] Customer sales retrieved: Customer=147, Count=49
+[08-May-2026 11:07:27 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778227646
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:07:27 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+    [stats] => 1
+)
+
+[08-May-2026 11:07:27 Asia/Baghdad] Customer stats retrieved: Customer=147, Total Debt USD=1713.5, Total Debt IQD=0, Sales Count=49
+[08-May-2026 11:07:27 Asia/Baghdad] Debt payments retrieved: Customer=147, Count=16
+[08-May-2026 11:07:27 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778227647
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:07:27 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:07:27 Asia/Baghdad] Customer sales retrieved: Customer=147, Count=49
+[08-May-2026 11:07:29 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778227649
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:07:29 Asia/Baghdad] get_customer_debt.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:07:29 Asia/Baghdad] Customer debt retrieved: Customer=147, Debt=1713.5
+[08-May-2026 11:10:15 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778227815
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:10:15 Asia/Baghdad] get_customer_debt.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:10:15 Asia/Baghdad] Customer debt retrieved: Customer=147, Debt=1713.5
+[08-May-2026 11:10:15 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778227815
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:10:15 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+    [stats] => 1
+)
+
+[08-May-2026 11:10:15 Asia/Baghdad] Customer stats retrieved: Customer=147, Total Debt USD=1713.5, Total Debt IQD=0, Sales Count=49
+[08-May-2026 11:10:15 Asia/Baghdad] select_account_adjustments.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:10:15 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778227815
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:10:15 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+    [stats] => 1
+)
+
+[08-May-2026 11:10:15 Asia/Baghdad] Customer stats retrieved: Customer=147, Total Debt USD=1713.5, Total Debt IQD=0, Sales Count=49
+[08-May-2026 11:10:15 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778227815
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:10:15 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:10:15 Asia/Baghdad] Customer sales retrieved: Customer=147, Count=49
+[08-May-2026 11:10:15 Asia/Baghdad] Debt payments retrieved: Customer=147, Count=16
+[08-May-2026 11:10:15 Asia/Baghdad] Debt payments retrieved: Customer=147, Count=16
+[08-May-2026 11:10:15 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778227815
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:10:15 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:10:15 Asia/Baghdad] Customer sales retrieved: Customer=147, Count=49
+[08-May-2026 11:10:17 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778227817
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:10:17 Asia/Baghdad] get_customer_debt.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:10:17 Asia/Baghdad] Customer debt retrieved: Customer=147, Debt=1713.5
+[08-May-2026 11:10:51 Asia/Baghdad] Parsed vars: customer_id='147', date='2026-05-08', dolar_rate='153000', paid_usd='1750', paid_iqd='0', discount='0.1013', note=''
+[08-May-2026 11:10:51 Asia/Baghdad] Return debt successfully added: Customer=هێمن حسن شێخۆ (ID: 147), Amount=1713.4999928105
+[08-May-2026 11:10:51 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778227851
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:10:51 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:10:51 Asia/Baghdad] Customer sales retrieved: Customer=147, Count=49
+[08-May-2026 11:10:51 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778227851
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:10:51 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+    [stats] => 1
+)
+
+[08-May-2026 11:10:51 Asia/Baghdad] Customer stats retrieved: Customer=147, Total Debt USD=0, Total Debt IQD=0, Sales Count=49
+[08-May-2026 11:10:51 Asia/Baghdad] Debt payments retrieved: Customer=147, Count=17
+[08-May-2026 11:10:51 Asia/Baghdad] select_account_adjustments.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:10:51 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778227851
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:10:51 Asia/Baghdad] get_customer_debt.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:10:51 Asia/Baghdad] Customer debt retrieved: Customer=147, Debt=0
+[08-May-2026 11:10:55 Asia/Baghdad] Restored 609.5 USD to sale 2200 for customer 147 (FIFO allocation)
+[08-May-2026 11:10:55 Asia/Baghdad] Restored 1104 USD to sale 2199 for customer 147 (FIFO allocation)
+[08-May-2026 11:10:55 Asia/Baghdad] Return debt successfully deleted: ID=777, Customer=هێمن حسن شێخۆ (ID: 147)
+[08-May-2026 11:10:56 Asia/Baghdad] Debt payments retrieved: Customer=147, Count=16
+[08-May-2026 11:10:56 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778227856
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:10:56 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:10:56 Asia/Baghdad] Customer sales retrieved: Customer=147, Count=49
+[08-May-2026 11:10:56 Asia/Baghdad] select_account_adjustments.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:10:56 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778227856
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:10:56 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+    [stats] => 1
+)
+
+[08-May-2026 11:10:56 Asia/Baghdad] Customer stats retrieved: Customer=147, Total Debt USD=1713.5, Total Debt IQD=0, Sales Count=49
+[08-May-2026 11:10:58 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778227858
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:10:58 Asia/Baghdad] get_customer_debt.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:10:58 Asia/Baghdad] Customer debt retrieved: Customer=147, Debt=1713.5
+[08-May-2026 11:10:59 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778227859
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:10:59 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+    [remaining_only] => 1
+)
+
+[08-May-2026 11:10:59 Asia/Baghdad] Customer remaining sales retrieved: Customer=147, Count=2
+[08-May-2026 11:13:16 Asia/Baghdad] Parsed vars: customer_id='147', date='2026-05-08', dolar_rate='153000', paid_usd='650', paid_iqd='0', discount='0.0229', note=''
+[08-May-2026 11:13:16 Asia/Baghdad] Return debt successfully added: Customer=هێمن حسن شێخۆ (ID: 147), Amount=609.50002418301
+[08-May-2026 11:13:16 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778227996
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:13:16 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+    [stats] => 1
+)
+
+[08-May-2026 11:13:16 Asia/Baghdad] Customer stats retrieved: Customer=147, Total Debt USD=1104, Total Debt IQD=0, Sales Count=49
+[08-May-2026 11:13:16 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778227996
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:13:16 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:13:16 Asia/Baghdad] Customer sales retrieved: Customer=147, Count=49
+[08-May-2026 11:13:16 Asia/Baghdad] Debt payments retrieved: Customer=147, Count=17
+[08-May-2026 11:13:16 Asia/Baghdad] select_account_adjustments.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:13:16 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778227996
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:13:16 Asia/Baghdad] get_customer_debt.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:13:16 Asia/Baghdad] Customer debt retrieved: Customer=147, Debt=1104
+[08-May-2026 11:13:19 Asia/Baghdad] Restored 609.5 USD to sale 2200 for customer 147
+[08-May-2026 11:13:19 Asia/Baghdad] Return debt successfully deleted: ID=778, Customer=هێمن حسن شێخۆ (ID: 147)
+[08-May-2026 11:13:19 Asia/Baghdad] Debt payments retrieved: Customer=147, Count=16
+[08-May-2026 11:13:19 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778227999
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:13:19 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+    [stats] => 1
+)
+
+[08-May-2026 11:13:19 Asia/Baghdad] Customer stats retrieved: Customer=147, Total Debt USD=1713.5, Total Debt IQD=0, Sales Count=49
+[08-May-2026 11:13:19 Asia/Baghdad] select_account_adjustments.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:13:19 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778227999
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:13:19 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:13:19 Asia/Baghdad] Customer sales retrieved: Customer=147, Count=49
+[08-May-2026 11:13:25 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778228005
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:13:25 Asia/Baghdad] get_customer_debt.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:13:25 Asia/Baghdad] Customer debt retrieved: Customer=147, Debt=1713.5
+[08-May-2026 11:17:08 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778228228
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:17:08 Asia/Baghdad] get_customer_debt.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:17:08 Asia/Baghdad] Customer debt retrieved: Customer=147, Debt=1713.5
+[08-May-2026 11:17:08 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778228228
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:17:08 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+    [stats] => 1
+)
+
+[08-May-2026 11:17:08 Asia/Baghdad] Customer stats retrieved: Customer=147, Total Debt USD=1713.5, Total Debt IQD=0, Sales Count=49
+[08-May-2026 11:17:08 Asia/Baghdad] select_account_adjustments.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:17:08 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778228228
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:17:08 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:17:08 Asia/Baghdad] Customer sales retrieved: Customer=147, Count=49
+[08-May-2026 11:17:08 Asia/Baghdad] Debt payments retrieved: Customer=147, Count=16
+[08-May-2026 11:17:08 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778228228
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:17:08 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+    [stats] => 1
+)
+
+[08-May-2026 11:17:08 Asia/Baghdad] Customer stats retrieved: Customer=147, Total Debt USD=1713.5, Total Debt IQD=0, Sales Count=49
+[08-May-2026 11:17:08 Asia/Baghdad] Debt payments retrieved: Customer=147, Count=16
+[08-May-2026 11:17:08 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778228228
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:17:08 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:17:08 Asia/Baghdad] Customer sales retrieved: Customer=147, Count=49
+[08-May-2026 11:17:12 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778228232
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:17:12 Asia/Baghdad] get_customer_debt.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:17:12 Asia/Baghdad] Customer debt retrieved: Customer=147, Debt=1713.5
+[08-May-2026 11:23:48 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778228628
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:23:48 Asia/Baghdad] get_customer_debt.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:23:48 Asia/Baghdad] Customer debt retrieved: Customer=147, Debt=1713.5
+[08-May-2026 11:23:48 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778228628
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:23:48 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+    [stats] => 1
+)
+
+[08-May-2026 11:23:48 Asia/Baghdad] Customer stats retrieved: Customer=147, Total Debt USD=1713.5, Total Debt IQD=0, Sales Count=49
+[08-May-2026 11:23:49 Asia/Baghdad] select_account_adjustments.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:23:49 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778228629
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:23:49 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:23:49 Asia/Baghdad] Customer sales retrieved: Customer=147, Count=49
+[08-May-2026 11:23:49 Asia/Baghdad] Debt payments retrieved: Customer=147, Count=16
+[08-May-2026 11:23:49 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778228629
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:23:49 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+    [stats] => 1
+)
+
+[08-May-2026 11:23:49 Asia/Baghdad] Customer stats retrieved: Customer=147, Total Debt USD=1713.5, Total Debt IQD=0, Sales Count=49
+[08-May-2026 11:23:49 Asia/Baghdad] Debt payments retrieved: Customer=147, Count=16
+[08-May-2026 11:23:49 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778228629
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:23:49 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:23:49 Asia/Baghdad] Customer sales retrieved: Customer=147, Count=49
+[08-May-2026 11:23:50 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778228630
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:23:50 Asia/Baghdad] get_customer_debt.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:23:50 Asia/Baghdad] Customer debt retrieved: Customer=147, Debt=1713.5
+[08-May-2026 11:24:31 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778228671
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:24:31 Asia/Baghdad] get_customer_debt.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:24:31 Asia/Baghdad] Customer debt retrieved: Customer=147, Debt=1713.5
+[08-May-2026 11:24:31 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778228671
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:24:31 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+    [stats] => 1
+)
+
+[08-May-2026 11:24:31 Asia/Baghdad] Customer stats retrieved: Customer=147, Total Debt USD=1713.5, Total Debt IQD=0, Sales Count=49
+[08-May-2026 11:24:31 Asia/Baghdad] select_account_adjustments.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:24:31 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778228671
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:24:31 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:24:31 Asia/Baghdad] Customer sales retrieved: Customer=147, Count=49
+[08-May-2026 11:24:31 Asia/Baghdad] Debt payments retrieved: Customer=147, Count=16
+[08-May-2026 11:24:32 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778228672
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:24:32 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+    [stats] => 1
+)
+
+[08-May-2026 11:24:32 Asia/Baghdad] Customer stats retrieved: Customer=147, Total Debt USD=1713.5, Total Debt IQD=0, Sales Count=49
+[08-May-2026 11:24:32 Asia/Baghdad] Debt payments retrieved: Customer=147, Count=16
+[08-May-2026 11:24:32 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778228672
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:24:32 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:24:32 Asia/Baghdad] Customer sales retrieved: Customer=147, Count=49
+[08-May-2026 11:24:35 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778228675
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:24:35 Asia/Baghdad] get_customer_debt.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:24:35 Asia/Baghdad] Customer debt retrieved: Customer=147, Debt=1713.5
+[08-May-2026 11:24:36 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778228676
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:24:36 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+    [remaining_only] => 1
+)
+
+[08-May-2026 11:24:36 Asia/Baghdad] Customer remaining sales retrieved: Customer=147, Count=2
+[08-May-2026 11:26:03 Asia/Baghdad] Parsed vars: customer_id='147', date='2026-05-08', dolar_rate='153000', paid_usd='650', paid_iqd='0', discount='0.0229', note=''
+[08-May-2026 11:26:03 Asia/Baghdad] Return debt successfully added: Customer=هێمن حسن شێخۆ (ID: 147), Amount=609.50002418301
+[08-May-2026 11:26:03 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778228763
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:26:03 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+    [stats] => 1
+)
+
+[08-May-2026 11:26:03 Asia/Baghdad] Customer stats retrieved: Customer=147, Total Debt USD=1104, Total Debt IQD=0, Sales Count=49
+[08-May-2026 11:26:03 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778228763
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:26:03 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:26:03 Asia/Baghdad] Customer sales retrieved: Customer=147, Count=49
+[08-May-2026 11:26:03 Asia/Baghdad] Debt payments retrieved: Customer=147, Count=17
+[08-May-2026 11:26:03 Asia/Baghdad] select_account_adjustments.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:26:03 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778228763
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:26:03 Asia/Baghdad] get_customer_debt.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:26:03 Asia/Baghdad] Customer debt retrieved: Customer=147, Debt=1104
+[08-May-2026 11:26:07 Asia/Baghdad] Restored 609.5 USD to sale 2200 for customer 147
+[08-May-2026 11:26:07 Asia/Baghdad] Return debt successfully deleted: ID=779, Customer=هێمن حسن شێخۆ (ID: 147)
+[08-May-2026 11:26:07 Asia/Baghdad] Debt payments retrieved: Customer=147, Count=16
+[08-May-2026 11:26:07 Asia/Baghdad] select_account_adjustments.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:26:07 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778228767
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:26:07 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+    [stats] => 1
+)
+
+[08-May-2026 11:26:07 Asia/Baghdad] Customer stats retrieved: Customer=147, Total Debt USD=1713.5, Total Debt IQD=0, Sales Count=49
+[08-May-2026 11:26:07 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778228767
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:26:07 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:26:07 Asia/Baghdad] Customer sales retrieved: Customer=147, Count=49
+[08-May-2026 11:26:09 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778228769
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:26:09 Asia/Baghdad] get_customer_debt.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:26:09 Asia/Baghdad] Customer debt retrieved: Customer=147, Debt=1713.5
+[08-May-2026 11:27:32 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778228852
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:27:32 Asia/Baghdad] get_customer_debt.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:27:32 Asia/Baghdad] Customer debt retrieved: Customer=147, Debt=1713.5
+[08-May-2026 11:27:32 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778228852
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:27:32 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+    [stats] => 1
+)
+
+[08-May-2026 11:27:32 Asia/Baghdad] Customer stats retrieved: Customer=147, Total Debt USD=1713.5, Total Debt IQD=0, Sales Count=49
+[08-May-2026 11:27:33 Asia/Baghdad] select_account_adjustments.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:27:33 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778228853
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:27:33 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:27:33 Asia/Baghdad] Customer sales retrieved: Customer=147, Count=49
+[08-May-2026 11:27:33 Asia/Baghdad] Debt payments retrieved: Customer=147, Count=16
+[08-May-2026 11:27:33 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778228853
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:27:33 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+    [stats] => 1
+)
+
+[08-May-2026 11:27:33 Asia/Baghdad] Customer stats retrieved: Customer=147, Total Debt USD=1713.5, Total Debt IQD=0, Sales Count=49
+[08-May-2026 11:27:33 Asia/Baghdad] Debt payments retrieved: Customer=147, Count=16
+[08-May-2026 11:27:33 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778228853
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:27:33 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:27:33 Asia/Baghdad] Customer sales retrieved: Customer=147, Count=49
+[08-May-2026 11:27:34 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778228854
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:27:34 Asia/Baghdad] get_customer_debt.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:27:34 Asia/Baghdad] Customer debt retrieved: Customer=147, Debt=1713.5
+[08-May-2026 11:28:21 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778228901
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:28:21 Asia/Baghdad] get_customer_debt.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:28:21 Asia/Baghdad] Customer debt retrieved: Customer=147, Debt=1713.5
+[08-May-2026 11:28:25 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778228905
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:28:25 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+    [remaining_only] => 1
+)
+
+[08-May-2026 11:28:25 Asia/Baghdad] Customer remaining sales retrieved: Customer=147, Count=2
+[08-May-2026 11:30:54 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778229054
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:30:54 Asia/Baghdad] get_customer_debt.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:30:54 Asia/Baghdad] Customer debt retrieved: Customer=147, Debt=1713.5
+[08-May-2026 11:30:54 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778229054
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:30:54 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+    [stats] => 1
+)
+
+[08-May-2026 11:30:54 Asia/Baghdad] Customer stats retrieved: Customer=147, Total Debt USD=1713.5, Total Debt IQD=0, Sales Count=49
+[08-May-2026 11:30:54 Asia/Baghdad] select_account_adjustments.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:30:54 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778229054
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:30:54 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:30:54 Asia/Baghdad] Customer sales retrieved: Customer=147, Count=49
+[08-May-2026 11:30:54 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778229054
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:30:54 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+    [stats] => 1
+)
+
+[08-May-2026 11:30:54 Asia/Baghdad] Customer stats retrieved: Customer=147, Total Debt USD=1713.5, Total Debt IQD=0, Sales Count=49
+[08-May-2026 11:30:54 Asia/Baghdad] Debt payments retrieved: Customer=147, Count=16
+[08-May-2026 11:30:55 Asia/Baghdad] Debt payments retrieved: Customer=147, Count=16
+[08-May-2026 11:30:55 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778229055
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:30:55 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:30:55 Asia/Baghdad] Customer sales retrieved: Customer=147, Count=49
+[08-May-2026 11:30:59 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778229059
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:30:59 Asia/Baghdad] get_customer_debt.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:30:59 Asia/Baghdad] Customer debt retrieved: Customer=147, Debt=1713.5
+[08-May-2026 11:31:00 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778229060
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:31:00 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+    [remaining_only] => 1
+)
+
+[08-May-2026 11:31:00 Asia/Baghdad] Customer remaining sales retrieved: Customer=147, Count=2
+[08-May-2026 11:32:32 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778229152
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:32:32 Asia/Baghdad] get_customer_debt.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:32:32 Asia/Baghdad] Customer debt retrieved: Customer=147, Debt=1713.5
+[08-May-2026 11:32:32 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778229152
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:32:32 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+    [stats] => 1
+)
+
+[08-May-2026 11:32:32 Asia/Baghdad] Customer stats retrieved: Customer=147, Total Debt USD=1713.5, Total Debt IQD=0, Sales Count=49
+[08-May-2026 11:32:32 Asia/Baghdad] select_account_adjustments.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:32:32 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778229152
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:32:32 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+    [stats] => 1
+)
+
+[08-May-2026 11:32:32 Asia/Baghdad] Customer stats retrieved: Customer=147, Total Debt USD=1713.5, Total Debt IQD=0, Sales Count=49
+[08-May-2026 11:32:32 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778229152
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:32:32 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:32:32 Asia/Baghdad] Customer sales retrieved: Customer=147, Count=49
+[08-May-2026 11:32:32 Asia/Baghdad] Debt payments retrieved: Customer=147, Count=16
+[08-May-2026 11:32:32 Asia/Baghdad] Debt payments retrieved: Customer=147, Count=16
+[08-May-2026 11:32:32 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778229152
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:32:32 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:32:32 Asia/Baghdad] Customer sales retrieved: Customer=147, Count=49
+[08-May-2026 11:32:34 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778229154
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:32:34 Asia/Baghdad] get_customer_debt.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:32:34 Asia/Baghdad] Customer debt retrieved: Customer=147, Debt=1713.5
+[08-May-2026 11:32:42 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778229162
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:32:42 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+    [remaining_only] => 1
+)
+
+[08-May-2026 11:32:42 Asia/Baghdad] Customer remaining sales retrieved: Customer=147, Count=2
+[08-May-2026 11:33:59 Asia/Baghdad] Parsed vars: customer_id='147', date='2026-05-08', dolar_rate='153000', paid_usd='650', paid_iqd='0', discount='0.0229', note=''
+[08-May-2026 11:33:59 Asia/Baghdad] Return debt successfully added: Customer=هێمن حسن شێخۆ (ID: 147), Amount=609.50002418301
+[08-May-2026 11:33:59 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778229239
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:33:59 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+    [stats] => 1
+)
+
+[08-May-2026 11:33:59 Asia/Baghdad] Customer stats retrieved: Customer=147, Total Debt USD=1104, Total Debt IQD=0, Sales Count=49
+[08-May-2026 11:33:59 Asia/Baghdad] Debt payments retrieved: Customer=147, Count=17
+[08-May-2026 11:33:59 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778229239
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:33:59 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:33:59 Asia/Baghdad] Customer sales retrieved: Customer=147, Count=49
+[08-May-2026 11:33:59 Asia/Baghdad] select_account_adjustments.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:34:00 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778229240
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:34:00 Asia/Baghdad] get_customer_debt.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:34:00 Asia/Baghdad] Customer debt retrieved: Customer=147, Debt=1104
+[08-May-2026 11:34:03 Asia/Baghdad] Restored 609.5 USD to sale 2200 for customer 147
+[08-May-2026 11:34:03 Asia/Baghdad] Return debt successfully deleted: ID=780, Customer=هێمن حسن شێخۆ (ID: 147)
+[08-May-2026 11:34:03 Asia/Baghdad] Debt payments retrieved: Customer=147, Count=16
+[08-May-2026 11:34:03 Asia/Baghdad] select_account_adjustments.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:34:03 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778229243
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:34:03 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+)
+
+[08-May-2026 11:34:03 Asia/Baghdad] Customer sales retrieved: Customer=147, Count=49
+[08-May-2026 11:34:03 Asia/Baghdad] SESSION: Array
+(
+    [LAST_ACTIVITY] => 1778229243
+    [user_id] => 1
+    [username] => Dana
+    [role] => admin
+)
+
+[08-May-2026 11:34:03 Asia/Baghdad] select_sale.php GET: Array
+(
+    [customer_id] => 147
+    [stats] => 1
+)
+
+[08-May-2026 11:34:03 Asia/Baghdad] Customer stats retrieved: Customer=147, Total Debt USD=1713.5, Total Debt IQD=0, Sales Count=49
+[08-May-2026 11:34:07 Asia/Baghdad] select_account_adjustments.php GET: Array
+(
+    [customer_id] => 147
+)
+

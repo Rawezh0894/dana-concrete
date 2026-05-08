@@ -74,6 +74,34 @@ const customerDebtColumnDefs = [
         type: 'numericColumn'
     },
     {
+        field: 'change_back_usd',
+        headerName: 'باقی بە دۆلار',
+        filter: 'agNumberColumnFilter',
+        floatingFilter: true,
+        sortable: true,
+        resizable: true,
+        minWidth: 100,
+        cellStyle: { textAlign: 'right', direction: 'rtl', color: '#dc3545' },
+        valueFormatter: function(params) {
+            return window.AGGridFormatters?.formatUSD(params.value) || '-';
+        },
+        type: 'numericColumn'
+    },
+    {
+        field: 'change_back_iq',
+        headerName: 'باقی بە دینار',
+        filter: 'agNumberColumnFilter',
+        floatingFilter: true,
+        sortable: true,
+        resizable: true,
+        minWidth: 100,
+        cellStyle: { textAlign: 'right', direction: 'rtl', color: '#dc3545' },
+        valueFormatter: function(params) {
+            return window.AGGridFormatters?.formatIQD(params.value) || '-';
+        },
+        type: 'numericColumn'
+    },
+    {
         field: 'paid_usd',
         headerName: 'بڕی داوە (USD)',
         filter: 'agNumberColumnFilter',
@@ -237,6 +265,8 @@ function loadCustomerDebtData(preservePagination = false) {
                     paid_usd: row.paid_usd || 0,
                     paid_iqd: row.paid_iqd || 0,
                     discount: row.discount || 0,
+                    change_back_usd: row.change_back_usd || 0,
+                    change_back_iq: row.change_back_iq || 0,
                     note: row.note || '-',
                     payment_type: row.payment_type || '-'
                 }));
@@ -323,6 +353,8 @@ $(document).on('click', '.edit-return-debt', function(e) {
                 $('#edit_customer_debt_paid_usd').val(data.paid_usd || '');
                 $('#edit_customer_debt_paid_iqd').val(data.paid_iqd || '');
                 $('#edit_customer_debt_discount').val(data.discount || '');
+                $('#edit_customer_debt_change_back_usd').val(data.change_back_usd || 0);
+                $('#edit_customer_debt_change_back_iqd').val(data.change_back_iq || 0);
                 $('#edit_customer_debt_note').val(data.note || '');
                 
                 const paymentTypeField = document.getElementById('edit_customer_debt_payment_type');

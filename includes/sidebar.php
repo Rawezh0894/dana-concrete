@@ -37,12 +37,6 @@ $logout_pages = ['logout.php'];
         <?php if (hasPermission('view_reports')): ?>
           <li><a href="../pages/reports.php" class="sidebar-link<?php if($current_page == 'reports.php') echo ' active'; ?>"><i class="bi bi-graph-up me-2"></i> ڕاپۆرت</a></li>
         <?php endif; ?>
-        <!-- <?php if (hasPermission('view_cash_box')): ?>
-          <li><a href="../pages/cash_box.php" class="sidebar-link<?php if($current_page == 'cash_box.php') echo ' active'; ?>"><i class="bi bi-cash-stack me-2"></i> قاسەکە</a></li>
-        <?php endif; ?> -->
-        <?php if (hasPermission('view_user_wallets')): ?>
-          <li><a href="../pages/user_wallets.php" class="sidebar-link<?php if($current_page == 'user_wallets.php') echo ' active'; ?>"><i class="bi bi-wallet2 me-2"></i> هەژماری تایبەت</a></li>
-        <?php endif; ?>
       </ul>
     </li>
     <!-- All other dropdowns -->
@@ -82,9 +76,6 @@ $logout_pages = ['logout.php'];
         <?php if (hasPermission('view_bins_silos')): ?>
           <li><a href="../pages/bins_silos.php" class="sidebar-link<?php if($current_page == 'bins_silos.php') echo ' active'; ?>"><i class="bi bi-box me-2"></i> بین/سایلۆکان</a></li>
         <?php endif; ?>
-        <?php if (hasPermission('view_purchase')): ?>
-          <li><a href="../pages/monthly_material_stock.php" class="sidebar-link<?php if($current_page == 'monthly_material_stock.php') echo ' active'; ?>"><i class="bi bi-clock-history me-2"></i> مێژووی بڕی مەوادەکان</a></li>
-        <?php endif; ?>
         <?php if (hasPermission('view_company')): ?>
           <li><a href="../pages/add_company.php" class="sidebar-link<?php if($current_page == 'add_company.php') echo ' active'; ?>"><i class="bi bi-building me-2"></i> کۆمپانیا</a></li>
         <?php endif; ?>
@@ -115,8 +106,6 @@ $logout_pages = ['logout.php'];
         <?php endif; ?>
         <?php if (hasPermission('view_sale')): ?>
           <li><a href="../pages/add_sale.php" class="sidebar-link<?php if($current_page == 'add_sale.php') echo ' active'; ?>"><i class="bi bi-cart-check me-2"></i> فرۆشتن</a></li>
-          <li><a href="../pages/cash_sales.php" class="sidebar-link<?php if($current_page == 'cash_sales.php') echo ' active'; ?>"><i class="bi bi-cash-coin me-2"></i> فرۆشتنی نەقد</a></li>
-          <li><a href="../pages/credit_sales.php" class="sidebar-link<?php if($current_page == 'credit_sales.php') echo ' active'; ?>"><i class="bi bi-credit-card-2-front me-2"></i> فرۆشتنی قەرز</a></li>
         <?php endif; ?>
         <?php if (hasPermission('view_raw_material_sales')): ?>
           <li><a href="../pages/raw_material_sales.php" class="sidebar-link<?php if($current_page == 'raw_material_sales.php') echo ' active'; ?>"><i class="bi bi-box-seam me-2"></i> فرۆشتنی مەوادی خام</a></li>
@@ -135,11 +124,10 @@ $logout_pages = ['logout.php'];
       </button>
       <ul class="collapse sidebar-submenu" id="expensesMenu">
         <?php if (hasPermission('view_employee_payment')): ?>
-          <li><a href="../pages/employee_expenses.php" class="sidebar-link<?php if($current_page == 'employee_expenses.php') echo ' active'; ?>"><i class="bi bi-person-workspace me-2"></i> بەڕێوەبردنی خەرجی کارمەند</a></li>
-          <li><a href="../pages/employee_payments.php" class="sidebar-link<?php if($current_page == 'employee_payments.php') echo ' active'; ?>"><i class="bi bi-clock-history me-2"></i> پارەدانە کۆنەکان</a></li>
+          <li><a href="../pages/employee_expenses.php" class="sidebar-link<?php if($current_page == 'employee_expenses.php') echo ' active'; ?>"><i class="bi bi-person-workspace me-2"></i> پارەدان بە کارمەند</a></li>
         <?php endif; ?>
         <?php if (hasPermission('view_other_expenses')): ?>
-          <li><a href="../pages/other_expenses.php" class="sidebar-link<?php if($current_page == 'other_expenses.php') echo ' active'; ?>"><i class="bi bi-receipt-cutoff me-2"></i>خەرجی سەیارەکان</a></li>
+          <li><a href="../pages/other_expenses.php" class="sidebar-link<?php if($current_page == 'other_expenses.php') echo ' active'; ?>"><i class="bi bi-receipt-cutoff me-2"></i>خەرجی مەعمەل</a></li>
           <li><a href="../pages/gas_usage.php" class="sidebar-link<?php if($current_page == 'gas_usage.php') echo ' active'; ?>"><i class="bi bi-gas-pump me-2"></i>بەکارهێنانی گاز</a></li>
         <?php endif; ?>
        
@@ -150,17 +138,7 @@ $logout_pages = ['logout.php'];
         <li><a href="../pages/asset_depreciation.php" class="sidebar-link<?php if($current_page == 'asset_depreciation.php') echo ' active'; ?>"><i class="bi bi-graph-down-arrow me-2"></i>داخورانی ئامێرەکان</a></li>
       </ul>
     </li>
-    <!-- Financial System Dropdown -->
-    <li class="sidebar-group">
-      <button class="sidebar-group-toggle d-flex align-items-center w-100" data-bs-toggle="collapse" data-bs-target="#financialMenu" aria-expanded="false">
-        <i class="bi bi-bank me-2"></i> سیستەمی دارایی
-      </button>
-      <ul class="collapse sidebar-submenu" id="financialMenu">
-        <li><a href="../pages/user_wallets.php" class="sidebar-link<?php if($current_page == 'user_wallets.php') echo ' active'; ?>"><i class="bi bi-wallet2 me-2"></i> قاسەی بەکارهێنەر</a></li>
-        <li><a href="../pages/transaction_categories.php" class="sidebar-link<?php if($current_page == 'transaction_categories.php') echo ' active'; ?>"><i class="bi bi-tags me-2"></i> پۆلێنکردنی مامەڵەکان</a></li>
-        <li><a href="../pages/wallet_report.php" class="sidebar-link<?php if($current_page == 'wallet_report.php') echo ' active'; ?>"><i class="bi bi-file-earmark-spreadsheet me-2"></i> کشف حساب (ڕاپۆرت)</a></li>
-      </ul>
-    </li>
+
     <li class="sidebar-group">
       <button class="sidebar-group-toggle d-flex align-items-center w-100" data-bs-toggle="collapse" data-bs-target="#factoryTrucksMenu" aria-expanded="false">
         <i class="bi bi-truck me-2"></i> تڕێلەکانی کارگە
@@ -177,8 +155,8 @@ $logout_pages = ['logout.php'];
         <i class="bi bi-gear-wide-connected me-2"></i> کۆگای یەدەگ
       </button>
       <ul class="collapse sidebar-submenu shadow-sm" id="newInventoryMenu">
-        <li><a href="../pages/inventory_management.php" class="sidebar-link<?php if($current_page == 'inventory_management.php') echo ' active'; ?>"><i class="bi bi-box-seam me-2"></i> بەڕێوەبردنی پارچە</a></li>
-        <li><a href="../pages/vehicle_usage_report.php" class="sidebar-link<?php if($current_page == 'vehicle_usage_report.php') echo ' active'; ?>"><i class="bi bi-file-earmark-bar-graph me-2"></i> ڕاپۆرتی بەکارهێنانی سەیارە</a></li>
+        <li><a href="../pages/inventory_management.php" class="sidebar-link<?php if($current_page == 'inventory_management.php') echo ' active'; ?>"><i class="bi bi-box-seam me-2"></i> کۆگا</a></li>
+        <li><a href="../pages/vehicle_usage_report.php" class="sidebar-link<?php if($current_page == 'vehicle_usage_report.php') echo ' active'; ?>"><i class="bi bi-file-earmark-bar-graph me-2"></i> خەرجی سەیارەکان</a></li>
       </ul>
     </li>
     <!-- New Koga (Materials) Dropdown -->

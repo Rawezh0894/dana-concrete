@@ -1,73 +1,74 @@
 // Calculate total price and set it as readonly
 $(document).ready(function() {
-    // Set total_price input to readonly
-    $('#total_price').prop('readonly', true);
+    // Set total_price inputs to readonly
+    $('#total_price, #edit_total_price').prop('readonly', true);
+    $('#remaining_amount, #edit_remaining_amount').prop('readonly', true);
 
-    function calculateTotalPrice() {
-        var quantity = parseFloat($('#quantity').val()) || 0;
-        var pricePerUnit = parseFloat($('#price_per_unit').val()) || 0;
+    function calculateTotalPrice(prefix = '') {
+        var quantity = parseFloat($('#' + prefix + 'quantity').val()) || 0;
+        var pricePerUnit = parseFloat($('#' + prefix + 'price_per_unit').val()) || 0;
         var total = quantity * pricePerUnit;
-        $('#total_price').val(total.toFixed(4));
+        $('#' + prefix + 'total_price').val(total.toFixed(4));
     }
 
-    function calculatePricePerUnit() {
-        var quantity = parseFloat($('#quantity').val()) || 0;
-        var paidUSD = parseFloat($('#amount_paid_usd').val()) || 0;
-        var paidIQD = parseFloat($('#amount_paid_iq').val()) || 0;
-        var dolarRate = parseFloat($('#dolar_rate').val()) || 1;
+    function calculatePricePerUnit(prefix = '') {
+        var quantity = parseFloat($('#' + prefix + 'quantity').val()) || 0;
+        var paidUSD = parseFloat($('#' + prefix + 'amount_paid_usd').val()) || 0;
+        var paidIQD = parseFloat($('#' + prefix + 'amount_paid_iq').val()) || 0;
+        var changeUSD = parseFloat($('#' + prefix + 'change_back_usd').val()) || 0;
+        var changeIQD = parseFloat($('#' + prefix + 'change_back_iq').val()) || 0;
+        var dolarRate = parseFloat($('#' + prefix + 'dolar_rate').val()) || 1;
         
         if (quantity > 0) {
-            // فۆرمۆلە: (پارەی دراو بە دۆلار + (پارەی دراو بە دینار / (نرخی100 دۆلار بە دینار/100))) / بڕ م3
-            var paidIQD_inUSD = paidIQD / (dolarRate / 100);
-            var totalPaid = paidUSD + paidIQD_inUSD;
+            var netPaidUSD = paidUSD - changeUSD;
+            var netPaidIQD = paidIQD - changeIQD;
+            var netPaidIQD_inUSD = netPaidIQD / (dolarRate / 100);
+            var totalPaid = netPaidUSD + netPaidIQD_inUSD;
             var pricePerUnit = totalPaid / quantity;
-            $('#price_per_unit').val(pricePerUnit.toFixed(4));
+            $('#' + prefix + 'price_per_unit').val(pricePerUnit.toFixed(4));
         }
     }
 
-    $('#quantity, #price_per_unit').on('input', calculateTotalPrice);
-    
-    // ژماردنی نرخی یەکە کاتێک پارەی دراو یان نرخی دۆلار دەگۆڕدرێت
-    $('#amount_paid_usd, #amount_paid_iq, #dolar_rate').on('input', function() {
-        calculatePricePerUnit();
-        calculateTotalPrice();
-    });
+    function calculateRemainingAmount(prefix = '') {
+        var total = parseFloat($('#' + prefix + 'total_price').val()) || 0;
+        var paidIQD = parseFloat($('#' + prefix + 'amount_paid_iq').val()) || 0;
+        var paidUSD = parseFloat($('#' + prefix + 'amount_paid_usd').val()) || 0;
+        var changeIQD = parseFloat($('#' + prefix + 'change_back_iq').val()) || 0;
+        var changeUSD = parseFloat($('#' + prefix + 'change_back_usd').val()) || 0;
+        var dolarRate = parseFloat($('#' + prefix + 'dolar_rate').val()) || 1;
+        var discount = parseFloat($('#' + prefix + 'discount').val()) || 0;
 
-    // Initial calculation in case values are pre-filled
-    calculateTotalPrice();
-
-    // Set remaining_amount input to readonly
-    $('#remaining_amount').prop('readonly', true);
-
-    function calculateRemainingAmount() {
-        var total = parseFloat($('#total_price').val()) || 0;
-        var paidIQD = parseFloat($('#amount_paid_iq').val()) || 0;
-        var paidUSD = parseFloat($('#amount_paid_usd').val()) || 0;
-        var dolarRate = parseFloat($('#dolar_rate').val()) || 1;
-        var discount = parseFloat($('#discount').val()) || 0;
-
-        // Convert IQD to USD based on rate for 100 USD
-        var paidIQD_inUSD = paidIQD / (dolarRate / 100);
-        var remaining = (total - paidIQD_inUSD - paidUSD) - discount;
-        $('#remaining_amount').val(remaining.toFixed(4));
+        var netPaidUSD = paidUSD - changeUSD;
+        var netPaidIQD = paidIQD - changeIQD;
+        var netPaidIQD_inUSD = netPaidIQD / (dolarRate / 100);
+        var remaining = (total - netPaidIQD_inUSD - netPaidUSD) - discount;
+        $('#' + prefix + 'remaining_amount').val(remaining.toFixed(4));
     }
 
-    // Update remaining amount when any relevant field changes
-    $('#total_price, #amount_paid_iq, #amount_paid_usd, #dolar_rate, #discount').on('input', calculateRemainingAmount);
-
-    // Also recalculate remaining amount after total price changes
-    $('#quantity, #price_per_unit').on('input', function() {
-        calculateTotalPrice();
-        calculateRemainingAmount();
+    // Event listeners
+    $('#quantity, #price_per_unit, #edit_quantity, #edit_price_per_unit').on('input', function() {
+        var prefix = this.id.startsWith('edit_') ? 'edit_' : '';
+        calculateTotalPrice(prefix);
+        calculateRemainingAmount(prefix);
     });
     
-    // ژماردنی نرخی یەکە کاتێک بڕ دەگۆڕدرێت
-    $('#quantity').on('input', function() {
-        calculatePricePerUnit();
+    $('#amount_paid_usd, #amount_paid_iq, #change_back_usd, #change_back_iq, #dolar_rate, #discount, #edit_amount_paid_usd, #edit_amount_paid_iq, #edit_change_back_usd, #edit_change_back_iq, #edit_dolar_rate, #edit_discount').on('input', function() {
+        var prefix = this.id.startsWith('edit_') ? 'edit_' : '';
+        calculatePricePerUnit(prefix);
+        calculateTotalPrice(prefix);
+        calculateRemainingAmount(prefix);
     });
 
-    // Initial calculation
+    $('#quantity, #edit_quantity').on('input', function() {
+        var prefix = this.id.startsWith('edit_') ? 'edit_' : '';
+        calculatePricePerUnit(prefix);
+    });
+
+    // Initial calculations
+    calculateTotalPrice();
     calculateRemainingAmount();
+    calculateTotalPrice('edit_');
+    calculateRemainingAmount('edit_');
 
     // Set default order_date to yesterday when modal opens
     $('#addSaleModal').on('show.bs.modal', function() {

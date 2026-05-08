@@ -502,6 +502,14 @@ usort($recipients, function($a, $b) {
               <label for="discount" class="form-label">داشکاندن</label>
               <input type="number" class="form-control" id="discount" name="discount" min="0" step="0.0001" value="0">
             </div>
+            <div class="col-md-4 mb-3">
+              <label for="change_back_iq" class="form-label">باقی بە دینار</label>
+              <input type="number" class="form-control" id="change_back_iq" name="change_back_iq" min="0" step="0.0001" value="0">
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="change_back_usd" class="form-label">باقی بە دۆلار</label>
+              <input type="number" class="form-control" id="change_back_usd" name="change_back_usd" min="0" step="0.0001" value="0">
+            </div>
           </div>
           <div class="row">
             <div class="col-md-12 mb-3">
@@ -626,6 +634,14 @@ usort($recipients, function($a, $b) {
             <div class="col-md-4 mb-3">
               <label for="edit_discount" class="form-label">داشکاندن</label>
               <input type="number" class="form-control" id="edit_discount" name="edit_discount" min="0" step="0.0001" value="0">
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="edit_change_back_iq" class="form-label">باقی بە دینار</label>
+              <input type="number" class="form-control" id="edit_change_back_iq" name="edit_change_back_iq" min="0" step="0.0001" value="0">
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="edit_change_back_usd" class="form-label">باقی بە دۆلار</label>
+              <input type="number" class="form-control" id="edit_change_back_usd" name="edit_change_back_usd" min="0" step="0.0001" value="0">
             </div>
           </div>
           <div class="row">

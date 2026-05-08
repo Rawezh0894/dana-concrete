@@ -21,14 +21,14 @@ if (!hasPermission('view_income_from_cars')) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>داهاتی سەیارەکان</title>
+    <title>کاروان حیسابی</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
     <link href="../assets/css/login.css" rel="stylesheet">
     <link href="../assets/css/variables.css" rel="stylesheet">
     <link href="../assets/css/nav.css" rel="stylesheet">
     <link href="../assets/css/comon/table.css" rel="stylesheet">
     <link href="../assets/css/comon/style.css" rel="stylesheet">
-    <link href="../assets/css/comon/select2_design.css" rel="stylesheet">\
+    <link href="../assets/css/comon/select2_design.css" rel="stylesheet">
     <link href="../assets/css/comon/cards.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.rtl.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -73,7 +73,7 @@ if (!hasPermission('view_income_from_cars')) {
 
 <div class="container-fluid mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3>داهاتی سەیارەکان</h3>
+        <h3>کاروان حیسابی</h3>
         <div>
             <button class="btn btn-outline-primary me-2" onclick="refreshData()" title="نوێکردنەوە">
                 <i class="fa fa-refresh"></i> نوێکردنەوە
@@ -183,7 +183,7 @@ if (!hasPermission('view_income_from_cars')) {
     <div class="row mb-4">
         <div class="col-md-6">
             <div class="chart-container">
-                <h5>داهاتی سەیارەکان بە پێی مەتر سێج</h5>
+                <h5>کاروان حیسابی بە پێی مەتر سێج</h5>
                 <div class="chart-wrapper">
                     <canvas id="carsChart"></canvas>
                 </div>
@@ -204,7 +204,7 @@ if (!hasPermission('view_income_from_cars')) {
         <div class="table-search-container">
             <div class="row">
                 <div class="col-md-6">
-                    <label class="form-label fw-bold text-dark">وردەکاری داهاتی سەیارەکان</label>
+                    <label class="form-label fw-bold text-dark">وردەکاری کاروان حیسابی</label>
                 </div>
                 <div class="col-md-6 text-end">
                     <span class="text-muted" id="tableInfo">کۆی: 0 تۆمار</span>

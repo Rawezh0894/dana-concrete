@@ -136,6 +136,8 @@ $(document).on('click', '.edit-sale', function() {
                     $('#edit_order_date').val(sale.order_date);
                     $('#edit_notes').val(sale.notes);
                     $('#edit_discount').val(sale.discount);
+                    $('#edit_change_back_iq').val(sale.change_back_iq);
+                    $('#edit_change_back_usd').val(sale.change_back_usd);
                     $('#editSaleModal').modal('show');
                 }
             }
@@ -166,60 +168,13 @@ $(document).on('click', '#refreshDollarRateEdit', function() {
     }, 1000);
 });
 
-// Calculation logic (same as add_sale.js)
 $(document).ready(function() {
-    $('#edit_total_price').prop('readonly', true);
-    $('#edit_remaining_amount').prop('readonly', true);
-    function calculateTotalPrice() {
-        var quantity = parseFloat($('#edit_quantity').val()) || 0;
-        var pricePerUnit = parseFloat($('#edit_price_per_unit').val()) || 0;
-        var total = quantity * pricePerUnit;
-        $('#edit_total_price').val(total.toFixed(4));
+    if (typeof calculateTotalPrice === 'function') {
+        calculateTotalPrice('edit_');
     }
-
-    function calculatePricePerUnit() {
-        var quantity = parseFloat($('#edit_quantity').val()) || 0;
-        var paidUSD = parseFloat($('#edit_amount_paid_usd').val()) || 0;
-        var paidIQD = parseFloat($('#edit_amount_paid_iq').val()) || 0;
-        var dolarRate = parseFloat($('#edit_dolar_rate').val()) || 1;
-        
-        if (quantity > 0) {
-            // فۆرمۆلە: (پارەی دراو بە دۆلار + (پارەی دراو بە دینار / (نرخی100 دۆلار بە دینار/100))) / بڕ م3
-            var paidIQD_inUSD = paidIQD / (dolarRate / 100);
-            var totalPaid = paidUSD + paidIQD_inUSD;
-            var pricePerUnit = totalPaid / quantity;
-            $('#edit_price_per_unit').val(pricePerUnit.toFixed(4));
-        }
+    if (typeof calculateRemainingAmount === 'function') {
+        calculateRemainingAmount('edit_');
     }
-    function calculateRemainingAmount() {
-        var total = parseFloat($('#edit_total_price').val()) || 0;
-        var paidIQD = parseFloat($('#edit_amount_paid_iq').val()) || 0;
-        var paidUSD = parseFloat($('#edit_amount_paid_usd').val()) || 0;
-        var dolarRate = parseFloat($('#edit_dolar_rate').val()) || 1;
-        var discount = parseFloat($('#edit_discount').val()) || 0;
-        var paidIQD_inUSD = paidIQD / (dolarRate / 100);
-        var remaining = (total - paidIQD_inUSD - paidUSD) - discount;
-        $('#edit_remaining_amount').val(remaining.toFixed(4));
-    }
-    $('#edit_quantity, #edit_price_per_unit').on('input', function() {
-        calculateTotalPrice();
-        calculateRemainingAmount();
-    });
-    
-    // ژماردنی نرخی یەکە کاتێک پارەی دراو یان نرخی دۆلار دەگۆڕدرێت
-    $('#edit_amount_paid_usd, #edit_amount_paid_iq, #edit_dolar_rate').on('input', function() {
-        calculatePricePerUnit();
-        calculateTotalPrice();
-        calculateRemainingAmount();
-    });
-    
-    // ژماردنی نرخی یەکە کاتێک بڕ دەگۆڕدرێت
-    $('#edit_quantity').on('input', function() {
-        calculatePricePerUnit();
-    });
-    $('#edit_total_price, #edit_amount_paid_iq, #edit_amount_paid_usd, #edit_dolar_rate, #edit_discount').on('input', calculateRemainingAmount);
-    calculateTotalPrice();
-    calculateRemainingAmount();
 });
 
 // Real-time invoice number validation for edit form

@@ -42,6 +42,8 @@ try {
     $order_date = $_POST['order_date'] ?? date('Y-m-d');
     $invoice_number = $_POST['invoice_number'] ?? '';
     $notes = $_POST['notes'] ?? '';
+    $change_back_usd = $_POST['change_back_usd'] ?? 0;
+    $change_back_iq = $_POST['change_back_iq'] ?? 0;
 
     // Validate required fields
     if (!$customer_id || !$formula_id || $quantity <= 0) {
@@ -90,13 +92,13 @@ try {
     $formula = $stmt->fetch();
 
     // Insert sale with all fields
-    $sql = "INSERT INTO sales (customer_id, formula_id, recipient, location, quantity, price_per_unit, total_price, payment_type, amount_paid_usd, amount_paid_iq, remaining_amount, dolar_rate, discount, order_date, invoice_number, notes) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO sales (customer_id, formula_id, recipient, location, quantity, price_per_unit, total_price, payment_type, amount_paid_usd, amount_paid_iq, remaining_amount, dolar_rate, discount, order_date, invoice_number, notes, change_back_usd, change_back_iq) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([
         $customer_id, $formula_id, $recipient, $location, $quantity, $price_per_unit, $total_price,
         $payment_type, $amount_paid_usd, $amount_paid_iq, $remaining_amount, $dolar_rate, $discount,
-        $order_date, $invoice_number, $notes
+        $order_date, $invoice_number, $notes, $change_back_usd, $change_back_iq
     ]);
 
     $sale_id = $pdo->lastInsertId();
@@ -120,7 +122,9 @@ try {
         'discount' => $discount,
         'order_date' => $order_date,
         'invoice_number' => $invoice_number,
-        'notes' => $notes
+        'notes' => $notes,
+        'change_back_usd' => $change_back_usd,
+        'change_back_iq' => $change_back_iq
     ];
 
     $additional_info = [

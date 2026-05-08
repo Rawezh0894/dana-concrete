@@ -32,6 +32,8 @@ try {
     $payment_type = $_POST['payment_type'] ?? 'fifo';
     $specific_sales_json = $_POST['specific_sales'] ?? '{}';
     $specific_sales = json_decode($specific_sales_json, true) ?? [];
+    $change_back_usd = floatval($_POST['change_back_usd'] ?? 0);
+    $change_back_iq = floatval($_POST['change_back_iq'] ?? 0);
 
     // Log parsed variables for debugging
     error_log("Parsed vars: customer_id='$customer_id', date='$date', dolar_rate='$dolar_rate', paid_usd='$paid_usd', paid_iqd='$paid_iqd', discount='$discount', note='$note'");
@@ -42,9 +44,11 @@ try {
         exit;
     }
 
-    // 1. هەژمارکردنی بڕی پارەی داوە بە دۆلار
-    $paid_iqd_usd = $dolar_rate > 0 ? $paid_iqd / ($dolar_rate / 100) : 0;
-    $total_paid_usd = $paid_usd + $paid_iqd_usd + $discount;
+    // 1. هەژمارکردنی بڕی پارەی داوە بە دۆلار (Net)
+    $net_paid_usd = $paid_usd - $change_back_usd;
+    $net_paid_iqd = $paid_iqd - $change_back_iq;
+    $net_paid_iqd_usd = $dolar_rate > 0 ? $net_paid_iqd / ($dolar_rate / 100) : 0;
+    $total_paid_usd = $net_paid_usd + $net_paid_iqd_usd + $discount;
 
     // 2. چێککردنی قەرز
     $stmt = $pdo->prepare('SELECT opening_debt_usd FROM customers WHERE id = ?');
@@ -188,8 +192,8 @@ try {
     $customer_phone = $customer['mobile1'] ?? 'هیچ ژمارەیەک نییە';
 
     // زیادکردنی قەرزە گەڕاوەکە لە customer_debt_payments
-    $stmt = $pdo->prepare('INSERT INTO customer_debt_payments (customer_id, date, dolar_rate, paid_usd, paid_iqd, discount, note, payment_type, from_opening_debt_usd, from_sales_usd) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-    $ok = $stmt->execute([$customer_id, $date, $dolar_rate, $paid_usd, $paid_iqd, $discount, $note, $payment_type, $paid_from_opening, $paid_from_sales]);
+    $stmt = $pdo->prepare('INSERT INTO customer_debt_payments (customer_id, date, dolar_rate, paid_usd, paid_iqd, discount, note, payment_type, from_opening_debt_usd, from_sales_usd, change_back_usd, change_back_iq) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    $ok = $stmt->execute([$customer_id, $date, $dolar_rate, $paid_usd, $paid_iqd, $discount, $note, $payment_type, $paid_from_opening, $paid_from_sales, $change_back_usd, $change_back_iq]);
     
     if (!$ok) {
         $pdo->rollBack();
@@ -220,7 +224,9 @@ try {
         'discount' => $discount,
         'note' => $note,
         'from_opening_debt_usd' => $paid_from_opening,
-        'from_sales_usd' => $paid_from_sales
+        'from_sales_usd' => $paid_from_sales,
+        'change_back_usd' => $change_back_usd,
+        'change_back_iq' => $change_back_iq
     ];
 
     $additional_info = [

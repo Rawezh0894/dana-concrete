@@ -40,7 +40,7 @@ try {
         exit;
     }
     
-    $stmt = $pdo->prepare('SELECT id, date, dolar_rate, paid_usd, paid_iqd, discount, note, payment_type FROM customer_debt_payments WHERE customer_id = ? ORDER BY date DESC, id DESC');
+    $stmt = $pdo->prepare('SELECT id, date, dolar_rate, paid_usd, paid_iqd, discount, note, payment_type, change_back_usd, change_back_iq FROM customer_debt_payments WHERE customer_id = ? ORDER BY date DESC, id DESC');
     $stmt->execute([$customer_id]);
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
