@@ -191,9 +191,11 @@ if ($company_id) {
     function applyFilters() {
         currentFilters.from_date = $('#from_date').val();
         currentFilters.to_date = $('#to_date').val();
-        loadStats(); loadAdjustments();
-        if (typeof loadPurchases === 'function') loadPurchases();
+        // Refresh all data without page reload
         if (typeof loadDebts === 'function') loadDebts();
+        if (typeof loadPurchases === 'function') loadPurchases();
+        if (typeof loadStats === 'function') loadStats();
+        if (typeof loadAdjustments === 'function') loadAdjustments();
     }
 
     function resetFilters() {
@@ -242,9 +244,9 @@ if ($company_id) {
 </script>
 
 <!-- Existing Custom Scripts -->
-<script src="../assets/js/company_profile/select_purchases.js"></script>
-<script src="../assets/js/company_profile/select_debt.js"></script>
-<script src="../assets/js/company_profile/add_debt.js"></script>
+<script src="../assets/js/company_profile/select_purchases.js?v=1.1"></script>
+<script src="../assets/js/company_profile/select_debt.js?v=1.1"></script>
+<script src="../assets/js/company_profile/add_debt.js?v=1.1"></script>
 
 </body>
 </html>

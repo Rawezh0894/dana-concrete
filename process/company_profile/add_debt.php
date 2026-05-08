@@ -102,9 +102,17 @@ try {
 
     $debt_payment_id = (int)$pdo->lastInsertId();
 
-    // Net reduction: (payment + discount) - change_back
-    applyCompanyCurrencyReduction($pdo, $company_id, 'usd', $amount_usd + $discount_usd - $change_back_usd, $dollar_rate);
-    applyCompanyCurrencyReduction($pdo, $company_id, 'iqd', $amount_iqd + $discount_iqd - $change_back_iqd, $dollar_rate);
+    // Apply reductions for payment and discount
+    applyCompanyCurrencyReduction($pdo, $company_id, 'usd', $amount_usd + $discount_usd, $dollar_rate);
+    applyCompanyCurrencyReduction($pdo, $company_id, 'iqd', $amount_iqd + $discount_iqd, $dollar_rate);
+
+    // Apply restoration for change back (increases debt)
+    if ($change_back_usd > 0) {
+        restoreCompanyCurrencyAmount($pdo, $company_id, 'usd', $change_back_usd, $dollar_rate);
+    }
+    if ($change_back_iqd > 0) {
+        restoreCompanyCurrencyAmount($pdo, $company_id, 'iqd', $change_back_iqd, $dollar_rate);
+    }
 
     $new_values = [
         'company_id' => $company_id,

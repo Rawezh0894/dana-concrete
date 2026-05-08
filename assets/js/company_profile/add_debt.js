@@ -198,7 +198,8 @@ document.getElementById('addDebtForm').onsubmit = async function(e) {
             // Refresh all data without page reload
             if (typeof loadDebts === 'function') loadDebts();
             if (typeof loadPurchases === 'function') loadPurchases();
-            if (typeof loadCompanyInfoCards === 'function') loadCompanyInfoCards();
+            if (typeof loadStats === 'function') loadStats();
+            if (typeof loadAdjustments === 'function') loadAdjustments();
         } else {
             console.error('Server error:', data.msg);
             Swal.fire('هەڵە!', data.msg || 'هەڵەیەک ڕویدا', 'error');
