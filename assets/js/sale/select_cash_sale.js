@@ -27,7 +27,7 @@ async function loadCashSales() {
     }
     function formatUSD(n) {
         if (!n || isNaN(n)) return '';
-        return formatNumber(Number(n).toFixed(2)) + ' $';
+        return formatNumber(Number(n).toFixed(4)) + ' $';
     }
     function formatIQD(n) {
         if (!n || isNaN(n)) return '';

@@ -58,6 +58,38 @@ $(document).ready(function() {
         calculateRemainingAmount(prefix);
     });
 
+    // Magic Balance Button logic for Sale
+    $(document).on('click', '.balance-sale-btn', function() {
+        var targetId = $(this).data('target');
+        var prefix = targetId.startsWith('edit_') ? 'edit_' : '';
+        
+        var total = parseFloat($('#' + prefix + 'total_price').val()) || 0;
+        var paidUSD = parseFloat($('#' + prefix + 'amount_paid_usd').val()) || 0;
+        var paidIQD = parseFloat($('#' + prefix + 'amount_paid_iq').val()) || 0;
+        var changeUSD = parseFloat($('#' + prefix + 'change_back_usd').val()) || 0;
+        var changeIQD = parseFloat($('#' + prefix + 'change_back_iq').val()) || 0;
+        var dolarRate = parseFloat($('#' + prefix + 'dolar_rate').val()) || 1;
+        
+        var netPaidUSD = paidUSD - changeUSD;
+        var netPaidIQD = paidIQD - changeIQD;
+        var netPaidIQD_inUSD = netPaidIQD / (dolarRate / 100);
+        
+        // Calculate the gap to make remaining zero
+        // Remaining = (Total - Paid) - Discount
+        // To make Remaining = 0: Discount = Total - Paid
+        var gap = total - netPaidIQD_inUSD - netPaidUSD;
+        
+        if (gap < 0) {
+            // If they paid too much, maybe they want change back instead? 
+            // For now, let's just set discount to 0 and let them handle change back.
+            $('#' + targetId).val(0);
+        } else {
+            $('#' + targetId).val(gap.toFixed(4));
+        }
+        
+        calculateRemainingAmount(prefix);
+    });
+
     // Initial calculations
     calculateTotalPrice();
     calculateRemainingAmount();

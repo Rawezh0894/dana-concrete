@@ -500,7 +500,12 @@ usort($recipients, function($a, $b) {
             </div>
             <div class="col-md-4 mb-3">
               <label for="discount" class="form-label">داشکاندن</label>
-              <input type="number" class="form-control" id="discount" name="discount" min="0" step="0.0001" value="0">
+              <div class="input-group">
+                <input type="number" class="form-control" id="discount" name="discount" min="0" step="0.0001" value="0">
+                <button type="button" class="btn btn-outline-info balance-sale-btn" data-target="discount" title="هاوسەنگکردن">
+                  <i class="fas fa-magic"></i>
+                </button>
+              </div>
             </div>
             <div class="col-md-4 mb-3">
               <label for="change_back_iq" class="form-label">باقی بە دینار</label>
@@ -633,7 +638,12 @@ usort($recipients, function($a, $b) {
             </div>
             <div class="col-md-4 mb-3">
               <label for="edit_discount" class="form-label">داشکاندن</label>
-              <input type="number" class="form-control" id="edit_discount" name="edit_discount" min="0" step="0.0001" value="0">
+              <div class="input-group">
+                <input type="number" class="form-control" id="edit_discount" name="edit_discount" min="0" step="0.0001" value="0">
+                <button type="button" class="btn btn-outline-info balance-sale-btn" data-target="edit_discount" title="هاوسەنگکردن">
+                  <i class="fas fa-magic"></i>
+                </button>
+              </div>
             </div>
             <div class="col-md-4 mb-3">
               <label for="edit_change_back_iq" class="form-label">باقی بە دینار</label>
