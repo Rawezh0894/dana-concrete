@@ -11,7 +11,8 @@ $(document).ready(function() {
         $('#' + prefix + 'total_price').val(total.toFixed(4));
     }
 
-    function calculatePricePerUnit(prefix = '') {
+    function DEPRECATED_calculatePricePerUnit(prefix = '') {
+        console.warn('DEPRECATED_calculatePricePerUnit called from ' + (new Error().stack));
         var quantity = parseFloat($('#' + prefix + 'quantity').val()) || 0;
         var paidUSD = parseFloat($('#' + prefix + 'amount_paid_usd').val()) || 0;
         var paidIQD = parseFloat($('#' + prefix + 'amount_paid_iq').val()) || 0;
