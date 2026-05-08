@@ -54,14 +54,7 @@ $(document).ready(function() {
     
     $('#amount_paid_usd, #amount_paid_iq, #change_back_usd, #change_back_iq, #dolar_rate, #discount, #edit_amount_paid_usd, #edit_amount_paid_iq, #edit_change_back_usd, #edit_change_back_iq, #edit_dolar_rate, #edit_discount').on('input', function() {
         var prefix = this.id.startsWith('edit_') ? 'edit_' : '';
-        calculatePricePerUnit(prefix);
-        calculateTotalPrice(prefix);
         calculateRemainingAmount(prefix);
-    });
-
-    $('#quantity, #edit_quantity').on('input', function() {
-        var prefix = this.id.startsWith('edit_') ? 'edit_' : '';
-        calculatePricePerUnit(prefix);
     });
 
     // Initial calculations
