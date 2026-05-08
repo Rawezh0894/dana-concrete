@@ -113,13 +113,32 @@ if ($company_id) {
         <div class="modal-header bg-success text-white"><h5 class="modal-title fw-bold">تۆمارکردنی پارەدان</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
         <div class="modal-body p-4">
             <div class="mb-3"><label class="form-label fw-bold">بەروار:</label><input type="date" class="form-control" name="date" required value="<?= date('Y-m-d') ?>"></div>
+            <div class="mb-3">
+                <label class="form-label fw-bold">نرخی ١٠٠ دۆلار:</label>
+                <div class="input-group">
+                    <input type="number" class="form-control fw-bold text-primary" id="debt_dollar_rate" name="dollar_rate" value="150000">
+                    <button type="button" class="btn btn-outline-secondary" onclick="fetchAndSetDollarRate('debt_dollar_rate')">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
             <div class="row g-3">
-                <div class="col-6"><label class="form-label">پارەی داوە (دۆلار)</label><input type="number" step="0.01" class="form-control" name="amount_usd" value="0"></div>
-                <div class="col-6"><label class="form-label">پارەی داوە (دینار)</label><input type="number" step="1" class="form-control" name="amount_iqd" value="0"></div>
+                <div class="col-6"><label class="form-label">پارەی داوە (دۆلار)</label><input type="number" step="0.01" class="form-control" id="debt_amount_usd" name="amount_usd" value="0"></div>
+                <div class="col-6"><label class="form-label">پارەی داوە (دینار)</label><input type="number" step="1" class="form-control" id="debt_amount_iqd" name="amount_iqd" value="0"></div>
             </div>
             <div class="row g-3 mt-1">
-                <div class="col-6"><label class="form-label">داشکاندن (دۆلار)</label><input type="number" step="0.01" class="form-control" name="discount_usd" value="0"></div>
-                <div class="col-6"><label class="form-label">داشکاندن (دینار)</label><input type="number" step="1" class="form-control" name="discount_iqd" value="0"></div>
+                <div class="col-6"><label class="form-label">داشکاندن (دۆلار)</label><input type="number" step="0.01" class="form-control" id="debt_discount_usd" name="discount_usd" value="0"></div>
+                <div class="col-6"><label class="form-label">داشکاندن (دینار)</label><input type="number" step="1" class="form-control" id="debt_discount_iqd" name="discount_iqd" value="0"></div>
+            </div>
+            <div class="row g-3 mt-3">
+                <div class="col-6">
+                    <label class="form-label small text-muted">قەرزی نوێ (USD)</label>
+                    <input type="text" class="form-control bg-light fw-bold" id="total_remaining_usd" readonly>
+                </div>
+                <div class="col-6">
+                    <label class="form-label small text-muted">قەرزی نوێ (IQD)</label>
+                    <input type="text" class="form-control bg-light fw-bold" id="total_remaining_iqd" readonly>
+                </div>
             </div>
             <div class="mb-3 mt-3"><label class="form-label">تێبینی:</label><textarea class="form-control" name="note" rows="2"></textarea></div>
         </div>

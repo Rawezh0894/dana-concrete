@@ -98,10 +98,10 @@ try {
 
     $debt_payment_id = (int)$pdo->lastInsertId();
 
-    applyCompanyCurrencyReduction($pdo, $company_id, 'usd', $amount_usd);
-    applyCompanyCurrencyReduction($pdo, $company_id, 'usd', $discount_usd);
-    applyCompanyCurrencyReduction($pdo, $company_id, 'iqd', $amount_iqd);
-    applyCompanyCurrencyReduction($pdo, $company_id, 'iqd', $discount_iqd);
+    applyCompanyCurrencyReduction($pdo, $company_id, 'usd', $amount_usd, $dollar_rate);
+    applyCompanyCurrencyReduction($pdo, $company_id, 'usd', $discount_usd, $dollar_rate);
+    applyCompanyCurrencyReduction($pdo, $company_id, 'iqd', $amount_iqd, $dollar_rate);
+    applyCompanyCurrencyReduction($pdo, $company_id, 'iqd', $discount_iqd, $dollar_rate);
 
     $new_values = [
         'company_id' => $company_id,

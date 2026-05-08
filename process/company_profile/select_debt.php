@@ -17,6 +17,52 @@ if (!$company_id) {
     exit;
 }
 
+if (isset($_GET['company_info'])) {
+    $stmt = $pdo->prepare('SELECT currency_type FROM company WHERE id = ?');
+    $stmt->execute([$company_id]);
+    echo json_encode($stmt->fetch(PDO::FETCH_ASSOC));
+    exit;
+}
+
+if (isset($_GET['total_remaining'])) {
+    // Basic debt info
+    $row = $pdo->prepare('SELECT opening_debt_usd, opening_debt_iqd FROM company WHERE id = ?');
+    $row->execute([$company_id]);
+    $debt_base = $row->fetch(PDO::FETCH_ASSOC);
+
+    // Sum of remaining amounts from purchases
+    $purch_stmt = $pdo->prepare("
+        SELECT 
+            COALESCE(SUM(remaining_usd), 0) as remaining_usd,
+            COALESCE(SUM(remaining_iqd), 0) as remaining_iqd,
+            COALESCE(SUM(remaining_iqd / NULLIF(exchange_rate / 100, 0)), 0) as remaining_iqd_converted
+        FROM purchases p
+        WHERE p.company_id = ? AND p.payment_type = 'قەرز'
+    ");
+    $purch_stmt->execute([$company_id]);
+    $purch_res = $purch_stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Sum of Adjustments
+    $adj_stmt = $pdo->prepare("
+        SELECT 
+            COALESCE(SUM(amount_usd), 0) as total_adj_usd,
+            COALESCE(SUM(amount_iqd), 0) as total_adj_iqd
+        FROM company_adjustments 
+        WHERE company_id = ?
+    ");
+    $adj_stmt->execute([$company_id]);
+    $adj_res = $adj_stmt->fetch(PDO::FETCH_ASSOC);
+
+    $total_debt_usd = floatval($purch_res['remaining_usd']) + floatval($purch_res['remaining_iqd_converted']) + floatval($debt_base['opening_debt_usd']) + floatval($adj_res['total_adj_usd']);
+    $total_debt_iqd = floatval($purch_res['remaining_iqd']) + floatval($debt_base['opening_debt_iqd']) + floatval($adj_res['total_adj_iqd']);
+
+    echo json_encode([
+        'total_remaining_usd' => $total_debt_usd,
+        'total_remaining_iqd' => $total_debt_iqd
+    ]);
+    exit;
+}
+
 if (isset($_GET['stats'])) {
     $from_date = $_GET['from_date'] ?? '';
     $to_date = $_GET['to_date'] ?? '';

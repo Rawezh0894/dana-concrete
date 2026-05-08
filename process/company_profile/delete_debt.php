@@ -46,10 +46,11 @@ try {
     $company = $companyStmt->fetch(PDO::FETCH_ASSOC);
     $company_name = $company['name'] ?? 'Unknown';
 
-    restoreCompanyCurrencyAmount($pdo, $company_id, 'usd', floatval($payment['amount_usd'] ?? 0));
-    restoreCompanyCurrencyAmount($pdo, $company_id, 'usd', floatval($payment['discount_usd'] ?? 0));
-    restoreCompanyCurrencyAmount($pdo, $company_id, 'iqd', floatval($payment['amount_iqd'] ?? 0));
-    restoreCompanyCurrencyAmount($pdo, $company_id, 'iqd', floatval($payment['discount_iqd'] ?? 0));
+    $dollar_rate = floatval($payment['dollar_rate'] ?? 0);
+    restoreCompanyCurrencyAmount($pdo, $company_id, 'usd', floatval($payment['amount_usd'] ?? 0), $dollar_rate);
+    restoreCompanyCurrencyAmount($pdo, $company_id, 'usd', floatval($payment['discount_usd'] ?? 0), $dollar_rate);
+    restoreCompanyCurrencyAmount($pdo, $company_id, 'iqd', floatval($payment['amount_iqd'] ?? 0), $dollar_rate);
+    restoreCompanyCurrencyAmount($pdo, $company_id, 'iqd', floatval($payment['discount_iqd'] ?? 0), $dollar_rate);
 
     $delete = $pdo->prepare('DELETE FROM debt_payments WHERE id = ?');
     if (!$delete->execute([$id])) {

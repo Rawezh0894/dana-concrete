@@ -28,16 +28,40 @@ function getCompanyDebtSnapshot(PDO $pdo, int $companyId): array
     ];
 }
 
-function applyCompanyCurrencyReduction(PDO $pdo, int $companyId, string $currency, float $amount): void
+function applyCompanyCurrencyReduction(PDO $pdo, int $companyId, string $currency, float $amount, float $dollarRate = 0): void
 {
     if ($amount <= 0) {
         return;
     }
 
+    $rateFactor = $dollarRate > 0 ? ($dollarRate / 100) : 0;
+
+    // 1. Reduce SAME currency debt
+    $amount = reduceSpecificCurrencyDebt($pdo, $companyId, $currency, $amount);
+
+    // 2. If amount remains and we have a rate, reduce OTHER currency debt
+    if ($amount > 0 && $rateFactor > 0) {
+        if ($currency === 'usd') {
+            // Convert remaining USD to IQD
+            $remainingIQD = $amount * $rateFactor;
+            reduceSpecificCurrencyDebt($pdo, $companyId, 'iqd', $remainingIQD);
+        } else {
+            // Convert remaining IQD to USD
+            $remainingUSD = $amount / $rateFactor;
+            reduceSpecificCurrencyDebt($pdo, $companyId, 'usd', $remainingUSD);
+        }
+    }
+}
+
+function reduceSpecificCurrencyDebt(PDO $pdo, int $companyId, string $currency, float $amount): float
+{
+    if ($amount <= 0) return 0;
+
     $openingColumn = $currency === 'usd' ? 'opening_debt_usd' : 'opening_debt_iqd';
     $remainingColumn = $currency === 'usd' ? 'remaining_usd' : 'remaining_iqd';
     $typeValue = $currency === 'usd' ? 'دۆلار' : 'دینار';
 
+    // A. Deduct from Opening Debt
     $openingStmt = $pdo->prepare("SELECT {$openingColumn} FROM company WHERE id = ? FOR UPDATE");
     $openingStmt->execute([$companyId]);
     $openingDebt = (float)$openingStmt->fetchColumn();
@@ -49,10 +73,9 @@ function applyCompanyCurrencyReduction(PDO $pdo, int $companyId, string $currenc
         $amount -= $toDeduct;
     }
 
-    if ($amount <= 0) {
-        return;
-    }
+    if ($amount <= 1e-6) return 0;
 
+    // B. Deduct from Purchases
     $purchasesStmt = $pdo->prepare("
         SELECT id, {$remainingColumn} AS remaining
         FROM purchases
@@ -66,31 +89,44 @@ function applyCompanyCurrencyReduction(PDO $pdo, int $companyId, string $currenc
     $purchasesStmt->execute([$companyId, $typeValue]);
 
     foreach ($purchasesStmt->fetchAll(PDO::FETCH_ASSOC) as $purchase) {
-        if ($amount <= 0) {
-            break;
-        }
+        if ($amount <= 1e-6) break;
         $toDeduct = min((float)$purchase['remaining'], $amount);
-        if ($toDeduct <= 0) {
-            continue;
-        }
+        if ($toDeduct <= 1e-6) continue;
 
         $pdo->prepare("UPDATE purchases SET {$remainingColumn} = {$remainingColumn} - ? WHERE id = ?")
             ->execute([$toDeduct, $purchase['id']]);
         $amount -= $toDeduct;
     }
 
-    // If anything remains due to rounding, subtract it from opening debt to keep totals consistent
-    if ($amount > 0) {
-        $pdo->prepare("UPDATE company SET {$openingColumn} = GREATEST({$openingColumn} - ?, 0) WHERE id = ?")
-            ->execute([$amount, $companyId]);
+    return $amount;
+}
+
+function restoreCompanyCurrencyAmount(PDO $pdo, int $companyId, string $currency, float $amount, float $dollarRate = 0): void
+{
+    if ($amount <= 0) return;
+
+    $rateFactor = $dollarRate > 0 ? ($dollarRate / 100) : 0;
+
+    // 1. Restore SAME currency first
+    // Note: Restoration is tricky because we don't know exactly what was reduced.
+    // For simplicity, we restore same then other.
+    
+    $amount = restoreSpecificCurrencyAmount($pdo, $companyId, $currency, $amount);
+
+    if ($amount > 0 && $rateFactor > 0) {
+        if ($currency === 'usd') {
+            $remainingIQD = $amount * $rateFactor;
+            restoreSpecificCurrencyAmount($pdo, $companyId, 'iqd', $remainingIQD);
+        } else {
+            $remainingUSD = $amount / $rateFactor;
+            restoreSpecificCurrencyAmount($pdo, $companyId, 'usd', $remainingUSD);
+        }
     }
 }
 
-function restoreCompanyCurrencyAmount(PDO $pdo, int $companyId, string $currency, float $amount): void
+function restoreSpecificCurrencyAmount(PDO $pdo, int $companyId, string $currency, float $amount): float
 {
-    if ($amount <= 0) {
-        return;
-    }
+    if ($amount <= 0) return 0;
 
     $openingColumn = $currency === 'usd' ? 'opening_debt_usd' : 'opening_debt_iqd';
     $remainingColumn = $currency === 'usd' ? 'remaining_usd' : 'remaining_iqd';
@@ -109,16 +145,11 @@ function restoreCompanyCurrencyAmount(PDO $pdo, int $companyId, string $currency
     $purchasesStmt->execute([$companyId, $typeValue]);
 
     foreach ($purchasesStmt->fetchAll(PDO::FETCH_ASSOC) as $purchase) {
-        if ($amount <= 0) {
-            break;
-        }
-
+        if ($amount <= 1e-6) break;
         $remaining = (float)$purchase['remaining'];
         $total = (float)$purchase['total'];
         $maxRestore = max($total - $remaining, 0);
-        if ($maxRestore <= 0) {
-            continue;
-        }
+        if ($maxRestore <= 1e-6) continue;
 
         $toRestore = min($maxRestore, $amount);
         $pdo->prepare("UPDATE purchases SET {$remainingColumn} = {$remainingColumn} + ? WHERE id = ?")
@@ -126,9 +157,12 @@ function restoreCompanyCurrencyAmount(PDO $pdo, int $companyId, string $currency
         $amount -= $toRestore;
     }
 
-    if ($amount > 0) {
+    if ($amount > 1e-6) {
         $pdo->prepare("UPDATE company SET {$openingColumn} = {$openingColumn} + ? WHERE id = ?")
             ->execute([$amount, $companyId]);
+        $amount = 0;
     }
+
+    return $amount;
 }
 
