@@ -77,7 +77,6 @@ try {
             AVG(cr.meter_amount) as average_meter,
             SUM(CASE WHEN cr.price_per_meter IS NOT NULL THEN cr.meter_amount * cr.price_per_meter ELSE 0 END) as total_price,
             GROUP_CONCAT(DISTINCT cf.name) as formulas_used,
-            GROUP_CONCAT(DISTINCT cr.location SEPARATOR ', ') as locations,
             MAX(cr.notes) as latest_notes,
             CASE 
                 WHEN COUNT(CASE WHEN cr.payment_status = 'paid' THEN 1 END) = COUNT(*) THEN 'paid'
@@ -172,7 +171,6 @@ try {
                 'average_meter' => round((float)($customer['average_meter'] ?? 0), 2),
                 'total_price' => round((float)($customer['total_price'] ?? 0), 2),
                 'formulas_used' => $customer['formulas_used'] ? explode(',', $customer['formulas_used']) : [],
-                'locations' => $customer['locations'] ?? '',
                 'latest_notes' => $customer['latest_notes'] ?? null,
                 'payment_status' => $customer['payment_status'] ?? 'unpaid'
             ];

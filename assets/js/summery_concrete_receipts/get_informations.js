@@ -6,17 +6,6 @@ $(document).ready(function() {
     setupFilterListeners();
 });
 
-function getTableColumns() {
-    const columns = ['#', 'customer_name', 'location', 'receipt_count', 'total_meter'];
-    
-    if (window.userPermissions.canViewPrices) {
-        columns.push('total_price', 'notes');
-    }
-    
-    columns.push('payment_status', 'formulas', 'actions');
-    return columns;
-}
-
 function loadSummaryData() {
     const filters = getCurrentFilters();
     
@@ -24,7 +13,17 @@ function loadSummaryData() {
     $('#summary-cards').addClass('opacity-50');
     
     // Show loading state using TableController
-    const columns = getTableColumns();
+    const columns = [
+        '#', 
+        'customer_name', 
+        'receipt_count', 
+        'total_meter', 
+        'total_price', 
+        'notes', 
+        'payment_status', 
+        'formulas', 
+        'actions'
+    ];
     TableController.showLoading('#customerSummaryTable', columns);
     
     $.ajax({
@@ -81,7 +80,17 @@ function updateSummaryCards(summary) {
 
 function updateCustomerSummaryTable(customerSummary) {
     // Define columns for the table
-    const columns = getTableColumns();
+    const columns = [
+        '#', 
+        'customer_name', 
+        'receipt_count', 
+        'total_meter', 
+        'total_price', 
+        'notes', 
+        'payment_status', 
+        'formulas', 
+        'actions'
+    ];
     
     // Format the data for TableController
     const formattedData = customerSummary.map(customer => {
@@ -112,14 +121,15 @@ function updateCustomerSummaryTable(customerSummary) {
                 break;
         }
         
-        const row = {
+        return {
             customer_name: `
                 <strong>${customer.customer_name}</strong>
                 ${customer.mobile1 ? `<br><small class="text-muted">${customer.mobile1}</small>` : ''}
             `,
-            location: customer.locations || '-',
             receipt_count: `<span class="badge bg-primary">${customer.receipt_count}</span>`,
             total_meter: `<strong>${customer.total_meter}</strong> م³`,
+            total_price: window.userPermissions.canViewPrices ? totalPrice : '-',
+            notes: window.userPermissions.canViewPrices ? notesDisplay : '-',
             payment_status: paymentStatus,
             formulas: formulasHtml,
             actions: `
@@ -128,13 +138,6 @@ function updateCustomerSummaryTable(customerSummary) {
                 </button>
             `
         };
-
-        if (window.userPermissions.canViewPrices) {
-            row.total_price = totalPrice;
-            row.notes = notesDisplay;
-        }
-
-        return row;
     });
     
     // Store data globally for pagination
@@ -550,7 +553,17 @@ function setupFilterListeners() {
         const newPageSize = parseInt($(this).val());
         if (window.customerSummaryData && window.customerSummaryData.length > 0) {
             // Re-render table with new page size
-            const columns = getTableColumns();
+            const columns = [
+                '#', 
+                'customer_name', 
+                'receipt_count', 
+                'total_meter', 
+                'total_price', 
+                'notes', 
+                'payment_status', 
+                'formulas', 
+                'actions'
+            ];
             
             TableController.renderWithPagination('#customerSummaryTable', window.customerSummaryData, columns, {
                 pageSize: newPageSize,
@@ -561,43 +574,22 @@ function setupFilterListeners() {
 }
 
 function applyQuickFilter(filterType) {
-    const now = new Date();
-    
-    const formatDate = (date) => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    };
-
-    const todayStr = formatDate(now);
-    
-    const yesterday = new Date();
-    yesterday.setDate(now.getDate() - 1);
-    const yesterdayStr = formatDate(yesterday);
-    
-    const pire = new Date();
-    pire.setDate(now.getDate() - 2);
-    const pireStr = formatDate(pire);
+    const today = new Date().toISOString().split('T')[0];
+    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
     
     switch(filterType) {
         case 'today':
-            $('#filter_date_from').val(todayStr);
-            $('#filter_date_to').val(todayStr);
+            $('#filter_date_from').val(today);
+            $('#filter_date_to').val(today);
             break;
         case 'yesterday':
-            $('#filter_date_from').val(yesterdayStr);
-            $('#filter_date_to').val(yesterdayStr);
-            break;
-        case 'pire':
-            $('#filter_date_from').val(pireStr);
-            $('#filter_date_to').val(pireStr);
+            $('#filter_date_from').val(yesterday);
+            $('#filter_date_to').val(yesterday);
             break;
         case 'reset':
-            $('#filter_customer_id').val('').trigger('change');
-            $('#filter_formulas_id').val('').trigger('change');
-            $('#filter_date_from').val(todayStr);
-            $('#filter_date_to').val(todayStr);
+            $('#filter_customer_id').val('');
+            $('#filter_formulas_id').val('');
+            // Don't reset date inputs - keep them as today
             break;
     }
 }
