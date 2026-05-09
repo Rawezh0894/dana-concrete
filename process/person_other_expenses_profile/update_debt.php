@@ -52,13 +52,27 @@ try {
         throw new RuntimeException('دانەوەی قەرز نەدۆزرایەوە!');
     }
 
-    // 1. Revert OLD net effect
+    // 1. Revert OLD effect
     $old_dollar_rate = floatval($payment['dollar_rate'] ?? 0);
-    $old_net_usd = floatval($payment['amount_usd'] ?? 0) + floatval($payment['discount_usd'] ?? 0) - floatval($payment['change_back_usd'] ?? 0);
-    $old_net_iqd = floatval($payment['amount_iqd'] ?? 0) + floatval($payment['discount_iqd'] ?? 0) - floatval($payment['change_back_iqd'] ?? 0);
+    $old_amount_usd = floatval($payment['amount_usd'] ?? 0);
+    $old_discount_usd = floatval($payment['discount_usd'] ?? 0);
+    $old_change_back_usd = floatval($payment['change_back_usd'] ?? 0);
 
-    restorePersonCurrencyAmount($pdo, $person_id, 'usd', $old_net_usd, $old_dollar_rate);
-    restorePersonCurrencyAmount($pdo, $person_id, 'iqd', $old_net_iqd, $old_dollar_rate);
+    $old_amount_iqd = floatval($payment['amount_iqd'] ?? 0);
+    $old_discount_iqd = floatval($payment['discount_iqd'] ?? 0);
+    $old_change_back_iqd = floatval($payment['change_back_iqd'] ?? 0);
+
+    // Restore what was paid/discounted (increases debt)
+    restorePersonCurrencyAmount($pdo, $person_id, 'usd', $old_amount_usd + $old_discount_usd, $old_dollar_rate);
+    restorePersonCurrencyAmount($pdo, $person_id, 'iqd', $old_amount_iqd + $old_discount_iqd, $old_dollar_rate);
+
+    // Remove what was given back as change (decreases debt)
+    if ($old_change_back_usd > 0) {
+        applyPersonCurrencyReduction($pdo, $person_id, 'usd', $old_change_back_usd, $old_dollar_rate);
+    }
+    if ($old_change_back_iqd > 0) {
+        applyPersonCurrencyReduction($pdo, $person_id, 'iqd', $old_change_back_iqd, $old_dollar_rate);
+    }
 
     // 2. Update the record
     $updateStmt = $pdo->prepare('

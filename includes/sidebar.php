@@ -58,10 +58,10 @@ $logout_pages = ['logout.php'];
           <li><a href="../pages/concrete_formulas.php" class="sidebar-link<?php if($current_page == 'concrete_formulas.php') echo ' active'; ?>"><i class="bi bi-calculator me-2"></i> فۆرمولاکان</a></li>
         <?php endif; ?>
         <?php if (hasPermission('view_service_receipts')): ?>
-          <li><a href="../pages/service_receipts.php" class="sidebar-link<?php if($current_page == 'service_receipts.php') echo ' active'; ?>"><i class="bi bi-gear-wide-connected me-2"></i> پسووڵەی خزمەتگوزاری</a></li>
+          <li><a href="../pages/service_receipts.php" class="sidebar-link<?php if($current_page == 'service_receipts.php') echo ' active'; ?>"><i class="bi bi-gear-wide-connected me-2"></i> بەکرێدانی ئامێرەکان</a></li>
         <?php endif; ?>
         <?php if (hasPermission('view_service_customers')): ?>
-          <li><a href="../pages/service_customers.php" class="sidebar-link<?php if($current_page == 'service_customers.php') echo ' active'; ?>"><i class="bi bi-people-fill me-2"></i> کڕیارانی خزمەتگوزاری</a></li>
+          <li><a href="../pages/service_customers.php" class="sidebar-link<?php if($current_page == 'service_customers.php') echo ' active'; ?>"><i class="bi bi-people-fill me-2"></i> وەرگری ئامێرە کرێکان</a></li>
         <?php endif; ?>
       </ul>
     </li>
