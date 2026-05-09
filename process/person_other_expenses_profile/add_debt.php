@@ -62,6 +62,9 @@ try {
 
     $debt_payment_id = (int)$pdo->lastInsertId();
 
+    // Get snapshot before applying effects
+    $snapshotBefore = getPersonDebtSnapshot($pdo, $person_id);
+
     // Apply reductions for payment and discount
     applyPersonCurrencyReduction($pdo, $person_id, 'usd', $amount_usd + $discount_usd, $dollar_rate);
     applyPersonCurrencyReduction($pdo, $person_id, 'iqd', $amount_iqd + $discount_iqd, $dollar_rate);
@@ -73,6 +76,16 @@ try {
     if ($change_back_iqd > 0) {
         restorePersonCurrencyAmount($pdo, $person_id, 'iqd', $change_back_iqd, $dollar_rate);
     }
+
+    // Get snapshot after applying effects
+    $snapshotAfter = getPersonDebtSnapshot($pdo, $person_id);
+
+    $deducted_usd = $snapshotBefore['total_debt_usd'] - $snapshotAfter['total_debt_usd'];
+    $deducted_iqd = $snapshotBefore['total_debt_iqd'] - $snapshotAfter['total_debt_iqd'];
+
+    // Update the payment record with actual deduction values
+    $pdo->prepare("UPDATE person_other_expenses_debt_payments SET deducted_usd = ?, deducted_iqd = ? WHERE id = ?")
+        ->execute([$deducted_usd, $deducted_iqd, $debt_payment_id]);
 
     require_once __DIR__ . '/../../includes/notify.php';
     notify(

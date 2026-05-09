@@ -40,24 +40,43 @@ try {
     $person_id = intval($payment['person_id']);
 
     $dollar_rate = floatval($payment['dollar_rate'] ?? 0);
-    $amount_usd = floatval($payment['amount_usd'] ?? 0);
-    $discount_usd = floatval($payment['discount_usd'] ?? 0);
-    $change_back_usd = floatval($payment['change_back_usd'] ?? 0);
+    $deducted_usd = floatval($payment['deducted_usd'] ?? 0);
+    $deducted_iqd = floatval($payment['deducted_iqd'] ?? 0);
 
-    $amount_iqd = floatval($payment['amount_iqd'] ?? 0);
-    $discount_iqd = floatval($payment['discount_iqd'] ?? 0);
-    $change_back_iqd = floatval($payment['change_back_iqd'] ?? 0);
+    if ($deducted_usd != 0 || $deducted_iqd != 0) {
+        // New logic: Use the recorded actual deduction for perfect restoration
+        if ($deducted_usd > 0) {
+            restorePersonCurrencyAmount($pdo, $person_id, 'usd', $deducted_usd, $dollar_rate);
+        } elseif ($deducted_usd < 0) {
+            applyPersonCurrencyReduction($pdo, $person_id, 'usd', abs($deducted_usd), $dollar_rate);
+        }
 
-    // 1. Restore what was paid/discounted (increases debt)
-    restorePersonCurrencyAmount($pdo, $person_id, 'usd', $amount_usd + $discount_usd, $dollar_rate);
-    restorePersonCurrencyAmount($pdo, $person_id, 'iqd', $amount_iqd + $discount_iqd, $dollar_rate);
+        if ($deducted_iqd > 0) {
+            restorePersonCurrencyAmount($pdo, $person_id, 'iqd', $deducted_iqd, $dollar_rate);
+        } elseif ($deducted_iqd < 0) {
+            applyPersonCurrencyReduction($pdo, $person_id, 'iqd', abs($deducted_iqd), $dollar_rate);
+        }
+    } else {
+        // Fallback for old records (best effort)
+        $amount_usd = floatval($payment['amount_usd'] ?? 0);
+        $discount_usd = floatval($payment['discount_usd'] ?? 0);
+        $change_back_usd = floatval($payment['change_back_usd'] ?? 0);
 
-    // 2. Remove what was given back as change (decreases debt)
-    if ($change_back_usd > 0) {
-        applyPersonCurrencyReduction($pdo, $person_id, 'usd', $change_back_usd, $dollar_rate);
-    }
-    if ($change_back_iqd > 0) {
-        applyPersonCurrencyReduction($pdo, $person_id, 'iqd', $change_back_iqd, $dollar_rate);
+        $amount_iqd = floatval($payment['amount_iqd'] ?? 0);
+        $discount_iqd = floatval($payment['discount_iqd'] ?? 0);
+        $change_back_iqd = floatval($payment['change_back_iqd'] ?? 0);
+
+        // 1. Restore what was paid/discounted (increases debt)
+        restorePersonCurrencyAmount($pdo, $person_id, 'usd', $amount_usd + $discount_usd, $dollar_rate);
+        restorePersonCurrencyAmount($pdo, $person_id, 'iqd', $amount_iqd + $discount_iqd, $dollar_rate);
+
+        // 2. Remove what was given back as change (decreases debt)
+        if ($change_back_usd > 0) {
+            applyPersonCurrencyReduction($pdo, $person_id, 'usd', $change_back_usd, $dollar_rate);
+        }
+        if ($change_back_iqd > 0) {
+            applyPersonCurrencyReduction($pdo, $person_id, 'iqd', $change_back_iqd, $dollar_rate);
+        }
     }
 
     $deleteStmt = $pdo->prepare('DELETE FROM person_other_expenses_debt_payments WHERE id = ?');
