@@ -16,7 +16,6 @@ function loadSummaryData() {
     const columns = [
         '#', 
         'customer_name', 
-        'location',
         'receipt_count', 
         'total_meter', 
         'total_price', 
@@ -84,7 +83,6 @@ function updateCustomerSummaryTable(customerSummary) {
     const columns = [
         '#', 
         'customer_name', 
-        'location',
         'receipt_count', 
         'total_meter', 
         'total_price', 
@@ -128,7 +126,6 @@ function updateCustomerSummaryTable(customerSummary) {
                 <strong>${customer.customer_name}</strong>
                 ${customer.mobile1 ? `<br><small class="text-muted">${customer.mobile1}</small>` : ''}
             `,
-            location: customer.locations || '-',
             receipt_count: `<span class="badge bg-primary">${customer.receipt_count}</span>`,
             total_meter: `<strong>${customer.total_meter}</strong> م³`,
             total_price: window.userPermissions.canViewPrices ? totalPrice : '-',
@@ -559,7 +556,6 @@ function setupFilterListeners() {
             const columns = [
                 '#', 
                 'customer_name', 
-                'location',
                 'receipt_count', 
                 'total_meter', 
                 'total_price', 
@@ -580,7 +576,6 @@ function setupFilterListeners() {
 function applyQuickFilter(filterType) {
     const today = new Date().toISOString().split('T')[0];
     const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-    const dayBeforeYesterday = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
     
     switch(filterType) {
         case 'today':
@@ -590,10 +585,6 @@ function applyQuickFilter(filterType) {
         case 'yesterday':
             $('#filter_date_from').val(yesterday);
             $('#filter_date_to').val(yesterday);
-            break;
-        case 'day_before_yesterday':
-            $('#filter_date_from').val(dayBeforeYesterday);
-            $('#filter_date_to').val(dayBeforeYesterday);
             break;
         case 'reset':
             $('#filter_customer_id').val('');

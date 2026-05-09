@@ -112,9 +112,6 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
         <button type="button" class="btn btn-sm btn-warning filter-btn" id="filter_yesterday" data-filter="yesterday">
           <i class="fas fa-calendar-minus me-1"></i>دوێنێ
         </button>
-        <button type="button" class="btn btn-sm btn-info filter-btn" id="filter_day_before_yesterday" data-filter="day_before_yesterday">
-          <i class="fas fa-calendar-alt me-1"></i>پێرێ
-        </button>
         <button type="button" class="btn btn-sm btn-secondary filter-btn" id="filter_reset" data-filter="reset">
           <i class="fas fa-redo me-1"></i>ڕیفڕێش
         </button>
@@ -177,7 +174,6 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
               <tr>
                 <th>#</th>
                 <th>ناوی کڕیار</th>
-                <th>شوێن</th>
                 <th>ژمارەی پسووڵەکان</th>
                 <th>کۆی مەتر سێجا</th>
                 <?php if (hasPermission('view_concrete_prices')): ?>
@@ -341,18 +337,18 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
         if (!window.userPermissions.canViewPrices) {
           // Remove price and notes columns from header
           const headers = headerRow.querySelectorAll('th');
-          if (headers.length >= 7) {
-            headers[5].remove(); // Remove price column
-            headers[5].remove(); // Remove notes column (now at index 5 after removing price)
+          if (headers.length >= 6) {
+            headers[4].remove(); // Remove price column
+            headers[4].remove(); // Remove notes column (now at index 4 after removing price)
           }
           
           // Remove price and notes columns from all rows
           const rows = printTable.querySelectorAll('tbody tr');
           rows.forEach(row => {
             const cells = row.querySelectorAll('td');
-            if (cells.length >= 7) {
-              cells[5].remove(); // Remove price column
-              cells[5].remove(); // Remove notes column (now at index 5 after removing price)
+            if (cells.length >= 6) {
+              cells[4].remove(); // Remove price column
+              cells[4].remove(); // Remove notes column (now at index 4 after removing price)
             }
           });
         }
