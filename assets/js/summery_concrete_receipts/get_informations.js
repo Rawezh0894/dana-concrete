@@ -13,18 +13,21 @@ function loadSummaryData() {
     $('#summary-cards').addClass('opacity-50');
     
     // Show loading state using TableController
-    const columns = [
+    let columns = [
         '#', 
         'customer_name', 
         'location',
         'receipt_count', 
         'total_meter', 
-        'total_price', 
-        'notes', 
         'payment_status', 
         'formulas', 
         'actions'
     ];
+    
+    // Add price-related columns if user has permission
+    if (window.userPermissions.canViewPrices) {
+        columns.splice(5, 0, 'total_price', 'notes');
+    }
     TableController.showLoading('#customerSummaryTable', columns);
     
     $.ajax({
@@ -81,18 +84,21 @@ function updateSummaryCards(summary) {
 
 function updateCustomerSummaryTable(customerSummary) {
     // Define columns for the table
-    const columns = [
+    let columns = [
         '#', 
         'customer_name', 
         'location',
         'receipt_count', 
         'total_meter', 
-        'total_price', 
-        'notes', 
         'payment_status', 
         'formulas', 
         'actions'
     ];
+    
+    // Add price-related columns if user has permission
+    if (window.userPermissions.canViewPrices) {
+        columns.splice(5, 0, 'total_price', 'notes');
+    }
     
     // Format the data for TableController
     const formattedData = customerSummary.map(customer => {
@@ -556,18 +562,21 @@ function setupFilterListeners() {
         const newPageSize = parseInt($(this).val());
         if (window.customerSummaryData && window.customerSummaryData.length > 0) {
             // Re-render table with new page size
-            const columns = [
+            let columns = [
                 '#', 
                 'customer_name', 
                 'location',
                 'receipt_count', 
                 'total_meter', 
-                'total_price', 
-                'notes', 
                 'payment_status', 
                 'formulas', 
                 'actions'
             ];
+            
+            // Add price-related columns if user has permission
+            if (window.userPermissions.canViewPrices) {
+                columns.splice(5, 0, 'total_price', 'notes');
+            }
             
             TableController.renderWithPagination('#customerSummaryTable', window.customerSummaryData, columns, {
                 pageSize: newPageSize,
