@@ -9,12 +9,12 @@ function initGrid() {
     if (!gridDiv) return;
 
     const columnDefs = [
-        { headerName: "#", field: "id", width: 70, sortable: true, filter: true },
-        { headerName: "بەروار", field: "depreciation_date", width: 150, sortable: true, filter: "agDateColumnFilter" },
+        { headerName: "#", field: "id", width: 80, sortable: true, filter: true },
+        { headerName: "بەروار", field: "depreciation_date", width: 180, sortable: true, filter: "agDateColumnFilter" },
         {
             headerName: "بڕ بە دینار",
             field: "amount_iqd",
-            width: 150,
+            width: 200,
             sortable: true,
             filter: "agNumberColumnFilter",
             valueFormatter: params => formatCurrency(params.value, 'IQD')
@@ -22,16 +22,16 @@ function initGrid() {
         {
             headerName: "بڕ بە دۆلار",
             field: "amount_usd",
-            width: 150,
+            width: 200,
             sortable: true,
             filter: "agNumberColumnFilter",
             valueFormatter: params => formatCurrency(params.value, 'USD')
         },
-        { headerName: "تێبینی", field: "note", flex: 1, minWidth: 200, filter: true, wrapText: true, autoHeight: true },
+        { headerName: "تێبینی", field: "note", flex: 2, minWidth: 300, filter: true, wrapText: true, autoHeight: true },
         {
             headerName: "کردارەکان",
             field: "id",
-            width: 120,
+            width: 180,
             sortable: false,
             filter: false,
             cellRenderer: params => {
