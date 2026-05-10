@@ -37,7 +37,9 @@ function loadSummaryData() {
         dataType: 'json',
         success: function(response) {
             $('#summary-cards').removeClass('opacity-50');
+            console.log('Backend response:', response);
             if (response.success) {
+                console.log('Customer summary data:', response.customer_summary);
                 updateSummaryCards(response.summary);
                 updateCustomerSummaryTable(response.customer_summary);
             } else {
@@ -101,6 +103,7 @@ function updateCustomerSummaryTable(customerSummary) {
     }
     
     // Format the data for TableController
+    console.log('Columns array:', columns);
     const formattedData = customerSummary.map(customer => {
         const formulasHtml = customer.formulas_used.map(formula => 
             `<span class="formula-badge me-1">${formula}</span>`
@@ -129,7 +132,7 @@ function updateCustomerSummaryTable(customerSummary) {
                 break;
         }
         
-        return {
+        const formattedRow = {
             customer_name: `
                 <strong>${customer.customer_name}</strong>
                 ${customer.mobile1 ? `<br><small class="text-muted">${customer.mobile1}</small>` : ''}
@@ -147,7 +150,11 @@ function updateCustomerSummaryTable(customerSummary) {
                 </button>
             `
         };
+        console.log('Formatted row sample:', formattedRow);
+        return formattedRow;
     });
+    
+    console.log('Formatted data sample:', formattedData.slice(0, 2));
     
     // Store data globally for pagination
     window.customerSummaryData = formattedData;
