@@ -10,7 +10,7 @@ function initGrid() {
 
     const columnDefs = [
         { headerName: "#", field: "id", width: 80, sortable: true, filter: true },
-        { headerName: "بەروار", field: "depreciation_date", width: 180, sortable: true, filter: "agDateColumnFilter" },
+        { headerName: "بەروار", field: "depreciation_date", width: 250, sortable: true, filter: "agDateColumnFilter" },
         {
             headerName: "بڕ بە دینار",
             field: "amount_iqd",
