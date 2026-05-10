@@ -174,6 +174,7 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
               <tr>
                 <th>#</th>
                 <th>ناوی کڕیار</th>
+                <th>شوێن</th>
                 <th>ژمارەی پسووڵەکان</th>
                 <th>کۆی مەتر سێجا</th>
                 <?php if (hasPermission('view_concrete_prices')): ?>

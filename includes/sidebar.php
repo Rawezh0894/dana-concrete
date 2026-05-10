@@ -132,7 +132,7 @@ $logout_pages = ['logout.php'];
         <?php endif; ?>
        
         <?php if (hasPermission('view_income_from_cars')): ?>
-          <li><a href="../pages/income_from_cars.php" class="sidebar-link<?php if($current_page == 'income_from_cars.php') echo ' active'; ?>"><i class="bi bi-graph-up-arrow me-2"></i>داهاتی سەیارەکان</a></li>
+          <li><a href="../pages/income_from_cars.php" class="sidebar-link<?php if($current_page == 'income_from_cars.php') echo ' active'; ?>"><i class="bi bi-graph-up-arrow me-2"></i>وردەکاری بارکردنەکان</a></li>
         <?php endif; ?>
         <li><a href="../pages/other_income.php" class="sidebar-link<?php if($current_page == 'other_income.php') echo ' active'; ?>"><i class="bi bi-wallet2 me-2"></i>داهاتی تر</a></li>
         <li><a href="../pages/asset_depreciation.php" class="sidebar-link<?php if($current_page == 'asset_depreciation.php') echo ' active'; ?>"><i class="bi bi-graph-down-arrow me-2"></i>داخورانی ئامێرەکان</a></li>

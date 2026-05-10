@@ -16,6 +16,7 @@ function loadSummaryData() {
     const columns = [
         '#', 
         'customer_name', 
+        'location',
         'receipt_count', 
         'total_meter', 
         'total_price', 
@@ -83,6 +84,7 @@ function updateCustomerSummaryTable(customerSummary) {
     const columns = [
         '#', 
         'customer_name', 
+        'location',
         'receipt_count', 
         'total_meter', 
         'total_price', 
@@ -126,6 +128,7 @@ function updateCustomerSummaryTable(customerSummary) {
                 <strong>${customer.customer_name}</strong>
                 ${customer.mobile1 ? `<br><small class="text-muted">${customer.mobile1}</small>` : ''}
             `,
+            location: customer.location || '-',
             receipt_count: `<span class="badge bg-primary">${customer.receipt_count}</span>`,
             total_meter: `<strong>${customer.total_meter}</strong> م³`,
             total_price: window.userPermissions.canViewPrices ? totalPrice : '-',
@@ -556,6 +559,7 @@ function setupFilterListeners() {
             const columns = [
                 '#', 
                 'customer_name', 
+                'location',
                 'receipt_count', 
                 'total_meter', 
                 'total_price', 
