@@ -156,9 +156,9 @@ function loadReturnDebt() {
                 const rows = mainTable.querySelectorAll('tr');
                 for (let row of rows) {
                     const cells = row.querySelectorAll('td');
-                    if (cells.length > 5) {
-                        const usd = parseFloat((cells[4].textContent || '').replace(/[$,]/g, ''));
-                        const iqd = parseFloat((cells[5].textContent || '').replace(/[د.ع,]/g, ''));
+                    if (cells.length > 6) {
+                        const usd = parseFloat((cells[5].textContent || '').replace(/[$,]/g, ''));
+                        const iqd = parseFloat((cells[6].textContent || '').replace(/[د.ع,]/g, ''));
                         if (usd && iqd) {
                             usdToIqdRate = iqd / usd;
                             break;
@@ -254,7 +254,7 @@ function loadReturnDebt() {
             console.error('Error loading return debt data:', error);
             const footer = document.getElementById('receipt-table-footer');
             if (footer) {
-                footer.innerHTML = '<tr class="summary-row"><td colspan="9" style="text-align: center; color: red;">هەڵە لە بارکردنی داتای قەرز</td></tr>';
+                footer.innerHTML = '<tr class="summary-row"><td colspan="10" style="text-align: center; color: red;">هەڵە لە بارکردنی داتای قەرز</td></tr>';
             }
             throw error;
         });
