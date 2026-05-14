@@ -250,3 +250,128 @@ function employee_loan_delete_cash_rows_for_loan(PDO $pdo, int $loanId): void
     $stmt = $pdo->prepare('DELETE FROM cash_box WHERE employee_loan_id = ?');
     $stmt->execute([$loanId]);
 }
+
+/**
+ * Insert deposit row(s) for direct cash loan repayment (cash in).
+ * Uses employee_loan_id when column exists (same as issuance rows).
+ */
+function employee_loan_insert_cash_deposits_for_repayment(
+    PDO $pdo,
+    int $loanId,
+    string $employeeName,
+    string $repaymentDateYmd,
+    float $repayUsd,
+    float $repayIqd,
+    ?int $createdBy
+): void {
+    $repayUsd = round($repayUsd, 2);
+    $repayIqd = round($repayIqd, 2);
+    if ($repayUsd <= 0 && $repayIqd <= 0) {
+        return;
+    }
+
+    $hasLoanCol = employee_loan_has_cash_loan_id_column($pdo);
+    $noteBase = 'Direct Loan Repayment - گەڕاندنەوەی قەرزی کارمەند — ' . $employeeName . ' — Loan ID ' . $loanId;
+
+    if ($repayUsd > 0) {
+        if ($hasLoanCol) {
+            $ins = $pdo->prepare(
+                'INSERT INTO cash_box (`date`, `type`, `amount_iqd`, `amount_usd`, `currency`, `note`, `created_by`, `employee_loan_id`)
+                 VALUES (?, ?, 0, ?, ?, ?, ?, ?)'
+            );
+            $ins->execute([$repaymentDateYmd, 'deposit', $repayUsd, 'دۆلار', $noteBase . ' ($)', $createdBy ?: null, $loanId]);
+        } else {
+            $ins = $pdo->prepare(
+                'INSERT INTO cash_box (`date`, `type`, `amount_iqd`, `amount_usd`, `currency`, `note`, `created_by`)
+                 VALUES (?, ?, 0, ?, ?, ?, ?)'
+            );
+            $ins->execute([$repaymentDateYmd, 'deposit', $repayUsd, 'دۆلار', $noteBase . ' ($)', $createdBy ?: null]);
+        }
+    }
+    if ($repayIqd > 0) {
+        if ($hasLoanCol) {
+            $ins = $pdo->prepare(
+                'INSERT INTO cash_box (`date`, `type`, `amount_iqd`, `amount_usd`, `currency`, `note`, `created_by`, `employee_loan_id`)
+                 VALUES (?, ?, ?, 0, ?, ?, ?, ?)'
+            );
+            $ins->execute([$repaymentDateYmd, 'deposit', $repayIqd, 'دینار', $noteBase . ' (د.ع)', $createdBy ?: null, $loanId]);
+        } else {
+            $ins = $pdo->prepare(
+                'INSERT INTO cash_box (`date`, `type`, `amount_iqd`, `amount_usd`, `currency`, `note`, `created_by`)
+                 VALUES (?, ?, ?, 0, ?, ?, ?)'
+            );
+            $ins->execute([$repaymentDateYmd, 'deposit', $repayIqd, 'دینار', $noteBase . ' (د.ع)', $createdBy ?: null]);
+        }
+    }
+}
+
+/**
+ * Direct repayment against a single loan (cash in + loan_repayments + balances).
+ *
+ * @throws RuntimeException
+ */
+function employee_loan_apply_direct_repayment(
+    PDO $pdo,
+    int $loanId,
+    float $repayUsd,
+    float $repayIqd,
+    string $repaymentDateYmd,
+    ?int $createdBy
+): void {
+    $repayUsd = round($repayUsd, 2);
+    $repayIqd = round($repayIqd, 2);
+    if ($repayUsd <= 0 && $repayIqd <= 0) {
+        throw new RuntimeException('لانیکەم یەک بڕ (دۆلار یان دینار) پێویستە.');
+    }
+
+    $stmt = $pdo->prepare(
+        'SELECT el.id, el.employee_id, el.remaining_usd, el.remaining_iqd, el.status, e.name AS employee_name
+         FROM employee_loans el
+         INNER JOIN employees e ON e.id = el.employee_id
+         WHERE el.id = ?'
+    );
+    $stmt->execute([$loanId]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$row) {
+        throw new RuntimeException('قەرز نەدۆزرایەوە.');
+    }
+    if (($row['status'] ?? '') !== 'active') {
+        throw new RuntimeException('ئەم قەرزە چالاک نییە.');
+    }
+
+    $remUsd = round((float) $row['remaining_usd'], 2);
+    $remIqd = round((float) $row['remaining_iqd'], 2);
+    if ($repayUsd > $remUsd + 0.0001) {
+        throw new RuntimeException('بڕی گەڕاندنەوەی دۆلار زیاترە لە قەرزی ماوە.');
+    }
+    if ($repayIqd > $remIqd + 0.0001) {
+        throw new RuntimeException('بڕی گەڕاندنەوەی دینار زیاترە لە قەرزی ماوە.');
+    }
+
+    $name = (string) $row['employee_name'];
+
+    employee_loan_insert_cash_deposits_for_repayment(
+        $pdo,
+        $loanId,
+        $name,
+        $repaymentDateYmd,
+        $repayUsd,
+        $repayIqd,
+        $createdBy
+    );
+
+    $insRep = $pdo->prepare(
+        'INSERT INTO loan_repayments (loan_id, expense_id, deducted_usd, deducted_iqd) VALUES (?, NULL, ?, ?)'
+    );
+    $insRep->execute([$loanId, $repayUsd, $repayIqd]);
+
+    $upd = $pdo->prepare(
+        'UPDATE employee_loans SET remaining_usd = remaining_usd - ?, remaining_iqd = remaining_iqd - ? WHERE id = ?'
+    );
+    $upd->execute([$repayUsd, $repayIqd, $loanId]);
+
+    $markPaid = $pdo->prepare(
+        "UPDATE employee_loans SET status = 'paid_off' WHERE id = ? AND remaining_usd <= 0.01 AND remaining_iqd <= 0.01"
+    );
+    $markPaid->execute([$loanId]);
+}

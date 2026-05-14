@@ -33,8 +33,27 @@ try {
     error_log('employee_expenses.php employee list: ' . $e->getMessage());
     $employees = [];
 }
-// Loan issuance: same practical access as cash operations / payroll (server also checks).
+// Loan issuance / direct repayment: same practical access as cash operations / payroll (server also checks).
 $can_issue_employee_loan = hasPermission('add_payment') || hasPermission('add_cash_box');
+
+$active_employee_loans = [];
+try {
+    $chkLoans = $pdo->query("SHOW TABLES LIKE 'employee_loans'");
+    if ($chkLoans && $chkLoans->rowCount() > 0) {
+        $stLoans = $pdo->query(
+            "SELECT el.id AS loan_id, el.employee_id, e.name AS employee_name,
+                    el.remaining_usd, el.remaining_iqd, el.loan_date
+             FROM employee_loans el
+             INNER JOIN employees e ON e.id = el.employee_id
+             WHERE el.status = 'active' AND (el.remaining_usd > 0.005 OR el.remaining_iqd > 0.005)
+             ORDER BY e.name ASC, el.loan_date ASC, el.id ASC"
+        );
+        $active_employee_loans = $stLoans ? $stLoans->fetchAll(PDO::FETCH_ASSOC) : [];
+    }
+} catch (Exception $e) {
+    error_log('employee_expenses.php active loans: ' . $e->getMessage());
+    $active_employee_loans = [];
+}
 ?>
 <!DOCTYPE html>
 <html lang="ku">
@@ -66,9 +85,6 @@ $can_issue_employee_loan = hasPermission('add_payment') || hasPermission('add_ca
     <div class="d-flex flex-column flex-lg-row flex-wrap align-items-lg-center justify-content-between gap-3 mb-4" style="position: relative; z-index: 20;">
         <h2 class="mb-0 order-1 order-lg-0" style="color: var(--seafoam-green); font-weight: bold;">بەڕێوەبردنی خەرجی کارمەندەکان</h2>
         <div class="d-flex flex-wrap align-items-center gap-2 order-0 order-lg-1 justify-content-lg-end" style="position: relative; z-index: 21;">
-            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addIncomeExpenseModal" style="background: var(--seafoam-green); font-weight: bold;">
-                <i class="fas fa-plus"></i> زیادکردنی مووچە/بەخشیش/کاروانحیسابی
-            </button>
             <button type="button"
                     id="btnIssueEmployeeLoan"
                     class="inline-flex items-center justify-center gap-2 rounded-lg border-2 border-sky-800 bg-sky-600 px-4 py-2.5 text-sm font-bold text-white shadow-md transition hover:bg-sky-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-300"
@@ -84,9 +100,73 @@ $can_issue_employee_loan = hasPermission('add_payment') || hasPermission('add_ca
             </button>
         </div>
     </div>
-    
-    
-    <!-- Filters -->
+
+    <!-- Active employee loans -->
+    <section class="mb-5 rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden" dir="rtl">
+        <div class="border-b border-slate-200 bg-gradient-to-l from-slate-50 to-white px-4 py-3 flex flex-wrap items-center justify-between gap-2">
+            <h3 class="text-lg font-bold text-slate-800 m-0 flex items-center gap-2">
+                <i class="fas fa-piggy-bank text-sky-600" aria-hidden="true"></i>
+                قەرزی کارمەندەکان <span class="text-sm font-normal text-slate-500">(چالاک)</span>
+            </h3>
+            <span class="text-xs text-slate-500">remaining_usd / remaining_iqd</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-200 text-sm">
+                <thead class="bg-slate-50">
+                    <tr>
+                        <th scope="col" class="px-4 py-3 text-right font-semibold text-slate-700">#</th>
+                        <th scope="col" class="px-4 py-3 text-right font-semibold text-slate-700">کارمەند</th>
+                        <th scope="col" class="px-4 py-3 text-right font-semibold text-slate-700">بەرواری قەرز</th>
+                        <th scope="col" class="px-4 py-3 text-right font-semibold text-slate-700">ماوە ($)</th>
+                        <th scope="col" class="px-4 py-3 text-right font-semibold text-slate-700">ماوە (د.ع)</th>
+                        <th scope="col" class="px-4 py-3 text-center font-semibold text-slate-700">کردار</th>
+                    </tr>
+                </thead>
+                <tbody id="active-employee-loans-tbody" class="divide-y divide-slate-100 bg-white">
+<?php if (count($active_employee_loans) === 0): ?>
+                    <tr>
+                        <td colspan="6" class="px-4 py-8 text-center text-slate-500">هیچ قەرزی چالاک نییە.</td>
+                    </tr>
+<?php else: ?>
+<?php
+    $loanRowNum = 0;
+    foreach ($active_employee_loans as $al):
+        ++$loanRowNum;
+        $lid = (int) ($al['loan_id'] ?? 0);
+        $ename = htmlspecialchars((string) ($al['employee_name'] ?? ''), ENT_QUOTES, 'UTF-8');
+        $rUsd = (float) ($al['remaining_usd'] ?? 0);
+        $rIqd = (float) ($al['remaining_iqd'] ?? 0);
+        $loanDate = htmlspecialchars((string) ($al['loan_date'] ?? ''), ENT_QUOTES, 'UTF-8');
+?>
+                    <tr class="hover:bg-slate-50/80 transition-colors">
+                        <td class="px-4 py-3 text-right text-slate-600"><?= $loanRowNum ?></td>
+                        <td class="px-4 py-3 text-right font-medium text-slate-900"><?= $ename ?></td>
+                        <td class="px-4 py-3 text-right text-slate-600"><?= $loanDate ?></td>
+                        <td class="px-4 py-3 text-right tabular-nums text-slate-800"><?= number_format($rUsd, 2) ?></td>
+                        <td class="px-4 py-3 text-right tabular-nums text-slate-800"><?= number_format($rIqd, 0) ?></td>
+                        <td class="px-4 py-3 text-center">
+<?php if ($can_issue_employee_loan): ?>
+                            <button type="button"
+                                    class="direct-loan-repay-btn inline-flex items-center justify-center gap-1.5 rounded-lg border border-emerald-700 bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
+                                    data-loan-id="<?= $lid ?>"
+                                    data-employee-name="<?= $ename ?>"
+                                    data-remaining-usd="<?= htmlspecialchars((string) $rUsd, ENT_QUOTES, 'UTF-8') ?>"
+                                    data-remaining-iqd="<?= htmlspecialchars((string) $rIqd, ENT_QUOTES, 'UTF-8') ?>">
+                                <i class="fas fa-hand-holding-usd text-[10px]" aria-hidden="true"></i>
+                                گەڕاندنەوەی قەرز بە نەقد
+                            </button>
+<?php else: ?>
+                            <span class="text-xs text-slate-400">—</span>
+<?php endif; ?>
+                        </td>
+                    </tr>
+<?php endforeach; ?>
+<?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
     <!-- Filters -->
     <div class="row mb-4">
         <div class="col-md-3 mb-3">
@@ -211,128 +291,6 @@ $can_issue_employee_loan = hasPermission('add_payment') || hasPermission('add_ca
     </div>
 </div>
 
-<!-- Add Income Expense Modal (مووچە/بەخشیش/کاروانحیسابی) -->
-<div class="modal fade" id="addIncomeExpenseModal" tabindex="-1" aria-labelledby="addIncomeExpenseModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <form id="addIncomeExpenseForm">
-        <div class="modal-header">
-          <h5 class="modal-title" id="addIncomeExpenseModalLabel">زیادکردنی مووچە/بەخشیش/کاروانحیسابی</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="mb-3">
-            <label for="income_employee_id" class="form-label">کارمەند</label>
-            <select class="form-select" id="income_employee_id" name="employee_id" required>
-              <option value="">-- هەلبژێرە --</option>
-              <?php foreach($employees as $emp): ?>
-                <option value="<?= $emp['id'] ?>" data-salary="<?= $emp['salary'] ?>" data-bonus="<?= $emp['bonus'] ?? 0 ?>"><?= htmlspecialchars($emp['name']) ?></option>
-              <?php endforeach; ?>
-            </select>
-            <small class="form-text text-muted" id="income-employee-balance-info" style="display: none;"></small>
-          </div>
-          
-          <div class="alert alert-info">
-            <i class="fas fa-info-circle"></i>
-            <strong>تێبینی:</strong> دەتوانیت لە یەک کاتدا هەم مووچە و هەم بەخشیش و هەم کاروانحیسابی بنووسیت.
-          </div>
-          
-          <div class="row">
-            <div class="col-md-4 mb-3">
-              <label for="income_salary" class="form-label">مووچە (د.ع)</label>
-              <input type="number" class="form-control" id="income_salary" name="salary" min="0" step="0.01" value="0">
-            </div>
-            <div class="col-md-4 mb-3">
-              <label for="income_bonus" class="form-label">بەخشیش (د.ع)</label>
-              <input type="number" class="form-control" id="income_bonus" name="bonus" min="0" step="0.01" value="0">
-            </div>
-            <div class="col-md-4 mb-3">
-              <label for="income_overtime" class="form-label">کاروانحیسابی (د.ع)</label>
-              <input type="number" class="form-control" id="income_overtime" name="overtime" min="0" step="0.01" value="0">
-            </div>
-          </div>
-          <div class="mb-3">
-            <label for="income_total_add" class="form-label">کۆی خەرجی (حساب — د.ع)</label>
-            <input type="text" class="form-control" id="income_total_add" readonly>
-          </div>
-
-          <div class="rounded-xl border border-teal-200 bg-teal-50/80 p-4 mb-3 text-start shadow-sm" dir="rtl">
-            <p class="text-sm font-bold text-teal-900 mb-3 flex items-center gap-2 border-b border-teal-200 pb-2">
-              <i class="fas fa-vault text-teal-600"></i> قاسە — ئەم بڕانە ڕاستەوخۆ لە قاسە دەکەم
-            </p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
-              <div class="sm:col-span-1">
-                <label for="income_amount_usd" class="block text-sm font-medium text-slate-700 mb-1">بڕی پارە بە دۆلار</label>
-                <div class="flex items-center gap-2">
-                  <span class="text-slate-500 text-sm">$</span>
-                  <input type="number" min="0" step="0.01" value="0" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500" id="income_amount_usd" name="amount_usd">
-                </div>
-              </div>
-              <div class="sm:col-span-1">
-                <label for="income_amount_iqd" class="block text-sm font-medium text-slate-700 mb-1">بڕی پارە بە دینار</label>
-                <input type="number" min="0" step="0.01" value="0" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500" id="income_amount_iqd" name="amount_iqd">
-                <span class="text-xs text-slate-500 mt-1 block">دینار (د.ع)</span>
-              </div>
-              <div class="sm:col-span-2">
-                <label for="income_exchange_rate" class="block text-sm font-medium text-slate-700 mb-1">نرخی گۆڕینەوە — ١ دۆلار بە چەند؟</label>
-                <input type="number" min="0" step="0.0001" value="0" class="w-full max-w-md rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500" id="income_exchange_rate" name="exchange_rate" placeholder="نمونە: 1500">
-              </div>
-            </div>
-            <div class="mt-4 rounded-lg bg-white/90 border border-teal-100 px-3 py-2 text-sm">
-              <span class="text-slate-600">کۆی خەرجی بە دینار (هاوتا):</span>
-              <strong class="text-teal-800 ms-1" id="income_cash_equiv_display">0</strong>
-              <span class="text-slate-500">د.ع</span>
-              <span class="text-xs text-slate-500 d-block mt-1" id="income_cash_equiv_hint">(دۆلار × نرخ) + دینار — دەبێت یەکسان بێت بە کۆی خەرجی لە سەرەوە</span>
-            </div>
-            <div class="mt-4 rounded-xl border border-indigo-200 bg-indigo-50/90 p-4 text-start shadow-sm" dir="rtl">
-              <p class="text-sm font-bold text-indigo-900 mb-2 flex items-center gap-2 border-b border-indigo-200 pb-2">
-                <i class="fas fa-piggy-bank text-indigo-600"></i> قەرزی کارمەند (کەمکردنەوە لە مووچە)
-              </p>
-              <div class="text-xs text-indigo-800 mb-3 rounded-lg bg-white/80 px-2 py-2 border border-indigo-100">
-                <span class="text-slate-600">قەرزی ماوە:</span>
-                <strong id="income_loan_outstanding_usd">0</strong> <span class="text-slate-500">$</span>
-                <span class="mx-2 text-slate-300">|</span>
-                <strong id="income_loan_outstanding_iqd">0</strong> <span class="text-slate-500">د.ع</span>
-              </div>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl mx-auto">
-                <div>
-                  <label for="income_deduct_loan_usd" class="block text-sm font-medium text-slate-700 mb-1">کەمکردنەوەی قەرز بە دۆلار (ئارەزوومەندانە)</label>
-                  <div class="flex items-center gap-2">
-                    <span class="text-slate-500 text-sm">$</span>
-                    <input type="number" min="0" step="0.01" value="0" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm" id="income_deduct_loan_usd" name="deduct_loan_usd" autocomplete="off">
-                  </div>
-                </div>
-                <div>
-                  <label for="income_deduct_loan_iqd" class="block text-sm font-medium text-slate-700 mb-1">کەمکردنەوەی قەرز بە دینار (ئارەزوومەندانە)</label>
-                  <input type="number" min="0" step="0.01" value="0" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm" id="income_deduct_loan_iqd" name="deduct_loan_iqd" autocomplete="off">
-                </div>
-              </div>
-              <p class="text-xs text-indigo-800 mt-3 mb-0">
-                <strong>پارەی خاو لە قاسە (دوای قەرز):</strong>
-                <span id="income_net_cash_display">0</span> د.ع
-                <span class="text-slate-500 d-block mt-1">ئەم بڕە دەبێت لە خانەکانی قاسە لە سەرەوە بنووسرێت (نابێت دووبارە لە قاسە دەرچێت بۆ بەشی قەرز).</span>
-              </p>
-            </div>
-          </div>
-
-          <div class="mb-3">
-            <label for="income_expense_date" class="form-label">مانگ (YYYY-MM)</label>
-            <input type="month" class="form-control" id="income_expense_date" name="expense_date" required>
-          </div>
-          <div class="mb-3">
-            <label for="income_notes" class="form-label">تێبینی</label>
-            <textarea class="form-control" id="income_notes" name="notes" rows="2"></textarea>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
-          <button type="submit" class="btn btn-success" style="background: var(--seafoam-green); font-weight: bold;">زیادکردن</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
 <!-- Issue employee loan (cash box outflow) — always in DOM for Bootstrap target -->
 <div class="modal fade" id="issueEmployeeLoanModal" tabindex="-1" aria-labelledby="issueEmployeeLoanModalLabel" aria-hidden="true" style="z-index: 1060;">
   <div class="modal-dialog modal-lg modal-dialog-centered" style="z-index: 1061;">
@@ -343,7 +301,7 @@ $can_issue_employee_loan = hasPermission('add_payment') || hasPermission('add_ca
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <div class="alert alert-warning small mb-3">بڕی دۆلار و/یان دینار ڕاستەوخۆ لە قاسە دەکەم وەک «Employee Loan Issued». دواتر لە کاتی مووچەدا دەتوانیت قەرز کەم بکەیتەوە.</div>
+          <div class="alert alert-warning small mb-3">بڕی دۆلار و/یان دینار ڕاستەوخۆ لە قاسە دەکەم وەک «Employee Loan Issued». دواتر دەتوانیت قەرز لە ڕێگەی گەڕاندنەوەی نەقد یان لە کاتی مووچەدا کەم بکەیتەوە.</div>
           <div class="mb-3">
             <label for="loan_employee_id" class="form-label">کارمەند</label>
             <select class="form-select" id="loan_employee_id" name="employee_id" required>
@@ -378,6 +336,50 @@ $can_issue_employee_loan = hasPermission('add_payment') || hasPermission('add_ca
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
           <button type="submit" class="btn btn-primary" style="background: var(--seafoam-green); font-weight: bold;">تۆمارکردن و دەرچوون لە قاسە</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Direct loan repayment (cash in to cash_box) -->
+<div class="modal fade" id="directLoanRepaymentModal" tabindex="-1" aria-labelledby="directLoanRepaymentModalLabel" aria-hidden="true" style="z-index: 1060;">
+  <div class="modal-dialog modal-dialog-centered" style="z-index: 1061;">
+    <div class="modal-content">
+      <form id="directLoanRepaymentForm">
+        <input type="hidden" id="direct_repay_loan_id" name="loan_id" value="">
+        <div class="modal-header border-b border-slate-200">
+          <h5 class="modal-title fw-bold" id="directLoanRepaymentModalLabel">گەڕاندنەوەی قەرز بە نەقد</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body text-start" dir="rtl">
+          <div class="rounded-lg border border-emerald-100 bg-emerald-50/80 px-3 py-2 mb-3 text-sm text-emerald-900">
+            <strong id="direct_repay_employee_display"></strong>
+            <div class="mt-1 text-xs text-slate-600">
+              ماوە: <span class="tabular-nums font-semibold text-slate-800" id="direct_repay_remaining_usd"></span> $
+              <span class="mx-1 text-slate-300">|</span>
+              <span class="tabular-nums font-semibold text-slate-800" id="direct_repay_remaining_iqd"></span> د.ع
+            </div>
+          </div>
+          <p class="small text-muted mb-3">پارەکە وەک <strong>هاتوو</strong> لە قاسە تۆمار دەکرێت (Direct Loan Repayment).</p>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="direct_repay_usd" class="form-label">گەڕاندنەوە بە دۆلار ($)</label>
+              <input type="number" class="form-control" id="direct_repay_usd" name="repay_usd" min="0" step="0.01" value="0" autocomplete="off">
+            </div>
+            <div class="col-md-6">
+              <label for="direct_repay_iqd" class="form-label">گەڕاندنەوە بە دینار (د.ع)</label>
+              <input type="number" class="form-control" id="direct_repay_iqd" name="repay_iqd" min="0" step="0.01" value="0" autocomplete="off">
+            </div>
+            <div class="col-12">
+              <label for="direct_repay_date" class="form-label">بەرواری وەرگرتن</label>
+              <input type="date" class="form-control" id="direct_repay_date" name="repayment_date" value="<?= htmlspecialchars(date('Y-m-d')) ?>" required>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-t border-slate-200">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
+          <button type="submit" class="btn btn-success fw-bold" style="background: var(--seafoam-green);">تۆمارکردن</button>
         </div>
       </form>
     </div>
@@ -574,229 +576,176 @@ $(function() {
             swalAlert('هەڵە', 'ئەم کردارە پێویستی ڕێگەی «زیادکردنی پارەدان» یان «زیادکردنی قاسە» هەیە. تکایە لە بەڕێوەبەری سیستەم بپرسە.', 'error');
         });
     }
-    // Calculate total for Income Expense Modal (مووچە/بەخشیش/کاروانحیسابی)
-    function calcIncomeTotal() {
-        var salary = parseFloat($('#income_salary').val()) || 0;
-        var bonus = parseFloat($('#income_bonus').val()) || 0;
-        var overtime = parseFloat($('#income_overtime').val()) || 0;
-        var total = salary + bonus + overtime;
-        $('#income_total_add').val(total.toLocaleString('en-US') + ' د.ع');
-        refreshIncomeCashEquiv();
+
+    function escAttr(s) {
+        return String(s == null ? '' : s)
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/</g, '&lt;');
     }
-    function incomeLoanDeductionEquiv() {
-        var u = parseFloat($('#income_deduct_loan_usd').val()) || 0;
-        var iq = parseFloat($('#income_deduct_loan_iqd').val()) || 0;
-        var rate = parseFloat($('#income_exchange_rate').val()) || 0;
-        if (u > 0 && rate <= 0) {
-            return null;
-        }
-        return Math.round((iq + u * rate) * 100) / 100;
+
+    function fmtNum(n, frac) {
+        var x = parseFloat(n) || 0;
+        return x.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: frac });
     }
-    function loadIncomeLoanBalance(employeeId) {
-        if (!employeeId) {
-            $('#income_loan_outstanding_usd').text('0');
-            $('#income_loan_outstanding_iqd').text('0');
-            $('#income_deduct_loan_usd').data('maxOutstanding', 0);
-            $('#income_deduct_loan_iqd').data('maxOutstanding', 0);
-            return;
-        }
-        $.get('../process/employee_payments/get_employee_loan_balance.php', { employee_id: employeeId }, function (r) {
-            if (r.success) {
-                $('#income_loan_outstanding_usd').text(parseFloat(r.outstanding_usd || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 }));
-                $('#income_loan_outstanding_iqd').text(parseFloat(r.outstanding_iqd || 0).toLocaleString('en-US', { maximumFractionDigits: 0 }));
-                $('#income_deduct_loan_usd').data('maxOutstanding', parseFloat(r.outstanding_usd || 0));
-                $('#income_deduct_loan_iqd').data('maxOutstanding', parseFloat(r.outstanding_iqd || 0));
+
+    window.refreshActiveEmployeeLoansTable = function () {
+        $.get('../process/employee_payments/active_loans_list.php', function (r) {
+            if (!r || !r.success) {
+                return;
             }
-        }, 'json');
-    }
-    function refreshIncomeCashEquiv() {
-        var salary = parseFloat($('#income_salary').val()) || 0;
-        var bonus = parseFloat($('#income_bonus').val()) || 0;
-        var overtime = parseFloat($('#income_overtime').val()) || 0;
-        var gross = salary + bonus + overtime;
-        var usd = parseFloat($('#income_amount_usd').val()) || 0;
-        var iqd = parseFloat($('#income_amount_iqd').val()) || 0;
-        var rate = parseFloat($('#income_exchange_rate').val()) || 0;
-        var eq = Math.round((iqd + usd * rate) * 100) / 100;
-        if (usd > 0 && rate <= 0) {
-            $('#income_cash_equiv_display').text('— (نرخ پێویستە)');
-        } else {
-            $('#income_cash_equiv_display').text(eq.toLocaleString('en-US'));
-        }
-        var le = incomeLoanDeductionEquiv();
-        if (le === null) {
-            $('#income_net_cash_display').text('—');
-            $('#income_cash_equiv_hint').text('(دۆلار × نرخ) + دینار — بۆ قەرزی دۆلار نرخ پێویستە');
-            return;
-        }
-        var net = Math.round((gross - le) * 100) / 100;
-        $('#income_net_cash_display').text(net.toLocaleString('en-US'));
-        $('#income_cash_equiv_hint').text('(دۆلار × نرخ) + دینار دەبێت یەکسان بێت بە کۆی خەرجی (' + gross.toLocaleString('en-US') + ') − قەرز (' + le.toLocaleString('en-US') + ') = ' + net.toLocaleString('en-US') + ' د.ع');
-    }
-    $('#income_salary, #income_bonus, #income_overtime, #income_amount_usd, #income_amount_iqd, #income_exchange_rate, #income_deduct_loan_usd, #income_deduct_loan_iqd').on('input change', function() {
-        calcIncomeTotal();
-    });
-    
-    // Auto-fill salary, bonus, and overtime in Income Expense Modal and show balance
-    $('#income_employee_id').on('change', function() {
-        var employeeId = $(this).val();
-        loadIncomeLoanBalance(employeeId);
-        if (!employeeId) {
-            $('#income_deduct_loan_usd').val(0);
-            $('#income_deduct_loan_iqd').val(0);
-        }
-        var salary = $(this).find('option:selected').data('salary') || '';
-        var bonus = $(this).find('option:selected').data('bonus') || 0;
-        $('#income_salary').val(salary);
-        $('#income_bonus').val(bonus);
-        
-        // Load overtime amount based on concrete receipts (only for employees with role "شۆفێری میکسەر")
-        if (employeeId) {
-            // First check if employee has role "شۆفێری میکسەر"
-            var selectedEmployee = $('#income_employee_id option:selected');
-            var employeeName = selectedEmployee.text();
-            
-            // Get employee role from server
-            $.get('../process/employee/get_employee_role.php', {employee_id: employeeId}, function(roleResponse) {
-                var hasMixerRole = false;
-                if (roleResponse.success && roleResponse.role) {
-                    var role = roleResponse.role;
-                    hasMixerRole = role.includes('شۆفێری میکسەر');
+            var $tb = $('#active-employee-loans-tbody');
+            $tb.empty();
+            if (!r.rows || r.rows.length === 0) {
+                $tb.append(
+                    '<tr><td colspan="6" class="px-4 py-8 text-center text-slate-500">هیچ قەرزی چالاک نییە.</td></tr>'
+                );
+                return;
+            }
+            r.rows.forEach(function (row, idx) {
+                var lid = parseInt(row.loan_id, 10);
+                var name = row.employee_name || '';
+                var ru = parseFloat(row.remaining_usd) || 0;
+                var ri = parseFloat(row.remaining_iqd) || 0;
+                var ld = row.loan_date || '';
+                var btn;
+                if (r.can_repay) {
+                    btn =
+                        '<button type="button" class="direct-loan-repay-btn inline-flex items-center justify-center gap-1.5 rounded-lg border border-emerald-700 bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300" data-loan-id="' +
+                        lid +
+                        '" data-employee-name="' +
+                        escAttr(name) +
+                        '" data-remaining-usd="' +
+                        escAttr(String(ru)) +
+                        '" data-remaining-iqd="' +
+                        escAttr(String(ri)) +
+                        '">' +
+                        '<i class="fas fa-hand-holding-usd text-[10px]" aria-hidden="true"></i> گەڕاندنەوەی قەرز بە نەقد</button>';
+                } else {
+                    btn = '<span class="text-xs text-slate-400">—</span>';
                 }
-                
-                if (!hasMixerRole) {
-                    // Employee doesn't have mixer role, set overtime to 0
-                    $('#income_overtime').val(0);
-                    calcIncomeTotal();
-                    $('#income-employee-balance-info').html('<div class="small text-muted">کاروان حیسابی تەنها بۆ کارمەندەکانی بە ڕۆڵی "شۆفێری میکسەر" هەژمار دەکرێت.</div>').show();
-                    return;
-                }
-                
-                // Employee has mixer role, proceed with overtime calculation
-                var selectedMonth = $('#income_expense_date').val() || '';
-                var params = {employee_id: employeeId};
-                if (selectedMonth) {
-                    params.month = selectedMonth.substring(0, 7); // Extract YYYY-MM
-                }
-                
-                // Get overtime amount
-                $.get('../process/employee_payments/get_employee_overtime.php', params, function(response) {
-                    if (response.success) {
-                        var overtimeAmount = parseFloat(response.data.overtime_amount) || 0;
-                        $('#income_overtime').val(overtimeAmount.toFixed(2));
-                        calcIncomeTotal();
-                        
-                        // Show overtime calculation details
-                        var balanceInfo = $('#income-employee-balance-info');
-                        var data = response.data;
-                        var existingText = balanceInfo.html() || '';
-                        var overtimeText = '<div class="small mt-2 border-top pt-2">';
-                        overtimeText += '<strong>کاروانحیسابی:</strong><br>';
-                        overtimeText += 'ژمارەی پسوڵە (میکسەر): ' + (data.mixer_receipt_count || 0) + '<br>';
-                        if ((data.pump_receipt_count || 0) > 0) {
-                            overtimeText += 'ژمارەی پسوڵە (پەمپ): ' + (data.pump_receipt_count || 0) + '<br>';
-                        }
-                        overtimeText += 'کۆی گشتی پسوڵەکان: ' + (data.total_receipts || 0) + '<br>';
-                        overtimeText += 'کۆی گشتی مەتر: ' + parseFloat(data.total_meter || 0).toFixed(2) + ' م³<br>';
-                        overtimeText += 'نرخی کاروانحیسابی: ' + parseFloat(data.overtime_rate || 0).toLocaleString('en-US') + ' د.ع/پسوڵە<br>';
-                        overtimeText += '<strong>کۆی کاروانحیسابی: ' + (data.total_receipts || 0) + ' × ' + parseFloat(data.overtime_rate || 0).toLocaleString('en-US') + ' = ' + overtimeAmount.toLocaleString('en-US') + ' د.ع</strong>';
-                        overtimeText += '</div>';
-                        
-                        if (existingText) {
-                            balanceInfo.html(existingText + overtimeText);
-                        } else {
-                            balanceInfo.html(overtimeText).show();
-                        }
-                    } else {
-                        // If error, set overtime to 0 and log error
-                        console.error('Error loading overtime:', response.message || 'Unknown error');
-                        $('#income_overtime').val(0);
-                        calcIncomeTotal();
-                    }
-                }, 'json').fail(function(xhr, status, error) {
-                    console.error('AJAX Error loading overtime:', status, error, xhr.responseText);
-                    $('#income_overtime').val(0);
-                    calcIncomeTotal();
-                });
-            }, 'json').fail(function() {
-                // If can't get role, set overtime to 0
-                $('#income_overtime').val(0);
-                calcIncomeTotal();
+                $tb.append(
+                    '<tr class="hover:bg-slate-50/80 transition-colors">' +
+                        '<td class="px-4 py-3 text-right text-slate-600">' +
+                        (idx + 1) +
+                        '</td>' +
+                        '<td class="px-4 py-3 text-right font-medium text-slate-900">' +
+                        escAttr(name) +
+                        '</td>' +
+                        '<td class="px-4 py-3 text-right text-slate-600">' +
+                        escAttr(ld) +
+                        '</td>' +
+                        '<td class="px-4 py-3 text-right tabular-nums text-slate-800">' +
+                        fmtNum(ru, 2) +
+                        '</td>' +
+                        '<td class="px-4 py-3 text-right tabular-nums text-slate-800">' +
+                        fmtNum(ri, 0) +
+                        '</td>' +
+                        '<td class="px-4 py-3 text-center">' +
+                        btn +
+                        '</td>' +
+                        '</tr>'
+                );
             });
-        } else {
-            $('#income_overtime').val(0);
-            calcIncomeTotal();
+        }, 'json');
+    };
+
+    $(document).on('click', '.direct-loan-repay-btn', function () {
+        if (!window.CAN_ISSUE_EMPLOYEE_LOAN) {
+            swalAlert('هەڵە', 'ڕێگەپێدراوە نییە.', 'error');
+            return;
         }
-        
-        // Load and display employee balance with daily calculation
-        if (employeeId) {
-            var selectedMonth = $('#income_expense_date').val() || '';
-            var params = {employee_id: employeeId};
-            if (selectedMonth) {
-                params.month = selectedMonth.substring(0, 7); // Extract YYYY-MM
-            }
-            
-            $.get('../process/employee_payments/get_employee_current_balance.php', params, function(response) {
-                if (response.success) {
-                    var balanceInfo = $('#income-employee-balance-info');
-                    var data = response.data;
-                    var balanceText = '<div class="small">';
-                    balanceText += '<strong>باڵانسی ئێستا (بە پێی ڕۆژەکان):</strong><br>';
-                    
-                    if (data.net_balance >= 0) {
-                        balanceText += '<span class="text-success">' + data.balance_message + '</span>';
-                    } else {
-                        balanceText += '<span class="text-danger">' + data.balance_message + '</span>';
-                    }
-                    
-                    // Add calculation details
-                    if (data.calculation_details) {
-                        balanceText += '<br><small class="text-muted mt-2 d-block">';
-                        balanceText += 'مووچەی مانگانە: ' + data.calculation_details.monthly_salary + '<br>';
-                        balanceText += 'ژمارەی ڕۆژەکان: ' + data.calculation_details.days_used + ' / ' + data.calculation_details.days_in_month + '<br>';
-                        balanceText += 'نرخی ڕۆژانە: ' + data.calculation_details.daily_salary_rate + '<br>';
-                        balanceText += 'مووچەی بەدەستهاتوو: ' + data.calculation_details.earned_salary + '<br>';
-                        if (parseFloat(data.calculation_details.advance_taken) > 0) {
-                            balanceText += 'پێشەکی وەرگیراو: ' + data.calculation_details.advance_taken;
-                        }
-                        balanceText += '</small>';
-                    }
-                    
-                    balanceText += '</div>';
-                    
-                    // Append to existing content (overtime info)
-                    var existingContent = balanceInfo.html();
-                    if (existingContent && existingContent.includes('کاروانحیسابی')) {
-                        // Overtime info already exists, prepend balance info
-                        balanceInfo.html(balanceText + existingContent);
-                    } else {
-                        balanceInfo.html(balanceText).show();
-                    }
-                }
-            }, 'json');
-        } else {
-            $('#income-employee-balance-info').hide();
-        }
+        var $b = $(this);
+        $('#direct_repay_loan_id').val($b.data('loan-id'));
+        $('#direct_repay_employee_display').text($b.data('employee-name') || '');
+        var ru = parseFloat($b.data('remaining-usd')) || 0;
+        var ri = parseFloat($b.data('remaining-iqd')) || 0;
+        $('#direct_repay_remaining_usd').text(ru.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 }));
+        $('#direct_repay_remaining_iqd').text(ri.toLocaleString('en-US', { maximumFractionDigits: 0 }));
+        $('#direct_repay_usd').val(0);
+        $('#direct_repay_iqd').val(0);
+        $('#direct_repay_date').val(new Date().toISOString().slice(0, 10));
+        $('#directLoanRepaymentForm').data('maxUsd', ru).data('maxIqd', ri);
+        var modal = new bootstrap.Modal(document.getElementById('directLoanRepaymentModal'));
+        modal.show();
     });
-    
+
+    $('#directLoanRepaymentForm').on('submit', function (e) {
+        e.preventDefault();
+        if (!window.CAN_ISSUE_EMPLOYEE_LOAN) {
+            swalAlert('هەڵە', 'ڕێگەپێدراوە نییە.', 'error');
+            return;
+        }
+        var lid = parseInt($('#direct_repay_loan_id').val(), 10);
+        var u = parseFloat($('#direct_repay_usd').val()) || 0;
+        var iq = parseFloat($('#direct_repay_iqd').val()) || 0;
+        var maxU = parseFloat($('#directLoanRepaymentForm').data('maxUsd')) || 0;
+        var maxI = parseFloat($('#directLoanRepaymentForm').data('maxIqd')) || 0;
+        if (lid <= 0) {
+            swalAlert('هەڵە', 'قەرز نادروستە', 'error');
+            return;
+        }
+        if (u <= 0 && iq <= 0) {
+            swalAlert('هەڵە', 'لانیکەم یەک بڕ بنووسە', 'error');
+            return;
+        }
+        if (u > maxU + 0.0001) {
+            swalAlert('هەڵە', 'بڕی دۆلار زیاترە لە ماوە', 'error');
+            return;
+        }
+        if (iq > maxI + 0.0001) {
+            swalAlert('هەڵە', 'بڕی دینار زیاترە لە ماوە', 'error');
+            return;
+        }
+        $.post('../process/employee_payments/direct_loan_repayment.php', $(this).serialize(), function (res) {
+            if (res.success) {
+                swalAlert('سەرکەوتوو', res.message || 'تۆمارکرا', 'success');
+                var dm = document.getElementById('directLoanRepaymentModal');
+                var m = bootstrap.Modal.getInstance(dm);
+                if (m) {
+                    m.hide();
+                } else {
+                    $(dm).modal('hide');
+                }
+                window.refreshActiveEmployeeLoansTable();
+                setTimeout(function () {
+                    if (window.loadBalances) {
+                        window.loadBalances();
+                    }
+                }, 400);
+            } else {
+                swalAlert('هەڵە', res.message || 'هەڵە', 'error');
+            }
+        }, 'json').fail(function (xhr) {
+            var msg = 'هەڵەی پەیوەندی';
+            try {
+                var j = JSON.parse(xhr.responseText);
+                if (j.message) {
+                    msg = j.message;
+                }
+            } catch (err) { /* ignore */ }
+            swalAlert('هەڵە', msg, 'error');
+        });
+    });
+
     // Load balance for Deduction Expense Modal
     $('#deduction_employee_id').on('change', function() {
         var employeeId = $(this).val();
-        
+
         if (employeeId) {
             var selectedMonth = $('#deduction_expense_date').val() || '';
             var params = {employee_id: employeeId};
             if (selectedMonth) {
                 params.month = selectedMonth.substring(0, 7);
             }
-            
+
             $.get('../process/employee_payments/get_employee_current_balance.php', params, function(response) {
                 if (response.success) {
                     var balanceInfo = $('#deduction-employee-balance-info');
                     var data = response.data;
                     var balanceText = '<div class="small">';
                     balanceText += '<strong>باڵانسی ئێستا:</strong><br>';
-                    
+
                     if (data.net_balance >= 0) {
                         balanceText += '<span class="text-success">' + data.balance_message + '</span>';
                     } else {
@@ -810,24 +759,11 @@ $(function() {
             $('#deduction-employee-balance-info').hide();
         }
     });
-    
-    // Initial calculation
-    calcIncomeTotal();
-    
-    // Set default month to current month for both modals
+
     var now = new Date();
     var month = (now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0'));
-    $('#income_expense_date').val(month);
     $('#deduction_expense_date').val(month);
-    
-    // Reload balance and overtime when month changes in Income Modal
-    $('#income_expense_date').on('change', function() {
-        var employeeId = $('#income_employee_id').val();
-        if (employeeId) {
-            $('#income_employee_id').trigger('change');
-        }
-    });
-    
+
     // Reload balance when month changes in Deduction Modal
     $('#deduction_expense_date').on('change', function() {
         var employeeId = $('#deduction_employee_id').val();
@@ -835,7 +771,7 @@ $(function() {
             $('#deduction_employee_id').trigger('change');
         }
     });
-    
+
     // Initialize Select2 for employee filter
     $('#employee-filter').select2({
         theme: 'bootstrap-5',
@@ -844,17 +780,7 @@ $(function() {
         allowClear: true,
         dir: 'rtl'
     });
-    
-    // Initialize Select2 for employee selects in modals
-    $('#income_employee_id').select2({
-        theme: 'bootstrap-5',
-        width: '100%',
-        placeholder: '-- هەلبژێرە --',
-        allowClear: true,
-        dir: 'rtl',
-        dropdownParent: $('#addIncomeExpenseModal')
-    });
-    
+
     $('#deduction_employee_id').select2({
         theme: 'bootstrap-5',
         width: '100%',
@@ -863,7 +789,7 @@ $(function() {
         dir: 'rtl',
         dropdownParent: $('#addDeductionExpenseModal')
     });
-    
+
     $('#update_employee_id').select2({
         theme: 'bootstrap-5',
         width: '100%',
@@ -893,8 +819,6 @@ $(function() {
         });
     }
 
-    // Select2 inside a Bootstrap 5 hidden modal: init after modal is visible, destroy on close
-    // so the option list and layout stay correct (avoids “empty” dropdown).
     $('#issueEmployeeLoanModal').on('shown.bs.modal', function () {
         initIssueLoanEmployeeSelect2();
     });
@@ -906,52 +830,48 @@ $(function() {
     });
 
     $('#issueEmployeeLoanForm').on('submit', function (e) {
-            e.preventDefault();
-            if (!window.CAN_ISSUE_EMPLOYEE_LOAN) {
-                swalAlert('هەڵە', 'ڕێگەپێدراوە نییە.', 'error');
-                return;
-            }
-            var usd = parseFloat($('#loan_usd').val()) || 0;
-            var iqd = parseFloat($('#loan_iqd').val()) || 0;
-            if (usd <= 0 && iqd <= 0) {
-                swalAlert('هەڵە', 'لانیکەم یەک بڕ بنووسە', 'error');
-                return;
-            }
-            $.post('../process/employee_payments/issue_employee_loan.php', $(this).serialize(), function (res) {
-                if (res.success) {
-                    swalAlert('سەرکەوتوو', res.message || 'تۆمارکرا', 'success');
-                    $('#issueEmployeeLoanForm')[0].reset();
-                    $('#loan_date').val(new Date().toISOString().slice(0, 10));
-                    var $loanEmp = $('#loan_employee_id');
-                    if ($loanEmp.data('select2')) {
-                        $loanEmp.val(null).trigger('change');
-                    }
-                    var emp = $('#income_employee_id').val();
-                    if (emp) {
-                        loadIncomeLoanBalance(emp);
-                    }
-                    $('#issueEmployeeLoanModal').modal('hide');
-                    setTimeout(function () {
-                        if (window.loadBalances) {
-                            window.loadBalances();
-                        }
-                    }, 400);
-                } else {
-                    swalAlert('هەڵە', res.message || 'هەڵە', 'error');
+        e.preventDefault();
+        if (!window.CAN_ISSUE_EMPLOYEE_LOAN) {
+            swalAlert('هەڵە', 'ڕێگەپێدراوە نییە.', 'error');
+            return;
+        }
+        var usd = parseFloat($('#loan_usd').val()) || 0;
+        var iqd = parseFloat($('#loan_iqd').val()) || 0;
+        if (usd <= 0 && iqd <= 0) {
+            swalAlert('هەڵە', 'لانیکەم یەک بڕ بنووسە', 'error');
+            return;
+        }
+        $.post('../process/employee_payments/issue_employee_loan.php', $(this).serialize(), function (res) {
+            if (res.success) {
+                swalAlert('سەرکەوتوو', res.message || 'تۆمارکرا', 'success');
+                $('#issueEmployeeLoanForm')[0].reset();
+                $('#loan_date').val(new Date().toISOString().slice(0, 10));
+                var $loanEmp = $('#loan_employee_id');
+                if ($loanEmp.data('select2')) {
+                    $loanEmp.val(null).trigger('change');
                 }
-            }, 'json').fail(function (xhr) {
-                var msg = 'هەڵەی پەیوەندی';
-                try {
-                    var j = JSON.parse(xhr.responseText);
-                    if (j.message) {
-                        msg = j.message;
+                $('#issueEmployeeLoanModal').modal('hide');
+                window.refreshActiveEmployeeLoansTable();
+                setTimeout(function () {
+                    if (window.loadBalances) {
+                        window.loadBalances();
                     }
-                } catch (err) { /* ignore */ }
-                swalAlert('هەڵە', msg, 'error');
-            });
+                }, 400);
+            } else {
+                swalAlert('هەڵە', res.message || 'هەڵە', 'error');
+            }
+        }, 'json').fail(function (xhr) {
+            var msg = 'هەڵەی پەیوەندی';
+            try {
+                var j = JSON.parse(xhr.responseText);
+                if (j.message) {
+                    msg = j.message;
+                }
+            } catch (err) { /* ignore */ }
+            swalAlert('هەڵە', msg, 'error');
+        });
     });
-    
-    // Reload balance cards when employee filter changes (Select2)
+
     $(document).on('change', '#employee-filter', function() {
         if (window.loadBalances) {
             window.loadBalances();

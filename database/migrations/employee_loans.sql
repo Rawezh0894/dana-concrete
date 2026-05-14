@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS `employee_loans` (
 CREATE TABLE IF NOT EXISTS `loan_repayments` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `loan_id` INT UNSIGNED NOT NULL,
-  `expense_id` INT UNSIGNED NOT NULL COMMENT 'Anchor employee_expenses.id for the payroll batch',
+  `expense_id` INT UNSIGNED NULL DEFAULT NULL COMMENT 'employee_expenses.id for payroll; NULL for direct cash repayment',
   `deducted_usd` DECIMAL(14,2) NOT NULL DEFAULT 0,
   `deducted_iqd` DECIMAL(20,2) NOT NULL DEFAULT 0,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
