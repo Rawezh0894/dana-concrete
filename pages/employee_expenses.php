@@ -13,20 +13,25 @@ if (!hasPermission('view_employee_payment')) {
         .'</div>';
     exit;
 }
-// Fetch employees for dropdown
-// Check if bonus column exists
+// Fetch employees for dropdowns (reuse $employees everywhere on this page).
+$employees = [];
 $bonusExists = false;
 try {
     $checkColumns = $pdo->query("SHOW COLUMNS FROM employees LIKE 'bonus'");
-    $bonusExists = $checkColumns->rowCount() > 0;
+    $bonusExists = $checkColumns && $checkColumns->rowCount() > 0;
 } catch (Exception $e) {
-    // Column doesn't exist
+    // ignore
 }
-
-if ($bonusExists) {
-    $employees = $pdo->query('SELECT id, name, salary, COALESCE(bonus, 0) as bonus FROM employees ORDER BY name')->fetchAll(PDO::FETCH_ASSOC);
-} else {
-    $employees = $pdo->query('SELECT id, name, salary, 0 as bonus FROM employees ORDER BY name')->fetchAll(PDO::FETCH_ASSOC);
+try {
+    if ($bonusExists) {
+        $stmt = $pdo->query('SELECT id, name, salary, COALESCE(bonus, 0) AS bonus FROM employees ORDER BY name ASC');
+    } else {
+        $stmt = $pdo->query('SELECT id, name, salary, 0 AS bonus FROM employees ORDER BY name ASC');
+    }
+    $employees = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
+} catch (Exception $e) {
+    error_log('employee_expenses.php employee list: ' . $e->getMessage());
+    $employees = [];
 }
 // Loan issuance: same practical access as cash operations / payroll (server also checks).
 $can_issue_employee_loan = hasPermission('add_payment') || hasPermission('add_cash_box');
@@ -343,10 +348,13 @@ $can_issue_employee_loan = hasPermission('add_payment') || hasPermission('add_ca
             <label for="loan_employee_id" class="form-label">کارمەند</label>
             <select class="form-select" id="loan_employee_id" name="employee_id" required>
               <option value="">-- هەلبژێرە --</option>
-              <?php foreach ($employees as $emp): ?>
-                <option value="<?= (int) $emp['id'] ?>"><?= htmlspecialchars($emp['name']) ?></option>
-              <?php endforeach; ?>
+<?php foreach ($employees as $emp): ?>
+              <option value="<?= (int) ($emp['id'] ?? 0) ?>"><?= htmlspecialchars((string) ($emp['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></option>
+<?php endforeach; ?>
             </select>
+            <?php if (count($employees) === 0): ?>
+            <div class="form-text text-danger mt-1">هیچ کارمەندێک لە خشتەکە نەدۆزرایەوە. تکایە تۆمارەکانی employees بپشکنە.</div>
+            <?php endif; ?>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" dir="rtl">
             <div>
@@ -865,16 +873,39 @@ $(function() {
         dropdownParent: $('#updateExpenseModal')
     });
 
-    if ($('#loan_employee_id').length) {
-        $('#loan_employee_id').select2({
+    function initIssueLoanEmployeeSelect2() {
+        var $sel = $('#loan_employee_id');
+        var $modal = $('#issueEmployeeLoanModal');
+        if (!$sel.length || !$modal.length) {
+            return;
+        }
+        if ($sel.data('select2')) {
+            $sel.select2('destroy');
+        }
+        var $parent = $modal.find('.modal-content');
+        $sel.select2({
             theme: 'bootstrap-5',
             width: '100%',
             placeholder: '-- هەلبژێرە --',
             allowClear: true,
             dir: 'rtl',
-            dropdownParent: $('#issueEmployeeLoanModal')
+            dropdownParent: $parent
         });
-        $('#issueEmployeeLoanForm').on('submit', function (e) {
+    }
+
+    // Select2 inside a Bootstrap 5 hidden modal: init after modal is visible, destroy on close
+    // so the option list and layout stay correct (avoids “empty” dropdown).
+    $('#issueEmployeeLoanModal').on('shown.bs.modal', function () {
+        initIssueLoanEmployeeSelect2();
+    });
+    $('#issueEmployeeLoanModal').on('hidden.bs.modal', function () {
+        var $sel = $('#loan_employee_id');
+        if ($sel.length && $sel.data('select2')) {
+            $sel.select2('destroy');
+        }
+    });
+
+    $('#issueEmployeeLoanForm').on('submit', function (e) {
             e.preventDefault();
             if (!window.CAN_ISSUE_EMPLOYEE_LOAN) {
                 swalAlert('هەڵە', 'ڕێگەپێدراوە نییە.', 'error');
@@ -891,6 +922,10 @@ $(function() {
                     swalAlert('سەرکەوتوو', res.message || 'تۆمارکرا', 'success');
                     $('#issueEmployeeLoanForm')[0].reset();
                     $('#loan_date').val(new Date().toISOString().slice(0, 10));
+                    var $loanEmp = $('#loan_employee_id');
+                    if ($loanEmp.data('select2')) {
+                        $loanEmp.val(null).trigger('change');
+                    }
                     var emp = $('#income_employee_id').val();
                     if (emp) {
                         loadIncomeLoanBalance(emp);
@@ -914,8 +949,7 @@ $(function() {
                 } catch (err) { /* ignore */ }
                 swalAlert('هەڵە', msg, 'error');
             });
-        });
-    }
+    });
     
     // Reload balance cards when employee filter changes (Select2)
     $(document).on('change', '#employee-filter', function() {
