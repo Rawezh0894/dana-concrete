@@ -30,6 +30,9 @@ try {
             e.salary as monthly_salary,
             ee.expense_type,
             ee.amount,
+            COALESCE(ee.amount_usd, 0) AS amount_usd,
+            COALESCE(ee.amount_iqd, 0) AS amount_iqd,
+            COALESCE(ee.exchange_rate, 0) AS exchange_rate,
             ee.notes,
             ee.expense_date,
             ee.created_at,
@@ -56,7 +59,8 @@ try {
         'overtime' => 'کاروانحیسابی',
         'advance' => 'پێشەکی',
         'deduction' => 'کەمکردنەوە',
-        'penalty' => 'سزا'
+        'penalty' => 'سزا',
+        'overtime_payment' => 'پێدانی کاروانحیسابی',
     ];
     
     $expense['expense_type_kurdish'] = $expense_types_kurdish[$expense['expense_type']] ?? $expense['expense_type'];

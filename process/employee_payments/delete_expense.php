@@ -1,6 +1,7 @@
 <?php
 require_once '../../config/db_conected.php';
 require_once '../../config/permissions.php';
+require_once __DIR__ . '/employee_expense_cash_box_helper.php';
 header('Content-Type: application/json');
 if (!isset($_SESSION['user_id'])) {
     http_response_code(403);
@@ -57,6 +58,8 @@ try {
         'expense_type' => $record['expense_type'],
         'amount' => $record['amount']
     ];
+
+    employee_expense_delete_cash_box_rows($pdo, $id);
 
     $stmt = $pdo->prepare('DELETE FROM employee_expenses WHERE id=?');
     if ($stmt->execute([$id])) {

@@ -3,6 +3,27 @@ $(function () {
         return Number(val).toLocaleString('en-US') + ' د.ع';
     }
 
+    function formatPayCell(row) {
+        var parts = [];
+        parts.push('<span class="fw-semibold">' + Number(row.amount || 0).toLocaleString('en-US') + ' د.ع</span> <span class="text-muted small">(حساب)</span>');
+        var u = parseFloat(row.amount_usd) || 0;
+        var iq = parseFloat(row.amount_iqd) || 0;
+        var r = parseFloat(row.exchange_rate) || 0;
+        if (u > 0) {
+            parts.push('<span class="text-primary"><i class="fas fa-dollar-sign me-1"></i>' + u.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '</span>');
+        }
+        if (iq > 0) {
+            parts.push('<span class="text-success">' + Number(iq).toLocaleString('en-US') + ' د.ع</span> <small class="text-muted">قاسە</small>');
+        }
+        if (r > 0 && u > 0) {
+            parts.push('<small class="text-muted">نرخ: ' + Number(r).toLocaleString('en-US') + ' د.ع/\$</small>');
+        }
+        if (u <= 0 && iq <= 0) {
+            parts.push('<small class="text-muted">قاسە: ' + Number(row.amount || 0).toLocaleString('en-US') + ' د.ع (دینار)</small>');
+        }
+        return '<div class="small text-start" style="min-width:140px;">' + parts.join('<br>') + '</div>';
+    }
+
     function loadExpenses() {
         const columns = ['#', 'employee_name', 'expense_type_kurdish', 'amount', 'expense_date', 'notes', 'employee_balance', 'created_at', 'actions'];
         TableController.showLoading('#employeeExpensesTable', columns);
@@ -30,7 +51,7 @@ $(function () {
 
             res.forEach((row, index) => {
                 row['#'] = index + 1;
-                row.amount = formatMoney(row.amount);
+                row.amount = formatPayCell(row);
 
                 // Format employee balance
                 const payable = parseFloat(row.employee_payable_balance || 0);

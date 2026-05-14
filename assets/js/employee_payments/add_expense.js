@@ -89,7 +89,10 @@ $(function () {
             overtime: overtime,
             advance: 0,
             deduction: 0,
-            penalty: 0
+            penalty: 0,
+            payment_amount_usd: parseFloat($('#income_payment_amount_usd').val()) || 0,
+            payment_amount_iqd: parseFloat($('#income_payment_amount_iqd').val()) || 0,
+            exchange_rate: parseFloat($('#income_exchange_rate').val()) || 0
         };
 
         $.post('../process/employee_payments/add_expense.php', formData, function (response) {
@@ -160,7 +163,10 @@ $(function () {
             advance: expenseType === 'advance' ? amount : 0,
             deduction: expenseType === 'deduction' ? amount : 0,
             penalty: expenseType === 'penalty' ? amount : 0,
-            overtime_payment: expenseType === 'overtime_payment' ? amount : 0
+            overtime_payment: expenseType === 'overtime_payment' ? amount : 0,
+            payment_amount_usd: parseFloat($('#deduction_payment_amount_usd').val()) || 0,
+            payment_amount_iqd: parseFloat($('#deduction_payment_amount_iqd').val()) || 0,
+            exchange_rate: parseFloat($('#deduction_exchange_rate').val()) || 0
         };
 
         $.post('../process/employee_payments/add_expense.php', formData, function (response) {
@@ -201,5 +207,39 @@ $(function () {
             swalAlert('هەڵە', msg, 'error');
         });
     });
+
+    function refreshIncomePaymentEquiv() {
+        var usd = parseFloat($('#income_payment_amount_usd').val()) || 0;
+        var iqd = parseFloat($('#income_payment_amount_iqd').val()) || 0;
+        var rate = parseFloat($('#income_exchange_rate').val()) || 0;
+        if (usd > 0 && rate <= 0) {
+            $('#income_payment_equiv_wrap').show();
+            $('#income_payment_equiv').text('— (نرخ پێویستە)');
+            return;
+        }
+        var eq = iqd + usd * rate;
+        if (usd > 0 || iqd > 0) {
+            $('#income_payment_equiv_wrap').show();
+            $('#income_payment_equiv').text(Math.round(eq).toLocaleString('en-US'));
+        } else {
+            $('#income_payment_equiv_wrap').hide();
+        }
+    }
+
+    function refreshDeductionPaymentEquiv() {
+        var usd = parseFloat($('#deduction_payment_amount_usd').val()) || 0;
+        var iqd = parseFloat($('#deduction_payment_amount_iqd').val()) || 0;
+        var rate = parseFloat($('#deduction_exchange_rate').val()) || 0;
+        var eq = iqd + usd * rate;
+        if (usd > 0 || iqd > 0) {
+            $('#deduction_payment_equiv_wrap').show();
+            $('#deduction_payment_equiv').text(Math.round(eq).toLocaleString('en-US'));
+        } else {
+            $('#deduction_payment_equiv_wrap').hide();
+        }
+    }
+
+    $('#income_payment_amount_usd, #income_payment_amount_iqd, #income_exchange_rate').on('input change', refreshIncomePaymentEquiv);
+    $('#deduction_payment_amount_usd, #deduction_payment_amount_iqd, #deduction_exchange_rate').on('input change', refreshDeductionPaymentEquiv);
 });
 

@@ -50,6 +50,7 @@ if ($bonusExists) {
     <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
 
     <link href="../assets/css/kurdish-font.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com" nonce="<?php echo $csp_nonce; ?>"></script>
 </head>
 <body dir="rtl">
 <?php include '../includes/navbar.php'; ?>
@@ -178,7 +179,7 @@ if ($bonusExists) {
                     <th>#</th>
                     <th>کارمەند</th>
                     <th>جۆری خەرجی</th>
-                    <th>بڕ (د.ع)</th>
+                    <th>بڕ / قاسە</th>
                     <th>مانگ</th>
                     <th>تێبینی</th>
                     <th>باڵانسی کارمەند</th>
@@ -237,6 +238,31 @@ if ($bonusExists) {
             <label for="income_total_add" class="form-label">کۆی گشتی</label>
             <input type="text" class="form-control" id="income_total_add" readonly>
           </div>
+
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 mb-3 text-start" dir="rtl">
+            <h6 class="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
+              <i class="fas fa-coins text-teal-600"></i> پارەدان لە قاسە (دوو دراو)
+            </h6>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div>
+                <label for="income_payment_amount_usd" class="block text-xs font-medium text-slate-600 mb-1">بڕی دۆلار ($)</label>
+                <input type="number" min="0" step="0.01" value="0" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500" id="income_payment_amount_usd" name="payment_amount_usd">
+              </div>
+              <div>
+                <label for="income_payment_amount_iqd" class="block text-xs font-medium text-slate-600 mb-1">بڕی دینار (د.ع)</label>
+                <input type="number" min="0" step="0.01" value="0" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500" id="income_payment_amount_iqd" name="payment_amount_iqd">
+              </div>
+              <div>
+                <label for="income_exchange_rate" class="block text-xs font-medium text-slate-600 mb-1">نرخ: ١ دۆلار = چەند دینار؟</label>
+                <input type="number" min="0" step="0.0001" value="0" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500" id="income_exchange_rate" name="exchange_rate" placeholder="نمونە: 1500">
+              </div>
+            </div>
+            <p class="text-xs text-slate-500 mt-2 mb-0" id="income_payment_hint">ئەگەر تەنها دینار دەدەیت: بڕی دینار بەتاڵ بێڵە یان یەکسان بە کۆی گشتی بکە؛ دۆلار و نرخ بەتاڵ بن.</p>
+            <div class="mt-2 text-sm font-semibold text-teal-800" id="income_payment_equiv_wrap" style="display:none;">
+              کۆی هاوتای دینار: <span id="income_payment_equiv">0</span> د.ع
+            </div>
+          </div>
+
           <div class="mb-3">
             <label for="income_expense_date" class="form-label">مانگ (YYYY-MM)</label>
             <input type="month" class="form-control" id="income_expense_date" name="expense_date" required>
@@ -294,8 +320,29 @@ if ($bonusExists) {
           </div>
           
           <div class="mb-3">
-            <label for="deduction_amount" class="form-label">بڕ (د.ع)</label>
+            <label for="deduction_amount" class="form-label">بڕ (د.ع) — حسابی خەرجی</label>
             <input type="number" class="form-control" id="deduction_amount" name="amount" min="0" step="0.01" required>
+          </div>
+
+          <div class="rounded-xl border border-amber-200 bg-amber-50 p-4 mb-3 text-start" dir="rtl">
+            <h6 class="text-sm font-bold text-amber-900 mb-3 flex items-center gap-2">
+              <i class="fas fa-wallet text-amber-600"></i> پارەدان لە قاسە
+            </h6>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div>
+                <label for="deduction_payment_amount_usd" class="block text-xs font-medium text-slate-600 mb-1">دۆلار ($)</label>
+                <input type="number" min="0" step="0.01" value="0" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" id="deduction_payment_amount_usd">
+              </div>
+              <div>
+                <label for="deduction_payment_amount_iqd" class="block text-xs font-medium text-slate-600 mb-1">دینار (د.ع)</label>
+                <input type="number" min="0" step="0.01" value="0" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" id="deduction_payment_amount_iqd">
+              </div>
+              <div>
+                <label for="deduction_exchange_rate" class="block text-xs font-medium text-slate-600 mb-1">١ دۆلار = دینار</label>
+                <input type="number" min="0" step="0.0001" value="0" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" id="deduction_exchange_rate" placeholder="1500">
+              </div>
+            </div>
+            <p class="text-xs text-slate-600 mt-2 mb-0" id="deduction_payment_equiv_wrap" style="display:none;">هاوتای دینار: <span id="deduction_payment_equiv" class="font-semibold">0</span> د.ع</p>
           </div>
           
           <div class="mb-3">
@@ -348,12 +395,31 @@ if ($bonusExists) {
               <option value="advance">پێشەکی</option>
               <option value="deduction">کەمکردنەوە</option>
               <option value="penalty">سزا</option>
+              <option value="overtime_payment">پێدانی کاروانحیسابی</option>
             </select>
           </div>
           
           <div class="mb-3">
-            <label for="update_amount" class="form-label">بڕ (د.ع)</label>
+            <label for="update_amount" class="form-label">بڕ (د.ع) — حساب</label>
             <input type="number" class="form-control" id="update_amount" name="amount" min="0" step="0.01" required>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 mb-3 text-start" dir="rtl">
+            <h6 class="text-sm font-bold text-slate-700 mb-3">پارەدان لە قاسە</h6>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div>
+                <label for="update_amount_usd" class="block text-xs font-medium text-slate-600 mb-1">دۆلار</label>
+                <input type="number" min="0" step="0.01" value="0" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" id="update_amount_usd" name="amount_usd">
+              </div>
+              <div>
+                <label for="update_amount_iqd" class="block text-xs font-medium text-slate-600 mb-1">دینار</label>
+                <input type="number" min="0" step="0.01" value="0" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" id="update_amount_iqd" name="amount_iqd">
+              </div>
+              <div>
+                <label for="update_exchange_rate" class="block text-xs font-medium text-slate-600 mb-1">نرخ (دینار/١\$)</label>
+                <input type="number" min="0" step="0.0001" value="0" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" id="update_exchange_rate" name="exchange_rate">
+              </div>
+            </div>
           </div>
           
           <div class="mb-3">

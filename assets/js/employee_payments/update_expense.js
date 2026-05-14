@@ -17,6 +17,9 @@ $(function () {
             $('#update_employee_id').val(expense.employee_id);
             $('#update_expense_type').val(expense.expense_type);
             $('#update_amount').val(expense.amount);
+            $('#update_amount_usd').val(expense.amount_usd != null ? expense.amount_usd : 0);
+            $('#update_amount_iqd').val(expense.amount_iqd != null ? expense.amount_iqd : 0);
+            $('#update_exchange_rate').val(expense.exchange_rate != null ? expense.exchange_rate : 0);
             $('#update_expense_date').val(expense.expense_date);
             $('#update_notes').val(expense.notes || '');
             
