@@ -32,18 +32,45 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   overlay.addEventListener('click', closeSidebar);
 
-  // Sidebar group expand/collapse (custom, not Bootstrap)
+  // Sidebar group expand/collapse (custom only — do not use data-bs-toggle="collapse" on these
+  // buttons or Bootstrap will fight this handler and the menu will flash closed.)
   document.querySelectorAll('.sidebar-group-toggle').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      const target = btn.getAttribute('data-bs-target');
-      if (target) {
-        const submenu = document.querySelector(target);
-        if (submenu) {
-          submenu.classList.toggle('open');
-          btn.setAttribute('aria-expanded', submenu.classList.contains('open'));
-        }
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      var controlsId = btn.getAttribute('aria-controls');
+      var submenu = controlsId ? document.getElementById(controlsId) : null;
+      if (!submenu) {
+        return;
+      }
+      var willOpen = !submenu.classList.contains('open');
+      submenu.classList.toggle('open', willOpen);
+      btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+    });
+  });
+
+  // Close all sidebar submenus when clicking outside the sidebar (main content, overlay, etc.)
+  document.addEventListener('click', function (e) {
+    if (!sidebar || !e.target || sidebar.contains(e.target)) {
+      return;
+    }
+    document.querySelectorAll('#sidebar .sidebar-submenu.open').forEach(function (ul) {
+      ul.classList.remove('open');
+      var group = ul.closest('.sidebar-group');
+      var t = group ? group.querySelector('.sidebar-group-toggle') : null;
+      if (t) {
+        t.setAttribute('aria-expanded', 'false');
       }
     });
+  });
+
+  // Keep aria-expanded in sync if PHP left .open on a submenu without matching button state
+  document.querySelectorAll('#sidebar .sidebar-group').forEach(function (group) {
+    var ul = group.querySelector('.sidebar-submenu');
+    var toggle = group.querySelector('.sidebar-group-toggle');
+    if (ul && toggle && ul.classList.contains('open')) {
+      toggle.setAttribute('aria-expanded', 'true');
+    }
   });
 
   // Active state for sidebar links
