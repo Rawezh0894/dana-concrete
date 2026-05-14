@@ -16,7 +16,9 @@ $is_system_active = in_array($current_page, $system_pages);
 // Single nav-links
 $dashboard_pages = ['dashboard.php'];
 $users_pages = ['users.php'];
-$logout_pages = ['logout.php']; 
+$logout_pages = ['logout.php'];
+$main_menu_pages = ['dashboard.php', 'reports.php', 'cash_box.php'];
+$is_main_menu_open = in_array($current_page, $main_menu_pages, true);
 
 ?>
 <?php require_once '../config/permissions.php'; ?>
@@ -27,15 +29,18 @@ $logout_pages = ['logout.php'];
   <ul class="sidebar-menu list-unstyled">
     <!-- Main Dashboard Dropdown -->
     <li class="sidebar-group">
-      <button class="sidebar-group-toggle d-flex align-items-center w-100" data-bs-toggle="collapse" data-bs-target="#mainMenu" aria-expanded="false">
+      <button class="sidebar-group-toggle d-flex align-items-center w-100" data-bs-toggle="collapse" data-bs-target="#mainMenu" aria-expanded="<?php echo $is_main_menu_open ? 'true' : 'false'; ?>">
         <i class="bi bi-speedometer2 me-2"></i> سەرەکی
       </button>
-      <ul class="collapse sidebar-submenu" id="mainMenu">
+      <ul class="collapse sidebar-submenu<?php if ($is_main_menu_open) echo ' open'; ?>" id="mainMenu">
         <?php if (hasPermission('view_dashboard')): ?>
           <li><a href="../pages/dashboard.php" class="sidebar-link<?php if($current_page == 'dashboard.php') echo ' active'; ?>"><i class="bi bi-speedometer2 me-2"></i> داشبۆرد</a></li>
         <?php endif; ?>
         <?php if (hasPermission('view_reports')): ?>
           <li><a href="../pages/reports.php" class="sidebar-link<?php if($current_page == 'reports.php') echo ' active'; ?>"><i class="bi bi-graph-up me-2"></i> ڕاپۆرت</a></li>
+        <?php endif; ?>
+        <?php if (hasPermission('view_cash_box')): ?>
+          <li><a href="../pages/cash_box.php" class="sidebar-link<?php if($current_page == 'cash_box.php') echo ' active'; ?>"><i class="bi bi-cash-coin me-2"></i> قاسەکە</a></li>
         <?php endif; ?>
       </ul>
     </li>

@@ -55,7 +55,8 @@ $(document).ready(function() {
                     if (typeof updateCashBoxSummary === 'function') {
                         var from = $('#filter_from').val();
                         var to = $('#filter_to').val();
-                        updateCashBoxSummary(from, to);
+                        var search = ($('#cashBoxSearch').val() || '').trim();
+                        updateCashBoxSummary(from, to, search);
                     }
                 } else {
                     Swal.fire('هەڵە!', response.error || 'ناتوانرێت نوێکرایەوە', 'error');

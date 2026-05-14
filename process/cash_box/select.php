@@ -1,13 +1,20 @@
 <?php
 session_start();
 require_once '../../config/db_conected.php';
+require_once '../../config/permissions.php';
 header('Content-Type: application/json; charset=utf-8');
+
+if (!isset($_SESSION['user_id']) || !hasPermission('view_cash_box')) {
+    echo json_encode(['success' => false, 'error' => 'دەستپێگەیشتن قەدەغەیە']);
+    exit;
+}
 
 // Handle both GET and POST requests
 $request_data = $_SERVER['REQUEST_METHOD'] === 'POST' ? $_POST : $_GET;
 
 $from = $request_data['from'] ?? null;
 $to = $request_data['to'] ?? null;
+$search = isset($request_data['search']) ? trim((string) $request_data['search']) : '';
 
 // Pagination parameters
 $page = isset($request_data['page']) ? max(1, intval($request_data['page'])) : 1;
@@ -23,6 +30,12 @@ if ($from) {
 if ($to) {
     $where[] = 'cb.date <= ?';
     $params[] = $to;
+}
+if ($search !== '') {
+    $where[] = '(cb.note LIKE ? OR CAST(cb.date AS CHAR) LIKE ?)';
+    $like = '%' . $search . '%';
+    $params[] = $like;
+    $params[] = $like;
 }
 $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
 

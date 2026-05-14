@@ -17,6 +17,7 @@ if (!hasPermission('view_cash_box')) {
 
 $from = $_GET['from'] ?? null;
 $to = $_GET['to'] ?? null;
+$search = isset($_GET['search']) ? trim((string) $_GET['search']) : '';
 
 $where = [];
 $params = [];
@@ -27,6 +28,12 @@ if ($from) {
 if ($to) {
     $where[] = 'cb.date <= ?';
     $params[] = $to;
+}
+if ($search !== '') {
+    $where[] = '(cb.note LIKE ? OR CAST(cb.date AS CHAR) LIKE ?)';
+    $like = '%' . $search . '%';
+    $params[] = $like;
+    $params[] = $like;
 }
 $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
 

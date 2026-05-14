@@ -1,22 +1,18 @@
 <?php
 session_start();
 require_once '../../config/db_conected.php';
+require_once '../../config/permissions.php';
 header('Content-Type: application/json; charset=utf-8');
+
+if (!isset($_SESSION['user_id']) || !hasPermission('view_cash_box')) {
+    echo json_encode(['success' => false, 'error' => 'دەستپێگەیشتن قەدەغەیە']);
+    exit;
+}
 
 $from = $_GET['from'] ?? null;
 $to = $_GET['to'] ?? null;
-
-$where = [];
-$params = [];
-if ($from) {
-    $where[] = 'date >= ?';
-    $params[] = $from;
-}
-if ($to) {
-    $where[] = 'date <= ?';
-    $params[] = $to;
-}
-$whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
+$search = isset($_GET['search']) ? trim((string) $_GET['search']) : '';
+$filters_active = ($from || $to || $search !== '');
 
 // Function to fetch dollar rate from API
 function fetchDollarRateFromAPI() {
@@ -66,6 +62,12 @@ try {
         $usd_where[] = 'date <= ?';
         $usd_params[] = $to;
     }
+    if ($search !== '') {
+        $usd_where[] = '(note LIKE ? OR CAST(date AS CHAR) LIKE ?)';
+        $like = '%' . $search . '%';
+        $usd_params[] = $like;
+        $usd_params[] = $like;
+    }
     $usd_where[] = "currency='دۆلار'";
     $usd_whereSql = 'WHERE ' . implode(' AND ', $usd_where);
     
@@ -79,6 +81,12 @@ try {
     if ($to) {
         $iqd_where[] = 'date <= ?';
         $iqd_params[] = $to;
+    }
+    if ($search !== '') {
+        $iqd_where[] = '(note LIKE ? OR CAST(date AS CHAR) LIKE ?)';
+        $likeIqd = '%' . $search . '%';
+        $iqd_params[] = $likeIqd;
+        $iqd_params[] = $likeIqd;
     }
     $iqd_where[] = "currency='دینار'";
     $iqd_whereSql = 'WHERE ' . implode(' AND ', $iqd_where);
@@ -99,7 +107,7 @@ try {
     // So 1 USD = (usd_iqd_rate / 100) IQD
     // Therefore: IQD amount in USD = total_iqd / (usd_iqd_rate / 100)
     $iqd_to_usd = 0;
-    if ($usd_iqd_rate > 0 && $total_iqd > 0) {
+    if ($usd_iqd_rate > 0 && $total_iqd != 0) {
         $iqd_to_usd = $total_iqd / ($usd_iqd_rate / 100);
     }
     
@@ -110,8 +118,8 @@ try {
     $stmt_manual->execute();
     $manual_total = $stmt_manual->fetchColumn();
     
-    // Use manual total if exists and is not null/false, otherwise use calculated
-    $is_manual = ($manual_total !== false && $manual_total !== null && $manual_total !== '');
+    // Manual override applies only when no date/search filters are active
+    $is_manual = !$filters_active && ($manual_total !== false && $manual_total !== null && $manual_total !== '');
     $total_usd_all = $is_manual ? floatval($manual_total) : $calculated_total;
     
     echo json_encode(['success' => true, 'data' => [

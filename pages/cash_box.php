@@ -13,13 +13,6 @@ if (!hasPermission('view_cash_box')) {
         .'</div>';
     exit;
 }
-if (!hasPermission('view_cash_box')) {
-    echo '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;">'
-        .'<i class="bi bi-lock-fill" style="font-size:5rem;color:#ccc;"></i>'
-        .'<h2 style="color:#888;">توانای دەست گەیشتنت نییە بەم پەیجە</h2>'
-        .'</div>';
-    exit;
-}
 // Note: add_cash_box permission is checked in the UI, not here
 // Users with only view_cash_box permission can still access the page
 ?>
@@ -63,6 +56,44 @@ if (!hasPermission('view_cash_box')) {
             <?php endif; ?>
         </div>
     </div>
+    <!-- Total balance (net deposits − withdrawals) -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card cash-box-balance-hero shadow border-0 overflow-hidden">
+                <div class="card-body p-4 p-md-5">
+                    <div class="row align-items-center g-4">
+                        <div class="col-lg-5 text-center text-lg-start">
+                            <p class="text-uppercase small text-white-50 mb-1 letter-spacing">کۆی باڵانس</p>
+                            <h3 class="text-white fw-bold mb-2">قاسەکە — کۆی گشتی</h3>
+                            <p class="text-white-50 mb-0 small">کەمکردنەوە لە زیادکردن دەردەکەوێت؛ دینار بە نرخی دۆلار دەگۆڕدرێت بۆ تێڕوانینی یەکگرتوو.</p>
+                        </div>
+                        <div class="col-lg-7">
+                            <div class="row g-3 text-center text-md-start">
+                                <div class="col-md-4">
+                                    <div class="cash-box-stat-tile rounded-4 p-3 h-100">
+                                        <div class="small text-muted mb-1">باڵانسی دۆلار</div>
+                                        <div class="fs-4 fw-bold text-dark" id="cashBoxTotalBalanceUsd">$0.00</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="cash-box-stat-tile rounded-4 p-3 h-100">
+                                        <div class="small text-muted mb-1">باڵانسی دینار</div>
+                                        <div class="fs-4 fw-bold text-dark" id="cashBoxTotalBalanceIqd">0 د.ع</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="cash-box-stat-tile rounded-4 p-3 h-100">
+                                        <div class="small text-muted mb-1">نزیکەی کۆ بە دۆلار</div>
+                                        <div class="fs-4 fw-bold text-success" id="cashBoxTotalBalanceCombined">$0.00</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Summary Cards -->
     <div class="row mb-4" id="cashBoxSummaryCards">
         <div class="col-lg-4 col-md-6 mb-3">
@@ -96,17 +127,26 @@ if (!hasPermission('view_cash_box')) {
             </div>
         </div>
     </div>
-    <div class="row mb-3">
-      <div class="col-md-3">
-        <label>لە بەروار:</label>
-        <input type="date" id="filter_from" class="form-control">
-      </div>
-      <div class="col-md-3">
-        <label>بۆ بەروار:</label>
-        <input type="date" id="filter_to" class="form-control">
-      </div>
-      <div class="col-md-2 d-flex align-items-end">
-        <button class="btn btn-secondary" id="clearFilterBtn" type="button">پاککردنەوە</button>
+    <div class="card border-0 shadow-sm mb-4 cash-box-filters-card">
+      <div class="card-body p-3 p-md-4">
+        <div class="row g-3 align-items-end">
+          <div class="col-12 col-lg-5">
+            <label for="cashBoxSearch" class="form-label fw-semibold mb-1"><i class="fas fa-search me-1 text-secondary"></i> گەڕان</label>
+            <input type="search" id="cashBoxSearch" class="form-control form-control-lg" placeholder="تێبینی یان بەروار (نمونە: قەرز، 2025-08)" autocomplete="off">
+            <small class="text-muted">لە ناو تێبینیدا بگەڕێ یان بەروار بنووسە</small>
+          </div>
+          <div class="col-6 col-md-3 col-lg-2">
+            <label for="filter_from" class="form-label">لە بەروار</label>
+            <input type="date" id="filter_from" class="form-control">
+          </div>
+          <div class="col-6 col-md-3 col-lg-2">
+            <label for="filter_to" class="form-label">بۆ بەروار</label>
+            <input type="date" id="filter_to" class="form-control">
+          </div>
+          <div class="col-12 col-md-6 col-lg-3 d-flex gap-2 flex-wrap">
+            <button class="btn btn-secondary flex-grow-1" id="clearFilterBtn" type="button"><i class="fas fa-eraser me-1"></i> پاککردنەوە</button>
+          </div>
+        </div>
       </div>
     </div>
     <div class="table-responsive">

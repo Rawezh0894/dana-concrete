@@ -26,20 +26,27 @@ function formatIqd(amount) {
     }) + ' د.ع';
 }
 
-function updateCashBoxSummary(from, to) {
+function updateCashBoxSummary(from, to, search) {
+    const q = (search !== undefined && search !== null) ? String(search).trim() : '';
     $.ajax({
         url: '../process/cash_box/summary.php',
         method: 'GET',
-        data: { from: from || '', to: to || '' },
+        data: { from: from || '', to: to || '', search: q },
         dataType: 'json',
         success: function(response) {
             if (response.success) {
                 const totalUsdOnly = Number(response.data.total_usd || 0);
                 $('#totalCashUsdOnly').text(formatUsd(totalUsdOnly));
-                
+
                 const totalIqdOnly = Number(response.data.total_iqd || 0);
                 $('#totalCashIqdOnly').text(formatIqd(totalIqdOnly));
-                
+
+                $('#cashBoxTotalBalanceUsd').text(formatUsd(totalUsdOnly));
+                $('#cashBoxTotalBalanceIqd').text(formatIqd(totalIqdOnly));
+
+                const combined = Number(response.data.total_usd_all || 0);
+                $('#cashBoxTotalBalanceCombined').text(formatUsd(combined));
+
                 if (response.data.usd_iqd_rate !== undefined) {
                     $('#dollarRate').text(formatNumber(response.data.usd_iqd_rate) + ' د.ع');
                 } else {
@@ -50,6 +57,9 @@ function updateCashBoxSummary(from, to) {
                 $('#totalCashUsdOnly').text('$0');
                 $('#totalCashIqdOnly').text('0 د.ع');
                 $('#dollarRate').text('0 د.ع');
+                $('#cashBoxTotalBalanceUsd').text('$0.00');
+                $('#cashBoxTotalBalanceIqd').text('0 د.ع');
+                $('#cashBoxTotalBalanceCombined').text('$0.00');
             }
         },
         error: function(xhr, status, error) {
@@ -57,32 +67,22 @@ function updateCashBoxSummary(from, to) {
             $('#totalCashUsdOnly').text('$0');
             $('#totalCashIqdOnly').text('0 د.ع');
             $('#dollarRate').text('0 د.ع');
+            $('#cashBoxTotalBalanceUsd').text('$0.00');
+            $('#cashBoxTotalBalanceIqd').text('0 د.ع');
+            $('#cashBoxTotalBalanceCombined').text('$0.00');
         }
     });
 }
 
 $(document).ready(function() {
-    function getFilterDates() {
+    function getFilterDatesAndSearch() {
         return {
             from: $('#filter_from').val(),
-            to: $('#filter_to').val()
+            to: $('#filter_to').val(),
+            search: ($('#cashBoxSearch').val() || '').trim()
         };
     }
-    // Initial summary
-    var dates = getFilterDates();
-    updateCashBoxSummary(dates.from, dates.to);
-
-    // Update summary on filter change
-    $('#filter_from, #filter_to').on('change', function() {
-        var dates = getFilterDates();
-        updateCashBoxSummary(dates.from, dates.to);
-    });
-    $('#clearFilterBtn').on('click', function() {
-        setTimeout(function() {
-            var dates = getFilterDates();
-            updateCashBoxSummary(dates.from, dates.to);
-        }, 100);
-    });
-    // Optionally, update after add/edit/delete
+    var initial = getFilterDatesAndSearch();
+    updateCashBoxSummary(initial.from, initial.to, initial.search);
     window.updateCashBoxSummary = updateCashBoxSummary;
-}); 
+});

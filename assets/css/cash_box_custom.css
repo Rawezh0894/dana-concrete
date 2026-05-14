@@ -1,5 +1,27 @@
 /* Custom styles for cash box page */
 
+.cash-box-balance-hero {
+    background: linear-gradient(135deg, #0f766e 0%, #134e4a 50%, #0d9488 100%);
+    border-radius: 1rem;
+}
+
+.cash-box-stat-tile {
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.06);
+}
+
+.cash-box-filters-card {
+    border-radius: 1rem;
+}
+
+.cash-box-filters-card .form-control-lg {
+    border-radius: 0.75rem;
+}
+
+.letter-spacing {
+    letter-spacing: 0.08em;
+}
+
 /* Style for incoming/outgoing column */
 .in-out-cell {
     font-weight: bold;
