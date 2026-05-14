@@ -1,5 +1,17 @@
 $(function () {
-    // Deduction modal totals + loan hints are driven from pages/employee_expenses.php (refreshDeductionModalTotals).
+    function deductionLedgerIqd() {
+        var usd = parseFloat($('#deduction_amount_usd').val()) || 0;
+        var iqd = parseFloat($('#deduction_amount_iqd').val()) || 0;
+        var rate = parseFloat($('#deduction_exchange_rate').val()) || 0;
+        return Math.round((iqd + usd * rate) * 100) / 100;
+    }
+
+    function refreshDeductionLedgerDisplay() {
+        var v = deductionLedgerIqd();
+        $('#deduction_ledger_total_display').text(v.toLocaleString('en-US'));
+    }
+
+    $('#deduction_amount_usd, #deduction_amount_iqd, #deduction_exchange_rate').on('input change', refreshDeductionLedgerDisplay);
 
     // Handle old forms (for backward compatibility)
     $('#addPaymentForm, #addExpenseForm').on('submit', function (e) {
@@ -147,65 +159,27 @@ $(function () {
         });
     });
 
-    function deductionNetCashIqd() {
-        var usd = parseFloat($('#deduction_amount_usd').val()) || 0;
-        var iqd = parseFloat($('#deduction_amount_iqd').val()) || 0;
-        var rate = parseFloat($('#deduction_exchange_rate').val()) || 0;
-        return Math.round((iqd + usd * rate) * 100) / 100;
-    }
-
-    function deductionLoanDeductionEquiv() {
-        var u = parseFloat($('#deduction_deduct_loan_usd').val()) || 0;
-        var iq = parseFloat($('#deduction_deduct_loan_iqd').val()) || 0;
-        var rate = parseFloat($('#deduction_exchange_rate').val()) || 0;
-        if (u > 0 && rate <= 0) {
-            return null;
-        }
-        return Math.round((iq + u * rate) * 100) / 100;
-    }
-
     $('#addDeductionExpenseForm').on('submit', function (e) {
         e.preventDefault();
 
         var expenseType = $('#deduction_expense_type').val();
-        var netCash = deductionNetCashIqd();
+        var ledger = deductionLedgerIqd();
         var usd = parseFloat($('#deduction_amount_usd').val()) || 0;
         var iqd = parseFloat($('#deduction_amount_iqd').val()) || 0;
         var rate = parseFloat($('#deduction_exchange_rate').val()) || 0;
-        var loanEquiv = deductionLoanDeductionEquiv();
 
         if (!expenseType) {
             swalAlert('هەڵە', 'تکایە جۆری خەرجی هەلبژێرە', 'error');
             return;
         }
 
-        if (loanEquiv === null) {
-            swalAlert('هەڵە', 'کاتێک کەمکردنەوەی قەرز بە دۆلار هەیە، نرخی گۆڕینەوە پێویستە.', 'error');
-            return;
-        }
-
-        var grossLedger = Math.round((netCash + loanEquiv) * 100) / 100;
-
-        if (grossLedger <= 0) {
-            swalAlert('هەڵە', 'کۆی خەرجی گشتی بە دینار دەبێت گەورەتر بێت لە سفر.', 'error');
+        if (ledger <= 0) {
+            swalAlert('هەڵە', 'کۆی خەرجی بە دینار دەبێت گەورەتر بێت لە سفر (دۆلار×نرخ + دینار).', 'error');
             return;
         }
 
         if (usd > 0 && rate <= 0) {
             swalAlert('هەڵە', 'کاتێک بڕی دۆلار هەیە، نرخی گۆڕینەوە پێویستە.', 'error');
-            return;
-        }
-
-        var dUsd = parseFloat($('#deduction_deduct_loan_usd').val()) || 0;
-        var dIqd = parseFloat($('#deduction_deduct_loan_iqd').val()) || 0;
-        var maxU = parseFloat($('#deduction_deduct_loan_usd').data('maxOutstanding'));
-        var maxI = parseFloat($('#deduction_deduct_loan_iqd').data('maxOutstanding'));
-        if (!isNaN(maxU) && dUsd > maxU + 0.001) {
-            swalAlert('هەڵە', 'کەمکردنەوەی دۆلار زیاترە لە قەرزی ماوە', 'error');
-            return;
-        }
-        if (!isNaN(maxI) && dIqd > maxI + 0.001) {
-            swalAlert('هەڵە', 'کەمکردنەوەی دینار زیاترە لە قەرزی ماوە', 'error');
             return;
         }
 
@@ -216,15 +190,13 @@ $(function () {
             salary: 0,
             bonus: 0,
             overtime: 0,
-            advance: expenseType === 'advance' ? grossLedger : 0,
-            deduction: expenseType === 'deduction' ? grossLedger : 0,
-            penalty: expenseType === 'penalty' ? grossLedger : 0,
-            overtime_payment: expenseType === 'overtime_payment' ? grossLedger : 0,
+            advance: expenseType === 'advance' ? ledger : 0,
+            deduction: expenseType === 'deduction' ? ledger : 0,
+            penalty: expenseType === 'penalty' ? ledger : 0,
+            overtime_payment: expenseType === 'overtime_payment' ? ledger : 0,
             amount_usd: usd,
             amount_iqd: iqd,
-            exchange_rate: rate,
-            deduct_loan_usd: dUsd,
-            deduct_loan_iqd: dIqd
+            exchange_rate: rate
         };
 
         $.post('../process/employee_payments/add_expense.php', formData, function (response) {
@@ -234,11 +206,7 @@ $(function () {
                 var now = new Date();
                 var month = (now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0'));
                 $('#deduction_expense_date').val(month);
-                $('#deduction_deduct_loan_usd').val(0);
-                $('#deduction_deduct_loan_iqd').val(0);
-                if (typeof refreshDeductionModalTotals === 'function') {
-                    refreshDeductionModalTotals();
-                }
+                refreshDeductionLedgerDisplay();
 
                 if (window.loadExpenses) window.loadExpenses();
                 if (window.employeeExpensesSummary && window.employeeExpensesSummary.loadSummaryData) {
@@ -267,4 +235,6 @@ $(function () {
             swalAlert('هەڵە', msg, 'error');
         });
     });
+
+    refreshDeductionLedgerDisplay();
 });

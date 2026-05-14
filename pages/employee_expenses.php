@@ -421,69 +421,34 @@ $can_issue_employee_loan = hasPermission('add_payment') || hasPermission('add_ca
               <option value="overtime_payment">کاروان حیسابی (پێدان)</option>
             </select>
           </div>
-
-          <div class="mb-3">
-            <label for="deduction_gross_ledger" class="form-label">کۆی خەرجی (حساب — گشتی د.ع)</label>
-            <input type="text" class="form-control" id="deduction_gross_ledger" readonly value="0 د.ع">
-            <span class="text-xs text-muted d-block mt-1">گشتی = (پارەی قاسە لە خوارەوە) + (کەمکردنەوەی قەرز)</span>
-          </div>
           
-          <div class="rounded-xl border border-teal-200 bg-teal-50/80 p-4 mb-3 text-start shadow-sm" dir="rtl">
-            <p class="text-sm font-bold text-teal-900 mb-3 flex items-center gap-2 border-b border-teal-200 pb-2">
-              <i class="fas fa-vault text-teal-600"></i> قاسە — ئەم بڕانە ڕاستەوخۆ لە قاسە دەکەم (دوای قەرز)
+          <div class="rounded-xl border border-amber-200 bg-amber-50/90 p-4 mb-3 text-start shadow-sm" dir="rtl">
+            <p class="text-sm font-bold text-amber-900 mb-3 flex items-center gap-2 border-b border-amber-200 pb-2">
+              <i class="fas fa-vault text-amber-600"></i> قاسە — ڕاستەوخۆ لە قاسە دەکەم
             </p>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
-              <div class="sm:col-span-1">
+              <div>
                 <label for="deduction_amount_usd" class="block text-sm font-medium text-slate-700 mb-1">بڕی پارە بە دۆلار</label>
                 <div class="flex items-center gap-2">
                   <span class="text-slate-500 text-sm">$</span>
-                  <input type="number" min="0" step="0.01" value="0" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500" id="deduction_amount_usd">
+                  <input type="number" min="0" step="0.01" value="0" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm" id="deduction_amount_usd">
                 </div>
               </div>
-              <div class="sm:col-span-1">
+              <div>
                 <label for="deduction_amount_iqd" class="block text-sm font-medium text-slate-700 mb-1">بڕی پارە بە دینار</label>
-                <input type="number" min="0" step="0.01" value="0" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500" id="deduction_amount_iqd">
+                <input type="number" min="0" step="0.01" value="0" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm" id="deduction_amount_iqd">
                 <span class="text-xs text-slate-500 mt-1 block">دینار (د.ع)</span>
               </div>
               <div class="sm:col-span-2">
                 <label for="deduction_exchange_rate" class="block text-sm font-medium text-slate-700 mb-1">نرخی گۆڕینەوە — ١ دۆلار بە چەند؟</label>
-                <input type="number" min="0" step="0.0001" value="0" class="w-full max-w-md rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500" id="deduction_exchange_rate" placeholder="نمونە: 1500">
+                <input type="number" min="0" step="0.0001" value="0" class="w-full max-w-md rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm" id="deduction_exchange_rate" placeholder="1500">
               </div>
             </div>
-            <div class="mt-4 rounded-lg bg-white/90 border border-teal-100 px-3 py-2 text-sm">
-              <span class="text-slate-600">کۆی پارەی قاسە بە دینار (هاوتا):</span>
-              <strong class="text-teal-800 ms-1" id="deduction_cash_equiv_display">0</strong>
+            <div class="mt-4 rounded-lg bg-white/90 border border-amber-100 px-3 py-2 text-sm">
+              <span class="text-slate-600">کۆی خەرجی بە دینار (حساب):</span>
+              <strong class="text-amber-900 ms-1" id="deduction_ledger_total_display">0</strong>
               <span class="text-slate-500">د.ع</span>
-              <span class="text-xs text-slate-500 d-block mt-1" id="deduction_cash_equiv_hint">(دۆلار × نرخ) + دینار — دەبێت یەکسان بێت بە گشتی − قەرز</span>
-            </div>
-            <div class="mt-4 rounded-xl border border-indigo-200 bg-indigo-50/90 p-4 text-start shadow-sm" dir="rtl">
-              <p class="text-sm font-bold text-indigo-900 mb-2 flex items-center gap-2 border-b border-indigo-200 pb-2">
-                <i class="fas fa-piggy-bank text-indigo-600"></i> قەرزی کارمەند (کەمکردنەوە لەم پارەدانە)
-              </p>
-              <div class="text-xs text-indigo-800 mb-3 rounded-lg bg-white/80 px-2 py-2 border border-indigo-100">
-                <span class="text-slate-600">قەرزی ماوە:</span>
-                <strong id="deduction_loan_outstanding_usd">0</strong> <span class="text-slate-500">$</span>
-                <span class="mx-2 text-slate-300">|</span>
-                <strong id="deduction_loan_outstanding_iqd">0</strong> <span class="text-slate-500">د.ع</span>
-              </div>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl mx-auto">
-                <div>
-                  <label for="deduction_deduct_loan_usd" class="block text-sm font-medium text-slate-700 mb-1">کەمکردنەوەی قەرز بە دۆلار (ئارەزوومەندانە)</label>
-                  <div class="flex items-center gap-2">
-                    <span class="text-slate-500 text-sm">$</span>
-                    <input type="number" min="0" step="0.01" value="0" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm" id="deduction_deduct_loan_usd" name="deduct_loan_usd" autocomplete="off">
-                  </div>
-                </div>
-                <div>
-                  <label for="deduction_deduct_loan_iqd" class="block text-sm font-medium text-slate-700 mb-1">کەمکردنەوەی قەرز بە دینار (ئارەزوومەندانە)</label>
-                  <input type="number" min="0" step="0.01" value="0" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm" id="deduction_deduct_loan_iqd" name="deduct_loan_iqd" autocomplete="off">
-                </div>
-              </div>
-              <p class="text-xs text-indigo-800 mt-3 mb-0">
-                <strong>پارەی خاو لە قاسە (دوای قەرز):</strong>
-                <span id="deduction_net_cash_display">0</span> د.ع
-                <span class="text-slate-500 d-block mt-1">ئەم بڕە دەبێت لە خانەکانی قاسە لە سەرەوە بنووسرێت (نابێت دووبارە لە قاسە دەرچێت بۆ بەشی قەرز).</span>
-              </p>
+              <span class="text-xs text-slate-500 d-block mt-1">(دۆلار × نرخ) + دینار</span>
             </div>
           </div>
           
@@ -627,71 +592,7 @@ $(function() {
         }
         return Math.round((iq + u * rate) * 100) / 100;
     }
-    function loadDeductionLoanBalance(employeeId) {
-        if (!employeeId) {
-            $('#deduction_loan_outstanding_usd').text('0');
-            $('#deduction_loan_outstanding_iqd').text('0');
-            $('#deduction_deduct_loan_usd').data('maxOutstanding', 0);
-            $('#deduction_deduct_loan_iqd').data('maxOutstanding', 0);
-            return;
-        }
-        $.get('../process/employee_payments/get_employee_loan_balance.php', { employee_id: employeeId }, function (r) {
-            if (r.success) {
-                $('#deduction_loan_outstanding_usd').text(parseFloat(r.outstanding_usd || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 }));
-                $('#deduction_loan_outstanding_iqd').text(parseFloat(r.outstanding_iqd || 0).toLocaleString('en-US', { maximumFractionDigits: 0 }));
-                $('#deduction_deduct_loan_usd').data('maxOutstanding', parseFloat(r.outstanding_usd || 0));
-                $('#deduction_deduct_loan_iqd').data('maxOutstanding', parseFloat(r.outstanding_iqd || 0));
-            }
-        }, 'json');
-    }
-
-    function deductionNetCashFromForm() {
-        var usd = parseFloat($('#deduction_amount_usd').val()) || 0;
-        var iqd = parseFloat($('#deduction_amount_iqd').val()) || 0;
-        var rate = parseFloat($('#deduction_exchange_rate').val()) || 0;
-        return Math.round((iqd + usd * rate) * 100) / 100;
-    }
-
-    function deductionLoanDeductionEquivFromForm() {
-        var u = parseFloat($('#deduction_deduct_loan_usd').val()) || 0;
-        var iq = parseFloat($('#deduction_deduct_loan_iqd').val()) || 0;
-        var rate = parseFloat($('#deduction_exchange_rate').val()) || 0;
-        if (u > 0 && rate <= 0) {
-            return null;
-        }
-        return Math.round((iq + u * rate) * 100) / 100;
-    }
-
-    function refreshDeductionModalTotals() {
-        var usd = parseFloat($('#deduction_amount_usd').val()) || 0;
-        var iqd = parseFloat($('#deduction_amount_iqd').val()) || 0;
-        var rate = parseFloat($('#deduction_exchange_rate').val()) || 0;
-        var net = Math.round((iqd + usd * rate) * 100) / 100;
-        var le = deductionLoanDeductionEquivFromForm();
-        if (usd > 0 && rate <= 0) {
-            $('#deduction_cash_equiv_display').text('— (نرخ پێویستە)');
-            $('#deduction_gross_ledger').val('—');
-            $('#deduction_net_cash_display').text('—');
-            $('#deduction_cash_equiv_hint').text('(دۆلار × نرخ) + دینار — بۆ قەرزی دۆلار نرخ پێویستە');
-            return;
-        }
-        if (le === null) {
-            $('#deduction_net_cash_display').text('—');
-            $('#deduction_cash_equiv_hint').text('(دۆلار × نرخ) + دینار — بۆ قەرزی دۆلار نرخ پێویستە');
-            return;
-        }
-        var gross = Math.round((net + le) * 100) / 100;
-        $('#deduction_cash_equiv_display').text(net.toLocaleString('en-US'));
-        $('#deduction_gross_ledger').val(gross.toLocaleString('en-US') + ' د.ع');
-        $('#deduction_net_cash_display').text(net.toLocaleString('en-US'));
-        $('#deduction_cash_equiv_hint').text('(دۆلار × نرخ) + دینار دەبێت یەکسان بێت بە گشتی (' + gross.toLocaleString('en-US') + ') − قەرز (' + le.toLocaleString('en-US') + ') = ' + net.toLocaleString('en-US') + ' د.ع');
-    }
-
-    window.refreshDeductionModalTotals = refreshDeductionModalTotals;
-
-    $(document).on('input change', '#deduction_amount_usd, #deduction_amount_iqd, #deduction_exchange_rate, #deduction_deduct_loan_usd, #deduction_deduct_loan_iqd, #deduction_expense_type', function () {
-        refreshDeductionModalTotals();
-    });
+    function loadIncomeLoanBalance(employeeId) {
         if (!employeeId) {
             $('#income_loan_outstanding_usd').text('0');
             $('#income_loan_outstanding_iqd').text('0');
@@ -881,12 +782,7 @@ $(function() {
     // Load balance for Deduction Expense Modal
     $('#deduction_employee_id').on('change', function() {
         var employeeId = $(this).val();
-        loadDeductionLoanBalance(employeeId);
-        if (!employeeId) {
-            $('#deduction_deduct_loan_usd').val(0);
-            $('#deduction_deduct_loan_iqd').val(0);
-        }
-        refreshDeductionModalTotals();
+        
         if (employeeId) {
             var selectedMonth = $('#deduction_expense_date').val() || '';
             var params = {employee_id: employeeId};
@@ -912,14 +808,11 @@ $(function() {
             }, 'json');
         } else {
             $('#deduction-employee-balance-info').hide();
-            loadDeductionLoanBalance('');
-            refreshDeductionModalTotals();
         }
     });
     
     // Initial calculation
     calcIncomeTotal();
-    refreshDeductionModalTotals();
     
     // Set default month to current month for both modals
     var now = new Date();

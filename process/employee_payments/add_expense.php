@@ -50,7 +50,6 @@ if ($total_expenses <= 0) {
 }
 
 $gross_income = $salary + $bonus + $overtime;
-$deduction_side_total = $advance + $deduction + $penalty + $overtime_payment;
 $loan_deduct_equiv = 0.0;
 $loansTableChk = $pdo->query("SHOW TABLES LIKE 'employee_loans'");
 $loans_table_ok = $loansTableChk && $loansTableChk->rowCount() > 0;
@@ -64,18 +63,17 @@ if ($loan_deduct_usd > 0 || $loan_deduct_iqd > 0) {
         echo json_encode(['success' => false, 'message' => 'کەمکردنەوەی قەرز بە دۆلار: نرخی گۆڕینەوە پێویستە.']);
         exit;
     }
-    $loan_basis = 0.0;
-    if ($gross_income > 0 && abs($total_expenses - $gross_income) < 0.01) {
-        $loan_basis = $gross_income;
-    } elseif ($gross_income <= 0 && $deduction_side_total > 0 && abs($total_expenses - $deduction_side_total) < 0.01) {
-        $loan_basis = $deduction_side_total;
-    } else {
-        echo json_encode(['success' => false, 'message' => 'کەمکردنەوەی قەرز تەنها لەگەڵ تەنها مووچە/بەخشیش/کاروان یان تەنها پێشەکی/کەمکردنەوە/سزا/پێدانی کارواندا دەبێت.']);
+    if ($gross_income <= 0) {
+        echo json_encode(['success' => false, 'message' => 'کەمکردنەوەی قەرز تەنها لەگەڵ مووچە/بەخشیش/کارواندا دەبێت.']);
+        exit;
+    }
+    if (abs($total_expenses - $gross_income) > 0.01) {
+        echo json_encode(['success' => false, 'message' => 'کەمکردنەوەی قەرز لە هەمان داواکاریدا تەنها بۆ کۆی مووچە/بەخشیش/کاروان ڕێگەپێدراوە.']);
         exit;
     }
     $loan_deduct_equiv = employee_expense_cash_iqd_equivalent($loan_deduct_usd, $loan_deduct_iqd, $exchange_rate);
-    if ($loan_deduct_equiv > $loan_basis + 1.0) {
-        echo json_encode(['success' => false, 'message' => 'کەمکردنەوەی قەرز نابێت زیاتر بێت لە کۆی ئەم خەرجییە.']);
+    if ($loan_deduct_equiv > $gross_income + 1.0) {
+        echo json_encode(['success' => false, 'message' => 'کەمکردنەوەی قەرز نابێت زیاتر بێت لە کۆی مووچە/بەخشیش/کاروان.']);
         exit;
     }
     $outstanding = employee_loan_outstanding_totals($pdo, $employee_id);
