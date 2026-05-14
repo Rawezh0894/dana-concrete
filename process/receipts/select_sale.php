@@ -26,7 +26,6 @@ $date_from = isset($_GET['date_from']) ? $_GET['date_from'] : '';
 $date_to = isset($_GET['date_to']) ? $_GET['date_to'] : '';
 $location = isset($_GET['location']) ? $_GET['location'] : 'all';
 $recipient = isset($_GET['recipient']) ? $_GET['recipient'] : 'all';
-$rezh_name = isset($_GET['rezh_name']) ? trim((string)$_GET['rezh_name']) : '';
 
 try {
     // Get customer information including opening debt, name, and mobile
@@ -72,7 +71,6 @@ $sql = "SELECT
         s.location,
         f.strength_mpa, 
         f.strength_kg,
-        MAX(f.name) as formula_name,
         SUM(s.quantity) as total_quantity,
         s.price_per_unit,
         SUM(s.total_price) as total_price_sum,
@@ -172,11 +170,6 @@ if ($recipient === 'none') {
     $sql .= " AND 1=0";
 }
 
-if ($rezh_name !== '') {
-    $sql .= " AND (CONCAT(IFNULL(f.name,''), ' ', IFNULL(f.type,'')) LIKE :rezh_name_search)";
-    $params['rezh_name_search'] = '%' . $rezh_name . '%';
-}
-
 $sql .= " GROUP BY s.order_date, s.location, f.strength_mpa, f.strength_kg, s.price_per_unit";
 $sql .= " ORDER BY s.order_date ASC";
 
@@ -198,7 +191,6 @@ try {
     $quantity = sanitize_text(number_format($row['total_quantity'], 2) . ' م³');
     $rezhRaw = $row['strength_mpa'] ? $row['strength_mpa'] . ' MPa' : ($row['strength_kg'] ? $row['strength_kg'] . ' Kg' : '');
     $rezh = sanitize_text($rezhRaw);
-    $rezhName = sanitize_text($row['formula_name'] ?? '');
     $ppu = sanitize_text(is_numeric($row['price_per_unit']) ? '$' . number_format($row['price_per_unit'], 2, '.', ',') : '');
     $total = sanitize_text(is_numeric($row['total_price_sum']) ? '$' . number_format($row['total_price_sum'], 2, '.', ',') : '');
     $remaining = sanitize_text(is_numeric($row['total_remaining_amount']) ? '$' . number_format($row['total_remaining_amount'], 2, '.', ',') : '$0.00');
@@ -213,7 +205,6 @@ try {
         'location' => sanitize_text($row['location'] ?? ''),
         'quantity' => $quantity,
         'rezh' => $rezh,
-        'rezh_name' => $rezhName,
         'price_per_unit' => $ppu,
         'total_price' => $total,
         'remaining_amount' => $remaining,

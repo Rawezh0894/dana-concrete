@@ -34,7 +34,6 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             #date-to-filter, label[for="date-to-filter"],
             #location-filter, label[for="location-filter"],
             #invoice-number-filter, label[for="invoice-number-filter"],
-            #rezh-name-filter, label[for="rezh-name-filter"],
             #show-invoice-number, label[for="show-invoice-number"],
             #show-opening-debt, label[for="show-opening-debt"],
             #force-debt-pagination, label[for="force-debt-pagination"],
@@ -81,23 +80,23 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             margin-top: 0.2rem;
         }
         
-        /* Style for invoice number cells (ژمارەی پسووڵە = column 8 in DOM order) */
-        .receipt-table td:nth-child(8).show-invoice,
+        /* Style for invoice number cells */
+        .receipt-table td:nth-child(8),
         #paid-table td:nth-child(4) {
             white-space: pre-line;
             word-wrap: break-word;
             max-width: 200px;
         }
         
-        /* Hide invoice number column by default (column 8) */
-        .receipt-table th:nth-child(8),
-        .receipt-table td:nth-child(8) {
+        /* Hide invoice number column by default */
+        .receipt-table th:nth-child(7),
+        .receipt-table td:nth-child(7) {
             display: none !important;
         }
         
         /* Show invoice number column when explicitly enabled */
-        .receipt-table th:nth-child(8).show-invoice,
-        .receipt-table td:nth-child(8).show-invoice {
+        .receipt-table th:nth-child(7).show-invoice,
+        .receipt-table td:nth-child(7).show-invoice {
             display: table-cell !important;
         }
         
@@ -560,15 +559,6 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 </div>
             </div>
             
-            <div class="filter-row">
-                <div class="filter-group">
-                    <label for="rezh-name-filter" class="filter-label">
-                        <i class="fa fa-flask"></i> گەڕان بە ناوی ڕێژە:
-                    </label>
-                    <input type="text" id="rezh-name-filter" class="filter-input" placeholder="ناوی فۆرمولا یان جۆر بنووسە...">
-                </div>
-            </div>
-            
             <!-- Row 3: Paid Table Date Range Filters -->
             <div class="filter-row">
                 <div class="filter-group">
@@ -655,7 +645,6 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 <th>شوێن</th>
                 <th>پێوانە</th>
                 <th>ڕێژە</th>
-                <th>جۆر</th>
                 <th>نرخی 1 م 3</th>
                 <th>کۆی نرخ</th>
                 <th>پارەی ماوە</th>
@@ -729,7 +718,6 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 var paidDateFrom = document.getElementById('paid-date-from-filter');
                 var paidDateTo = document.getElementById('paid-date-to-filter');
                 var invoiceNumberFilter = document.getElementById('invoice-number-filter');
-                var rezhNameFilter = document.getElementById('rezh-name-filter');
                 var showInvoiceCheckbox = document.getElementById('show-invoice-number');
                 var showOpeningDebtCheckbox = document.getElementById('show-opening-debt');
                 var forceDebtPaginationCheckbox = document.getElementById('force-debt-pagination');
@@ -741,7 +729,6 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 if (paidDateFrom) paidDateFrom.value = '';
                 if (paidDateTo) paidDateTo.value = '';
                 if (invoiceNumberFilter) invoiceNumberFilter.value = '';
-                if (rezhNameFilter) rezhNameFilter.value = '';
                 
                 // Reset location multi-select
                 resetLocationMultiSelect();
@@ -913,19 +900,6 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             });
         }
         
-        var rezhNameFilter = document.getElementById('rezh-name-filter');
-        if (rezhNameFilter) {
-            let rezhNameTimeout;
-            rezhNameFilter.addEventListener('input', function() {
-                clearTimeout(rezhNameTimeout);
-                rezhNameTimeout = setTimeout(() => {
-                    if (typeof loadSalesData === 'function') {
-                        loadSalesData();
-                    }
-                }, 400);
-            });
-        }
-        
         // Recipient "Select All" (Excel-like): when checked -> check all; when unchecked -> uncheck all
         const recipientAllCheckbox = document.getElementById('recipient-all');
         if (recipientAllCheckbox && !recipientAllCheckbox.dataset.boundExcelLike) {
@@ -950,8 +924,27 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             if (table) {
                 const dataRows = table.querySelectorAll('tbody tr');
                 dataRows.forEach(row => {
-                    if (row.children[7]) {
-                        const invoiceCell = row.children[7];
+                    if (row.children[6]) {
+                        const invoiceCell = row.children[6];
+                        const originalInvoiceNumber = invoiceCell.textContent;
+                        
+                        // Store original invoice number
+                        invoiceCell.setAttribute('data-original-invoice', originalInvoiceNumber);
+                        
+                        // Format to show only 3 invoice numbers per row
+                        const formattedInvoice = formatInvoiceNumbers(originalInvoiceNumber);
+                        invoiceCell.innerHTML = formattedInvoice;
+                    }
+                });
+            }
+            
+            // Also format paid table
+            const paidTable = document.getElementById('paid-table');
+            if (paidTable) {
+                const paidDataRows = paidTable.querySelectorAll('tbody tr');
+                paidDataRows.forEach(row => {
+                    if (row.children[3]) {
+                        const invoiceCell = row.children[3];
                         const originalInvoiceNumber = invoiceCell.textContent;
                         
                         // Store original invoice number
@@ -971,30 +964,30 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         const table = document.querySelector('.receipt-table');
         if (!table) return;
         
-        // Get the invoice number column (8th column, index 7)
+        // Get the invoice number column (7th column, index 6)
         const headerRow = table.querySelector('thead tr');
         const dataRows = table.querySelectorAll('tbody tr');
         
-        if (headerRow && headerRow.children[7]) {
+        if (headerRow && headerRow.children[6]) {
             if (show) {
-                headerRow.children[7].classList.add('show-invoice');
+                headerRow.children[6].classList.add('show-invoice');
             } else {
-                headerRow.children[7].classList.remove('show-invoice');
+                headerRow.children[6].classList.remove('show-invoice');
             }
         }
         
         // Hide/show invoice number column in all data rows
         dataRows.forEach(row => {
-            if (row.children[7]) {
+            if (row.children[6]) {
                 if (show) {
-                    row.children[7].classList.add('show-invoice');
+                    row.children[6].classList.add('show-invoice');
                 } else {
-                    row.children[7].classList.remove('show-invoice');
+                    row.children[6].classList.remove('show-invoice');
                 }
                 
                 // Format invoice numbers to show only 3 per row when visible
                 if (show) {
-                    const invoiceCell = row.children[7];
+                    const invoiceCell = row.children[6];
                     const originalInvoiceNumber = invoiceCell.getAttribute('data-original-invoice') || invoiceCell.textContent;
                     
                     // Store original invoice number if not already stored
@@ -1078,17 +1071,17 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             const cells = summaryRow.querySelectorAll('td');
             
             if (cells.length >= 3) {
-                // Layout: 2 + 3 + 4 = 9 columns
+                // New layout: 2 + 2 + 4 = 8 columns
                 cells[0].setAttribute('colspan', '2'); // Location + Quantity
-                cells[1].setAttribute('colspan', '3'); // Ratio + Ratio name + Price per unit
+                cells[1].setAttribute('colspan', '2'); // Ratio + Price per unit
                 cells[2].setAttribute('colspan', '4'); // Total + Remaining + Invoice + Date
             } else if (cells.length === 2) {
-                // Fallback for old layout (9 columns)
+                // Fallback for old layout
                 if (showInvoiceColumn) {
-                    cells[0].setAttribute('colspan', '4');
+                    cells[0].setAttribute('colspan', '3');
                     cells[1].setAttribute('colspan', '5');
                 } else {
-                    cells[0].setAttribute('colspan', '3');
+                    cells[0].setAttribute('colspan', '2');
                     cells[1].setAttribute('colspan', '6');
                 }
             }
@@ -1308,7 +1301,7 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
     });
 </script>
 <script src="../assets/js/receipts/receipts.js?v=2.1" nonce="<?php echo $csp_nonce; ?>"></script>
-<script src="../assets/js/receipts/select_sale.js?v=2.2" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/receipts/select_sale.js?v=2.1" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/receipts/select_return_debt.js?v=2.1" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/receipts/load_locations.js?v=2.1" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/receipts/load_recipients.js?v=2.1" nonce="<?php echo $csp_nonce; ?>"></script>
