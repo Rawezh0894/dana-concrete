@@ -148,7 +148,7 @@
 }
 
 .sidebar-submenu.open {
-  max-height: 2400px;
+  max-height: 500px;
   opacity: 1;
 }
 
@@ -313,9 +313,12 @@
   background: var(--spearmint);
 }
 
-/* Do not add global .collapse { display: none } here — it breaks Bootstrap Collapse
-   elsewhere on the page and conflicted with sidebar menus that used both .collapse
-   and custom .open toggling. Sidebar submenus use only .sidebar-submenu + .open. */
+.collapse {
+  display: none;
+}
+.collapse.show {
+  display: block;
+}
 
 .sidebar-link.active {
   background: var(--lime-green) !important;

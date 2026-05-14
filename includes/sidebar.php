@@ -29,10 +29,10 @@ $is_main_menu_open = in_array($current_page, $main_menu_pages, true);
   <ul class="sidebar-menu list-unstyled">
     <!-- Main Dashboard Dropdown -->
     <li class="sidebar-group">
-      <button type="button" class="sidebar-group-toggle d-flex align-items-center w-100" aria-expanded="<?php echo $is_main_menu_open ? 'true' : 'false'; ?>" aria-controls="mainMenu">
+      <button class="sidebar-group-toggle d-flex align-items-center w-100" data-bs-toggle="collapse" data-bs-target="#mainMenu" aria-expanded="<?php echo $is_main_menu_open ? 'true' : 'false'; ?>">
         <i class="bi bi-speedometer2 me-2"></i> سەرەکی
       </button>
-      <ul class="sidebar-submenu<?php if ($is_main_menu_open) echo ' open'; ?>" id="mainMenu">
+      <ul class="collapse sidebar-submenu<?php if ($is_main_menu_open) echo ' open'; ?>" id="mainMenu">
         <?php if (hasPermission('view_dashboard')): ?>
           <li><a href="../pages/dashboard.php" class="sidebar-link<?php if($current_page == 'dashboard.php') echo ' active'; ?>"><i class="bi bi-speedometer2 me-2"></i> داشبۆرد</a></li>
         <?php endif; ?>
@@ -46,10 +46,10 @@ $is_main_menu_open = in_array($current_page, $main_menu_pages, true);
     </li>
     <!-- All other dropdowns -->
     <li class="sidebar-group">
-      <button type="button" class="sidebar-group-toggle d-flex align-items-center w-100" aria-expanded="false" aria-controls="concreteMenu">
+      <button class="sidebar-group-toggle d-flex align-items-center w-100" data-bs-toggle="collapse" data-bs-target="#concreteMenu" aria-expanded="false">
         <i class="bi bi-building me-2"></i> کۆنکرێت
       </button>
-      <ul class="sidebar-submenu" id="concreteMenu">
+      <ul class="collapse sidebar-submenu" id="concreteMenu">
         <?php if (hasPermission('view_concrete_receipts')): ?>
           <li><a href="../pages/concrete_receipts.php" class="sidebar-link<?php if($current_page == 'concrete_receipts.php') echo ' active'; ?>"><i class="bi bi-file-earmark-text me-2"></i> پسووڵەی ناردن</a></li>
         <?php endif; ?>
@@ -71,10 +71,10 @@ $is_main_menu_open = in_array($current_page, $main_menu_pages, true);
       </ul>
     </li>
     <li class="sidebar-group">
-      <button type="button" class="sidebar-group-toggle d-flex align-items-center w-100" aria-expanded="false" aria-controls="materialsAccountsMenu">
+      <button class="sidebar-group-toggle d-flex align-items-center w-100" data-bs-toggle="collapse" data-bs-target="#materialsAccountsMenu" aria-expanded="false">
         <i class="bi bi-box-seam me-2"></i> مەواد و هەژمارەکان
       </button>
-      <ul class="sidebar-submenu" id="materialsAccountsMenu">
+      <ul class="collapse sidebar-submenu" id="materialsAccountsMenu">
         <!-- <?php if (hasPermission('view_materials')): ?>
           <li><a href="../pages/stock_adjustments.php" class="sidebar-link<?php if($current_page == 'stock_adjustments.php') echo ' active'; ?>"><i class="bi bi-gear me-2"></i> گۆڕانکاری مەواد</a></li>
         <?php endif; ?> -->
@@ -102,10 +102,10 @@ $is_main_menu_open = in_array($current_page, $main_menu_pages, true);
       </ul>
     </li>
     <li class="sidebar-group">
-      <button type="button" class="sidebar-group-toggle d-flex align-items-center w-100" aria-expanded="false" aria-controls="vouchersMenu">
+      <button class="sidebar-group-toggle d-flex align-items-center w-100" data-bs-toggle="collapse" data-bs-target="#vouchersMenu" aria-expanded="false">
         <i class="bi bi-receipt me-2"></i> مامەڵەکان
       </button>
-      <ul class="sidebar-submenu" id="vouchersMenu">
+      <ul class="collapse sidebar-submenu" id="vouchersMenu">
         <?php if (hasPermission('view_purchase')): ?>
           <li><a href="../pages/add_purchase.php" class="sidebar-link<?php if($current_page == 'add_purchase.php') echo ' active'; ?>"><i class="bi bi-cart-plus me-2"></i> کڕین</a></li>
         <?php endif; ?>
@@ -124,10 +124,10 @@ $is_main_menu_open = in_array($current_page, $main_menu_pages, true);
       </ul>
     </li>
     <li class="sidebar-group">
-      <button type="button" class="sidebar-group-toggle d-flex align-items-center w-100" aria-expanded="false" aria-controls="expensesMenu">
+      <button class="sidebar-group-toggle d-flex align-items-center w-100" data-bs-toggle="collapse" data-bs-target="#expensesMenu" aria-expanded="false">
         <i class="bi bi-credit-card me-2"></i> خەرجیەکان
       </button>
-      <ul class="sidebar-submenu" id="expensesMenu">
+      <ul class="collapse sidebar-submenu" id="expensesMenu">
         <?php if (hasPermission('view_employee_payment')): ?>
           <li><a href="../pages/employee_expenses.php" class="sidebar-link<?php if($current_page == 'employee_expenses.php') echo ' active'; ?>"><i class="bi bi-person-workspace me-2"></i> پارەدان بە کارمەند</a></li>
         <?php endif; ?>
@@ -145,10 +145,10 @@ $is_main_menu_open = in_array($current_page, $main_menu_pages, true);
     </li>
 
     <li class="sidebar-group">
-      <button type="button" class="sidebar-group-toggle d-flex align-items-center w-100" aria-expanded="false" aria-controls="factoryTrucksMenu">
+      <button class="sidebar-group-toggle d-flex align-items-center w-100" data-bs-toggle="collapse" data-bs-target="#factoryTrucksMenu" aria-expanded="false">
         <i class="bi bi-truck me-2"></i> تڕێلەکانی کارگە
       </button>
-      <ul class="sidebar-submenu" id="factoryTrucksMenu">
+      <ul class="collapse sidebar-submenu" id="factoryTrucksMenu">
         <li><a href="../pages/factory_trucks.php" class="sidebar-link<?php if($current_page == 'factory_trucks.php') echo ' active'; ?>"><i class="bi bi-gear-fill me-2"></i> بەڕێوەبردنی تڕێلە</a></li>
         <li><a href="../pages/truck_expenses.php" class="sidebar-link<?php if($current_page == 'truck_expenses.php') echo ' active'; ?>"><i class="bi bi-receipt-cutoff me-2"></i> خەرجی تڕێلە</a></li>
         <li><a href="../pages/truck_report.php" class="sidebar-link<?php if($current_page == 'truck_report.php') echo ' active'; ?>"><i class="bi bi-graph-up-arrow me-2"></i> ڕاپۆرتی قازانج</a></li>
@@ -156,10 +156,10 @@ $is_main_menu_open = in_array($current_page, $main_menu_pages, true);
     </li>
     <!-- New Spare Parts Inventory -->
     <li class="sidebar-group">
-      <button type="button" class="sidebar-group-toggle d-flex align-items-center w-100" aria-expanded="false" aria-controls="newInventoryMenu">
+      <button class="sidebar-group-toggle d-flex align-items-center w-100" data-bs-toggle="collapse" data-bs-target="#newInventoryMenu" aria-expanded="false">
         <i class="bi bi-gear-wide-connected me-2"></i> کۆگای یەدەگ
       </button>
-      <ul class="sidebar-submenu shadow-sm" id="newInventoryMenu">
+      <ul class="collapse sidebar-submenu shadow-sm" id="newInventoryMenu">
         <li><a href="../pages/inventory_management.php" class="sidebar-link<?php if($current_page == 'inventory_management.php') echo ' active'; ?>"><i class="bi bi-box-seam me-2"></i> کۆگا</a></li>
         <li><a href="../pages/vehicle_usage_report.php" class="sidebar-link<?php if($current_page == 'vehicle_usage_report.php') echo ' active'; ?>"><i class="bi bi-file-earmark-bar-graph me-2"></i> خەرجی سەیارەکان</a></li>
       </ul>
@@ -181,10 +181,10 @@ $is_main_menu_open = in_array($current_page, $main_menu_pages, true);
     </li> -->
     <!-- System Management Dropdown -->
     <li class="sidebar-group">
-      <button type="button" class="sidebar-group-toggle d-flex align-items-center w-100" aria-expanded="false" aria-controls="systemMenu">
+      <button class="sidebar-group-toggle d-flex align-items-center w-100" data-bs-toggle="collapse" data-bs-target="#systemMenu" aria-expanded="false">
         <i class="bi bi-gear me-2"></i> بەڕێوەبردنی سیستەم
       </button>
-      <ul class="sidebar-submenu" id="systemMenu">
+      <ul class="collapse sidebar-submenu" id="systemMenu">
         <?php if (hasPermission('view_users')): ?>
           <li><a href="../pages/users.php" class="sidebar-link<?php if($current_page == 'users.php') echo ' active'; ?>"><i class="bi bi-people me-2"></i> بەکارهێنەران</a></li>
         <?php endif; ?>
