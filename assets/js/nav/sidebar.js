@@ -32,17 +32,18 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   overlay.addEventListener('click', closeSidebar);
 
-  // Sidebar group expand/collapse (custom, not Bootstrap)
+  // Sidebar group expand/collapse — driven entirely by the .open class / custom CSS.
+  // data-bs-toggle="collapse" has been removed from the buttons so Bootstrap's
+  // collapse plugin never fires here, eliminating the double-toggle flash bug.
   document.querySelectorAll('.sidebar-group-toggle').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      const target = btn.getAttribute('data-bs-target');
-      if (target) {
-        const submenu = document.querySelector(target);
-        if (submenu) {
-          submenu.classList.toggle('open');
-          btn.setAttribute('aria-expanded', submenu.classList.contains('open'));
-        }
-      }
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation(); // prevent any document-level click handler from closing the menu
+      const targetSelector = btn.getAttribute('data-bs-target');
+      if (!targetSelector) { return; }
+      const submenu = document.querySelector(targetSelector);
+      if (!submenu) { return; }
+      const isOpen = submenu.classList.toggle('open');
+      btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
     });
   });
 

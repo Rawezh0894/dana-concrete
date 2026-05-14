@@ -313,13 +313,6 @@
   background: var(--spearmint);
 }
 
-.collapse {
-  display: none;
-}
-.collapse.show {
-  display: block;
-}
-
 .sidebar-link.active {
   background: var(--lime-green) !important;
   color: #fff !important;
