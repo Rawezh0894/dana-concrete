@@ -1,68 +1,137 @@
-/* Custom styles for cash box page */
+/* ═══════════════════════════════════════════════════════════════════════════
+   Cash Box — Professional Cash Management System
+   ═══════════════════════════════════════════════════════════════════════════ */
 
+/* ── Hero card ───────────────────────────────────────────────────────────── */
 .cash-box-balance-hero {
     background: linear-gradient(135deg, #0f766e 0%, #134e4a 50%, #0d9488 100%);
     border-radius: 1rem;
 }
-
 .cash-box-stat-tile {
     background: rgba(255, 255, 255, 0.96);
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.06);
+    box-shadow: 0 0.4rem 0.8rem rgba(0, 0, 0, 0.07);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-
-.cash-box-filters-card {
-    border-radius: 1rem;
-}
-
-.cash-box-filters-card .form-control-lg {
-    border-radius: 0.75rem;
-}
-
-.letter-spacing {
-    letter-spacing: 0.08em;
-}
-
-/* Style for incoming/outgoing column */
-.in-out-cell {
-    font-weight: bold;
-    border-radius: 4px;
-    padding: 4px 8px;
-    text-align: center;
-    min-width: 80px;
-}
-
-.in-out-incoming {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-}
-
-.in-out-outgoing {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-}
-
-/* Excel export button styling */
-#exportExcelBtn {
-    transition: all 0.3s ease;
-}
-
-#exportExcelBtn:hover {
+.cash-box-stat-tile:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    box-shadow: 0 0.6rem 1.2rem rgba(0, 0, 0, 0.1);
+}
+.letter-spacing { letter-spacing: 0.08em; }
+
+/* ── Financial flow cards ────────────────────────────────────────────────── */
+.cashbox-flow-card {
+    border-radius: 0.875rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border-left: 4px solid transparent !important;
+}
+.cashbox-flow-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.6rem 1.4rem rgba(0, 0, 0, 0.1) !important;
+}
+.cashbox-inflow-card  { border-left-color: #22c55e !important; }
+.cashbox-outflow-card { border-left-color: #ef4444 !important; }
+.cashbox-net-card     { border-left-color: #3b82f6 !important; }
+
+.cashbox-net-positive { border-left-color: #22c55e !important; }
+.cashbox-net-negative { border-left-color: #ef4444 !important; }
+.cashbox-net-zero     { border-left-color: #94a3b8 !important; }
+
+.cashbox-flow-icon {
+    width: 46px;
+    height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 }
 
-/* Table header styling for new column */
-#cashBoxTable th:nth-child(4) {
-    background-color: var(--seafoam-green) !important;
-    color: white !important;
+/* ── Quick filter pills ──────────────────────────────────────────────────── */
+.quick-filter-btn.active {
+    background-color: var(--seafoam-green, #2dd4bf) !important;
+    border-color:     var(--seafoam-green, #2dd4bf) !important;
+    color: #fff !important;
 }
 
-/* Responsive adjustments */
+/* ── Filters card ────────────────────────────────────────────────────────── */
+.cash-box-filters-card       { border-radius: 1rem; }
+.cash-box-filters-card .form-control { border-radius: 0.6rem; }
+
+/* ── Daily closing header ────────────────────────────────────────────────── */
+.cashbox-closing-header {
+    background: #f0fdf4;
+    border-bottom: 1px solid #bbf7d0;
+    border-radius: 0.5rem 0.5rem 0 0;
+    user-select: none;
+}
+.cashbox-closing-header:hover { background: #dcfce7; }
+.cashbox-chevron {
+    transition: transform 0.3s ease;
+}
+.cashbox-chevron.rotated { transform: rotate(180deg); }
+
+/* ── In/Out badges in table ──────────────────────────────────────────────── */
+.in-out-cell {
+    font-weight: 700;
+    border-radius: 0.3rem;
+    padding: 3px 9px;
+    font-size: 0.8rem;
+    display: inline-block;
+    min-width: 72px;
+    text-align: center;
+}
+.in-out-incoming {
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #86efac;
+}
+.in-out-outgoing {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+}
+
+/* ── Running balance colours ─────────────────────────────────────────────── */
+.cashbox-bal-pos {
+    color: #166534;
+    font-weight: 700;
+}
+.cashbox-bal-neg {
+    color: #991b1b;
+    font-weight: 700;
+}
+
+/* ── Action buttons column ───────────────────────────────────────────────── */
+#cashBoxTable th:last-child,
+#cashBoxTable td:last-child { white-space: nowrap; }
+
+/* ── Excel / Print buttons ───────────────────────────────────────────────── */
+#exportExcelBtn,
+#printReportBtn {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+#exportExcelBtn:hover,
+#printReportBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* ── Audit log modal ─────────────────────────────────────────────────────── */
+.cashbox-audit-header {
+    background: linear-gradient(135deg, #1e3a5f, #1e40af);
+    color: #fff;
+}
+.cashbox-audit-header .btn-close { filter: invert(1); }
+.cashbox-audit-timeline          { font-size: 0.9rem; }
+.cashbox-audit-entry {
+    padding: 14px 16px;
+    border-bottom: 1px solid #f1f5f9;
+}
+.cashbox-audit-even { background: #f8fafc; }
+.cashbox-audit-odd  { background: #fff; }
+.cashbox-audit-entry:last-child { border-bottom: none; }
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-    .in-out-cell {
-        min-width: 60px;
-        font-size: 0.9em;
-    }
+    .in-out-cell { min-width: 60px; font-size: 0.75rem; }
+    .cashbox-flow-card .fs-5 { font-size: 1rem !important; }
 }

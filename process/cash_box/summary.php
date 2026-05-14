@@ -9,128 +9,117 @@ if (!isset($_SESSION['user_id']) || !hasPermission('view_cash_box')) {
     exit;
 }
 
-$from = $_GET['from'] ?? null;
-$to = $_GET['to'] ?? null;
+$from   = $_GET['from']   ?? null;
+$to     = $_GET['to']     ?? null;
 $search = isset($_GET['search']) ? trim((string) $_GET['search']) : '';
 $filters_active = ($from || $to || $search !== '');
 
-// Function to fetch dollar rate from API
-function fetchDollarRateFromAPI() {
-    $apiUrl = 'https://dinarapi.hediworks.site/api/get-price';
-    $apiToken = 'S3gl9SVEkZ1Vvc93cCjsbLLmwDvgzk';
-    $id = '8'; // 100 dollar ID
-    
-    $url = $apiUrl . '?id=' . $id . '&api_token=' . $apiToken;
-    
-    $context = stream_context_create([
-        'http' => [
-            'timeout' => 10,
-            'user_agent' => 'DanaConcrete/1.0'
-        ]
-    ]);
-    
-    $response = @file_get_contents($url, false, $context);
-    
-    if ($response !== false) {
-        $data = json_decode($response, true);
+function fetchDollarRateFromAPI(): ?float {
+    $url = 'https://dinarapi.hediworks.site/api/get-price?id=8&api_token=S3gl9SVEkZ1Vvc93cCjsbLLmwDvgzk';
+    $ctx = stream_context_create(['http' => ['timeout' => 10, 'user_agent' => 'DanaConcrete/1.0']]);
+    $resp = @file_get_contents($url, false, $ctx);
+    if ($resp !== false) {
+        $data = json_decode($resp, true);
         if ($data && isset($data['value']) && is_numeric($data['value'])) {
-            return floatval($data['value']);
+            return (float) $data['value'];
         }
     }
-    
     return null;
 }
 
 try {
-    // Get exchange rate from API
-    $usd_iqd_rate = 139250; // Default fallback value
-    
-    // Try to get rate from API
+    $usd_iqd_rate = 139250;
     $api_rate = fetchDollarRateFromAPI();
     if ($api_rate !== null) {
         $usd_iqd_rate = $api_rate;
     }
-    
-    // Build WHERE clause for USD with currency filter
-    $usd_where = [];
-    $usd_params = [];
+
+    // Build shared WHERE clause (without currency)
+    $base_where  = [];
+    $base_params = [];
     if ($from) {
-        $usd_where[] = 'date >= ?';
-        $usd_params[] = $from;
+        $base_where[]  = 'date >= ?';
+        $base_params[] = $from;
     }
     if ($to) {
-        $usd_where[] = 'date <= ?';
-        $usd_params[] = $to;
+        $base_where[]  = 'date <= ?';
+        $base_params[] = $to;
     }
     if ($search !== '') {
-        $usd_where[] = '(note LIKE ? OR CAST(date AS CHAR) LIKE ?)';
+        $base_where[] = '(note LIKE ? OR CAST(date AS CHAR) LIKE ?)';
         $like = '%' . $search . '%';
-        $usd_params[] = $like;
-        $usd_params[] = $like;
+        $base_params[] = $like;
+        $base_params[] = $like;
     }
-    $usd_where[] = "currency='دۆلار'";
-    $usd_whereSql = 'WHERE ' . implode(' AND ', $usd_where);
-    
-    // Build WHERE clause for IQD with currency filter
-    $iqd_where = [];
-    $iqd_params = [];
-    if ($from) {
-        $iqd_where[] = 'date >= ?';
-        $iqd_params[] = $from;
-    }
-    if ($to) {
-        $iqd_where[] = 'date <= ?';
-        $iqd_params[] = $to;
-    }
-    if ($search !== '') {
-        $iqd_where[] = '(note LIKE ? OR CAST(date AS CHAR) LIKE ?)';
-        $likeIqd = '%' . $search . '%';
-        $iqd_params[] = $likeIqd;
-        $iqd_params[] = $likeIqd;
-    }
-    $iqd_where[] = "currency='دینار'";
-    $iqd_whereSql = 'WHERE ' . implode(' AND ', $iqd_where);
-    
-    // Calculate USD total
-    $sql_usd = "SELECT COALESCE(SUM(CASE WHEN type='deposit' THEN amount_usd ELSE -amount_usd END), 0) as total_usd FROM cash_box $usd_whereSql";
-    $stmt_usd = $pdo->prepare($sql_usd);
-    $stmt_usd->execute($usd_params);
-    $total_usd = floatval($stmt_usd->fetchColumn() ?: 0);
-    
-    // Calculate IQD total
-    $sql_iqd = "SELECT COALESCE(SUM(CASE WHEN type='deposit' THEN amount_iqd ELSE -amount_iqd END), 0) as total_iqd FROM cash_box $iqd_whereSql";
-    $stmt_iqd = $pdo->prepare($sql_iqd);
-    $stmt_iqd->execute($iqd_params);
-    $total_iqd = floatval($stmt_iqd->fetchColumn() ?: 0);
-    
-    // Convert IQD to USD using API rate (100 USD = usd_iqd_rate IQD)
-    // So 1 USD = (usd_iqd_rate / 100) IQD
-    // Therefore: IQD amount in USD = total_iqd / (usd_iqd_rate / 100)
-    $iqd_to_usd = 0;
-    if ($usd_iqd_rate > 0 && $total_iqd != 0) {
-        $iqd_to_usd = $total_iqd / ($usd_iqd_rate / 100);
-    }
-    
+
+    // --- USD-currency transactions ---
+    $usd_where  = array_merge($base_where, ["currency='دۆلار'"]);
+    $usd_sql    = 'WHERE ' . implode(' AND ', $usd_where);
+    $usd_params = $base_params;
+
+    $stmt = $pdo->prepare("
+        SELECT
+            COALESCE(SUM(CASE WHEN type='deposit'  THEN amount_usd ELSE 0 END), 0) AS inflow_usd,
+            COALESCE(SUM(CASE WHEN type='withdraw' THEN amount_usd ELSE 0 END), 0) AS outflow_usd,
+            COALESCE(SUM(CASE WHEN type='deposit'  THEN amount_usd ELSE -amount_usd END), 0) AS net_usd
+        FROM cash_box $usd_sql
+    ");
+    $stmt->execute($usd_params);
+    $usd = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // --- IQD-currency transactions ---
+    $iqd_where  = array_merge($base_where, ["currency='دینار'"]);
+    $iqd_sql    = 'WHERE ' . implode(' AND ', $iqd_where);
+    $iqd_params = $base_params;
+
+    $stmt2 = $pdo->prepare("
+        SELECT
+            COALESCE(SUM(CASE WHEN type='deposit'  THEN amount_iqd ELSE 0 END), 0) AS inflow_iqd,
+            COALESCE(SUM(CASE WHEN type='withdraw' THEN amount_iqd ELSE 0 END), 0) AS outflow_iqd,
+            COALESCE(SUM(CASE WHEN type='deposit'  THEN amount_iqd ELSE -amount_iqd END), 0) AS net_iqd
+        FROM cash_box $iqd_sql
+    ");
+    $stmt2->execute($iqd_params);
+    $iqd = $stmt2->fetch(PDO::FETCH_ASSOC);
+
+    // --- Transaction count ---
+    $count_where = $base_where ? ('WHERE ' . implode(' AND ', $base_where)) : '';
+    $count_stmt  = $pdo->prepare("SELECT COUNT(*) FROM cash_box $count_where");
+    $count_stmt->execute($base_params);
+    $tx_count = (int) $count_stmt->fetchColumn();
+
+    $total_usd = (float) $usd['net_usd'];
+    $total_iqd = (float) $iqd['net_iqd'];
+
+    $iqd_to_usd = $usd_iqd_rate > 0 ? round($total_iqd / ($usd_iqd_rate / 100), 2) : 0;
     $calculated_total = round($total_usd + $iqd_to_usd, 2);
-    
-    // Check if there's a manually set total
+
+    // Manual override (no filter active)
     $stmt_manual = $pdo->prepare("SELECT value FROM settings WHERE name = 'cash_box_total_usd_all' LIMIT 1");
     $stmt_manual->execute();
     $manual_total = $stmt_manual->fetchColumn();
-    
-    // Manual override applies only when no date/search filters are active
-    $is_manual = !$filters_active && ($manual_total !== false && $manual_total !== null && $manual_total !== '');
-    $total_usd_all = $is_manual ? floatval($manual_total) : $calculated_total;
-    
+    $is_manual      = !$filters_active && ($manual_total !== false && $manual_total !== null && $manual_total !== '');
+    $total_usd_all  = $is_manual ? (float) $manual_total : $calculated_total;
+
     echo json_encode(['success' => true, 'data' => [
-        'total_usd_all' => $total_usd_all,
+        'total_usd_all'    => $total_usd_all,
         'calculated_total' => $calculated_total,
-        'is_manual' => $is_manual,
-        'total_usd' => $total_usd,
-        'total_iqd' => $total_iqd,
-        'iqd_to_usd' => $iqd_to_usd,
-        'usd_iqd_rate' => $usd_iqd_rate
+        'is_manual'        => $is_manual,
+        // Net balances
+        'total_usd'        => $total_usd,
+        'total_iqd'        => $total_iqd,
+        'iqd_to_usd'       => $iqd_to_usd,
+        'usd_iqd_rate'     => $usd_iqd_rate,
+        // Inflow (deposits)
+        'inflow_usd'       => (float) $usd['inflow_usd'],
+        'inflow_iqd'       => (float) $iqd['inflow_iqd'],
+        // Outflow (withdrawals)
+        'outflow_usd'      => (float) $usd['outflow_usd'],
+        'outflow_iqd'      => (float) $iqd['outflow_iqd'],
+        // Transaction count
+        'transaction_count' => $tx_count,
     ]]);
-} catch (Exception $e) {
+
+} catch (\Exception $e) {
     echo json_encode(['success' => false, 'error' => $e->getMessage()]);
-} 
+}
