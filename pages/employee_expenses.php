@@ -235,31 +235,37 @@ if ($bonusExists) {
             </div>
           </div>
           <div class="mb-3">
-            <label for="income_total_add" class="form-label">کۆی گشتی</label>
+            <label for="income_total_add" class="form-label">کۆی خەرجی (حساب — د.ع)</label>
             <input type="text" class="form-control" id="income_total_add" readonly>
           </div>
 
-          <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 mb-3 text-start" dir="rtl">
-            <h6 class="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
-              <i class="fas fa-coins text-teal-600"></i> پارەدان لە قاسە (دوو دراو)
-            </h6>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div>
-                <label for="income_payment_amount_usd" class="block text-xs font-medium text-slate-600 mb-1">بڕی دۆلار ($)</label>
-                <input type="number" min="0" step="0.01" value="0" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500" id="income_payment_amount_usd" name="payment_amount_usd">
+          <div class="rounded-xl border border-teal-200 bg-teal-50/80 p-4 mb-3 text-start shadow-sm" dir="rtl">
+            <p class="text-sm font-bold text-teal-900 mb-3 flex items-center gap-2 border-b border-teal-200 pb-2">
+              <i class="fas fa-vault text-teal-600"></i> قاسە — ئەم بڕانە ڕاستەوخۆ لە قاسە دەکەم
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
+              <div class="sm:col-span-1">
+                <label for="income_amount_usd" class="block text-sm font-medium text-slate-700 mb-1">بڕی پارە بە دۆلار</label>
+                <div class="flex items-center gap-2">
+                  <span class="text-slate-500 text-sm">$</span>
+                  <input type="number" min="0" step="0.01" value="0" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500" id="income_amount_usd" name="amount_usd">
+                </div>
               </div>
-              <div>
-                <label for="income_payment_amount_iqd" class="block text-xs font-medium text-slate-600 mb-1">بڕی دینار (د.ع)</label>
-                <input type="number" min="0" step="0.01" value="0" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500" id="income_payment_amount_iqd" name="payment_amount_iqd">
+              <div class="sm:col-span-1">
+                <label for="income_amount_iqd" class="block text-sm font-medium text-slate-700 mb-1">بڕی پارە بە دینار</label>
+                <input type="number" min="0" step="0.01" value="0" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500" id="income_amount_iqd" name="amount_iqd">
+                <span class="text-xs text-slate-500 mt-1 block">دینار (د.ع)</span>
               </div>
-              <div>
-                <label for="income_exchange_rate" class="block text-xs font-medium text-slate-600 mb-1">نرخ: ١ دۆلار = چەند دینار؟</label>
-                <input type="number" min="0" step="0.0001" value="0" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500" id="income_exchange_rate" name="exchange_rate" placeholder="نمونە: 1500">
+              <div class="sm:col-span-2">
+                <label for="income_exchange_rate" class="block text-sm font-medium text-slate-700 mb-1">نرخی گۆڕینەوە — ١ دۆلار بە چەند؟</label>
+                <input type="number" min="0" step="0.0001" value="0" class="w-full max-w-md rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500" id="income_exchange_rate" name="exchange_rate" placeholder="نمونە: 1500">
               </div>
             </div>
-            <p class="text-xs text-slate-500 mt-2 mb-0" id="income_payment_hint">ئەگەر تەنها دینار دەدەیت: بڕی دینار بەتاڵ بێڵە یان یەکسان بە کۆی گشتی بکە؛ دۆلار و نرخ بەتاڵ بن.</p>
-            <div class="mt-2 text-sm font-semibold text-teal-800" id="income_payment_equiv_wrap" style="display:none;">
-              کۆی هاوتای دینار: <span id="income_payment_equiv">0</span> د.ع
+            <div class="mt-4 rounded-lg bg-white/90 border border-teal-100 px-3 py-2 text-sm">
+              <span class="text-slate-600">کۆی خەرجی بە دینار (هاوتا):</span>
+              <strong class="text-teal-800 ms-1" id="income_cash_equiv_display">0</strong>
+              <span class="text-slate-500">د.ع</span>
+              <span class="text-xs text-slate-500 d-block mt-1">(دۆلار × نرخ) + دینار — دەبێت یەکسان بێت بە کۆی خەرجی لە سەرەوە</span>
             </div>
           </div>
 
@@ -319,30 +325,34 @@ if ($bonusExists) {
             </select>
           </div>
           
-          <div class="mb-3">
-            <label for="deduction_amount" class="form-label">بڕ (د.ع) — حسابی خەرجی</label>
-            <input type="number" class="form-control" id="deduction_amount" name="amount" min="0" step="0.01" required>
-          </div>
-
-          <div class="rounded-xl border border-amber-200 bg-amber-50 p-4 mb-3 text-start" dir="rtl">
-            <h6 class="text-sm font-bold text-amber-900 mb-3 flex items-center gap-2">
-              <i class="fas fa-wallet text-amber-600"></i> پارەدان لە قاسە
-            </h6>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div class="rounded-xl border border-amber-200 bg-amber-50/90 p-4 mb-3 text-start shadow-sm" dir="rtl">
+            <p class="text-sm font-bold text-amber-900 mb-3 flex items-center gap-2 border-b border-amber-200 pb-2">
+              <i class="fas fa-vault text-amber-600"></i> قاسە — ڕاستەوخۆ لە قاسە دەکەم
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
               <div>
-                <label for="deduction_payment_amount_usd" class="block text-xs font-medium text-slate-600 mb-1">دۆلار ($)</label>
-                <input type="number" min="0" step="0.01" value="0" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" id="deduction_payment_amount_usd">
+                <label for="deduction_amount_usd" class="block text-sm font-medium text-slate-700 mb-1">بڕی پارە بە دۆلار</label>
+                <div class="flex items-center gap-2">
+                  <span class="text-slate-500 text-sm">$</span>
+                  <input type="number" min="0" step="0.01" value="0" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm" id="deduction_amount_usd">
+                </div>
               </div>
               <div>
-                <label for="deduction_payment_amount_iqd" class="block text-xs font-medium text-slate-600 mb-1">دینار (د.ع)</label>
-                <input type="number" min="0" step="0.01" value="0" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" id="deduction_payment_amount_iqd">
+                <label for="deduction_amount_iqd" class="block text-sm font-medium text-slate-700 mb-1">بڕی پارە بە دینار</label>
+                <input type="number" min="0" step="0.01" value="0" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm" id="deduction_amount_iqd">
+                <span class="text-xs text-slate-500 mt-1 block">دینار (د.ع)</span>
               </div>
-              <div>
-                <label for="deduction_exchange_rate" class="block text-xs font-medium text-slate-600 mb-1">١ دۆلار = دینار</label>
-                <input type="number" min="0" step="0.0001" value="0" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" id="deduction_exchange_rate" placeholder="1500">
+              <div class="sm:col-span-2">
+                <label for="deduction_exchange_rate" class="block text-sm font-medium text-slate-700 mb-1">نرخی گۆڕینەوە — ١ دۆلار بە چەند؟</label>
+                <input type="number" min="0" step="0.0001" value="0" class="w-full max-w-md rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm" id="deduction_exchange_rate" placeholder="1500">
               </div>
             </div>
-            <p class="text-xs text-slate-600 mt-2 mb-0" id="deduction_payment_equiv_wrap" style="display:none;">هاوتای دینار: <span id="deduction_payment_equiv" class="font-semibold">0</span> د.ع</p>
+            <div class="mt-4 rounded-lg bg-white/90 border border-amber-100 px-3 py-2 text-sm">
+              <span class="text-slate-600">کۆی خەرجی بە دینار (حساب):</span>
+              <strong class="text-amber-900 ms-1" id="deduction_ledger_total_display">0</strong>
+              <span class="text-slate-500">د.ع</span>
+              <span class="text-xs text-slate-500 d-block mt-1">(دۆلار × نرخ) + دینار</span>
+            </div>
           </div>
           
           <div class="mb-3">
@@ -399,27 +409,30 @@ if ($bonusExists) {
             </select>
           </div>
           
-          <div class="mb-3">
-            <label for="update_amount" class="form-label">بڕ (د.ع) — حساب</label>
-            <input type="number" class="form-control" id="update_amount" name="amount" min="0" step="0.01" required>
-          </div>
-
-          <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 mb-3 text-start" dir="rtl">
-            <h6 class="text-sm font-bold text-slate-700 mb-3">پارەدان لە قاسە</h6>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 mb-3 text-start shadow-sm" dir="rtl">
+            <p class="text-sm font-bold text-slate-800 mb-3 border-b border-slate-200 pb-2">قاسە</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
               <div>
-                <label for="update_amount_usd" class="block text-xs font-medium text-slate-600 mb-1">دۆلار</label>
-                <input type="number" min="0" step="0.01" value="0" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" id="update_amount_usd" name="amount_usd">
+                <label for="update_amount_usd" class="block text-sm font-medium text-slate-700 mb-1">بڕی پارە بە دۆلار</label>
+                <div class="flex items-center gap-2">
+                  <span class="text-slate-500 text-sm">$</span>
+                  <input type="number" min="0" step="0.01" value="0" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm" id="update_amount_usd" name="amount_usd">
+                </div>
               </div>
               <div>
-                <label for="update_amount_iqd" class="block text-xs font-medium text-slate-600 mb-1">دینار</label>
-                <input type="number" min="0" step="0.01" value="0" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" id="update_amount_iqd" name="amount_iqd">
+                <label for="update_amount_iqd" class="block text-sm font-medium text-slate-700 mb-1">بڕی پارە بە دینار</label>
+                <input type="number" min="0" step="0.01" value="0" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm" id="update_amount_iqd" name="amount_iqd">
               </div>
-              <div>
-                <label for="update_exchange_rate" class="block text-xs font-medium text-slate-600 mb-1">نرخ (دینار/١\$)</label>
-                <input type="number" min="0" step="0.0001" value="0" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" id="update_exchange_rate" name="exchange_rate">
+              <div class="sm:col-span-2">
+                <label for="update_exchange_rate" class="block text-sm font-medium text-slate-700 mb-1">نرخی گۆڕینەوە — ١ دۆلار بە چەند؟</label>
+                <input type="number" min="0" step="0.0001" value="0" class="w-full max-w-md rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm" id="update_exchange_rate" name="exchange_rate">
               </div>
             </div>
+            <div class="mt-3 text-sm">
+              <span class="text-slate-600">کۆی خەرجی بە دینار:</span>
+              <strong id="update_ledger_display" class="text-slate-900 ms-1">0</strong> د.ع
+            </div>
+            <input type="hidden" id="update_amount" name="amount" value="0">
           </div>
           
           <div class="mb-3">
@@ -462,9 +475,22 @@ $(function() {
         var overtime = parseFloat($('#income_overtime').val()) || 0;
         var total = salary + bonus + overtime;
         $('#income_total_add').val(total.toLocaleString('en-US') + ' د.ع');
+        refreshIncomeCashEquiv();
     }
-    
-    $('#income_salary, #income_bonus, #income_overtime').on('input change', calcIncomeTotal);
+    function refreshIncomeCashEquiv() {
+        var usd = parseFloat($('#income_amount_usd').val()) || 0;
+        var iqd = parseFloat($('#income_amount_iqd').val()) || 0;
+        var rate = parseFloat($('#income_exchange_rate').val()) || 0;
+        var eq = Math.round(iqd + usd * rate);
+        if (usd > 0 && rate <= 0) {
+            $('#income_cash_equiv_display').text('— (نرخ پێویستە)');
+        } else {
+            $('#income_cash_equiv_display').text(eq.toLocaleString('en-US'));
+        }
+    }
+    $('#income_salary, #income_bonus, #income_overtime, #income_amount_usd, #income_amount_iqd, #income_exchange_rate').on('input change', function() {
+        calcIncomeTotal();
+    });
     
     // Auto-fill salary, bonus, and overtime in Income Expense Modal and show balance
     $('#income_employee_id').on('change', function() {

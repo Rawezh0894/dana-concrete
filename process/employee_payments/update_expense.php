@@ -25,12 +25,13 @@ $id = intval($_POST['id'] ?? 0);
 $employee_id = intval($_POST['employee_id'] ?? 0);
 $expense_date = trim($_POST['expense_date'] ?? '');
 $expense_type = trim($_POST['expense_type'] ?? '');
-$amount = floatval($_POST['amount'] ?? 0);
 $notes = trim($_POST['notes'] ?? '');
 
-$amount_usd = floatval($_POST['amount_usd'] ?? 0);
-$amount_iqd = floatval($_POST['amount_iqd'] ?? 0);
+$amount_usd = round(floatval($_POST['amount_usd'] ?? 0), 2);
+$amount_iqd = round(floatval($_POST['amount_iqd'] ?? 0), 2);
 $exchange_rate = floatval($_POST['exchange_rate'] ?? 0);
+
+$amount = employee_expense_cash_iqd_equivalent($amount_usd, $amount_iqd, $exchange_rate);
 
 if ($id <= 0) {
     echo json_encode(['success' => false, 'message' => 'هەڵەی ID']);
@@ -43,7 +44,12 @@ if ($employee_id <= 0 || $expense_date === '' || $expense_type === '') {
 }
 
 if ($amount <= 0) {
-    echo json_encode(['success' => false, 'message' => 'بڕی خەرجی پێویستە']);
+    echo json_encode(['success' => false, 'message' => 'کۆی خەرجی بە دینار دەبێت گەورەتر بێت لە سفر (دۆلار×نرخ + دینار).']);
+    exit;
+}
+
+if ($amount_usd > 0 && $exchange_rate <= 0) {
+    echo json_encode(['success' => false, 'message' => 'کاتێک بڕی دۆلار هەیە، نرخی گۆڕینەوە پێویستە.']);
     exit;
 }
 

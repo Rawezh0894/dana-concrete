@@ -30,8 +30,8 @@ $deduction = floatval($_POST['deduction'] ?? 0);
 $penalty = floatval($_POST['penalty'] ?? 0);
 $overtime_payment = floatval($_POST['overtime_payment'] ?? 0);
 
-$payment_amount_usd = floatval($_POST['payment_amount_usd'] ?? 0);
-$payment_amount_iqd = floatval($_POST['payment_amount_iqd'] ?? 0);
+$amount_usd = round(floatval($_POST['amount_usd'] ?? 0), 2);
+$amount_iqd = round(floatval($_POST['amount_iqd'] ?? 0), 2);
 $exchange_rate = floatval($_POST['exchange_rate'] ?? 0);
 
 if ($employee_id <= 0 || $expense_date === '') {
@@ -43,6 +43,24 @@ $total_expenses = $salary + $bonus + $overtime + $advance + $deduction + $penalt
 if ($total_expenses <= 0) {
     echo json_encode(['success' => false, 'message' => 'لانیکەم یەک جۆری خەرجی پێویستە']);
     exit;
+}
+
+$cash_equiv = employee_expense_cash_iqd_equivalent($amount_usd, $amount_iqd, $exchange_rate);
+if ($amount_usd > 0 && $exchange_rate <= 0) {
+    echo json_encode(['success' => false, 'message' => 'کاتێک بڕی دۆلار هەیە، نرخی گۆڕینەوە پێویستە.']);
+    exit;
+}
+
+// قاسە: یان هاوتای دینار یەکسان بە کۆی حساب، یان تەنها دینار لە قاسە (هەردووکیان سفر) → کۆی دینار لە قاسە دەردەچێت
+if ($amount_usd > 0 || $amount_iqd > 0) {
+    if (abs($cash_equiv - $total_expenses) > 1.0) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'کۆی خەرجی بە دینار (' . number_format($total_expenses, 0) . ') دەبێت یەکسان بێت بە (دۆلار × نرخ) + دینار = '
+                . number_format($cash_equiv, 0) . ' د.ع.',
+        ]);
+        exit;
+    }
 }
 
 $lines = [];
@@ -69,18 +87,6 @@ if ($overtime_payment > 0) {
 }
 
 try {
-    $splitLines = employee_expense_split_payment_amounts(
-        $lines,
-        $payment_amount_usd,
-        $payment_amount_iqd,
-        $exchange_rate
-    );
-} catch (RuntimeException $e) {
-    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
-    exit;
-}
-
-try {
     $pdo->beginTransaction();
 
     $stmt = $pdo->prepare('SELECT name FROM employees WHERE id = ?');
@@ -89,41 +95,55 @@ try {
     $employee_name = $employee['name'] ?? 'Unknown';
 
     $expense_ids = [];
+    $first_expense_id = null;
 
     $stmtInsert = $pdo->prepare(
         'INSERT INTO employee_expenses (employee_id, expense_type, amount, amount_usd, amount_iqd, exchange_rate, notes, created_by, expense_date)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
     );
 
-    foreach ($splitLines as $i => $sl) {
+    foreach ($lines as $idx => $ln) {
+        $is_first = ($idx === 0);
+        $row_usd = $is_first ? $amount_usd : 0.0;
+        $row_iqd = $is_first ? $amount_iqd : 0.0;
+        $row_rate = $is_first ? $exchange_rate : 0.0;
+
         $stmtInsert->execute([
             $employee_id,
-            $sl['type'],
-            $sl['amount'],
-            $sl['amount_usd'],
-            $sl['amount_iqd'],
-            $sl['exchange_rate'],
+            $ln['type'],
+            $ln['amount'],
+            $row_usd,
+            $row_iqd,
+            $row_rate,
             $notes,
             $_SESSION['user_id'],
             $expense_date,
         ]);
         $newId = (int) $pdo->lastInsertId();
-        $expense_ids[] = ['type' => $sl['type'], 'id' => $newId, 'amount' => $sl['amount']];
-
-        $rowForCash = [
-            'id' => $newId,
-            'employee_id' => $employee_id,
-            'expense_type' => $sl['type'],
-            'amount' => $sl['amount'],
-            'amount_usd' => $sl['amount_usd'],
-            'amount_iqd' => $sl['amount_iqd'],
-            'exchange_rate' => $sl['exchange_rate'],
-            'expense_date' => $expense_date,
-            'notes' => $notes,
-            'created_by' => (int) $_SESSION['user_id'],
-        ];
-        employee_expense_sync_cash_box($pdo, $rowForCash, $employee_name);
+        if ($is_first) {
+            $first_expense_id = $newId;
+        }
+        $expense_ids[] = ['type' => $ln['type'], 'id' => $newId, 'amount' => $ln['amount']];
     }
+
+    if ($first_expense_id === null) {
+        throw new RuntimeException('هەڵە لە دروستکردنی تۆمار');
+    }
+
+    $first_type = $lines[0]['type'] ?? 'batch';
+    employee_expense_replace_cash_withdrawals(
+        $pdo,
+        $first_expense_id,
+        $employee_name,
+        $first_type,
+        $expense_date,
+        $amount_usd,
+        $amount_iqd,
+        $exchange_rate,
+        $notes,
+        (int) $_SESSION['user_id'],
+        ($amount_usd <= 0 && $amount_iqd <= 0) ? $total_expenses : 0.0
+    );
 
     $expense_types_kurdish = [
         'salary' => 'مووچە',
@@ -191,7 +211,7 @@ try {
     error_log('PDOException in employee_payments/add_expense.php: ' . $e->getMessage());
     $msg = $e->getMessage();
     if (strpos($msg, 'Unknown column') !== false && strpos($msg, 'amount_usd') !== false) {
-        $msg .= ' — تکایە فایلی database/migrations/employee_expenses_multicurrency_cashbox.sql جێبەجێ بکە.';
+        $msg .= ' — تکایە database/migrations/employee_expenses_multicurrency_cashbox.sql جێبەجێ بکە.';
     }
     echo json_encode(['success' => false, 'message' => 'هەڵە لە زیادکردنی خەرجی کارمەند: ' . $msg]);
 }
