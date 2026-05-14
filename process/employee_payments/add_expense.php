@@ -2,6 +2,7 @@
 require_once '../../config/db_conected.php';
 require_once '../../config/permissions.php';
 require_once __DIR__ . '/employee_expense_cash_box_helper.php';
+require_once __DIR__ . '/employee_loan_helper.php';
 header('Content-Type: application/json');
 if (!isset($_SESSION['user_id'])) {
     http_response_code(403);
@@ -34,6 +35,9 @@ $amount_usd = round(floatval($_POST['amount_usd'] ?? 0), 2);
 $amount_iqd = round(floatval($_POST['amount_iqd'] ?? 0), 2);
 $exchange_rate = floatval($_POST['exchange_rate'] ?? 0);
 
+$loan_deduct_usd = round(floatval($_POST['deduct_loan_usd'] ?? 0), 2);
+$loan_deduct_iqd = round(floatval($_POST['deduct_loan_iqd'] ?? 0), 2);
+
 if ($employee_id <= 0 || $expense_date === '') {
     echo json_encode(['success' => false, 'message' => 'کارمەند و بەروار پێویستە']);
     exit;
@@ -45,18 +49,64 @@ if ($total_expenses <= 0) {
     exit;
 }
 
+$gross_income = $salary + $bonus + $overtime;
+$loan_deduct_equiv = 0.0;
+$loansTableChk = $pdo->query("SHOW TABLES LIKE 'employee_loans'");
+$loans_table_ok = $loansTableChk && $loansTableChk->rowCount() > 0;
+
+if ($loan_deduct_usd > 0 || $loan_deduct_iqd > 0) {
+    if (!$loans_table_ok) {
+        echo json_encode(['success' => false, 'message' => 'خشتەی قەرز دامەزراوە نییە — employee_loans.sql جێبەجێ بکە.']);
+        exit;
+    }
+    if ($loan_deduct_usd > 0 && $exchange_rate <= 0) {
+        echo json_encode(['success' => false, 'message' => 'کەمکردنەوەی قەرز بە دۆلار: نرخی گۆڕینەوە پێویستە.']);
+        exit;
+    }
+    if ($gross_income <= 0) {
+        echo json_encode(['success' => false, 'message' => 'کەمکردنەوەی قەرز تەنها لەگەڵ مووچە/بەخشیش/کارواندا دەبێت.']);
+        exit;
+    }
+    if (abs($total_expenses - $gross_income) > 0.01) {
+        echo json_encode(['success' => false, 'message' => 'کەمکردنەوەی قەرز لە هەمان داواکاریدا تەنها بۆ کۆی مووچە/بەخشیش/کاروان ڕێگەپێدراوە.']);
+        exit;
+    }
+    $loan_deduct_equiv = employee_expense_cash_iqd_equivalent($loan_deduct_usd, $loan_deduct_iqd, $exchange_rate);
+    if ($loan_deduct_equiv > $gross_income + 1.0) {
+        echo json_encode(['success' => false, 'message' => 'کەمکردنەوەی قەرز نابێت زیاتر بێت لە کۆی مووچە/بەخشیش/کاروان.']);
+        exit;
+    }
+    $outstanding = employee_loan_outstanding_totals($pdo, $employee_id);
+    if ($loan_deduct_usd > $outstanding['usd'] + 0.01) {
+        echo json_encode(['success' => false, 'message' => 'کەمکردنەوەی دۆلار زیاترە لە قەرزی ماوەی دۆلار.']);
+        exit;
+    }
+    if ($loan_deduct_iqd > $outstanding['iqd'] + 0.01) {
+        echo json_encode(['success' => false, 'message' => 'کەمکردنەوەی دینار زیاترە لە قەرزی ماوەی دینار.']);
+        exit;
+    }
+}
+
+$net_ledger_for_cash = round($total_expenses - $loan_deduct_equiv, 2);
+if ($net_ledger_for_cash < -0.01) {
+    echo json_encode(['success' => false, 'message' => 'کۆی پارەی قاسە نابێت نەرێنی بێت.']);
+    exit;
+}
+
 $cash_equiv = employee_expense_cash_iqd_equivalent($amount_usd, $amount_iqd, $exchange_rate);
 if ($amount_usd > 0 && $exchange_rate <= 0) {
     echo json_encode(['success' => false, 'message' => 'کاتێک بڕی دۆلار هەیە، نرخی گۆڕینەوە پێویستە.']);
     exit;
 }
 
-// قاسە: یان هاوتای دینار یەکسان بە کۆی حساب، یان تەنها دینار لە قاسە (هەردووکیان سفر) → کۆی دینار لە قاسە دەردەچێت
+// قاسە: هاوتای دینار = کۆی خەرجی − کەمکردنەوەی قەرز (کاتێک قەرز هەیە)، یان کۆی تەواو
 if ($amount_usd > 0 || $amount_iqd > 0) {
-    if (abs($cash_equiv - $total_expenses) > 1.0) {
+    if (abs($cash_equiv - $net_ledger_for_cash) > 1.0) {
         echo json_encode([
             'success' => false,
-            'message' => 'کۆی خەرجی بە دینار (' . number_format($total_expenses, 0) . ') دەبێت یەکسان بێت بە (دۆلار × نرخ) + دینار = '
+            'message' => 'کۆی پارەی قاسە بە دینار دەبێت یەکسان بێت بە کۆی خەرجی (' . number_format($total_expenses, 0)
+                . ') − قەرز (' . number_format($loan_deduct_equiv, 0) . ') = '
+                . number_format($net_ledger_for_cash, 0) . ' د.ع. ئێستا (دۆلار×نرخ)+دینار = '
                 . number_format($cash_equiv, 0) . ' د.ع.',
         ]);
         exit;
@@ -130,7 +180,15 @@ try {
         throw new RuntimeException('هەڵە لە دروستکردنی تۆمار');
     }
 
+    if ($loans_table_ok && ($loan_deduct_usd > 0 || $loan_deduct_iqd > 0)) {
+        employee_loan_apply_repayment($pdo, $employee_id, $loan_deduct_usd, $loan_deduct_iqd, $first_expense_id);
+    }
+
     $first_type = $lines[0]['type'] ?? 'batch';
+    $fallback_iqd = 0.0;
+    if ($amount_usd <= 0 && $amount_iqd <= 0) {
+        $fallback_iqd = max(0.0, $net_ledger_for_cash);
+    }
     employee_expense_replace_cash_withdrawals(
         $pdo,
         $first_expense_id,
@@ -142,7 +200,7 @@ try {
         $exchange_rate,
         $notes,
         (int) $_SESSION['user_id'],
-        ($amount_usd <= 0 && $amount_iqd <= 0) ? $total_expenses : 0.0
+        $fallback_iqd
     );
 
     $expense_types_kurdish = [

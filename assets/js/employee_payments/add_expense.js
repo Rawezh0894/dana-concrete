@@ -98,8 +98,23 @@ $(function () {
             penalty: 0,
             amount_usd: parseFloat($('#income_amount_usd').val()) || 0,
             amount_iqd: parseFloat($('#income_amount_iqd').val()) || 0,
-            exchange_rate: parseFloat($('#income_exchange_rate').val()) || 0
+            exchange_rate: parseFloat($('#income_exchange_rate').val()) || 0,
+            deduct_loan_usd: parseFloat($('#income_deduct_loan_usd').val()) || 0,
+            deduct_loan_iqd: parseFloat($('#income_deduct_loan_iqd').val()) || 0
         };
+
+        var dUsd = formData.deduct_loan_usd;
+        var dIqd = formData.deduct_loan_iqd;
+        var maxU = parseFloat($('#income_deduct_loan_usd').data('maxOutstanding'));
+        var maxI = parseFloat($('#income_deduct_loan_iqd').data('maxOutstanding'));
+        if (!isNaN(maxU) && dUsd > maxU + 0.001) {
+            swalAlert('هەڵە', 'کەمکردنەوەی دۆلار زیاترە لە قەرزی ماوە', 'error');
+            return;
+        }
+        if (!isNaN(maxI) && dIqd > maxI + 0.001) {
+            swalAlert('هەڵە', 'کەمکردنەوەی دینار زیاترە لە قەرزی ماوە', 'error');
+            return;
+        }
 
         $.post('../process/employee_payments/add_expense.php', formData, function (response) {
             if (response.success) {
@@ -110,6 +125,8 @@ $(function () {
                 $('#income_expense_date').val(month);
                 $('#income_total_add').val('0 د.ع');
                 $('#income_cash_equiv_display').text('0');
+                $('#income_deduct_loan_usd').val(0);
+                $('#income_deduct_loan_iqd').val(0);
                 if (typeof calcIncomeTotal === 'function') {
                     calcIncomeTotal();
                 }

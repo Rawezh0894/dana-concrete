@@ -2,6 +2,7 @@
 require_once '../../config/db_conected.php';
 require_once '../../config/permissions.php';
 require_once __DIR__ . '/employee_expense_cash_box_helper.php';
+require_once __DIR__ . '/employee_loan_helper.php';
 header('Content-Type: application/json');
 if (!isset($_SESSION['user_id'])) {
     http_response_code(403);
@@ -39,7 +40,8 @@ try {
         'overtime' => 'کاروانحیسابی',
         'advance' => 'پێشەکی',
         'deduction' => 'کەمکردنەوە',
-        'penalty' => 'سزا'
+        'penalty' => 'سزا',
+        'overtime_payment' => 'پێدانی کاروانحیسابی',
     ];
 
     // Create old values for notification
@@ -59,6 +61,9 @@ try {
         'amount' => $record['amount']
     ];
 
+    $pdo->beginTransaction();
+
+    employee_loan_reverse_repayments_for_expense($pdo, $id);
     employee_expense_delete_cash_box_rows($pdo, $id);
 
     $stmt = $pdo->prepare('DELETE FROM employee_expenses WHERE id=?');
@@ -76,11 +81,16 @@ try {
             getUserIP()
         );
 
+        $pdo->commit();
         echo json_encode(['success' => true, 'message' => 'خەرجی سڕایەوە']);
     } else {
+        $pdo->rollBack();
         echo json_encode(['success' => false, 'message' => 'هەڵە لە سڕینەوە']);
     }
 } catch (PDOException $e) {
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
     error_log('PDOException in employee_payments/delete_expense.php: ' . $e->getMessage());
     echo json_encode(['success' => false, 'message' => 'هەڵە لە سڕینەوەی خەرجی: ' . $e->getMessage()]);
 }

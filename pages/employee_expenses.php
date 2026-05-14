@@ -28,6 +28,8 @@ if ($bonusExists) {
 } else {
     $employees = $pdo->query('SELECT id, name, salary, 0 as bonus FROM employees ORDER BY name')->fetchAll(PDO::FETCH_ASSOC);
 }
+// Loan issuance: same practical access as cash operations / payroll (server also checks).
+$can_issue_employee_loan = hasPermission('add_payment') || hasPermission('add_cash_box');
 ?>
 <!DOCTYPE html>
 <html lang="ku">
@@ -56,11 +58,21 @@ if ($bonusExists) {
 <?php include '../includes/navbar.php'; ?>
 <?php include '../includes/sidebar.php'; ?>
 <div class="container-fluid py-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0" style="color: var(--seafoam-green); font-weight: bold;">بەڕێوەبردنی خەرجی کارمەندەکان</h2>
-        <div>
-            <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#addIncomeExpenseModal" style="background: var(--seafoam-green); font-weight: bold;">
+    <div class="d-flex flex-column flex-lg-row flex-wrap align-items-lg-center justify-content-between gap-3 mb-4" style="position: relative; z-index: 20;">
+        <h2 class="mb-0 order-1 order-lg-0" style="color: var(--seafoam-green); font-weight: bold;">بەڕێوەبردنی خەرجی کارمەندەکان</h2>
+        <div class="d-flex flex-wrap align-items-center gap-2 order-0 order-lg-1 justify-content-lg-end" style="position: relative; z-index: 21;">
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addIncomeExpenseModal" style="background: var(--seafoam-green); font-weight: bold;">
                 <i class="fas fa-plus"></i> زیادکردنی مووچە/بەخشیش/کاروانحیسابی
+            </button>
+            <button type="button"
+                    id="btnIssueEmployeeLoan"
+                    class="inline-flex items-center justify-center gap-2 rounded-lg border-2 border-sky-800 bg-sky-600 px-4 py-2.5 text-sm font-bold text-white shadow-md transition hover:bg-sky-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-300"
+                    style="min-width: 10.5rem; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);"
+                    data-bs-toggle="modal"
+                    data-bs-target="#issueEmployeeLoanModal"
+                    aria-haspopup="dialog">
+                <i class="fas fa-hand-holding-usd" aria-hidden="true"></i>
+                <span>قەرزی کارمەند</span>
             </button>
             <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#addDeductionExpenseModal" style="font-weight: bold;">
                 <i class="fas fa-minus"></i> زیادکردنی پێشەکی/کەمکردنەوە/سزا
@@ -265,7 +277,36 @@ if ($bonusExists) {
               <span class="text-slate-600">کۆی خەرجی بە دینار (هاوتا):</span>
               <strong class="text-teal-800 ms-1" id="income_cash_equiv_display">0</strong>
               <span class="text-slate-500">د.ع</span>
-              <span class="text-xs text-slate-500 d-block mt-1">(دۆلار × نرخ) + دینار — دەبێت یەکسان بێت بە کۆی خەرجی لە سەرەوە</span>
+              <span class="text-xs text-slate-500 d-block mt-1" id="income_cash_equiv_hint">(دۆلار × نرخ) + دینار — دەبێت یەکسان بێت بە کۆی خەرجی لە سەرەوە</span>
+            </div>
+            <div class="mt-4 rounded-xl border border-indigo-200 bg-indigo-50/90 p-4 text-start shadow-sm" dir="rtl">
+              <p class="text-sm font-bold text-indigo-900 mb-2 flex items-center gap-2 border-b border-indigo-200 pb-2">
+                <i class="fas fa-piggy-bank text-indigo-600"></i> قەرزی کارمەند (کەمکردنەوە لە مووچە)
+              </p>
+              <div class="text-xs text-indigo-800 mb-3 rounded-lg bg-white/80 px-2 py-2 border border-indigo-100">
+                <span class="text-slate-600">قەرزی ماوە:</span>
+                <strong id="income_loan_outstanding_usd">0</strong> <span class="text-slate-500">$</span>
+                <span class="mx-2 text-slate-300">|</span>
+                <strong id="income_loan_outstanding_iqd">0</strong> <span class="text-slate-500">د.ع</span>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl mx-auto">
+                <div>
+                  <label for="income_deduct_loan_usd" class="block text-sm font-medium text-slate-700 mb-1">کەمکردنەوەی قەرز بە دۆلار (ئارەزوومەندانە)</label>
+                  <div class="flex items-center gap-2">
+                    <span class="text-slate-500 text-sm">$</span>
+                    <input type="number" min="0" step="0.01" value="0" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm" id="income_deduct_loan_usd" name="deduct_loan_usd" autocomplete="off">
+                  </div>
+                </div>
+                <div>
+                  <label for="income_deduct_loan_iqd" class="block text-sm font-medium text-slate-700 mb-1">کەمکردنەوەی قەرز بە دینار (ئارەزوومەندانە)</label>
+                  <input type="number" min="0" step="0.01" value="0" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm" id="income_deduct_loan_iqd" name="deduct_loan_iqd" autocomplete="off">
+                </div>
+              </div>
+              <p class="text-xs text-indigo-800 mt-3 mb-0">
+                <strong>پارەی خاو لە قاسە (دوای قەرز):</strong>
+                <span id="income_net_cash_display">0</span> د.ع
+                <span class="text-slate-500 d-block mt-1">ئەم بڕە دەبێت لە خانەکانی قاسە لە سەرەوە بنووسرێت (نابێت دووبارە لە قاسە دەرچێت بۆ بەشی قەرز).</span>
+              </p>
             </div>
           </div>
 
@@ -281,6 +322,54 @@ if ($bonusExists) {
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
           <button type="submit" class="btn btn-success" style="background: var(--seafoam-green); font-weight: bold;">زیادکردن</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Issue employee loan (cash box outflow) — always in DOM for Bootstrap target -->
+<div class="modal fade" id="issueEmployeeLoanModal" tabindex="-1" aria-labelledby="issueEmployeeLoanModalLabel" aria-hidden="true" style="z-index: 1060;">
+  <div class="modal-dialog modal-lg modal-dialog-centered" style="z-index: 1061;">
+    <div class="modal-content">
+      <form id="issueEmployeeLoanForm">
+        <div class="modal-header">
+          <h5 class="modal-title" id="issueEmployeeLoanModalLabel">قەرزی کارمەند — دەرچوون لە قاسە</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="alert alert-warning small mb-3">بڕی دۆلار و/یان دینار ڕاستەوخۆ لە قاسە دەکەم وەک «Employee Loan Issued». دواتر لە کاتی مووچەدا دەتوانیت قەرز کەم بکەیتەوە.</div>
+          <div class="mb-3">
+            <label for="loan_employee_id" class="form-label">کارمەند</label>
+            <select class="form-select" id="loan_employee_id" name="employee_id" required>
+              <option value="">-- هەلبژێرە --</option>
+              <?php foreach ($employees as $emp): ?>
+                <option value="<?= (int) $emp['id'] ?>"><?= htmlspecialchars($emp['name']) ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" dir="rtl">
+            <div>
+              <label for="loan_usd" class="form-label">بڕی قەرز بە دۆلار ($)</label>
+              <input type="number" class="form-control" id="loan_usd" name="loan_usd" min="0" step="0.01" value="0">
+            </div>
+            <div>
+              <label for="loan_iqd" class="form-label">بڕی قەرز بە دینار (د.ع)</label>
+              <input type="number" class="form-control" id="loan_iqd" name="loan_iqd" min="0" step="0.01" value="0">
+            </div>
+            <div class="sm:col-span-2">
+              <label for="loan_date" class="form-label">بەروار</label>
+              <input type="date" class="form-control" id="loan_date" name="loan_date" value="<?= htmlspecialchars(date('Y-m-d')) ?>" required>
+            </div>
+            <div class="sm:col-span-2">
+              <label for="loan_notes" class="form-label">تێبینی</label>
+              <textarea class="form-control" id="loan_notes" name="notes" rows="2" placeholder="ئارەزوومەندانە"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
+          <button type="submit" class="btn btn-primary" style="background: var(--seafoam-green); font-weight: bold;">تۆمارکردن و دەرچوون لە قاسە</button>
         </div>
       </form>
     </div>
@@ -467,7 +556,16 @@ if ($bonusExists) {
 <script src="../assets/js/employee_payments/update_expense.js" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/employee_payments/summary_expenses.js" nonce="<?php echo $csp_nonce; ?>"></script>
 <script nonce="<?php echo $csp_nonce; ?>">
+window.CAN_ISSUE_EMPLOYEE_LOAN = <?php echo $can_issue_employee_loan ? 'true' : 'false'; ?>;
+</script>
+<script nonce="<?php echo $csp_nonce; ?>">
 $(function() {
+    if (!window.CAN_ISSUE_EMPLOYEE_LOAN) {
+        $('#btnIssueEmployeeLoan').removeAttr('data-bs-toggle').removeAttr('data-bs-target');
+        $('#btnIssueEmployeeLoan').on('click', function () {
+            swalAlert('هەڵە', 'ئەم کردارە پێویستی ڕێگەی «زیادکردنی پارەدان» یان «زیادکردنی قاسە» هەیە. تکایە لە بەڕێوەبەری سیستەم بپرسە.', 'error');
+        });
+    }
     // Calculate total for Income Expense Modal (مووچە/بەخشیش/کاروانحیسابی)
     function calcIncomeTotal() {
         var salary = parseFloat($('#income_salary').val()) || 0;
@@ -477,24 +575,68 @@ $(function() {
         $('#income_total_add').val(total.toLocaleString('en-US') + ' د.ع');
         refreshIncomeCashEquiv();
     }
+    function incomeLoanDeductionEquiv() {
+        var u = parseFloat($('#income_deduct_loan_usd').val()) || 0;
+        var iq = parseFloat($('#income_deduct_loan_iqd').val()) || 0;
+        var rate = parseFloat($('#income_exchange_rate').val()) || 0;
+        if (u > 0 && rate <= 0) {
+            return null;
+        }
+        return Math.round((iq + u * rate) * 100) / 100;
+    }
+    function loadIncomeLoanBalance(employeeId) {
+        if (!employeeId) {
+            $('#income_loan_outstanding_usd').text('0');
+            $('#income_loan_outstanding_iqd').text('0');
+            $('#income_deduct_loan_usd').data('maxOutstanding', 0);
+            $('#income_deduct_loan_iqd').data('maxOutstanding', 0);
+            return;
+        }
+        $.get('../process/employee_payments/get_employee_loan_balance.php', { employee_id: employeeId }, function (r) {
+            if (r.success) {
+                $('#income_loan_outstanding_usd').text(parseFloat(r.outstanding_usd || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 }));
+                $('#income_loan_outstanding_iqd').text(parseFloat(r.outstanding_iqd || 0).toLocaleString('en-US', { maximumFractionDigits: 0 }));
+                $('#income_deduct_loan_usd').data('maxOutstanding', parseFloat(r.outstanding_usd || 0));
+                $('#income_deduct_loan_iqd').data('maxOutstanding', parseFloat(r.outstanding_iqd || 0));
+            }
+        }, 'json');
+    }
     function refreshIncomeCashEquiv() {
+        var salary = parseFloat($('#income_salary').val()) || 0;
+        var bonus = parseFloat($('#income_bonus').val()) || 0;
+        var overtime = parseFloat($('#income_overtime').val()) || 0;
+        var gross = salary + bonus + overtime;
         var usd = parseFloat($('#income_amount_usd').val()) || 0;
         var iqd = parseFloat($('#income_amount_iqd').val()) || 0;
         var rate = parseFloat($('#income_exchange_rate').val()) || 0;
-        var eq = Math.round(iqd + usd * rate);
+        var eq = Math.round((iqd + usd * rate) * 100) / 100;
         if (usd > 0 && rate <= 0) {
             $('#income_cash_equiv_display').text('— (نرخ پێویستە)');
         } else {
             $('#income_cash_equiv_display').text(eq.toLocaleString('en-US'));
         }
+        var le = incomeLoanDeductionEquiv();
+        if (le === null) {
+            $('#income_net_cash_display').text('—');
+            $('#income_cash_equiv_hint').text('(دۆلار × نرخ) + دینار — بۆ قەرزی دۆلار نرخ پێویستە');
+            return;
+        }
+        var net = Math.round((gross - le) * 100) / 100;
+        $('#income_net_cash_display').text(net.toLocaleString('en-US'));
+        $('#income_cash_equiv_hint').text('(دۆلار × نرخ) + دینار دەبێت یەکسان بێت بە کۆی خەرجی (' + gross.toLocaleString('en-US') + ') − قەرز (' + le.toLocaleString('en-US') + ') = ' + net.toLocaleString('en-US') + ' د.ع');
     }
-    $('#income_salary, #income_bonus, #income_overtime, #income_amount_usd, #income_amount_iqd, #income_exchange_rate').on('input change', function() {
+    $('#income_salary, #income_bonus, #income_overtime, #income_amount_usd, #income_amount_iqd, #income_exchange_rate, #income_deduct_loan_usd, #income_deduct_loan_iqd').on('input change', function() {
         calcIncomeTotal();
     });
     
     // Auto-fill salary, bonus, and overtime in Income Expense Modal and show balance
     $('#income_employee_id').on('change', function() {
         var employeeId = $(this).val();
+        loadIncomeLoanBalance(employeeId);
+        if (!employeeId) {
+            $('#income_deduct_loan_usd').val(0);
+            $('#income_deduct_loan_iqd').val(0);
+        }
         var salary = $(this).find('option:selected').data('salary') || '';
         var bonus = $(this).find('option:selected').data('bonus') || 0;
         $('#income_salary').val(salary);
@@ -722,6 +864,58 @@ $(function() {
         dir: 'rtl',
         dropdownParent: $('#updateExpenseModal')
     });
+
+    if ($('#loan_employee_id').length) {
+        $('#loan_employee_id').select2({
+            theme: 'bootstrap-5',
+            width: '100%',
+            placeholder: '-- هەلبژێرە --',
+            allowClear: true,
+            dir: 'rtl',
+            dropdownParent: $('#issueEmployeeLoanModal')
+        });
+        $('#issueEmployeeLoanForm').on('submit', function (e) {
+            e.preventDefault();
+            if (!window.CAN_ISSUE_EMPLOYEE_LOAN) {
+                swalAlert('هەڵە', 'ڕێگەپێدراوە نییە.', 'error');
+                return;
+            }
+            var usd = parseFloat($('#loan_usd').val()) || 0;
+            var iqd = parseFloat($('#loan_iqd').val()) || 0;
+            if (usd <= 0 && iqd <= 0) {
+                swalAlert('هەڵە', 'لانیکەم یەک بڕ بنووسە', 'error');
+                return;
+            }
+            $.post('../process/employee_payments/issue_employee_loan.php', $(this).serialize(), function (res) {
+                if (res.success) {
+                    swalAlert('سەرکەوتوو', res.message || 'تۆمارکرا', 'success');
+                    $('#issueEmployeeLoanForm')[0].reset();
+                    $('#loan_date').val(new Date().toISOString().slice(0, 10));
+                    var emp = $('#income_employee_id').val();
+                    if (emp) {
+                        loadIncomeLoanBalance(emp);
+                    }
+                    $('#issueEmployeeLoanModal').modal('hide');
+                    setTimeout(function () {
+                        if (window.loadBalances) {
+                            window.loadBalances();
+                        }
+                    }, 400);
+                } else {
+                    swalAlert('هەڵە', res.message || 'هەڵە', 'error');
+                }
+            }, 'json').fail(function (xhr) {
+                var msg = 'هەڵەی پەیوەندی';
+                try {
+                    var j = JSON.parse(xhr.responseText);
+                    if (j.message) {
+                        msg = j.message;
+                    }
+                } catch (err) { /* ignore */ }
+                swalAlert('هەڵە', msg, 'error');
+            });
+        });
+    }
     
     // Reload balance cards when employee filter changes (Select2)
     $(document).on('change', '#employee-filter', function() {
