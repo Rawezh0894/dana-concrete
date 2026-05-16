@@ -270,7 +270,7 @@ if (!isset($_SESSION['user_id'])) {
           <h5 class="modal-title" id="addExpenseModalLabel">زیادکردنی خەرجی تر</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body" data-expense-form="add">
           <div class="mb-3">
             <label for="purpose" class="form-label">مەبەستی سەرف کردن</label>
             <textarea class="form-control" id="purpose" name="purpose" rows="2"></textarea>
@@ -311,10 +311,7 @@ if (!isset($_SESSION['user_id'])) {
             <div class="col-md-4">
               <label for="expense_type" class="form-label">جۆری خەرجی</label>
               <select class="form-control" id="expense_type" name="expense_type" required>
-                <option value="">-- هەلبژێرە --</option>
-                <option value="خەرجی تر">خەرجی تر</option>
-
-
+                <option value="خەرجی تر" selected>خەرجی تر</option>
                 <option value="خواردنگە">خواردنگە</option>
                 <option value="ئۆفیس">ئۆفیس</option>
               </select>
@@ -359,35 +356,35 @@ if (!isset($_SESSION['user_id'])) {
                 </button>
               </div>
             </div>
-            <div class="col-md-4 warehouse-hidden-field">
+            <div class="col-md-4 warehouse-hidden-field currency-field-iqd">
               <label for="amount_iqd" class="form-label">بڕی پارە بە دینار</label>
               <input type="number" step="0.01" class="form-control" id="amount_iqd" name="amount_iqd" value="0">
             </div>
-            <div class="col-md-4 warehouse-hidden-field">
+            <div class="col-md-4 warehouse-hidden-field currency-field-usd">
               <label for="amount_usd" class="form-label">بڕی پارە بە دۆلار</label>
               <input type="number" step="0.01" class="form-control" id="amount_usd" name="amount_usd" value="0">
             </div>
           </div>
           <div class="mb-3 row">
-            <div class="col-md-4 warehouse-hidden-field">
+            <div class="col-md-4 warehouse-hidden-field currency-field-iqd">
               <label for="paid_iqd" class="form-label">پارەی دراو بە دینار</label>
               <input type="number" step="0.01" class="form-control" id="paid_iqd" name="paid_iqd" value="0">
             </div>
-            <div class="col-md-4 warehouse-hidden-field">
+            <div class="col-md-4 warehouse-hidden-field currency-field-usd">
               <label for="paid_usd" class="form-label">پارەی دراو بە دۆلار</label>
               <input type="number" step="0.01" class="form-control" id="paid_usd" name="paid_usd" value="0">
             </div>
-            <div class="col-md-4 warehouse-hidden-field">
+            <div class="col-md-4 warehouse-hidden-field currency-field-exchange">
               <label for="exchange_rate" class="form-label">نرخی 100 دۆلار بە دینار</label>
               <input type="number" step="0.01" class="form-control" id="exchange_rate" name="exchange_rate" value="139250">
             </div>
           </div>
           <div class="mb-3 row">
-            <div class="col-md-4 warehouse-hidden-field">
+            <div class="col-md-4 warehouse-hidden-field currency-field-iqd">
               <label for="remaining_iqd" class="form-label">بڕی ماوە بە دینار</label>
               <input type="number" step="0.01" class="form-control" id="remaining_iqd" name="remaining_iqd" value="0" readonly>
             </div>
-            <div class="col-md-4 warehouse-hidden-field">
+            <div class="col-md-4 warehouse-hidden-field currency-field-usd">
               <label for="remaining_usd" class="form-label">بڕی ماوە بە دۆلار</label>
               <input type="number" step="0.01" class="form-control" id="remaining_usd" name="remaining_usd" value="0" readonly>
             </div>
@@ -445,7 +442,7 @@ if (!isset($_SESSION['user_id'])) {
           <h5 class="modal-title" id="editExpenseModalLabel">دەستکاری خەرجی تر</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body" data-expense-form="edit">
           <input type="hidden" id="edit_id" name="id">
           <div class="mb-3">
             <label for="edit_purpose" class="form-label">مەبەستی سەرف کردن</label>

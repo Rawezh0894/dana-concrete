@@ -33,6 +33,14 @@ async function editExpense(id, data) {
         formData.append('currency_type', 'دینار'); // Default value
     }
 
+    if (typeof validateOtherExpenseCurrencyAmounts === 'function') {
+        const currencyCheck = validateOtherExpenseCurrencyAmounts('edit');
+        if (!currencyCheck.ok) {
+            Swal.fire('هەڵە!', currencyCheck.msg, 'error');
+            return;
+        }
+    }
+
     // --- VALIDATION START ---
     const paymentTypeVal = formData.get('payment_type');
     const remIqd = parseFloat(formData.get('remaining_iqd') || 0);
@@ -113,59 +121,57 @@ function setupEditExpenseModal() {
     const exchangeRate = document.getElementById('edit_exchange_rate');
     if (currencyType && amountIqd && amountUsd && paidIqd && paidUsd && exchangeRate) {
         function handleCurrencyChange() {
-            // Never disable fields, let the user enter both if needed
-            amountIqd.disabled = false;
-            amountUsd.disabled = false;
-
-            if (currencyType.value === 'دینار') {
-                // Keep them enabled but maybe clear the other if empty
-                // amountUsd.value = 0; // Don't auto-clear if it has value
-            } else if (currencyType.value === 'دۆلار') {
-                // amountIqd.value = 0;
+            if (typeof applyOtherExpenseCurrencyFields === 'function') {
+                applyOtherExpenseCurrencyFields('edit');
             }
-            // For 'تێکەڵ', both remain enabled (which they are anyway now)
-
-            updateRemaining();
         }
-        function updateRemaining() {
-            let amountIqdVal = parseFloat(amountIqd.value) || 0;
-            let amountUsdVal = parseFloat(amountUsd.value) || 0;
-            let paidIqdVal = parseFloat(paidIqd.value) || 0;
-            let paidUsdVal = parseFloat(paidUsd.value) || 0;
-            let exRate = parseFloat(exchangeRate.value) || 0;
-
-            // Use the exchange rate from the input field
-            if (exRate === 0) {
-                // If exchange rate is not set, try to get it from the field
-                const exchangeRateField = document.getElementById('edit_exchange_rate');
-                if (exchangeRateField && exchangeRateField.value) {
-                    exRate = parseFloat(exchangeRateField.value);
+        window.updateEditRemaining = function () {
+            const paymentType = document.getElementById('edit_payment_type');
+            if (paymentType && paymentType.value === 'نەقد') {
+                if (!amountIqd.disabled) {
+                    paidIqd.value = amountIqd.value;
+                }
+                if (!amountUsd.disabled) {
+                    paidUsd.value = amountUsd.value;
                 }
             }
+
+            const amountIqdVal = parseFloat(amountIqd.value) || 0;
+            const amountUsdVal = parseFloat(amountUsd.value) || 0;
+            const paidIqdVal = parseFloat(paidIqd.value) || 0;
+            const paidUsdVal = parseFloat(paidUsd.value) || 0;
+
             if (currencyType.value === 'دینار') {
-                // Convert everything to IQD for the primary balance check
-                let totalBillInIqd = amountIqdVal + (amountUsdVal * (exRate / 100));
-                let totalPaidInIqd = paidIqdVal + (paidUsdVal * (exRate / 100));
-                remainingIqd.value = (totalBillInIqd - totalPaidInIqd).toFixed(0);
-                remainingUsd.value = 0;
+                remainingIqd.value = (amountIqdVal - paidIqdVal).toFixed(0);
+                remainingUsd.value = '0';
             } else if (currencyType.value === 'دۆلار') {
-                // Convert everything to USD for the primary balance check
-                let totalBillInUsd = amountUsdVal + (amountIqdVal / (exRate / 100));
-                let totalPaidInUsd = paidUsdVal + (paidIqdVal / (exRate / 100));
-                remainingUsd.value = (totalBillInUsd - totalPaidInUsd).toFixed(2);
-                remainingIqd.value = 0;
+                remainingUsd.value = (amountUsdVal - paidUsdVal).toFixed(2);
+                remainingIqd.value = '0';
             } else if (currencyType.value === 'تێکەڵ') {
-                // Calculate both independently
                 remainingIqd.value = (amountIqdVal - paidIqdVal).toFixed(0);
                 remainingUsd.value = (amountUsdVal - paidUsdVal).toFixed(2);
             } else {
-                if (remainingIqd) remainingIqd.value = (amountIqdVal - paidIqdVal).toFixed(0);
-                if (remainingUsd) remainingUsd.value = (amountUsdVal - paidUsdVal).toFixed(2);
+                remainingIqd.value = (amountIqdVal - paidIqdVal).toFixed(0);
+                remainingUsd.value = (amountUsdVal - paidUsdVal).toFixed(2);
             }
+        };
+        const updateRemaining = window.updateEditRemaining;
+
+        if (currencyType._oeCurrencyHandler) {
+            currencyType.removeEventListener('change', currencyType._oeCurrencyHandler);
         }
+        currencyType._oeCurrencyHandler = handleCurrencyChange;
         currencyType.addEventListener('change', handleCurrencyChange);
-        [amountIqd, paidIqd, amountUsd, paidUsd, exchangeRate].forEach(input => {
-            if (input) input.addEventListener('input', updateRemaining);
+
+        const paymentTypeSelect = document.getElementById('edit_payment_type');
+        if (paymentTypeSelect) {
+            paymentTypeSelect.addEventListener('change', updateRemaining);
+        }
+
+        [amountIqd, paidIqd, amountUsd, paidUsd, exchangeRate].forEach(function (input) {
+            if (input) {
+                input.addEventListener('input', updateRemaining);
+            }
         });
         handleCurrencyChange();
     }

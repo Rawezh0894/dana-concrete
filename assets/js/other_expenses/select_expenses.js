@@ -348,6 +348,13 @@ window.openEditModalById = async function (id) {
 
         document.getElementById('edit_date').value = row.date;
 
+        if (typeof applyOtherExpenseCurrencyFields === 'function') {
+            applyOtherExpenseCurrencyFields('edit');
+        }
+        if (typeof window.updateEditRemaining === 'function') {
+            window.updateEditRemaining();
+        }
+
         const modal = new bootstrap.Modal(document.getElementById('editExpenseModal'));
         modal.show();
 

@@ -110,6 +110,19 @@ if (addExpenseForm) {
             formData.append('currency_type', 'دینار'); // Default value
         }
 
+        if (typeof validateOtherExpenseCurrencyAmounts === 'function') {
+            const currencyCheck = validateOtherExpenseCurrencyAmounts('add');
+            if (!currencyCheck.ok) {
+                Swal.fire('هەڵە!', currencyCheck.msg, 'error');
+                submittingExpense = false;
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
+                }
+                return;
+            }
+        }
+
         // --- VALIDATION START ---
         const paymentTypeVal = formData.get('payment_type');
         const remIqd = parseFloat(formData.get('remaining_iqd') || 0);
@@ -181,7 +194,11 @@ if (addExpenseForm) {
                 document.getElementById('singleCarContainer').style.display = 'block';
                 document.getElementById('invoiceSplitsList').innerHTML = '';
                 document.getElementById('toggleSplitCars').innerText = 'دابەشکردن';
-                if (typeof fetchAndPopulateExchangeRate === 'function') fetchAndPopulateExchangeRate();
+                if (typeof initOtherExpenseAddDefaults === 'function') {
+                    initOtherExpenseAddDefaults();
+                } else if (typeof fetchAndPopulateExchangeRate === 'function') {
+                    fetchAndPopulateExchangeRate();
+                }
             } else {
                 console.error('Server returned error:', data.msg);
                 Swal.fire('هەڵە!', data.msg || 'هەڵەیەک ڕویدا', 'error');
