@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/../cash_box/cash_box_helpers.php';
+
 /**
  * Employee loans: issuance (cash box) and repayment (FIFO per currency).
  */
@@ -40,7 +42,6 @@ function employee_loan_outstanding_totals(PDO $pdo, int $employeeId): array
 /**
  * Insert withdraw row(s) for loan issuance; sets employee_loan_id when column exists.
  *
- * @throws RuntimeException on insufficient balance
  */
 function employee_loan_insert_cash_withdrawals(
     PDO $pdo,
@@ -57,26 +58,7 @@ function employee_loan_insert_cash_withdrawals(
         return;
     }
 
-    if ($loanUsd > 0) {
-        $balStmt = $pdo->query("
-            SELECT COALESCE(SUM(CASE WHEN type='deposit' THEN amount_usd ELSE -amount_usd END), 0)
-            FROM cash_box WHERE currency='دۆلار'
-        ");
-        $usdBal = (float) $balStmt->fetchColumn();
-        if ($loanUsd > $usdBal + 0.0001) {
-            throw new RuntimeException('باڵانسی دۆلاری قاسە پێبوو نییە بۆ قەرز.');
-        }
-    }
-    if ($loanIqd > 0) {
-        $balStmt = $pdo->query("
-            SELECT COALESCE(SUM(CASE WHEN type='deposit' THEN amount_iqd ELSE -amount_iqd END), 0)
-            FROM cash_box WHERE currency='دینار'
-        ");
-        $iqdBal = (float) $balStmt->fetchColumn();
-        if ($loanIqd > $iqdBal + 0.0001) {
-            throw new RuntimeException('باڵانسی دیناری قاسە پێبوو نییە بۆ قەرز.');
-        }
-    }
+    cash_box_ensure_no_withdraw_balance_block($pdo);
 
     $hasLoanCol = employee_loan_has_cash_loan_id_column($pdo);
     $noteBase = 'Employee Loan Issued — قەرزی کارمەند: ' . $employeeName . ' — Loan ID ' . $loanId;

@@ -1,4 +1,7 @@
 <?php
+
+require_once __DIR__ . '/../cash_box/cash_box_helpers.php';
+
 /**
  * Cash box sync for cash (نەقد) sales: deposits for amounts received, withdrawals for change returned.
  * Notes include [sale:{id}] for reliable update/delete; legacy trigger notes are removed on sync.
@@ -38,6 +41,8 @@ function sale_sync_cash_box(PDO $pdo, array $sale, ?int $createdBy): void
     if (($sale['payment_type'] ?? '') !== 'نەقد') {
         return;
     }
+
+    cash_box_ensure_no_withdraw_balance_block($pdo);
 
     $date = $sale['order_date'] ?? date('Y-m-d');
     if (preg_match('/^\d{4}-\d{2}$/', (string) $date)) {

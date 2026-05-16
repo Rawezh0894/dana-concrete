@@ -2,7 +2,10 @@
 session_start();
 require_once '../../config/db_conected.php';
 require_once '../../config/permissions.php';
+require_once __DIR__ . '/cash_box_helpers.php';
 header('Content-Type: application/json; charset=utf-8');
+
+cash_box_ensure_no_withdraw_balance_block($pdo);
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['success' => false, 'error' => 'POST only']);
@@ -29,47 +32,6 @@ $noteLen = function_exists('mb_strlen') ? mb_strlen($note, 'UTF-8') : strlen($no
 if ($noteLen < 10) {
     echo json_encode(['success' => false, 'error' => 'تێبینی پێویستە بە ماناداری بنوسرێت (کەمترین ١٠ پیت)']);
     exit;
-}
-
-// --- Insufficient-balance guard (hard block) ---
-if ($type === 'withdraw') {
-    if ($currency === 'دۆلار') {
-        $bal_stmt = $pdo->query("
-            SELECT COALESCE(SUM(CASE WHEN type='deposit' THEN amount_usd ELSE -amount_usd END), 0)
-            FROM cash_box WHERE currency='دۆلار'
-        ");
-        $current_bal = (float) $bal_stmt->fetchColumn();
-        if ($amount_usd > $current_bal) {
-            echo json_encode([
-                'success'             => false,
-                'insufficient_balance'=> true,
-                'current_balance'     => $current_bal,
-                'error'               => sprintf(
-                    'باڵانسی قاسەکە پێبوو نییە. باڵانسی ئێستا: $%s',
-                    number_format($current_bal, 2)
-                ),
-            ]);
-            exit;
-        }
-    } elseif ($currency === 'دینار') {
-        $bal_stmt = $pdo->query("
-            SELECT COALESCE(SUM(CASE WHEN type='deposit' THEN amount_iqd ELSE -amount_iqd END), 0)
-            FROM cash_box WHERE currency='دینار'
-        ");
-        $current_bal = (float) $bal_stmt->fetchColumn();
-        if ($amount_iqd > $current_bal) {
-            echo json_encode([
-                'success'             => false,
-                'insufficient_balance'=> true,
-                'current_balance'     => $current_bal,
-                'error'               => sprintf(
-                    'باڵانسی قاسەکە پێبوو نییە. باڵانسی ئێستا: %s د.ع',
-                    number_format($current_bal, 0)
-                ),
-            ]);
-            exit;
-        }
-    }
 }
 
 // Ensure audit log table exists

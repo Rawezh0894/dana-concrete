@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/../cash_box/cash_box_helpers.php';
+
 /**
  * Personal loans to people outside the customer list — cash box integrated.
  */
@@ -24,6 +26,8 @@ function personal_loan_ensure_schema(PDO $pdo): void
     if ($done) {
         return;
     }
+
+    cash_box_ensure_no_withdraw_balance_block($pdo);
 
     $pdo->exec("
         CREATE TABLE IF NOT EXISTS `personal_loan_persons` (
@@ -154,24 +158,8 @@ function personal_loan_compute_application(
 
 function personal_loan_check_cash_balance(PDO $pdo, float $usdWithdraw, float $iqdWithdraw): void
 {
-    if ($usdWithdraw > 0) {
-        $bal = (float) $pdo->query(
-            "SELECT COALESCE(SUM(CASE WHEN type='deposit' THEN amount_usd ELSE -amount_usd END), 0)
-             FROM cash_box WHERE currency='دۆلار'"
-        )->fetchColumn();
-        if ($usdWithdraw > $bal + 0.0001) {
-            throw new RuntimeException('باڵانسی دۆلاری قاسە پێبوو نییە.');
-        }
-    }
-    if ($iqdWithdraw > 0) {
-        $bal = (float) $pdo->query(
-            "SELECT COALESCE(SUM(CASE WHEN type='deposit' THEN amount_iqd ELSE -amount_iqd END), 0)
-             FROM cash_box WHERE currency='دینار'"
-        )->fetchColumn();
-        if ($iqdWithdraw > $bal + 0.0001) {
-            throw new RuntimeException('باڵانسی دیناری قاسە پێبوو نییە.');
-        }
-    }
+    cash_box_ensure_no_withdraw_balance_block($pdo);
+    // Balance check disabled: withdrawals allowed even if cash box goes negative.
 }
 
 function personal_loan_insert_cash_row(

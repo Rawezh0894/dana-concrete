@@ -1,4 +1,7 @@
 <?php
+
+require_once __DIR__ . '/../cash_box/cash_box_helpers.php';
+
 /**
  * Cash box integration for employee_expenses.
  * Withdrawals use employee_expense_id on cash_box for update/delete sync.
@@ -86,6 +89,8 @@ function employee_expense_replace_cash_withdrawals(
     ?int $createdBy,
     float $fallbackIqdWithdraw
 ): void {
+    cash_box_ensure_no_withdraw_balance_block($pdo);
+
     $chk = $pdo->query("SHOW COLUMNS FROM cash_box LIKE 'employee_expense_id'");
     if (!$chk || $chk->rowCount() === 0) {
         return;
