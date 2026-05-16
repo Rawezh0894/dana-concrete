@@ -328,8 +328,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-    // Function to populate gas purchase price from bins_silos
-
+    // Remove optional gas-price hint elements (legacy UI; safe no-op if none exist)
+    window.clearGasPriceMessage = function (formType) {
+        const prefix = formType === 'edit' ? 'edit_' : '';
+        const id = prefix + 'gas_price_message';
+        const byId = document.getElementById(id);
+        if (byId) {
+            byId.remove();
+        }
+        document.querySelectorAll('.gas-price-message').forEach(function (el) {
+            if (!formType || el.getAttribute('data-form') === formType || !el.getAttribute('data-form')) {
+                el.remove();
+            }
+        });
+    };
 
     // Function to toggle gas and material fields visibility
     window.toggleGasMaterialFields = function (expenseType, formType) {
@@ -361,7 +373,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
             // Clear gas price messages
-            clearGasPriceMessage(formType);
+            window.clearGasPriceMessage(formType);
 
 
 
@@ -383,7 +395,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
             // Clear gas price messages
-            clearGasPriceMessage(formType);
+            window.clearGasPriceMessage(formType);
         } else {
             // Hide all gas and material fields for empty or other selections
             gasMaterialFields.forEach(field => {
@@ -402,7 +414,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
             // Clear gas price messages
-            clearGasPriceMessage(formType);
+            window.clearGasPriceMessage(formType);
         }
         // Function to toggle car field visibility
         function toggleCarField(expenseType, formType) {
@@ -417,7 +429,13 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
         toggleCarField(expenseType, formType);
-    }
+
+        if (formType === 'add' && typeof applyOtherExpenseCurrencyFields === 'function') {
+            applyOtherExpenseCurrencyFields('add');
+        } else if (formType === 'edit' && typeof applyOtherExpenseCurrencyFields === 'function') {
+            applyOtherExpenseCurrencyFields('edit');
+        }
+    };
 
     // Function to handle expense type changes
 
