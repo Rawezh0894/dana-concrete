@@ -99,6 +99,9 @@ $is_main_menu_open = in_array($current_page, $main_menu_pages, true);
         <?php if (hasPermission('view_person_other_expenses')): ?>
           <li><a href="../pages/person_other_expenses.php" class="sidebar-link<?php if($current_page == 'person_other_expenses.php') echo ' active'; ?>"><i class="bi bi-person-lines-fill me-2"></i> خەرجی تر</a></li>
         <?php endif; ?>
+        <?php if (hasPermission('view_personal_loans') || hasPermission('view_cash_box')): ?>
+          <li><a href="../pages/personal_loans.php" class="sidebar-link<?php if($current_page == 'personal_loans.php') echo ' active'; ?>"><i class="bi bi-cash-coin me-2"></i> قەرزی کەسانی دەرەکی</a></li>
+        <?php endif; ?>
       </ul>
     </li>
     <li class="sidebar-group">
