@@ -14,8 +14,8 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 <head>
     <meta charset="UTF-8">
     <title>پسووڵە</title>
-    <link rel="stylesheet" href="../assets/css/receipts.css?v=2.1">
-    <link rel="stylesheet" href="../assets/fonts/Rabar_021.ttf">
+    <link rel="stylesheet" href="../assets/css/receipts.css?v=2.2">
+    <link href="../assets/css/kurdish-font.css" rel="stylesheet">
     <link href="../assets/css/comon/table.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
@@ -81,35 +81,24 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             margin-top: 0.2rem;
         }
         
-        /* Style for invoice number cells */
-        .receipt-table td:nth-child(8),
-        #paid-table td:nth-child(4) {
+        /* Optional columns on main sales receipt table only */
+        #sales-receipt-table .col-formula-type,
+        #sales-receipt-table .col-invoice {
+            display: none;
+        }
+        #sales-receipt-table.show-formula-type .col-formula-type,
+        #sales-receipt-table.show-invoice-col .col-invoice {
+            display: table-cell;
+        }
+        #sales-receipt-table .col-invoice {
             white-space: pre-line;
             word-wrap: break-word;
             max-width: 200px;
         }
-        
-        /* Hide formula type column by default */
-        .receipt-table th:nth-child(4),
-        .receipt-table td:nth-child(4) {
-            display: none !important;
-        }
-        
-        .receipt-table th:nth-child(4).show-formula-type,
-        .receipt-table td:nth-child(4).show-formula-type {
-            display: table-cell !important;
-        }
-        
-        /* Hide invoice number column by default */
-        .receipt-table th:nth-child(8),
-        .receipt-table td:nth-child(8) {
-            display: none !important;
-        }
-        
-        /* Show invoice number column when explicitly enabled */
-        .receipt-table th:nth-child(8).show-invoice,
-        .receipt-table td:nth-child(8).show-invoice {
-            display: table-cell !important;
+        #paid-table td:nth-child(4) {
+            white-space: pre-line;
+            word-wrap: break-word;
+            max-width: 200px;
         }
         
         /* Debt discount column visibility */
@@ -659,18 +648,18 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
     </div>
 
    
-    <table class="receipt-table receipt-table-custom">
+    <table class="receipt-table receipt-table-custom" id="sales-receipt-table">
         <thead>
             <tr>
-                <th>شوێن</th>
-                <th>پێوانە</th>
-                <th>ڕێژە</th>
-                <th>جۆری فۆرمولا</th>
-                <th>نرخی 1 م 3</th>
-                <th>کۆی نرخ</th>
-                <th>پارەی ماوە</th>
-                <th>ژمارەی پسووڵە</th>
-                <th>بەروار</th>
+                <th class="col-location">شوێن</th>
+                <th class="col-quantity">پێوانە</th>
+                <th class="col-ratio">ڕێژە</th>
+                <th class="col-formula-type">جۆری فۆرمولا</th>
+                <th class="col-unit-price">نرخی 1 م 3</th>
+                <th class="col-total">کۆی نرخ</th>
+                <th class="col-remaining">پارەی ماوە</th>
+                <th class="col-invoice">ژمارەی پسووڵە</th>
+                <th class="col-date">بەروار</th>
             </tr>
         </thead>
         <tbody id="receipt-table-body">
@@ -965,21 +954,12 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         
         // Format all invoice numbers on page load
         function formatAllInvoiceNumbers() {
-            const table = document.querySelector('.receipt-table');
+            const table = document.getElementById('sales-receipt-table');
             if (table) {
-                const dataRows = table.querySelectorAll('tbody tr');
-                dataRows.forEach(row => {
-                    if (row.children[7]) {
-                        const invoiceCell = row.children[7];
-                        const originalInvoiceNumber = invoiceCell.textContent;
-                        
-                        // Store original invoice number
-                        invoiceCell.setAttribute('data-original-invoice', originalInvoiceNumber);
-                        
-                        // Format to show only 3 invoice numbers per row
-                        const formattedInvoice = formatInvoiceNumbers(originalInvoiceNumber);
-                        invoiceCell.innerHTML = formattedInvoice;
-                    }
+                table.querySelectorAll('tbody .col-invoice').forEach(invoiceCell => {
+                    const originalInvoiceNumber = invoiceCell.getAttribute('data-original-invoice') || invoiceCell.textContent;
+                    invoiceCell.setAttribute('data-original-invoice', originalInvoiceNumber);
+                    invoiceCell.innerHTML = formatInvoiceNumbers(originalInvoiceNumber);
                 });
             }
             
@@ -1004,69 +984,34 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         }
     });
     
-    // Function to toggle formula type column visibility (4th column, index 3)
+    function getSalesReceiptTable() {
+        return document.getElementById('sales-receipt-table');
+    }
+
+    // Function to toggle formula type column visibility
     function toggleFormulaTypeColumn(show) {
-        const table = document.querySelector('.receipt-table');
+        const table = getSalesReceiptTable();
         if (!table) return;
-
-        const headerRow = table.querySelector('thead tr');
-        const dataRows = table.querySelectorAll('tbody tr');
-
-        if (headerRow && headerRow.children[3]) {
-            headerRow.children[3].classList.toggle('show-formula-type', !!show);
-        }
-
-        dataRows.forEach(row => {
-            if (row.children[3]) {
-                row.children[3].classList.toggle('show-formula-type', !!show);
-            }
-        });
-
+        table.classList.toggle('show-formula-type', !!show);
         updateSummaryColspan();
     }
 
     // Function to toggle invoice number column visibility
     function toggleInvoiceNumberColumn(show) {
-        const table = document.querySelector('.receipt-table');
+        const table = getSalesReceiptTable();
         if (!table) return;
-        
-        // Get the invoice number column (8th column, index 7)
-        const headerRow = table.querySelector('thead tr');
-        const dataRows = table.querySelectorAll('tbody tr');
-        
-        if (headerRow && headerRow.children[7]) {
-            if (show) {
-                headerRow.children[7].classList.add('show-invoice');
-            } else {
-                headerRow.children[7].classList.remove('show-invoice');
-            }
+
+        table.classList.toggle('show-invoice-col', !!show);
+
+        if (show) {
+            table.querySelectorAll('tbody .col-invoice').forEach(invoiceCell => {
+                const originalInvoiceNumber = invoiceCell.getAttribute('data-original-invoice') || invoiceCell.textContent;
+                if (!invoiceCell.getAttribute('data-original-invoice')) {
+                    invoiceCell.setAttribute('data-original-invoice', originalInvoiceNumber);
+                }
+                invoiceCell.innerHTML = formatInvoiceNumbers(originalInvoiceNumber);
+            });
         }
-        
-        // Hide/show invoice number column in all data rows
-        dataRows.forEach(row => {
-            if (row.children[7]) {
-                if (show) {
-                    row.children[7].classList.add('show-invoice');
-                } else {
-                    row.children[7].classList.remove('show-invoice');
-                }
-                
-                // Format invoice numbers to show only 3 per row when visible
-                if (show) {
-                    const invoiceCell = row.children[7];
-                    const originalInvoiceNumber = invoiceCell.getAttribute('data-original-invoice') || invoiceCell.textContent;
-                    
-                    // Store original invoice number if not already stored
-                    if (!invoiceCell.getAttribute('data-original-invoice')) {
-                        invoiceCell.setAttribute('data-original-invoice', originalInvoiceNumber);
-                    }
-                    
-                    // Format to show only 3 invoice numbers per row
-                    const formattedInvoice = formatInvoiceNumbers(originalInvoiceNumber);
-                    invoiceCell.innerHTML = formattedInvoice;
-                }
-            }
-        });
         
         // Note: The paid table doesn't have an invoice number column, so we don't need to handle it here
         // The paid table only has: Paid Amount USD, Paid Amount IQD, Payment Date, and Note columns
@@ -1359,7 +1304,7 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
     });
 </script>
 <script src="../assets/js/receipts/receipts.js?v=2.1" nonce="<?php echo $csp_nonce; ?>"></script>
-<script src="../assets/js/receipts/select_sale.js?v=2.1" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/receipts/select_sale.js?v=2.2" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/receipts/select_return_debt.js?v=2.1" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/receipts/load_locations.js?v=2.1" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/receipts/load_recipients.js?v=2.1" nonce="<?php echo $csp_nonce; ?>"></script>
