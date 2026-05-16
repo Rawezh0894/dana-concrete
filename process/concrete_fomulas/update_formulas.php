@@ -1,6 +1,7 @@
 <?php
 require_once '../../config/db_conected.php';
 require_once '../../config/permissions.php';
+require_once __DIR__ . '/concrete_formulas_schema_helper.php';
 header('Content-Type: application/json; charset=utf-8');
 
 if (!hasPermission('edit_concrete_formulas')) {
@@ -37,6 +38,7 @@ $water_kg = $_POST['water_kg'] ?? 0;
 $additive_kg = $_POST['additive_kg'] ?? 0;
 
 try {
+    ensure_concrete_formula_type_enum($pdo);
     $stmt = $pdo->prepare("UPDATE concrete_formulas SET name=?, type=?, strength_kg=?, strength_mpa=?, black_sand_kg=?, brown_sand_kg=?, gravel_bin3_kg=?, gravel_bin4_kg=?, cement_cem1_kg=?, cement_cem2_kg=?, water_kg=?, additive_kg=? WHERE id=?");
     $result = $stmt->execute([
         $name,

@@ -90,7 +90,7 @@ if (!hasPermission('view_concrete_formulas')) {
                 <option value="سەقف">سەقف</option>
                 <option value="پایە">پایە</option>
                 <option value="NORMAL">NORMAL</option>
-                <option value="SOLD">SOFT</option>
+                <option value="SOFT">SOFT</option>
               </select>
             </div>
             <div class="col-md-6">
@@ -196,7 +196,7 @@ if (!hasPermission('view_concrete_formulas')) {
                 <option value="سەقف">سەقف</option>
                 <option value="پایە">پایە</option>
                 <option value="NORMAL">NORMAL</option>
-                <option value="SOLD">SOFT</option>
+                <option value="SOFT">SOFT</option>
               </select>
             </div>
             <div class="col-md-6">
