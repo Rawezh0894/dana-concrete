@@ -7,6 +7,7 @@ ini_set('error_log', __DIR__ . '/../../php-error.log');
 header('Content-Type: application/json');
 require_once '../../config/db_conected.php';
 require_once '../../config/permissions.php';
+require_once __DIR__ . '/sale_cash_box_helper.php';
 
 // Log session and POST data for debugging
 error_log('SESSION: ' . print_r($_SESSION, true));
@@ -49,6 +50,30 @@ try {
     if (!$id || !$location || !$quantity || !$price_per_unit || !$total_price || !$payment_type || !$invoice_number || !$order_date || !$formula_id) {
         error_log('Missing required fields for sale update');
         echo json_encode(['success' => false, 'message' => 'هەموو خانە پڕ بکە']);
+        exit;
+    }
+
+    $amount_paid_usd = (float) $amount_paid_usd;
+    $amount_paid_iq = (float) $amount_paid_iq;
+    $total_price = (float) $total_price;
+    $discount = (float) $discount;
+    $remaining_amount = (float) $remaining_amount;
+    $change_back_usd = (float) $change_back_usd;
+    $change_back_iq = (float) $change_back_iq;
+    $dolar_rate = (float) $dolar_rate;
+
+    $cashError = sale_validate_cash_payment(
+        $payment_type,
+        $total_price,
+        $discount,
+        $amount_paid_usd,
+        $amount_paid_iq,
+        $change_back_usd,
+        $change_back_iq,
+        $dolar_rate
+    );
+    if ($cashError !== null) {
+        echo json_encode(['success' => false, 'message' => $cashError]);
         exit;
     }
 
@@ -172,7 +197,20 @@ try {
         $id
     ]);
 
-    if ($result && $stmt->rowCount() > 0) {
+    if ($result) {
+        sale_sync_cash_box($pdo, [
+            'id' => (int) $id,
+            'payment_type' => $payment_type,
+            'order_date' => $order_date,
+            'invoice_number' => $invoice_number,
+            'amount_paid_usd' => $amount_paid_usd,
+            'amount_paid_iq' => $amount_paid_iq,
+            'change_back_usd' => $change_back_usd,
+            'change_back_iq' => $change_back_iq,
+            '_old_invoice_number' => $old_record['invoice_number'] ?? null,
+        ], (int) ($_SESSION['user_id'] ?? 0));
+
+        if ($stmt->rowCount() > 0) {
         // Get customer and formula information for notification
         $stmt = $pdo->prepare("SELECT name FROM customers WHERE id = ?");
         $stmt->execute([$customer_id]);
@@ -230,9 +268,12 @@ try {
 
         error_log('Sale successfully updated: ID=' . $id . ', Invoice=' . $invoice_number . ', Customer=' . $customer_name);
         echo json_encode(['success' => true, 'message' => 'فرۆشتن نوێکرایەوە!']);
+        } else {
+            echo json_encode(['success' => true, 'message' => 'قاسە نوێکرایەوە']);
+        }
     } else {
-        error_log('No rows affected when updating sale: ID=' . $id);
-        echo json_encode(['success' => false, 'message' => 'هیچ گۆڕانکارییەک نەکرا!']);
+        error_log('Update failed for sale: ID=' . $id);
+        echo json_encode(['success' => false, 'message' => 'هەڵە لە نوێکردنەوە!']);
     }
 } catch (PDOException $e) {
     error_log('PDOException in update_sale.php: ' . $e->getMessage());

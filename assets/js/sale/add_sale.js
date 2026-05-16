@@ -356,46 +356,19 @@ $(document).ready(function () {
         submitBtn.prop('disabled', true);
         submitBtn.html('<span class="spinner-border spinner-border-sm me-2"></span>چاوەڕوان بە...');
 
-        var paymentType = $('#payment_type').val();
-        var remaining = parseFloat($('#remaining_amount').val()) || 0;
-        var total = parseFloat($('#total_price').val()) || 0;
-        var paidIQD = parseFloat($('#amount_paid_iq').val()) || 0;
-        var paidUSD = parseFloat($('#amount_paid_usd').val()) || 0;
-        var dolarRate = parseFloat($('#dolar_rate').val()) || 1;
-        var paidIQD_inUSD = paidIQD / (dolarRate / 100);
-
-        if (paymentType === 'نەقد' && remaining > 0) {
-            Swal.fire({
-                icon: 'error',
-                title: 'هەڵە',
-                text: 'کاتێک جۆری پارەدان نەقدە، نابێت پارەی ماوە بێت!'
-            });
-            submitting = false;
-            submitBtn.prop('disabled', false);
-            submitBtn.html(originalBtnText);
-            return false;
-        }
-        if (paidIQD_inUSD > total) {
-            Swal.fire({
-                icon: 'error',
-                title: 'هەڵە',
-                text: 'پارەی دراو بە دینار (بە دۆلار) نابێت لە کۆی نرخ زیاتربێت!'
-            });
-            submitting = false;
-            submitBtn.prop('disabled', false);
-            submitBtn.html(originalBtnText);
-            return false;
-        }
-        if (paidUSD > total) {
-            Swal.fire({
-                icon: 'error',
-                title: 'هەڵە',
-                text: 'پارەی دراو بە دۆلار نابێت لە کۆی نرخ زیاتربێت!'
-            });
-            submitting = false;
-            submitBtn.prop('disabled', false);
-            submitBtn.html(originalBtnText);
-            return false;
+        if (typeof window.validateSalePayment === 'function') {
+            var paymentCheck = window.validateSalePayment('');
+            if (!paymentCheck.ok) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'هەڵە',
+                    text: paymentCheck.message
+                });
+                submitting = false;
+                submitBtn.prop('disabled', false);
+                submitBtn.html(originalBtnText);
+                return false;
+            }
         }
 
         // Check if invoice number is valid (not duplicate)

@@ -22,12 +22,38 @@ $(document).ready(function() {
         var dolarRate = parseFloat($('#' + prefix + 'dolar_rate').val()) || 1;
         var discount = parseFloat($('#' + prefix + 'discount').val()) || 0;
 
-        var netPaidUSD = paidUSD - changeUSD;
-        var netPaidIQD = paidIQD - changeIQD;
-        var netPaidIQD_inUSD = netPaidIQD / (dolarRate / 100);
-        var remaining = (total - netPaidIQD_inUSD - netPaidUSD) - discount;
+        var ratePerUsd = dolarRate / 100;
+        if (ratePerUsd <= 0) {
+            ratePerUsd = 1;
+        }
+        var paidGrossUsd = paidUSD + (paidIQD / ratePerUsd);
+        var changeGrossUsd = changeUSD + (changeIQD / ratePerUsd);
+        var netPaidUsd = paidGrossUsd - changeGrossUsd;
+        var remaining = (total - discount) - netPaidUsd;
         $('#' + prefix + 'remaining_amount').val(remaining.toFixed(4));
     }
+
+    window.validateSalePayment = function (prefix = '') {
+        var paymentType = $('#' + prefix + 'payment_type').val();
+        var remaining = parseFloat($('#' + prefix + 'remaining_amount').val()) || 0;
+        var tolerance = 0.05;
+
+        if (paymentType === 'نەقد') {
+            if (remaining > tolerance) {
+                return {
+                    ok: false,
+                    message: 'کاتێک جۆری پارەدان نەقدە، نابێت پارەی ماوە بێت!'
+                };
+            }
+            if (remaining < -tolerance) {
+                return {
+                    ok: false,
+                    message: 'کۆی پارەی دراو (دوای باقی) زیاترە لە کۆی نرخ!'
+                };
+            }
+        }
+        return { ok: true };
+    };
 
     // Event listeners: quantity and price_per_unit -> recalculate total and remaining
     $('#quantity, #price_per_unit, #edit_quantity, #edit_price_per_unit').on('input', function() {

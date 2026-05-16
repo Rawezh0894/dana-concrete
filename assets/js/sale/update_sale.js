@@ -249,6 +249,21 @@ $('#editSaleForm').on('submit', function(e) {
     submitBtn.prop('disabled', true);
     submitBtn.html('<span class="spinner-border spinner-border-sm me-2"></span>چاوەڕوان بە...');
     
+    if (typeof window.validateSalePayment === 'function') {
+        const paymentCheck = window.validateSalePayment('edit_');
+        if (!paymentCheck.ok) {
+            Swal.fire({
+                icon: 'error',
+                title: 'هەڵە',
+                text: paymentCheck.message
+            });
+            isUpdating = false;
+            submitBtn.prop('disabled', false);
+            submitBtn.html(originalBtnText);
+            return false;
+        }
+    }
+
     // Check if invoice number is valid (not duplicate)
     const invoiceNumber = $('#edit_invoice_number').val().trim();
     if (invoiceNumber && $('#edit_invoice_number').hasClass('is-invalid')) {

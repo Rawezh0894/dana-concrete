@@ -7,6 +7,7 @@ ini_set('error_log', __DIR__ . '/../../php-error.log');
 header('Content-Type: application/json');
 require_once '../../config/db_conected.php';
 require_once '../../config/permissions.php';
+require_once __DIR__ . '/sale_cash_box_helper.php';
 
 // Log session and POST data for debugging
 error_log('SESSION: ' . print_r($_SESSION, true));
@@ -134,6 +135,8 @@ try {
         $additional_info['original_invoice_length'] = strlen($sale['invoice_number']);
         $additional_info['truncated_invoice'] = $truncatedInvoiceNumber;
     }
+
+    sale_delete_cash_box_for_sale($pdo, (int) $id, $sale['invoice_number'] ?? null);
 
     $stmt = $pdo->prepare('DELETE FROM sales WHERE id = ?');
     $stmt->execute([$id]);

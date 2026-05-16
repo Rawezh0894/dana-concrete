@@ -6,6 +6,7 @@ ini_set('error_log', __DIR__ . '/../../php-error.log');
 
 require_once '../../config/db_conected.php';
 require_once '../../config/permissions.php';
+require_once __DIR__ . '/sale_cash_box_helper.php';
 
 // Log session and POST data for debugging
 error_log('SESSION: ' . print_r($_SESSION, true));
@@ -48,6 +49,30 @@ try {
     // Validate required fields
     if (!$customer_id || !$formula_id || $quantity <= 0) {
         echo json_encode(['success' => false, 'message' => 'هەموو خانە پێویستەکان پڕبکەرەوە']);
+        exit;
+    }
+
+    $amount_paid_usd = (float) $amount_paid_usd;
+    $amount_paid_iq = (float) $amount_paid_iq;
+    $total_price = (float) $total_price;
+    $discount = (float) $discount;
+    $remaining_amount = (float) $remaining_amount;
+    $change_back_usd = (float) $change_back_usd;
+    $change_back_iq = (float) $change_back_iq;
+    $dolar_rate = (float) $dolar_rate;
+
+    $cashError = sale_validate_cash_payment(
+        $payment_type,
+        $total_price,
+        $discount,
+        $amount_paid_usd,
+        $amount_paid_iq,
+        $change_back_usd,
+        $change_back_iq,
+        $dolar_rate
+    );
+    if ($cashError !== null) {
+        echo json_encode(['success' => false, 'message' => $cashError]);
         exit;
     }
 
@@ -102,6 +127,17 @@ try {
     ]);
 
     $sale_id = $pdo->lastInsertId();
+
+    sale_sync_cash_box($pdo, [
+        'id' => $sale_id,
+        'payment_type' => $payment_type,
+        'order_date' => $order_date,
+        'invoice_number' => $invoice_number,
+        'amount_paid_usd' => $amount_paid_usd,
+        'amount_paid_iq' => $amount_paid_iq,
+        'change_back_usd' => $change_back_usd,
+        'change_back_iq' => $change_back_iq,
+    ], (int) $_SESSION['user_id']);
 
     // Create detailed notification with old and new values
     $new_values = [
