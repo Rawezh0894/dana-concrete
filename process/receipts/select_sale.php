@@ -71,6 +71,7 @@ $sql = "SELECT
         s.location,
         f.strength_mpa, 
         f.strength_kg,
+        f.type as formula_type,
         SUM(s.quantity) as total_quantity,
         s.price_per_unit,
         SUM(s.total_price) as total_price_sum,
@@ -170,7 +171,7 @@ if ($recipient === 'none') {
     $sql .= " AND 1=0";
 }
 
-$sql .= " GROUP BY s.order_date, s.location, f.strength_mpa, f.strength_kg, s.price_per_unit";
+$sql .= " GROUP BY s.order_date, s.location, f.strength_mpa, f.strength_kg, f.type, s.price_per_unit";
 $sql .= " ORDER BY s.order_date ASC";
 
 // Debug: Log the SQL query
@@ -191,6 +192,7 @@ try {
     $quantity = sanitize_text(number_format($row['total_quantity'], 2) . ' م³');
     $rezhRaw = $row['strength_mpa'] ? $row['strength_mpa'] . ' MPa' : ($row['strength_kg'] ? $row['strength_kg'] . ' Kg' : '');
     $rezh = sanitize_text($rezhRaw);
+    $formulaType = sanitize_text($row['formula_type'] ?? '');
     $ppu = sanitize_text(is_numeric($row['price_per_unit']) ? '$' . number_format($row['price_per_unit'], 2, '.', ',') : '');
     $total = sanitize_text(is_numeric($row['total_price_sum']) ? '$' . number_format($row['total_price_sum'], 2, '.', ',') : '');
     $remaining = sanitize_text(is_numeric($row['total_remaining_amount']) ? '$' . number_format($row['total_remaining_amount'], 2, '.', ',') : '$0.00');
@@ -205,6 +207,7 @@ try {
         'location' => sanitize_text($row['location'] ?? ''),
         'quantity' => $quantity,
         'rezh' => $rezh,
+        'formula_type' => $formulaType,
         'price_per_unit' => $ppu,
         'total_price' => $total,
         'remaining_amount' => $remaining,

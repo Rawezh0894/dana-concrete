@@ -124,7 +124,7 @@ class ReceiptManager {
         if (tbody) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="9" class="table-loading">
+                    <td colspan="10" class="table-loading">
                         <div style="text-align: center; padding: 2rem;">
                             <i class="fa fa-spinner fa-spin" style="font-size: 2rem; color: var(--seafoam-green); margin-bottom: 1rem;"></i>
                             <p style="margin: 0; color: #666; font-size: 1rem;">لە بارکردنی داتاکان...</p>
@@ -141,7 +141,7 @@ class ReceiptManager {
         if (tbody) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="9" class="table-empty">
+                    <td colspan="10" class="table-empty">
                         <i class="fa fa-inbox" style="font-size: 3rem; color: #dee2e6; margin-bottom: 1rem; display: block;"></i>
                         <p style="margin: 0.5rem 0; font-size: 1.1rem; color: #6c757d;">هیچ داتایەک نەدۆزرایەوە</p>
                         <small style="display: block; color: #adb5bd; font-size: 0.9rem;">تکایە فلتەرەکان بگۆڕە یان داتای نوێ زیاد بکە</small>
@@ -160,7 +160,7 @@ class ReceiptManager {
             const errorMessage = message || 'هەڵەی نەناسراو';
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="9" style="text-align: center; padding: 2rem; color: #dc3545;">
+                    <td colspan="10" style="text-align: center; padding: 2rem; color: #dc3545;">
                         <i class="fa fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
                         <p>هەڵە لە بارکردنی داتاکان</p>
                         <small style="display: block; margin: 0.5rem 0; font-size: 0.9rem;">${errorMessage}</small>
@@ -367,6 +367,7 @@ class ReceiptManager {
                         <td>${row.location || ''}</td>
                         <td>${row.quantity || ''}</td>
                         <td>${row.rezh || ''}</td>
+                        <td>${row.formula_type || ''}</td>
                         <td>${this.formatCurrency(row.price_per_unit)}</td>
                         <td>${this.formatCurrency(row.total_price)}</td>
                         <td>${this.formatCurrency(row.remaining_amount)}</td>
@@ -378,7 +379,7 @@ class ReceiptManager {
                 console.error('Error processing row:', row, error);
                 return `
                     <tr class="receipt-row error-row">
-                        <td colspan="9" style="color: #dc3545; text-align: center;">
+                        <td colspan="10" style="color: #dc3545; text-align: center;">
                             <i class="fa fa-exclamation-triangle"></i>
                             هەڵە لە پرۆسێسکردنی ئەم ڕیزە
                         </td>
@@ -388,6 +389,7 @@ class ReceiptManager {
         }).join('');
 
         tbody.innerHTML = rows;
+        this.applyOptionalColumnVisibility();
         this.updateSummary(total, remainingTotal, response.total_quantity);
         this.updateDebtSummary(openingDebt, remainingTotal);
         
@@ -420,19 +422,11 @@ class ReceiptManager {
             const totalValue = typeof total === 'number' ? total : 0;
             const remainingValue = typeof remainingTotal === 'number' ? remainingTotal : 0;
             
-            // Check if invoice number column is visible
-            const showInvoiceCheckbox = document.getElementById('show-invoice-number');
-            const showInvoiceColumn = showInvoiceCheckbox ? showInvoiceCheckbox.checked : true;
-            
-            // Note: Table summary should NOT be affected by opening debt filter
-            // The table shows only sales transaction totals, not opening debt
-            
-            // Set colspan based on invoice column visibility
-            // When invoice column is visible: 2 + 2 + 4 = 8 columns
-            // When invoice column is hidden: 2 + 2 + 4 = 8 columns
-            const firstColspan = '2';  // Location + Quantity
-            const secondColspan = '2'; // Ratio + Price per unit
-            const thirdColspan = showInvoiceColumn ? '4' : '4'; // Total + Remaining + Invoice + Date
+            const showInvoiceColumn = document.getElementById('show-invoice-number')?.checked;
+            const showFormulaColumn = document.getElementById('show-formula-type')?.checked;
+            const firstColspan = '2';
+            const secondColspan = String(2 + (showFormulaColumn ? 1 : 0));
+            const thirdColspan = String(3 + (showInvoiceColumn ? 1 : 0));
             
             tfoot.innerHTML = `
                 <tr class="summary-row">
@@ -540,6 +534,17 @@ class ReceiptManager {
         // Use the new multi-select function
         return typeof getSelectedRecipients === 'function' ? getSelectedRecipients() : 'all';
     }
+
+    applyOptionalColumnVisibility() {
+        const showInvoice = document.getElementById('show-invoice-number')?.checked;
+        const showFormula = document.getElementById('show-formula-type')?.checked;
+        if (typeof toggleInvoiceNumberColumn === 'function') {
+            toggleInvoiceNumberColumn(!!showInvoice);
+        }
+        if (typeof toggleFormulaTypeColumn === 'function') {
+            toggleFormulaTypeColumn(!!showFormula);
+        }
+    }
 }
 
 // Initialize the receipt manager when DOM is loaded
@@ -562,7 +567,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (tbody) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="9" style="text-align: center; padding: 2rem; color: #dc3545;">
+                    <td colspan="10" style="text-align: center; padding: 2rem; color: #dc3545;">
                         <i class="fa fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
                         <p>هەڵە لە دەستپێکردنی سیستەمەکە</p>
                         <small style="display: block; margin: 0.5rem 0; font-size: 0.9rem;">تکایە پەڕەکە ڕیفرێش بکە</small>

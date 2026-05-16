@@ -34,6 +34,7 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             #date-to-filter, label[for="date-to-filter"],
             #location-filter, label[for="location-filter"],
             #invoice-number-filter, label[for="invoice-number-filter"],
+            #show-formula-type, label[for="show-formula-type"],
             #show-invoice-number, label[for="show-invoice-number"],
             #show-opening-debt, label[for="show-opening-debt"],
             #force-debt-pagination, label[for="force-debt-pagination"],
@@ -88,15 +89,26 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             max-width: 200px;
         }
         
+        /* Hide formula type column by default */
+        .receipt-table th:nth-child(4),
+        .receipt-table td:nth-child(4) {
+            display: none !important;
+        }
+        
+        .receipt-table th:nth-child(4).show-formula-type,
+        .receipt-table td:nth-child(4).show-formula-type {
+            display: table-cell !important;
+        }
+        
         /* Hide invoice number column by default */
-        .receipt-table th:nth-child(7),
-        .receipt-table td:nth-child(7) {
+        .receipt-table th:nth-child(8),
+        .receipt-table td:nth-child(8) {
             display: none !important;
         }
         
         /* Show invoice number column when explicitly enabled */
-        .receipt-table th:nth-child(7).show-invoice,
-        .receipt-table td:nth-child(7).show-invoice {
+        .receipt-table th:nth-child(8).show-invoice,
+        .receipt-table td:nth-child(8).show-invoice {
             display: table-cell !important;
         }
         
@@ -604,6 +616,14 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             <!-- Row 5: Display Options -->
             <div class="filter-row">
                 <div class="filter-group checkbox-group">
+                    <label for="show-formula-type" class="filter-checkbox-label">
+                        <input type="checkbox" id="show-formula-type" class="filter-checkbox">
+                        <span class="checkmark"></span>
+                        <i class="fa fa-flask"></i> نیشاندانی جۆری فۆرمولا
+                    </label>
+                </div>
+                
+                <div class="filter-group checkbox-group">
                     <label for="show-invoice-number" class="filter-checkbox-label">
                         <input type="checkbox" id="show-invoice-number" class="filter-checkbox">
                         <span class="checkmark"></span>
@@ -645,6 +665,7 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 <th>شوێن</th>
                 <th>پێوانە</th>
                 <th>ڕێژە</th>
+                <th>جۆری فۆرمولا</th>
                 <th>نرخی 1 م 3</th>
                 <th>کۆی نرخ</th>
                 <th>پارەی ماوە</th>
@@ -718,6 +739,7 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 var paidDateFrom = document.getElementById('paid-date-from-filter');
                 var paidDateTo = document.getElementById('paid-date-to-filter');
                 var invoiceNumberFilter = document.getElementById('invoice-number-filter');
+                var showFormulaCheckbox = document.getElementById('show-formula-type');
                 var showInvoiceCheckbox = document.getElementById('show-invoice-number');
                 var showOpeningDebtCheckbox = document.getElementById('show-opening-debt');
                 var forceDebtPaginationCheckbox = document.getElementById('force-debt-pagination');
@@ -735,6 +757,11 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                 
                 // Reset recipient multi-select
                 resetRecipientMultiSelect();
+                if (showFormulaCheckbox) {
+                    showFormulaCheckbox.checked = false;
+                    toggleFormulaTypeColumn(false);
+                    localStorage.removeItem('showFormulaType');
+                }
                 if (showInvoiceCheckbox) {
                     showInvoiceCheckbox.checked = false;
                     toggleInvoiceNumberColumn(false);
@@ -764,6 +791,24 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             });
         }
         
+        // Formula type column visibility toggle
+        var showFormulaCheckbox = document.getElementById('show-formula-type');
+        if (showFormulaCheckbox) {
+            const savedFormulaPreference = localStorage.getItem('showFormulaType');
+            if (savedFormulaPreference !== null) {
+                showFormulaCheckbox.checked = savedFormulaPreference === 'true';
+                toggleFormulaTypeColumn(showFormulaCheckbox.checked);
+            } else {
+                showFormulaCheckbox.checked = false;
+                toggleFormulaTypeColumn(false);
+            }
+            showFormulaCheckbox.addEventListener('change', function() {
+                const isChecked = this.checked;
+                toggleFormulaTypeColumn(isChecked);
+                localStorage.setItem('showFormulaType', isChecked.toString());
+            });
+        }
+
         // Invoice number visibility toggle
         var showInvoiceCheckbox = document.getElementById('show-invoice-number');
         if (showInvoiceCheckbox) {
@@ -924,8 +969,8 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             if (table) {
                 const dataRows = table.querySelectorAll('tbody tr');
                 dataRows.forEach(row => {
-                    if (row.children[6]) {
-                        const invoiceCell = row.children[6];
+                    if (row.children[7]) {
+                        const invoiceCell = row.children[7];
                         const originalInvoiceNumber = invoiceCell.textContent;
                         
                         // Store original invoice number
@@ -959,35 +1004,56 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         }
     });
     
+    // Function to toggle formula type column visibility (4th column, index 3)
+    function toggleFormulaTypeColumn(show) {
+        const table = document.querySelector('.receipt-table');
+        if (!table) return;
+
+        const headerRow = table.querySelector('thead tr');
+        const dataRows = table.querySelectorAll('tbody tr');
+
+        if (headerRow && headerRow.children[3]) {
+            headerRow.children[3].classList.toggle('show-formula-type', !!show);
+        }
+
+        dataRows.forEach(row => {
+            if (row.children[3]) {
+                row.children[3].classList.toggle('show-formula-type', !!show);
+            }
+        });
+
+        updateSummaryColspan();
+    }
+
     // Function to toggle invoice number column visibility
     function toggleInvoiceNumberColumn(show) {
         const table = document.querySelector('.receipt-table');
         if (!table) return;
         
-        // Get the invoice number column (7th column, index 6)
+        // Get the invoice number column (8th column, index 7)
         const headerRow = table.querySelector('thead tr');
         const dataRows = table.querySelectorAll('tbody tr');
         
-        if (headerRow && headerRow.children[6]) {
+        if (headerRow && headerRow.children[7]) {
             if (show) {
-                headerRow.children[6].classList.add('show-invoice');
+                headerRow.children[7].classList.add('show-invoice');
             } else {
-                headerRow.children[6].classList.remove('show-invoice');
+                headerRow.children[7].classList.remove('show-invoice');
             }
         }
         
         // Hide/show invoice number column in all data rows
         dataRows.forEach(row => {
-            if (row.children[6]) {
+            if (row.children[7]) {
                 if (show) {
-                    row.children[6].classList.add('show-invoice');
+                    row.children[7].classList.add('show-invoice');
                 } else {
-                    row.children[6].classList.remove('show-invoice');
+                    row.children[7].classList.remove('show-invoice');
                 }
                 
                 // Format invoice numbers to show only 3 per row when visible
                 if (show) {
-                    const invoiceCell = row.children[6];
+                    const invoiceCell = row.children[7];
                     const originalInvoiceNumber = invoiceCell.getAttribute('data-original-invoice') || invoiceCell.textContent;
                     
                     // Store original invoice number if not already stored
@@ -1007,7 +1073,7 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         // The invoice number filter should only affect the main receipt table
         
         // Update colspan in summary row to match visible columns
-        updateSummaryColspan(show);
+        updateSummaryColspan();
         
         // Also update the summary row if it exists
         if (window.receiptManager && window.receiptManager.updateSummary) {
@@ -1065,26 +1131,18 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
     }
     
     // Function to update summary row colspan based on visible columns
-    function updateSummaryColspan(showInvoiceColumn) {
+    function updateSummaryColspan() {
         const summaryRow = document.querySelector('.summary-row');
-        if (summaryRow) {
-            const cells = summaryRow.querySelectorAll('td');
-            
-            if (cells.length >= 3) {
-                // New layout: 2 + 2 + 4 = 8 columns
-                cells[0].setAttribute('colspan', '2'); // Location + Quantity
-                cells[1].setAttribute('colspan', '2'); // Ratio + Price per unit
-                cells[2].setAttribute('colspan', '4'); // Total + Remaining + Invoice + Date
-            } else if (cells.length === 2) {
-                // Fallback for old layout
-                if (showInvoiceColumn) {
-                    cells[0].setAttribute('colspan', '3');
-                    cells[1].setAttribute('colspan', '5');
-                } else {
-                    cells[0].setAttribute('colspan', '2');
-                    cells[1].setAttribute('colspan', '6');
-                }
-            }
+        if (!summaryRow) return;
+
+        const showInvoiceColumn = document.getElementById('show-invoice-number')?.checked;
+        const showFormulaColumn = document.getElementById('show-formula-type')?.checked;
+        const cells = summaryRow.querySelectorAll('td');
+
+        if (cells.length >= 3) {
+            cells[0].setAttribute('colspan', '2');
+            cells[1].setAttribute('colspan', String(2 + (showFormulaColumn ? 1 : 0)));
+            cells[2].setAttribute('colspan', String(3 + (showInvoiceColumn ? 1 : 0)));
         }
     }
     
