@@ -12,11 +12,18 @@ function cash_box_ensure_no_withdraw_balance_block(PDO $pdo): void
     if ($done) {
         return;
     }
+
+    // DDL (DROP TRIGGER) implicitly commits in MySQL — never run inside a transaction.
+    if ($pdo->inTransaction()) {
+        return;
+    }
+
     $done = true;
 
     try {
         $pdo->exec('DROP TRIGGER IF EXISTS `trg_before_withdraw_cash_box`');
     } catch (PDOException $e) {
+        $done = false;
         error_log('cash_box_ensure_no_withdraw_balance_block: ' . $e->getMessage());
     }
 }

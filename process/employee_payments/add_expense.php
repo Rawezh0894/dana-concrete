@@ -3,6 +3,7 @@ require_once '../../config/db_conected.php';
 require_once '../../config/permissions.php';
 require_once __DIR__ . '/employee_expense_cash_box_helper.php';
 require_once __DIR__ . '/employee_loan_helper.php';
+require_once __DIR__ . '/../cash_box/cash_box_helpers.php';
 header('Content-Type: application/json');
 if (!isset($_SESSION['user_id'])) {
     http_response_code(403);
@@ -135,6 +136,8 @@ if ($penalty > 0) {
 if ($overtime_payment > 0) {
     $lines[] = ['type' => 'overtime_payment', 'amount' => $overtime_payment];
 }
+
+cash_box_ensure_no_withdraw_balance_block($pdo);
 
 try {
     $pdo->beginTransaction();

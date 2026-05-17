@@ -2,6 +2,7 @@
 require_once '../../config/db_conected.php';
 require_once '../../config/permissions.php';
 require_once __DIR__ . '/employee_expense_cash_box_helper.php';
+require_once __DIR__ . '/../cash_box/cash_box_helpers.php';
 header('Content-Type: application/json');
 
 if (!isset($_SESSION['user_id'])) {
@@ -58,6 +59,8 @@ if (!in_array($expense_type, $valid_types, true)) {
     echo json_encode(['success' => false, 'message' => 'جۆری خەرجی نادروستە']);
     exit;
 }
+
+cash_box_ensure_no_withdraw_balance_block($pdo);
 
 try {
     $pdo->beginTransaction();

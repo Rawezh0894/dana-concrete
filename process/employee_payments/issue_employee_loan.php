@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once '../../config/db_conected.php';
 require_once '../../config/permissions.php';
 require_once __DIR__ . '/employee_loan_helper.php';
+require_once __DIR__ . '/../cash_box/cash_box_helpers.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -44,6 +45,8 @@ if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $loan_date)) {
     echo json_encode(['success' => false, 'message' => 'بەرواری نادروست']);
     exit;
 }
+
+cash_box_ensure_no_withdraw_balance_block($pdo);
 
 try {
     $pdo->beginTransaction();
