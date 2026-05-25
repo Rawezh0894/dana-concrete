@@ -152,69 +152,61 @@ $(document).ready(function () {
     updateAmountsFor('purchase');
 });
 
-// Excel Export Function (Switched to CSV for better compatibility)
-function exportPurchaseToExcel(format = 'csv') {
-    // Get current filter values
-    const companyId = $('#filter_company').val() || '';
-    const locationId = $('#filter_location').val() || '';
-    const driverId = $('#filter_driver').val() || '';
-    const materialId = $('#filter_material').val() || '';
-    const fromDate = $('#filter_from').val() || '';
-    const toDate = $('#filter_to').val() || '';
-
-    // Create form data
+function buildPurchaseExportFormData(extraFields) {
     const formData = new FormData();
-    formData.append('company_id', companyId);
-    formData.append('location_id', locationId);
-    formData.append('driver_id', driverId);
-    formData.append('material_id', materialId);
-    formData.append('from_date', fromDate);
-    formData.append('to_date', toDate);
-    formData.append('export_format', 'csv');
+    formData.append('company_id', $('#filter_company').val() || '');
+    formData.append('location_id', $('#filter_location').val() || '');
+    formData.append('driver_id', $('#filter_driver').val() || '');
+    formData.append('material_id', $('#filter_material').val() || '');
+    formData.append('from_date', $('#filter_from').val() || '');
+    formData.append('to_date', $('#filter_to').val() || '');
+    if (extraFields) {
+        Object.keys(extraFields).forEach(function (key) {
+            formData.append(key, extraFields[key]);
+        });
+    }
+    return formData;
+}
 
-    // Show loading message
+function runPurchaseExport(formData, downloadFilename, loadingText, successText) {
     Swal.fire({
         title: 'چاوەڕوان بە...',
-        text: 'خەملێنراوە بۆ ئیکسپۆرتکردن',
+        text: loadingText,
         allowOutsideClick: false,
-        didOpen: () => {
+        didOpen: function () {
             Swal.showLoading();
         }
     });
 
-    // Make AJAX request to export
     fetch('../process/purchase/export_excel.php', {
         method: 'POST',
         body: formData
     })
-        .then(response => {
+        .then(function (response) {
             if (response.ok) {
                 return response.blob();
             }
             throw new Error('Network response was not ok');
         })
-        .then(blob => {
-            // Create download link
+        .then(function (blob) {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.style.display = 'none';
             a.href = url;
-            a.download = `کڕینەکان_${new Date().toISOString().split('T')[0]}.csv`;
+            a.download = downloadFilename;
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
-
-            // Show success message
             Swal.fire({
                 icon: 'success',
                 title: 'سەرکەوتوو!',
-                text: 'فایلەکە بە سەرکەوتوویی ئیکسپۆرت کرا',
+                text: successText,
                 timer: 2000,
                 showConfirmButton: false
             });
         })
-        .catch(error => {
+        .catch(function (error) {
             console.error('Export error:', error);
             Swal.fire({
                 icon: 'error',
@@ -224,157 +216,52 @@ function exportPurchaseToExcel(format = 'csv') {
         });
 }
 
-// Monthly Report Export Function (Switched to CSV)
-function exportPurchaseMonthlyReport(format = 'csv') {
-    // Get current filter values
-    const companyId = $('#filter_company').val() || '';
-    const locationId = $('#filter_location').val() || '';
-    const driverId = $('#filter_driver').val() || '';
-    const materialId = $('#filter_material').val() || '';
-    const fromDate = $('#filter_from').val() || '';
-    const toDate = $('#filter_to').val() || '';
-
-    // Create form data
-    const formData = new FormData();
-    formData.append('company_id', companyId);
-    formData.append('location_id', locationId);
-    formData.append('driver_id', driverId);
-    formData.append('material_id', materialId);
-    formData.append('from_date', fromDate);
-    formData.append('to_date', toDate);
-    formData.append('export_type', 'monthly_report');
-    formData.append('export_format', 'csv');
-
-    // Show loading message
-    Swal.fire({
-        title: 'چاوەڕوان بە...',
-        text: 'خەملێنراوە بۆ ئیکسپۆرتی ڕاپۆرتی مانگانە',
-        allowOutsideClick: false,
-        didOpen: () => {
-            Swal.showLoading();
-        }
-    });
-
-    // Make AJAX request to export monthly report
-    fetch('../process/purchase/export_excel.php', {
-        method: 'POST',
-        body: formData
-    })
-        .then(response => {
-            if (response.ok) {
-                return response.blob();
-            }
-            throw new Error('Network response was not ok');
-        })
-        .then(blob => {
-            // Create download link
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            a.download = `ڕاپۆرتی_مانگانەی_کڕینەکان_و_شۆفێرەکان_${new Date().toISOString().split('T')[0]}.csv`;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-
-            // Show success message
-            Swal.fire({
-                icon: 'success',
-                title: 'سەرکەوتوو!',
-                text: 'ڕاپۆرتی مانگانە بە سەرکەوتوویی ئیکسپۆرت کرا',
-                timer: 2000,
-                showConfirmButton: false
-            });
-        })
-        .catch(error => {
-            console.error('Monthly report export error:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'هەڵە!',
-                text: 'هەڵەیەک لە ئیکسپۆرتی ڕاپۆرتی مانگانە هەیە. تکایە دواتر هەوڵ بدەوە'
-            });
-        });
+function exportPurchaseToExcel() {
+    const dateStr = new Date().toISOString().split('T')[0];
+    runPurchaseExport(
+        buildPurchaseExportFormData({ export_format: 'excel' }),
+        'کڕینەکان_' + dateStr + '.xls',
+        'خەملێنراوە بۆ ئیکسپۆرتی Excel',
+        'فایلی Excel (.xls) بە سەرکەوتوویی داگیرا'
+    );
 }
 
-// CSV Export Functions
 function exportPurchaseToCSV() {
-    exportPurchaseToExcel('csv');
+    const dateStr = new Date().toISOString().split('T')[0];
+    runPurchaseExport(
+        buildPurchaseExportFormData({ export_format: 'csv' }),
+        'کڕینەکان_' + dateStr + '.csv',
+        'خەملێنراوە بۆ ئیکسپۆرتی CSV',
+        'فایلی CSV بە سەرکەوتوویی داگیرا'
+    );
+}
+
+function exportPurchaseMonthlyReport() {
+    const dateStr = new Date().toISOString().split('T')[0];
+    runPurchaseExport(
+        buildPurchaseExportFormData({ export_type: 'monthly_report', export_format: 'excel' }),
+        'ڕاپۆرتی_مانگانەی_کڕینەکان_' + dateStr + '.xls',
+        'خەملێنراوە بۆ ئیکسپۆرتی ڕاپۆرتی مانگانە',
+        'ڕاپۆرتی مانگانە بە سەرکەوتوویی ئیکسپۆرت کرا'
+    );
 }
 
 function exportPurchaseMonthlyReportToCSV() {
-    exportPurchaseMonthlyReport('csv');
+    const dateStr = new Date().toISOString().split('T')[0];
+    runPurchaseExport(
+        buildPurchaseExportFormData({ export_type: 'monthly_report', export_format: 'csv' }),
+        'ڕاپۆرتی_مانگانەی_کڕینەکان_' + dateStr + '.csv',
+        'خەملێنراوە بۆ ئیکسپۆرتی CSV',
+        'ڕاپۆرتی مانگانە بە CSV داگیرا'
+    );
 }
 
-// Summary Export Function (Switched to CSV)
 function exportPurchaseSummaryToExcel() {
-    // Get current filter values
-    const companyId = $('#filter_company').val() || '';
-    const locationId = $('#filter_location').val() || '';
-    const driverId = $('#filter_driver').val() || '';
-    const materialId = $('#filter_material').val() || '';
-    const fromDate = $('#filter_from').val() || '';
-    const toDate = $('#filter_to').val() || '';
-
-    // Create form data
-    const formData = new FormData();
-    formData.append('company_id', companyId);
-    formData.append('location_id', locationId);
-    formData.append('driver_id', driverId);
-    formData.append('material_id', materialId);
-    formData.append('from_date', fromDate);
-    formData.append('to_date', toDate);
-    formData.append('export_type', 'summary');
-    formData.append('export_format', 'csv');
-
-    // Show loading message
-    Swal.fire({
-        title: 'چاوەڕوان بە...',
-        text: 'خەملێنراوە بۆ ئیکسپۆرتی کورتە',
-        allowOutsideClick: false,
-        didOpen: () => {
-            Swal.showLoading();
-        }
-    });
-
-    // Make AJAX request to export summary
-    fetch('../process/purchase/export_excel.php', {
-        method: 'POST',
-        body: formData
-    })
-        .then(response => {
-            if (response.ok) {
-                return response.blob();
-            }
-            throw new Error('Network response was not ok');
-        })
-        .then(blob => {
-            // Create download link
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            a.download = `کورتەی_کڕینەکان_${new Date().toISOString().split('T')[0]}.csv`;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-
-            // Show success message
-            Swal.fire({
-                icon: 'success',
-                title: 'سەرکەوتوو!',
-                text: 'کورتە بە سەرکەوتوویی ئیکسپۆرت کرا',
-                timer: 2000,
-                showConfirmButton: false
-            });
-        })
-        .catch(error => {
-            console.error('Summary export error:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'هەڵە!',
-                text: 'هەڵەیەک لە ئیکسپۆرتی کورتە هەیە. تکایە دواتر هەوڵ بدەوە'
-            });
-        });
+    const dateStr = new Date().toISOString().split('T')[0];
+    runPurchaseExport(
+        buildPurchaseExportFormData({ export_type: 'summary', export_format: 'excel' }),
+        'کورتەی_کڕینەکان_' + dateStr + '.xls',
+        'خەملێنراوە بۆ ئیکسپۆرتی کورتە',
+        'کورتە بە سەرکەوتوویی ئیکسپۆرت کرا'
+    );
 }

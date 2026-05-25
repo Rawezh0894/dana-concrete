@@ -506,55 +506,7 @@ window.reloadPurchases = function () {
     loadPurchaseData(true); // Preserve pagination state
 };
 
-// Export to Excel (CSV for community version)
-function exportPurchaseToExcel() {
-    if (purchaseGridApi) {
-        const params = {
-            fileName: `کڕینەکان_${new Date().toISOString().split('T')[0]}.csv`
-        };
-        purchaseGridApi.exportDataAsCsv(params);
-    }
-}
-
-// Export to CSV
-function exportPurchaseToCSV() {
-    if (purchaseGridApi) {
-        const params = {
-            fileName: `کڕینەکان_${new Date().toISOString().split('T')[0]}.csv`
-        };
-        purchaseGridApi.exportDataAsCsv(params);
-    }
-}
-
-// Export Summary to CSV
-function exportPurchaseSummaryToExcel() {
-    if (purchaseGridApi) {
-        const params = {
-            fileName: `کورتەی_کڕینەکان_${new Date().toISOString().split('T')[0]}.csv`
-        };
-        purchaseGridApi.exportDataAsCsv(params);
-    }
-}
-
-// Export Monthly Report
-function exportPurchaseMonthlyReport() {
-    if (purchaseGridApi) {
-        const params = {
-            fileName: `ڕاپۆرتی_مانگانەی_کڕینەکان_${new Date().toISOString().split('T')[0]}.csv`
-        };
-        purchaseGridApi.exportDataAsCsv(params);
-    }
-}
-
-// Export Monthly Report to CSV
-function exportPurchaseMonthlyReportToCSV() {
-    if (purchaseGridApi) {
-        const params = {
-            fileName: `ڕاپۆرتی_مانگانەی_کڕینەکان_${new Date().toISOString().split('T')[0]}.csv`
-        };
-        purchaseGridApi.exportDataAsCsv(params);
-    }
-}
+// Export functions: see purchase.js (server-side .xls / .csv aligned with grid columns)
 // Function to set default date range to current month
 function setDefaultDateFilter() {
     const today = new Date();

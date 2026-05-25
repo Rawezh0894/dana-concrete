@@ -83,78 +83,7 @@ function loadPurchaseSummary(filterParams = '') {
         });
 }
 
-// Function to export purchase summary to Excel
-function exportPurchaseSummaryToExcel() {
-    // Get current filter values
-    const companyId = $('#filter_company').val() || '';
-    const locationId = $('#filter_location').val() || '';
-    const driverId = $('#filter_driver').val() || '';
-    const materialId = $('#filter_material').val() || '';
-    const fromDate = $('#filter_from').val() || '';
-    const toDate = $('#filter_to').val() || '';
-    
-    // Create form data
-    const formData = new FormData();
-    formData.append('company_id', companyId);
-    formData.append('location_id', locationId);
-    formData.append('driver_id', driverId);
-    formData.append('material_id', materialId);
-    formData.append('from_date', fromDate);
-    formData.append('to_date', toDate);
-    formData.append('export_format', 'csv');
-    formData.append('export_type', 'summary');
-    
-    // Show loading message
-    Swal.fire({
-        title: 'چاوەڕوان بە...',
-        text: 'خەملێنراوە بۆ ئیکسپۆرتی کورتەی کڕینەکان',
-        allowOutsideClick: false,
-        didOpen: () => {
-            Swal.showLoading();
-        }
-    });
-    
-    // Make AJAX request to export summary
-    fetch('../process/purchase/export_excel.php', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => {
-        if (response.ok) {
-            return response.blob();
-        }
-        throw new Error('Network response was not ok');
-    })
-    .then(blob => {
-        // Create download link
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
-        a.download = `کورتەی_کڕینەکان_${new Date().toISOString().split('T')[0]}.csv`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-        
-        // Show success message
-        Swal.fire({
-            icon: 'success',
-            title: 'سەرکەوتوو!',
-            text: 'کورتەی کڕینەکان بە سەرکەوتوویی ئیکسپۆرت کرا',
-            timer: 2000,
-            showConfirmButton: false
-        });
-    })
-    .catch(error => {
-        console.error('Summary export error:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'هەڵە!',
-            text: 'هەڵەیەک لە ئیکسپۆرتی کورتەکە هەیە. تکایە دواتر هەوڵ بدەوە'
-        });
-    });
-}
+// exportPurchaseSummaryToExcel: defined in purchase.js
 
 // Initialize summary cards when page loads
 $(document).ready(function() {
@@ -173,7 +102,4 @@ $(document).ready(function() {
 });
 
 // Make function globally available for refresh after add/edit/delete
-window.loadPurchaseSummary = loadPurchaseSummary; 
-
-// Make function globally available
-window.exportPurchaseSummaryToExcel = exportPurchaseSummaryToExcel; 
+window.loadPurchaseSummary = loadPurchaseSummary;
