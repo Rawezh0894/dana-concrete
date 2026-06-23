@@ -1,6 +1,25 @@
 <?php
+
 /**
- * Ensures concrete_formulas.type accepts NORMAL and SOFT (idempotent).
+ * Allowed values for concrete_formulas.type (single source of truth).
+ *
+ * @return list<string>
+ */
+function concrete_formula_type_enum_values(): array
+{
+    return [
+        'عەرزی تێکەڵ',
+        'عەرزی سادە',
+        'سەقف',
+        'پایە',
+        'ئەساس',
+        'NORMAL',
+        'SOFT',
+    ];
+}
+
+/**
+ * Ensures concrete_formulas.type ENUM contains all known values (idempotent).
  */
 function ensure_concrete_formula_type_enum(PDO $pdo): void
 {
@@ -17,19 +36,21 @@ function ensure_concrete_formula_type_enum(PDO $pdo): void
             return;
         }
         $typeDef = $col['Type'];
-        if (stripos($typeDef, 'NORMAL') !== false && stripos($typeDef, 'SOFT') !== false) {
-            return;
+
+        foreach (concrete_formula_type_enum_values() as $value) {
+            if (strpos($typeDef, "'" . str_replace("'", "''", $value) . "'") === false) {
+                $quoted = array_map(
+                    static fn (string $v): string => "'" . str_replace("'", "''", $v) . "'",
+                    concrete_formula_type_enum_values()
+                );
+                $pdo->exec(
+                    'ALTER TABLE concrete_formulas MODIFY COLUMN `type` ENUM('
+                    . implode(',', $quoted)
+                    . ') NOT NULL'
+                );
+                return;
+            }
         }
-        $pdo->exec(
-            "ALTER TABLE concrete_formulas MODIFY COLUMN `type` ENUM(
-                'عەرزی تێکەڵ',
-                'عەرزی سادە',
-                'سەقف',
-                'پایە',
-                'NORMAL',
-                'SOFT'
-            ) NOT NULL"
-        );
     } catch (Throwable $e) {
         error_log('ensure_concrete_formula_type_enum: ' . $e->getMessage());
     }

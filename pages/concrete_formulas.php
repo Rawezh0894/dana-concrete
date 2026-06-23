@@ -13,6 +13,16 @@ if (!hasPermission('view_concrete_formulas')) {
         .'</div>';
     exit;
 }
+
+$concrete_formula_types = [
+    'عەرزی تێکەڵ',
+    'عەرزی سادە',
+    'سەقف',
+    'پایە',
+    'ئەساس',
+    'NORMAL',
+    'SOFT',
+];
 ?>
 <!DOCTYPE html>
 <html lang="ku">
@@ -85,12 +95,9 @@ if (!hasPermission('view_concrete_formulas')) {
               <label for="formula_type" class="form-label">جۆر</label>
               <select class="form-control" id="formula_type" name="type" required>
                 <option value="">-- هەلبژێرە --</option>
-                <option value="عەرزی تێکەڵ">عەرزی تێکەڵ</option>
-                <option value="عەرزی سادە">عەرزی سادە</option>
-                <option value="سەقف">سەقف</option>
-                <option value="پایە">پایە</option>
-                <option value="NORMAL">NORMAL</option>
-                <option value="SOFT">SOFT</option>
+                <?php foreach ($concrete_formula_types as $formulaType): ?>
+                <option value="<?php echo htmlspecialchars($formulaType, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($formulaType, ENT_QUOTES, 'UTF-8'); ?></option>
+                <?php endforeach; ?>
               </select>
             </div>
             <div class="col-md-6">
@@ -191,12 +198,9 @@ if (!hasPermission('view_concrete_formulas')) {
               <label for="update_formula_type" class="form-label">جۆر</label>
               <select class="form-control" id="update_formula_type" name="type" required>
                 <option value="">-- هەلبژێرە --</option>
-                <option value="عەرزی تێکەڵ">عەرزی تێکەڵ</option>
-                <option value="عەرزی سادە">عەرزی سادە</option>
-                <option value="سەقف">سەقف</option>
-                <option value="پایە">پایە</option>
-                <option value="NORMAL">NORMAL</option>
-                <option value="SOFT">SOFT</option>
+                <?php foreach ($concrete_formula_types as $formulaType): ?>
+                <option value="<?php echo htmlspecialchars($formulaType, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($formulaType, ENT_QUOTES, 'UTF-8'); ?></option>
+                <?php endforeach; ?>
               </select>
             </div>
             <div class="col-md-6">

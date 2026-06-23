@@ -1,4 +1,4 @@
--- Add NORMAL, SOFT, and ئەساس to concrete_formulas.type enum
+-- Add ئەساس to concrete_formulas.type enum
 ALTER TABLE `concrete_formulas`
   MODIFY COLUMN `type` ENUM(
     'عەرزی تێکەڵ',
