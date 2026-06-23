@@ -13,7 +13,9 @@ $invoice_filter_mode = isset($_GET['invoice_filter_mode']) ? $_GET['invoice_filt
 $invoice_filter_mode = $invoice_filter_mode === 'exclude' ? 'exclude' : 'include';
 
 // Start base query
-$sql = "SELECT cdp.id, cdp.paid_usd, cdp.paid_iqd, cdp.date, cdp.discount, cdp.note, cdp.dolar_rate 
+$sql = "SELECT cdp.id, cdp.paid_usd, cdp.paid_iqd, cdp.date, cdp.discount, cdp.note, cdp.dolar_rate,
+        COALESCE(cdp.change_back_usd, 0) AS change_back_usd,
+        COALESCE(cdp.change_back_iq, 0) AS change_back_iq
         FROM customer_debt_payments cdp
         WHERE cdp.customer_id = :customer_id";
 $params = ['customer_id' => $customer_id];

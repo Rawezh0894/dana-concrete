@@ -95,7 +95,8 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             word-wrap: break-word;
             max-width: 200px;
         }
-        #paid-table td:nth-child(4) {
+        #paid-table td:nth-child(4),
+        #paid-table .paid-date-col {
             white-space: pre-line;
             word-wrap: break-word;
             max-width: 200px;
@@ -107,6 +108,14 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         }
         
         #paid-table.show-debt-discount .debt-discount-col {
+            display: table-cell;
+        }
+
+        #paid-table .change-back-col {
+            display: none;
+        }
+
+        #paid-table.show-change-back .change-back-col {
             display: table-cell;
         }
         
@@ -643,6 +652,14 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
                         <i class="fa fa-tags"></i> نیشاندانی داشکاندن لە دانەوەی قەرز
                     </label>
                 </div>
+
+                <div class="filter-group checkbox-group">
+                    <label for="show-change-back" class="filter-checkbox-label">
+                        <input type="checkbox" id="show-change-back" class="filter-checkbox">
+                        <span class="checkmark"></span>
+                        <i class="fa fa-hand-holding-usd"></i> نیشاندانی باقی پێدراوەتەوە
+                    </label>
+                </div>
             </div>
         </div>
     </div>
@@ -676,6 +693,8 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             <tr>
                 <th>پارەی واسڵ کراو (USD)</th>
                 <th>پارەی واسڵ کراو (د.ع)</th>
+                <th class="change-back-col">باقی پێدراوەتەوە (USD)</th>
+                <th class="change-back-col">باقی پێدراوەتەوە (د.ع)</th>
                 <th class="debt-discount-col">داشکاندن</th>
                 <th>بەرواری پارەدان</th>
                 <th>تێبینی</th>
@@ -868,6 +887,26 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             });
         } else {
             toggleDebtDiscountColumn(false);
+        }
+
+        var showChangeBackCheckbox = document.getElementById('show-change-back');
+        if (showChangeBackCheckbox) {
+            const savedChangeBackPreference = localStorage.getItem('showChangeBack');
+            if (savedChangeBackPreference !== null) {
+                showChangeBackCheckbox.checked = savedChangeBackPreference === 'true';
+            }
+            toggleChangeBackColumn(showChangeBackCheckbox.checked);
+
+            showChangeBackCheckbox.addEventListener('change', function() {
+                const isChecked = this.checked;
+                toggleChangeBackColumn(isChecked);
+                localStorage.setItem('showChangeBack', isChecked.toString());
+                if (typeof loadReturnDebt === 'function') {
+                    loadReturnDebt();
+                }
+            });
+        } else {
+            toggleChangeBackColumn(false);
         }
         
         // Force debt pagination toggle
@@ -1072,6 +1111,17 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             paidTable.classList.add('show-debt-discount');
         } else {
             paidTable.classList.remove('show-debt-discount');
+        }
+    }
+
+    function toggleChangeBackColumn(show) {
+        const paidTable = document.getElementById('paid-table');
+        if (!paidTable) return;
+
+        if (show) {
+            paidTable.classList.add('show-change-back');
+        } else {
+            paidTable.classList.remove('show-change-back');
         }
     }
     

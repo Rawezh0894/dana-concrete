@@ -51,6 +51,43 @@ function shouldShowDebtDiscount() {
     return checkbox ? checkbox.checked === true : false;
 }
 
+function shouldShowChangeBack() {
+    const checkbox = document.getElementById('show-change-back');
+    return checkbox ? checkbox.checked === true : false;
+}
+
+function applyPaidTableColumnVisibility() {
+    const paidTable = document.getElementById('paid-table');
+    if (!paidTable) return;
+
+    if (shouldShowDebtDiscount()) {
+        paidTable.classList.add('show-debt-discount');
+    } else {
+        paidTable.classList.remove('show-debt-discount');
+    }
+
+    if (shouldShowChangeBack()) {
+        paidTable.classList.add('show-change-back');
+    } else {
+        paidTable.classList.remove('show-change-back');
+    }
+}
+
+function getPaidTableColumnCount() {
+    let count = 4;
+    if (shouldShowChangeBack()) count += 2;
+    if (shouldShowDebtDiscount()) count += 1;
+    return count;
+}
+
+function formatIqdAmount(amount) {
+    const num = parseFloat(amount);
+    if (!isFinite(num) || num === 0) {
+        return '0 د.ع';
+    }
+    return num.toLocaleString(undefined, { maximumFractionDigits: 0 }) + ' د.ع';
+}
+
 // Function to format date as DD/MM/YYYY
 function formatDate(dateString) {
     if (!dateString) return '';
@@ -175,19 +212,15 @@ function loadReturnDebt() {
                 let totalPaidIqd = 0;
                 let totalIqdToUsd = 0;
                 let totalDiscount = 0;
+                let totalChangeUsd = 0;
+                let totalChangeIq = 0;
                 let iqdConversionPossible = true;
-                const showDiscountColumn = shouldShowDebtDiscount();
-                const paidTable = document.getElementById('paid-table');
-                if (paidTable) {
-                    if (showDiscountColumn) {
-                        paidTable.classList.add('show-debt-discount');
-                    } else {
-                        paidTable.classList.remove('show-debt-discount');
-                    }
-                }
+                applyPaidTableColumnVisibility();
                 data.forEach(row => {
                     const amountUsd = parseFloat(row.paid_usd || 0);
                     const amountIqd = parseFloat(row.paid_iqd || 0);
+                    const changeUsd = parseFloat(row.change_back_usd || 0);
+                    const changeIq = parseFloat(row.change_back_iq || 0);
                     const rate = parseFloat(row.dolar_rate || 0);
                     const discountAmount = parseFloat(row.discount || 0) || 0;
                     let iqdToUsd = 0;
@@ -202,12 +235,16 @@ function loadReturnDebt() {
                     totalPaidIqd += amountIqd;
                     totalIqdToUsd += iqdToUsd;
                     totalDiscount += discountAmount;
+                    totalChangeUsd += changeUsd;
+                    totalChangeIq += changeIq;
                     paidTableBody.innerHTML += `
                         <tr>
                             <td>${'$' + (amountUsd ? amountUsd.toLocaleString() : '0')}</td>
                             <td>${amountIqd ? amountIqd.toLocaleString() + ' د.ع' : '0 د.ع'}</td>
+                            <td class="change-back-col">${formatUsdAmount(changeUsd)}</td>
+                            <td class="change-back-col">${formatIqdAmount(changeIq)}</td>
                             <td class="debt-discount-col">${formatUsdAmount(discountAmount)}</td>
-                            <td>${formatDate(row.date)}</td>
+                            <td class="paid-date-col">${formatDate(row.date)}</td>
                             <td>${row.note && row.note.trim() ? row.note : '–'}</td>
                         </tr>
                     `;
@@ -224,6 +261,14 @@ function loadReturnDebt() {
                     paidTableBody.innerHTML += `
                         <tr class="paid-summary-row">
                             <td colspan="2" style="font-weight:bold;">${totalText}</td>
+                            <td class="change-back-col" style="font-weight:bold; text-align:center;">
+                                ${formatUsdAmount(totalChangeUsd)}
+                                <div style="font-size:0.85em; font-weight:normal; margin-top:0.25rem;">کۆی باقی ($)</div>
+                            </td>
+                            <td class="change-back-col" style="font-weight:bold; text-align:center;">
+                                ${formatIqdAmount(totalChangeIq)}
+                                <div style="font-size:0.85em; font-weight:normal; margin-top:0.25rem;">کۆی باقی (د.ع)</div>
+                            </td>
                             <td class="debt-discount-col" style="font-weight:bold; text-align:center;">
                                 ${formatUsdAmount(totalDiscount)}
                                 <div style="font-size:0.85em; font-weight:normal; margin-top:0.25rem;">کۆی داشکاندن</div>
@@ -232,10 +277,10 @@ function loadReturnDebt() {
                         </tr>
                     `;
                 } else {
-                    // Show "no payments" message when there are no payments
+                    const colCount = getPaidTableColumnCount();
                     paidTableBody.innerHTML = `
                         <tr>
-                            <td colspan="5" style="text-align: center; padding: 2rem; color: #6c757d; font-style: italic;">
+                            <td colspan="${colCount}" style="text-align: center; padding: 2rem; color: #6c757d; font-style: italic;">
                                 <i class="fa fa-info-circle" style="margin-left: 0.5rem;"></i>
                                 هیچ پارەدانێک نیە
                             </td>
