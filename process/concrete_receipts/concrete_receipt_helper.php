@@ -14,15 +14,39 @@ declare(strict_types=1);
  */
 
 /**
+ * Increment an alphabetic prefix, spreadsheet-column style, with no upper limit:
+ *   A → B, … Z → AA, AA → AB, … AZ → BA, … ZZ → AAA, …
+ * This means numbering never runs out (capacity grows by adding letters).
+ */
+function concreteReceiptIncrementPrefix(string $prefix): string
+{
+    $letters = str_split($prefix);
+    $i = count($letters) - 1;
+
+    while ($i >= 0) {
+        if ($letters[$i] !== 'Z') {
+            $letters[$i] = chr(ord($letters[$i]) + 1);
+            return implode('', $letters);
+        }
+        $letters[$i] = 'A';
+        $i--;
+    }
+
+    // Carried past the leftmost letter: widen (e.g. Z → AA, ZZ → AAA).
+    return 'A' . implode('', $letters);
+}
+
+/**
  * Compute the next receipt number based on the highest existing value.
- * Format: <A-Z>-<0001..9999>, rolling over to the next letter.
+ * Format: <A-Z>+ - <0001..9999>. When digits hit 9999 the letter prefix
+ * advances (…Z-9999 → AA-0001), so the sequence never wraps back to A-0001.
  */
 function concreteReceiptNextNumber(PDO $pdo): string
 {
     $stmt = $pdo->query("SELECT receipt_number FROM concrete_receipts ORDER BY id DESC LIMIT 1");
     $last = $stmt ? $stmt->fetchColumn() : false;
 
-    if (!$last || !preg_match('/^([A-Z])-([0-9]{4})$/', (string) $last, $m)) {
+    if (!$last || !preg_match('/^([A-Z]+)-([0-9]{4})$/', (string) $last, $m)) {
         return 'A-0001';
     }
 
@@ -33,11 +57,7 @@ function concreteReceiptNextNumber(PDO $pdo): string
         return sprintf('%s-%04d', $prefix, $num + 1);
     }
 
-    if ($prefix === 'Z') {
-        return 'A-0001';
-    }
-
-    return sprintf('%s-0001', chr(ord($prefix) + 1));
+    return sprintf('%s-0001', concreteReceiptIncrementPrefix($prefix));
 }
 
 /**
@@ -47,7 +67,7 @@ function concreteReceiptNextNumber(PDO $pdo): string
 function concreteReceiptIsAutoNumber(?string $value): bool
 {
     $value = trim((string) $value);
-    return $value === '' || (bool) preg_match('/^[A-Z]-[0-9]{4}$/', $value);
+    return $value === '' || (bool) preg_match('/^[A-Z]+-[0-9]{4}$/', $value);
 }
 
 /**
