@@ -6,6 +6,7 @@ ini_set('error_log', __DIR__ . '/../../php-error.log');
 
 require_once '../../config/db_conected.php';
 require_once '../../config/permissions.php';
+require_once __DIR__ . '/concrete_receipt_helper.php';
 
 // Log session and POST data for debugging
 error_log('SESSION: ' . print_r($_SESSION, true));
@@ -48,6 +49,9 @@ if (!$id || !$receipt_number || !$location || !$meter_amount || !$formulas_id) {
 }
 
 try {
+    // Ensure the DB-level uniqueness guard exists (idempotent).
+    ensureConcreteReceiptUniqueIndex($pdo);
+
     // Check if receipt exists
     $checkStmt = $pdo->prepare('SELECT id, receipt_number FROM concrete_receipts WHERE id = ?');
     $checkStmt->execute([$id]);
@@ -274,6 +278,10 @@ try {
     }
 } catch (PDOException $e) {
     error_log('PDOException in update_concrete_receipts.php: ' . $e->getMessage());
+    if (concreteReceiptIsDuplicateError($e)) {
+        echo json_encode(['success' => false, 'message' => 'ئەم ژمارەی پسوڵە پێشتر تۆمارکراوە!']);
+        exit;
+    }
     echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 } catch (Exception $e) {
     error_log('Exception in update_concrete_receipts.php: ' . $e->getMessage());
