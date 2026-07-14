@@ -225,4 +225,14 @@
 .duplicate-row .btn {
     color: white !important;
     border-color: white !important;
+}
+
+/* Custom styles for Add Concrete Receipt Modal Select2 Options */
+#addConcreteReceiptModal .select2-container--bootstrap-5 .select2-results__option {
+    font-size: 18px !important;
+}
+
+#addConcreteReceiptModal .select2-container--bootstrap-5 .select2-results__option--highlighted,
+#addConcreteReceiptModal .select2-container--bootstrap-5 .select2-results__option[aria-selected=true] {
+    color: #000 !important;
 } 
