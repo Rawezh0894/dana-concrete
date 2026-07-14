@@ -87,7 +87,7 @@ $pump_drivers = array_filter($employees, function ($emp) {
   <link href="../assets/css/comon/style.css" rel="stylesheet">
   <link href="../assets/css/comon/cards.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-  <link href="../assets/css/concrete_receipts_custom.css" rel="stylesheet">
+  <link href="../assets/css/concrete_receipts_custom.css?v=<?= time() ?>" rel="stylesheet">
   <!-- AG Grid CSS -->
   <link href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/styles/ag-grid.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.0/styles/ag-theme-alpine.css" rel="stylesheet">
