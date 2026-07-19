@@ -612,8 +612,28 @@ $(document).on('click', '.edit-purchase', function (e) {
                 $('#edit_date').val(data.date);
                 $('#edit_type').val(data.type).trigger('change');
                 $('#edit_kg').val(data.kg);
+                
+                // Calculate and set material and freight totals
+                const kgTons = (parseFloat(data.kg) || 0) / 1000;
+                
+                const materialCostIqd = kgTons * (parseFloat(data.price_per_kg_iqd) || 0);
+                const materialCostUsd = kgTons * (parseFloat(data.price_per_kg_usd) || 0);
+                const freightCostIqd = kgTons * (parseFloat(data.freight_price_per_kg_iqd) || 0);
+                const freightCostUsd = kgTons * (parseFloat(data.freight_price_per_kg_usd) || 0);
+                
+                $('#edit_material_cost_iqd').val(materialCostIqd.toFixed(0));
+                $('#edit_material_cost_usd').val(materialCostUsd.toFixed(2));
+                $('#edit_freight_cost_iqd').val(freightCostIqd.toFixed(0));
+                $('#edit_freight_cost_usd').val(freightCostUsd.toFixed(2));
+                
+                // Hidden fields for backward compatibility
                 $('#edit_price_per_kg_iqd').val(data.price_per_kg_iqd);
                 $('#edit_price_per_kg_usd').val(data.price_per_kg_usd);
+                $('#edit_freight_price_per_kg_iqd').val(data.freight_price_per_kg_iqd);
+                $('#edit_freight_price_per_kg_usd').val(data.freight_price_per_kg_usd);
+                $('#edit_total_freight_cost_iqd').val(data.total_freight_cost_iqd);
+                $('#edit_total_freight_cost_usd').val(data.total_freight_cost_usd);
+                
                 $('#edit_exchange_rate').val(data.exchange_rate);
                 $('#edit_payment_type').val(data.payment_type);
                 $('#edit_price').val(data.price);

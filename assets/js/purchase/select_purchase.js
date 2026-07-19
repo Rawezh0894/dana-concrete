@@ -505,18 +505,18 @@ document.addEventListener('DOMContentLoaded', () => loadPurchases('', 1));
 // Function to handle dynamic price per kg fields in edit modal
 function handleEditTypeChange() {
     const typeSelect = document.getElementById('edit_type');
-    const iqdGroup = document.getElementById('edit_pricePerKgIqdGroup');
-    const usdGroup = document.getElementById('edit_pricePerKgUsdGroup');
+    const iqdGroup = document.getElementById('edit_materialCostIqdGroup');
+    const usdGroup = document.getElementById('edit_materialCostUsdGroup');
     
     if (typeSelect && iqdGroup && usdGroup) {
         if (typeSelect.value === 'دینار') {
             iqdGroup.style.display = 'block';
             usdGroup.style.display = 'none';
-            document.getElementById('edit_price_per_kg_usd').value = '0';
+            document.getElementById('edit_material_cost_usd').value = '0';
         } else if (typeSelect.value === 'دۆلار') {
             iqdGroup.style.display = 'none';
             usdGroup.style.display = 'block';
-            document.getElementById('edit_price_per_kg_iqd').value = '0';
+            document.getElementById('edit_material_cost_iqd').value = '0';
         } else {
             iqdGroup.style.display = 'block';
             usdGroup.style.display = 'block';
@@ -604,8 +604,6 @@ document.addEventListener('click', async function(e) {
                         'date': 'edit_date',
                         'type': 'edit_type',
                         'kg': 'edit_kg',
-                        'price_per_kg_iqd': 'edit_price_per_kg_iqd',
-                        'price_per_kg_usd': 'edit_price_per_kg_usd',
                         'exchange_rate': 'edit_exchange_rate',
                         'payment_type': 'edit_payment_type',
                         'price': 'edit_price',
@@ -669,6 +667,26 @@ document.addEventListener('click', async function(e) {
                             console.warn(`Input element not found: ${inputId}`);
                         }
                     }
+                    
+                    // Set legacy hidden fields
+                    if (document.getElementById('edit_price_per_kg_iqd')) document.getElementById('edit_price_per_kg_iqd').value = data.price_per_kg_iqd || '0';
+                    if (document.getElementById('edit_price_per_kg_usd')) document.getElementById('edit_price_per_kg_usd').value = data.price_per_kg_usd || '0';
+                    if (document.getElementById('edit_freight_price_per_kg_iqd')) document.getElementById('edit_freight_price_per_kg_iqd').value = data.freight_price_per_kg_iqd || '0';
+                    if (document.getElementById('edit_freight_price_per_kg_usd')) document.getElementById('edit_freight_price_per_kg_usd').value = data.freight_price_per_kg_usd || '0';
+                    if (document.getElementById('edit_total_freight_cost_iqd')) document.getElementById('edit_total_freight_cost_iqd').value = data.total_freight_cost_iqd || '0';
+                    if (document.getElementById('edit_total_freight_cost_usd')) document.getElementById('edit_total_freight_cost_usd').value = data.total_freight_cost_usd || '0';
+                    
+                    // Custom calculation for material_cost and freight_cost based on kg
+                    const kgTons = (parseFloat(data.kg) || 0) / 1000;
+                    const materialCostIqd = kgTons * (parseFloat(data.price_per_kg_iqd) || 0);
+                    const materialCostUsd = kgTons * (parseFloat(data.price_per_kg_usd) || 0);
+                    const freightCostIqd = kgTons * (parseFloat(data.freight_price_per_kg_iqd) || 0);
+                    const freightCostUsd = kgTons * (parseFloat(data.freight_price_per_kg_usd) || 0);
+                    
+                    if (document.getElementById('edit_material_cost_iqd')) document.getElementById('edit_material_cost_iqd').value = materialCostIqd.toFixed(0);
+                    if (document.getElementById('edit_material_cost_usd')) document.getElementById('edit_material_cost_usd').value = materialCostUsd.toFixed(2);
+                    if (document.getElementById('edit_freight_cost_iqd')) document.getElementById('edit_freight_cost_iqd').value = freightCostIqd.toFixed(0);
+                    if (document.getElementById('edit_freight_cost_usd')) document.getElementById('edit_freight_cost_usd').value = freightCostUsd.toFixed(2);
                     
                     // Handle dynamic price per kg fields
                     handleEditTypeChange();

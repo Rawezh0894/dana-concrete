@@ -26,108 +26,112 @@ $(document).on('change', '#material_id', function () {
 // Shared logic for add and edit purchase modals
 function togglePricePerKgInputsFor(typeSelector, iqdGroupSelector, usdGroupSelector) {
     var type = $(typeSelector).val();
+    
+    var materialIqdGroupSelector = iqdGroupSelector.replace('materialCost', 'materialCost');
+    var materialUsdGroupSelector = usdGroupSelector.replace('materialCost', 'materialCost');
+    var freightIqdGroupSelector = iqdGroupSelector.replace('materialCost', 'freightCost');
+    var freightUsdGroupSelector = usdGroupSelector.replace('materialCost', 'freightCost');
+
     if (type === 'دینار') {
         $(iqdGroupSelector).show();
         $(usdGroupSelector).hide();
+        $(freightIqdGroupSelector).show();
+        $(freightUsdGroupSelector).hide();
     } else if (type === 'دۆلار') {
         $(iqdGroupSelector).hide();
         $(usdGroupSelector).show();
+        $(freightIqdGroupSelector).hide();
+        $(freightUsdGroupSelector).show();
     } else {
         $(iqdGroupSelector).hide();
         $(usdGroupSelector).hide();
+        $(freightIqdGroupSelector).hide();
+        $(freightUsdGroupSelector).hide();
     }
 }
 
 function updateAmountsFor(prefix) {
     const kg = parseFloat($('#' + prefix + 'kg').val()) || 0;
     const type = $('#' + prefix + 'type').val();
-    let pricePerKg = 0;
+    
+    let materialTotal = 0;
+    let freightTotal = 0;
+    
     if (type === 'دینار') {
-        pricePerKg = parseFloat($('#' + prefix + 'price_per_kg_iqd').val()) || 0;
+        materialTotal = parseFloat($('#' + prefix + 'material_cost_iqd').val()) || 0;
+        freightTotal = parseFloat($('#' + prefix + 'freight_cost_iqd').val()) || 0;
     } else if (type === 'دۆلار') {
-        pricePerKg = parseFloat($('#' + prefix + 'price_per_kg_usd').val()) || 0;
+        materialTotal = parseFloat($('#' + prefix + 'material_cost_usd').val()) || 0;
+        freightTotal = parseFloat($('#' + prefix + 'freight_cost_usd').val()) || 0;
     }
-    const price = parseFloat($('#' + prefix + 'price').val()) || 0;
-    const amount_iqd = parseFloat($('#' + prefix + 'amount_iqd').val()) || 0;
-    const paid_usd = parseFloat($('#' + prefix + 'paid_usd').val()) || 0;
-    const paid_iqd = parseFloat($('#' + prefix + 'paid_iqd').val()) || 0;
+    
     const exchange_rate = parseFloat($('#' + prefix + 'exchange_rate').val()) || 1;
-    const amount = (kg / 1000) * pricePerKg;
-    const remainingUsdFocused = document.activeElement === document.getElementById(prefix + 'remaining_usd');
-    const remainingIqdFocused = document.activeElement === document.getElementById(prefix + 'remaining_iqd');
-    const amountIqdFocused = document.activeElement === document.getElementById(prefix + 'amount_iqd');
-
+    
+    // Calculate and set hidden price per kg values for backward compatibility
+    if (kg > 0) {
+        if (type === 'دینار') {
+            $('#' + prefix + 'price_per_kg_iqd').val((materialTotal / (kg / 1000)).toFixed(2));
+            $('#' + prefix + 'freight_price_per_kg_iqd').val((freightTotal / (kg / 1000)).toFixed(2));
+            $('#' + prefix + 'price_per_kg_usd').val(0);
+            $('#' + prefix + 'freight_price_per_kg_usd').val(0);
+        } else if (type === 'دۆلار') {
+            $('#' + prefix + 'price_per_kg_usd').val((materialTotal / (kg / 1000)).toFixed(2));
+            $('#' + prefix + 'freight_price_per_kg_usd').val((freightTotal / (kg / 1000)).toFixed(2));
+            $('#' + prefix + 'price_per_kg_iqd').val(0);
+            $('#' + prefix + 'freight_price_per_kg_iqd').val(0);
+        }
+    } else {
+        $('#' + prefix + 'price_per_kg_iqd').val(0);
+        $('#' + prefix + 'price_per_kg_usd').val(0);
+        $('#' + prefix + 'freight_price_per_kg_iqd').val(0);
+        $('#' + prefix + 'freight_price_per_kg_usd').val(0);
+    }
+    
+    const totalAmount = materialTotal + freightTotal;
+    
+    // Update total hidden and readonly cost fields
     if (type === 'دینار') {
-        $('#' + prefix + 'price').prop('readonly', true).val(0);
-        // Allow manual input for amount_iqd when type is دینار
-        $('#' + prefix + 'amount_iqd').prop('readonly', false);
-        if (amountIqdFocused && kg > 0) {
-            const calculatedPricePerTon = (amount_iqd / (kg / 1000));
-            $('#' + prefix + 'price_per_kg_iqd').val(calculatedPricePerTon.toFixed(2));
-        }
-
-        if (!amountIqdFocused) {
-            const currentPricePerTon = parseFloat($('#' + prefix + 'price_per_kg_iqd').val()) || 0;
-            const calculatedAmount = (kg / 1000) * currentPricePerTon;
-            const flooredAmount = Math.floor(calculatedAmount / 1000) * 1000;
-            $('#' + prefix + 'amount_iqd').val(flooredAmount.toFixed(0));
-        }
-
-        // Also round paid_iqd if not focused to match the request "input of amount should be cut"
-        const paidIqdFocused = document.activeElement === document.getElementById(prefix + 'paid_iqd');
-        if (!paidIqdFocused) {
-            const currentPaidIqd = parseFloat($('#' + prefix + 'paid_iqd').val()) || 0;
-            const flooredPaidIqd = Math.floor(currentPaidIqd / 1000) * 1000;
-            $('#' + prefix + 'paid_iqd').val(flooredPaidIqd.toFixed(0));
-        }
-
-        $('#' + prefix + 'remaining_usd').prop('readonly', true);
-        $('#' + prefix + 'remaining_iqd').prop('readonly', false);
-        const updated_paid_iqd = parseFloat($('#' + prefix + 'paid_iqd').val()) || 0;
-        const paid_usd_to_iqd = paid_usd * exchange_rate / 100;
-        const current_amount_iqd = parseFloat($('#' + prefix + 'amount_iqd').val()) || 0;
-        let remaining_iqd = current_amount_iqd - (updated_paid_iqd + paid_usd_to_iqd);
-        if (!remainingIqdFocused) {
-            if (remaining_iqd < 0) {
-                remaining_iqd = 0;
-            }
-            const flooredRemainingIqd = Math.floor(remaining_iqd / 1000) * 1000;
-            $('#' + prefix + 'remaining_iqd').val(flooredRemainingIqd.toFixed(0));
-        }
+        $('#' + prefix + 'total_freight_cost_iqd').val(freightTotal.toFixed(0));
+        $('#' + prefix + 'total_freight_cost_usd').val(0);
+        $('#' + prefix + 'amount_iqd').val(totalAmount.toFixed(0));
+        $('#' + prefix + 'price').val(0);
+    } else if (type === 'دۆلار') {
+        $('#' + prefix + 'total_freight_cost_usd').val(freightTotal.toFixed(2));
+        $('#' + prefix + 'total_freight_cost_iqd').val(0);
+        $('#' + prefix + 'price').val(totalAmount.toFixed(2));
+        $('#' + prefix + 'amount_iqd').val(0);
+    } else {
+        $('#' + prefix + 'total_freight_cost_usd').val(0);
+        $('#' + prefix + 'total_freight_cost_iqd').val(0);
+        $('#' + prefix + 'price').val(0);
+        $('#' + prefix + 'amount_iqd').val(0);
+    }
+    
+    // Handle total paid amounts mapping to legacy hidden fields
+    const paid_to_location_usd = parseFloat($('#' + prefix + 'paid_to_location_usd').val()) || 0;
+    const paid_to_driver_usd = parseFloat($('#' + prefix + 'paid_to_driver_usd').val()) || 0;
+    const total_paid_usd = paid_to_location_usd + paid_to_driver_usd;
+    $('#' + prefix + 'paid_usd').val(total_paid_usd.toFixed(2));
+    
+    const paid_to_location_iqd = parseFloat($('#' + prefix + 'paid_to_location_iqd').val()) || 0;
+    const paid_to_driver_iqd = parseFloat($('#' + prefix + 'paid_to_driver_iqd').val()) || 0;
+    const total_paid_iqd = paid_to_location_iqd + paid_to_driver_iqd;
+    $('#' + prefix + 'paid_iqd').val(total_paid_iqd.toFixed(2));
+    
+    // Remaining calculation
+    if (type === 'دینار') {
+        const paid_usd_to_iqd = total_paid_usd * exchange_rate / 100;
+        let remaining_iqd = totalAmount - (total_paid_iqd + paid_usd_to_iqd);
+        if (remaining_iqd < 0) remaining_iqd = 0;
+        $('#' + prefix + 'remaining_iqd').val(remaining_iqd.toFixed(0));
         $('#' + prefix + 'remaining_usd').val(0);
     } else if (type === 'دۆلار') {
-        // Allow manual input for amount_iqd when type is دۆلار
-        $('#' + prefix + 'amount_iqd').prop('readonly', false);
-        $('#' + prefix + 'price').prop('readonly', false).val(amount.toFixed(2));
-        $('#' + prefix + 'remaining_iqd').prop('readonly', true);
-        $('#' + prefix + 'remaining_usd').prop('readonly', false);
-
-        // Do not calculate amount_iqd from price when type is دۆلار
-        // (Removing automatic calculation as requested)
-
-        // Also round paid_iqd if not focused
-        const paidIqdFocused = document.activeElement === document.getElementById(prefix + 'paid_iqd');
-        if (!paidIqdFocused) {
-            const p_iqd = parseFloat($('#' + prefix + 'paid_iqd').val()) || 0;
-            const flooredP = Math.floor(p_iqd / 1000) * 1000;
-            $('#' + prefix + 'paid_iqd').val(flooredP.toFixed(0));
-        }
-
-        const updated_paid_iqd = parseFloat($('#' + prefix + 'paid_iqd').val()) || 0;
-        const paid_iqd_to_usd = updated_paid_iqd * 100 / exchange_rate;
-        const current_price = parseFloat($('#' + prefix + 'price').val()) || 0;
-        const current_paid_usd = parseFloat($('#' + prefix + 'paid_usd').val()) || 0;
-
-        let remaining_usd = current_price - (current_paid_usd + paid_iqd_to_usd);
+        const paid_iqd_to_usd = total_paid_iqd * 100 / exchange_rate;
+        let remaining_usd = totalAmount - (total_paid_usd + paid_iqd_to_usd);
         if (remaining_usd < 0) remaining_usd = 0;
-
-        if (!remainingUsdFocused) $('#' + prefix + 'remaining_usd').val(remaining_usd.toFixed(2));
+        $('#' + prefix + 'remaining_usd').val(remaining_usd.toFixed(2));
         $('#' + prefix + 'remaining_iqd').val(0);
     } else {
-        $('#' + prefix + 'price').prop('readonly', false).val(0);
-        $('#' + prefix + 'amount_iqd').prop('readonly', false).val(0);
-        $('#' + prefix + 'remaining_usd').prop('readonly', false);
-        $('#' + prefix + 'remaining_iqd').prop('readonly', false);
         $('#' + prefix + 'remaining_usd').val(0);
         $('#' + prefix + 'remaining_iqd').val(0);
     }
@@ -145,10 +149,10 @@ $(document).ready(function () {
         dateInput.value = `${yyyy}-${mm}-${dd}`;
     }
     // Set default price_per_kg_iqd and price_per_kg_usd to 0
-    const priceIqd = document.getElementById('price_per_kg_iqd');
-    if (priceIqd) priceIqd.value = 0;
-    const priceUsd = document.getElementById('price_per_kg_usd');
-    if (priceUsd) priceUsd.value = 0;
+    const materialCostIqd = document.getElementById('material_cost_iqd');
+    if (materialCostIqd) materialCostIqd.value = 0;
+    const materialCostUsd = document.getElementById('material_cost_usd');
+    if (materialCostUsd) materialCostUsd.value = 0;
     updateAmountsFor('purchase');
 });
 

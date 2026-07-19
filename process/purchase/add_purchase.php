@@ -29,10 +29,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $kg = $_POST['kg'] ?? null;
     $price_per_kg_iqd = $_POST['price_per_kg_iqd'] ?? 0;
     $price_per_kg_usd = $_POST['price_per_kg_usd'] ?? 0;
+    $freight_price_per_kg_iqd = $_POST['freight_price_per_kg_iqd'] ?? 0;
+    $freight_price_per_kg_usd = $_POST['freight_price_per_kg_usd'] ?? 0;
     $exchange_rate = $_POST['exchange_rate'] ?? null;
     $price = $_POST['price'] ?? null;
     $paid_iqd = $_POST['paid_iqd'] ?? 0;
     $paid_usd = $_POST['paid_usd'] ?? 0;
+    $paid_to_location_iqd = $_POST['paid_to_location_iqd'] ?? 0;
+    $paid_to_location_usd = $_POST['paid_to_location_usd'] ?? 0;
+    $paid_to_driver_iqd = $_POST['paid_to_driver_iqd'] ?? 0;
+    $paid_to_driver_usd = $_POST['paid_to_driver_usd'] ?? 0;
+    $total_freight_cost_iqd = $_POST['total_freight_cost_iqd'] ?? 0;
+    $total_freight_cost_usd = $_POST['total_freight_cost_usd'] ?? 0;
     $remaining_iqd = $_POST['remaining_iqd'] ?? 0;
     $remaining_usd = $_POST['remaining_usd'] ?? 0;
     $payment_type = $_POST['payment_type'] ?? null;
@@ -64,10 +72,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'kg' => $kg,
         'price_per_kg_iqd' => $price_per_kg_iqd,
         'price_per_kg_usd' => $price_per_kg_usd,
+        'freight_price_per_kg_iqd' => $freight_price_per_kg_iqd,
+        'freight_price_per_kg_usd' => $freight_price_per_kg_usd,
         'price' => $price,
         'amount_iqd' => $amount_iqd,
         'paid_usd' => $paid_usd,
         'paid_iqd' => $paid_iqd,
+        'paid_to_location_iqd' => $paid_to_location_iqd,
+        'paid_to_location_usd' => $paid_to_location_usd,
+        'paid_to_driver_iqd' => $paid_to_driver_iqd,
+        'paid_to_driver_usd' => $paid_to_driver_usd,
+        'total_freight_cost_iqd' => $total_freight_cost_iqd,
+        'total_freight_cost_usd' => $total_freight_cost_usd,
         'remaining_usd' => $remaining_usd,
         'remaining_iqd' => $remaining_iqd,
     ];
@@ -106,9 +122,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $location_stmt->execute([$location_id]);
     $location = $location_stmt->fetchColumn();
     try {
-        $stmt = $pdo->prepare("INSERT INTO purchases (date, invoice_number, driver, location, material_id, amount_iqd, kg, price, payment_type, exchange_rate, company_id, type, paid_usd, paid_iqd, remaining_usd, remaining_iqd, bin_id, price_per_kg_iqd, price_per_kg_usd, factory_truck_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt = $pdo->prepare("INSERT INTO purchases (date, invoice_number, driver, location, material_id, amount_iqd, kg, price, payment_type, exchange_rate, company_id, type, paid_usd, paid_iqd, remaining_usd, remaining_iqd, bin_id, price_per_kg_iqd, price_per_kg_usd, freight_price_per_kg_iqd, freight_price_per_kg_usd, total_freight_cost_iqd, total_freight_cost_usd, paid_to_location_iqd, paid_to_location_usd, paid_to_driver_iqd, paid_to_driver_usd, factory_truck_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         $ok = $stmt->execute([
-            $date, $invoice_number, $driver, $location, $material_id, $amount_iqd, $kg, $price, $payment_type, $exchange_rate, $company_id, $type, $paid_usd, $paid_iqd, $remaining_usd, $remaining_iqd, $bin_id, $price_per_kg_iqd, $price_per_kg_usd, $factory_truck_id
+            $date, $invoice_number, $driver, $location, $material_id, $amount_iqd, $kg, $price, $payment_type, $exchange_rate, $company_id, $type, $paid_usd, $paid_iqd, $remaining_usd, $remaining_iqd, $bin_id, $price_per_kg_iqd, $price_per_kg_usd, $freight_price_per_kg_iqd, $freight_price_per_kg_usd, $total_freight_cost_iqd, $total_freight_cost_usd, $paid_to_location_iqd, $paid_to_location_usd, $paid_to_driver_iqd, $paid_to_driver_usd, $factory_truck_id
         ]);
         if ($ok) {
             // Update company debt
@@ -155,6 +171,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'bin_id' => $bin_id,
                 'price_per_kg_iqd' => $price_per_kg_iqd,
                 'price_per_kg_usd' => $price_per_kg_usd,
+                'freight_price_per_kg_iqd' => $freight_price_per_kg_iqd,
+                'freight_price_per_kg_usd' => $freight_price_per_kg_usd,
+                'total_freight_cost_iqd' => $total_freight_cost_iqd,
+                'total_freight_cost_usd' => $total_freight_cost_usd,
+                'paid_to_location_iqd' => $paid_to_location_iqd,
+                'paid_to_location_usd' => $paid_to_location_usd,
+                'paid_to_driver_iqd' => $paid_to_driver_iqd,
+                'paid_to_driver_usd' => $paid_to_driver_usd,
                 'invoice_number' => $invoice_number,
                 'date' => $date
             ];
