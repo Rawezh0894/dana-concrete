@@ -90,6 +90,8 @@ if ($company_id) {
             <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#purchases">مێژووی کڕینەکان</button></li>
             <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#debt">دانەوەی قەرزەکان</button></li>
             <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#adjustment">ڕێکخستنەوەی حیساب</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#locations_statement">کەشف حیسابی شوێنەکان</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#drivers_statement">کەشف حیسابی شۆفێرەکان</button></li>
         </ul>
         
         <div class="tab-content border-0">
@@ -101,6 +103,12 @@ if ($company_id) {
             <div class="tab-pane fade" id="adjustment">
                 <div class="d-flex justify-content-end mb-3"><button class="btn btn-warning fw-bold rounded-pill px-4 text-dark" data-bs-toggle="modal" data-bs-target="#addAdjustmentModal"><i class="fas fa-sync-alt me-1"></i> ڕێکخستنەوەی حیساب</button></div>
                 <table id="adjustmentTable" class="table table-hover w-100 text-center"></table>
+            </div>
+            <div class="tab-pane fade" id="locations_statement">
+                <table id="locationsSummaryTable" class="table table-hover w-100 text-center"></table>
+            </div>
+            <div class="tab-pane fade" id="drivers_statement">
+                <table id="driversSummaryTable" class="table table-hover w-100 text-center"></table>
             </div>
         </div>
     </div>
@@ -167,6 +175,38 @@ if ($company_id) {
     </form></div></div>
 </div>
 
+<div class="modal fade" id="locationLedgerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header text-white" style="background: #20b2aa;">
+                <h5 class="modal-title fw-bold" id="locationLedgerTitle">کەشف حیسابی شوێن</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="table-responsive">
+                    <table id="locationLedgerTable" class="table table-hover w-100 text-center"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="driverLedgerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header text-white" style="background: #20b2aa;">
+                <h5 class="modal-title fw-bold" id="driverLedgerTitle">کەشف حیسابی شۆفێر</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="table-responsive">
+                    <table id="driverLedgerTable" class="table table-hover w-100 text-center"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- JS Libraries -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -196,6 +236,8 @@ if ($company_id) {
         if (typeof loadPurchases === 'function') loadPurchases();
         if (typeof loadStats === 'function') loadStats();
         if (typeof loadAdjustments === 'function') loadAdjustments();
+        if (typeof loadLocationsSummary === 'function') loadLocationsSummary();
+        if (typeof loadDriversSummary === 'function') loadDriversSummary();
     }
 
     function resetFilters() {
@@ -247,6 +289,8 @@ if ($company_id) {
 <script src="../assets/js/company_profile/select_purchases.js?v=1.1"></script>
 <script src="../assets/js/company_profile/select_debt.js?v=1.1"></script>
 <script src="../assets/js/company_profile/add_debt.js?v=1.1"></script>
+<script src="../assets/js/company_profile/select_locations_statement.js?v=1.1"></script>
+<script src="../assets/js/company_profile/select_drivers_statement.js?v=1.1"></script>
 
 </body>
 </html>
