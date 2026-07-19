@@ -180,7 +180,12 @@ if ($company_id) {
         <div class="modal-content border-0 shadow">
             <div class="modal-header text-white" style="background: #20b2aa;">
                 <h5 class="modal-title fw-bold" id="locationLedgerTitle">کەشف حیسابی شوێن</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <div>
+                    <button type="button" class="btn btn-sm btn-light fw-bold" onclick="printLocationStatement()">
+                        <i class="fas fa-print"></i> پرێنت
+                    </button>
+                    <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="modal"></button>
+                </div>
             </div>
             <div class="modal-body p-4">
                 <div class="table-responsive">
@@ -196,7 +201,12 @@ if ($company_id) {
         <div class="modal-content border-0 shadow">
             <div class="modal-header text-white" style="background: #20b2aa;">
                 <h5 class="modal-title fw-bold" id="driverLedgerTitle">کەشف حیسابی شۆفێر</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <div>
+                    <button type="button" class="btn btn-sm btn-light fw-bold" onclick="printDriverStatement()">
+                        <i class="fas fa-print"></i> پرێنت
+                    </button>
+                    <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="modal"></button>
+                </div>
             </div>
             <div class="modal-body p-4">
                 <div class="table-responsive">

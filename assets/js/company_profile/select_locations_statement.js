@@ -1,5 +1,14 @@
 let locationsSummaryTable = null;
 let locationLedgerTable = null;
+let currentLocationName = '';
+
+function printLocationStatement() {
+    if(!currentLocationName) return;
+    let url = `print_location_statement.php?company_id=${COMPANY_ID}&location=${encodeURIComponent(currentLocationName)}`;
+    if(currentFilters.from_date) url += `&from_date=${currentFilters.from_date}`;
+    if(currentFilters.to_date) url += `&to_date=${currentFilters.to_date}`;
+    window.open(url, '_blank');
+}
 
 function loadLocationsSummary() {
     if (locationsSummaryTable) {
@@ -82,6 +91,7 @@ function loadLocationsSummary() {
 }
 
 function openLocationLedger(locationName) {
+    currentLocationName = locationName;
     $('#locationLedgerTitle').text(`کەشف حیسابی شوێن - ${locationName}`);
     
     if (locationLedgerTable) {

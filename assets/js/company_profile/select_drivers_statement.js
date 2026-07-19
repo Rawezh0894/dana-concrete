@@ -1,5 +1,14 @@
 let driversSummaryTable = null;
 let driverLedgerTable = null;
+let currentDriverName = '';
+
+function printDriverStatement() {
+    if(!currentDriverName) return;
+    let url = `print_driver_statement.php?company_id=${COMPANY_ID}&driver=${encodeURIComponent(currentDriverName)}`;
+    if(currentFilters.from_date) url += `&from_date=${currentFilters.from_date}`;
+    if(currentFilters.to_date) url += `&to_date=${currentFilters.to_date}`;
+    window.open(url, '_blank');
+}
 
 function loadDriversSummary() {
     if (driversSummaryTable) {
@@ -82,6 +91,7 @@ function loadDriversSummary() {
 }
 
 function openDriverLedger(driverName) {
+    currentDriverName = driverName;
     $('#driverLedgerTitle').text(`کەشف حیسابی شۆفێر - ${driverName}`);
     
     if (driverLedgerTable) {
