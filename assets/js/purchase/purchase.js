@@ -61,8 +61,9 @@ function updateAmountsFor(prefix) {
         materialTotal = parseFloat($('#' + prefix + 'material_cost_iqd').val()) || 0;
         freightTotal = parseFloat($('#' + prefix + 'freight_cost_iqd').val()) || 0;
     } else if (type === 'دۆلار') {
-        materialTotal = parseFloat($('#' + prefix + 'material_cost_usd').val()) || 0;
-        freightTotal = parseFloat($('#' + prefix + 'freight_cost_usd').val()) || 0;
+        let pricePerTonUsd = parseFloat($('#' + prefix + 'price_per_ton_usd').val()) || 0;
+        materialTotal = (kg / 1000) * pricePerTonUsd;
+        freightTotal = 0;
     }
     
     const exchange_rate = parseFloat($('#' + prefix + 'exchange_rate').val()) || 1;
@@ -151,8 +152,8 @@ $(document).ready(function () {
     // Set default price_per_kg_iqd and price_per_kg_usd to 0
     const materialCostIqd = document.getElementById('material_cost_iqd');
     if (materialCostIqd) materialCostIqd.value = 0;
-    const materialCostUsd = document.getElementById('material_cost_usd');
-    if (materialCostUsd) materialCostUsd.value = 0;
+    const pricePerTonUsd = document.getElementById('price_per_ton_usd');
+    if (pricePerTonUsd) pricePerTonUsd.value = 0;
     updateAmountsFor('purchase');
 });
 

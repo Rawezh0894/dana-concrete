@@ -622,7 +622,8 @@ $(document).on('click', '.edit-purchase', function (e) {
                 const freightCostUsd = kgTons * (parseFloat(data.freight_price_per_kg_usd) || 0);
                 
                 $('#edit_material_cost_iqd').val(materialCostIqd.toFixed(0));
-                $('#edit_material_cost_usd').val(materialCostUsd.toFixed(2));
+                const pricePerTonUsd = parseFloat(data.price_per_kg_usd) || 0;
+                $('#edit_price_per_ton_usd').val(pricePerTonUsd.toFixed(2));
                 $('#edit_freight_cost_iqd').val(freightCostIqd.toFixed(0));
                 $('#edit_freight_cost_usd').val(freightCostUsd.toFixed(2));
                 

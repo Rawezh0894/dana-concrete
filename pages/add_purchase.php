@@ -648,8 +648,8 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
                     <input type="number" class="form-control" id="edit_material_cost_iqd" name="material_cost_iqd" min="0" step="0.01" value="0">
                 </div>
                 <div id="edit_materialCostUsdGroup">
-                    <label for="edit_material_cost_usd" class="form-label">کۆی تێچووی کڕین (مەواد) بە دۆلار</label>
-                    <input type="number" class="form-control" id="edit_material_cost_usd" name="material_cost_usd" min="0" step="0.01" value="0">
+                    <label for="edit_price_per_ton_usd" class="form-label">نرخی 1 تەن بە دۆلار</label>
+                    <input type="number" class="form-control" id="edit_price_per_ton_usd" name="price_per_ton_usd" min="0" step="0.01" value="0">
                 </div>
             </div>
             <div class="col-md-6 mb-3">
@@ -657,9 +657,8 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
                     <label for="edit_freight_cost_iqd" class="form-label">کۆی تێچووی نقڵ بە دینار</label>
                     <input type="number" class="form-control" id="edit_freight_cost_iqd" name="freight_cost_iqd" min="0" step="0.01" value="0">
                 </div>
-                <div id="edit_freightCostUsdGroup">
-                    <label for="edit_freight_cost_usd" class="form-label">کۆی تێچووی نقڵ بە دۆلار</label>
-                    <input type="number" class="form-control" id="edit_freight_cost_usd" name="freight_cost_usd" min="0" step="0.01" value="0">
+                <div id="edit_freightCostUsdGroup" style="display: none;">
+                    <input type="hidden" id="edit_freight_cost_usd" name="freight_cost_usd" value="0">
                 </div>
             </div>
           </div>
@@ -851,8 +850,8 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
                     <input type="number" class="form-control" id="material_cost_iqd" name="material_cost_iqd" min="0" step="0.01" value="0">
                 </div>
                 <div id="materialCostUsdGroup">
-                    <label for="material_cost_usd" class="form-label">کۆی تێچووی کڕین (مەواد) بە دۆلار</label>
-                    <input type="number" class="form-control" id="material_cost_usd" name="material_cost_usd" min="0" step="0.01" value="0">
+                    <label for="price_per_ton_usd" class="form-label">نرخی 1 تەن بە دۆلار</label>
+                    <input type="number" class="form-control" id="price_per_ton_usd" name="price_per_ton_usd" min="0" step="0.01" value="0">
                 </div>
             </div>
             <div class="col-md-6 mb-3">
@@ -860,9 +859,8 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
                     <label for="freight_cost_iqd" class="form-label">کۆی تێچووی نقڵ بە دینار</label>
                     <input type="number" class="form-control" id="freight_cost_iqd" name="freight_cost_iqd" min="0" step="0.01" value="0">
                 </div>
-                <div id="freightCostUsdGroup">
-                    <label for="freight_cost_usd" class="form-label">کۆی تێچووی نقڵ بە دۆلار</label>
-                    <input type="number" class="form-control" id="freight_cost_usd" name="freight_cost_usd" min="0" step="0.01" value="0">
+                <div id="freightCostUsdGroup" style="display: none;">
+                    <input type="hidden" id="freight_cost_usd" name="freight_cost_usd" value="0">
                 </div>
             </div>
           </div>
@@ -1126,7 +1124,7 @@ $(function() {
     $('#type').on('change', handleAddTypeChange);
     handleAddTypeChange();
 });
-$('#kg, #material_cost_iqd, #material_cost_usd, #freight_cost_iqd, #freight_cost_usd, #type, #paid_to_location_usd, #paid_to_location_iqd, #paid_to_driver_usd, #paid_to_driver_iqd, #exchange_rate').on('input change', function() {
+$('#kg, #material_cost_iqd, #price_per_ton_usd, #freight_cost_iqd, #freight_cost_usd, #type, #paid_to_location_usd, #paid_to_location_iqd, #paid_to_driver_usd, #paid_to_driver_iqd, #exchange_rate').on('input change', function() {
     updateAmountsFor('');
 });
 
@@ -1143,7 +1141,7 @@ $(function() {
     $('#edit_type').on('change', handleEditTypeChange);
     handleEditTypeChange();
 });
-$('#edit_kg, #edit_material_cost_iqd, #edit_material_cost_usd, #edit_freight_cost_iqd, #edit_freight_cost_usd, #edit_type, #edit_paid_to_location_usd, #edit_paid_to_location_iqd, #edit_paid_to_driver_usd, #edit_paid_to_driver_iqd, #edit_exchange_rate').on('input change', function() {
+$('#edit_kg, #edit_material_cost_iqd, #edit_price_per_ton_usd, #edit_freight_cost_iqd, #edit_freight_cost_usd, #edit_type, #edit_paid_to_location_usd, #edit_paid_to_location_iqd, #edit_paid_to_driver_usd, #edit_paid_to_driver_iqd, #edit_exchange_rate').on('input change', function() {
     updateAmountsFor('edit_');
 });
 
