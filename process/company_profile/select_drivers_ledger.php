@@ -45,7 +45,7 @@ try {
             paid_to_driver_iqd,
             (total_freight_cost_usd - paid_to_driver_usd) as remaining_usd,
             (total_freight_cost_iqd - paid_to_driver_iqd) as remaining_iqd,
-            note
+            '' as note
         FROM purchases
         WHERE $where
         ORDER BY date ASC, id ASC

@@ -43,7 +43,7 @@ $query = "
     SELECT 
         id, date, invoice_number, location, kg, 
         total_freight_cost_usd, total_freight_cost_iqd, 
-        paid_to_driver_usd, paid_to_driver_iqd, note
+        paid_to_driver_usd, paid_to_driver_iqd, '' as note
     FROM purchases
     WHERE $where
     ORDER BY date ASC, id ASC
