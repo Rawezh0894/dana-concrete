@@ -1113,7 +1113,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
 <script src="../assets/js/purchase/ag_grid_purchase.js?v=<?php echo @filemtime(__DIR__ . '/../assets/js/purchase/ag_grid_purchase.js') ?: time(); ?>" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/purchase/summary.js?v=<?php echo time(); ?>" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/purchase/delete_purchase.js" nonce="<?php echo $csp_nonce; ?>"></script>
-<script src="../assets/js/purchase/purchase.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/purchase/purchase.js?v=<?php echo @filemtime(__DIR__ . '/../assets/js/purchase/purchase.js') ?: time(); ?>" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/purchase/update_purchase.js?v=<?php echo @filemtime(__DIR__ . '/../assets/js/purchase/update_purchase.js') ?: time(); ?>" nonce="<?php echo $csp_nonce; ?>"></script>
 <script nonce="<?php echo $csp_nonce; ?>">
 // Add modal: dynamic price per kg fields
