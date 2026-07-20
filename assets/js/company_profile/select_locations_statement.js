@@ -121,10 +121,10 @@ function openLocationLedger(locationName) {
             },
             { 
                 data: null, 
-                title: 'بڕی کرێ',
+                title: 'بڕی کڕین',
                 render: function(data, type, row) {
-                    let usd = parseFloat(row.total_freight_cost_usd);
-                    let iqd = parseFloat(row.total_freight_cost_iqd);
+                    let usd = parseFloat(row.material_cost_usd);
+                    let iqd = parseFloat(row.material_cost_iqd);
                     if(usd > 0) return `<span class="text-danger">${usd.toLocaleString()} $</span>`;
                     if(iqd > 0) return `<span class="text-danger">${iqd.toLocaleString()} د.ع</span>`;
                     return '0';

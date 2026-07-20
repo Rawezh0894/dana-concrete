@@ -10,7 +10,7 @@ $location = isset($_GET['location']) ? $_GET['location'] : '';
 $from_date = isset($_GET['from_date']) ? $_GET['from_date'] : '';
 $to_date = isset($_GET['to_date']) ? $_GET['to_date'] : '';
 
-if (!$company_id || empty($location)) die("Invalid Parameters");
+if (!$company_id) die("Invalid Parameters");
 
 // Fetch Company Info
 $comp_stmt = $pdo->prepare("SELECT name FROM company WHERE id = ?");
@@ -20,8 +20,8 @@ $company = $comp_stmt->fetch(PDO::FETCH_ASSOC);
 if (!$company) die("Company Not Found");
 
 // Build Query
-$where = "company_id = :company_id AND location = :location";
-$params = [':company_id' => $company_id, ':location' => $location];
+$where = "company_id = :company_id AND location IS NOT NULL AND location != ''";
+$params = [':company_id' => $company_id];
 
 $date_label = "تەواوی کاتەکان";
 if (!empty($from_date) && !empty($to_date)) {
@@ -41,44 +41,38 @@ if (!empty($from_date) && !empty($to_date)) {
 
 $query = "
     SELECT 
-        id, date, invoice_number, driver, kg, 
-        price, amount_iqd, total_freight_cost_usd, total_freight_cost_iqd, 
-        paid_to_location_usd, paid_to_location_iqd, note
+        location,
+        SUM(price - total_freight_cost_usd) as total_cost_usd,
+        SUM(amount_iqd - total_freight_cost_iqd) as total_cost_iqd,
+        SUM(paid_to_location_usd) as total_paid_usd,
+        SUM(paid_to_location_iqd) as total_paid_iqd,
+        SUM((price - total_freight_cost_usd) - paid_to_location_usd) as remaining_usd,
+        SUM((amount_iqd - total_freight_cost_iqd) - paid_to_location_iqd) as remaining_iqd
     FROM purchases
     WHERE $where
-    ORDER BY date ASC, id ASC
+    GROUP BY location
+    ORDER BY location ASC
 ";
 
 $stmt = $pdo->prepare($query);
 $stmt->execute($params);
 $transactions = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$total_kg = 0;
-$total_cost_usd = 0;
-$total_cost_iqd = 0;
-$total_paid_usd = 0;
-$total_paid_iqd = 0;
-
 foreach ($transactions as $t) {
-    $mat_usd = (float)$t['price'] - (float)$t['total_freight_cost_usd'];
-    $mat_iqd = (float)$t['amount_iqd'] - (float)$t['total_freight_cost_iqd'];
-    
-    $total_kg += (float)$t['kg'];
-    $total_cost_usd += $mat_usd;
-    $total_cost_iqd += $mat_iqd;
-    $total_paid_usd += (float)$t['paid_to_location_usd'];
-    $total_paid_iqd += (float)$t['paid_to_location_iqd'];
+    $total_cost_usd += (float)$t['total_cost_usd'];
+    $total_cost_iqd += (float)$t['total_cost_iqd'];
+    $total_paid_usd += (float)$t['total_paid_usd'];
+    $total_paid_iqd += (float)$t['total_paid_iqd'];
+    $remaining_usd += (float)$t['remaining_usd'];
+    $remaining_iqd += (float)$t['remaining_iqd'];
 }
-
-$remaining_usd = $total_cost_usd - $total_paid_usd;
-$remaining_iqd = $total_cost_iqd - $total_paid_iqd;
 
 ?>
 <!DOCTYPE html>
 <html lang="ku" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>کەشف حیسابی شوێن - <?= htmlspecialchars($location) ?></title>
+    <title>کەشف حیسابی گشت شوێنەکان</title>
     <style>
         @font-face {
             font-family: 'Rabar21';
@@ -275,49 +269,41 @@ $remaining_iqd = $total_cost_iqd - $total_paid_iqd;
             <p>سیستەمی بەڕێوەبردنی کڕین و فرۆشتن</p>
             <p>ڕێککەوتی چاپ: <?= date('Y-m-d') ?></p>
         </div>
-        <div class="report-title">کەشف حیسابی شوێن</div>
+        <div class="report-title">کەشف حیسابی گشت شوێنەکان</div>
     </div>
 
     <div class="meta-grid">
         <div class="meta-item"><span class="meta-label">ناوی کۆمپانیا:</span><span class="meta-value"><?= htmlspecialchars($company['name']) ?></span></div>
-        <div class="meta-item"><span class="meta-label">ناوی شوێن:</span><span class="meta-value"><?= htmlspecialchars($location) ?></span></div>
+
         <div class="meta-item" style="grid-column: span 2;"><span class="meta-label">ماوەی ڕاپۆرت:</span><span class="meta-value"><?= $date_label ?></span></div>
     </div>
 
     <table>
         <thead>
             <tr>
-                <th>بەروار</th>
-                <th>ژ.پسوڵە</th>
-                <th>شۆفێر</th>
-                <th>کێش (کگم)</th>
+                <th>ناوی شوێن</th>
                 <th>بڕی کڕین ($)</th>
                 <th>بڕی کڕین (د.ع)</th>
                 <th>پارەی دراو ($)</th>
                 <th>پارەی دراو (د.ع)</th>
-                <th>تێبینی</th>
+                <th>قەرزی ماوە ($)</th>
+                <th>قەرزی ماوە (د.ع)</th>
             </tr>
         </thead>
         <tbody>
             <?php foreach($transactions as $t): ?>
             <tr>
-                <td><?= $t['date'] ?></td>
-                <td><?= htmlspecialchars($t['invoice_number']) ?></td>
-                <td><?= htmlspecialchars($t['driver'] ?: '---') ?></td>
-                <td><?= number_format($t['kg']) ?></td>
-                <?php 
-                    $m_usd = (float)$t['price'] - (float)$t['total_freight_cost_usd'];
-                    $m_iqd = (float)$t['amount_iqd'] - (float)$t['total_freight_cost_iqd'];
-                ?>
-                <td class="text-danger"><?= $m_usd > 0 ? number_format($m_usd, 2) : '-' ?></td>
-                <td class="text-danger"><?= $m_iqd > 0 ? number_format($m_iqd) : '-' ?></td>
-                <td class="text-success"><?= (float)$t['paid_to_location_usd'] > 0 ? number_format($t['paid_to_location_usd'], 2) : '-' ?></td>
-                <td class="text-success"><?= (float)$t['paid_to_location_iqd'] > 0 ? number_format($t['paid_to_location_iqd']) : '-' ?></td>
-                <td><?= htmlspecialchars($t['note'] ?: '---') ?></td>
+                <td><?= htmlspecialchars($t['location']) ?></td>
+                <td class="text-danger"><?= (float)$t['total_cost_usd'] > 0 ? number_format($t['total_cost_usd'], 2) : '-' ?></td>
+                <td class="text-danger"><?= (float)$t['total_cost_iqd'] > 0 ? number_format($t['total_cost_iqd']) : '-' ?></td>
+                <td class="text-success"><?= (float)$t['total_paid_usd'] > 0 ? number_format($t['total_paid_usd'], 2) : '-' ?></td>
+                <td class="text-success"><?= (float)$t['total_paid_iqd'] > 0 ? number_format($t['total_paid_iqd']) : '-' ?></td>
+                <td class="<?= (float)$t['remaining_usd'] > 0 ? 'text-danger' : 'text-success' ?>" style="font-weight: bold;"><?= (float)$t['remaining_usd'] != 0 ? number_format($t['remaining_usd'], 2) : '-' ?></td>
+                <td class="<?= (float)$t['remaining_iqd'] > 0 ? 'text-danger' : 'text-success' ?>" style="font-weight: bold;"><?= (float)$t['remaining_iqd'] != 0 ? number_format($t['remaining_iqd']) : '-' ?></td>
             </tr>
             <?php endforeach; ?>
             <?php if(empty($transactions)): ?>
-            <tr><td colspan="9">هیچ مامەڵەیەک نەدۆزرایەوە</td></tr>
+            <tr><td colspan="7">هیچ مامەڵەیەک نەدۆزرایەوە</td></tr>
             <?php endif; ?>
         </tbody>
     </table>
@@ -356,8 +342,8 @@ $remaining_iqd = $total_cost_iqd - $total_paid_iqd;
             </div>
         </div>
         <div class="summary-row" style="margin-top: 15px; border-top: 2px solid #ccc; padding-top: 15px; justify-content: center; font-size: 16px;">
-            <span>کۆی کێشی گواستراوە: </span>
-            <span style="font-weight: bold; margin-right: 10px;"><?= number_format($total_kg) ?> کگم</span>
+            <span>ژمارەی شوێنەکان: </span>
+            <span style="font-weight: bold; margin-right: 10px;"><?= count($transactions) ?> شوێن</span>
         </div>
     </div>
 

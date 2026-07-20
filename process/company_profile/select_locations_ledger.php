@@ -39,12 +39,12 @@ try {
             invoice_number,
             driver,
             kg,
-            total_freight_cost_usd,
-            total_freight_cost_iqd,
+            (price - total_freight_cost_usd) as material_cost_usd,
+            (amount_iqd - total_freight_cost_iqd) as material_cost_iqd,
             paid_to_location_usd,
             paid_to_location_iqd,
-            (total_freight_cost_usd - paid_to_location_usd) as remaining_usd,
-            (total_freight_cost_iqd - paid_to_location_iqd) as remaining_iqd,
+            ((price - total_freight_cost_usd) - paid_to_location_usd) as remaining_usd,
+            ((amount_iqd - total_freight_cost_iqd) - paid_to_location_iqd) as remaining_iqd,
             note
         FROM purchases
         WHERE $where

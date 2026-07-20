@@ -34,12 +34,12 @@ try {
     $query = "
         SELECT 
             location,
-            SUM(total_freight_cost_usd) as total_cost_usd,
-            SUM(total_freight_cost_iqd) as total_cost_iqd,
+            SUM(price - total_freight_cost_usd) as total_cost_usd,
+            SUM(amount_iqd - total_freight_cost_iqd) as total_cost_iqd,
             SUM(paid_to_location_usd) as total_paid_usd,
             SUM(paid_to_location_iqd) as total_paid_iqd,
-            SUM(total_freight_cost_usd - paid_to_location_usd) as remaining_usd,
-            SUM(total_freight_cost_iqd - paid_to_location_iqd) as remaining_iqd
+            SUM((price - total_freight_cost_usd) - paid_to_location_usd) as remaining_usd,
+            SUM((amount_iqd - total_freight_cost_iqd) - paid_to_location_iqd) as remaining_iqd
         FROM purchases
         WHERE $where
         GROUP BY location

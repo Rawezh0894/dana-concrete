@@ -105,9 +105,15 @@ if ($company_id) {
                 <table id="adjustmentTable" class="table table-hover w-100 text-center"></table>
             </div>
             <div class="tab-pane fade" id="locations_statement">
+                <div class="d-flex justify-content-end mb-3">
+                    <button class="btn btn-teal fw-bold text-white rounded-pill px-4" onclick="printAllLocationsStatement()"><i class="fas fa-print me-1"></i> پرێنتکردنی هەموو شوێنەکان</button>
+                </div>
                 <table id="locationsSummaryTable" class="table table-hover w-100 text-center"></table>
             </div>
             <div class="tab-pane fade" id="drivers_statement">
+                <div class="d-flex justify-content-end mb-3">
+                    <button class="btn btn-teal fw-bold text-white rounded-pill px-4" onclick="printAllDriversStatement()"><i class="fas fa-print me-1"></i> پرێنتکردنی هەموو شۆفێرەکان</button>
+                </div>
                 <table id="driversSummaryTable" class="table table-hover w-100 text-center"></table>
             </div>
         </div>
@@ -254,6 +260,20 @@ if ($company_id) {
         $('#from_date, #to_date').val('');
         currentFilters = { from_date: '', to_date: '' };
         applyFilters();
+    }
+
+    function printAllLocationsStatement() {
+        let url = `print_all_locations_statement.php?company_id=${COMPANY_ID}`;
+        if(currentFilters.from_date) url += `&from_date=${currentFilters.from_date}`;
+        if(currentFilters.to_date) url += `&to_date=${currentFilters.to_date}`;
+        window.open(url, '_blank');
+    }
+
+    function printAllDriversStatement() {
+        let url = `print_all_drivers_statement.php?company_id=${COMPANY_ID}`;
+        if(currentFilters.from_date) url += `&from_date=${currentFilters.from_date}`;
+        if(currentFilters.to_date) url += `&to_date=${currentFilters.to_date}`;
+        window.open(url, '_blank');
     }
 
     $('#addAdjustmentForm').on('submit', function(e) {
