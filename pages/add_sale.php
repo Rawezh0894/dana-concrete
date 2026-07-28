@@ -409,7 +409,7 @@ usort($recipients, function($a, $b) {
             </div>
             <div class="col-md-4 mb-3">
               <label for="recipient" class="form-label">وەرگر</label>
-              <select class="form-select" id="recipient" name="recipient_id" data-placeholder="وەرگرێک هەڵبژێرە">
+              <select class="form-select" id="recipient" name="recipient" data-placeholder="وەرگرێک هەڵبژێرە">
                 <option value="">وەرگرێک هەڵبژێرە</option>
                 <?php foreach ($recipients as $recipient): 
                     $phoneList = array_filter([
@@ -419,7 +419,7 @@ usort($recipients, function($a, $b) {
                     $searchMeta = trim($recipient['name'] . ' ' . implode(' ', $phoneList));
                 ?>
                     <option 
-                        value="<?= (int)$recipient['id'] ?>"
+                        value="<?= htmlspecialchars($recipient['name']) ?>"
                         data-name="<?= htmlspecialchars($recipient['name']) ?>"
                         data-search="<?= htmlspecialchars($searchMeta) ?>"
                     >
@@ -547,7 +547,7 @@ usort($recipients, function($a, $b) {
             </div>
             <div class="col-md-4 mb-3">
               <label for="edit_recipient" class="form-label">وەرگر</label>
-              <select class="form-select" id="edit_recipient" name="edit_recipient_id" data-placeholder="وەرگرێک هەڵبژێرە">
+              <select class="form-select" id="edit_recipient" name="edit_recipient" data-placeholder="وەرگرێک هەڵبژێرە">
                 <option value="">وەرگرێک هەڵبژێرە</option>
                 <?php foreach ($recipients as $recipient): 
                     $phoneList = array_filter([
@@ -557,7 +557,7 @@ usort($recipients, function($a, $b) {
                     $searchMeta = trim($recipient['name'] . ' ' . implode(' ', $phoneList));
                 ?>
                     <option 
-                        value="<?= (int)$recipient['id'] ?>"
+                        value="<?= htmlspecialchars($recipient['name']) ?>"
                         data-name="<?= htmlspecialchars($recipient['name']) ?>"
                         data-search="<?= htmlspecialchars($searchMeta) ?>"
                     >

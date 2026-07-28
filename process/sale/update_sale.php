@@ -25,8 +25,7 @@ try {
     if ($customer_id === '' || $customer_id === '0' || $customer_id === null) {
         $customer_id = null;
     }
-    $recipient_id = isset($_POST['edit_recipient_id']) && $_POST['edit_recipient_id'] !== '' ? intval($_POST['edit_recipient_id']) : null;
-    $recipient = null;
+    $recipient = trim($_POST['edit_recipient'] ?? '');
     $location = $_POST['edit_location'] ?? null;
     $quantity = $_POST['edit_quantity'] ?? null;
     $price_per_unit = $_POST['edit_price_per_unit'] ?? null;
@@ -152,25 +151,8 @@ try {
         'change_back_iq' => $old_record['change_back_iq']
     ];
 
-    if ($recipient_id) {
-        // First try to get from recipients table
-        $recipientStmt = $pdo->prepare("SELECT name FROM recipients WHERE id = ?");
-        $recipientStmt->execute([$recipient_id]);
-        $recipientRow = $recipientStmt->fetch(PDO::FETCH_ASSOC);
-        
-        // If not found in recipients table, try customers table (is_recipient = 1)
-        if (!$recipientRow) {
-            $recipientStmt = $pdo->prepare("SELECT name FROM customers WHERE id = ? AND is_recipient = 1");
-            $recipientStmt->execute([$recipient_id]);
-            $recipientRow = $recipientStmt->fetch(PDO::FETCH_ASSOC);
-        }
-        
-        if ($recipientRow) {
-            $recipient = $recipientRow['name'];
-        }
-    }
-    if ($recipient === null || $recipient === '') {
-        $recipient = $_POST['edit_recipient'] ?? $old_record['recipient'];
+    if ($recipient === '') {
+        $recipient = $old_record['recipient'];
     }
 
     // Now perform the update
