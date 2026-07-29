@@ -60,8 +60,8 @@ $total_paid_usd = 0;
 $total_paid_iqd = 0;
 
 foreach ($transactions as $t) {
-    $mat_usd = (float)$t['price'] - (float)$t['total_freight_cost_usd'];
-    $mat_iqd = (float)$t['amount_iqd'] - (float)$t['total_freight_cost_iqd'];
+    $mat_usd = (float)$t['price'];
+    $mat_iqd = (float)$t['amount_iqd'];
     
     $total_kg += (float)$t['kg'];
     $total_cost_usd += $mat_usd;
@@ -306,8 +306,8 @@ $remaining_iqd = $total_cost_iqd - $total_paid_iqd;
                 <td><?= htmlspecialchars($t['driver'] ?: '---') ?></td>
                 <td><?= number_format($t['kg']) ?></td>
                 <?php 
-                    $m_usd = (float)$t['price'] - (float)$t['total_freight_cost_usd'];
-                    $m_iqd = (float)$t['amount_iqd'] - (float)$t['total_freight_cost_iqd'];
+                    $m_usd = (float)$t['price'];
+                    $m_iqd = (float)$t['amount_iqd'];
                 ?>
                 <td class="text-danger"><?= $m_usd > 0 ? number_format($m_usd, 2) : '-' ?></td>
                 <td class="text-danger"><?= $m_iqd > 0 ? number_format($m_iqd) : '-' ?></td>
