@@ -126,12 +126,12 @@ foreach ($transactions as $t) {
     }
     
     if ($mat_cost_iqd > 0) {
-        $key = (string)$mat_cost_iqd;
+        $key = (string)round($mat_cost_iqd);
         if (!isset($summary_groups[$mat]['iqd'][$key])) $summary_groups[$mat]['iqd'][$key] = 0;
         $summary_groups[$mat]['iqd'][$key]++;
     }
     if ($mat_cost_usd > 0) {
-        $key = (string)$mat_cost_usd;
+        $key = (string)round($mat_cost_usd, 2);
         if (!isset($summary_groups[$mat]['usd'][$key])) $summary_groups[$mat]['usd'][$key] = 0;
         $summary_groups[$mat]['usd'][$key]++;
     }
