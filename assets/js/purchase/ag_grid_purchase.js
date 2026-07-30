@@ -441,8 +441,10 @@ function loadPurchaseData(preservePagination = false) {
     const fromDate = document.getElementById('filter_from')?.value || '';
     const toDate = document.getElementById('filter_to')?.value || '';
     const companyId = document.getElementById('filter_company')?.value || '';
-    const locationId = document.getElementById('filter_location')?.value || '';
-    const driverId = document.getElementById('filter_driver')?.value || '';
+    let locationId = $('#filter_location').val() || '';
+    if (Array.isArray(locationId)) locationId = locationId.join(',');
+    let driverId = $('#filter_driver').val() || '';
+    if (Array.isArray(driverId)) driverId = driverId.join(',');
     const materialId = document.getElementById('filter_material')?.value || '';
     const searchTerm = document.getElementById('purchase_global_search')?.value || '';
 
@@ -589,10 +591,10 @@ document.addEventListener('DOMContentLoaded', function () {
             const clearFilterBtn = document.getElementById('clearFilterBtn');
             if (clearFilterBtn) {
                 clearFilterBtn.addEventListener('click', function () {
-                    document.getElementById('filter_company').value = '';
-                    document.getElementById('filter_location').value = '';
-                    document.getElementById('filter_driver').value = '';
-                    document.getElementById('filter_material').value = '';
+                    $('#filter_company').val('').trigger('change');
+                    $('#filter_location').val(null).trigger('change');
+                    $('#filter_driver').val(null).trigger('change');
+                    $('#filter_material').val('').trigger('change');
                     document.getElementById('filter_from').value = '';
                     document.getElementById('filter_to').value = '';
                     document.getElementById('purchase_global_search').value = '';

@@ -298,11 +298,8 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
             <button class="btn btn-info text-white fw-bold ms-1" onclick="openLocationStatement()">
                 <i class="fas fa-print me-1"></i> <span class="d-none d-sm-inline">کەشف حیسابی سەرچاوە</span>
             </button>
-            <button class="btn btn-primary text-white fw-bold ms-1" onclick="openDriverStatement()">
+            <button class="btn btn-primary text-white fw-bold" onclick="openDriverStatement()">
                 <i class="fas fa-id-card me-1"></i> <span class="d-none d-sm-inline">کەشف حیسابی شۆفێر</span>
-            </button>
-            <button class="btn btn-secondary text-white fw-bold" onclick="openAllLocationsStatement()">
-                <i class="fas fa-list-alt me-1"></i> <span class="d-none d-sm-inline">کەشف حیسابی گشتی شوێنەکان</span>
             </button>
             <?php if (hasPermission('add_purchase')): ?>
             <button class="btn btn-add-purchase" data-bs-toggle="modal" data-bs-target="#addPurchaseModal">
@@ -520,8 +517,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
         </div>
         <div class="col-md-3">
           <label for="filter_location">شوێن:</label>
-          <select class="form-select select2" id="filter_location">
-            <option value="">هەموو شوێنەکان</option>
+          <select class="form-select select2" id="filter_location" multiple="multiple" data-placeholder="هەموو شوێنەکان">
             <?php foreach ($locations as $loc): ?>
               <option value="<?= $loc['id'] ?>"><?= htmlspecialchars($loc['name']) ?></option>
             <?php endforeach; ?>
@@ -529,8 +525,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
         </div>
         <div class="col-md-3">
           <label for="filter_driver">شۆفێر:</label>
-          <select class="form-select select2" id="filter_driver">
-            <option value="">هەموو شۆفێرەکان</option>
+          <select class="form-select select2" id="filter_driver" multiple="multiple" data-placeholder="هەموو شۆفێرەکان">
             <?php foreach ($drivers as $drv): ?>
               <option value="<?= $drv['id'] ?>"><?= htmlspecialchars($drv['name']) ?></option>
             <?php endforeach; ?>
@@ -1783,7 +1778,9 @@ $(document).ready(function() {
 });
 
 function openLocationStatement() {
-    const locationId = document.getElementById('filter_location')?.value;
+    let locationId = $('#filter_location').val();
+    if (Array.isArray(locationId)) locationId = locationId.join(',');
+    
     if (!locationId) {
         Swal.fire('ئاگاداری', 'تکایە سەرەتا شوێنێک هەڵبژێرە لە بەشی فلتەرەکان', 'warning');
         return;
@@ -1791,13 +1788,16 @@ function openLocationStatement() {
     const fromDate = document.getElementById('filter_from')?.value || '';
     const toDate = document.getElementById('filter_to')?.value || '';
     const companyId = document.getElementById('filter_company')?.value || '';
-    const driverId = document.getElementById('filter_driver')?.value || '';
+    
+    let driverId = $('#filter_driver').val();
+    if (Array.isArray(driverId)) driverId = driverId.join(',');
+    
     const materialId = document.getElementById('filter_material')?.value || '';
     
     const params = new URLSearchParams({
-        location_id: locationId,
+        location_id: locationId || '',
         company_id: companyId,
-        driver_id: driverId,
+        driver_id: driverId || '',
         material_id: materialId,
         from_date: fromDate,
         to_date: toDate
@@ -1807,7 +1807,9 @@ function openLocationStatement() {
 }
 
 function openDriverStatement() {
-    const driverId = document.getElementById('filter_driver')?.value;
+    let driverId = $('#filter_driver').val();
+    if (Array.isArray(driverId)) driverId = driverId.join(',');
+    
     if (!driverId) {
         Swal.fire('ئاگاداری', 'تکایە سەرەتا شۆفێرێک هەڵبژێرە لە بەشی فلتەرەکان', 'warning');
         return;
@@ -1815,12 +1817,15 @@ function openDriverStatement() {
     const fromDate = document.getElementById('filter_from')?.value || '';
     const toDate = document.getElementById('filter_to')?.value || '';
     const companyId = document.getElementById('filter_company')?.value || '';
-    const locationId = document.getElementById('filter_location')?.value || '';
+    
+    let locationId = $('#filter_location').val();
+    if (Array.isArray(locationId)) locationId = locationId.join(',');
+    
     const materialId = document.getElementById('filter_material')?.value || '';
     
     const params = new URLSearchParams({
-        driver_id: driverId,
-        location_id: locationId,
+        driver_id: driverId || '',
+        location_id: locationId || '',
         company_id: companyId,
         material_id: materialId,
         from_date: fromDate,
@@ -1828,24 +1833,6 @@ function openDriverStatement() {
     });
     
     window.open('print_driver_statement.php?' + params.toString(), '_blank');
-}
-
-function openAllLocationsStatement() {
-    const fromDate = document.getElementById('filter_from')?.value || '';
-    const toDate = document.getElementById('filter_to')?.value || '';
-    const companyId = document.getElementById('filter_company')?.value || '';
-    const driverId = document.getElementById('filter_driver')?.value || '';
-    const materialId = document.getElementById('filter_material')?.value || '';
-    
-    const params = new URLSearchParams({
-        company_id: companyId,
-        driver_id: driverId,
-        material_id: materialId,
-        from_date: fromDate,
-        to_date: toDate
-    });
-    
-    window.open('print_all_locations_statement.php?' + params.toString(), '_blank');
 }
 </script>
 </body>

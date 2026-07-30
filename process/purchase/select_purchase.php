@@ -116,12 +116,26 @@ if ($company_id) {
     $params[] = $company_id;
 }
 if ($location_id) {
-    $where[] = "l.id = ?";
-    $params[] = $location_id;
+    if (strpos($location_id, ',') !== false) {
+        $loc_ids = array_map('intval', explode(',', $location_id));
+        $placeholders = implode(',', array_fill(0, count($loc_ids), '?'));
+        $where[] = "l.id IN ($placeholders)";
+        $params = array_merge($params, $loc_ids);
+    } else {
+        $where[] = "l.id = ?";
+        $params[] = $location_id;
+    }
 }
 if ($driver_id) {
-    $where[] = "d.id = ?";
-    $params[] = $driver_id;
+    if (strpos($driver_id, ',') !== false) {
+        $drv_ids = array_map('intval', explode(',', $driver_id));
+        $placeholders = implode(',', array_fill(0, count($drv_ids), '?'));
+        $where[] = "d.id IN ($placeholders)";
+        $params = array_merge($params, $drv_ids);
+    } else {
+        $where[] = "d.id = ?";
+        $params[] = $driver_id;
+    }
 }
 if ($material_id) {
     $where[] = "p.material_id = ?";

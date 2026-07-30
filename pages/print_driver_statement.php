@@ -5,22 +5,27 @@ require_once '../config/db_conected.php';
 
 if (!isset($_SESSION['user_id'])) die("Forbidden");
 
-$driver_id = isset($_GET['driver_id']) ? (int)$_GET['driver_id'] : 0;
+$driver_ids_raw = isset($_GET['driver_id']) ? $_GET['driver_id'] : '';
 $driver_name = isset($_GET['driver']) ? $_GET['driver'] : '';
 $company_id = isset($_GET['company_id']) ? (int)$_GET['company_id'] : 0;
-$location_id = isset($_GET['location_id']) ? (int)$_GET['location_id'] : 0;
+$location_ids_raw = isset($_GET['location_id']) ? $_GET['location_id'] : '';
 $material_id = isset($_GET['material_id']) ? (int)$_GET['material_id'] : 0;
 $from_date = isset($_GET['from_date']) ? $_GET['from_date'] : '';
 $to_date = isset($_GET['to_date']) ? $_GET['to_date'] : '';
 
-// Resolve driver name if ID is provided
-if ($driver_id && empty($driver_name)) {
-    $drv_stmt = $pdo->prepare("SELECT name FROM drivers WHERE id = ?");
-    $drv_stmt->execute([$driver_id]);
-    $driver_name = $drv_stmt->fetchColumn();
+// Resolve driver names if ID is provided
+if (!empty($driver_ids_raw)) {
+    $drv_ids = array_map('intval', explode(',', $driver_ids_raw));
+    $drv_placeholders = implode(',', array_fill(0, count($drv_ids), '?'));
+    $drv_stmt = $pdo->prepare("SELECT name FROM drivers WHERE id IN ($drv_placeholders)");
+    $drv_stmt->execute($drv_ids);
+    $driver_names_arr = $drv_stmt->fetchAll(PDO::FETCH_COLUMN);
+    if (!empty($driver_names_arr)) {
+        $driver_name = implode('، ', $driver_names_arr);
+    }
 }
 
-if (empty($driver_name)) {
+if (empty($driver_name) || empty($driver_names_arr)) {
     die("<div style='font-family:sans-serif; text-align:center; margin-top:50px; font-size:20px; color:red;'>تکایە سەرەتا لە بەشی فلتەرەکان شۆفێرێک هەڵبژێرە، پاشان کرتە لە دوگمەی 'کەشف حیسابی شۆفێر' بکە.</div>");
 }
 
@@ -33,36 +38,39 @@ if ($company_id) {
 }
 
 // Build Query
-$where = "p.driver = :driver_name";
-$params = [':driver_name' => $driver_name];
+$drv_name_placeholders = implode(',', array_fill(0, count($driver_names_arr), '?'));
+$where = "p.driver IN ($drv_name_placeholders)";
+$params = $driver_names_arr;
 
 $date_label = "تەواوی کاتەکان";
 if (!empty($from_date) && !empty($to_date)) {
-    $where .= " AND p.date >= :from_date AND p.date <= :to_date";
-    $params[':from_date'] = $from_date;
-    $params[':to_date'] = $to_date;
+    $where .= " AND p.date >= ? AND p.date <= ?";
+    $params[] = $from_date;
+    $params[] = $to_date;
     $date_label = $from_date . " تا " . $to_date;
 } elseif (!empty($from_date)) {
-    $where .= " AND p.date >= :from_date";
-    $params[':from_date'] = $from_date;
+    $where .= " AND p.date >= ?";
+    $params[] = $from_date;
     $date_label = "لە " . $from_date . " بەدواوە";
 } elseif (!empty($to_date)) {
-    $where .= " AND p.date <= :to_date";
-    $params[':to_date'] = $to_date;
+    $where .= " AND p.date <= ?";
+    $params[] = $to_date;
     $date_label = "تا " . $to_date;
 }
 
 if ($company_id) {
-    $where .= " AND p.company_id = :company_id";
-    $params[':company_id'] = $company_id;
+    $where .= " AND p.company_id = ?";
+    $params[] = $company_id;
 }
-if ($location_id) {
-    $where .= " AND l.id = :location_id";
-    $params[':location_id'] = $location_id;
+if (!empty($location_ids_raw)) {
+    $loc_ids = array_map('intval', explode(',', $location_ids_raw));
+    $loc_placeholders = implode(',', array_fill(0, count($loc_ids), '?'));
+    $where .= " AND l.id IN ($loc_placeholders)";
+    $params = array_merge($params, $loc_ids);
 }
 if ($material_id) {
-    $where .= " AND p.material_id = :material_id";
-    $params[':material_id'] = $material_id;
+    $where .= " AND p.material_id = ?";
+    $params[] = $material_id;
 }
 
 $query = "
