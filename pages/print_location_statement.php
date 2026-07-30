@@ -98,7 +98,7 @@ $material_counts = []; // total invoices per material
 $summary_groups = []; // grouped by material and unit price
 
 foreach ($transactions as $t) {
-    $mat = $t['material_name'] ?: 'بێ ناو';
+    $mat = trim($t['material_name'] ?: 'بێ ناو');
     $mat_cost_iqd = (float)$t['material_cost_iqd'];
     $mat_cost_usd = (float)$t['material_cost_usd'];
     
@@ -126,7 +126,7 @@ foreach ($transactions as $t) {
     }
     
     if ($mat_cost_iqd > 0) {
-        $key = (string)round($mat_cost_iqd);
+        $key = (string)round($mat_cost_iqd, 2);
         if (!isset($summary_groups[$mat]['iqd'][$key])) $summary_groups[$mat]['iqd'][$key] = 0;
         $summary_groups[$mat]['iqd'][$key]++;
     }
