@@ -551,32 +551,22 @@ $remaining_iqd = $total_cost_iqd - $total_paid_iqd;
         <div class="section-header">
             <i class="fas fa-layer-group"></i> پوختەی کڕینەکان بەپێی جۆر و نرخ (بۆ شوێنەکە)
         </div>
-        <div class="groups-content">
+        <div class="groups-content" style="padding: 20px; font-size: 17px; line-height: 2; font-weight: bold; color: var(--primary); text-align: right;">
             <?php if (empty($summary_groups)): ?>
-                <div style="color: var(--text-light); text-align: center; padding: 20px;">هیچ داتایەک نییە بۆ نیشاندان</div>
+                <div style="color: var(--text-light); text-align: center; font-weight: normal;">هیچ داتایەک نییە بۆ نیشاندان</div>
             <?php else: ?>
-                <?php foreach ($summary_groups as $mat_name => $currencies): ?>
-                    <div class="material-box">
-                        <div class="material-box-title">
-                            <?= htmlspecialchars($mat_name) ?> 
-                            <span style="font-size: 12px; color: var(--text-light); font-weight: normal;">(کۆی گشتی: <?= $material_counts[$mat_name] ?> پسووڵە)</span>
-                        </div>
-                        
-                        <!-- IQD Groupings -->
-                        <?php foreach ($currencies['iqd'] as $price => $count): ?>
-                            <div class="group-item">
-                                <?= $count ?> پسووڵەی <?= htmlspecialchars($mat_name) ?> بڕدراوە بە نرخی <span class="group-highlight"><?= number_format((float)$price) ?></span> د.ع بۆ هەر پسووڵەیەک.
-                            </div>
-                        <?php endforeach; ?>
-                        
-                        <!-- USD Groupings -->
-                        <?php foreach ($currencies['usd'] as $price => $count): ?>
-                            <div class="group-item">
-                                <?= $count ?> پسووڵەی <?= htmlspecialchars($mat_name) ?> بڕدراوە بە نرخی <span class="group-highlight" style="color: var(--primary);"><?= number_format((float)$price, 2) ?></span> $ بۆ هەر پسووڵەیەک.
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-                <?php endforeach; ?>
+                <?php
+                $sentences = [];
+                foreach ($summary_groups as $mat_name => $currencies) {
+                    foreach ($currencies['iqd'] as $price => $count) {
+                        $sentences[] = "{$count} {$mat_name} بردراوە بە " . number_format((float)$price);
+                    }
+                    foreach ($currencies['usd'] as $price => $count) {
+                        $sentences[] = "{$count} {$mat_name} بردراوە بە " . number_format((float)$price, 2) . " $";
+                    }
+                }
+                echo implode(' ، ', $sentences);
+                ?>
             <?php endif; ?>
         </div>
     </div>
@@ -621,53 +611,7 @@ $remaining_iqd = $total_cost_iqd - $total_paid_iqd;
         </div>
     </div>
 
-    <!-- Detailed Table -->
-    <div class="table-container">
-        <div class="section-header" style="margin-bottom: 15px; border-radius: 6px;">
-            <i class="fas fa-list"></i> وردەکاری هەموو پسووڵەکان
-        </div>
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>بەروار</th>
-                    <th>ژ.پسوڵە</th>
-                    <th>مەواد</th>
-                    <th>کێش (کگم)</th>
-                    <th>تێچووی کڕین ($)</th>
-                    <th>تێچووی کڕین (د.ع)</th>
-                    <th>پێدراو بە شوێن ($)</th>
-                    <th>پێدراو بە شوێن (د.ع)</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php $i = 1; foreach($transactions as $t): ?>
-                <tr>
-                    <td><?= $i++ ?></td>
-                    <td><?= htmlspecialchars($t['date']) ?></td>
-                    <td style="font-weight: bold;"><?= htmlspecialchars($t['invoice_number']) ?></td>
-                    <td><?= htmlspecialchars($t['material_name']) ?></td>
-                    <td><?= number_format($t['kg']) ?></td>
-                    <?php 
-                        $m_usd = (float)$t['material_cost_usd'];
-                        $m_iqd = (float)$t['material_cost_iqd'];
-                        
-                        if ($m_iqd == 0 && (float)$t['amount_iqd'] > 0) {
-                             $m_iqd = (float)$t['amount_iqd'] - (float)$t['total_freight_cost_iqd'];
-                        }
-                    ?>
-                    <td style="color: var(--danger);"><?= $m_usd > 0 ? number_format($m_usd, 2) : '-' ?></td>
-                    <td style="color: var(--danger); font-weight: bold;"><?= $m_iqd > 0 ? number_format($m_iqd) : '-' ?></td>
-                    <td style="color: var(--success);"><?= (float)$t['paid_to_location_usd'] > 0 ? number_format($t['paid_to_location_usd'], 2) : '-' ?></td>
-                    <td style="color: var(--success); font-weight: bold;"><?= (float)$t['paid_to_location_iqd'] > 0 ? number_format($t['paid_to_location_iqd']) : '-' ?></td>
-                </tr>
-                <?php endforeach; ?>
-                <?php if(empty($transactions)): ?>
-                <tr><td colspan="9" style="padding: 20px; color: var(--text-light);">هیچ مامەڵەیەک نەدۆزرایەوە بەپێی ئەم فلتەرانە</td></tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
-    </div>
+
 
     <div class="footer-signatures">
         <div class="sig-box">ناوی ئامادەکار / ژمێریار</div>
