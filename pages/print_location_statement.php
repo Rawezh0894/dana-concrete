@@ -13,7 +13,7 @@ $from_date = isset($_GET['from_date']) ? $_GET['from_date'] : '';
 $to_date = isset($_GET['to_date']) ? $_GET['to_date'] : '';
 
 if (!$location_id) {
-    die("<div style='font-family:sans-serif; text-align:center; margin-top:50px; font-size:20px; color:red;'>تکایە سەرەتا لە بەشی فلتەرەکان شوێنێک هەڵبژێرە، پاشان کرتە لە دوگمەی 'کەشف حیسابی شوێن' بکە.</div>");
+    die("<div style='font-family:sans-serif; text-align:center; margin-top:50px; font-size:20px; color:red;'>تکایە سەرەتا لە بەشی فلتەرەکان شوێنێک هەڵبژێرە، پاشان کرتە لە دوگمەی 'کەشف حیسابی سەرچاوە' بکە.</div>");
 }
 
 // Get Location Name
@@ -24,11 +24,11 @@ $location_name = $loc_stmt->fetchColumn();
 if (!$location_name) die("شوێن نەدۆزرایەوە");
 
 // Get Company Name if selected
-$company_name = "هەموو کۆمپانیاکان";
+$company_name = "دانا کۆنکرێت";
 if ($company_id) {
     $comp_stmt = $pdo->prepare("SELECT name FROM company WHERE id = ?");
     $comp_stmt->execute([$company_id]);
-    $company_name = $comp_stmt->fetchColumn() ?: "هەموو کۆمپانیاکان";
+    $company_name = $comp_stmt->fetchColumn() ?: "دانا کۆنکرێت";
 }
 
 // Build Query
@@ -145,7 +145,7 @@ $remaining_iqd = $total_cost_iqd - $total_paid_iqd;
 <html lang="ku" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>کەشف حیسابی شوێن - <?= htmlspecialchars($location_name) ?></title>
+    <title>کەشف حیسابی سەرچاوە - <?= htmlspecialchars($location_name) ?></title>
     <!-- Include FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -489,10 +489,10 @@ $remaining_iqd = $total_cost_iqd - $total_paid_iqd;
     <div class="erp-header">
         <div class="header-title-section">
             <h1><?= htmlspecialchars($company_name) ?></h1>
-            <h2>سیستەمی بەڕێوەبردنی کڕین و فرۆشتن</h2>
+            <h2>بۆ کۆنکرێتی ئامادەکراو</h2>
         </div>
         <div class="doc-details">
-            <div class="doc-type-badge">کەشف حیسابی شوێن</div>
+            <div class="doc-type-badge">کەشف حیسابی سەرچاوە</div>
             <table class="doc-info-table">
                 <tr><td class="label">ڕێککەوتی چاپ:</td><td><?= date('Y-m-d H:i') ?></td></tr>
                 <tr><td class="label">کۆی مامەڵەکان:</td><td><?= number_format($total_invoices) ?></td></tr>

@@ -266,7 +266,7 @@ foreach ($transactions as $t) {
     <div class="header-section">
         <div class="company-info">
             <h1><?= htmlspecialchars($company['name']) ?></h1>
-            <p>سیستەمی بەڕێوەبردنی کڕین و فرۆشتن</p>
+            <p>بۆ کۆنکرێتی ئامادەکراو</p>
             <p>ڕێککەوتی چاپ: <?= date('Y-m-d') ?></p>
         </div>
         <div class="report-title">کەشف حیسابی گشت شوێنەکان</div>

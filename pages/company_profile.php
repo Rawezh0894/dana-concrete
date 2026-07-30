@@ -90,7 +90,7 @@ if ($company_id) {
             <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#purchases">مێژووی کڕینەکان</button></li>
             <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#debt">دانەوەی قەرزەکان</button></li>
             <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#adjustment">ڕێکخستنەوەی حیساب</button></li>
-            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#locations_statement">کەشف حیسابی شوێنەکان</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#locations_statement">کەشف حیسابی سەرچاوەەکان</button></li>
             <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#drivers_statement">کەشف حیسابی شۆفێرەکان</button></li>
         </ul>
         
@@ -185,7 +185,7 @@ if ($company_id) {
     <div class="modal-dialog modal-xl">
         <div class="modal-content border-0 shadow">
             <div class="modal-header text-white" style="background: #20b2aa;">
-                <h5 class="modal-title fw-bold" id="locationLedgerTitle">کەشف حیسابی شوێن</h5>
+                <h5 class="modal-title fw-bold" id="locationLedgerTitle">کەشف حیسابی سەرچاوە</h5>
                 <div>
                     <button type="button" class="btn btn-sm btn-light fw-bold" onclick="printLocationStatement()">
                         <i class="fas fa-print"></i> پرێنت

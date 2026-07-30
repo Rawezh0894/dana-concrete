@@ -296,7 +296,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
                 </button>
             </div>
             <button class="btn btn-info text-white fw-bold" onclick="openLocationStatement()">
-                <i class="fas fa-print me-1"></i> <span class="d-none d-sm-inline">کەشف حیسابی شوێن</span>
+                <i class="fas fa-print me-1"></i> <span class="d-none d-sm-inline">کەشف حیسابی سەرچاوە</span>
             </button>
             <?php if (hasPermission('add_purchase')): ?>
             <button class="btn btn-add-purchase" data-bs-toggle="modal" data-bs-target="#addPurchaseModal">
@@ -506,7 +506,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
         <div class="col-md-3">
           <label for="filter_company">کۆمپانیا:</label>
           <select class="form-select select2" id="filter_company">
-            <option value="">هەموو کۆمپانیاکان</option>
+            <option value="">دانا کۆنکرێت</option>
             <?php foreach ($companies as $comp): ?>
               <option value="<?= $comp['id'] ?>"><?= htmlspecialchars($comp['name']) ?></option>
             <?php endforeach; ?>

@@ -3,10 +3,10 @@ let locationLedgerTable = null;
 let currentLocationName = '';
 
 function printLocationStatement() {
-    if(!currentLocationName) return;
+    if (!currentLocationName) return;
     let url = `print_location_statement.php?company_id=${COMPANY_ID}&location=${encodeURIComponent(currentLocationName)}`;
-    if(currentFilters.from_date) url += `&from_date=${currentFilters.from_date}`;
-    if(currentFilters.to_date) url += `&to_date=${currentFilters.to_date}`;
+    if (currentFilters.from_date) url += `&from_date=${currentFilters.from_date}`;
+    if (currentFilters.to_date) url += `&to_date=${currentFilters.to_date}`;
     window.open(url, '_blank');
 }
 
@@ -28,47 +28,47 @@ function loadLocationsSummary() {
         },
         columns: [
             { data: 'location', title: 'ناوی شوێن' },
-            { 
-                data: 'total_cost_usd', 
+            {
+                data: 'total_cost_usd',
                 title: 'کۆی گشتی کرێ ($)',
-                render: function(data) {
+                render: function (data) {
                     return `<span class="fw-bold text-dark">${parseFloat(data).toLocaleString()} $</span>`;
                 }
             },
-            { 
-                data: 'total_cost_iqd', 
+            {
+                data: 'total_cost_iqd',
                 title: 'کۆی گشتی کرێ (د.ع)',
-                render: function(data) {
+                render: function (data) {
                     return `<span class="fw-bold text-dark">${parseFloat(data).toLocaleString()} د.ع</span>`;
                 }
             },
-            { 
-                data: 'total_paid_usd', 
+            {
+                data: 'total_paid_usd',
                 title: 'پارەی دراو ($)',
-                render: function(data) {
+                render: function (data) {
                     return `<span class="fw-bold text-success">${parseFloat(data).toLocaleString()} $</span>`;
                 }
             },
-            { 
-                data: 'total_paid_iqd', 
+            {
+                data: 'total_paid_iqd',
                 title: 'پارەی دراو (د.ع)',
-                render: function(data) {
+                render: function (data) {
                     return `<span class="fw-bold text-success">${parseFloat(data).toLocaleString()} د.ع</span>`;
                 }
             },
-            { 
-                data: 'remaining_usd', 
+            {
+                data: 'remaining_usd',
                 title: 'قەرزی ماوە ($)',
-                render: function(data) {
+                render: function (data) {
                     let val = parseFloat(data);
                     let colorClass = val > 0 ? 'text-danger' : (val < 0 ? 'text-warning' : 'text-success');
                     return `<span class="fw-bold ${colorClass}">${val.toLocaleString()} $</span>`;
                 }
             },
-            { 
-                data: 'remaining_iqd', 
+            {
+                data: 'remaining_iqd',
                 title: 'قەرزی ماوە (د.ع)',
-                render: function(data) {
+                render: function (data) {
                     let val = parseFloat(data);
                     let colorClass = val > 0 ? 'text-danger' : (val < 0 ? 'text-warning' : 'text-success');
                     return `<span class="fw-bold ${colorClass}">${val.toLocaleString()} د.ع</span>`;
@@ -77,7 +77,7 @@ function loadLocationsSummary() {
             {
                 data: null,
                 title: 'کردار',
-                render: function(data, type, row) {
+                render: function (data, type, row) {
                     return `<button onclick="openLocationLedger('${row.location}')" class="btn btn-sm btn-teal text-white rounded-pill px-3"><i class="fas fa-eye me-1"></i> بینینی کەشف حیساب</button>`;
                 }
             }
@@ -92,8 +92,8 @@ function loadLocationsSummary() {
 
 function openLocationLedger(locationName) {
     currentLocationName = locationName;
-    $('#locationLedgerTitle').text(`کەشف حیسابی شوێن - ${locationName}`);
-    
+    $('#locationLedgerTitle').text(`کەشف حیسابی سەرچاوە - ${locationName}`);
+
     if (locationLedgerTable) {
         locationLedgerTable.destroy();
     }
@@ -114,41 +114,41 @@ function openLocationLedger(locationName) {
             { data: 'date', title: 'بەروار' },
             { data: 'invoice_number', title: 'ژ.پسوڵە' },
             { data: 'driver', title: 'شۆفێر' },
-            { 
-                data: 'kg', 
+            {
+                data: 'kg',
                 title: 'کێش (کگم)',
-                render: function(data) { return parseFloat(data).toLocaleString(); }
+                render: function (data) { return parseFloat(data).toLocaleString(); }
             },
-            { 
-                data: null, 
+            {
+                data: null,
                 title: 'بڕی کڕین',
-                render: function(data, type, row) {
+                render: function (data, type, row) {
                     let usd = parseFloat(row.material_cost_usd);
                     let iqd = parseFloat(row.material_cost_iqd);
-                    if(usd > 0) return `<span class="text-danger">${usd.toLocaleString()} $</span>`;
-                    if(iqd > 0) return `<span class="text-danger">${iqd.toLocaleString()} د.ع</span>`;
+                    if (usd > 0) return `<span class="text-danger">${usd.toLocaleString()} $</span>`;
+                    if (iqd > 0) return `<span class="text-danger">${iqd.toLocaleString()} د.ع</span>`;
                     return '0';
                 }
             },
-            { 
-                data: null, 
+            {
+                data: null,
                 title: 'پارەی دراو',
-                render: function(data, type, row) {
+                render: function (data, type, row) {
                     let usd = parseFloat(row.paid_to_location_usd);
                     let iqd = parseFloat(row.paid_to_location_iqd);
-                    if(usd > 0) return `<span class="text-success">${usd.toLocaleString()} $</span>`;
-                    if(iqd > 0) return `<span class="text-success">${iqd.toLocaleString()} د.ع</span>`;
+                    if (usd > 0) return `<span class="text-success">${usd.toLocaleString()} $</span>`;
+                    if (iqd > 0) return `<span class="text-success">${iqd.toLocaleString()} د.ع</span>`;
                     return '0';
                 }
             },
-            { 
-                data: null, 
+            {
+                data: null,
                 title: 'باڵانس (ماوە)',
-                render: function(data, type, row) {
+                render: function (data, type, row) {
                     let usd = parseFloat(row.remaining_usd);
                     let iqd = parseFloat(row.remaining_iqd);
-                    if(usd !== 0) return `<span class="fw-bold ${usd > 0 ? 'text-danger' : 'text-success'}">${usd.toLocaleString()} $</span>`;
-                    if(iqd !== 0) return `<span class="fw-bold ${iqd > 0 ? 'text-danger' : 'text-success'}">${iqd.toLocaleString()} د.ع</span>`;
+                    if (usd !== 0) return `<span class="fw-bold ${usd > 0 ? 'text-danger' : 'text-success'}">${usd.toLocaleString()} $</span>`;
+                    if (iqd !== 0) return `<span class="fw-bold ${iqd > 0 ? 'text-danger' : 'text-success'}">${iqd.toLocaleString()} د.ع</span>`;
                     return '0';
                 }
             }
@@ -164,6 +164,6 @@ function openLocationLedger(locationName) {
     $('#locationLedgerModal').modal('show');
 }
 
-$(document).ready(function() {
+$(document).ready(function () {
     loadLocationsSummary();
 });
