@@ -142,6 +142,34 @@ const purchaseColumnDefs = [
         type: 'numericColumn'
     },
     {
+        field: 'material_cost_iqd',
+        headerName: 'تێچووی کڕین',
+        filter: 'agNumberColumnFilter',
+        floatingFilter: true,
+        sortable: true,
+        resizable: true,
+        minWidth: 100,
+        cellStyle: { textAlign: 'right', direction: 'rtl', fontWeight: 'bold', color: '#17a2b8' },
+        valueFormatter: function (params) {
+            return agFormatIQD(params.value);
+        },
+        type: 'numericColumn'
+    },
+    {
+        field: 'total_freight_cost_iqd',
+        headerName: 'تێچووی نقڵ',
+        filter: 'agNumberColumnFilter',
+        floatingFilter: true,
+        sortable: true,
+        resizable: true,
+        minWidth: 100,
+        cellStyle: { textAlign: 'right', direction: 'rtl', fontWeight: 'bold', color: '#fd7e14' },
+        valueFormatter: function (params) {
+            return agFormatIQD(params.value);
+        },
+        type: 'numericColumn'
+    },
+    {
         field: 'price',
         headerName: 'نرخ',
         filter: 'agNumberColumnFilter',
@@ -464,6 +492,8 @@ function loadPurchaseData(preservePagination = false) {
                     price_per_kg_iqd: row.price_per_kg_iqd || 0,
                     price: row.price || 0,
                     amount_iqd: row.amount_iqd || 0,
+                    material_cost_iqd: row.material_cost_iqd || 0,
+                    total_freight_cost_iqd: row.total_freight_cost_iqd || 0,
                     exchange_rate: row.exchange_rate || 0,
                     paid_usd: row.paid_usd || 0,
                     paid_iqd: row.paid_iqd || 0,

@@ -174,7 +174,7 @@ $count_stmt->execute($params);
 $total_records = $count_stmt->fetchColumn();
 
 // Get paginated data
-$sql = "SELECT p.id, c.name AS company_name, l.name AS location_name, d.name AS driver_name, p.invoice_number, m.name AS material_name, p.date, p.payment_type, p.type, p.kg, p.price_per_kg_usd, p.price_per_kg_iqd, p.price, p.amount_iqd, p.exchange_rate, p.paid_usd, p.paid_iqd, p.remaining_usd, p.remaining_iqd, b.name AS bin_name, ft.truck_name AS factory_truck_name
+$sql = "SELECT p.id, c.name AS company_name, l.name AS location_name, d.name AS driver_name, p.invoice_number, m.name AS material_name, p.date, p.payment_type, p.type, p.kg, p.price_per_kg_usd, p.price_per_kg_iqd, p.price, p.amount_iqd, p.exchange_rate, p.paid_usd, p.paid_iqd, p.remaining_usd, p.remaining_iqd, b.name AS bin_name, ft.truck_name AS factory_truck_name, (p.kg / 1000 * p.price_per_kg_iqd) AS material_cost_iqd, p.total_freight_cost_iqd
 FROM purchases p
 LEFT JOIN company c ON p.company_id = c.id
 LEFT JOIN locations l ON p.location = l.name
