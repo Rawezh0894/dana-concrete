@@ -295,8 +295,11 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
                     <i class="fas fa-file-csv me-1"></i><span class="d-none d-sm-inline">CSV</span>
                 </button>
             </div>
-            <button class="btn btn-info text-white fw-bold" onclick="openLocationStatement()">
+            <button class="btn btn-info text-white fw-bold ms-1" onclick="openLocationStatement()">
                 <i class="fas fa-print me-1"></i> <span class="d-none d-sm-inline">کەشف حیسابی سەرچاوە</span>
+            </button>
+            <button class="btn btn-primary text-white fw-bold" onclick="openDriverStatement()">
+                <i class="fas fa-id-card me-1"></i> <span class="d-none d-sm-inline">کەشف حیسابی شۆفێر</span>
             </button>
             <?php if (hasPermission('add_purchase')): ?>
             <button class="btn btn-add-purchase" data-bs-toggle="modal" data-bs-target="#addPurchaseModal">
@@ -1798,6 +1801,30 @@ function openLocationStatement() {
     });
     
     window.open('print_location_statement.php?' + params.toString(), '_blank');
+}
+
+function openDriverStatement() {
+    const driverId = document.getElementById('filter_driver')?.value;
+    if (!driverId) {
+        Swal.fire('ئاگاداری', 'تکایە سەرەتا شۆفێرێک هەڵبژێرە لە بەشی فلتەرەکان', 'warning');
+        return;
+    }
+    const fromDate = document.getElementById('filter_from')?.value || '';
+    const toDate = document.getElementById('filter_to')?.value || '';
+    const companyId = document.getElementById('filter_company')?.value || '';
+    const locationId = document.getElementById('filter_location')?.value || '';
+    const materialId = document.getElementById('filter_material')?.value || '';
+    
+    const params = new URLSearchParams({
+        driver_id: driverId,
+        location_id: locationId,
+        company_id: companyId,
+        material_id: materialId,
+        from_date: fromDate,
+        to_date: toDate
+    });
+    
+    window.open('print_driver_statement.php?' + params.toString(), '_blank');
 }
 </script>
 </body>

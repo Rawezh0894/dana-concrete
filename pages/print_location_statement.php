@@ -638,7 +638,7 @@ $remaining_iqd = $total_cost_iqd - $total_paid_iqd;
                 <span style="color: var(--danger); font-weight: bold;"><?= number_format($total_cost_iqd) ?></span>
             </div>
             <div class="balance-row">
-                <span>کۆی پارەی پێدراو بۆ شوێن:</span>
+                <span>کۆی پارەی پێدراو بە سەرچاوە:</span>
                 <span style="color: var(--success); font-weight: bold;"><?= number_format($total_paid_iqd) ?></span>
             </div>
             <div class="balance-row total">
@@ -656,7 +656,7 @@ $remaining_iqd = $total_cost_iqd - $total_paid_iqd;
                 <span style="color: var(--danger); font-weight: bold;"><?= number_format($total_cost_usd, 2) ?></span>
             </div>
             <div class="balance-row">
-                <span>کۆی پارەی پێدراو بۆ شوێن:</span>
+                <span>کۆی پارەی پێدراو بە سەرچاوە:</span>
                 <span style="color: var(--success); font-weight: bold;"><?= number_format($total_paid_usd, 2) ?></span>
             </div>
             <div class="balance-row total">
