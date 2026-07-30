@@ -126,12 +126,12 @@ foreach ($transactions as $t) {
     }
     
     if ($mat_cost_iqd > 0) {
-        $key = (string)round($mat_cost_iqd, 2);
+        $key = number_format($mat_cost_iqd);
         if (!isset($summary_groups[$mat]['iqd'][$key])) $summary_groups[$mat]['iqd'][$key] = 0;
         $summary_groups[$mat]['iqd'][$key]++;
     }
     if ($mat_cost_usd > 0) {
-        $key = (string)round($mat_cost_usd, 2);
+        $key = number_format($mat_cost_usd, 2);
         if (!isset($summary_groups[$mat]['usd'][$key])) $summary_groups[$mat]['usd'][$key] = 0;
         $summary_groups[$mat]['usd'][$key]++;
     }
@@ -559,10 +559,10 @@ $remaining_iqd = $total_cost_iqd - $total_paid_iqd;
                 $sentences = [];
                 foreach ($summary_groups as $mat_name => $currencies) {
                     foreach ($currencies['iqd'] as $price => $count) {
-                        $sentences[] = "{$count} {$mat_name} بردراوە بە " . number_format((float)$price);
+                        $sentences[] = "{$count} {$mat_name} بردراوە بە {$price}";
                     }
                     foreach ($currencies['usd'] as $price => $count) {
-                        $sentences[] = "{$count} {$mat_name} بردراوە بە " . number_format((float)$price, 2) . " $";
+                        $sentences[] = "{$count} {$mat_name} بردراوە بە {$price} $";
                     }
                 }
                 echo implode(' ، ', $sentences);
