@@ -295,6 +295,9 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
                     <i class="fas fa-file-csv me-1"></i><span class="d-none d-sm-inline">CSV</span>
                 </button>
             </div>
+            <button class="btn btn-info text-white fw-bold" onclick="openLocationStatement()">
+                <i class="fas fa-print me-1"></i> <span class="d-none d-sm-inline">کەشف حیسابی شوێن</span>
+            </button>
             <?php if (hasPermission('add_purchase')): ?>
             <button class="btn btn-add-purchase" data-bs-toggle="modal" data-bs-target="#addPurchaseModal">
                 <i class="fas fa-plus me-1"></i> <span class="d-none d-sm-inline">زیادکردنی کڕین</span>
@@ -1772,6 +1775,30 @@ $(document).on('input', '#total_weight', function() {
 $(document).ready(function() {
     loadDriversData();
 });
+
+function openLocationStatement() {
+    const locationId = document.getElementById('filter_location')?.value;
+    if (!locationId) {
+        Swal.fire('ئاگاداری', 'تکایە سەرەتا شوێنێک هەڵبژێرە لە بەشی فلتەرەکان', 'warning');
+        return;
+    }
+    const fromDate = document.getElementById('filter_from')?.value || '';
+    const toDate = document.getElementById('filter_to')?.value || '';
+    const companyId = document.getElementById('filter_company')?.value || '';
+    const driverId = document.getElementById('filter_driver')?.value || '';
+    const materialId = document.getElementById('filter_material')?.value || '';
+    
+    const params = new URLSearchParams({
+        location_id: locationId,
+        company_id: companyId,
+        driver_id: driverId,
+        material_id: materialId,
+        from_date: fromDate,
+        to_date: toDate
+    });
+    
+    window.open('print_location_statement.php?' + params.toString(), '_blank');
+}
 </script>
 </body>
 </html>
