@@ -298,8 +298,11 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
             <button class="btn btn-info text-white fw-bold ms-1" onclick="openLocationStatement()">
                 <i class="fas fa-print me-1"></i> <span class="d-none d-sm-inline">کەشف حیسابی سەرچاوە</span>
             </button>
-            <button class="btn btn-primary text-white fw-bold" onclick="openDriverStatement()">
+            <button class="btn btn-primary text-white fw-bold ms-1" onclick="openDriverStatement()">
                 <i class="fas fa-id-card me-1"></i> <span class="d-none d-sm-inline">کەشف حیسابی شۆفێر</span>
+            </button>
+            <button class="btn btn-secondary text-white fw-bold" onclick="openAllLocationsStatement()">
+                <i class="fas fa-list-alt me-1"></i> <span class="d-none d-sm-inline">کەشف حیسابی گشتی شوێنەکان</span>
             </button>
             <?php if (hasPermission('add_purchase')): ?>
             <button class="btn btn-add-purchase" data-bs-toggle="modal" data-bs-target="#addPurchaseModal">
@@ -1825,6 +1828,24 @@ function openDriverStatement() {
     });
     
     window.open('print_driver_statement.php?' + params.toString(), '_blank');
+}
+
+function openAllLocationsStatement() {
+    const fromDate = document.getElementById('filter_from')?.value || '';
+    const toDate = document.getElementById('filter_to')?.value || '';
+    const companyId = document.getElementById('filter_company')?.value || '';
+    const driverId = document.getElementById('filter_driver')?.value || '';
+    const materialId = document.getElementById('filter_material')?.value || '';
+    
+    const params = new URLSearchParams({
+        company_id: companyId,
+        driver_id: driverId,
+        material_id: materialId,
+        from_date: fromDate,
+        to_date: toDate
+    });
+    
+    window.open('print_all_locations_statement.php?' + params.toString(), '_blank');
 }
 </script>
 </body>
