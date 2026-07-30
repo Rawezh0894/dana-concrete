@@ -464,14 +464,22 @@ $remaining_iqd = $total_cost_iqd - $total_paid_iqd;
         .btn-print:hover { background: #152c6b; }
 
         @media print {
+            @page {
+                size: A4;
+                margin: 10mm;
+            }
             .no-print-toolbar { display: none; }
             body { background: white; }
-            .print-page { margin: 0; box-shadow: none; border: none; width: 100%; padding: 0; }
+            .print-page { margin: 0; box-shadow: none; border: none; width: 100%; min-height: auto; padding: 0; }
             .balance-header { -webkit-print-color-adjust: exact; background: var(--primary) !important; color: white !important; }
             th { -webkit-print-color-adjust: exact; background: var(--primary) !important; color: white !important; }
             .doc-type-badge { -webkit-print-color-adjust: exact; background: var(--primary) !important; color: white !important; }
             .kpi-icon { -webkit-print-color-adjust: exact; }
             .section-header { -webkit-print-color-adjust: exact; }
+            .footer-signatures {
+                margin-top: 30px;
+                page-break-inside: avoid;
+            }
         }
     </style>
 </head>
@@ -533,7 +541,7 @@ $remaining_iqd = $total_cost_iqd - $total_paid_iqd;
                 <div class="kpi-icon" style="background: var(--accent);"><i class="fas fa-weight-hanging"></i></div>
                 <div class="kpi-details">
                     <div class="kpi-title">کۆی کێشی گواستراوە</div>
-                    <div class="kpi-value"><?= number_format($total_kg) ?> کگم</div>
+                    <div class="kpi-value"><?= number_format($total_kg / 1000, 2) ?> تەن</div>
                 </div>
             </div>
             <div class="kpi-card">
