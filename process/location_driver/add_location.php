@@ -17,6 +17,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo json_encode(['success' => false, 'msg' => 'هەڵە لە زیادکردن']);
         }
     } else {
-        echo json_encode(['success' => false, 'msg' => 'ناوی شوێن پێویستە']);
+        echo json_encode(['success' => false, 'msg' => 'ناوی سەرچاوە پێویستە']);
     }
 }

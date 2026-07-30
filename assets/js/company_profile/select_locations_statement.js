@@ -27,7 +27,7 @@ function loadLocationsSummary() {
             dataSrc: ''
         },
         columns: [
-            { data: 'location', title: 'ناوی شوێن' },
+            { data: 'location', title: 'ناوی سەرچاوە' },
             {
                 data: 'total_cost_usd',
                 title: 'کۆی گشتی کرێ ($)',

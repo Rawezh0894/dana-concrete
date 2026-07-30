@@ -366,7 +366,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
               <h6 class="mb-3">شوێنەکان</h6>
               <form id="inlineAddLocationForm" class="row g-2 mb-2">
                 <div class="col-md-10">
-                  <input type="text" id="inline_location_name" class="form-control" placeholder="ناوی شوێن" required>
+                  <input type="text" id="inline_location_name" class="form-control" placeholder="ناوی سەرچاوە" required>
                 </div>
                 <div class="col-md-2 d-grid">
                   <button type="submit" class="btn btn-success"><i class="fas fa-plus"></i></button>
@@ -376,7 +376,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
               <form id="inlineEditLocationForm" class="row g-2 mb-3" style="display:none;">
                 <input type="hidden" id="inline_edit_location_id">
                 <div class="col-md-10">
-                  <input type="text" id="inline_edit_location_name" class="form-control" placeholder="ناوی شوێن" required>
+                  <input type="text" id="inline_edit_location_name" class="form-control" placeholder="ناوی سەرچاوە" required>
                 </div>
                 <div class="col-md-2 d-flex gap-1">
                   <button type="submit" class="btn btn-warning btn-sm"><i class="fas fa-save"></i></button>
@@ -951,7 +951,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <input type="text" class="form-control" name="name" placeholder="ناوی شوێن" required>
+          <input type="text" class="form-control" name="name" placeholder="ناوی سەرچاوە" required>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
@@ -1031,7 +1031,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
                 <thead style="background: var(--kelly-green); color: white;">
                   <tr>
                     <th>#</th>
-                    <th>ناوی شوێن</th>
+                    <th>ناوی سەرچاوە</th>
                     <th>کردارەکان</th>
                   </tr>
                 </thead>

@@ -503,7 +503,7 @@ $remaining_iqd = $total_cost_iqd - $total_paid_iqd;
     <!-- Filters Meta -->
     <div class="filter-meta">
         <div class="meta-group">
-            <span class="meta-label">ناوی شوێن</span>
+            <span class="meta-label">ناوی سەرچاوە</span>
             <span class="meta-value"><?= htmlspecialchars($location_name) ?></span>
         </div>
         <div class="meta-group">
@@ -549,24 +549,56 @@ $remaining_iqd = $total_cost_iqd - $total_paid_iqd;
     <!-- Grouped Materials Section (As requested by user) -->
     <div class="material-groups-section">
         <div class="section-header">
-            <i class="fas fa-layer-group"></i> پوختەی کڕینەکان بەپێی جۆر و نرخ (بۆ شوێنەکە)
+            <i class="fas fa-layer-group"></i> پوختەی کڕینەکان بەپێی جۆر و نرخ
         </div>
-        <div class="groups-content" style="padding: 20px; font-size: 17px; line-height: 2; font-weight: bold; color: var(--primary); text-align: right;">
+        <div class="groups-content" style="padding: 20px;">
             <?php if (empty($summary_groups)): ?>
                 <div style="color: var(--text-light); text-align: center; font-weight: normal;">هیچ داتایەک نییە بۆ نیشاندان</div>
             <?php else: ?>
-                <?php
-                $sentences = [];
-                foreach ($summary_groups as $mat_name => $currencies) {
-                    foreach ($currencies['iqd'] as $price => $count) {
-                        $sentences[] = "{$count} {$mat_name} بردراوە بە {$price}";
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                    <?php
+                    foreach ($summary_groups as $mat_name => $currencies) {
+                        foreach ($currencies['iqd'] as $price => $count) {
+                            ?>
+                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="background: var(--primary); color: white; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold;">
+                                        <?= $count ?>
+                                    </div>
+                                    <div>
+                                        <div style="color: var(--text-light); font-size: 12px;">مەواد</div>
+                                        <div style="font-weight: bold; font-size: 15px; color: var(--text-main);"><?= htmlspecialchars($mat_name) ?></div>
+                                    </div>
+                                </div>
+                                <div style="text-align: left; border-right: 1px solid #e2e8f0; padding-right: 15px;">
+                                    <div style="color: var(--text-light); font-size: 12px;">نرخ / تێچوو</div>
+                                    <div style="font-weight: bold; font-size: 16px; color: var(--danger);"><?= $price ?> <span style="font-size: 12px;">د.ع</span></div>
+                                </div>
+                            </div>
+                            <?php
+                        }
+                        foreach ($currencies['usd'] as $price => $count) {
+                            ?>
+                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="background: var(--primary); color: white; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold;">
+                                        <?= $count ?>
+                                    </div>
+                                    <div>
+                                        <div style="color: var(--text-light); font-size: 12px;">مەواد</div>
+                                        <div style="font-weight: bold; font-size: 15px; color: var(--text-main);"><?= htmlspecialchars($mat_name) ?></div>
+                                    </div>
+                                </div>
+                                <div style="text-align: left; border-right: 1px solid #e2e8f0; padding-right: 15px;">
+                                    <div style="color: var(--text-light); font-size: 12px;">نرخ / تێچوو</div>
+                                    <div style="font-weight: bold; font-size: 16px; color: var(--primary);"><?= $price ?> <span style="font-size: 12px;">$</span></div>
+                                </div>
+                            </div>
+                            <?php
+                        }
                     }
-                    foreach ($currencies['usd'] as $price => $count) {
-                        $sentences[] = "{$count} {$mat_name} بردراوە بە {$price} $";
-                    }
-                }
-                echo implode(' ، ', $sentences);
-                ?>
+                    ?>
+                </div>
             <?php endif; ?>
         </div>
     </div>
@@ -587,7 +619,7 @@ $remaining_iqd = $total_cost_iqd - $total_paid_iqd;
                 <span>ماوە (قەرزی کۆتایی):</span>
                 <span style="color: <?= $remaining_iqd > 0 ? 'var(--danger)' : ($remaining_iqd < 0 ? 'var(--success)' : 'inherit') ?>;">
                     <?= number_format(abs($remaining_iqd)) ?> 
-                    <?= $remaining_iqd > 0 ? '(شوێن قەرزدارە)' : ($remaining_iqd < 0 ? '(شوێن داواکارە)' : '') ?>
+                    <?= $remaining_iqd > 0 ? '' : ($remaining_iqd < 0 ? '(شوێن داواکارە)' : '') ?>
                 </span>
             </div>
         </div>
@@ -605,7 +637,7 @@ $remaining_iqd = $total_cost_iqd - $total_paid_iqd;
                 <span>ماوە (قەرزی کۆتایی):</span>
                 <span style="color: <?= $remaining_usd > 0 ? 'var(--danger)' : ($remaining_usd < 0 ? 'var(--success)' : 'inherit') ?>;">
                     <?= number_format(abs($remaining_usd), 2) ?> 
-                    <?= $remaining_usd > 0 ? '(شوێن قەرزدارە)' : ($remaining_usd < 0 ? '(شوێن داواکارە)' : '') ?>
+                    <?= $remaining_usd > 0 ? '' : ($remaining_usd < 0 ? '(شوێن داواکارە)' : '') ?>
                 </span>
             </div>
         </div>

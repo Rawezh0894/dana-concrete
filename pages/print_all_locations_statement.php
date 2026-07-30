@@ -281,7 +281,7 @@ foreach ($transactions as $t) {
     <table>
         <thead>
             <tr>
-                <th>ناوی شوێن</th>
+                <th>ناوی سەرچاوە</th>
                 <th>بڕی کڕین ($)</th>
                 <th>بڕی کڕین (د.ع)</th>
                 <th>پارەی دراو ($)</th>
