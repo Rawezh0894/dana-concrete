@@ -559,39 +559,57 @@ $remaining_iqd = $total_cost_iqd - $total_paid_iqd;
                     <?php
                     foreach ($summary_groups as $mat_name => $currencies) {
                         foreach ($currencies['iqd'] as $price => $count) {
+                            $total_cost = (float)str_replace(',', '', $price) * $count;
                             ?>
-                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-                                <div style="display: flex; align-items: center; gap: 10px;">
-                                    <div style="background: var(--primary); color: white; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold;">
-                                        <?= $count ?>
+                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 15px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <div style="background: var(--primary); color: white; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold;">
+                                            <?= $count ?>
+                                        </div>
+                                        <div>
+                                            <div style="color: var(--text-light); font-size: 12px;">مەواد</div>
+                                            <div style="font-weight: bold; font-size: 15px; color: var(--text-main);"><?= htmlspecialchars($mat_name) ?></div>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <div style="color: var(--text-light); font-size: 12px;">مەواد</div>
-                                        <div style="font-weight: bold; font-size: 15px; color: var(--text-main);"><?= htmlspecialchars($mat_name) ?></div>
+                                    <div style="text-align: left;">
+                                        <div style="color: var(--text-light); font-size: 12px;">نرخی دانە</div>
+                                        <div style="font-weight: bold; font-size: 16px; color: var(--text-main);"><?= $price ?> <span style="font-size: 12px;">د.ع</span></div>
                                     </div>
                                 </div>
-                                <div style="text-align: left; border-right: 1px solid #e2e8f0; padding-right: 15px;">
-                                    <div style="color: var(--text-light); font-size: 12px;">نرخ / تێچوو</div>
-                                    <div style="font-weight: bold; font-size: 16px; color: var(--danger);"><?= $price ?> <span style="font-size: 12px;">د.ع</span></div>
+                                <div style="border-top: 1px dashed #cbd5e1; padding-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+                                    <div style="color: var(--text-light); font-size: 13px;">کۆی گشتی:</div>
+                                    <div style="font-weight: bold; font-size: 18px; color: var(--danger);">
+                                        <?= number_format($total_cost) ?> <span style="font-size: 12px;">د.ع</span>
+                                    </div>
                                 </div>
                             </div>
                             <?php
                         }
                         foreach ($currencies['usd'] as $price => $count) {
+                            $total_cost = (float)str_replace(',', '', $price) * $count;
                             ?>
-                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-                                <div style="display: flex; align-items: center; gap: 10px;">
-                                    <div style="background: var(--primary); color: white; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold;">
-                                        <?= $count ?>
+                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 15px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <div style="background: var(--primary); color: white; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold;">
+                                            <?= $count ?>
+                                        </div>
+                                        <div>
+                                            <div style="color: var(--text-light); font-size: 12px;">مەواد</div>
+                                            <div style="font-weight: bold; font-size: 15px; color: var(--text-main);"><?= htmlspecialchars($mat_name) ?></div>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <div style="color: var(--text-light); font-size: 12px;">مەواد</div>
-                                        <div style="font-weight: bold; font-size: 15px; color: var(--text-main);"><?= htmlspecialchars($mat_name) ?></div>
+                                    <div style="text-align: left;">
+                                        <div style="color: var(--text-light); font-size: 12px;">نرخی دانە</div>
+                                        <div style="font-weight: bold; font-size: 16px; color: var(--text-main);"><?= $price ?> <span style="font-size: 12px;">$</span></div>
                                     </div>
                                 </div>
-                                <div style="text-align: left; border-right: 1px solid #e2e8f0; padding-right: 15px;">
-                                    <div style="color: var(--text-light); font-size: 12px;">نرخ / تێچوو</div>
-                                    <div style="font-weight: bold; font-size: 16px; color: var(--primary);"><?= $price ?> <span style="font-size: 12px;">$</span></div>
+                                <div style="border-top: 1px dashed #cbd5e1; padding-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+                                    <div style="color: var(--text-light); font-size: 13px;">کۆی گشتی:</div>
+                                    <div style="font-weight: bold; font-size: 18px; color: var(--primary);">
+                                        <?= number_format($total_cost, 2) ?> <span style="font-size: 12px;">$</span>
+                                    </div>
                                 </div>
                             </div>
                             <?php
