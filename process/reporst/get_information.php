@@ -216,16 +216,18 @@ try {
 
     // Sales (فرۆشتن) - Only USD
     $sales = [
-        'cash' => ['usd' => 0],
-        'credit' => ['usd' => 0]
+        'cash' => ['usd' => 0, 'meters' => 0],
+        'credit' => ['usd' => 0, 'meters' => 0]
     ];
-    $sales_query = "SELECT payment_type, SUM(total_price) as usd FROM sales WHERE 1=1 $date_condition_sales GROUP BY payment_type";
+    $sales_query = "SELECT payment_type, SUM(total_price) as usd, SUM(quantity) as meters FROM sales WHERE 1=1 $date_condition_sales GROUP BY payment_type";
     $stmt = $pdo->query($sales_query);
     while ($row = $stmt->fetch()) {
         if ($row['payment_type'] === 'نەقد') {
             $sales['cash']['usd'] = $row['usd'] ?? 0;
+            $sales['cash']['meters'] = $row['meters'] ?? 0;
         } elseif ($row['payment_type'] === 'قەرز') {
             $sales['credit']['usd'] = $row['usd'] ?? 0;
+            $sales['credit']['meters'] = $row['meters'] ?? 0;
         }
     }
 

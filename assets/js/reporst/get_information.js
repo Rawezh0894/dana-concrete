@@ -268,7 +268,55 @@ function renderDashboardCards(data) {
     ];
 
     // Other Cards (کارتەکانی دیکە)
+    const salesCashUsd = Number(data.data?.sales?.cash?.usd) || 0;
+    const salesCreditUsd = Number(data.data?.sales?.credit?.usd) || 0;
+    const salesCashMeters = Number(data.data?.sales?.cash?.meters) || 0;
+    const salesCreditMeters = Number(data.data?.sales?.credit?.meters) || 0;
+    const totalSalesMeters = salesCashMeters + salesCreditMeters;
+    const totalSalesUsd = salesCashUsd + salesCreditUsd;
+    const averagePricePerMeter = totalSalesMeters > 0 ? (totalSalesUsd / totalSalesMeters) : 0;
+
     const otherCards = [
+        {
+            key: 'sales_cash_usd',
+            label: 'کۆی نرخی فرۆشتن بە نەقدی',
+            icon: 'fa-money-bill-wave',
+            cardClass: 'sales-card',
+            value: formatCurrency(salesCashUsd, 'USD'),
+            subtitle: 'فرۆشتنی نەقدی'
+        },
+        {
+            key: 'sales_credit_usd',
+            label: 'کۆی نرخی فرۆشتن بە قەرزی',
+            icon: 'fa-hand-holding-usd',
+            cardClass: 'sales-card',
+            value: formatCurrency(salesCreditUsd, 'USD'),
+            subtitle: 'فرۆشتنی قەرزی'
+        },
+        {
+            key: 'sales_cash_meters',
+            label: 'کۆی مەتری نەقدی',
+            icon: 'fa-ruler-combined',
+            cardClass: 'sales-card',
+            value: formatNumber(salesCashMeters) + ' م³',
+            subtitle: 'مەترەکانی فرۆشتنی نەقدی'
+        },
+        {
+            key: 'sales_credit_meters',
+            label: 'کۆی مەتری قەرزی',
+            icon: 'fa-ruler-combined',
+            cardClass: 'sales-card',
+            value: formatNumber(salesCreditMeters) + ' م³',
+            subtitle: 'مەترەکانی فرۆشتنی قەرزی'
+        },
+        {
+            key: 'average_price_per_meter',
+            label: 'تێکڕای نرخی هەر مەترێک کۆنکرێت',
+            icon: 'fa-chart-pie',
+            cardClass: 'sales-card',
+            value: formatCurrency(averagePricePerMeter, 'USD'),
+            subtitle: 'تێکڕای نرخ بۆ یەک مەتر فرۆشتن'
+        },
         {
             key: 'customer',
             label: 'کۆی قەرزی کڕیارەکان',
