@@ -133,42 +133,22 @@ try {
     
     $total_debt_final = $total_debt_usd + $total_debt_iqd_converted;
     
-    // 2. Total companies count (کۆی ژمارەی کۆمپانیاکان) - with filters
-    if ($company_id) {
-        // If specific company is selected, count is 1
-        $total_companies = 1;
-    } else {
-        $stmt = $pdo->query("SELECT COUNT(*) as total FROM company");
-        $row = $stmt->fetch();
-        $total_companies = intval($row['total'] ?? 0);
-    }
+    // 2. Material KG summary - with filters
+    $material_kg_sql = "
+        SELECT 
+            m.name as material_name, 
+            SUM(p.kg) as total_kg 
+        FROM purchases p
+        JOIN materials m ON p.material_id = m.id
+        LEFT JOIN locations l ON p.location = l.name
+        LEFT JOIN drivers d ON p.driver = d.name
+        $filter_sql
+        GROUP BY m.id, m.name
+    ";
     
-    // 3. Indebted companies count (کۆمپانیاکانی قەرزدار) - with filters
-    if ($company_id) {
-        // If specific company is selected, check if it's indebted
-        $stmt = $pdo->prepare("
-            SELECT 
-                CASE WHEN (c.opening_debt_usd > 0 OR c.opening_debt_iqd > 0) 
-                     OR EXISTS(SELECT 1 FROM purchases p WHERE p.company_id = c.id AND (p.remaining_usd > 0 OR p.remaining_iqd > 0))
-                THEN 1 ELSE 0 END as indebted_count
-            FROM company c 
-            WHERE c.id = ?
-        ");
-        $stmt->execute([$company_id]);
-        $row = $stmt->fetch();
-        $indebted_companies = intval($row['indebted_count'] ?? 0);
-    } else {
-        // If no company filter, get all indebted companies
-        $stmt = $pdo->query("
-            SELECT COUNT(DISTINCT c.id) as indebted_count 
-            FROM company c 
-            LEFT JOIN purchases p ON c.id = p.company_id 
-            WHERE (c.opening_debt_usd > 0 OR c.opening_debt_iqd > 0) 
-               OR (p.remaining_usd > 0 OR p.remaining_iqd > 0)
-        ");
-        $row = $stmt->fetch();
-        $indebted_companies = intval($row['indebted_count'] ?? 0);
-    }
+    $stmt_mat = $pdo->prepare($material_kg_sql);
+    $stmt_mat->execute($filter_params);
+    $materials_kg = $stmt_mat->fetchAll(PDO::FETCH_ASSOC);
     
     echo json_encode([
         'success' => true,
@@ -177,8 +157,7 @@ try {
             'total_price_usd' => round($total_price_usd, 2),
             'total_price_iqd' => round($total_price_iqd, 0),
             'total_invoices' => $total_invoices,
-            'total_companies' => $total_companies,
-            'indebted_companies' => $indebted_companies,
+            'materials_kg' => $materials_kg,
             'usd_iqd_rate' => $usd_iqd_rate
         ]
     ]);

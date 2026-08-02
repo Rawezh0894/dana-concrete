@@ -68,14 +68,27 @@ function loadPurchaseSummary(filterParams = '') {
                 $('#total-invoices').text(formatNumber(data.total_invoices));
             }
             
-            // Update total companies card
-            if (data.total_companies !== undefined) {
-                $('#total-companies').text(formatNumber(data.total_companies));
-            }
+            // Remove any previously added material cards
+            $('.dynamic-material-card').remove();
             
-            // Update indebted companies card
-            if (data.indebted_companies !== undefined) {
-                $('#indebted-companies').text(formatNumber(data.indebted_companies));
+            // Add material cards
+            if (data.materials_kg && Array.isArray(data.materials_kg)) {
+                data.materials_kg.forEach(material => {
+                    const kg = material.total_kg ? material.total_kg : 0;
+                    const cardHtml = `
+                        <div class="col-xl-2 col-lg-3 col-md-4 mb-3 dynamic-material-card">
+                            <div class="card text-center shadow card-gradient-info card-animate-hover">
+                                <div class="card-body">
+                                    <i class="fas fa-box card-icon"></i>
+                                    <h6 class="card-title">${material.material_name}</h6>
+                                    <div class="fs-4 fw-bold" style="font-size: 1.1rem !important;">${formatNumber(kg)} کگم</div>
+                                    <small class="text-light">کۆی گشتی کێش</small>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    $('#purchaseSummaryCards').append(cardHtml);
+                });
             }
         })
         .catch(error => {

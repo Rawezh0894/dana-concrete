@@ -437,37 +437,7 @@ $companies = $pdo->query("SELECT id, name FROM company")->fetchAll(PDO::FETCH_AS
                 </div>
             </div>
         </div>
-        <div class="col-xl-2 col-lg-3 col-md-4 mb-3">
-            <div class="card text-center shadow card-gradient-info card-animate-hover">
-                <div class="card-body">
-                    <i class="fas fa-building card-icon"></i>
-                    <h6 class="card-title">کۆی کۆمپانیاکان</h6>
-                    <div class="fs-4 fw-bold" id="total-companies">0</div>
-                    <small class="text-light">ژمارەی گشتی</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-2 col-lg-3 col-md-4 mb-3">
-            <div class="card text-center shadow card-gradient-warning card-animate-hover">
-                <div class="card-body">
-                    <i class="fas fa-hand-holding-usd card-icon"></i>
-                    <h6 class="card-title">کۆمپانیاکانی قەرزدار</h6>
-                    <div class="fs-4 fw-bold" id="indebted-companies">0</div>
-                    <small class="text-light">کۆمپانیاکانی قەرزدار</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-2 col-lg-12 col-md-4 mb-3">
-            <div class="card text-center shadow card-animate-hover summary-export-card h-100 d-flex align-items-center justify-content-center">
-                <div class="card-body">
-                    <i class="fas fa-file-excel card-icon"></i>
-                    <h6 class="card-title">ئیکسپۆرت</h6>
-                    <button class="btn btn-sm btn-light mt-2" onclick="exportPurchaseSummaryToExcel()" title="ئیکسپۆرتی کورتەی کڕینەکان بۆ Excel">
-                        <i class="fas fa-download me-1"></i>داگرتن
-                    </button>
-                </div>
-            </div>
-        </div>
+        <!-- Dynamic Material Cards will be appended here -->
     </div>
     
     <!-- Date Filters Row -->
