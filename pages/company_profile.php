@@ -164,6 +164,36 @@ if ($company_id) {
     </form></div></div>
 </div>
 
+<div class="modal fade" id="editDebtModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-md"><div class="modal-content border-0 shadow"><form id="editDebtForm">
+        <input type="hidden" name="company_id" value="<?= $company_id ?>">
+        <input type="hidden" id="edit_debt_id" name="id">
+        <div class="modal-header bg-primary text-white"><h5 class="modal-title fw-bold">دەستکاری پارەدان</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body p-4">
+            <div class="mb-3"><label class="form-label fw-bold">بەروار:</label><input type="date" class="form-control" id="edit_debt_date" name="date" required></div>
+            <div class="mb-3">
+                <label class="form-label fw-bold">نرخی ١٠٠ دۆلار:</label>
+                <div class="input-group">
+                    <input type="number" class="form-control fw-bold text-primary" id="edit_debt_dollar_rate" name="dollar_rate">
+                    <button type="button" class="btn btn-outline-secondary" onclick="fetchAndSetDollarRate('edit_debt_dollar_rate')">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="row g-3">
+                <div class="col-6"><label class="form-label">پارەی داوە (دۆلار)</label><input type="number" step="0.01" class="form-control" id="edit_debt_amount_usd" name="amount_usd" value="0"></div>
+                <div class="col-6"><label class="form-label">پارەی داوە (دینار)</label><input type="number" step="1" class="form-control" id="edit_debt_amount_iqd" name="amount_iqd" value="0"></div>
+            </div>
+            <div class="row g-3 mt-1">
+                <div class="col-6"><label class="form-label">داشکاندن (دۆلار)</label><input type="number" step="0.01" class="form-control" id="edit_debt_discount_usd" name="discount_usd" value="0"></div>
+                <div class="col-6"><label class="form-label">داشکاندن (دینار)</label><input type="number" step="1" class="form-control" id="edit_debt_discount_iqd" name="discount_iqd" value="0"></div>
+            </div>
+            <div class="mb-3 mt-3"><label class="form-label">تێبینی:</label><textarea class="form-control" id="edit_debt_note" name="note" rows="2"></textarea></div>
+        </div>
+        <div class="modal-footer"><button type="submit" class="btn btn-primary fw-bold px-5">نوێکردنەوە</button></div>
+    </form></div></div>
+</div>
+
 <div class="modal fade" id="addAdjustmentModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-md"><div class="modal-content border-0 shadow"><form id="addAdjustmentForm">
         <input type="hidden" name="company_id" value="<?= $company_id ?>">
@@ -321,6 +351,8 @@ if ($company_id) {
 <script src="../assets/js/company_profile/add_debt.js?v=1.1"></script>
 <script src="../assets/js/company_profile/select_locations_statement.js?v=1.1"></script>
 <script src="../assets/js/company_profile/select_drivers_statement.js?v=1.1"></script>
+<script src="../assets/js/company_profile/update_debt.js?v=1.1"></script>
+<script src="../assets/js/company_profile/delete_debt.js?v=1.1"></script>
 
 </body>
 </html>
