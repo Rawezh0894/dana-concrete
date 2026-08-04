@@ -75,14 +75,23 @@ function loadPurchaseSummary(filterParams = '') {
             if (data.materials_kg && Array.isArray(data.materials_kg)) {
                 data.materials_kg.forEach(material => {
                     const kg = material.total_kg ? material.total_kg : 0;
+                    const avgUsd = material.avg_price_usd_per_ton || 0;
+                    const avgIqd = material.avg_price_iqd_per_ton || 0;
                     const cardHtml = `
                         <div class="col-xl-2 col-lg-3 col-md-4 mb-3 dynamic-material-card">
-                            <div class="card text-center shadow card-gradient-info card-animate-hover">
-                                <div class="card-body">
-                                    <i class="fas fa-box card-icon"></i>
-                                    <h6 class="card-title">${material.material_name}</h6>
-                                    <div class="fs-4 fw-bold" style="font-size: 1.1rem !important;">${formatNumber(kg)} کگم</div>
-                                    <small class="text-light">کۆی گشتی کێش</small>
+                            <div class="card text-center shadow card-gradient-info card-animate-hover" style="height: 100%;">
+                                <div class="card-body d-flex flex-column justify-content-between p-3">
+                                    <div class="mb-2">
+                                        <i class="fas fa-box card-icon mb-2"></i>
+                                        <h6 class="card-title text-truncate mb-1" title="${material.material_name}">${material.material_name}</h6>
+                                        <div class="fs-5 fw-bold mb-0">${formatNumber(kg)} کگم</div>
+                                        <small class="text-light d-block mt-0" style="font-size: 0.75rem;">کۆی گشتی کێش</small>
+                                    </div>
+                                    <div class="border-top border-light border-opacity-25 pt-2 mt-auto">
+                                        <div class="fw-bold text-white mb-1" style="font-size: 0.85rem;">تێکڕای نرخ (تۆن):</div>
+                                        <div class="text-white fw-semibold" style="font-size: 1rem;">$${formatCurrency(avgUsd)}</div>
+                                        <div class="text-white opacity-75" style="font-size: 0.85rem;">${formatNumber(avgIqd)} دینار</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

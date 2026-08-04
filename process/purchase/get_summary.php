@@ -137,7 +137,9 @@ try {
     $material_kg_sql = "
         SELECT 
             m.name as material_name, 
-            SUM(p.kg) as total_kg 
+            SUM(p.kg) as total_kg,
+            SUM(CASE WHEN p.type = 'دۆلار' THEN p.price ELSE p.amount_iqd / NULLIF(p.exchange_rate / 100, 0) END) as total_cost_usd,
+            SUM(CASE WHEN p.type = 'دینار' THEN p.amount_iqd ELSE p.price * (p.exchange_rate / 100) END) as total_cost_iqd
         FROM purchases p
         JOIN materials m ON p.material_id = m.id
         LEFT JOIN locations l ON p.location = l.name
@@ -148,7 +150,19 @@ try {
     
     $stmt_mat = $pdo->prepare($material_kg_sql);
     $stmt_mat->execute($filter_params);
-    $materials_kg = $stmt_mat->fetchAll(PDO::FETCH_ASSOC);
+    $materials_raw = $stmt_mat->fetchAll(PDO::FETCH_ASSOC);
+    
+    $materials_kg = [];
+    foreach ($materials_raw as $row) {
+        $kg = floatval($row['total_kg'] ?? 0);
+        $avg_price_usd_per_ton = $kg > 0 ? ($row['total_cost_usd'] / $kg * 1000) : 0;
+        $avg_price_iqd_per_ton = $kg > 0 ? ($row['total_cost_iqd'] / $kg * 1000) : 0;
+        
+        $row['avg_price_usd_per_ton'] = round($avg_price_usd_per_ton, 2);
+        $row['avg_price_iqd_per_ton'] = round($avg_price_iqd_per_ton, 0);
+        
+        $materials_kg[] = $row;
+    }
     
     echo json_encode([
         'success' => true,
