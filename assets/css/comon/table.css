@@ -90,7 +90,8 @@
 
 /* ستایلی تەیبڵ */
 .table {
-  width: 100%;
+  min-width: 100%;
+  width: max-content !important;
   border-collapse: collapse;
   font-family: 'Rabar_021', sans-serif;
   font-size: 0.95rem;
@@ -317,18 +318,43 @@
   scrollbar-color: var(--primary-green) var(--ultra-light-green);
 }
 
-.table-responsive::-webkit-scrollbar {
+/* Force horizontal scrolling on DataTables generated wrappers and any bare table */
+.dataTables_wrapper > .row > .col-sm-12,
+.dataTables_wrapper > .row > .col-md-12 {
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  width: 100%;
+}
+
+/* Force DataTables to allow overflow by preventing column squishing */
+table.dataTable {
+  min-width: 100% !important;
+  width: max-content !important;
+}
+
+table.dataTable th,
+table.dataTable td {
+  white-space: nowrap !important;
+}
+
+.table-responsive::-webkit-scrollbar,
+.dataTables_wrapper > .row > .col-sm-12::-webkit-scrollbar,
+.dataTables_wrapper > .row > .col-md-12::-webkit-scrollbar {
   height: 8px;
   background: var(--ultra-light-green);
   border-radius: 4px;
 }
 
-.table-responsive::-webkit-scrollbar-thumb {
+.table-responsive::-webkit-scrollbar-thumb,
+.dataTables_wrapper > .row > .col-sm-12::-webkit-scrollbar-thumb,
+.dataTables_wrapper > .row > .col-md-12::-webkit-scrollbar-thumb {
   background: var(--primary-blue);
   border-radius: 4px;
 }
 
-.table-responsive::-webkit-scrollbar-thumb:hover {
+.table-responsive::-webkit-scrollbar-thumb:hover,
+.dataTables_wrapper > .row > .col-sm-12::-webkit-scrollbar-thumb:hover,
+.dataTables_wrapper > .row > .col-md-12::-webkit-scrollbar-thumb:hover {
   background: #2563eb;
 }
 
