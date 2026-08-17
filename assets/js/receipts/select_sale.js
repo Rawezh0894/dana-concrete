@@ -54,7 +54,7 @@ class ReceiptManager {
         // Bind tooltip events with better handling
         document.addEventListener('mouseover', (e) => this.handleTooltipShow(e));
         document.addEventListener('mouseout', (e) => this.handleTooltipHide(e));
-        
+
         // Prevent tooltip from showing on mobile
         document.addEventListener('touchstart', () => this.hideTooltip());
     }
@@ -82,23 +82,23 @@ class ReceiptManager {
 
     showTooltip(text, x, y) {
         if (!this.tooltip || !text) return;
-        
+
         this.tooltip.textContent = text;
-        
+
         // Calculate position to keep tooltip within viewport
         const tooltipWidth = 300; // max-width from CSS
         const tooltipHeight = 60; // approximate height
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
-        
+
         let left = x + 10;
         let top = y - 40;
-        
+
         // Adjust horizontal position if tooltip would go off screen
         if (left + tooltipWidth > viewportWidth) {
             left = x - tooltipWidth - 10;
         }
-        
+
         // Adjust vertical position if tooltip would go off screen
         if (top < 0) {
             top = y + 20;
@@ -106,7 +106,7 @@ class ReceiptManager {
         if (top + tooltipHeight > viewportHeight) {
             top = viewportHeight - tooltipHeight - 10;
         }
-        
+
         this.tooltip.style.left = left + 'px';
         this.tooltip.style.top = top + 'px';
         this.tooltip.classList.add('show');
@@ -149,7 +149,7 @@ class ReceiptManager {
                 </tr>
             `;
         }
-        
+
         // Mark sales data as not loaded
         window.SALES_DATA_LOADED = false;
     }
@@ -171,28 +171,28 @@ class ReceiptManager {
                 </tr>
             `;
         }
-        
+
         // Mark sales data as not loaded
         window.SALES_DATA_LOADED = false;
     }
 
     formatReceiptNumber(number) {
         if (!number && number !== 0) return '';
-        
+
         try {
             const receiptNumber = String(number);
-            
+
             // Check if this is a grouped invoice number (contains commas)
             if (receiptNumber.includes(',')) {
                 const invoices = receiptNumber.split(',').map(inv => inv.trim());
                 const isLong = invoices.length > 3; // Show tooltip if more than 3 invoices
-                
+
                 // Format to show only first 3 invoices with indication of more
                 let displayText = invoices.slice(0, 3).join(', ');
                 if (invoices.length > 3) {
                     displayText += ` (+${invoices.length - 3} more)`;
                 }
-                
+
                 return `
                     <div class="receipt-number-cell ${isLong ? 'truncated' : ''}" 
                          title="${receiptNumber}"
@@ -223,7 +223,7 @@ class ReceiptManager {
 
     formatCurrency(amount) {
         if (!amount && amount !== 0) return '';
-        
+
         // Convert to string if it's not already
         const amountStr = String(amount);
         const num = parseFloat(amountStr.replace(/[$,]/g, '')) || 0;
@@ -235,7 +235,7 @@ class ReceiptManager {
 
     formatDate(dateString) {
         if (!dateString) return '';
-        
+
         try {
             // Handle different date formats
             let date;
@@ -247,17 +247,17 @@ class ReceiptManager {
             } else {
                 return String(dateString);
             }
-            
+
             // Check if date is valid
             if (isNaN(date.getTime())) {
                 return String(dateString);
             }
-            
+
             // Format as DD/MM/YYYY (day/month/year)
             const day = String(date.getDate()).padStart(2, '0');
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const year = date.getFullYear();
-            
+
             return `${day}/${month}/${year}`;
         } catch (e) {
             console.warn('Error formatting date:', dateString, e);
@@ -270,14 +270,14 @@ class ReceiptManager {
 
         try {
             this.showLoading();
-            
+
             const type = this.getSelectedTransactionType();
             const month = this.getSelectedMonth();
             const date_from = this.getDateFrom();
             const date_to = this.getDateTo();
             const location = this.getSelectedLocation();
             const recipient = this.getSelectedRecipient();
-            
+
             const params = new URLSearchParams({
                 customer_id: CUSTOMER_ID,
                 type,
@@ -289,7 +289,7 @@ class ReceiptManager {
             });
 
             const response = await fetch(`../process/receipts/select_sale.php?${params.toString()}`);
-            
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -301,7 +301,7 @@ class ReceiptManager {
             } catch (jsonError) {
                 console.error('JSON parsing error:', jsonError);
                 console.error('Raw response:', textResponse);
-                
+
                 // Check if response contains HTML error (PHP error)
                 if (textResponse.includes('<br />') || textResponse.includes('<b>')) {
                     throw new Error('هەڵەی سێرڤەر: داتاکان بە شێوەیەکی دروست نەگەڕانەوە');
@@ -313,7 +313,7 @@ class ReceiptManager {
             }
 
             this.renderSalesData(data);
-            
+
         } catch (error) {
             console.error('Error loading sales data:', error);
             this.showError(error.message);
@@ -339,7 +339,7 @@ class ReceiptManager {
 
         const data = response.sales_data;
         const openingDebt = response.opening_debt;
-        
+
         const tbody = document.getElementById('receipt-table-body');
         if (!tbody) {
             console.error('Table body element not found');
@@ -353,7 +353,7 @@ class ReceiptManager {
 
         let total = 0;
         let remainingTotal = 0;
-        
+
         const rows = data.map(row => {
             try {
                 // Calculate totals with safe parsing
@@ -396,10 +396,10 @@ class ReceiptManager {
         this.applyOptionalColumnVisibility();
         this.updateSummary(total, remainingTotal, response.total_quantity);
         this.updateDebtSummary(openingDebt, remainingTotal);
-        
+
         // Mark sales data as loaded
         window.SALES_DATA_LOADED = true;
-        
+
         // Load return debt data after sales data is loaded
         if (typeof loadReturnDebt === 'function') {
             setTimeout(() => loadReturnDebt(), 100);
@@ -409,7 +409,7 @@ class ReceiptManager {
     // Helper function for safe float parsing
     safeParseFloat(value) {
         if (!value && value !== 0) return 0;
-        
+
         try {
             const strValue = String(value);
             return parseFloat(strValue.replace(/[$,]/g, '')) || 0;
@@ -425,13 +425,13 @@ class ReceiptManager {
             // Ensure values are numbers
             const totalValue = typeof total === 'number' ? total : 0;
             const remainingValue = typeof remainingTotal === 'number' ? remainingTotal : 0;
-            
+
             const showInvoiceColumn = document.getElementById('show-invoice-number')?.checked;
             const showFormulaColumn = document.getElementById('show-formula-type')?.checked;
             const firstColspan = '2';
             const secondColspan = String(2 + (showFormulaColumn ? 1 : 0));
             const thirdColspan = String(3 + (showInvoiceColumn ? 1 : 0));
-            
+
             tfoot.innerHTML = `
                 <tr class="summary-row">
                     <td colspan="${firstColspan}" style="text-align: center;">
@@ -465,11 +465,11 @@ class ReceiptManager {
                 openingDebtValue = currentOpeningDebt;
             }
         }
-        
+
         const grossTotal = typeof this.lastGrossTotal === 'number' ? this.lastGrossTotal : 0;
         const totalDiscount = typeof window.RECEIPT_TOTAL_DISCOUNT === 'number' ? window.RECEIPT_TOTAL_DISCOUNT : 0;
         const totalPaid = typeof window.RECEIPT_TOTAL_PAID === 'number' ? window.RECEIPT_TOTAL_PAID : 0;
-        
+
         // Single Source of Truth calculations
         const netTotal = Math.max(0, Math.round((grossTotal - totalDiscount) * 100) / 100);
         const totalDebtReduction = Math.round((totalPaid + totalDiscount) * 100) / 100;
@@ -478,12 +478,12 @@ class ReceiptManager {
         const showOpeningDebtCheckbox = document.getElementById('show-opening-debt');
         const includeOpeningDebt = showOpeningDebtCheckbox ? showOpeningDebtCheckbox.checked : true;
         const totalRemaining = includeOpeningDebt ? Math.round((openingDebtValue + calculatedRemaining) * 100) / 100 : calculatedRemaining;
-        
+
         // Store globals
         window.RECEIPT_TOTAL = totalRemaining;
         window.REMAINING_TOTAL = calculatedRemaining;
         window.OPENING_DEBT = openingDebtValue;
-        
+
         const container = document.getElementById('final-summary-section');
         if (!container) return;
 
@@ -504,7 +504,7 @@ class ReceiptManager {
                     <div class="detail-item">
                         <i class="fa fa-receipt"></i>
                         <div class="detail-content">
-                            <span class="detail-label">کۆی نرخ (Gross)</span>
+                            <span class="detail-label">کۆی نرخ  </span>
                             <span class="detail-value">${this.formatCurrency(grossTotal)}</span>
                         </div>
                     </div>
@@ -520,7 +520,7 @@ class ReceiptManager {
                     <div class="detail-item">
                         <i class="fa fa-hand-holding-usd"></i>
                         <div class="detail-content">
-                            <span class="detail-label">پارەی واسڵکراوی صافی (واستکراو − باقی)</span>
+                            <span class="detail-label">پارەی واسڵکراوی صافی </span>
                             <span class="detail-value" style="color: #198754;">${this.formatCurrency(totalPaid)}</span>
                         </div>
                     </div>
@@ -561,7 +561,7 @@ class ReceiptManager {
         // Use the new multi-select function
         return typeof getSelectedLocations === 'function' ? getSelectedLocations() : 'all';
     }
-    
+
     getSelectedRecipient() {
         // Use the new multi-select function
         return typeof getSelectedRecipients === 'function' ? getSelectedRecipients() : 'all';
@@ -580,16 +580,16 @@ class ReceiptManager {
 }
 
 // Initialize the receipt manager when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     try {
         if (typeof CUSTOMER_ID === 'undefined' || !CUSTOMER_ID) {
             console.error('CUSTOMER_ID is not defined');
             return;
         }
-        
+
         // Initialize the professional receipt manager
         window.receiptManager = new ReceiptManager();
-        
+
         // Legacy function for backward compatibility
         window.loadSalesData = loadSalesData;
     } catch (error) {
