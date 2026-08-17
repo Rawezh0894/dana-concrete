@@ -210,10 +210,10 @@ function loadReturnDebt() {
                 paidTableBody.innerHTML = '';
                 let totalPaidUsd = 0;
                 let totalPaidIqd = 0;
-                let totalIqdToUsd = 0;
                 let totalDiscount = 0;
                 let totalChangeUsd = 0;
                 let totalChangeIq = 0;
+                let totalNetPaidUsd = 0;
                 let iqdConversionPossible = true;
                 applyPaidTableColumnVisibility();
                 data.forEach(row => {
@@ -223,17 +223,22 @@ function loadReturnDebt() {
                     const changeIq = parseFloat(row.change_back_iq || 0);
                     const rate = parseFloat(row.dolar_rate || 0);
                     const discountAmount = parseFloat(row.discount || 0) || 0;
-                    let iqdToUsd = 0;
-                    if (amountIqd > 0) {
+                    
+                    // Net paid amount for this payment (subtracting change returned to customer)
+                    const netUsd = amountUsd - changeUsd;
+                    const netIqd = amountIqd - changeIq;
+                    let netIqdToUsd = 0;
+                    if (netIqd !== 0) {
                         if (rate > 0) {
-                            iqdToUsd = amountIqd / (rate / 100);
+                            netIqdToUsd = netIqd / (rate / 100);
                         } else {
                             iqdConversionPossible = false;
                         }
                     }
+                    totalNetPaidUsd += (netUsd + netIqdToUsd);
+
                     totalPaidUsd += amountUsd;
                     totalPaidIqd += amountIqd;
-                    totalIqdToUsd += iqdToUsd;
                     totalDiscount += discountAmount;
                     totalChangeUsd += changeUsd;
                     totalChangeIq += changeIq;
@@ -252,7 +257,7 @@ function loadReturnDebt() {
 
                 // Rounding totals to avoid floating point precision issues (e.g. 949.26000001)
                 totalDiscount = Math.round(totalDiscount * 100) / 100;
-                let grandTotalUsd = Math.round((iqdConversionPossible ? (totalPaidUsd + totalIqdToUsd) : totalPaidUsd) * 100) / 100;
+                let grandTotalUsd = Math.round(totalNetPaidUsd * 100) / 100;
                 
                 // Expose to window for summary component single source of truth
                 window.RECEIPT_TOTAL_DISCOUNT = totalDiscount;
@@ -281,7 +286,7 @@ function loadReturnDebt() {
                                 ${formatUsdAmount(totalDiscount)}
                                 <div style="font-size:0.85em; font-weight:normal; margin-top:0.25rem;">کۆی داشکاندن</div>
                             </td>
-                            <td colspan="2" style="font-weight:bold;">کۆی پارەی واسڵ کراو</td>
+                            <td colspan="2" style="font-weight:bold;">کۆی پارەی واسڵ کراو (صافی)</td>
                         </tr>
                     `;
                 } else {
