@@ -472,7 +472,8 @@ class ReceiptManager {
         
         // Single Source of Truth calculations
         const netTotal = Math.max(0, Math.round((grossTotal - totalDiscount) * 100) / 100);
-        const calculatedRemaining = Math.max(0, Math.round((netTotal - totalPaid) * 100) / 100);
+        const totalDebtReduction = Math.round((totalPaid + totalDiscount) * 100) / 100;
+        const calculatedRemaining = Math.max(0, Math.round((grossTotal - totalDebtReduction) * 100) / 100);
 
         const showOpeningDebtCheckbox = document.getElementById('show-opening-debt');
         const includeOpeningDebt = showOpeningDebtCheckbox ? showOpeningDebtCheckbox.checked : true;
@@ -499,7 +500,7 @@ class ReceiptManager {
 
         container.innerHTML = `
             <div class="receipt-final-footer">
-                <div class="debt-details-grid" style="flex-wrap: wrap; justify-content: space-around;">
+                <div class="debt-details-grid" style="flex-wrap: wrap; justify-content: space-around; gap: 1.5rem;">
                     <div class="detail-item">
                         <i class="fa fa-receipt"></i>
                         <div class="detail-content">
@@ -517,18 +518,18 @@ class ReceiptManager {
                     </div>
                     <div class="detail-separator"></div>
                     <div class="detail-item">
-                        <i class="fa fa-calculator"></i>
+                        <i class="fa fa-hand-holding-usd"></i>
                         <div class="detail-content">
-                            <span class="detail-label">کۆی پاکژ (Net Total)</span>
-                            <span class="detail-value" style="color: #0d6efd;">${this.formatCurrency(netTotal)}</span>
+                            <span class="detail-label">پارەی واسڵکراوی صافی (واستکراو − باقی)</span>
+                            <span class="detail-value" style="color: #198754;">${this.formatCurrency(totalPaid)}</span>
                         </div>
                     </div>
                     <div class="detail-separator"></div>
                     <div class="detail-item">
-                        <i class="fa fa-hand-holding-usd"></i>
+                        <i class="fa fa-calculator"></i>
                         <div class="detail-content">
-                            <span class="detail-label">کۆی واسڵکراو</span>
-                            <span class="detail-value" style="color: #198754;">${this.formatCurrency(totalPaid)}</span>
+                            <span class="detail-label">کۆی کەمکراوە لە قەرز (واسڵکراو + داشکاندن)</span>
+                            <span class="detail-value" style="color: #0d6efd;">${this.formatCurrency(totalDebtReduction)}</span>
                         </div>
                     </div>
                     ${openingDebtHtml}
