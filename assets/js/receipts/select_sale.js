@@ -524,14 +524,6 @@ class ReceiptManager {
                             <span class="detail-value" style="color: #198754;">${this.formatCurrency(totalPaid)}</span>
                         </div>
                     </div>
-                    <div class="detail-separator"></div>
-                    <div class="detail-item">
-                        <i class="fa fa-calculator"></i>
-                        <div class="detail-content">
-                            <span class="detail-label">کۆی کەمکراوە لە قەرز (واسڵکراو + داشکاندن)</span>
-                            <span class="detail-value" style="color: #0d6efd;">${this.formatCurrency(totalDebtReduction)}</span>
-                        </div>
-                    </div>
                     ${openingDebtHtml}
                 </div>
                 <div class="grand-total-bar" style="margin-top: 1rem;">
