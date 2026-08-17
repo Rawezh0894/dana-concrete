@@ -249,14 +249,22 @@ function loadReturnDebt() {
                         </tr>
                     `;
                 });
+
+                // Rounding totals to avoid floating point precision issues (e.g. 949.26000001)
+                totalDiscount = Math.round(totalDiscount * 100) / 100;
+                let grandTotalUsd = Math.round((iqdConversionPossible ? (totalPaidUsd + totalIqdToUsd) : totalPaidUsd) * 100) / 100;
+                
+                // Expose to window for summary component single source of truth
+                window.RECEIPT_TOTAL_DISCOUNT = totalDiscount;
+                window.RECEIPT_TOTAL_PAID = grandTotalUsd;
+
                 // Add total row if any payments, otherwise show "no payments" message
                 if (data.length > 0) {
-                    let grandTotalUsd = (iqdConversionPossible ? (totalPaidUsd + totalIqdToUsd) : totalPaidUsd);
                     let totalText = '';
                     if (iqdConversionPossible) {
-                        totalText = '$' + grandTotalUsd.toLocaleString(undefined, {maximumFractionDigits:2});
+                        totalText = '$' + grandTotalUsd.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
                     } else {
-                        totalText = '$' + totalPaidUsd.toLocaleString(undefined, {maximumFractionDigits:2}) + ' <span style="color:red;font-size:0.95em">(نرخی دۆلار بۆ دینار نییە!)</span>';
+                        totalText = '$' + totalPaidUsd.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' <span style="color:red;font-size:0.95em">(نرخی دۆلار بۆ دینار نییە!)</span>';
                     }
                     paidTableBody.innerHTML += `
                         <tr class="paid-summary-row">
@@ -293,6 +301,11 @@ function loadReturnDebt() {
             window.RETURN_DEBT_DATA_LOADED = true;
             console.log('Return debt data loaded successfully');
             
+            // Update debt summary section with recalculated single source of truth figures
+            if (window.receiptManager && typeof window.receiptManager.updateDebtSummary === 'function') {
+                window.receiptManager.updateDebtSummary();
+            }
+
             return data;
         })
         .catch(error => {

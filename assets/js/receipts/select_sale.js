@@ -388,6 +388,10 @@ class ReceiptManager {
             }
         }).join('');
 
+        this.lastGrossTotal = total;
+        this.lastOpeningDebt = openingDebt;
+        this.lastRemainingTotal = remainingTotal;
+
         tbody.innerHTML = rows;
         this.applyOptionalColumnVisibility();
         this.updateSummary(total, remainingTotal, response.total_quantity);
@@ -448,30 +452,42 @@ class ReceiptManager {
     }
 
     updateDebtSummary(openingDebt, remainingTotal) {
-        // Handle opening debt
+        // Fallback to stored instance state if parameters omitted
+        if (openingDebt !== undefined) this.lastOpeningDebt = openingDebt;
+        if (remainingTotal !== undefined) this.lastRemainingTotal = remainingTotal;
+
         let openingDebtValue = 0;
-        if (openingDebt) {
-            if (typeof openingDebt === 'string') {
-                openingDebtValue = parseFloat(openingDebt.replace(/[$,]/g, '')) || 0;
-            } else if (typeof openingDebt === 'number') {
-                openingDebtValue = openingDebt;
+        const currentOpeningDebt = this.lastOpeningDebt;
+        if (currentOpeningDebt) {
+            if (typeof currentOpeningDebt === 'string') {
+                openingDebtValue = parseFloat(currentOpeningDebt.replace(/[$,]/g, '')) || 0;
+            } else if (typeof currentOpeningDebt === 'number') {
+                openingDebtValue = currentOpeningDebt;
             }
         }
         
-        const remainingValue = typeof remainingTotal === 'number' ? remainingTotal : 0;
+        const grossTotal = typeof this.lastGrossTotal === 'number' ? this.lastGrossTotal : 0;
+        const totalDiscount = typeof window.RECEIPT_TOTAL_DISCOUNT === 'number' ? window.RECEIPT_TOTAL_DISCOUNT : 0;
+        const totalPaid = typeof window.RECEIPT_TOTAL_PAID === 'number' ? window.RECEIPT_TOTAL_PAID : 0;
+        
+        // Single Source of Truth calculations
+        const netTotal = Math.max(0, Math.round((grossTotal - totalDiscount) * 100) / 100);
+        const calculatedRemaining = Math.max(0, Math.round((netTotal - totalPaid) * 100) / 100);
+
         const showOpeningDebtCheckbox = document.getElementById('show-opening-debt');
         const includeOpeningDebt = showOpeningDebtCheckbox ? showOpeningDebtCheckbox.checked : true;
-        const totalRemaining = includeOpeningDebt ? (openingDebtValue + remainingValue) : remainingValue;
+        const totalRemaining = includeOpeningDebt ? Math.round((openingDebtValue + calculatedRemaining) * 100) / 100 : calculatedRemaining;
         
         // Store globals
         window.RECEIPT_TOTAL = totalRemaining;
-        window.REMAINING_TOTAL = remainingValue;
+        window.REMAINING_TOTAL = calculatedRemaining;
         window.OPENING_DEBT = openingDebtValue;
         
         const container = document.getElementById('final-summary-section');
         if (!container) return;
 
-        const openingDebtHtml = includeOpeningDebt ? `
+        const openingDebtHtml = includeOpeningDebt && openingDebtValue > 0 ? `
+            <div class="detail-separator"></div>
             <div class="detail-item">
                 <i class="fa fa-history"></i>
                 <div class="detail-content">
@@ -479,25 +495,48 @@ class ReceiptManager {
                     <span class="detail-value">${this.formatCurrency(openingDebtValue)}</span>
                 </div>
             </div>
-            <div class="detail-separator"></div>
         ` : '';
 
         container.innerHTML = `
             <div class="receipt-final-footer">
-                <div class="debt-details-grid">
-                    ${openingDebtHtml}
+                <div class="debt-details-grid" style="flex-wrap: wrap; justify-content: space-around;">
                     <div class="detail-item">
-                        <i class="fa fa-money-bill-wave"></i>
+                        <i class="fa fa-receipt"></i>
                         <div class="detail-content">
-                            <span class="detail-label">پارەی ماوەی وەسڵ</span>
-                            <span class="detail-value">${this.formatCurrency(remainingValue)}</span>
+                            <span class="detail-label">کۆی نرخ (Gross)</span>
+                            <span class="detail-value">${this.formatCurrency(grossTotal)}</span>
                         </div>
                     </div>
+                    <div class="detail-separator"></div>
+                    <div class="detail-item">
+                        <i class="fa fa-tags"></i>
+                        <div class="detail-content">
+                            <span class="detail-label">کۆی داشکاندن</span>
+                            <span class="detail-value" style="color: #dc3545;">${this.formatCurrency(totalDiscount)}</span>
+                        </div>
+                    </div>
+                    <div class="detail-separator"></div>
+                    <div class="detail-item">
+                        <i class="fa fa-calculator"></i>
+                        <div class="detail-content">
+                            <span class="detail-label">کۆی پاکژ (Net Total)</span>
+                            <span class="detail-value" style="color: #0d6efd;">${this.formatCurrency(netTotal)}</span>
+                        </div>
+                    </div>
+                    <div class="detail-separator"></div>
+                    <div class="detail-item">
+                        <i class="fa fa-hand-holding-usd"></i>
+                        <div class="detail-content">
+                            <span class="detail-label">کۆی واسڵکراو</span>
+                            <span class="detail-value" style="color: #198754;">${this.formatCurrency(totalPaid)}</span>
+                        </div>
+                    </div>
+                    ${openingDebtHtml}
                 </div>
-                <div class="grand-total-bar">
+                <div class="grand-total-bar" style="margin-top: 1rem;">
                     <div class="total-info">
                         <i class="fa fa-calculator"></i>
-                        <span class="total-text">کۆی گشتی پارەی ماوە</span>
+                        <span class="total-text">کۆی گشتی پارەی ماوە (باڵانس)</span>
                     </div>
                     <span class="total-amount">${this.formatCurrency(totalRemaining)}</span>
                 </div>
