@@ -1354,8 +1354,8 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
     });
 </script>
 <script src="../assets/js/receipts/receipts.js?v=2.1" nonce="<?php echo $csp_nonce; ?>"></script>
-<script src="../assets/js/receipts/select_sale.js?v=2.2" nonce="<?php echo $csp_nonce; ?>"></script>
-<script src="../assets/js/receipts/select_return_debt.js?v=2.1" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/receipts/select_sale.js?v=<?php echo time(); ?>" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/receipts/select_return_debt.js?v=<?php echo time(); ?>" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/receipts/load_locations.js?v=2.1" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/receipts/load_recipients.js?v=2.1" nonce="<?php echo $csp_nonce; ?>"></script>
 </body>
