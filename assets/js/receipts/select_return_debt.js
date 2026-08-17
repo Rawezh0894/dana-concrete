@@ -216,12 +216,29 @@ function loadReturnDebt() {
                 let totalNetPaidUsd = 0;
                 let iqdConversionPossible = true;
                 applyPaidTableColumnVisibility();
+
+                // Determine fallback exchange rate for payments missing explicit dolar_rate
+                let fallbackRate = usdToIqdRate || 0;
+                if (!fallbackRate && data && data.length > 0) {
+                    for (let r of data) {
+                        let rRate = parseFloat(r.dolar_rate || 0);
+                        if (rRate > 0) {
+                            fallbackRate = rRate;
+                            break;
+                        }
+                    }
+                }
+                if (!fallbackRate) fallbackRate = 150000;
+
                 data.forEach(row => {
                     const amountUsd = parseFloat(row.paid_usd || 0);
                     const amountIqd = parseFloat(row.paid_iqd || 0);
                     const changeUsd = parseFloat(row.change_back_usd || 0);
                     const changeIq = parseFloat(row.change_back_iq || 0);
-                    const rate = parseFloat(row.dolar_rate || 0);
+                    let rate = parseFloat(row.dolar_rate || 0);
+                    if (rate <= 0) {
+                        rate = fallbackRate;
+                    }
                     const discountAmount = parseFloat(row.discount || 0) || 0;
                     
                     // Net paid amount for this payment (subtracting change returned to customer)
