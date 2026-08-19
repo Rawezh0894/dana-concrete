@@ -23,6 +23,7 @@ try {
     $formulas_id = isset($_GET['formulas_id']) ? $_GET['formulas_id'] : '';
     $date_from = isset($_GET['date_from']) ? $_GET['date_from'] : '';
     $date_to = isset($_GET['date_to']) ? $_GET['date_to'] : '';
+    $sale_status = isset($_GET['sale_status']) ? $_GET['sale_status'] : '';
 
     // Build WHERE clause
     $where_conditions = [];
@@ -48,6 +49,18 @@ try {
         $params[] = $date_to;
     }
 
+    $summary_where_conditions = $where_conditions;
+    $summary_params = $params;
+
+    if (!empty($sale_status)) {
+        if ($sale_status === 'sent') {
+            $summary_where_conditions[] = "EXISTS (SELECT 1 FROM sales s WHERE (s.invoice_number = cr.receipt_number OR FIND_IN_SET(cr.receipt_number, REPLACE(s.invoice_number, ', ', ',')) > 0 OR s.invoice_number LIKE CONCAT('%', cr.receipt_number, '%')))";
+        } else if ($sale_status === 'unsent') {
+            $summary_where_conditions[] = "NOT EXISTS (SELECT 1 FROM sales s WHERE (s.invoice_number = cr.receipt_number OR FIND_IN_SET(cr.receipt_number, REPLACE(s.invoice_number, ', ', ',')) > 0 OR s.invoice_number LIKE CONCAT('%', cr.receipt_number, '%')))";
+        }
+    }
+
+    $summary_where_clause = !empty($summary_where_conditions) ? "WHERE " . implode(" AND ", $summary_where_conditions) : "";
     $where_clause = !empty($where_conditions) ? "WHERE " . implode(" AND ", $where_conditions) : "";
 
     // Get summary statistics
@@ -59,42 +72,66 @@ try {
             AVG(cr.meter_amount) as average_meter,
             SUM(CASE WHEN cr.price_per_meter IS NOT NULL THEN cr.meter_amount * cr.price_per_meter ELSE 0 END) as total_price
         FROM concrete_receipts cr
-        $where_clause
+        $summary_where_clause
     ";
 
     $summary_stmt = $pdo->prepare($summary_query);
-    $summary_stmt->execute($params);
+    $summary_stmt->execute($summary_params);
     $summary = $summary_stmt->fetch(PDO::FETCH_ASSOC);
 
-    // Get customer summary
+    // Get customer summary with derived table for sale_status filtering
     $customer_summary_query = "
-        SELECT 
-            c.id as customer_id,
-            c.name as customer_name,
-            c.mobile1,
-            COUNT(cr.id) as receipt_count,
-            SUM(cr.meter_amount) as total_meter,
-            AVG(cr.meter_amount) as average_meter,
-            SUM(CASE WHEN cr.price_per_meter IS NOT NULL THEN cr.meter_amount * cr.price_per_meter ELSE 0 END) as total_price,
-            GROUP_CONCAT(DISTINCT cf.name) as formulas_used,
-            GROUP_CONCAT(DISTINCT cr.location) as locations,
-            MAX(cr.notes) as latest_notes,
-            CASE 
-                WHEN COUNT(CASE WHEN cr.payment_status = 'paid' THEN 1 END) = COUNT(*) THEN 'paid'
-                WHEN COUNT(CASE WHEN cr.payment_status = 'paid' THEN 1 END) > 0 THEN 'partial'
-                ELSE 'unpaid'
-            END as payment_status
-        FROM customers c
-        LEFT JOIN concrete_receipts cr ON c.id = cr.customer_id
-        LEFT JOIN concrete_formulas cf ON cr.formulas_id = cf.id
-        $where_clause
-        GROUP BY c.id, c.name, c.mobile1
-        HAVING receipt_count > 0
-        ORDER BY MIN(cr.created_at) ASC
+        SELECT * FROM (
+            SELECT 
+                c.id as customer_id,
+                c.name as customer_name,
+                c.mobile1,
+                COUNT(cr.id) as receipt_count,
+                SUM(cr.meter_amount) as total_meter,
+                AVG(cr.meter_amount) as average_meter,
+                SUM(CASE WHEN cr.price_per_meter IS NOT NULL THEN cr.meter_amount * cr.price_per_meter ELSE 0 END) as total_price,
+                GROUP_CONCAT(DISTINCT cf.name) as formulas_used,
+                GROUP_CONCAT(DISTINCT cr.location) as locations,
+                MAX(cr.notes) as latest_notes,
+                CASE 
+                    WHEN COUNT(CASE WHEN cr.payment_status = 'paid' THEN 1 END) = COUNT(*) THEN 'paid'
+                    WHEN COUNT(CASE WHEN cr.payment_status = 'paid' THEN 1 END) > 0 THEN 'partial'
+                    ELSE 'unpaid'
+                END as payment_status,
+                CASE 
+                    WHEN COUNT(CASE WHEN EXISTS (
+                        SELECT 1 FROM sales s 
+                        WHERE (s.invoice_number = cr.receipt_number 
+                           OR FIND_IN_SET(cr.receipt_number, REPLACE(s.invoice_number, ', ', ',')) > 0 
+                           OR s.invoice_number LIKE CONCAT('%', cr.receipt_number, '%'))
+                    ) THEN 1 END) = COUNT(cr.id) THEN 'sent'
+                    WHEN COUNT(CASE WHEN EXISTS (
+                        SELECT 1 FROM sales s 
+                        WHERE (s.invoice_number = cr.receipt_number 
+                           OR FIND_IN_SET(cr.receipt_number, REPLACE(s.invoice_number, ', ', ',')) > 0 
+                           OR s.invoice_number LIKE CONCAT('%', cr.receipt_number, '%'))
+                    ) THEN 1 END) > 0 THEN 'partial'
+                    ELSE 'unsent'
+                END as sale_status
+            FROM customers c
+            LEFT JOIN concrete_receipts cr ON c.id = cr.customer_id
+            LEFT JOIN concrete_formulas cf ON cr.formulas_id = cf.id
+            $where_clause
+            GROUP BY c.id, c.name, c.mobile1
+            HAVING receipt_count > 0
+        ) AS customer_sub
     ";
 
+    $customer_summary_params = $params;
+    if (!empty($sale_status)) {
+        $customer_summary_query .= " WHERE sale_status = ?";
+        $customer_summary_params[] = $sale_status;
+    }
+
+    $customer_summary_query .= " ORDER BY customer_id ASC";
+
     $customer_summary_stmt = $pdo->prepare($customer_summary_query);
-    $customer_summary_stmt->execute($params);
+    $customer_summary_stmt->execute($customer_summary_params);
     $customer_summary = $customer_summary_stmt->fetchAll(PDO::FETCH_ASSOC);
 
     // Get detailed receipts for a specific customer (if requested)
@@ -119,6 +156,14 @@ try {
             $customer_details_params[] = $date_to;
         }
 
+        if (!empty($sale_status)) {
+            if ($sale_status === 'sent') {
+                $customer_details_where_conditions[] = "EXISTS (SELECT 1 FROM sales s WHERE (s.invoice_number = cr.receipt_number OR FIND_IN_SET(cr.receipt_number, REPLACE(s.invoice_number, ', ', ',')) > 0 OR s.invoice_number LIKE CONCAT('%', cr.receipt_number, '%')))";
+            } else if ($sale_status === 'unsent') {
+                $customer_details_where_conditions[] = "NOT EXISTS (SELECT 1 FROM sales s WHERE (s.invoice_number = cr.receipt_number OR FIND_IN_SET(cr.receipt_number, REPLACE(s.invoice_number, ', ', ',')) > 0 OR s.invoice_number LIKE CONCAT('%', cr.receipt_number, '%')))";
+            }
+        }
+
         $customer_details_where_clause = "WHERE " . implode(" AND ", $customer_details_where_conditions);
 
         $customer_details_query = "
@@ -136,7 +181,13 @@ try {
                 cr.created_at,
                 cf.name as formula_name,
                 CONCAT(mc.name, ' - ', md.name) as mixer_info,
-                CONCAT(pc.name, ' - ', pd.name) as pump_info
+                CONCAT(pc.name, ' - ', pd.name) as pump_info,
+                (CASE WHEN EXISTS (
+                    SELECT 1 FROM sales s 
+                    WHERE (s.invoice_number = cr.receipt_number 
+                       OR FIND_IN_SET(cr.receipt_number, REPLACE(s.invoice_number, ', ', ',')) > 0 
+                       OR s.invoice_number LIKE CONCAT('%', cr.receipt_number, '%'))
+                ) THEN 1 ELSE 0 END) as is_sold
             FROM concrete_receipts cr
             LEFT JOIN concrete_formulas cf ON cr.formulas_id = cf.id
             LEFT JOIN cars mc ON cr.mixer_car_id = mc.id
@@ -174,7 +225,8 @@ try {
                 'total_price' => round((float)($customer['total_price'] ?? 0), 2),
                 'formulas_used' => $customer['formulas_used'] ? explode(',', $customer['formulas_used']) : [],
                 'latest_notes' => $customer['latest_notes'] ?? null,
-                'payment_status' => $customer['payment_status'] ?? 'unpaid'
+                'payment_status' => $customer['payment_status'] ?? 'unpaid',
+                'sale_status' => $customer['sale_status'] ?? 'unsent'
             ];
         }, $customer_summary)
     ];
@@ -195,7 +247,9 @@ try {
                 'created_at' => $receipt['created_at'],
                 'formula_name' => $receipt['formula_name'],
                 'mixer_info' => $receipt['mixer_info'],
-                'pump_info' => $receipt['pump_info']
+                'pump_info' => $receipt['pump_info'],
+                'is_sold' => (int)($receipt['is_sold'] ?? 0),
+                'sale_status' => ((int)($receipt['is_sold'] ?? 0) === 1) ? 'sent' : 'unsent'
             ];
         }, $customer_details);
     }

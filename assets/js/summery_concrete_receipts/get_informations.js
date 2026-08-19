@@ -20,6 +20,7 @@ function loadSummaryData() {
         'receipt_count', 
         'total_meter', 
         'payment_status', 
+        'sale_status',
         'formulas', 
         'actions'
     ];
@@ -73,6 +74,7 @@ function getCurrentFilters() {
     return {
         customer_id: $('#filter_customer_id').val(),
         formulas_id: $('#filter_formulas_id').val(),
+        sale_status: $('#filter_sale_status').val(),
         date_from: $('#filter_date_from').val(),
         date_to: $('#filter_date_to').val()
     };
@@ -93,6 +95,7 @@ function updateCustomerSummaryTable(customerSummary) {
         'receipt_count', 
         'total_meter', 
         'payment_status', 
+        'sale_status',
         'formulas', 
         'actions'
     ];
@@ -131,6 +134,21 @@ function updateCustomerSummaryTable(customerSummary) {
                 paymentStatus = '<span class="badge bg-warning">پارەی نەداوە</span>';
                 break;
         }
+
+        // Sale status display
+        let saleStatusDisplay;
+        switch(customer.sale_status) {
+            case 'sent':
+                saleStatusDisplay = '<span class="badge bg-success">نێردراوە بۆ فرۆشتن</span>';
+                break;
+            case 'partial':
+                saleStatusDisplay = '<span class="badge bg-info">بەشێکی نێردراوە بۆ فرۆشتن</span>';
+                break;
+            case 'unsent':
+            default:
+                saleStatusDisplay = '<span class="badge bg-danger">نەنێردراوە بۆ فرۆشتن</span>';
+                break;
+        }
         
         const formattedRow = {
             customer_name: `
@@ -143,6 +161,7 @@ function updateCustomerSummaryTable(customerSummary) {
             total_price: window.userPermissions.canViewPrices ? totalPrice : '-',
             notes: window.userPermissions.canViewPrices ? notesDisplay : '-',
             payment_status: paymentStatus,
+            sale_status: saleStatusDisplay,
             formulas: formulasHtml,
             actions: `
                 <button class="btn btn-sm btn-info" onclick="showCustomerDetails(${customer.customer_id}, '${customer.customer_name}')">
@@ -215,6 +234,7 @@ function displayCustomerDetails(customerName, receipts) {
                             ${window.userPermissions.canViewPrices ? '<th>نرخی مەتر سێجا</th>' : ''}
                             ${window.userPermissions.canViewPrices ? '<th>تێبینی</th>' : ''}
                             <th>دۆخی پارەدان</th>
+                            <th>دۆخی فرۆشتن</th>
                             <th>فۆرمۆلا</th>
                             <th>میکسەر</th>
                             <th>پەمپ</th>
@@ -253,14 +273,16 @@ function renderCustomerReceiptsTable(receipts) {
         'location', 
         'receiver_name', 
         'meter_amount', 
-        'price_per_meter', 
-        'notes', 
         'payment_status', 
+        'sale_status',
         'formula_name', 
         'mixer_info', 
         'pump_info', 
         'created_at'
     ];
+    if (window.userPermissions.canViewPrices) {
+        columns.splice(5, 0, 'price_per_meter', 'notes');
+    }
     
     // Format the data for TableController
     const formattedData = receipts.map(receipt => {
@@ -272,6 +294,11 @@ function renderCustomerReceiptsTable(receipts) {
         const receiptPaymentStatus = receipt.payment_status === 'paid' ? 
             '<span class="badge bg-success">پارەی داوە</span>' : 
             '<span class="badge bg-warning">پارەی نەداوە</span>';
+
+        // Sale status display for individual receipts
+        const receiptSaleStatus = (receipt.is_sold == 1 || receipt.sale_status === 'sent') ? 
+            '<span class="badge bg-success">نێردراوە بۆ فرۆشتن</span>' : 
+            '<span class="badge bg-danger">نەنێردراوە بۆ فرۆشتن</span>';
         
         return {
             select: `<input type="checkbox" class="receipt-checkbox" value="${receipt.id}" data-receipt-number="${receipt.receipt_number}" data-receipt-data='${JSON.stringify(receipt)}'>`,
@@ -282,6 +309,7 @@ function renderCustomerReceiptsTable(receipts) {
             price_per_meter: window.userPermissions.canViewPrices ? priceDisplay : '-',
             notes: window.userPermissions.canViewPrices ? (receipt.notes || '') : '-',
             payment_status: receiptPaymentStatus,
+            sale_status: receiptSaleStatus,
             formula_name: `<span class="formula-badge">${receipt.formula_name || '-'}</span>`,
             mixer_info: receipt.mixer_info || '-',
             pump_info: receipt.pump_info || '-',
@@ -553,7 +581,7 @@ function savePricePerMeter() {
 
 function setupFilterListeners() {
     // Filter inputs
-    $('#filter_customer_id, #filter_formulas_id, #filter_date_from, #filter_date_to').on('change', function() {
+    $('#filter_customer_id, #filter_formulas_id, #filter_sale_status, #filter_date_from, #filter_date_to').on('change', function() {
         loadSummaryData();
     });
     
@@ -576,6 +604,7 @@ function setupFilterListeners() {
                 'receipt_count', 
                 'total_meter', 
                 'payment_status', 
+                'sale_status',
                 'formulas', 
                 'actions'
             ];
@@ -609,6 +638,7 @@ function applyQuickFilter(filterType) {
         case 'reset':
             $('#filter_customer_id').val('');
             $('#filter_formulas_id').val('');
+            $('#filter_sale_status').val('');
             // Don't reset date inputs - keep them as today
             break;
     }

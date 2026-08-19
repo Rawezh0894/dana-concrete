@@ -83,7 +83,7 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
 
     <!-- Filter Row -->
     <div class="row g-2 mb-3 no-print">
-      <div class="col-md-3">
+      <div class="col-md-2">
         <select class="form-select" id="filter_customer_id">
           <option value="">کڕیار: هەموو</option>
           <?php foreach ($customers as $c): ?>
@@ -91,12 +91,20 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
           <?php endforeach; ?>
         </select>
       </div>
-      <div class="col-md-3">
+      <div class="col-md-2">
         <select class="form-select" id="filter_formulas_id">
           <option value="">ڕێژە: هەموو</option>
           <?php foreach ($formulas as $f): ?>
             <option value="<?= $f['id'] ?>"><?= htmlspecialchars($f['name']) ?></option>
           <?php endforeach; ?>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <select class="form-select" id="filter_sale_status">
+          <option value="">دۆخی فرۆشتن: هەموو</option>
+          <option value="sent">نێردراوە بۆ فرۆشتن</option>
+          <option value="partial">بەشێکی نێردراوە بۆ فرۆشتن</option>
+          <option value="unsent">نەنێردراوە بۆ فرۆشتن</option>
         </select>
       </div>
       <div class="col-md-2">
@@ -182,6 +190,7 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
                 <th>تێبینی</th>
                 <?php endif; ?>
                 <th>دۆخی پارەدان</th>
+                <th>دۆخی فرۆشتن</th>
                 <th>فۆرمۆلاکان</th>
                 <th>کردارەکان</th>
               </tr>
