@@ -54,9 +54,9 @@ try {
 
     if (!empty($sale_status)) {
         if ($sale_status === 'sent') {
-            $summary_where_conditions[] = "EXISTS (SELECT 1 FROM sales s WHERE (s.invoice_number = cr.receipt_number OR FIND_IN_SET(cr.receipt_number, REPLACE(s.invoice_number, ', ', ',')) > 0 OR s.invoice_number LIKE CONCAT('%', cr.receipt_number, '%')))";
+            $summary_where_conditions[] = "EXISTS (SELECT 1 FROM sales s WHERE (s.invoice_number COLLATE utf8mb4_general_ci = cr.receipt_number COLLATE utf8mb4_general_ci OR FIND_IN_SET(cr.receipt_number COLLATE utf8mb4_general_ci, REPLACE(s.invoice_number COLLATE utf8mb4_general_ci, ', ', ',')) > 0 OR s.invoice_number COLLATE utf8mb4_general_ci LIKE CONCAT('%', cr.receipt_number COLLATE utf8mb4_general_ci, '%')))";
         } else if ($sale_status === 'unsent') {
-            $summary_where_conditions[] = "NOT EXISTS (SELECT 1 FROM sales s WHERE (s.invoice_number = cr.receipt_number OR FIND_IN_SET(cr.receipt_number, REPLACE(s.invoice_number, ', ', ',')) > 0 OR s.invoice_number LIKE CONCAT('%', cr.receipt_number, '%')))";
+            $summary_where_conditions[] = "NOT EXISTS (SELECT 1 FROM sales s WHERE (s.invoice_number COLLATE utf8mb4_general_ci = cr.receipt_number COLLATE utf8mb4_general_ci OR FIND_IN_SET(cr.receipt_number COLLATE utf8mb4_general_ci, REPLACE(s.invoice_number COLLATE utf8mb4_general_ci, ', ', ',')) > 0 OR s.invoice_number COLLATE utf8mb4_general_ci LIKE CONCAT('%', cr.receipt_number COLLATE utf8mb4_general_ci, '%')))";
         }
     }
 
@@ -101,15 +101,15 @@ try {
                 CASE 
                     WHEN COUNT(CASE WHEN EXISTS (
                         SELECT 1 FROM sales s 
-                        WHERE (s.invoice_number = cr.receipt_number 
-                           OR FIND_IN_SET(cr.receipt_number, REPLACE(s.invoice_number, ', ', ',')) > 0 
-                           OR s.invoice_number LIKE CONCAT('%', cr.receipt_number, '%'))
+                        WHERE (s.invoice_number COLLATE utf8mb4_general_ci = cr.receipt_number COLLATE utf8mb4_general_ci 
+                           OR FIND_IN_SET(cr.receipt_number COLLATE utf8mb4_general_ci, REPLACE(s.invoice_number COLLATE utf8mb4_general_ci, ', ', ',')) > 0 
+                           OR s.invoice_number COLLATE utf8mb4_general_ci LIKE CONCAT('%', cr.receipt_number COLLATE utf8mb4_general_ci, '%'))
                     ) THEN 1 END) = COUNT(cr.id) THEN 'sent'
                     WHEN COUNT(CASE WHEN EXISTS (
                         SELECT 1 FROM sales s 
-                        WHERE (s.invoice_number = cr.receipt_number 
-                           OR FIND_IN_SET(cr.receipt_number, REPLACE(s.invoice_number, ', ', ',')) > 0 
-                           OR s.invoice_number LIKE CONCAT('%', cr.receipt_number, '%'))
+                        WHERE (s.invoice_number COLLATE utf8mb4_general_ci = cr.receipt_number COLLATE utf8mb4_general_ci 
+                           OR FIND_IN_SET(cr.receipt_number COLLATE utf8mb4_general_ci, REPLACE(s.invoice_number COLLATE utf8mb4_general_ci, ', ', ',')) > 0 
+                           OR s.invoice_number COLLATE utf8mb4_general_ci LIKE CONCAT('%', cr.receipt_number COLLATE utf8mb4_general_ci, '%'))
                     ) THEN 1 END) > 0 THEN 'partial'
                     ELSE 'unsent'
                 END as sale_status
@@ -158,9 +158,9 @@ try {
 
         if (!empty($sale_status)) {
             if ($sale_status === 'sent') {
-                $customer_details_where_conditions[] = "EXISTS (SELECT 1 FROM sales s WHERE (s.invoice_number = cr.receipt_number OR FIND_IN_SET(cr.receipt_number, REPLACE(s.invoice_number, ', ', ',')) > 0 OR s.invoice_number LIKE CONCAT('%', cr.receipt_number, '%')))";
+                $customer_details_where_conditions[] = "EXISTS (SELECT 1 FROM sales s WHERE (s.invoice_number COLLATE utf8mb4_general_ci = cr.receipt_number COLLATE utf8mb4_general_ci OR FIND_IN_SET(cr.receipt_number COLLATE utf8mb4_general_ci, REPLACE(s.invoice_number COLLATE utf8mb4_general_ci, ', ', ',')) > 0 OR s.invoice_number COLLATE utf8mb4_general_ci LIKE CONCAT('%', cr.receipt_number COLLATE utf8mb4_general_ci, '%')))";
             } else if ($sale_status === 'unsent') {
-                $customer_details_where_conditions[] = "NOT EXISTS (SELECT 1 FROM sales s WHERE (s.invoice_number = cr.receipt_number OR FIND_IN_SET(cr.receipt_number, REPLACE(s.invoice_number, ', ', ',')) > 0 OR s.invoice_number LIKE CONCAT('%', cr.receipt_number, '%')))";
+                $customer_details_where_conditions[] = "NOT EXISTS (SELECT 1 FROM sales s WHERE (s.invoice_number COLLATE utf8mb4_general_ci = cr.receipt_number COLLATE utf8mb4_general_ci OR FIND_IN_SET(cr.receipt_number COLLATE utf8mb4_general_ci, REPLACE(s.invoice_number COLLATE utf8mb4_general_ci, ', ', ',')) > 0 OR s.invoice_number COLLATE utf8mb4_general_ci LIKE CONCAT('%', cr.receipt_number COLLATE utf8mb4_general_ci, '%')))";
             }
         }
 
@@ -184,9 +184,9 @@ try {
                 CONCAT(pc.name, ' - ', pd.name) as pump_info,
                 (CASE WHEN EXISTS (
                     SELECT 1 FROM sales s 
-                    WHERE (s.invoice_number = cr.receipt_number 
-                       OR FIND_IN_SET(cr.receipt_number, REPLACE(s.invoice_number, ', ', ',')) > 0 
-                       OR s.invoice_number LIKE CONCAT('%', cr.receipt_number, '%'))
+                    WHERE (s.invoice_number COLLATE utf8mb4_general_ci = cr.receipt_number COLLATE utf8mb4_general_ci 
+                       OR FIND_IN_SET(cr.receipt_number COLLATE utf8mb4_general_ci, REPLACE(s.invoice_number COLLATE utf8mb4_general_ci, ', ', ',')) > 0 
+                       OR s.invoice_number COLLATE utf8mb4_general_ci LIKE CONCAT('%', cr.receipt_number COLLATE utf8mb4_general_ci, '%'))
                 ) THEN 1 ELSE 0 END) as is_sold
             FROM concrete_receipts cr
             LEFT JOIN concrete_formulas cf ON cr.formulas_id = cf.id
