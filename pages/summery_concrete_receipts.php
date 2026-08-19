@@ -308,8 +308,6 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
   <script src="../assets/js/swalAlert.js" nonce="<?php echo $csp_nonce; ?>"></script>
   <script src="../assets/js/comon/select2_script.js" nonce="<?php echo $csp_nonce; ?>"></script>
   <script src="../assets/js/comon/table-controler.js" nonce="<?php echo $csp_nonce; ?>"></script>
-  <script src="../assets/js/summery_concrete_receipts/filter.js" nonce="<?php echo $csp_nonce; ?>"></script>
-  <script src="../assets/js/summery_concrete_receipts/get_informations.js" nonce="<?php echo $csp_nonce; ?>"></script>
   <script nonce="<?php echo $csp_nonce; ?>">
     // Pass permissions to JavaScript
     window.userPermissions = {
@@ -317,6 +315,10 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
       canSetPrices: <?php echo hasPermission('set_concrete_prices') ? 'true' : 'false'; ?>,
       canEditPrices: <?php echo hasPermission('edit_concrete_prices') ? 'true' : 'false'; ?>
     };
+  </script>
+  <script src="../assets/js/summery_concrete_receipts/filter.js?v=<?= time() ?>" nonce="<?php echo $csp_nonce; ?>"></script>
+  <script src="../assets/js/summery_concrete_receipts/get_informations.js?v=<?= time() ?>" nonce="<?php echo $csp_nonce; ?>"></script>
+  <script nonce="<?php echo $csp_nonce; ?>">
     function printReport() {
       // Update print section with current data
       document.getElementById('print_date').textContent = new Date().toLocaleDateString('ku-IQ');

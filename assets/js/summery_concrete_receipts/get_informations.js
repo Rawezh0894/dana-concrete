@@ -26,7 +26,7 @@ function loadSummaryData() {
     ];
     
     // Add price-related columns if user has permission
-    if (window.userPermissions.canViewPrices) {
+    if (window.userPermissions && window.userPermissions.canViewPrices) {
         columns.splice(5, 0, 'total_price', 'notes');
     }
     TableController.showLoading('#customerSummaryTable', columns);
@@ -101,7 +101,7 @@ function updateCustomerSummaryTable(customerSummary) {
     ];
     
     // Add price-related columns if user has permission
-    if (window.userPermissions.canViewPrices) {
+    if (window.userPermissions && window.userPermissions.canViewPrices) {
         columns.splice(5, 0, 'total_price', 'notes');
     }
     
@@ -610,7 +610,7 @@ function setupFilterListeners() {
             ];
             
             // Add price-related columns if user has permission
-            if (window.userPermissions.canViewPrices) {
+            if (window.userPermissions && window.userPermissions.canViewPrices) {
                 columns.splice(5, 0, 'total_price', 'notes');
             }
             
