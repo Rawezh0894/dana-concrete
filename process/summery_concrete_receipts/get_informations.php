@@ -93,6 +93,8 @@ try {
                 GROUP_CONCAT(DISTINCT cf.name) as formulas_used,
                 GROUP_CONCAT(DISTINCT cr.location) as locations,
                 MAX(cr.notes) as latest_notes,
+                MIN(cr.id) as min_receipt_id,
+                MIN(cr.created_at) as min_created_at,
                 CASE 
                     WHEN COUNT(CASE WHEN cr.payment_status = 'paid' THEN 1 END) = COUNT(*) THEN 'paid'
                     WHEN COUNT(CASE WHEN cr.payment_status = 'paid' THEN 1 END) > 0 THEN 'partial'
@@ -128,7 +130,7 @@ try {
         $customer_summary_params[] = $sale_status;
     }
 
-    $customer_summary_query .= " ORDER BY customer_id ASC";
+    $customer_summary_query .= " ORDER BY min_receipt_id ASC";
 
     $customer_summary_stmt = $pdo->prepare($customer_summary_query);
     $customer_summary_stmt->execute($customer_summary_params);
@@ -195,7 +197,7 @@ try {
             LEFT JOIN cars pc ON cr.pump_car_id = pc.id
             LEFT JOIN employees pd ON cr.pump_driver_id = pd.id
             $customer_details_where_clause
-            ORDER BY cr.created_at DESC
+            ORDER BY cr.created_at ASC, cr.id ASC
         ";
         
         $customer_details_stmt = $pdo->prepare($customer_details_query);
