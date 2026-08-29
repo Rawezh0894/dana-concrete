@@ -113,12 +113,15 @@ $formulas = $pdo->query("SELECT id, name FROM concrete_formulas")->fetchAll(PDO:
       <div class="col-md-2">
         <input type="date" class="form-control" id="filter_date_to" value="<?= date('Y-m-d') ?>" placeholder="بۆ بەرواری">
       </div>
-      <div class="col-md-2 d-flex gap-2">
+      <div class="col-md-2 d-flex gap-1 flex-wrap">
         <button type="button" class="btn btn-sm btn-primary filter-btn" id="filter_today" data-filter="today">
           <i class="fas fa-calendar-day me-1"></i>ئەمڕۆ
         </button>
         <button type="button" class="btn btn-sm btn-warning filter-btn" id="filter_yesterday" data-filter="yesterday">
           <i class="fas fa-calendar-minus me-1"></i>دوێنێ
+        </button>
+        <button type="button" class="btn btn-sm btn-info filter-btn" id="filter_day_before_yesterday" data-filter="day_before_yesterday">
+          <i class="fas fa-calendar-alt me-1"></i>پێرێ
         </button>
         <button type="button" class="btn btn-sm btn-secondary filter-btn" id="filter_reset" data-filter="reset">
           <i class="fas fa-redo me-1"></i>ڕیفڕێش

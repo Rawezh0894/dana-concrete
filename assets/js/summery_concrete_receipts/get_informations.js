@@ -623,9 +623,24 @@ function setupFilterListeners() {
 }
 
 function applyQuickFilter(filterType) {
-    const today = new Date().toISOString().split('T')[0];
-    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-    
+    const formatDateObj = (d) => {
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    const now = new Date();
+    const today = formatDateObj(now);
+
+    const yDate = new Date();
+    yDate.setDate(yDate.getDate() - 1);
+    const yesterday = formatDateObj(yDate);
+
+    const dbyDate = new Date();
+    dbyDate.setDate(dbyDate.getDate() - 2);
+    const dayBeforeYesterday = formatDateObj(dbyDate);
+
     switch(filterType) {
         case 'today':
             $('#filter_date_from').val(today);
@@ -634,6 +649,10 @@ function applyQuickFilter(filterType) {
         case 'yesterday':
             $('#filter_date_from').val(yesterday);
             $('#filter_date_to').val(yesterday);
+            break;
+        case 'day_before_yesterday':
+            $('#filter_date_from').val(dayBeforeYesterday);
+            $('#filter_date_to').val(dayBeforeYesterday);
             break;
         case 'reset':
             $('#filter_customer_id').val('');
