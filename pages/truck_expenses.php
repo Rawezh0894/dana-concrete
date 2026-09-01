@@ -15,7 +15,8 @@ $trucks = $pdo->query("SELECT id, truck_name, plate_number FROM factory_trucks W
 // Filter inputs from GET
 $filter_truck_id = isset($_GET['filter_truck_id']) ? trim($_GET['filter_truck_id']) : '';
 $filter_invoice = isset($_GET['filter_invoice']) ? trim($_GET['filter_invoice']) : '';
-$filter_date = isset($_GET['filter_date']) ? trim($_GET['filter_date']) : '';
+$filter_from_date = isset($_GET['filter_from_date']) ? trim($_GET['filter_from_date']) : '';
+$filter_to_date = isset($_GET['filter_to_date']) ? trim($_GET['filter_to_date']) : '';
 $filter_amount_usd = (isset($_GET['filter_amount_usd']) && $_GET['filter_amount_usd'] !== '' && $_GET['filter_amount_usd'] !== '0') ? (float)$_GET['filter_amount_usd'] : null;
 $filter_amount_iqd = (isset($_GET['filter_amount_iqd']) && $_GET['filter_amount_iqd'] !== '' && $_GET['filter_amount_iqd'] !== '0') ? (float)$_GET['filter_amount_iqd'] : null;
 $filter_note = isset($_GET['filter_note']) ? trim($_GET['filter_note']) : '';
@@ -32,9 +33,13 @@ if ($filter_invoice !== '' && $filter_invoice !== '0000') {
     $sql .= " AND te.invoice_number LIKE :invoice";
     $params[':invoice'] = '%' . $filter_invoice . '%';
 }
-if ($filter_date !== '') {
-    $sql .= " AND te.date = :date";
-    $params[':date'] = $filter_date;
+if ($filter_from_date !== '') {
+    $sql .= " AND te.date >= :from_date";
+    $params[':from_date'] = $filter_from_date;
+}
+if ($filter_to_date !== '') {
+    $sql .= " AND te.date <= :to_date";
+    $params[':to_date'] = $filter_to_date;
 }
 if ($filter_amount_usd !== null) {
     $sql .= " AND te.amount_usd = :amount_usd";
