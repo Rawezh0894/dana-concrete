@@ -165,8 +165,12 @@ $expenses = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <input type="text" name="filter_invoice" id="filter_invoice" class="form-control" placeholder="0000" value="<?= htmlspecialchars($filter_invoice) ?>">
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label fw-bold">بەروار</label>
-                            <input type="date" name="filter_date" id="filter_date" class="form-control" value="<?= htmlspecialchars($filter_date) ?>">
+                            <label class="form-label fw-bold">لە بەرواری</label>
+                            <input type="date" name="filter_from_date" id="filter_from_date" class="form-control" value="<?= htmlspecialchars($filter_from_date) ?>">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">بۆ بەرواری</label>
+                            <input type="date" name="filter_to_date" id="filter_to_date" class="form-control" value="<?= htmlspecialchars($filter_to_date) ?>">
                         </div>
                         <div class="col-md-3">
                             <label class="form-label fw-bold">بڕی پارە (دۆلار)</label>
@@ -176,11 +180,11 @@ $expenses = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <label class="form-label fw-bold">بڕی پارە (دینار)</label>
                             <input type="number" step="1" name="filter_amount_iqd" id="filter_amount_iqd" class="form-control" value="<?= $filter_amount_iqd !== null ? $filter_amount_iqd : '0' ?>">
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label class="form-label fw-bold">تێبینی / وردەکاری خەرجی</label>
                             <input type="text" name="filter_note" id="filter_note" class="form-control" placeholder="وەک: گۆڕینی ڕۆن و فلتەر" value="<?= htmlspecialchars($filter_note) ?>">
                         </div>
-                        <div class="col-md-3 d-flex align-items-end">
+                        <div class="col-md-2 d-flex align-items-end">
                             <button type="submit" class="btn btn-primary w-100 fw-bold rounded-3">
                                 <i class="fas fa-search me-1"></i>فلتەرکردن
                             </button>
@@ -344,7 +348,8 @@ $expenses = $stmt->fetchAll(PDO::FETCH_ASSOC);
     function applyLiveFilter() {
         let truckId = $('#filter_truck_id').val();
         let invoice = $('#filter_invoice').val().trim().toLowerCase();
-        let dateVal = $('#filter_date').val();
+        let fromDate = $('#filter_from_date').val();
+        let toDate = $('#filter_to_date').val();
         let amountUsdVal = $('#filter_amount_usd').val();
         let amountIqdVal = $('#filter_amount_iqd').val();
         let amountUsd = parseFloat(amountUsdVal);
@@ -363,7 +368,8 @@ $expenses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             if (truckId && rowTruck !== truckId) show = false;
             if (invoice && invoice !== '0000' && !rowInvoice.includes(invoice)) show = false;
-            if (dateVal && rowDate !== dateVal) show = false;
+            if (fromDate && rowDate < fromDate) show = false;
+            if (toDate && rowDate > toDate) show = false;
             if (amountUsdVal !== '' && amountUsdVal !== '0' && !isNaN(amountUsd) && rowUsd !== amountUsd) show = false;
             if (amountIqdVal !== '' && amountIqdVal !== '0' && !isNaN(amountIqd) && rowIqd !== amountIqd) show = false;
             if (note && !rowNote.includes(note)) show = false;
@@ -376,14 +382,15 @@ $expenses = $stmt->fetchAll(PDO::FETCH_ASSOC);
         });
     }
 
-    $('#filter_truck_id, #filter_invoice, #filter_date, #filter_amount_usd, #filter_amount_iqd, #filter_note').on('input change', function() {
+    $('#filter_truck_id, #filter_invoice, #filter_from_date, #filter_to_date, #filter_amount_usd, #filter_amount_iqd, #filter_note').on('input change', function() {
         applyLiveFilter();
     });
 
     $('#resetFilterBtn').on('click', function() {
         $('#filter_truck_id').val('');
         $('#filter_invoice').val('');
-        $('#filter_date').val('');
+        $('#filter_from_date').val('');
+        $('#filter_to_date').val('');
         $('#filter_amount_usd').val('0');
         $('#filter_amount_iqd').val('0');
         $('#filter_note').val('');
