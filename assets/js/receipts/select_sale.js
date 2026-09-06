@@ -458,13 +458,22 @@ class ReceiptManager {
             }
         }
 
+        let salesRemainingValue = 0;
+        const currentSalesRemaining = this.lastRemainingTotal;
+        if (currentSalesRemaining !== undefined && currentSalesRemaining !== null) {
+            if (typeof currentSalesRemaining === 'string') {
+                salesRemainingValue = parseFloat(currentSalesRemaining.replace(/[$,]/g, '')) || 0;
+            } else if (typeof currentSalesRemaining === 'number') {
+                salesRemainingValue = currentSalesRemaining;
+            }
+        }
+
         const grossTotal = typeof this.lastGrossTotal === 'number' ? this.lastGrossTotal : 0;
         const totalDiscount = typeof window.RECEIPT_TOTAL_DISCOUNT === 'number' ? window.RECEIPT_TOTAL_DISCOUNT : 0;
         const totalPaid = typeof window.RECEIPT_TOTAL_PAID === 'number' ? window.RECEIPT_TOTAL_PAID : 0;
 
-        // calculatedRemaining = کۆی نرخ - پارەی واسڵ کراو (لەخشتەی پارەدان) - داشکاندن
-        const totalDebtReduction = Math.round((totalPaid + totalDiscount) * 100) / 100;
-        const calculatedRemaining = Math.max(0, Math.round((grossTotal - totalDebtReduction) * 100) / 100);
+        // پارەی ماوەی وەسڵەکان لە بنکەدراوە پێشتر پارەدانی لێ دەرکراوە، بۆیە ڕاستەوخۆ پارەی ماوەی خشتەکەیە
+        const calculatedRemaining = Math.max(0, Math.round(salesRemainingValue * 100) / 100);
 
         const showOpeningDebtCheckbox = document.getElementById('show-opening-debt');
         const includeOpeningDebt = showOpeningDebtCheckbox ? showOpeningDebtCheckbox.checked : true;
