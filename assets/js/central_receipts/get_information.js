@@ -68,6 +68,9 @@ function populateReceiptData(data) {
     const isFormulaChecked = localStorage.getItem('central_receipt_show_formula') === 'true';
     if (showFormulaCheckbox) {
         showFormulaCheckbox.checked = isFormulaChecked;
+        showFormulaCheckbox.onchange = function() {
+            toggleFormulaNameDisplay(this.checked);
+        };
     }
 
     updateStrengthDisplay();
@@ -96,6 +99,7 @@ function toggleFormulaNameDisplay(checked) {
     localStorage.setItem('central_receipt_show_formula', checked ? 'true' : 'false');
     updateStrengthDisplay();
 }
+window.toggleFormulaNameDisplay = toggleFormulaNameDisplay;
 
 // Helper function to set element text content
 function setElementText(elementId, text) {

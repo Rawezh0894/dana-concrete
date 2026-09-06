@@ -188,7 +188,7 @@ $receipt_id = isset($_GET['id']) ? $_GET['id'] : null;
     <?php endif; ?>
     
     <!-- Include the external JavaScript file -->
-    <script src="../assets/js/central_receipts/get_information.js" nonce="<?php echo $csp_nonce; ?>"></script>
+    <script src="../assets/js/central_receipts/get_information.js?v=<?php echo time(); ?>" nonce="<?php echo $csp_nonce; ?>"></script>
     <style>
     .loading-overlay {
         position: fixed;
