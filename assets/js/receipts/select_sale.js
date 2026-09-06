@@ -391,6 +391,7 @@ class ReceiptManager {
         this.lastGrossTotal = total;
         this.lastOpeningDebt = openingDebt;
         this.lastRemainingTotal = remainingTotal;
+        this.lastTotalQuantity = response.total_quantity;
 
         tbody.innerHTML = rows;
         this.applyOptionalColumnVisibility();
@@ -420,31 +421,22 @@ class ReceiptManager {
     }
 
     updateSummary(total, remainingTotal, totalQuantity = null) {
+        if (totalQuantity !== null) {
+            this.lastTotalQuantity = totalQuantity;
+        }
+        const currentTotalQuantity = totalQuantity || this.lastTotalQuantity || '0.00 م³';
+
         const tfoot = document.getElementById('receipt-table-footer');
         if (tfoot) {
-            // Ensure values are numbers
-            const totalValue = typeof total === 'number' ? total : 0;
-            const remainingValue = typeof remainingTotal === 'number' ? remainingTotal : 0;
-
             const showInvoiceColumn = document.getElementById('show-invoice-number')?.checked;
             const showFormulaColumn = document.getElementById('show-formula-type')?.checked;
-            const firstColspan = '2';
-            const secondColspan = String(2 + (showFormulaColumn ? 1 : 0));
-            const thirdColspan = String(3 + (showInvoiceColumn ? 1 : 0));
+            const totalColspan = String(7 + (showFormulaColumn ? 1 : 0) + (showInvoiceColumn ? 1 : 0));
 
             tfoot.innerHTML = `
                 <tr class="summary-row">
-                    <td colspan="${firstColspan}" style="text-align: center;">
+                    <td colspan="${totalColspan}" style="text-align: center;">
                         <i class="fa fa-cube"></i>
-                        کۆی پێوانە: ${totalQuantity || '0.00 م³'}
-                    </td>
-                    <td colspan="${secondColspan}" style="text-align: center;">
-                        <i class="fa fa-calculator"></i>
-                        کۆی نرخ: ${this.formatCurrency(totalValue)}
-                    </td>
-                    <td colspan="${thirdColspan}" style="text-align: center;">
-                        <i class="fa fa-money-bill-wave"></i>
-                        کۆی پارەی ماوە: ${this.formatCurrency(remainingValue)}
+                        کۆی پێوانە: ${currentTotalQuantity}
                     </td>
                 </tr>
             `;

@@ -1065,38 +1065,11 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             const summaryRow = document.querySelector('.summary-row');
             if (summaryRow) {
                 const cells = summaryRow.querySelectorAll('td');
-                
-                if (cells.length >= 3) {
-                    // New layout with quantity total
+                if (cells.length > 0) {
                     const quantityText = cells[0]?.textContent || '';
-                    const totalText = cells[1]?.textContent || '';
-                    const remainingText = cells[2]?.textContent || '';
-                    
-                    // Extract totals from the text (basic parsing)
-                    const quantityMatch = quantityText.match(/کۆی پێوانە: ([\d,]+\.?\d* م³)/);
-                    const totalMatch = totalText.match(/کۆی نرخ: \$?([\d,]+\.?\d*)/);
-                    const remainingMatch = remainingText.match(/کۆی پارەی ماوە: \$?([\d,]+\.?\d*)/);
-                    
-                    if (totalMatch && remainingMatch) {
-                        const total = parseFloat(totalMatch[1].replace(/,/g, ''));
-                        const remaining = parseFloat(remainingMatch[1].replace(/,/g, ''));
-                        const quantity = quantityMatch ? quantityMatch[1] : '0.00 م³';
-                        window.receiptManager.updateSummary(total, remaining, quantity);
-                    }
-                } else if (cells.length === 2) {
-                    // Old layout fallback
-                    const firstCellText = cells[0]?.textContent || '';
-                    const secondCellText = cells[1]?.textContent || '';
-                    
-                    // Extract totals from the text (basic parsing)
-                    const totalMatch = firstCellText.match(/کۆی نرخ: \$?([\d,]+\.?\d*)/);
-                    const remainingMatch = secondCellText.match(/کۆی پارەی ماوە: \$?([\d,]+\.?\d*)/);
-                    
-                    if (totalMatch && remainingMatch) {
-                        const total = parseFloat(totalMatch[1].replace(/,/g, ''));
-                        const remaining = parseFloat(remainingMatch[1].replace(/,/g, ''));
-                        window.receiptManager.updateSummary(total, remaining);
-                    }
+                    const quantityMatch = quantityText.match(/کۆی پێوانە:\s*([\d,]+\.?\d*\s*م³)/);
+                    const quantity = quantityMatch ? quantityMatch[1] : null;
+                    window.receiptManager.updateSummary(0, 0, quantity);
                 }
             }
         }
@@ -1132,12 +1105,14 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
         const showInvoiceColumn = document.getElementById('show-invoice-number')?.checked;
         const showFormulaColumn = document.getElementById('show-formula-type')?.checked;
+        const totalColspan = String(7 + (showFormulaColumn ? 1 : 0) + (showInvoiceColumn ? 1 : 0));
         const cells = summaryRow.querySelectorAll('td');
 
-        if (cells.length >= 3) {
-            cells[0].setAttribute('colspan', '2');
-            cells[1].setAttribute('colspan', String(2 + (showFormulaColumn ? 1 : 0)));
-            cells[2].setAttribute('colspan', String(3 + (showInvoiceColumn ? 1 : 0)));
+        if (cells.length > 0) {
+            cells[0].setAttribute('colspan', totalColspan);
+            for (let i = 1; i < cells.length; i++) {
+                cells[i].style.display = 'none';
+            }
         }
     }
     
