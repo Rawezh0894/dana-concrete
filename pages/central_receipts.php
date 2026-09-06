@@ -171,7 +171,11 @@ $receipt_id = isset($_GET['id']) ? $_GET['id'] : null;
         <small style="color: #666;">پسوڵە بە شێوەیەکی خۆکار چاپ دەکرێت و تابەکە دادەخرێت</small>
     </div>
     <?php else: ?>
-    <div class="actions">
+    <div class="actions" style="display: flex; align-items: center; justify-content: center; gap: 15px; flex-wrap: wrap;">
+        <label style="cursor: pointer; user-select: none; display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 500; color: #333; background: #fff; padding: 6px 12px; border: 1px solid #ccc; border-radius: 6px;">
+            <input type="checkbox" id="show_formula_name_checkbox" style="width: 16px; height: 16px; cursor: pointer;" onchange="toggleFormulaNameDisplay(this.checked)">
+            نیشاندانی ناوی فۆرمۆلا (لەبری MPa & Kg)
+        </label>
         <button onclick="goBack()" class="btn-back">
             گەڕانەوە
         </button>

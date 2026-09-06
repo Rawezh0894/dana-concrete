@@ -1,3 +1,6 @@
+// Global variable to store current receipt data
+let currentReceiptData = null;
+
 // Function to load receipt data
 function loadReceiptData() {
     const receiptId = getReceiptIdFromUrl();
@@ -31,6 +34,7 @@ function getReceiptIdFromUrl() {
 
 // Function to populate receipt data
 function populateReceiptData(data) {
+    currentReceiptData = data;
     const receipt = data.receipt;
     
     // Populate basic info
@@ -57,8 +61,40 @@ function populateReceiptData(data) {
     setElementText('pump_driver_name', receipt.pump_driver_name || '-');
     setElementText('pump_driver_mobile', receipt.pump_driver_mobile || '-');
     
-    setElementText('strength_info', data.strength_info || '-');
     setElementText('meter_amount', data.formatted_quantity + ' M³');
+
+    // Initialize formula checkbox state
+    const showFormulaCheckbox = document.getElementById('show_formula_name_checkbox');
+    const isFormulaChecked = localStorage.getItem('central_receipt_show_formula') === 'true';
+    if (showFormulaCheckbox) {
+        showFormulaCheckbox.checked = isFormulaChecked;
+    }
+
+    updateStrengthDisplay();
+}
+
+// Function to update strength or formula name display
+function updateStrengthDisplay() {
+    if (!currentReceiptData) return;
+    const showFormulaCheckbox = document.getElementById('show_formula_name_checkbox');
+    const isChecked = showFormulaCheckbox ? showFormulaCheckbox.checked : (localStorage.getItem('central_receipt_show_formula') === 'true');
+    
+    const receipt = currentReceiptData.receipt || {};
+    let textToDisplay = '-';
+    
+    if (isChecked) {
+        textToDisplay = receipt.formula_name || currentReceiptData.strength_info || '-';
+    } else {
+        textToDisplay = currentReceiptData.strength_info || '-';
+    }
+    
+    setElementText('strength_info', textToDisplay);
+}
+
+// Function to toggle formula name display
+function toggleFormulaNameDisplay(checked) {
+    localStorage.setItem('central_receipt_show_formula', checked ? 'true' : 'false');
+    updateStrengthDisplay();
 }
 
 // Helper function to set element text content
