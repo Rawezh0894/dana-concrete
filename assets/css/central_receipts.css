@@ -295,8 +295,8 @@ body {
         print-color-adjust: exact;
     }
     
-    .actions {
-        display: none;
+    .actions, .no-print {
+        display: none !important;
     }
 }
 

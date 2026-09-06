@@ -29,7 +29,7 @@ $receipt_id = isset($_GET['id']) ? $_GET['id'] : null;
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>پسوڵەی کۆنکرێت - دانا کۆنکرێت</title>
-    <link href="../assets/css/central_receipts.css" rel="stylesheet">
+    <link href="../assets/css/central_receipts.css?v=<?php echo time(); ?>" rel="stylesheet">
     <link rel="icon" href="../../../../public/assets/images/logo.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <!-- Force portrait orientation for printing -->
@@ -160,18 +160,18 @@ $receipt_id = isset($_GET['id']) ? $_GET['id'] : null;
     </div>
 
     <?php if (!isset($_GET['id'])): ?>
-    <div class="actions">
+    <div class="actions no-print">
         <a href="/pages/concrete_receipts.php" class="btn-back">
             گەڕانەوە
         </a>
     </div>
     <?php elseif (isset($_GET['auto_print'])): ?>
     <!-- Auto print mode - tab will close automatically after printing -->
-    <div class="actions" style="text-align: center; margin-top: 20px;">
+    <div class="actions no-print" style="text-align: center; margin-top: 20px;">
         <small style="color: #666;">پسوڵە بە شێوەیەکی خۆکار چاپ دەکرێت و تابەکە دادەخرێت</small>
     </div>
     <?php else: ?>
-    <div class="actions" style="display: flex; align-items: center; justify-content: center; gap: 15px; flex-wrap: wrap;">
+    <div class="actions no-print" style="display: flex; align-items: center; justify-content: center; gap: 15px; flex-wrap: wrap;">
         <label style="cursor: pointer; user-select: none; display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 500; color: #333; background: #fff; padding: 6px 12px; border: 1px solid #ccc; border-radius: 6px;">
             <input type="checkbox" id="show_formula_name_checkbox" style="width: 16px; height: 16px; cursor: pointer;" onchange="toggleFormulaNameDisplay(this.checked)">
             نیشاندانی ناوی فۆرمۆلا (لەبری MPa & Kg)
