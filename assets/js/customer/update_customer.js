@@ -1,34 +1,43 @@
 // Edit button click is handled in ag_grid_customer.js (avoid duplicate handlers)
 
 $(document).ready(function () {
-// Handle update submit
     const editCustomerForm = $('#editCustomerForm');
     if (editCustomerForm.length) {
-        // Multiple submission prevention flag
         let isUpdating = false;
-        
+
         editCustomerForm.on('submit', function (e) {
             e.preventDefault();
-            
-            // Prevent multiple submissions
+
             if (isUpdating) {
                 showAlert('warning', 'تکایە چاوەڕوان بە...');
                 return false;
             }
-            
-            // Set updating flag and disable submit button
+
             isUpdating = true;
             const submitBtn = $(this).find('button[type="submit"]');
             const originalBtnText = submitBtn.html();
             submitBtn.prop('disabled', true);
             submitBtn.html('<span class="spinner-border spinner-border-sm me-2"></span>چاوەڕوان بە...');
-            
-            // Always send is_company so the DB value persists after refresh
-            const isCompany = $('#editCustomerIsCompany').is(':checked') ? '1' : '0';
-            $('#editCustomerIsCompanyValue').val(isCompany);
+
+            const companyCheckbox = this.querySelector('#editCustomerIsCompany');
+            const recipientCheckbox = this.querySelector('#editCustomerIsRecipient');
             const formData = new FormData(this);
-            formData.set('is_company', isCompany);
-            
+            // Force flags explicitly (same approach that works for is_recipient)
+            formData.set('is_company', companyCheckbox && companyCheckbox.checked ? '1' : '0');
+            formData.set('is_recipient', recipientCheckbox && recipientCheckbox.checked ? '1' : '0');
+
+            // Disabled debt fields are omitted from FormData — re-enable briefly so values are sent
+            const usdInput = this.querySelector('#editCustomerOpeningDebtUsd');
+            const iqdInput = this.querySelector('#editCustomerOpeningDebtIqd');
+            const usdWasDisabled = usdInput?.disabled;
+            const iqdWasDisabled = iqdInput?.disabled;
+            if (usdInput) usdInput.disabled = false;
+            if (iqdInput) iqdInput.disabled = false;
+            formData.set('opening_debt_usd', usdInput?.value || '0');
+            formData.set('opening_debt_iqd', iqdInput?.value || '0');
+            if (usdInput) usdInput.disabled = usdWasDisabled;
+            if (iqdInput) iqdInput.disabled = iqdWasDisabled;
+
             $.ajax({
                 url: '../process/customer/update_customer.php',
                 method: 'POST',
@@ -36,27 +45,41 @@ $(document).ready(function () {
                 processData: false,
                 contentType: false,
                 dataType: 'json',
-                success: function(data) {
+                success: function (data) {
                     const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('editCustomerModal'));
                     if (data.success) {
                         modal.hide();
                         if (typeof reloadCustomers === 'function') {
                             reloadCustomers();
                         } else if (typeof loadCustomers === 'function') {
-                        loadCustomers();
+                            loadCustomers();
                         }
-                        // Refresh summary stats
                         if (typeof loadSummaryStats === 'function') loadSummaryStats();
-                        swalAlert('سەرکەوتوو', 'زانیاری کڕیار نوێکرایەوە!', 'success');
+
+                        const companySaved = Number(data.is_company) === 1;
+                        const companyRequested = companyCheckbox && companyCheckbox.checked;
+                        if (companyRequested && !companySaved) {
+                            swalAlert(
+                                'ئاگاداری',
+                                'نوێکرایەوە، بەڵام is_company لە داتابەیس پاشەکەوت نەبوو. ستوونی is_company بپشکنە.',
+                                'warning'
+                            );
+                        } else {
+                            swalAlert('سەرکەوتوو', 'زانیاری کڕیار نوێکرایەوە!', 'success');
+                        }
                     } else {
                         swalAlert('هەڵە', data.message || 'هەڵەیەک هەیە', 'error');
                     }
                 },
-                error: function() {
-                    swalAlert('هەڵە', 'هەڵەیەک هەیە لە پەیوەندیدا.', 'error');
+                error: function (xhr) {
+                    let msg = 'هەڵەیەک هەیە لە پەیوەندیدا.';
+                    try {
+                        const parsed = JSON.parse(xhr.responseText);
+                        if (parsed.message) msg = parsed.message;
+                    } catch (err) { /* ignore */ }
+                    swalAlert('هەڵە', msg, 'error');
                 },
-                complete: function() {
-                    // Reset updating flag and restore submit button
+                complete: function () {
                     isUpdating = false;
                     submitBtn.prop('disabled', false);
                     submitBtn.html(originalBtnText);
@@ -64,13 +87,12 @@ $(document).ready(function () {
             });
         });
     }
-    
-    // Handle currency type change for edit modal opening debt
+
     const editOpeningDebtUsd = $('#editCustomerOpeningDebtUsd');
     const editOpeningDebtIqd = $('#editCustomerOpeningDebtIqd');
-    
+
     if (editOpeningDebtUsd.length && editOpeningDebtIqd.length) {
-        editOpeningDebtUsd.on('input', function() {
+        editOpeningDebtUsd.on('input', function () {
             if ($(this).val() > 0) {
                 editOpeningDebtIqd.val('');
                 editOpeningDebtIqd.prop('disabled', true);
@@ -78,8 +100,8 @@ $(document).ready(function () {
                 editOpeningDebtIqd.prop('disabled', false);
             }
         });
-        
-        editOpeningDebtIqd.on('input', function() {
+
+        editOpeningDebtIqd.on('input', function () {
             if ($(this).val() > 0) {
                 editOpeningDebtUsd.val('');
                 editOpeningDebtUsd.prop('disabled', true);
@@ -88,6 +110,4 @@ $(document).ready(function () {
             }
         });
     }
-    });
-
-// Handle delete button click for customers
+});

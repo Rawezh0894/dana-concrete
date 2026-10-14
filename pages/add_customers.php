@@ -204,9 +204,8 @@ if (!hasPermission('view_customer')) {
             </div>
           </div>
           <div class="mb-3">
-            <input type="hidden" name="is_company" id="customer_is_company_value" value="0">
             <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" id="customer_is_company" value="1" autocomplete="off">
+              <input class="form-check-input" type="checkbox" id="customer_is_company" name="is_company" value="1">
               <label class="form-check-label" for="customer_is_company">
                 ئەمە کۆمپانیایە
               </label>
@@ -263,9 +262,8 @@ if (!hasPermission('view_customer')) {
             </div>
           </div>
           <div class="mb-3">
-            <input type="hidden" name="is_company" id="editCustomerIsCompanyValue" value="0">
             <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" id="editCustomerIsCompany" value="1" autocomplete="off">
+              <input class="form-check-input" type="checkbox" id="editCustomerIsCompany" name="is_company" value="1">
               <label class="form-check-label" for="editCustomerIsCompany">
                 ئەمە کۆمپانیایە
               </label>

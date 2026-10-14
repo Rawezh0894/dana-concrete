@@ -2,57 +2,84 @@
 session_start();
 require_once '../../config/db_conected.php';
 require_once '../../config/permissions.php';
+require_once __DIR__ . '/_customer_flags.php';
+
+header('Content-Type: application/json; charset=utf-8');
 
 if (!hasPermission('update_customer')) {
     http_response_code(403);
-    echo json_encode(['error' => 'Permission denied']);
+    echo json_encode(['success' => false, 'message' => 'Permission denied']);
     exit;
 }
 
 if (!isset($_SESSION['user_id'])) {
     http_response_code(401);
-    echo json_encode(['error' => 'Unauthorized']);
+    echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit;
 }
 
 $id = intval($_POST['id'] ?? 0);
-$name = $_POST['name'] ?? '';
-$mobile1 = $_POST['mobile1'] ?? '';
-$mobile2 = $_POST['mobile2'] ?? '';
+$name = trim($_POST['name'] ?? '');
+$mobile1 = trim($_POST['mobile1'] ?? '');
+$mobile2 = trim($_POST['mobile2'] ?? '');
 $opening_debt_usd = floatval($_POST['opening_debt_usd'] ?? 0);
 $opening_debt_iqd = floatval($_POST['opening_debt_iqd'] ?? 0);
-$is_recipient = isset($_POST['is_recipient']) && in_array((string)$_POST['is_recipient'], ['1', 'true', 'on'], true) ? 1 : 0;
-$is_company = isset($_POST['is_company']) && in_array((string)$_POST['is_company'], ['1', 'true', 'on'], true) ? 1 : 0;
+$is_recipient = customer_post_flag('is_recipient');
+$is_company = customer_post_flag('is_company');
 
-// Validate required fields
-if (empty($name) || empty($mobile1) || $id <= 0) {
+if ($name === '' || $mobile1 === '' || $id <= 0) {
     echo json_encode(['success' => false, 'message' => 'تکایە هەموو خانە پێویستەکان پڕبکەرەوە']);
     exit;
 }
 
-// Only one of opening_debt_usd or opening_debt_iqd should be nonzero
-if ($opening_debt_usd > 0) $opening_debt_iqd = 0;
-if ($opening_debt_iqd > 0) $opening_debt_usd = 0;
+if ($opening_debt_usd > 0) {
+    $opening_debt_iqd = 0;
+}
+if ($opening_debt_iqd > 0) {
+    $opening_debt_usd = 0;
+}
 
 try {
-    // Check for duplicate mobile number (excluding current customer)
-    $stmt = $pdo->prepare("SELECT id FROM customers WHERE mobile1 = ? AND id != ?");
+    $stmt = $pdo->prepare('SELECT id FROM customers WHERE mobile1 = ? AND id != ?');
     $stmt->execute([$mobile1, $id]);
     if ($stmt->fetch()) {
         echo json_encode(['success' => false, 'message' => 'ئەم ژمارەی مۆبایل پێشتر تۆمارکراوە!']);
         exit;
     }
 
-    $stmt = $pdo->prepare("UPDATE customers SET name = ?, mobile1 = ?, mobile2 = ?, opening_debt_usd = ?, opening_debt_iqd = ?, is_recipient = ?, is_company = ? WHERE id = ?");
-    $result = $stmt->execute([$name, $mobile1, $mobile2, $opening_debt_usd, $opening_debt_iqd, $is_recipient, $is_company, $id]);
-    
-    if ($result) {
-        echo json_encode(['success' => true, 'message' => 'کڕیار بەسەرکەوتوویی نوێکرایەوە!']);
-    } else {
-        echo json_encode(['success' => false, 'message' => 'هەڵە لە نوێکردنەوە!']);
-    }
+    $stmt = $pdo->prepare(
+        'UPDATE customers
+         SET name = ?, mobile1 = ?, mobile2 = ?, opening_debt_usd = ?, opening_debt_iqd = ?,
+             is_recipient = ?, is_company = ?
+         WHERE id = ?'
+    );
+    $stmt->execute([
+        $name,
+        $mobile1,
+        $mobile2,
+        $opening_debt_usd,
+        $opening_debt_iqd,
+        $is_recipient,
+        $is_company,
+        $id,
+    ]);
+
+    // Verify what was actually stored
+    $check = $pdo->prepare('SELECT is_company, is_recipient FROM customers WHERE id = ?');
+    $check->execute([$id]);
+    $stored = $check->fetch(PDO::FETCH_ASSOC) ?: [];
+
+    echo json_encode([
+        'success' => true,
+        'message' => 'کڕیار بەسەرکەوتوویی نوێکرایەوە!',
+        'is_company' => (int)($stored['is_company'] ?? $is_company),
+        'is_recipient' => (int)($stored['is_recipient'] ?? $is_recipient),
+        'received_is_company' => $is_company,
+    ], JSON_UNESCAPED_UNICODE);
 } catch (Exception $e) {
     error_log('Exception in update_customer.php: ' . $e->getMessage());
-    echo json_encode(['success' => false, 'message' => 'هەڵە لە نوێکردنەوەی کڕیار!']);
+    echo json_encode([
+        'success' => false,
+        'message' => 'هەڵە لە نوێکردنەوەی کڕیار: ' . $e->getMessage(),
+    ], JSON_UNESCAPED_UNICODE);
 }
-?>

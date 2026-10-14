@@ -559,9 +559,8 @@ $pump_drivers = array_filter($employees, function ($emp) {
               </div>
             </div>
             <div class="mb-3">
-              <input type="hidden" name="is_company" id="customer_is_company_value" value="0">
               <div class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" id="customer_is_company" value="1" autocomplete="off">
+                <input class="form-check-input" type="checkbox" id="customer_is_company" name="is_company" value="1">
                 <label class="form-check-label" for="customer_is_company">
                   ئەمە کۆمپانیایە
                 </label>

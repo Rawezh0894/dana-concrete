@@ -44,6 +44,21 @@ const customerColumnDefs = [
         }
     },
     {
+        field: 'is_company',
+        headerName: 'کۆمپانیا',
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+        sortable: true,
+        resizable: true,
+        minWidth: 100,
+        cellStyle: { textAlign: 'center', direction: 'rtl' },
+        cellRenderer: function (params) {
+            return Number(params.value) === 1
+                ? '<span class="badge bg-primary"><i class="fas fa-building"></i> بەڵێ</span>'
+                : '<span class="badge bg-secondary"><i class="fas fa-times"></i> نەخێر</span>';
+        }
+    },
+    {
         field: 'is_recipient',
         headerName: 'وەرگر',
         filter: 'agTextColumnFilter',
@@ -228,7 +243,8 @@ function loadCustomerData(preservePagination = false) {
                     mobile2: row.mobile2 || '-',
                     opening_debt_usd: row.opening_debt_usd || 0,
                     opening_debt_iqd: row.opening_debt_iqd || 0,
-                    is_recipient: row.is_recipient || 0
+                    is_recipient: row.is_recipient || 0,
+                    is_company: Number(row.is_company) === 1 ? 1 : 0
                 }));
 
                 customerGridApi.setGridOption('rowData', rowData);
@@ -362,9 +378,10 @@ $(document).on('click', '.edit-customer-btn', function (e) {
                 const isCompany = Number(data.is_company) === 1 || data.is_company === true || data.is_company === '1';
 
                 function applyCompanyFlags() {
-                    $('#editCustomerIsRecipient').prop('checked', isRecipient);
-                    $('#editCustomerIsCompany').prop('checked', isCompany);
-                    $('#editCustomerIsCompanyValue').val(isCompany ? '1' : '0');
+                    const recipientEl = document.getElementById('editCustomerIsRecipient');
+                    const companyEl = document.getElementById('editCustomerIsCompany');
+                    if (recipientEl) recipientEl.checked = isRecipient;
+                    if (companyEl) companyEl.checked = isCompany;
                 }
 
                 applyCompanyFlags();
