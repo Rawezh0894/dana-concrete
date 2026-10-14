@@ -1,47 +1,4 @@
-// Handle edit button click for customers
-$(document).on('click', '.edit-customer-btn', function() {
-    const btn = $(this);
-    const id = btn.data('id');
-    
-    $.get(`../process/customer/get_customer.php?id=${id}`, function(response) {
-        if (response.success && response.data) {
-            const customer = response.data;
-            $('#editCustomerModal').modal('show');
-            $('#editCustomerId').val(customer.id);
-            $('#editCustomerName').val(customer.name || '');
-            $('#editCustomerMobile1').val(customer.mobile1 || '');
-            $('#editCustomerMobile2').val(customer.mobile2 || '');
-            
-            // Handle numeric values properly
-            const usdValue = parseFloat(customer.opening_debt_usd || 0);
-            const iqdValue = parseFloat(customer.opening_debt_iqd || 0);
-            
-            $('#editCustomerOpeningDebtUsd').val(usdValue > 0 ? usdValue : '');
-            $('#editCustomerOpeningDebtIqd').val(iqdValue > 0 ? iqdValue : '');
-            
-            // Apply saved flags (modal show already defaults company switch to off)
-            const isRecipient = parseInt(customer.is_recipient || 0, 10);
-            const isCompany = parseInt(customer.is_company || 0, 10);
-            $('#editCustomerIsRecipient').prop('checked', isRecipient === 1);
-            $('#editCustomerIsCompany').prop('checked', isCompany === 1);
-            
-            // Enable/disable fields based on values
-            if (usdValue > 0) {
-                $('#editCustomerOpeningDebtIqd').prop('disabled', true);
-            } else if (iqdValue > 0) {
-                $('#editCustomerOpeningDebtUsd').prop('disabled', true);
-            } else {
-                $('#editCustomerOpeningDebtUsd, #editCustomerOpeningDebtIqd').prop('disabled', false);
-            }
-        } else {
-            console.error('Error loading customer data:', response.error);
-            swalAlert('هەڵە', 'هەڵەیەک هەیە لە وەرگرتنی داتای کڕیار', 'error');
-        }
-    }, 'json').fail(function() {
-        console.error('Error:', 'Network error');
-        swalAlert('هەڵە', 'هەڵەیەک هەیە لە پەیوەندیدا', 'error');
-    });
-});
+// Edit button click is handled in ag_grid_customer.js (avoid duplicate handlers)
 
 $(document).ready(function () {
 // Handle update submit

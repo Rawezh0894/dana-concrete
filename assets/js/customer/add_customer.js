@@ -119,10 +119,10 @@ $(document).ready(function() {
     handleOpeningDebtCurrencyChange();
     handleEditOpeningDebtCurrencyChange();
     
-    // Default: company switch is always off
-    $('#customer_is_company, #editCustomerIsCompany').prop('checked', false);
+    // Add form: company switch always starts off
+    $('#customer_is_company').prop('checked', false);
 
-    // Reset form when modal is shown
+    // Reset add form when modal is shown
     $('#addCustomerModal').on('show.bs.modal', function() {
         $('#addCustomerForm')[0].reset();
         $('#customer_opening_debt_usd, #customer_opening_debt_iqd').prop('disabled', false);
@@ -130,13 +130,13 @@ $(document).ready(function() {
         $('#customer_is_company').prop('checked', false);
     });
     
-    // Reset edit form defaults when modal is shown (data is applied after show)
+    // Edit form: only unlock debt fields on show — do NOT clear is_company here
+    // (cleaving it here overwrites the value loaded from DB)
     $('#editCustomerModal').on('show.bs.modal', function() {
         $('#editCustomerOpeningDebtUsd, #editCustomerOpeningDebtIqd').prop('disabled', false);
-        $('#editCustomerIsRecipient').prop('checked', false);
-        $('#editCustomerIsCompany').prop('checked', false);
     });
 
+    // Clear flags only after modal is fully closed
     $('#editCustomerModal').on('hidden.bs.modal', function() {
         $('#editCustomerIsRecipient').prop('checked', false);
         $('#editCustomerIsCompany').prop('checked', false);

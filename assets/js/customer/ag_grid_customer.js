@@ -358,14 +358,19 @@ $(document).on('click', '.edit-customer-btn', function (e) {
                     $('#editCustomerOpeningDebtUsd, #editCustomerOpeningDebtIqd').prop('disabled', false);
                 }
 
-                // Show modal first (resets company switch to off by default)
+                const isRecipient = Number(data.is_recipient || 0) === 1;
+                const isCompany = Number(data.is_company || 0) === 1;
+
+                // Apply flags, then show modal (do not clear is_company on show)
+                $('#editCustomerIsRecipient').prop('checked', isRecipient);
+                $('#editCustomerIsCompany').prop('checked', isCompany);
                 $('#editCustomerModal').modal('show');
 
-                // Apply saved flags after show so defaults stay off unless DB says otherwise
-                const isRecipient = parseInt(data.is_recipient || 0, 10);
-                const isCompany = parseInt(data.is_company || 0, 10);
-                $('#editCustomerIsRecipient').prop('checked', isRecipient === 1);
-                $('#editCustomerIsCompany').prop('checked', isCompany === 1);
+                // Re-apply after shown in case any show handler touched the switches
+                $('#editCustomerModal').one('shown.bs.modal', function () {
+                    $('#editCustomerIsRecipient').prop('checked', isRecipient);
+                    $('#editCustomerIsCompany').prop('checked', isCompany);
+                });
             } else {
                 Swal.fire('هەڵە!', response.error || 'نەتوانرا داتاکان بخوێندرێنەوە', 'error');
             }
