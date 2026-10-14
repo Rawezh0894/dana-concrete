@@ -119,6 +119,9 @@ $(document).ready(function() {
     handleOpeningDebtCurrencyChange();
     handleEditOpeningDebtCurrencyChange();
     
+    // Default: company switch is always off
+    $('#customer_is_company, #editCustomerIsCompany').prop('checked', false);
+
     // Reset form when modal is shown
     $('#addCustomerModal').on('show.bs.modal', function() {
         $('#addCustomerForm')[0].reset();
@@ -127,8 +130,15 @@ $(document).ready(function() {
         $('#customer_is_company').prop('checked', false);
     });
     
-    // Reset edit form when modal is shown
+    // Reset edit form defaults when modal is shown (data is applied after show)
     $('#editCustomerModal').on('show.bs.modal', function() {
         $('#editCustomerOpeningDebtUsd, #editCustomerOpeningDebtIqd').prop('disabled', false);
+        $('#editCustomerIsRecipient').prop('checked', false);
+        $('#editCustomerIsCompany').prop('checked', false);
+    });
+
+    $('#editCustomerModal').on('hidden.bs.modal', function() {
+        $('#editCustomerIsRecipient').prop('checked', false);
+        $('#editCustomerIsCompany').prop('checked', false);
     });
 });
