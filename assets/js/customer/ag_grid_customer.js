@@ -353,6 +353,10 @@ $(document).on('click', '.edit-customer-btn', function (e) {
                 const isRecipient = parseInt(data.is_recipient || 0);
                 $('#editCustomerIsRecipient').prop('checked', isRecipient === 1);
 
+                // Set is_company checkbox
+                const isCompany = parseInt(data.is_company || 0);
+                $('#editCustomerIsCompany').prop('checked', isCompany === 1);
+
                 // Enable/disable fields based on values
                 if (usdValue > 0) {
                     $('#editCustomerOpeningDebtIqd').prop('disabled', true);

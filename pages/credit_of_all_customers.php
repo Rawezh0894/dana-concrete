@@ -15,7 +15,7 @@ if (!hasPermission('view_customer')) {
 }
 
 // گەڕانەوەی هەموو کڕیارە قەرزارەکان
-$sql = "SELECT c.id, c.name, c.mobile1, c.mobile2, c.opening_debt_usd, c.opening_debt_iqd,
+$sql = "SELECT c.id, c.name, c.mobile1, c.mobile2, c.opening_debt_usd, c.opening_debt_iqd, IFNULL(c.is_company, 0) AS is_company,
     (
         SELECT IFNULL(SUM(quantity),0) FROM sales s WHERE s.customer_id = c.id AND s.payment_type = 'قەرز' AND s.remaining_amount > 0
     ) as total_credit_meter,
@@ -216,7 +216,7 @@ usort($customers, function($a, $b) {
 
     <!-- Filters -->
     <div class="filter-section mb-4 no-print">
-        <div class="row">
+        <div class="row align-items-end">
             <div class="col-md-3">
                 <div class="form-group">
                     <label for="invoiceFilter" class="form-label">
@@ -233,7 +233,18 @@ usort($customers, function($a, $b) {
                     <input type="text" id="formulaFilter" class="form-control" placeholder="MPA یان Kg بنووسە بۆ فلتەرکردن...">
                 </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label class="form-label">جۆری کڕیار:</label>
+                    <div class="form-check form-switch mt-2">
+                        <input class="form-check-input" type="checkbox" id="companyFilter" role="switch">
+                        <label class="form-check-label" for="companyFilter" id="companyFilterLabel">
+                            تەنیا کڕیارە ئاساییەکان
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
                 <div class="form-group">
                     <label class="form-label">کردارەکان:</label>
                     <div class="d-flex gap-2">
@@ -261,11 +272,14 @@ usort($customers, function($a, $b) {
             // کۆی قەرز (قەرزی سەرەتای + پارەی ماوەی مامەڵەکان)
             $total_debt = floatval($c['opening_debt_usd']) + floatval($c['total_sales_debt']);
         ?>
-        <div class="customer-card print-break-inside-avoid">
+        <div class="customer-card print-break-inside-avoid" data-is-company="<?= intval($c['is_company'] ?? 0) ?>">
             <div class="customer-info">
                 <span class="text-primary">
-                    <i class="fa fa-user-circle"></i>
+                    <i class="fa <?= intval($c['is_company'] ?? 0) === 1 ? 'fa-building' : 'fa-user-circle' ?>"></i>
                     <?= htmlspecialchars($c['name']) ?>
+                    <?php if (intval($c['is_company'] ?? 0) === 1): ?>
+                        <small class="text-muted">(کۆمپانیا)</small>
+                    <?php endif; ?>
                 </span>
                 <span class="text-secondary">
                     <i class="fa fa-phone"></i>
@@ -370,19 +384,35 @@ usort($customers, function($a, $b) {
 // Filter Functionality
 let invoiceNumbersVisible = true;
 
+function updateCompanyFilterLabel() {
+    const companyFilter = document.getElementById('companyFilter');
+    const label = document.getElementById('companyFilterLabel');
+    if (!companyFilter || !label) return;
+    label.textContent = companyFilter.checked ? 'تەنیا کۆمپانیاکان' : 'تەنیا کڕیارە ئاساییەکان';
+}
+
 function applyFilters() {
     const invoiceFilterValue = document.getElementById('invoiceFilter').value.toLowerCase().trim();
     const formulaFilterValue = document.getElementById('formulaFilter').value.toLowerCase().trim();
+    const showCompaniesOnly = document.getElementById('companyFilter')?.checked === true;
     const customerCards = document.querySelectorAll('.customer-card');
     
     customerCards.forEach(card => {
         const invoiceCells = card.querySelectorAll('td:nth-child(9)'); // Invoice number column (9th after removing paid columns)
         const formulaCells = card.querySelectorAll('td:nth-child(4)'); // Formula column (4th)
+        const isCompany = card.getAttribute('data-is-company') === '1';
         
         let shouldShowCard = true;
+
+        // Company vs regular customer filter
+        if (showCompaniesOnly) {
+            if (!isCompany) shouldShowCard = false;
+        } else {
+            if (isCompany) shouldShowCard = false;
+        }
         
         // Check invoice filter
-        if (invoiceFilterValue !== '') {
+        if (shouldShowCard && invoiceFilterValue !== '') {
             let invoiceMatch = false;
             invoiceCells.forEach(cell => {
                 const invoiceText = cell.textContent.toLowerCase();
@@ -394,7 +424,7 @@ function applyFilters() {
         }
         
         // Check formula filter
-        if (formulaFilterValue !== '') {
+        if (shouldShowCard && formulaFilterValue !== '') {
             let formulaMatch = false;
             formulaCells.forEach(cell => {
                 const formulaText = cell.textContent.toLowerCase();
@@ -420,6 +450,11 @@ function filterByFormula() {
 function clearAllFilters() {
     document.getElementById('invoiceFilter').value = '';
     document.getElementById('formulaFilter').value = '';
+    const companyFilter = document.getElementById('companyFilter');
+    if (companyFilter) {
+        companyFilter.checked = false;
+        updateCompanyFilterLabel();
+    }
     applyFilters();
 }
 
@@ -455,6 +490,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const formulaFilter = document.getElementById('formulaFilter');
     if (formulaFilter) {
         formulaFilter.addEventListener('input', filterByFormula);
+    }
+
+    const companyFilter = document.getElementById('companyFilter');
+    if (companyFilter) {
+        companyFilter.addEventListener('change', function() {
+            updateCompanyFilterLabel();
+            applyFilters();
+        });
+        updateCompanyFilterLabel();
+        applyFilters();
     }
 });
 </script>

@@ -22,6 +22,10 @@ $(document).on('click', '.edit-customer-btn', function() {
             // Set is_recipient checkbox
             const isRecipient = parseInt(customer.is_recipient || 0);
             $('#editCustomerIsRecipient').prop('checked', isRecipient === 1);
+
+            // Set is_company checkbox
+            const isCompany = parseInt(customer.is_company || 0);
+            $('#editCustomerIsCompany').prop('checked', isCompany === 1);
             
             // Enable/disable fields based on values
             if (usdValue > 0) {

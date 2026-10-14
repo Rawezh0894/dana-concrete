@@ -203,6 +203,14 @@ if (!hasPermission('view_customer')) {
               </label>
             </div>
           </div>
+          <div class="mb-3">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="customer_is_company" name="is_company" value="1">
+              <label class="form-check-label" for="customer_is_company">
+                ئەمە کۆمپانیایە
+              </label>
+            </div>
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">داخستن</button>
@@ -250,6 +258,14 @@ if (!hasPermission('view_customer')) {
               <input class="form-check-input" type="checkbox" id="editCustomerIsRecipient" name="is_recipient" value="1">
               <label class="form-check-label" for="editCustomerIsRecipient">
                 ئەم کڕیارە هەم کڕیارە و هەم وەرگریشە
+              </label>
+            </div>
+          </div>
+          <div class="mb-3">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="editCustomerIsCompany" name="is_company" value="1">
+              <label class="form-check-label" for="editCustomerIsCompany">
+                ئەمە کۆمپانیایە
               </label>
             </div>
           </div>

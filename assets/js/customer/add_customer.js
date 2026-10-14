@@ -34,6 +34,7 @@ $(document).ready(function () {
                     if (data.success) {
                         addCustomerForm[0].reset();
                         $('#customer_is_recipient').prop('checked', false);
+                        $('#customer_is_company').prop('checked', false);
                         modal.hide();
                         if (typeof reloadCustomers === 'function') {
                             reloadCustomers();
@@ -123,6 +124,7 @@ $(document).ready(function() {
         $('#addCustomerForm')[0].reset();
         $('#customer_opening_debt_usd, #customer_opening_debt_iqd').prop('disabled', false);
         $('#customer_is_recipient').prop('checked', false);
+        $('#customer_is_company').prop('checked', false);
     });
     
     // Reset edit form when modal is shown
