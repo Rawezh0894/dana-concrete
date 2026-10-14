@@ -20,7 +20,11 @@ $(document).ready(function () {
             submitBtn.prop('disabled', true);
             submitBtn.html('<span class="spinner-border spinner-border-sm me-2"></span>چاوەڕوان بە...');
             
+            // Always send is_company (checkbox alone is omitted when unchecked)
+            const isCompany = $('#customer_is_company').is(':checked') ? '1' : '0';
+            $('#customer_is_company_value').val(isCompany);
             const formData = new FormData(this);
+            formData.set('is_company', isCompany);
             
             $.ajax({
                 url: '../process/customer/add_customer.php',
@@ -35,6 +39,7 @@ $(document).ready(function () {
                         addCustomerForm[0].reset();
                         $('#customer_is_recipient').prop('checked', false);
                         $('#customer_is_company').prop('checked', false);
+                        $('#customer_is_company_value').val('0');
                         modal.hide();
                         if (typeof reloadCustomers === 'function') {
                             reloadCustomers();
@@ -119,8 +124,17 @@ $(document).ready(function() {
     handleOpeningDebtCurrencyChange();
     handleEditOpeningDebtCurrencyChange();
     
+    // Keep hidden is_company in sync with the switch
+    $('#customer_is_company').on('change', function () {
+        $('#customer_is_company_value').val(this.checked ? '1' : '0');
+    });
+    $('#editCustomerIsCompany').on('change', function () {
+        $('#editCustomerIsCompanyValue').val(this.checked ? '1' : '0');
+    });
+
     // Add form: company switch always starts off
     $('#customer_is_company').prop('checked', false);
+    $('#customer_is_company_value').val('0');
 
     // Reset add form when modal is shown
     $('#addCustomerModal').on('show.bs.modal', function() {
@@ -128,10 +142,10 @@ $(document).ready(function() {
         $('#customer_opening_debt_usd, #customer_opening_debt_iqd').prop('disabled', false);
         $('#customer_is_recipient').prop('checked', false);
         $('#customer_is_company').prop('checked', false);
+        $('#customer_is_company_value').val('0');
     });
     
     // Edit form: only unlock debt fields on show — do NOT clear is_company here
-    // (cleaving it here overwrites the value loaded from DB)
     $('#editCustomerModal').on('show.bs.modal', function() {
         $('#editCustomerOpeningDebtUsd, #editCustomerOpeningDebtIqd').prop('disabled', false);
     });
@@ -140,5 +154,6 @@ $(document).ready(function() {
     $('#editCustomerModal').on('hidden.bs.modal', function() {
         $('#editCustomerIsRecipient').prop('checked', false);
         $('#editCustomerIsCompany').prop('checked', false);
+        $('#editCustomerIsCompanyValue').val('0');
     });
 });

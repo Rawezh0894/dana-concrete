@@ -1,7 +1,13 @@
 // Add Customer AJAX handler for modal
 $(document).ready(function() {
+  $('#customer_is_company').on('change', function () {
+    $('#customer_is_company_value').val(this.checked ? '1' : '0');
+  });
+
   $('#addCustomerForm').on('submit', function(e) {
     e.preventDefault();
+    var isCompany = $('#customer_is_company').is(':checked') ? '1' : '0';
+    $('#customer_is_company_value').val(isCompany);
     var formData = $(this).serialize();
     $.post('../process/customer/add_customer.php', formData, function(res) {
       console.log('Add customer response:', res);
@@ -15,6 +21,7 @@ $(document).ready(function() {
         $('#addCustomerForm')[0].reset();
         $('#customer_is_recipient').prop('checked', false);
         $('#customer_is_company').prop('checked', false);
+        $('#customer_is_company_value').val('0');
       } else {
         console.error('Add customer error:', res);
         Swal.fire('هەڵە!', res.message || res.msg || 'هەڵەیەک ڕویدا', 'error');

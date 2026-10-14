@@ -358,19 +358,18 @@ $(document).on('click', '.edit-customer-btn', function (e) {
                     $('#editCustomerOpeningDebtUsd, #editCustomerOpeningDebtIqd').prop('disabled', false);
                 }
 
-                const isRecipient = Number(data.is_recipient || 0) === 1;
-                const isCompany = Number(data.is_company || 0) === 1;
+                const isRecipient = Number(data.is_recipient) === 1 || data.is_recipient === true || data.is_recipient === '1';
+                const isCompany = Number(data.is_company) === 1 || data.is_company === true || data.is_company === '1';
 
-                // Apply flags, then show modal (do not clear is_company on show)
-                $('#editCustomerIsRecipient').prop('checked', isRecipient);
-                $('#editCustomerIsCompany').prop('checked', isCompany);
-                $('#editCustomerModal').modal('show');
-
-                // Re-apply after shown in case any show handler touched the switches
-                $('#editCustomerModal').one('shown.bs.modal', function () {
+                function applyCompanyFlags() {
                     $('#editCustomerIsRecipient').prop('checked', isRecipient);
                     $('#editCustomerIsCompany').prop('checked', isCompany);
-                });
+                    $('#editCustomerIsCompanyValue').val(isCompany ? '1' : '0');
+                }
+
+                applyCompanyFlags();
+                $('#editCustomerModal').modal('show');
+                $('#editCustomerModal').one('shown.bs.modal', applyCompanyFlags);
             } else {
                 Swal.fire('هەڵە!', response.error || 'نەتوانرا داتاکان بخوێندرێنەوە', 'error');
             }

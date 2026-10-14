@@ -29,14 +29,15 @@ try {
     $customer = $stmt->fetch(PDO::FETCH_ASSOC);
     
     if ($customer) {
-        // Convert numeric fields to proper types
+        // Convert numeric fields to proper types (TINYINT may arrive as bool/string)
         $customer['opening_debt_usd'] = floatval($customer['opening_debt_usd'] ?? 0);
         $customer['opening_debt_iqd'] = floatval($customer['opening_debt_iqd'] ?? 0);
-        $customer['is_recipient'] = intval($customer['is_recipient'] ?? 0);
-        $customer['is_company'] = intval($customer['is_company'] ?? 0);
+        $customer['is_recipient'] = ((int)($customer['is_recipient'] ?? 0) === 1) ? 1 : 0;
+        $customer['is_company'] = ((int)($customer['is_company'] ?? 0) === 1) ? 1 : 0;
         $customer['id'] = intval($customer['id']);
         
-        echo json_encode(['success' => true, 'data' => $customer]);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['success' => true, 'data' => $customer], JSON_UNESCAPED_UNICODE);
     } else {
         echo json_encode(['success' => false, 'error' => 'Customer not found']);
     }

@@ -23,7 +23,11 @@ $(document).ready(function () {
             submitBtn.prop('disabled', true);
             submitBtn.html('<span class="spinner-border spinner-border-sm me-2"></span>چاوەڕوان بە...');
             
+            // Always send is_company so the DB value persists after refresh
+            const isCompany = $('#editCustomerIsCompany').is(':checked') ? '1' : '0';
+            $('#editCustomerIsCompanyValue').val(isCompany);
             const formData = new FormData(this);
+            formData.set('is_company', isCompany);
             
             $.ajax({
                 url: '../process/customer/update_customer.php',
