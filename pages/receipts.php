@@ -39,7 +39,8 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             #show-opening-debt, label[for="show-opening-debt"],
             #force-debt-pagination, label[for="force-debt-pagination"],
             #print-btn, .fa-print,
-            #refresh-btn, .fa-refresh {
+            #refresh-btn, .fa-refresh,
+            #export-excel-btn {
                 display: none !important;
             }
         }
@@ -440,6 +441,9 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
     </button>
     <button id="refresh-btn" style="padding: 0.5rem 2rem; font-size: 1.1rem; background: #009688; color: #fff; border: none; border-radius: 5px; cursor: pointer; margin-right: 1rem;">
         <i class="fa fa-refresh"></i> ڕیفرێش
+    </button>
+    <button id="export-excel-btn" style="padding: 0.5rem 2rem; font-size: 1.1rem; background: #217346; color: #fff; border: none; border-radius: 5px; cursor: pointer; margin-right: 1rem;">
+        <i class="fa fa-file-excel"></i> ئیکسپۆرتی Excel
     </button>
 </div>
 <div class="receipt-container">
@@ -1328,10 +1332,12 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         }
     });
 </script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/receipts/receipts.js?v=2.1" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/receipts/select_sale.js?v=<?php echo time(); ?>" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/receipts/select_return_debt.js?v=<?php echo time(); ?>" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/receipts/load_locations.js?v=2.1" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/receipts/load_recipients.js?v=2.1" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="../assets/js/receipts/export_excel.js?v=<?php echo time(); ?>" nonce="<?php echo $csp_nonce; ?>"></script>
 </body>
 </html>
