@@ -443,7 +443,7 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         <i class="fa fa-refresh"></i> ڕیفرێش
     </button>
     <button id="export-excel-btn" style="padding: 0.5rem 2rem; font-size: 1.1rem; background: #217346; color: #fff; border: none; border-radius: 5px; cursor: pointer; margin-right: 1rem;">
-        <i class="fa fa-file-excel"></i> ئیکسپۆرتی Excel
+        <i class="fa fa-file-excel"></i> ئیکسپۆرتی Excel (.xlsx)
     </button>
 </div>
 <div class="receipt-container">
@@ -1333,6 +1333,7 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
     });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/receipts/receipts.js?v=2.1" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/receipts/select_sale.js?v=<?php echo time(); ?>" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/receipts/select_return_debt.js?v=<?php echo time(); ?>" nonce="<?php echo $csp_nonce; ?>"></script>

@@ -23,12 +23,140 @@ function getReceiptExportFilters() {
     };
 }
 
+function safeSheetName(name) {
+    return String(name || 'Sheet')
+        .replace(/[\\/?*\[\]]/g, ' ')
+        .substring(0, 31) || 'Sheet';
+}
+
+function buildReceiptWorkbook(data) {
+    const wb = XLSX.utils.book_new();
+    const customer = data.customer || {};
+    const salesTotals = data.sales_totals || {};
+    const paymentTotals = data.payments_totals || {};
+
+    const infoRows = [
+        ['پسووڵەی کڕیار'],
+        ['ناوی کڕیار', customer.name || ''],
+        ['ژ.م', customer.mobile || ''],
+        ['قەرزی سەرەتایی (USD)', customer.opening_debt_usd || 0],
+        ['بەرواری ئیکسپۆرت', data.exported_at || ''],
+        []
+    ];
+
+    const salesHeaders = [
+        '#',
+        'شوێن',
+        'پێوانە (م³)',
+        'ڕێژە',
+        'جۆر',
+        'نرخی 1 م³',
+        'کۆی نرخ',
+        'پارەی ماوە',
+        'ژمارەی پسووڵە',
+        'بەروار'
+    ];
+
+    const salesRows = (data.sales || []).map((row) => [
+        row['#'] || '',
+        row['شوێن'] || '',
+        row['پێوانە (م³)'] || 0,
+        row['ڕێژە'] || '',
+        row['جۆر'] || '',
+        row['نرخی 1 م³'] || 0,
+        row['کۆی نرخ'] || 0,
+        row['پارەی ماوە'] || 0,
+        row['ژمارەی پسووڵە'] || '',
+        row['بەروار'] || ''
+    ]);
+
+    if (salesRows.length) {
+        salesRows.push([
+            'کۆی گشتی',
+            '',
+            salesTotals.quantity || 0,
+            '',
+            '',
+            '',
+            salesTotals.total_price || 0,
+            salesTotals.remaining || 0,
+            '',
+            ''
+        ]);
+    } else {
+        salesRows.push(['هیچ مامەڵەیەک نەدۆزرایەوە']);
+    }
+
+    const salesSheet = XLSX.utils.aoa_to_sheet([
+        ...infoRows,
+        salesHeaders,
+        ...salesRows
+    ]);
+    XLSX.utils.book_append_sheet(wb, salesSheet, safeSheetName('مامەڵەکان'));
+
+    const paymentHeaders = [
+        '#',
+        'پارەی واسڵ کراو (USD)',
+        'پارەی واسڵ کراو (د.ع)',
+        'باقی پێدراوەتەوە (USD)',
+        'باقی پێدراوەتەوە (د.ع)',
+        'داشکاندن',
+        'بەرواری پارەدان',
+        'تێبینی'
+    ];
+
+    const paymentRows = (data.payments || []).map((row) => [
+        row['#'] || '',
+        row['پارەی واسڵ کراو (USD)'] || 0,
+        row['پارەی واسڵ کراو (د.ع)'] || 0,
+        row['باقی پێدراوەتەوە (USD)'] || 0,
+        row['باقی پێدراوەتەوە (د.ع)'] || 0,
+        row['داشکاندن'] || 0,
+        row['بەرواری پارەدان'] || '',
+        row['تێبینی'] || ''
+    ]);
+
+    if (paymentRows.length) {
+        paymentRows.push([
+            'کۆی گشتی',
+            paymentTotals.paid_usd || 0,
+            paymentTotals.paid_iqd || 0,
+            '',
+            '',
+            '',
+            '',
+            ''
+        ]);
+    } else {
+        paymentRows.push(['هیچ دانەوەیەک نەدۆزرایەوە']);
+    }
+
+    const paymentsSheet = XLSX.utils.aoa_to_sheet([
+        ['دانەوەی قەرز'],
+        [],
+        paymentHeaders,
+        ...paymentRows
+    ]);
+    XLSX.utils.book_append_sheet(wb, paymentsSheet, safeSheetName('دانەوەی قەرز'));
+
+    return wb;
+}
+
 function exportReceiptsToExcel() {
     if (typeof CUSTOMER_ID === 'undefined' || !CUSTOMER_ID) {
         if (typeof Swal !== 'undefined') {
             Swal.fire('هەڵە', 'ناسنامەی کڕیار نەدۆزرایەوە', 'error');
         } else {
             alert('ناسنامەی کڕیار نەدۆزرایەوە');
+        }
+        return;
+    }
+
+    if (typeof XLSX === 'undefined') {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire('هەڵە', 'کتێبخانەی Excel بارنەبووە. پەڕەکە refresh بکە.', 'error');
+        } else {
+            alert('کتێبخانەی Excel بارنەبووە');
         }
         return;
     }
@@ -43,7 +171,7 @@ function exportReceiptsToExcel() {
     if (showLoading) {
         Swal.fire({
             title: 'چاوەڕوان بە...',
-            text: 'خەملێنراوە بۆ ئیکسپۆرتی Excel',
+            text: 'خەملێنراوە بۆ ئیکسپۆرتی Excel (.xlsx)',
             allowOutsideClick: false,
             didOpen: () => Swal.showLoading()
         });
@@ -53,33 +181,21 @@ function exportReceiptsToExcel() {
         method: 'POST',
         body: formData
     })
-        .then((response) => {
-            if (!response.ok) {
-                return response.text().then((text) => {
-                    throw new Error(text || 'Network response was not ok');
-                });
+        .then((response) => response.json().then((data) => ({ ok: response.ok, data })))
+        .then(({ ok, data }) => {
+            if (!ok || !data.success) {
+                throw new Error((data && data.message) || 'هەڵەیەک لە ئیکسپۆرتکردن هەیە');
             }
-            const disposition = response.headers.get('Content-Disposition') || '';
-            let filename = `پسووڵە_${new Date().toISOString().split('T')[0]}.xls`;
-            const match = disposition.match(/filename="?([^"]+)"?/i);
-            if (match && match[1]) {
-                filename = match[1];
-            }
-            return response.blob().then((blob) => ({ blob, filename }));
-        })
-        .then(({ blob, filename }) => {
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
+
+            const wb = buildReceiptWorkbook(data);
+            const safeName = String(data.customer?.name || 'customer')
+                .replace(/[\\/:*?"<>|]+/g, '_')
+                .trim() || 'customer';
+            const filename = `پسووڵە_${safeName}_${new Date().toISOString().split('T')[0]}.xlsx`;
+            XLSX.writeFile(wb, filename);
 
             if (showLoading) {
-                Swal.fire('سەرکەوتوو', 'فایلی Excel بە سەرکەوتوویی داگیرا', 'success');
+                Swal.fire('سەرکەوتوو', 'فایلی Excel (.xlsx) بە سەرکەوتوویی داگیرا', 'success');
             }
         })
         .catch((error) => {

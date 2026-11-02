@@ -2,16 +2,18 @@
 session_start();
 require_once '../../config/db_conected.php';
 
+header('Content-Type: application/json; charset=utf-8');
+
 if (!isset($_SESSION['user_id'])) {
     http_response_code(401);
-    echo 'Unauthorized';
+    echo json_encode(['success' => false, 'message' => 'Unauthorized'], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
 $customer_id = isset($_REQUEST['customer_id']) ? intval($_REQUEST['customer_id']) : 0;
 if ($customer_id <= 0) {
     http_response_code(400);
-    echo 'Customer ID is required';
+    echo json_encode(['success' => false, 'message' => 'Customer ID is required'], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
@@ -25,11 +27,6 @@ $paid_date_from = $_REQUEST['paid_date_from'] ?? '';
 $paid_date_to = $_REQUEST['paid_date_to'] ?? '';
 $invoice_number = trim($_REQUEST['invoice_number'] ?? '');
 $invoice_filter_mode = ($_REQUEST['invoice_filter_mode'] ?? 'include') === 'exclude' ? 'exclude' : 'include';
-
-function h($value): string
-{
-    return htmlspecialchars((string)($value ?? ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-}
 
 function format_strength(?string $mpa, ?string $kg): string
 {
@@ -50,15 +47,10 @@ try {
     $customer = $customerStmt->fetch(PDO::FETCH_ASSOC);
     if (!$customer) {
         http_response_code(404);
-        echo 'Customer not found';
+        echo json_encode(['success' => false, 'message' => 'Customer not found'], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
-    $customerName = $customer['name'] ?? '';
-    $customerMobile = $customer['mobile1'] ?? '';
-    $openingDebt = (float)($customer['opening_debt_usd'] ?? 0);
-
-    // --- Sales query (same filters as select_sale.php) ---
     $salesSql = "SELECT
             s.order_date,
             s.location,
@@ -153,9 +145,35 @@ try {
 
     $salesStmt = $pdo->prepare($salesSql);
     $salesStmt->execute($salesParams);
-    $salesRows = $salesStmt->fetchAll(PDO::FETCH_ASSOC);
+    $salesRaw = $salesStmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // --- Debt payments query (same filters as select_return_debt.php) ---
+    $sales = [];
+    $totalQty = 0;
+    $totalPrice = 0;
+    $totalRemaining = 0;
+    foreach ($salesRaw as $i => $row) {
+        $qty = (float)($row['total_quantity'] ?? 0);
+        $price = (float)($row['total_price_sum'] ?? 0);
+        $remaining = (float)($row['total_remaining_amount'] ?? 0);
+        $ppu = (float)($row['price_per_unit'] ?? 0);
+        $totalQty += $qty;
+        $totalPrice += $price;
+        $totalRemaining += $remaining;
+
+        $sales[] = [
+            '#' => $i + 1,
+            'شوێن' => $row['location'] ?? '',
+            'پێوانە (م³)' => round($qty, 2),
+            'ڕێژە' => format_strength($row['strength_mpa'] ?? '', $row['strength_kg'] ?? ''),
+            'جۆر' => $row['formula_type'] ?? '',
+            'نرخی 1 م³' => round($ppu, 2),
+            'کۆی نرخ' => round($price, 2),
+            'پارەی ماوە' => round($remaining, 2),
+            'ژمارەی پسووڵە' => $row['invoice_numbers'] ?? '',
+            'بەروار' => $row['order_date'] ?? '',
+        ];
+    }
+
     $debtSql = "SELECT cdp.paid_usd, cdp.paid_iqd, cdp.date, cdp.discount, cdp.note,
             COALESCE(cdp.change_back_usd, 0) AS change_back_usd,
             COALESCE(cdp.change_back_iq, 0) AS change_back_iq
@@ -205,133 +223,54 @@ try {
 
     $debtStmt = $pdo->prepare($debtSql);
     $debtStmt->execute($debtParams);
-    $debtRows = $debtStmt->fetchAll(PDO::FETCH_ASSOC);
+    $debtRaw = $debtStmt->fetchAll(PDO::FETCH_ASSOC);
 
-    $safeFileName = preg_replace('/[^\p{L}\p{N}_\-]+/u', '_', $customerName);
-    $filename = 'receipt_' . ($safeFileName ?: 'customer') . '_' . date('Y-m-d_H-i-s') . '.xls';
-
-    header('Content-Type: application/vnd.ms-excel; charset=utf-8');
-    header('Content-Disposition: attachment; filename="' . $filename . '"');
-    header('Cache-Control: max-age=0');
-    header('Pragma: no-cache');
-    header('Expires: 0');
-
-    echo "\xEF\xBB\xBF";
-    echo '<meta charset="UTF-8">';
-    echo '<html><head><meta charset="UTF-8"></head><body dir="rtl">';
-
-    echo '<h2>پسووڵەی کڕیار</h2>';
-    echo '<table border="0" cellpadding="4">';
-    echo '<tr><td><b>ناوی کڕیار:</b></td><td>' . h($customerName) . '</td></tr>';
-    echo '<tr><td><b>ژ.م:</b></td><td>' . h($customerMobile) . '</td></tr>';
-    echo '<tr><td><b>قەرزی سەرەتایی (USD):</b></td><td>' . number_format($openingDebt, 2, '.', ',') . '</td></tr>';
-    echo '<tr><td><b>بەرواری ئیکسپۆرت:</b></td><td>' . date('Y-m-d H:i') . '</td></tr>';
-    echo '</table><br>';
-
-    echo '<h3>مامەڵەکان</h3>';
-    echo '<table border="1" cellpadding="5" cellspacing="0">';
-    echo '<thead><tr>';
-    echo '<th>#</th>';
-    echo '<th>شوێن</th>';
-    echo '<th>پێوانە (م³)</th>';
-    echo '<th>ڕێژە</th>';
-    echo '<th>جۆر</th>';
-    echo '<th>نرخی 1 م³</th>';
-    echo '<th>کۆی نرخ</th>';
-    echo '<th>پارەی ماوە</th>';
-    echo '<th>ژمارەی پسووڵە</th>';
-    echo '<th>بەروار</th>';
-    echo '</tr></thead><tbody>';
-
-    $totalQty = 0;
-    $totalPrice = 0;
-    $totalRemaining = 0;
-
-    if (empty($salesRows)) {
-        echo '<tr><td colspan="10">هیچ مامەڵەیەک نەدۆزرایەوە</td></tr>';
-    } else {
-        foreach ($salesRows as $i => $row) {
-            $qty = (float)($row['total_quantity'] ?? 0);
-            $price = (float)($row['total_price_sum'] ?? 0);
-            $remaining = (float)($row['total_remaining_amount'] ?? 0);
-            $ppu = (float)($row['price_per_unit'] ?? 0);
-            $totalQty += $qty;
-            $totalPrice += $price;
-            $totalRemaining += $remaining;
-
-            echo '<tr>';
-            echo '<td>' . ($i + 1) . '</td>';
-            echo '<td>' . h($row['location'] ?? '') . '</td>';
-            echo '<td>' . number_format($qty, 2, '.', ',') . '</td>';
-            echo '<td>' . h(format_strength($row['strength_mpa'] ?? '', $row['strength_kg'] ?? '')) . '</td>';
-            echo '<td>' . h($row['formula_type'] ?? '') . '</td>';
-            echo '<td>' . number_format($ppu, 2, '.', ',') . '</td>';
-            echo '<td>' . number_format($price, 2, '.', ',') . '</td>';
-            echo '<td>' . number_format($remaining, 2, '.', ',') . '</td>';
-            echo '<td>' . h($row['invoice_numbers'] ?? '') . '</td>';
-            echo '<td>' . h($row['order_date'] ?? '') . '</td>';
-            echo '</tr>';
-        }
-        echo '<tr style="font-weight:bold;background:#e8f4fd;">';
-        echo '<td colspan="2">کۆی گشتی</td>';
-        echo '<td>' . number_format($totalQty, 2, '.', ',') . '</td>';
-        echo '<td colspan="3"></td>';
-        echo '<td>' . number_format($totalPrice, 2, '.', ',') . '</td>';
-        echo '<td>' . number_format($totalRemaining, 2, '.', ',') . '</td>';
-        echo '<td colspan="2"></td>';
-        echo '</tr>';
-    }
-    echo '</tbody></table><br>';
-
-    echo '<h3>دانەوەی قەرز</h3>';
-    echo '<table border="1" cellpadding="5" cellspacing="0">';
-    echo '<thead><tr>';
-    echo '<th>#</th>';
-    echo '<th>پارەی واسڵ کراو (USD)</th>';
-    echo '<th>پارەی واسڵ کراو (د.ع)</th>';
-    echo '<th>باقی پێدراوەتەوە (USD)</th>';
-    echo '<th>باقی پێدراوەتەوە (د.ع)</th>';
-    echo '<th>داشکاندن</th>';
-    echo '<th>بەرواری پارەدان</th>';
-    echo '<th>تێبینی</th>';
-    echo '</tr></thead><tbody>';
-
+    $payments = [];
     $sumPaidUsd = 0;
     $sumPaidIqd = 0;
+    foreach ($debtRaw as $i => $row) {
+        $paidUsd = (float)($row['paid_usd'] ?? 0);
+        $paidIqd = (float)($row['paid_iqd'] ?? 0);
+        $sumPaidUsd += $paidUsd;
+        $sumPaidIqd += $paidIqd;
 
-    if (empty($debtRows)) {
-        echo '<tr><td colspan="8">هیچ دانەوەیەک نەدۆزرایەوە</td></tr>';
-    } else {
-        foreach ($debtRows as $i => $row) {
-            $paidUsd = (float)($row['paid_usd'] ?? 0);
-            $paidIqd = (float)($row['paid_iqd'] ?? 0);
-            $sumPaidUsd += $paidUsd;
-            $sumPaidIqd += $paidIqd;
-
-            echo '<tr>';
-            echo '<td>' . ($i + 1) . '</td>';
-            echo '<td>' . number_format($paidUsd, 2, '.', ',') . '</td>';
-            echo '<td>' . number_format($paidIqd, 0, '.', ',') . '</td>';
-            echo '<td>' . number_format((float)($row['change_back_usd'] ?? 0), 2, '.', ',') . '</td>';
-            echo '<td>' . number_format((float)($row['change_back_iq'] ?? 0), 0, '.', ',') . '</td>';
-            echo '<td>' . number_format((float)($row['discount'] ?? 0), 2, '.', ',') . '</td>';
-            echo '<td>' . h($row['date'] ?? '') . '</td>';
-            echo '<td>' . h($row['note'] ?? '') . '</td>';
-            echo '</tr>';
-        }
-        echo '<tr style="font-weight:bold;background:#e8f4fd;">';
-        echo '<td>کۆی گشتی</td>';
-        echo '<td>' . number_format($sumPaidUsd, 2, '.', ',') . '</td>';
-        echo '<td>' . number_format($sumPaidIqd, 0, '.', ',') . '</td>';
-        echo '<td colspan="5"></td>';
-        echo '</tr>';
+        $payments[] = [
+            '#' => $i + 1,
+            'پارەی واسڵ کراو (USD)' => round($paidUsd, 2),
+            'پارەی واسڵ کراو (د.ع)' => round($paidIqd, 0),
+            'باقی پێدراوەتەوە (USD)' => round((float)($row['change_back_usd'] ?? 0), 2),
+            'باقی پێدراوەتەوە (د.ع)' => round((float)($row['change_back_iq'] ?? 0), 0),
+            'داشکاندن' => round((float)($row['discount'] ?? 0), 2),
+            'بەرواری پارەدان' => $row['date'] ?? '',
+            'تێبینی' => $row['note'] ?? '',
+        ];
     }
-    echo '</tbody></table>';
 
-    echo '</body></html>';
+    echo json_encode([
+        'success' => true,
+        'customer' => [
+            'name' => $customer['name'] ?? '',
+            'mobile' => $customer['mobile1'] ?? '',
+            'opening_debt_usd' => (float)($customer['opening_debt_usd'] ?? 0),
+        ],
+        'sales' => $sales,
+        'sales_totals' => [
+            'quantity' => round($totalQty, 2),
+            'total_price' => round($totalPrice, 2),
+            'remaining' => round($totalRemaining, 2),
+        ],
+        'payments' => $payments,
+        'payments_totals' => [
+            'paid_usd' => round($sumPaidUsd, 2),
+            'paid_iqd' => round($sumPaidIqd, 0),
+        ],
+        'exported_at' => date('Y-m-d H:i'),
+    ], JSON_UNESCAPED_UNICODE);
 } catch (Exception $e) {
     error_log('Receipt Excel export failed: ' . $e->getMessage());
     http_response_code(500);
-    header('Content-Type: text/plain; charset=utf-8');
-    echo 'هەڵە لە ئیکسپۆرت: ' . $e->getMessage();
+    echo json_encode([
+        'success' => false,
+        'message' => 'هەڵە لە ئیکسپۆرت: ' . $e->getMessage(),
+    ], JSON_UNESCAPED_UNICODE);
 }
