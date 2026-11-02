@@ -1333,7 +1333,7 @@ $customer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
     });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" nonce="<?php echo $csp_nonce; ?>"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.min.js" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/receipts/receipts.js?v=2.1" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/receipts/select_sale.js?v=<?php echo time(); ?>" nonce="<?php echo $csp_nonce; ?>"></script>
 <script src="../assets/js/receipts/select_return_debt.js?v=<?php echo time(); ?>" nonce="<?php echo $csp_nonce; ?>"></script>
